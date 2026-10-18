@@ -191,6 +191,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. If you know your way round already, Cody will not fuss. He will want to, mind.',
   },
+  {
+    version: '0.9',
+    lines: [
+      'The whole town tucks itself into your phone the first time it opens now, so it opens ' +
+        'with no signal at all. Even in a tunnel. I tried a tunnel.',
+      'Settings says when you last saved a backup code, and Cody mentions it, gently, about ' +
+        'once a week when it has been a while. He worries. Nicely.',
+      'Your party photo has a Keep it button for your camera roll. And if anything goes wobbly, ' +
+        'Settings says so, with a little note to hand to Cody.',
+    ],
+    ps: 'P.S. Nothing ever went wobbly in my day. We had no buttons. It was very peaceful.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

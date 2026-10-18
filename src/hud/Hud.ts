@@ -147,7 +147,7 @@ export interface Hud {
   /** Cody's list for her first day (V1's R1), unless a sheet is up; its button and glows woken. */
   openFirstDay(): void;
   /** Their photo at the Halloween party, flash and all, over whatever's up (0.2's J4). */
-  photo(picture: HTMLCanvasElement, caption: string): void;
+  photo(picture: HTMLCanvasElement, caption: string, print?: () => Promise<Blob | null>): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
   /** The bag or her Candy gives a little bump, as what she got lands (V1's E1). */
@@ -390,7 +390,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     viewport,
     openTitle: (onStart) => openTitle(hud, options.title, onStart),
     whatsNew: (onDone) => whatsNew(hud, options.notes, onDone),
-    photo: (picture, caption) => openPhoto(hud, picture, caption),
+    photo: (picture, caption, print) => openPhoto(hud, picture, caption, print),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);

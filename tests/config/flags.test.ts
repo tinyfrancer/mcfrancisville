@@ -4,6 +4,7 @@ import {
   galleryRequested,
   hourRequested,
   manualLoopRequested,
+  perfRequested,
   weatherRequested,
 } from '../../src/config/flags';
 
@@ -42,5 +43,11 @@ describe('flags', () => {
     expect(dayRequested('?day=christmas')).toBeNull();
     expect(dayRequested('?day=2026-13-45')).toBeNull();
     expect(dayRequested('')).toBeNull();
+  });
+
+  it("reads ?perf (V1's S3)", () => {
+    expect(perfRequested('?perf')).toBe(true);
+    expect(perfRequested('?hour=12&perf')).toBe(true);
+    expect(perfRequested('')).toBe(false);
   });
 });

@@ -744,6 +744,8 @@ const CSS = `
 }
 .hud-sheet .hud-hearts { margin: 4px 0 8px; font-size: 18px; letter-spacing: 2px; color: ${T.accent}; }
 .hud-sheet .hud-gift { margin: 8px 2px 0; font-size: 15px; color: ${T.accent}; }
+.hud-sheet .hud-nudge { margin: 10px 2px 0; font-size: 14px; color: ${T.muted}; }
+.hud-sheet .hud-backed-up, .hud-sheet .hud-trouble { font-size: 14px; color: ${T.muted}; }
 ${FIRST_DAY_CSS}
 ${TODAY_CSS}
 /* The red Tesla's road: it drives across once, left to right, and parks just out of view. */

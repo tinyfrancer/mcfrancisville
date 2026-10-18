@@ -10,7 +10,7 @@
  * Usage: npm run dev, then `node scripts/smoke.mjs [--headed] [--section=a,b]`. Screenshots land in
  * .smoke/.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const URL_BASE = process.env.SMOKE_URL ?? 'http://localhost:5173/';
@@ -2328,6 +2328,56 @@ async function settings() {
     restored.tx === here.tx && restored.ty === here.ty,
     `${JSON.stringify(here)} -> ${JSON.stringify(restored)}`,
   );
+}
+
+/**
+ * Keeping her town safe (V1's S3): Settings says when this phone last backed up, and again once a
+ * code is copied; something gone wrong is noted and mentioned on the Sound tab with a note to copy.
+ */
+async function safe() {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.evaluate(() => {
+    localStorage.removeItem('mcfrancisville:backedUpAt');
+    window.dispatchEvent(
+      new ErrorEvent('error', { message: 'smoke', error: new Error('a pretend wobble') }),
+    );
+  });
+  await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Sound")');
+  const trouble =
+    (await page
+      .locator('.hud-trouble')
+      .textContent()
+      .catch(() => '')) ?? '';
+  check(
+    'a wobble is mentioned on the Sound tab, by its day',
+    /wobbly on \d+ \w+/.test(trouble),
+    trouble,
+  );
+  await tapElement('.hud-trouble-copy');
+  const note = await page.evaluate(() => navigator.clipboard.readText()).catch(() => '');
+  check('its note copies, for Cody', /a pretend wobble/.test(note), note.slice(0, 80));
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
+  await page.waitForFunction(() =>
+    /** @type {HTMLTextAreaElement | null} */ (
+      document.querySelector('.hud-code')
+    )?.value.startsWith('MFV'),
+  );
+  const before = (await page.locator('.hud-backed-up').textContent()) ?? '';
+  await tapElement('.hud-settings-sheet button:text-is("Copy")');
+  await page
+    .waitForFunction(() =>
+      /today/.test(document.querySelector('.hud-backed-up')?.textContent ?? ''),
+    )
+    .catch(() => {});
+  const after = (await page.locator('.hud-backed-up').textContent()) ?? '';
+  check(
+    'the Backup tab says when this phone last backed up, and today once a code is copied',
+    /yet/.test(before) && after === 'Last backed up today.',
+    `${before} -> ${after}`,
+  );
+  await page.evaluate(() => localStorage.removeItem('mcfrancisville:errors'));
+  await tapElement('.hud-sheet button:text("Done")');
 }
 
 async function neighbours() {
@@ -6345,6 +6395,19 @@ async function finale() {
       JSON.stringify(photo),
     );
     await page.screenshot({ path: '.smoke/photo.png' });
+    // Kept as a print (V1's S3): the share sheet on her iPhone, a download here, with none.
+    const download = page.waitForEvent('download', { timeout: 10_000 }).catch(() => null);
+    await tapElement('.hud-photo-keep');
+    const file = await download;
+    const path = file && (await file.path().catch(() => null));
+    const png = path ? readFileSync(path) : null;
+    check(
+      'the photo can be kept, as a print big enough for the camera roll',
+      !!png &&
+        png.readUInt32BE(16) >= 900 &&
+        /^mcfrancisville-.*\.png$/.test(file?.suggestedFilename() ?? ''),
+      `${file?.suggestedFilename()} ${png ? png.readUInt32BE(16) : 0}`,
+    );
   }
   await closeSheets();
   await page.screenshot({ path: '.smoke/fair-party.png' });
@@ -6984,6 +7047,7 @@ const SECTIONS = [
   ['mystery', mystery],
   ['sound', sound],
   ['settings', settings],
+  ['safe', safe],
   ['weather', weather],
   ['night', night],
   ['fountain', fountain],

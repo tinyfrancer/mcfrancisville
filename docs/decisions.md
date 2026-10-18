@@ -7074,6 +7074,82 @@ she picks is hers to feel); a sad face when a critter flees or a fish gets away 
 punishes, decision 11); a new face drawn per neighbour per feeling (thirteen times six faces to
 keep, where the doll's face and a few faces of their own cover everyone).
 
+## 322. Safe: the shell kept for the first launch with no signal, a backup nudge, the photo kept, notes of what went wrong, and a way to time her phone (2026-10-18, V1's S3)
+
+_Session S3 of the V1 plan, lane 5, answering finding 5 of `docs/v1_analysis.md` (no splash, a
+service worker with no precache so the first offline launch can fail and old bundles never
+pruned, no backup nudge, the party photo can't be saved, no error reporting, 60 fps on a real
+iPhone never measured). No save change: everything new is the phone's, beside the save, as the
+sound switches are. Personal touches parked (decision 177): Cody's two nudge lines are the warmest
+sensible default, nothing was asked._
+
+- **The splash was already done** by L5 (decision 295: ten launch screens, the night, the icon and
+  the name, drawn by `npm run icons`, held by `tests/pwa/manifest.test.ts`), so S3 drew none; the
+  worker now precaches them with the rest.
+- **The worker precaches the shell** (`public/sw.js`). `vite build` runs a plugin in the new
+  `vite.config.ts` that, once everything (public files too) is written, lists `dist/` into the
+  worker (`precacheList` in `src/precache.ts`: the page as `/`, the hashed chunk, the manifest,
+  the icons and the launch screens; never `sw.js`, a map or anything hidden) and names its cache
+  by a hash of every file and the worker's own code, so the same build makes the same worker and
+  any change makes a new one. Installing adds each file on its own (one that fails can't stop the
+  rest, or the worker); activating deletes every `mcfrancisville-*` cache but its own, so last
+  month's bundles go (the old worker's single runtime cache, `mcfrancisville-v1`, held every
+  bundle ever fetched). **Navigation stays network first** (decision 13's reason: a new deploy is
+  seen at once), kept under `/` and served from there with no signal; `/assets/` is cache first
+  (a hashed name never changes); anything else network first with the cache behind it. Lookups
+  ignore `Vary` (Vite's preview says `Vary: Origin`, which a module script's request carries and
+  the precache's didn't, and the first offline reload failed on it). **`/api/` is never touched**,
+  for S2's function. `npm run smoke:offline` (`scripts/smoke-offline.mjs`, a CI step against `npm
+run preview` on the build just made) visits once with signal, checks every listed file kept and
+  an older version's cache gone, then with the context offline reloads and opens a new page: both
+  reach the title, and the new one goes on through the dedication to the creator. The old worker
+  failed this: the first visit's page isn't controlled, so nothing was cached until a second.
+- **"Last backed up"**: the Backup tab says "No backup code saved from this phone yet", "today",
+  "yesterday" or "N days ago" (`backedUpLine` in `src/systems/backupNudge.ts`, by 5am days), from
+  `mcfrancisville:backedUpAt` (`src/safekeeping.ts`), stamped when a code is copied to the
+  clipboard or the share sheet takes it (not when the copy falls back to selecting the text: we
+  can't know she copied it). A restored code doesn't stamp it: that phone hasn't backed up.
+- **The nudge** is a line under Cody's hello (`GreetingCard.nudge`, `SAFE_KEEPING` in
+  `src/data/greetings.ts`), at most once a week (`nudgeFor`, `mcfrancisville:nudgedAt`): while the
+  game is in a browser tab, to put it on the Home Screen (installed is what keeps the save from
+  Safari's wipe, decision 5); once installed, a fresh code when the last is a fortnight old, or
+  there never was one and the town (`createdAt`) is. Never on his first hello. A line under the
+  greeting rather than a greeting of its own, so it never takes the place of his welcome, a
+  holiday's or the red Tesla's.
+- **The photo is kept as a print** (`printOf` in `src/render/photo.ts`): her pixels at the whole
+  scale nearest 1080 wide, on the polaroid's white with the caption under it, as a PNG. The photo
+  card's "Keep it" (`src/hud/PhotoCard.ts`, `keepPhoto` in `src/hud/keepPhoto.ts`) hands it to
+  `navigator.share` with a file where `canShare` says it can (an iPhone's sheet has Save Image),
+  else downloads it; closing the sheet is her choice and downloads nothing. Named for its day.
+- **Notes of what went wrong** (`src/errorNotes.ts`): `catchErrors(window)` first thing in
+  `main.ts` notes every uncaught error and unhandled rejection (message, file and line, stack cut
+  to 1,200 characters), the last five kept in `mcfrancisville:errors`, the same error again
+  counted rather than added (an error every frame stays one note). It never prevents the console
+  seeing it and nothing in it can throw. Settings' **Sound tab**, beside the silent switch's hint,
+  says "Something went a bit wobbly on 18 October" for a month after the last one, with **Copy
+  note** (every note, the version and the phone's user agent) for Cody.
+- **`?perf`** (`src/wiring/perf.ts`, `perfRequested` in `config/flags.ts`): from her first tap on
+  the town it times 30 s of frames, the gap between frames and the step and draw inside each, and
+  shows each's p50 and p95 and the fps in a corner that takes no taps, then stops with the result
+  up. **In production too**, against the prompt's "dev build": the build on her phone is the one
+  worth measuring (a dev build is unbundled modules, no minifying, Vite's client), opening a
+  dev server to her phone means a LAN and a laptop, and `?gallery` is production's already
+  (decision 21). Without the query nothing is measured or shown. The method and a place for her
+  number are in `docs/architecture.md`'s performance baseline: **nobody has read it yet**.
+
+**Rejected:** `vite-plugin-pwa`/Workbox (a dependency, a generated worker nobody here reads, for a
+list of sixteen files); precaching from `index.html`'s references at runtime (the worker would
+parse HTML, and the icons and launch screens aren't referenced from the page the same way);
+cache-first navigation (stale until a second launch, decision 13); the nudge as its own card or a
+toast (one more thing in her way as she opens the game); stamping a backup on opening the Backup
+tab (seeing a code isn't keeping it); the nudge or the stamps in the save (a restore would carry
+another phone's); an error reporter that sends anything anywhere (no backend, and her phone's
+notes are hers to pass on); catching and swallowing errors in the loop (a hidden fault is worse
+than a noted one, and changing the loop's shape wasn't asked); `?perf` sampling `world.update`
+and the draw apart (perf.mjs does that on the container; on her phone what matters is the frame);
+splitting the 1.66 MB chunk (precached once a version, it costs her a download per deploy, not a
+launch; worth it only if a launch is ever slow on her phone).
+
 ## 312. Today: what's waiting, each line read off the world, a tap away; a parcel over a favour; a dot on the chip (2026-10-18, V1's R2)
 
 _Session R2 of the V1 plan, lane 4, for `docs/v1_analysis.md`'s finding 3 ("No today": goals live
