@@ -217,6 +217,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   cornDogStall: { w: 3, h: 1 },
   hookAGhostStall: { w: 3, h: 1 },
   toffeeAppleStall: { w: 3, h: 1 },
+  // The duck pond and the strength bell (V1's R6b).
+  duckPondStall: { w: 3, h: 1 },
+  strengthBellStall: { w: 3, h: 1 },
   // Market day's table, by the stage (0.2's M3).
   marketStall: { w: 3, h: 1 },
   // Never written in a map: it stands at `WANDERING_STALL_AT` the weeks it's in town (V1's R3).
@@ -865,6 +868,9 @@ export const FAIR_LEGEND: Record<string, LegendEntry> = {
   '4': { tile: 'grass', prop: 'cornDogStall' },
   '5': { tile: 'grass', prop: 'hookAGhostStall' },
   '6': { tile: 'grass', prop: 'toffeeAppleStall' },
+  // V1's R6b.
+  '9': { tile: 'grass', prop: 'duckPondStall' },
+  '0': { tile: 'grass', prop: 'strengthBellStall' },
   '7': { tile: 'grass', prop: 'ferrisWheel' },
   '8': { tile: 'grass', prop: 'marketStall' },
   '!': { tile: 'grass', prop: 'lightPole' },
@@ -882,6 +888,9 @@ export const FAIRGROUND_SPOTS = {
   cornDogs: { tx: 22, ty: 12 },
   hookAGhost: { tx: 7, ty: 17 },
   toffeeApples: { tx: 22, ty: 17 },
+  // The duck pond and the strength bell (V1's R6b), between them.
+  duckPond: { tx: 11, ty: 17 },
+  strengthBell: { tx: 18, ty: 17 },
   tentFlap: { tx: 25, ty: 7 },
   bigWheel: { tx: 5, ty: 27 },
   midway: { tx: 15, ty: 15 },
@@ -924,8 +933,9 @@ export const FAIRGROUND: MapSource = {
   digSpots: [
     { tx: 24, ty: 2 },
     { tx: 2, ty: 8 },
-    { tx: 11, ty: 15 },
-    { tx: 18, ty: 16 },
+    // Moved off the duck pond and the strength bell (V1's R6b).
+    { tx: 13, ty: 13 },
+    { tx: 19, ty: 19 },
     { tx: 6, ty: 19 },
     { tx: 5, ty: 31 },
     { tx: 26, ty: 26 },
@@ -950,10 +960,10 @@ export const FAIRGROUND: MapSource = {
     '#..==.....jj..==..jj.....==..#',
     '#..==..,,.....==....d....==..#',
     '#,.==.........==.........==.T#',
-    '#..==.555.....==.....666.==..#',
+    '#..==.555.999.==.000.666.==..#',
     '#..==.........==.........==..#',
-    '#T.==......y..==..d......==v.#',
-    '#..==....y....==.....,,..==..#',
+    '#T.==.........==.........==v.#',
+    '#..==....y.y..==.d...,,..==..#',
     '#..==.........==.........==.T#',
     '#..==!..!..!..==..!..!..!==..#',
     '#.v========================..#',

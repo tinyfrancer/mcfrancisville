@@ -32,6 +32,8 @@ export const SQUISHY_IDS: readonly SquishyId[] = [
   'booBao',
   'xiaoLongBoo',
   'batGyoza',
+  // Only ever won at the fairground (V1's R6b).
+  'luckyDuckSquish',
 ];
 
 /** Her monster dolls, as `ITEMS` has them. */

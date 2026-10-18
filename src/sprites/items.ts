@@ -7,6 +7,7 @@ import { DOLL_ART } from './dolls';
 import { FOSSIL_ART } from './fossils';
 import { ORCHARD_ITEM_ART } from './orchard';
 import { RARE_KEEPSAKE_ART } from './rareEvents';
+import { FAIR_PRIZE_ART } from './fairPrizes';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
 import type { Palette, SpriteSource } from './sprite';
@@ -2599,6 +2600,8 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   ...FOSSIL_ART,
   // The rare events' keepsakes (V1's R3).
   ...RARE_KEEPSAKE_ART,
+  // Only ever won at the Hollow Fairground (V1's R6b).
+  ...FAIR_PRIZE_ART,
 };
 
 /**

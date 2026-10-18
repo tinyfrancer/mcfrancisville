@@ -255,6 +255,8 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       if (event.did === 'growing') return [burst('sparkle', there, 3, 10)];
       return [emote('?')];
     case 'tossed':
+      // A near-perfect throw at the fair (V1's R6b) sparkles more, and she hums.
+      if (event.grade === 2) return [burst('sparkle', head, 7, 16), emote('♪')];
       return event.landed ? [burst('sparkle', head, 3, 12)] : [emote('…')];
     case 'won':
       return event.top

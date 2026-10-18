@@ -326,10 +326,72 @@ const market: Wares = (s, x, y, w) => {
   }
 };
 
+/**
+ * The duck pond (V1's R6b): a long trough of water along the counter with yellow ducks bobbing
+ * in it, one in a gold crown, and a little net leant at the end.
+ */
+const duckPond: Wares = (s, x, y, w) => {
+  slab(s, x, y - 8, w - 8, 8, TRIM);
+  s.rect(x + 2, y - 7, w - 12, 3, fillOf(ROOF)).rect(x + 2, y - 7, w - 12, 1, lightOf(ROOF));
+  for (let i = 0; i < 6; i++) {
+    const dx = x + 6 + i * 10;
+    const dy = y - 10 + (i % 2);
+    s.ellipse(dx, dy, 4, 2.5, fillOf(STONE)).ellipse(dx - 2, dy - 3, 2.5, 2, fillOf(STONE));
+    s.set(dx - 3, dy - 4, lightOf(STONE)).set(dx - 3, dy - 3, INK);
+    s.rect(dx - 6, dy - 3, 2, 1, fillOf(ACCENT_TWO));
+    s.set(dx + 3, dy - 2, shadeOf(STONE));
+  }
+  // The lucky one's crown.
+  s.rect(x + 23, y - 17, 4, 2, fillOf(ACCENT_TWO)).set(x + 23, y - 18, fillOf(ACCENT_TWO));
+  s.set(x + 26, y - 18, fillOf(ACCENT_TWO));
+  // Prizes hung along the back: little ducks on a line.
+  s.line(x + 2, 40, x + w - 2, 40, darkOf(TRIM));
+  for (let i = 0; i < 5; i++) {
+    const px = x + 8 + i * 13;
+    s.ellipse(px, 45, 3, 3, i % 2 === 0 ? WHITE : fillOf(STONE)).set(px - 1, 44, INK);
+  }
+  s.line(x + w - 4, y - 30, x + w - 2, y, darkOf(TRIM));
+  s.ellipse(x + w - 4, y - 32, 3, 3, fillOf(WALL)).set(x + w - 4, y - 32, darkOf(WALL));
+};
+
+/**
+ * The strength bell (V1's R6b): a striped pole up the side of the booth with a gold bell at its
+ * top and a scarlet puck at its foot, a mallet leant on the counter, and prizes hung along the back.
+ */
+const strengthBell: Wares = (s, x, y, w) => {
+  const px = x - 1;
+  s.rect(px, 8, 3, y - 8, fillOf(TRIM)).rect(px, 8, 1, y - 8, lightOf(TRIM));
+  for (let ry = 14; ry < y - 4; ry += 6) s.rect(px, ry, 3, 1, fillOf(ACCENT_TWO));
+  s.sphere(
+    px + 1.5,
+    7,
+    4,
+    3.5,
+    darkOf(ACCENT_TWO) + shadeOf(ACCENT_TWO) + fillOf(ACCENT_TWO) + lightOf(ACCENT_TWO),
+  );
+  s.set(px + 1, 10, darkOf(ACCENT_TWO));
+  s.rect(px - 2, y - 5, 7, 3, fillOf(DOOR)).rect(px - 2, y - 5, 7, 1, lightOf(DOOR));
+  s.rect(px - 4, y - 2, 11, 2, fillOf(STONE));
+  // The mallet, leant on the counter.
+  s.line(x + w - 10, y - 22, x + w - 4, y, darkOf(TRIM));
+  s.rect(x + w - 15, y - 27, 10, 6, fillOf(DOOR)).rect(x + w - 15, y - 27, 10, 1, lightOf(DOOR));
+  // Prizes hung along the back: plush ghosts and bags of sweets.
+  s.line(x + 8, 40, x + w - 2, 40, darkOf(TRIM));
+  for (let i = 0; i < 4; i++) {
+    const gx = x + 16 + i * 14;
+    if (i % 2 === 0) {
+      s.ellipse(gx, 46, 3.5, 4, WHITE).rect(gx - 3, 47, 7, 3, WHITE);
+      s.set(gx - 1, 45, INK).set(gx + 1, 45, INK);
+    } else s.rect(gx - 3, 42, 6, 8, fillOf(ACCENT)).rect(gx - 3, 42, 6, 1, lightOf(ACCENT));
+  }
+};
+
 export const RING_TOSS_STALL = drawStall('RING TOSS', ringToss);
 export const CORN_DOG_STALL = drawStall('CORN DOGS', cornDogs);
 export const HOOK_A_GHOST_STALL = drawStall('HOOK A GHOST', hookAGhost);
 export const TOFFEE_APPLE_STALL = drawStall('TOFFEE APPLES', toffeeApples);
+export const DUCK_POND_STALL = drawStall('DUCK POND', duckPond);
+export const STRENGTH_BELL_STALL = drawStall('RING THE BELL', strengthBell);
 export const MARKET_STALL = drawStall('MARKET', market);
 /** The wandering stall (V1's R3), in town for a week now and then: market day's table, in plum. */
 export const WANDERING_STALL = drawStall('CURIOS', market);
@@ -340,6 +402,8 @@ export const STALL_BILLOWS = {
   cornDog: () => [drawStall('CORN DOGS', cornDogs, 1)],
   hookAGhost: () => [drawStall('HOOK A GHOST', hookAGhost, 1)],
   toffeeApple: () => [drawStall('TOFFEE APPLES', toffeeApples, 1)],
+  duckPond: () => [drawStall('DUCK POND', duckPond, 1)],
+  strengthBell: () => [drawStall('RING THE BELL', strengthBell, 1)],
   market: () => [drawStall('MARKET', market, 1)],
   wandering: () => [drawStall('CURIOS', market, 1)],
 } as const;
@@ -365,6 +429,9 @@ export const RING_TOSS_PALETTE = stallPalette(C.scarlet, C.cream);
 export const CORN_DOG_PALETTE = stallPalette(C.gold, C.scarlet, C.pumpkinLight);
 export const HOOK_A_GHOST_PALETTE = stallPalette(C.orbBlue, C.cream);
 export const TOFFEE_APPLE_PALETTE = stallPalette(C.scarlet, C.gold);
+// Its stone is the ducks' yellow, its second accent their beaks and the lucky one's crown.
+export const DUCK_POND_PALETTE = stallPalette(C.plum, C.pumpkin, C.candle);
+export const STRENGTH_BELL_PALETTE = stallPalette(C.navy, C.gold);
 // Its stone is the gourds in the second basket, its door the jam.
 export const MARKET_PALETTE = stallPalette(C.moss, C.cream, C.pumpkin);
 // The wandering stall's: a plum awning striped gold, its baskets of lavender curios.
