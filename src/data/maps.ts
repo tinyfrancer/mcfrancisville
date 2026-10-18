@@ -219,6 +219,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   toffeeAppleStall: { w: 3, h: 1 },
   // Market day's table, by the stage (0.2's M3).
   marketStall: { w: 3, h: 1 },
+  // Never written in a map: it stands at `WANDERING_STALL_AT` the weeks it's in town (V1's R3).
+  wanderingStall: { w: 3, h: 1 },
   fortuneTent: { w: 3, h: 2, door: 1 },
   ferrisWheel: { w: 5, h: 2 },
   lightPole: { w: 1, h: 1 },

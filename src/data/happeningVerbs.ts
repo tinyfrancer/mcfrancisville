@@ -1,6 +1,7 @@
-import type { HappeningId, ItemId } from '../types/ids';
+import type { HappeningId, ItemId, RhythmId } from '../types/ids';
 import type { Glyph } from './glyphs';
 import { PARTY_IDS } from './birthdayParties';
+import { RHYTHM_VERBS } from './rhythmVerbs';
 
 /*
  * What she does at a happening (V1's P4; `docs/v1_analysis.md`: "Happenings are watched"): one
@@ -71,7 +72,10 @@ const SING: VerbRow = {
     "You sang to me last birthday, {name}. I've hummed it all year. Will you sing it again?",
 };
 
-const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow | OwnVerb> = {
+const EVERYDAY: Record<
+  Exclude<HappeningId, (typeof PARTY_IDS)[number] | RhythmId>,
+  VerbRow | OwnVerb
+> = {
   bookClub: {
     label: "Pick next week's book",
     glyph: 'book',
@@ -555,6 +559,7 @@ const EVERYDAY: Record<Exclude<HappeningId, (typeof PARTY_IDS)[number]>, VerbRow
 /** Every happening's verb: the everyday ones', and singing at every birthday party. */
 export const VERBS: Record<HappeningId, VerbRow | OwnVerb> = {
   ...EVERYDAY,
+  ...RHYTHM_VERBS,
   ...(Object.fromEntries(PARTY_IDS.map((id) => [id, SING])) as Record<
     (typeof PARTY_IDS)[number],
     VerbRow

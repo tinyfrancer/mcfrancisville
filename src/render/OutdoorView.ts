@@ -53,6 +53,7 @@ import { drawGlints } from './bloom';
 import { coveredCrowns, maskOf, nearHer, SeeThrough, type Placed } from './occlusion';
 import { bakeIcon } from './items';
 import { drawFlash, drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
+import { drawMeteors } from './meteors';
 import {
   doorDrawables,
   eaveDrawables,
@@ -483,6 +484,8 @@ export class OutdoorView implements SceneView {
       ...this.skyDrawables(me, nowMs),
       ...this.leafDrawables(nowMs),
       ...this.cartDrawables(),
+      ...this.passerDrawables(),
+      ...this.strayDrawables(nowMs),
       ...neighbours,
       ...this.wesDrawables(),
       ...critters,
@@ -526,7 +529,9 @@ export class OutdoorView implements SceneView {
     drawLine(ctx, this.world, me, cam, nowMs);
     if (!snowing) drawWeatherAir(ctx, weather, cam, nowMs);
     const sky = this.world.holidays.sky();
-    if (sky === 'snow' || snowing) drawSnow(ctx, cam, nowMs);
+    // A rare event's sky (V1's R3): a snow day's snow, or a meteor shower after dark.
+    const rareSky = this.world.rareEvents.sky();
+    if (sky === 'snow' || snowing || rareSky === 'snow') drawSnow(ctx, cam, nowMs);
 
     const beat = this.fountainBeat();
     const lights = [
@@ -556,6 +561,7 @@ export class OutdoorView implements SceneView {
       for (const f of this.fountains) drawFountainNotes(ctx, f.top, beat, cam);
     }
     if (sky === 'fireworks') drawFireworks(ctx, cam, nowMs);
+    if (rareSky === 'meteors') drawMeteors(ctx, cam, nowMs);
     if (this.weatherShown === null) drawFlash(ctx, this.world.weather.sinceFlash(), REDUCED());
     this.drawSnackTwinkle(nowMs);
     drawRipeSparkles(ctx, this.world, this.zone.id, cam, nowMs);
@@ -1054,6 +1060,29 @@ export class OutdoorView implements SceneView {
     const { x } = tileCentre(wes);
     const footY = wes.ty * TILE_SIZE + 28;
     return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
+  }
+
+  /** Whoever is passing through and stands here (V1's R3), facing her way. */
+  private passerDrawables(): Drawable[] {
+    return this.world.rareEvents.passers(this.zone.id).map((p) => {
+      const sprite = bakeFigure(p.id, 'down', 0);
+      const { x } = tileCentre(p);
+      const footY = p.ty * TILE_SIZE + 28;
+      return { footY, sprite, x: x - sprite.width / 2, y: footY - sprite.height };
+    });
+  }
+
+  /** A critter gone astray (V1's R3), bobbing where it waits, lit so it can be found. */
+  private strayDrawables(nowMs: number): Drawable[] {
+    const stray = this.world.rareEvents.stray();
+    if (!stray || stray.zone !== this.zone.id) return [];
+    const art = ITEM_ART[stray.critter];
+    const sprite = bakeIcon(`item:${stray.critter}`, art.source, art.palette);
+    const bob = 2 * Math.round(Math.sin(nowMs / 450));
+    const footY = stray.ty * TILE_SIZE + 18;
+    return [
+      { footY, sprite, x: stray.tx * TILE_SIZE, y: stray.ty * TILE_SIZE - 6 + bob, glow: sprite },
+    ];
   }
 
   /** Tonight's snack, which only ever waits in town. */

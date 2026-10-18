@@ -1,4 +1,5 @@
-import type { HolidayId, TownEventId } from './calendar';
+import type { FestivalId, HolidayId, TownEventId } from './calendar';
+import type { RareEventId } from './rareEvents';
 import type { DayWindow } from './windows';
 import { CODY_NICKNAME } from './villagers';
 
@@ -81,6 +82,32 @@ export const HOLIDAY_GREETINGS: Record<HolidayId | TownEventId, string> = {
   fullMoon: 'Full moon tonight, mi amor. Rufus is being very normal about it. Very, very normal.',
   luckyFriday:
     'Friday the 13th! Luckiest day there is. Beads everywhere. I found three in my shoe.',
+};
+
+/** A festival week a season (V1's R3): every festival but October's, which is a month. */
+export type SeasonFestivalId = Exclude<FestivalId, 'halloweenFestival'>;
+
+/**
+ * Cody's hello on a day out of the ordinary (V1's R3): the first day of a festival week, or a rare
+ * event's (the wandering stall's Monday).
+ */
+export const RHYTHM_GREETINGS: Record<SeasonFestivalId | RareEventId, string> = {
+  blossomWeek:
+    "Honey bunny, it's blossom week! Every tree's gone pink. I've got petals in my hair. I'm keeping them.",
+  fireworksWeek:
+    'Fireworks week, booby! A whole week of it. The bats have filed a complaint. I signed it. Sorry, bats.',
+  lightsWeek:
+    "Winter lights week, mi amor. Every window's lit. Ours is the best one. I may have used too many.",
+  meteorShower:
+    "Hazel says there's a meteor shower tonight, babe. Let's look up after eight. I'll wish for you. Again.",
+  wanderingStall:
+    'A wandering stall rolled in by the bakery, mi amor! Curios from far away. I bought nothing. Yet.',
+  stranger:
+    'Ooh, someone new in town, booby, just passing through. Big pack, little lantern. Go say hi!',
+  snowDay:
+    "SNOW DAY! Babe! Mittens! Everyone's out! I've already made a snow bat. It's not great. It's great.",
+  lostCritter:
+    "Someone's little critter has wandered off, mi amor. You're the best at finding things. You found me.",
 };
 
 /**

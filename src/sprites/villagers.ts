@@ -1,5 +1,6 @@
 import type { CodyHalf, Costume } from '../data/finale';
 import type { BraceletId, Facing, VillagerId } from '../types/ids';
+import type { PasserId } from '../data/rareEvents';
 import type { Feeling } from '../types/mood';
 import type { Stance } from '../types/stance';
 import { WORKS } from '../data/work';
@@ -54,8 +55,8 @@ import { carvePumpkin, maudeEye, maudeMouth, shadesMouth, skullFace } from './mo
  * top. Maude is a ghost, so she is a sheet, and drawn by hand.
  */
 
-/** Everyone drawn like a villager: the neighbours, the Moon Pie Man, and Wes. */
-export type Figure = VillagerId | 'moonPieMan' | 'wes';
+/** Everyone drawn like a villager: the neighbours, the Moon Pie Man, Wes, and passers-by (V1's R3). */
+export type Figure = VillagerId | 'moonPieMan' | 'wes' | PasserId;
 export type { Costume };
 
 /** A piece of clothing a figure wears, in a colour of its own where no fabric fits. */
@@ -1080,6 +1081,28 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
     under: [TRENCH, MOUSTACHE],
     over: [LOW_HAT],
   },
+  // Passing through (V1's R3): the wayfarer, long silver hair under a bobble hat and a long moss
+  // coat for the road; and Moira, Nessa's aunt, a lighthouse keeper in stripes and a sun hat.
+  wayfarer: {
+    skin: tone(C.skinBronze, C.skinBronzeShade),
+    eyes: C.eyeGreen,
+    hair: { style: HAIR.long, tones: solidHair(tone(C.hairSilver, C.hairSilverShade)) },
+    clothes: [
+      worn('joggers', 'ink'),
+      worn('cozyTee', 'cream'),
+      worn('operaCoat', 'moss'),
+      worn('rainBoots', 'pumpkin'),
+    ],
+    over: [worn('bobbleBeanie', 'scarlet')],
+  },
+  moira: {
+    skin: tone(C.skinPorcelain, C.skinPorcelainShade),
+    eyes: C.eyeBlue,
+    face: { freckles: true },
+    hair: { style: HAIR.bob, tones: solidHair(tone(C.hairSilver, C.hairSilverShade)) },
+    clothes: [worn('cutoffs', 'denim'), worn('stripyTee', 'navy'), worn('rainBoots', 'scarlet')],
+    over: [worn('strawSunHat', 'cream')],
+  },
 };
 
 // ---- In costume, for the Halloween Festival (0.2's J2) ----
@@ -1088,7 +1111,10 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
  * What each neighbour wears in costume (`NEIGHBOUR_COSTUMES` in `src/data/costumes.ts` says when),
  * in place of their own clothes, touches or hats where it says. Maude's is her hat alone.
  */
-const COSTUMES: Record<Exclude<Figure, 'maude' | 'moonPieMan' | 'wes'>, Partial<FigureArt>> = {
+const COSTUMES: Record<
+  Exclude<Figure, 'maude' | 'moonPieMan' | 'wes' | PasserId>,
+  Partial<FigureArt>
+> = {
   cody: {
     over: [worn('lionMane', 'gold'), worn('roundGlasses', 'ink', tone(C.bark, C.barkDark))],
   },
@@ -1413,8 +1439,8 @@ export function figureLayers(
   const dressed =
     id === 'cody' && costume !== null && costume !== 'own' && costume !== 'lion'
       ? CODY_HALVES[costume]
-      : costumed && id !== 'moonPieMan' && id !== 'wes'
-        ? COSTUMES[id]
+      : costumed && id in COSTUMES
+        ? COSTUMES[id as keyof typeof COSTUMES]
         : {};
   const art: FigureArt = { ...own, ...dressed };
   const layers: Layer[] = [];

@@ -166,6 +166,7 @@ the World.
 | `TrickOrTreat`  | a sweet at a neighbour's door on a festival evening            | bag, takings, residents, happenings        |
 | `PumpkinPatch`  | how the farm's patch is coming on, picking from it (0.2's J3)  | bag, takings                               |
 | `Finale`        | the 31st: crowning a costume, Cody's half, their photo (J4)    | takings, her look, neighbours, `thank`     |
+| `RareEvents`    | today's rare event, passers-by, a stray, arrivals told (R3)    | bag, takings, wallet, mailbox, stalls      |
 | `Baking`        | the day's bake with Wrapunzel at Crumbs & Curios (0.2's E1)    | bag, wallet, takings, `thank`              |
 | `Activities`    | the fairground's games, fortune and snack stalls (0.2's M2)    | bag, wallet, takings, weather, Agatha      |
 | `Noticeboard`   | the notes on the board this window, answering them             | bag, wallet, takings, `thank` (friends)    |

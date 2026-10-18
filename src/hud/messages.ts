@@ -38,6 +38,8 @@ import { aSweet } from '../systems/trickOrTreat';
 import type { CritterId, FigurineId, FirstDayStepId, ItemId, PropId } from '../types/ids';
 import type { Glyph } from '../data/glyphs';
 import type { WorldEvent } from '../world/World';
+import type { Herald } from '../world/events';
+import { PASSERS, RARE_EVENTS } from '../data/rareEvents';
 
 /**
  * Said when she tries the ice without her skates, and slides back to the bank (phase B1). Question
@@ -565,6 +567,21 @@ export function eventToast(event: WorldEvent): Toast | null {
         : { text: PICKED_TODAY, icon: { item: 'patchPumpkin' } };
     case 'foundLost':
       return { text: LOST[event.lost].found, icon: 'lookingGlass' };
+    // V1's R3: what's out of the ordinary today, a passer-by's hello, and a stray found.
+    case 'heralded': {
+      const told = heraldToast(event.what);
+      return event.posted ? { ...told, text: `${told.text} ${KEEPSAKE_POSTED}` } : told;
+    }
+    case 'metPasser':
+      return {
+        text:
+          `${PASSERS[event.who].name}: "${event.line}"` +
+          (event.gift ? ` ${PASSERS[event.who].name} gave you ${aSweet(event.gift)}.` : '') +
+          (event.posted ? ` ${KEEPSAKE_POSTED}` : ''),
+        icon: event.gift ? { item: event.gift } : 'footprints',
+      };
+    case 'foundStray':
+      return { text: event.line, special: true, icon: { item: event.critter } };
     case 'decorated':
       return {
         text: DECOR[event.decor].up,
@@ -632,6 +649,29 @@ export function eventToast(event: WorldEvent): Toast | null {
     default:
       return null;
   }
+}
+
+/** Said after a rare event's toast when its keepsake has come in the mail with it (V1's R3). */
+export const KEEPSAKE_POSTED = "And there's a letter in your mailbox!";
+
+/** What's told as out of the ordinary today (V1's R3), the first time she's out that day. */
+function heraldToast(what: Herald): Toast {
+  if ('rare' in what) {
+    const row = RARE_EVENTS[what.rare];
+    return { text: row.heralds, special: true, icon: row.glyph };
+  }
+  if ('passer' in what) {
+    return { text: PASSERS[what.passer].heralds ?? '', special: true, icon: 'shell' };
+  }
+  return what.shop === 'moonPie'
+    ? {
+        text: 'The Moon Pie Man has set up his cart in town today! Chocolate. Banana. Watermelon. Moon pie.',
+        icon: { item: 'moonPie' },
+      }
+    : {
+        text: 'Spirit Halloweenie has popped up in town today! (Temporarily.) Costumes inside.',
+        icon: 'skull',
+      };
 }
 
 /** Said as she casts, until she has caught her first fish (phase Q). */

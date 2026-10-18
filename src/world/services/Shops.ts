@@ -1,4 +1,5 @@
 import type { Ware } from '../../data/shop';
+import { wanderingStallOn } from '../../systems/rareEvents';
 import { dayKey, windowOf } from '../../systems/clock';
 import { isHappening } from '../../systems/calendar';
 import { canSell, paysOn, sameWare, stockOf, wantedOn, type Shelf } from '../../systems/shop';
@@ -37,6 +38,8 @@ export class Shops {
   isOpen(shop: ShopId): boolean {
     if (shop === 'popUp') return this.stalls.popUp() !== null;
     if (shop === 'moonPie') return this.stalls.moonPieCart() !== null;
+    // The wandering stall (V1's R3), the weeks it's in town.
+    if (shop === 'wandering') return wanderingStallOn(dayKey(this.ctx.clock.now())) !== null;
     if (shop === 'market') {
       return atTheFair() && isHappening('marketDay', dayKey(this.ctx.clock.now()));
     }

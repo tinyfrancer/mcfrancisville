@@ -23,8 +23,8 @@ export type HolidayId =
 /** The town's own days, which change something while they last. */
 export type TownEventId = 'marketDay' | 'fullMoon' | 'luckyFriday';
 
-/** The town's festivals, which span days (decision 143). */
-export type FestivalId = 'halloweenFestival';
+/** The town's festivals, which span days (decision 143); a week a season beyond October (V1's R3). */
+export type FestivalId = 'halloweenFestival' | 'blossomWeek' | 'fireworksWeek' | 'lightsWeek';
 
 export type CalendarId = SpecialDayId | HolidayId | TownEventId | FestivalId;
 
@@ -213,6 +213,36 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
     morning: 'The Halloween Festival is on!',
     finale: 'halloween',
     banner: ['HALLOWEEN', 'FESTIVAL'],
+  },
+  // A week a season beyond October (V1's R3), each with a shelf of its own and a beat a week.
+  blossomWeek: {
+    name: 'Blossom week',
+    kind: 'festival',
+    when: { from: '04-18', until: '04-24' },
+    about:
+      'A week in spring when every tree in town is pink, and a picnic under the willow on the Saturday.',
+    morning: "It's blossom week! Every tree in town has gone pink.",
+    banner: ['BLOSSOM', 'WEEK'],
+  },
+  fireworksWeek: {
+    name: 'Fireworks week',
+    kind: 'festival',
+    when: { from: '06-28', until: '07-04' },
+    about:
+      'The week before the Fourth, with sparklers at the shore on the Saturday and fireworks to finish.',
+    morning: "It's fireworks week! The bats have been warned.",
+    finale: 'fourthOfJuly',
+    banner: ['FIREWORKS', 'WEEK'],
+  },
+  lightsWeek: {
+    name: 'Winter lights week',
+    kind: 'festival',
+    when: { from: '12-18', until: '12-24' },
+    about:
+      'The week before Christmas Eve, every window lit, and a walk round the lights on the Saturday.',
+    morning: "It's winter lights week! Every window in town is lit.",
+    finale: 'christmasEve',
+    banner: ['WINTER', 'LIGHTS'],
   },
 };
 

@@ -66,6 +66,7 @@ import type { Finale } from './services/Finale';
 import type { Fishing } from './services/Fishing';
 import type { FirstDay } from './services/FirstDay';
 import type { UpNow } from './services/UpNow';
+import type { RareEvents } from './services/RareEvents';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
@@ -251,6 +252,8 @@ export abstract class WorldParts {
   readonly firstDay: FirstDay;
   /** What's up now, for the calendar's Today tab (V1's R2). */
   readonly upNow: UpNow;
+  /** What's out of the ordinary today, and who's passing through (V1's R3). */
+  readonly rareEvents: RareEvents;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -336,6 +339,7 @@ export abstract class WorldParts {
       stalls: this.stalls,
       neighbourhood: this.neighbourhood,
       outside,
+      mailbox,
     });
     ({
       calendar: this.calendar,
@@ -343,6 +347,7 @@ export abstract class WorldParts {
       trickOrTreat: this.trickOrTreat,
     } = festival);
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
+    this.rareEvents = festival.rareEvents;
     ({ weather: this.weather, fountain: this.fountain } = outdoors(shared, zones, outside));
     this.activities = fairground(shared, this.weather).activities;
     const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
@@ -373,7 +378,14 @@ export abstract class WorldParts {
     ({ sitting: this.sitting, poses: this.poses } = hers);
     const { candyTree, stall, garden, noticeboard, fossils, shops, calendar } = this;
     const today = { candyTree, stall, garden, noticeboard, fossils, shops, calendar };
-    this.upNow = upNow(shared, { ...today, neighbourhood, firstDay: this.firstDay, hasHad });
+    this.upNow = upNow(shared, {
+      ...today,
+      neighbourhood,
+      firstDay: this.firstDay,
+      hasHad,
+      rareEvents: this.rareEvents,
+      stalls: this.stalls,
+    });
   }
 
   /**

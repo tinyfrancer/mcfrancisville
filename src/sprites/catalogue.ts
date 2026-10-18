@@ -340,8 +340,8 @@ export function catalogue(): Entry[] {
     const lines = CALENDAR[id].banner;
     if (lines) grid(`festival:banner:${id}`, festivalBanner(lines), FESTIVAL_BANNER_PALETTE);
   }
-  // Her neighbours, the Moon Pie Man and Wes, turning and walking.
-  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
+  // Her neighbours, the Moon Pie Man, Wes and those passing through (V1's R3), turning and walking.
+  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes', 'wayfarer', 'moira'] as const) {
     for (const facing of FACINGS) {
       for (let frame = 0; frame < DOLL_FRAMES; frame++) {
         entries.push({

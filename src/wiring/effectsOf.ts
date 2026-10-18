@@ -270,6 +270,13 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [burst('sparkle', feet, 5, 10), emote('!')];
     case 'decorated':
       return [burst('confetti', head), emote('♪')];
+    // V1's R3: something out of the ordinary told, a passer-by's hello, a stray found.
+    case 'heralded':
+      return [burst('sparkle', head, 4, 14), emote('!')];
+    case 'metPasser':
+      return event.gift ? [pop({ item: event.gift }, 1, head), emote('♥')] : [emote('♪')];
+    case 'foundStray':
+      return [burst('sparkle', feet, 5, 10), pop({ item: event.critter }, 1, feet), emote('!')];
     case 'frozen':
       return [burst('sparkle', head, 6, 20), emote('♪')];
     case 'dressedUp':

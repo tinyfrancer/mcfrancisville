@@ -359,7 +359,16 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R2 landed (PR #190). Next in this lane: R3.
+R2 landed (PR #190). **R3 in progress** on `claude/r3-weeks-that-differ` (draft PR; no save bump
+planned: what she has seen is `Takings` for the day and the keepsakes are `rare:<id>` letters).
+Done: daytime happenings Mon/Tue/Thu and the three festival weeks' beats (`data/rhythmHappenings.ts`,
+verbs `data/rhythmVerbs.ts`); the festival weeks (`blossomWeek`, `fireworksWeek`, `lightsWeek` in
+`data/calendar.ts`, marks, shelves at Cobweb Corner, banners, Cody's hello `RHYTHM_GREETINGS`,
+`data/festivalLines.ts`); rare events (`data/rareEvents.ts`, `systems/rareEvents.ts`,
+`world.rareEvents`, the wandering stall through `Decorations`, the wayfarer and Moira drawn from
+the doll's parts, a stray critter carried home by a talk action, meteors `render/meteors.ts`, snow
+day snow); the Moon Pie Man and the pop-up told on arrival; Today lines; smoke's `rare`. Next:
+decision 313, the 0.8 `NOTES` line, the PR, merge.
 
 **For R3/R4 (from R2, decision 312):** the calendar's Today is `todayLines(facts)` in
 `systems/today.ts`, worked out each time from `TodayFacts`, which `areas/upNow.ts` reads off the

@@ -174,6 +174,31 @@ export const CALENDAR_MARKS: Record<CalendarId, ItemArt> = {
     },
     { b: C.plum, e: C.candle },
   ),
+  // The weeks a season beyond October (V1's R3): a blossom, sparklers, and a string of lights.
+  blossomWeek: mark(
+    (s) => {
+      for (let k = 0; k < 5; k++) {
+        const a = (k / 5) * Math.PI * 2 - Math.PI / 2;
+        s.ellipse(8 + Math.cos(a) * 4, 8 + Math.sin(a) * 4, 2.5, 2.5, 'p');
+      }
+      s.ellipse(8, 8, 2, 2, 'P').set(8, 8, 'y');
+    },
+    { p: C.blossom, P: C.blossomLight, y: C.candle },
+  ),
+  fireworksWeek: burst(C.candle, C.orbBlueLight),
+  lightsWeek: mark(
+    (s) => {
+      s.line(1, 4, 15, 4, 'w');
+      for (const [x, key] of [
+        [3, 'r'],
+        [8, 'g'],
+        [13, 'b'],
+      ] as const) {
+        s.rect(x - 1, 5, 3, 1, 'w').ellipse(x, 9, 2, 3, key);
+      }
+    },
+    { w: C.iron, r: C.scarlet, g: C.candle, b: C.orbBlueLight },
+  ),
 };
 
 /** Fireworks: rays out from a bright middle, in two colours. */

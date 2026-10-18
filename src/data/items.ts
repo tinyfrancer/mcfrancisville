@@ -2,6 +2,7 @@ import type { CritterId, ItemId } from '../types/ids';
 import { CRITTERS } from './critters';
 import { FOSSIL_ITEMS } from './fossils';
 import { ORCHARD_ITEMS } from './orchard';
+import { RARE_KEEPSAKES } from './rareEvents';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
 export type ItemKind =
@@ -865,6 +866,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
   ...ORCHARD_ITEMS,
   // Dug up from the day's mounds (0.3's C1).
   ...FOSSIL_ITEMS,
+  // A keepsake the first time each rare event comes (V1's R3).
+  ...RARE_KEEPSAKES,
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

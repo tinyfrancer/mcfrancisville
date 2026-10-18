@@ -292,6 +292,12 @@ describe('selling', () => {
       'hallKey',
       'ringTossRosette',
       'plushGhost',
+      // The rare events' keepsakes (V1's R3).
+      'starShard',
+      'stallPennant',
+      'wayfarerPostcard',
+      'snowflakeCharm',
+      'finderRosette',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));

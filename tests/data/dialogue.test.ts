@@ -12,6 +12,9 @@ import {
 } from '../../src/data/greetings';
 import { HAPPENINGS } from '../../src/data/happenings';
 import { HOLIDAY_LINES } from '../../src/data/holidayLines';
+import { FESTIVAL_LINES } from '../../src/data/festivalLines';
+import { PASSERS, RARE_EVENTS, STRAYS } from '../../src/data/rareEvents';
+import { RHYTHM_GREETINGS } from '../../src/data/greetings';
 import { DECOR, HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { FIXTURES, INTERIORS } from '../../src/data/interiors';
 import { ITEMS } from '../../src/data/items';
@@ -91,6 +94,8 @@ const LINES = [
   ...sentences([WES_FIRST, WES_TALK, WES_READY, WES_STAYS, WES_DELIVERS, LAST_PIN]),
   // V1's P3b: meeting the mayor, and Wes after.
   ...sentences([REVEAL_LINES, WES_MET]),
+  // V1's R3: rare events, those passing through, strays, festival weeks.
+  ...sentences([RARE_EVENTS, PASSERS, STRAYS, FESTIVAL_LINES, RHYTHM_GREETINGS]),
 ];
 
 /** One word, two, long and hyphened, typed in lower case, with stray spaces, and none at all. */

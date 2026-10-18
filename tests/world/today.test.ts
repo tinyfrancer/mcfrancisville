@@ -9,6 +9,8 @@ import { happeningsOn, hourOfNight, venueOf } from '../../src/systems/happenings
 import { parseMap } from '../../src/systems/grid';
 import { hasFresh, type TodayLine } from '../../src/systems/today';
 import { weatherOn } from '../../src/systems/weather';
+import { PASSERS } from '../../src/data/rareEvents';
+import { passersOn, rareEventOn } from '../../src/systems/rareEvents';
 import { canGoToday, goToday } from '../../src/wiring/todayGo';
 import type { World } from '../../src/world/World';
 import { harness, type Harness } from './harness';
@@ -85,6 +87,17 @@ function holds(h: Harness, line: TodayLine): boolean {
       return line.days > 0;
     case 'wanted':
       return JSON.stringify(line.items) === JSON.stringify(w.shops.wanted());
+    // V1's R3.
+    case 'rare':
+      return rareEventOn(day) === line.id && w.rareEvents.today() === line.id;
+    case 'peddler':
+      return line.shop === 'moonPie' ? w.shops.isOpen('moonPie') : w.shops.isOpen('popUp');
+    case 'passer':
+      return passersOn(day).includes(line.who) && PASSERS[line.who].zone === line.zone;
+    case 'stray': {
+      const stray = line.carrying ? w.rareEvents.carrying() : w.rareEvents.stray();
+      return stray?.owner === line.owner && stray.zone === line.zone;
+    }
   }
 }
 

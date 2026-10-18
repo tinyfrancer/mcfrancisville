@@ -1,4 +1,5 @@
 import { HAPPENINGS } from '../data/happenings';
+import { WANDERING_STALL_AT, type PasserId, type RareEventId } from '../data/rareEvents';
 import type {
   CritterId,
   HappeningId,
@@ -13,7 +14,7 @@ import { callOn } from './calls';
 import { shiftDay, weekOf } from './calendar';
 import { atHers, isHusband } from './cody';
 import { isVisitDay } from './critters';
-import { hourOfNight } from './happenings';
+import { happeningOf, hourOfNight } from './happenings';
 import { inTown } from './mayor';
 import type { Tile } from './pathfinding';
 import { visitsOn } from './schedules';
@@ -36,7 +37,8 @@ export interface Caller {
  */
 export function callersOn(day: string, best: (villager: VillagerId) => boolean): Caller[] {
   const callers: Caller[] = visitsOn(day)
-    .filter((v) => v.host === 'her')
+    // A happening of theirs comes first (V1's R3's daytime beats meet more of the visits).
+    .filter((v) => v.host === 'her' && happeningOf(v.guest, v.from + 0.25, day) === null)
     .map(({ guest, from, until }) => ({ who: guest, from, until }));
   for (const who of VILLAGER_IDS) {
     if (isHusband(who) || !inTown(who) || !best(who)) continue;
@@ -94,6 +96,20 @@ export interface TodayFacts {
   callers: readonly Caller[];
   /** The critters visiting today out of their time (R5's `isVisiting`), and those she's never had. */
   critters: { visiting: readonly CritterId[]; fresh: readonly CritterId[] };
+  /** Today's rare event (V1's R3), and the day it began: the wandering stall's Monday. */
+  rare: { id: RareEventId; began: string } | null;
+  /** The Moon Pie Man and the pop-up, those in town today, and where each stands. */
+  peddlers: readonly { shop: 'moonPie' | 'popUp'; tile: Tile }[];
+  /** Who is passing through today, where, and their hours. */
+  passers: readonly { who: PasserId; zone: MapZoneId; from: number; until: number }[];
+  /** A critter gone astray today: where it waits, or that she's carrying it home. */
+  stray: {
+    owner: VillagerId;
+    name: string;
+    critter: CritterId;
+    zone: MapZoneId;
+    carrying: boolean;
+  } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -114,6 +130,18 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'critters'; visiting: readonly CritterId[]; fresh: readonly CritterId[] }
   | { kind: 'visitsSoon'; days: number }
   | { kind: 'wanted'; items: readonly ItemId[] }
+  // V1's R3: what's out of the ordinary, who's in town for the day, who's passing through, a stray.
+  | { kind: 'rare'; id: RareEventId }
+  | { kind: 'peddler'; shop: 'moonPie' | 'popUp' }
+  | { kind: 'passer'; who: PasserId; zone: MapZoneId; now: boolean }
+  | {
+      kind: 'stray';
+      owner: VillagerId;
+      name: string;
+      critter: CritterId;
+      zone: MapZoneId;
+      carrying: boolean;
+    }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -144,6 +172,7 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
     const { done, of } = facts.firstDay;
     lines.push({ kind: 'firstDay', done, of, key: `firstDay:${done}` });
   }
+  lines.push(...outOfTheOrdinary(facts));
   if (facts.tree > 0) {
     lines.push({
       kind: 'tree',
@@ -239,6 +268,55 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       items: facts.wanted,
       key: `wanted:${weekOf(day)}`,
       go: { zone: 'town', prop: 'shopHouse' },
+    });
+  }
+  return lines;
+}
+
+/**
+ * What's out of the ordinary today (V1's R3): a rare event, the Moon Pie Man and the pop-up when
+ * they're in town, whoever's passing through until they go, and a stray until it's home.
+ */
+function outOfTheOrdinary(facts: TodayFacts): TodayLine[] {
+  const { day, hour } = facts;
+  const lines: TodayLine[] = [];
+  if (facts.rare) {
+    const { id, began } = facts.rare;
+    lines.push({
+      kind: 'rare',
+      id,
+      key: `rare:${id}:${began}`,
+      ...(id === 'wanderingStall'
+        ? { go: { zone: 'town' as const, tile: WANDERING_STALL_AT } }
+        : {}),
+    });
+  }
+  for (const p of facts.passers) {
+    if (!notOver(hour, p.until)) continue;
+    lines.push({
+      kind: 'passer',
+      who: p.who,
+      zone: p.zone,
+      now: isOn(hour, p.from, p.until),
+      key: `passer:${p.who}:${day}`,
+      go: { zone: p.zone },
+    });
+  }
+  if (facts.stray) {
+    const { carrying, owner, zone } = facts.stray;
+    lines.push({
+      kind: 'stray',
+      ...facts.stray,
+      key: `stray:${day}:${carrying ? 'home' : 'lost'}`,
+      go: carrying ? { villager: owner } : { zone },
+    });
+  }
+  for (const { shop, tile } of facts.peddlers) {
+    lines.push({
+      kind: 'peddler',
+      shop,
+      key: `peddler:${shop}:${day}`,
+      go: { zone: 'town', tile },
     });
   }
   return lines;

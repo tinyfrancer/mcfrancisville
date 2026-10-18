@@ -331,6 +331,8 @@ export const CORN_DOG_STALL = drawStall('CORN DOGS', cornDogs);
 export const HOOK_A_GHOST_STALL = drawStall('HOOK A GHOST', hookAGhost);
 export const TOFFEE_APPLE_STALL = drawStall('TOFFEE APPLES', toffeeApples);
 export const MARKET_STALL = drawStall('MARKET', market);
+/** The wandering stall (V1's R3), in town for a week now and then: market day's table, in plum. */
+export const WANDERING_STALL = drawStall('CURIOS', market);
 
 /** Each stall with its awning let down a pixel by the breeze, for its second frame (V1's E5). */
 export const STALL_BILLOWS = {
@@ -339,6 +341,7 @@ export const STALL_BILLOWS = {
   hookAGhost: () => [drawStall('HOOK A GHOST', hookAGhost, 1)],
   toffeeApple: () => [drawStall('TOFFEE APPLES', toffeeApples, 1)],
   market: () => [drawStall('MARKET', market, 1)],
+  wandering: () => [drawStall('CURIOS', market, 1)],
 } as const;
 
 /** A stall's colours: its awning and skirt in two of its own, the rest shared. */
@@ -364,6 +367,8 @@ export const HOOK_A_GHOST_PALETTE = stallPalette(C.orbBlue, C.cream);
 export const TOFFEE_APPLE_PALETTE = stallPalette(C.scarlet, C.gold);
 // Its stone is the gourds in the second basket, its door the jam.
 export const MARKET_PALETTE = stallPalette(C.moss, C.cream, C.pumpkin);
+// The wandering stall's: a plum awning striped gold, its baskets of lavender curios.
+export const WANDERING_PALETTE = stallPalette(C.plum, C.gold, C.lavender);
 
 export const STALL_LIT: Palette = { ...WINDOWS_LIT, ...BULBS_LIT };
 

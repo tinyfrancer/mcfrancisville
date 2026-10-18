@@ -5,6 +5,7 @@ import type { BroomLook } from '../data/broom';
 import type { TogetherId } from '../data/cody';
 import type { Placed } from '../data/home';
 import type { DecorId } from '../data/holidays';
+import type { PasserId, RareEventId } from '../data/rareEvents';
 import type { ClueId } from '../data/mystery';
 import type { Effect } from '../data/dishes';
 import type { Made } from '../data/recipes';
@@ -257,7 +258,22 @@ export type WorldEvent =
   /** A shelf finished (0.2's F2), its letter posted with it: cheered where she is (V1's E1). */
   | { kind: 'shelved'; shelf: MilestoneId }
   /** She gave a neighbour a gift, and how they took it (V1's E1: a heart over them if loved). */
-  | { kind: 'gave'; villager: VillagerId; item: ItemId; reaction: Reaction };
+  | { kind: 'gave'; villager: VillagerId; item: ItemId; reaction: Reaction }
+  /**
+   * Something out of the ordinary today (V1's R3), told the first time she's out that day: a
+   * rare event, a visitor come to stay, or the Moon Pie Man or the pop-up arrived in town.
+   */
+  | { kind: 'heralded'; what: Herald; posted?: true }
+  /**
+   * She said hello to someone passing through (V1's R3): their line, and what they gave her;
+   * `posted` when a keepsake came in the mail with it, quietly, for the toast to say.
+   */
+  | { kind: 'metPasser'; who: PasserId; line: string; gift: ItemId | null; posted?: true }
+  /** She found a neighbour's critter gone astray, to carry home to them (V1's R3). */
+  | { kind: 'foundStray'; critter: CritterId; line: string };
+
+/** What's told as out of the ordinary today (V1's R3). */
+export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };
 
 /** A run of tiles, `w` by `h` from its top-left: what she walked up to (V1's E1). */
 export interface TileBox {

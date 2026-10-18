@@ -6155,6 +6155,75 @@ async function seasons() {
   );
 }
 
+/**
+ * Rare events (V1's R3): a meteor shower's night by `?day=`, told by a toast and in Today, shooting
+ * stars in the sky; and the wandering stall's week, the stall stood in town and opened as a shop.
+ */
+async function rare() {
+  const shower = '2026-11-29';
+  await openOn(shower, 22);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', `she is in town on ${shower}`);
+  await page.evaluate(() => window.view.step(40, 30));
+  const shown = await page.evaluate(() => ({
+    today: window.world.rareEvents.today(),
+    sky: window.world.rareEvents.sky(),
+    line: window.world.upNow.lines().some((l) => l.kind === 'rare'),
+  }));
+  check(
+    `${shower} is a meteor shower's night, shooting stars in the sky and a line in Today`,
+    shown.today === 'meteorShower' && shown.sky === 'meteors' && shown.line,
+    JSON.stringify(shown),
+  );
+  // The day's letters are told first, each waiting its turn: a tap sends each on.
+  /** @type {string[]} */
+  const told = [];
+  for (let i = 0; i < 8; i++) {
+    const text =
+      (await page
+        .locator('.hud-toast-shown')
+        .textContent()
+        .catch(() => '')) ?? '';
+    told.push(text);
+    if (text.includes('meteor shower')) break;
+    await page.evaluate(() =>
+      document.querySelector('.hud-toast-shown')?.dispatchEvent(new Event('pointerdown')),
+    );
+    await page.waitForTimeout(100);
+  }
+  check(
+    'the meteor shower is told by a toast',
+    told.some((t) => t.includes('meteor shower')),
+    told.join(' | '),
+  );
+  await page.screenshot({ path: '.smoke/rare-meteors.png' });
+
+  const stallDay = '2026-11-18';
+  await openOn(stallDay, 12);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', `she is in town on ${stallDay}`);
+  await page.evaluate(() => window.view.step(40, 10));
+  await closeSheets();
+  const stood = await page.evaluate(() => ({
+    today: window.world.rareEvents.today(),
+    open: window.world.shops.isOpen('wandering'),
+  }));
+  check(
+    `the wandering stall is in town on ${stallDay}`,
+    stood.today === 'wanderingStall' && stood.open,
+    JSON.stringify(stood),
+  );
+  await page.evaluate(() => window.world.tapTile(31, 35));
+  await stepUntil(
+    () => document.querySelector('.hud-shop-sheet') !== null,
+    'the wandering stall opens as a shop',
+  );
+  const title = (await page.locator('.hud-shop-sheet').textContent()) ?? '';
+  check('the wandering stall sells its curios', title.includes('Curios from far away'), title);
+  await page.screenshot({ path: '.smoke/rare-stall.png' });
+  await closeSheets();
+}
+
 /** The Halloween Festival (0.2's J1): the banner, the chip's countdown, the calendar, the title. */
 async function festival() {
   await openOn('2026-10-05', 12);
@@ -7083,6 +7152,7 @@ const SECTIONS = [
   ['scarah', scarah],
   ['holidays', holidays],
   ['seasons', seasons],
+  ['rare', rare],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],
   ['october', october],

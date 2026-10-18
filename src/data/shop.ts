@@ -13,6 +13,7 @@ import type { FestivalId, TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { FOSSIL_VALUES } from './fossils';
+import { RARE_KEEPSAKE_VALUES } from './rareEvents';
 import { ORCHARD_VALUES } from './orchard';
 import { DISPLAY_WARES } from './display';
 import { SURFACE_WARES, TRINKET_WARES } from './tabletop';
@@ -201,6 +202,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   ...ORCHARD_VALUES,
   ...critterValues(),
   ...FOSSIL_VALUES,
+  ...RARE_KEEPSAKE_VALUES,
 };
 
 function critterValues(): Record<CritterId, number> {
@@ -553,6 +555,33 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         on: 'marketDay',
         moves: 'market',
       },
+      // A shelf for each season's festival week (V1's R3).
+      {
+        name: 'Blossom week',
+        picks: [
+          { from: outfits('butterflyWings', 'tulleSkirt'), count: 1 },
+          { from: furniture('flowerPots', 'gardenBench'), count: 1 },
+          { from: items('sunflowerSeed', 'roseSeed'), count: 1 },
+        ],
+        on: 'blossomWeek',
+      },
+      {
+        name: 'Fireworks week',
+        picks: [
+          { from: outfits('sundressDots', 'denimJacket'), count: 1 },
+          { from: furniture('picnicTable', 'fairyLights'), count: 1 },
+          { from: items('popcorn', 'toffeeApple'), count: 1 },
+        ],
+        on: 'fireworksWeek',
+      },
+      {
+        name: 'Winter lights',
+        picks: [
+          { from: furniture('fairyLights', 'snowGlobe'), count: 1 },
+          { from: outfits('velvetDress', 'stripyTights', 'manyColoursCoat'), count: 1 },
+        ],
+        on: 'lightsWeek',
+      },
       // Six of the twenty-two a day (0.2's N2), so any seed turns up within the week.
       { name: 'Seeds', picks: [{ from: SEEDS, count: 6 }] },
       { name: 'Fancy shoes', picks: [{ from: FANCY_SHOES, count: 2 }] },
@@ -665,6 +694,24 @@ export const SHOPS: Record<ShopId, ShopRow> = {
   workshop: WORKSHOP,
   // Rufus's (V1's P4): his flower buckets, opened as a shop.
   flowers: FLOWER_SHOP,
+  // The wandering stall (V1's R3), in town for a week now and then: a week's curios, dealt whole.
+  wandering: {
+    name: 'The wandering stall',
+    greeting:
+      'Curios from far away, love! Here till Sunday, then the road takes me on. Have a good look.',
+    shelves: [
+      {
+        name: 'Curios from far away',
+        picks: [
+          { from: furniture(...TRINKET_WARES), count: 2 },
+          { from: SQUISHIES, count: 1 },
+          { from: DOLLS, count: 1 },
+          { from: RECORDS, count: 1 },
+        ],
+        everyWeek: true,
+      },
+    ],
+  },
 };
 
 /** The pop-up is in town on about this many days in seven, and which days is up to the day key. */

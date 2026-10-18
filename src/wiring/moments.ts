@@ -88,6 +88,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
     if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+    if (event.kind === 'arrived' && event.at === 'wanderingStall') hud.openShop('wandering');
     if (event.kind === 'arrived' && event.at === 'seedCart') hud.openShop('seeds');
     if (event.kind === 'arrived' && event.at === 'barn') hud.openBarn();
     // Market day's stall by the fairground's stage (0.2's M3): its table, or when it's out.

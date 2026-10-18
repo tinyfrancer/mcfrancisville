@@ -168,6 +168,8 @@ import {
   MARKET_PALETTE,
   MARKET_STALL,
   STALL_BILLOWS,
+  WANDERING_PALETTE,
+  WANDERING_STALL,
 } from './fairground';
 import {
   GOURDON_GLOW,
@@ -658,6 +660,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
   hookAGhostStall: stall(HOOK_A_GHOST_STALL, HOOK_A_GHOST_PALETTE, STALL_BILLOWS.hookAGhost),
   toffeeAppleStall: stall(TOFFEE_APPLE_STALL, TOFFEE_APPLE_PALETTE, STALL_BILLOWS.toffeeApple),
   marketStall: stall(MARKET_STALL, MARKET_PALETTE, STALL_BILLOWS.market),
+  wanderingStall: stall(WANDERING_STALL, WANDERING_PALETTE, STALL_BILLOWS.wandering),
   fortuneTent: {
     ...FORTUNE_TENT,
     palette: FORTUNE_TENT_PALETTE,

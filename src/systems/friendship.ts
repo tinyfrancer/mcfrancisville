@@ -1,3 +1,5 @@
+import { FESTIVAL_LINES } from '../data/festivalLines';
+import { RARE_EVENTS, type RareEventId } from '../data/rareEvents';
 import { HUSBAND, MARRIED_LINES } from '../data/cody';
 import { ITEMS } from '../data/items';
 import { bestLetter, isBestLetter } from './bestFriends';
@@ -26,6 +28,7 @@ import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/village
 import { ZONES } from '../data/zones';
 import type { ItemId, MilestoneId, VillagerId, ZoneId } from '../types/ids';
 import { isNight, windowAtHour } from './clock';
+import { festivalDay, festivalsOn, partsOf } from './calendar';
 import { topicsNow, type TalkScene } from './dialogue';
 import { holidayLetterId, holidayOn } from './holidays';
 import { hashMixed, hashString } from './random';
@@ -176,7 +179,21 @@ export function dayLine(villager: VillagerId, day: string): string | null {
   // Their own birthday (V1's P4) comes before a holiday's line.
   if (villager !== 'cody' && isBirthday(villager, day)) return BIRTHDAY_LINES[villager];
   const holiday = holidayOn(day);
-  return holiday ? HOLIDAY_LINES[holiday][villager] : null;
+  if (holiday) return HOLIDAY_LINES[holiday][villager];
+  return festivalLine(villager, day);
+}
+
+/**
+ * A festival week's line (V1's R3), on its first day and its Saturday, for those who have one.
+ */
+function festivalLine(villager: VillagerId, day: string): string | null {
+  for (const id of festivalsOn(day)) {
+    if (id === 'halloweenFestival') continue;
+    const first = festivalDay(id, day).nth === 1;
+    if (!first && partsOf(day).weekday !== 6) continue;
+    return FESTIVAL_LINES[id][villager] ?? null;
+  }
+  return null;
 }
 
 /**
@@ -299,6 +316,11 @@ export function letterOf(id: string): Letter | null {
   if (key === 'found') {
     const letter = n && n in ZONES ? ZONES[n as ZoneId].letter : undefined;
     return letter ? { ...letter } : null;
+  }
+  // A rare event's keepsake (V1's R3), the first time it comes: `rare:<event>`.
+  if (key === 'rare') {
+    const rare = n && n in RARE_EVENTS ? RARE_EVENTS[n as RareEventId] : undefined;
+    return rare ? { ...rare.letter, gift: { item: rare.keepsake } } : null;
   }
   if (key === 'shelf') {
     const milestone = n && n in MILESTONES ? MILESTONES[n as MilestoneId] : undefined;

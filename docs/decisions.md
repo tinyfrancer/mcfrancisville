@@ -7201,3 +7201,77 @@ dot in the save (a phone's, like R1's hints); a favour bubble showing the thing 
 16-pixel icon in an 18-pixel bubble doesn't read; the line in Today says what); hopping her to a
 neighbour indoors in another building (the neighbours sheet's Find never hops either; she's flown
 to the place, or walked to the door).
+
+## 313. Weeks that differ: daytime beats, a festival week a season, rare events, passers-by, and arrivals told (2026-10-18, V1's R3)
+
+_Session R3 of the V1 plan, lane 4, for `docs/v1_analysis.md` finding 3 ("Every weekday is the
+same", "Decision 211 removed the pacing", "Surprises are thin"). No save change. Personal touches
+parked (decision 177): who hosts, the critters' names, Moira, the wayfarer and every line are the
+warmest default the rows suggest; nothing was asked._
+
+- **Something on in the daytime on Monday, Tuesday and Thursday** (`RHYTHM_HAPPENINGS`,
+  `data/rhythmHappenings.ts`, spread into `HAPPENINGS`; `RhythmId`): Scarah's market round at her
+  seed cart at Boo Acres (Monday 8–11, with Rufus; pick the week's star crop for the sign), Hazel's
+  cloud watching at the lookout (Tuesday 14–17, with Nessa; name a cloud) and Agatha's herb walk in
+  Whisperwood (Thursday 13–16, with Barty; choose the herb for the week's brew). Each has a verb as
+  P4's do (`RHYTHM_VERBS`, `data/rhythmVerbs.ts`), dealt three at a time by the week and remembered
+  by the host. Gourdon keeps his open day's pick (the plan's example for Thursday was his bench day,
+  but "pick the week's piece" is already his Saturday's verb; two of one verb a week would blur).
+- **A festival week a season beyond October** (`FestivalId`: `blossomWeek` 18–24 April,
+  `fireworksWeek` 28 June–4 July counting down to the Fourth, `lightsWeek` 18–24 December counting
+  down to Christmas Eve), rows within `calendar.ts`'s span rules, so `festivalsOn`, the calendar's
+  band, the banner across the square (`BLOSSOM WEEK`, `FIREWORKS WEEK`, `WINTER LIGHTS`) and the
+  countdown work as October's do. Each has a shelf `on` it at Cobweb Corner (`Blossom week`,
+  `Fireworks week`, `Winter lights`, from wares already priced), one beat on its Saturday (the
+  blossom picnic under the willow, sparklers at the shore, the lights walk from the well; none when
+  the Saturday is the finale, whose holiday has its own), a calendar mark, Cody's hello on its first
+  day (`RHYTHM_GREETINGS`) and a first line from six neighbours each on its first day and its
+  Saturday (`FESTIVAL_LINES`, through `dayLine` after a holiday's). **They play the town's tune**
+  (`TunedFestival` in `audio/music.ts`: only October's has a theme of its own); a theme each was
+  more than this session.
+- **Rare events** (`data/rareEvents.ts`, `systems/rareEvents.ts`): a meteor shower (a clear night,
+  shooting stars after eight anywhere outdoors, `render/meteors.ts`), the wandering stall (a whole
+  week, Monday to Sunday, never two running and never in a festival's week, at `WANDERING_STALL_AT`
+  by the bakery: market day's stall redrawn in plum and gold, `CURIOS`, through `Decorations`, a
+  shop of its own, `wandering`, whose week's curios are dealt `everyWeek`), a wayfarer passing
+  through town for the day, a snow day in December to February (snow falling all day by the
+  world's `rareEvents.sky()`, over whatever the weather is) and a critter gone astray (a
+  neighbour's own, bobbing on a dig spot of its place clear of the day's mound until she walks onto
+  it, then carried home by a talk action, "Give back Sir Hops", for 40 Candy and a little
+  friendship). **Dealt from the day key alone**: one week in 15 the stall, and one day in 11 of the
+  rest a day's event that fits (its months, a clear sky), a snow day first half the time in
+  winter; never on a holiday, one of her days or a festival's; never two at once. About one day in
+  8.7 in all (`tests/systems/rareEvents.test.ts` holds 1/11 to 1/7.5 over six years, each in two
+  years, a snow day every winter).
+- **Told, and a keepsake the first time**: the first time she's out on the day (in town for the
+  Moon Pie Man and the pop-up), a `heralded` toast (`Herald`: a rare event, a visitor's first day,
+  or a peddler arrived), and a line in Today; the first time each rare event comes, a letter with a
+  keepsake (`rare:<id>`: Hazel's star shard, Ollie with the stall's pennant and the wayfarer's
+  postcard after the hello, Cody's snowflake charm, Maude's finder's rosette once the stray is
+  home; five `RareKeepsakeId` items, unsellable). **No save bump**: what she was told, met, found
+  and carried is `Takings` for the day (`rare:` is once a day in `onceADay`), and "the first time"
+  is the mailbox's, which never sends a letter twice.
+- **Passers-by** (`PASSERS`, figures from the doll's parts in `sprites/villagers.ts`, a voice each):
+  the wayfarer on a stranger's day, and **Moira**, Nessa's aunt, who keeps a lighthouse and stays at
+  Lantern Shore every 12–18 July, an arrival on a schedule as decision 271 allows, a span of the
+  year (`when`), not a villager row. Tapping one walks her up (`Visit` `passer`); the first hello
+  of the day is a line and a little treat (`metPasser`), after that a line.
+- **The Moon Pie Man and the pop-up told when they arrive**: a toast the first time she's in town
+  on a day they're there and weren't the day before, and a Today line with a tap to the cart or the
+  pop-up while they're in town (the calendar's plain "is in town today" row gives way to it).
+- **Today** grows `rare`, `passer`, `stray` and `peddler` lines (`TodayFacts.rare`, `passers`,
+  `stray`, `peddlers`, read in `areas/upNow.ts`), each held by `tests/world/today.test.ts`'s `holds`.
+- **Done**: `tests/world/weeksDiffer.test.ts` holds every month for two years with no two days
+  alike (the calendar's rows and festivals, the happenings, the rare event, who's passing through
+  and visiting, the peddlers and the weather together), and every Monday, Tuesday and Thursday with
+  a daytime beat; smoke's `rare` opens 29 November 2026 at ten at night (`?day=`) and sees the
+  shower, its toast and its line, and 18 November's stall opened as a shop.
+
+**Rejected:** a rare event per day by a weighted table with "none" in it (a week's stall can't be
+dealt a day at a time without being a week's state); keeping what she has seen in the save (a
+letter already is the record, and `Takings` holds the day); a snow day that changes the weather
+(the world's rain waters the beds; snow over a clear or foggy day reads as a snow day all the
+same); the visitor as a villager row (decision 271: arrivals that aren't locks, and a thirteenth
+neighbour with hearts and favours for one week a year would be a neighbour she can't keep up
+with); a theme of music per festival week (three tunes is a session of its own); new ware art for
+the festival shelves (what's already drawn and priced fits each week).

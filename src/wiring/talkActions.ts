@@ -2,7 +2,7 @@ import { TOGETHER, TOGETHER_IDS } from '../data/cody';
 import { TUNES } from '../data/instruments';
 import { isHusband } from '../systems/cody';
 import { VILLAGERS } from '../data/villagers';
-import { candy, quantity } from '../hud/messages';
+import { candy, KEEPSAKE_POSTED, quantity } from '../hud/messages';
 import type { TalkAction } from '../hud/TalkSheet';
 import type { VillagerId } from '../types/ids';
 import type { World } from '../world/World';
@@ -87,6 +87,21 @@ export function talkActions(world: World, id: VillagerId, changed: () => void): 
         },
       });
     }
+  }
+  // Their critter gone astray, carried home (V1's R3).
+  const stray = world.rareEvents.canHandBack(id) ? world.rareEvents.carrying() : null;
+  if (stray) {
+    actions.push({
+      label: `Give back ${stray.name}`,
+      glyph: { item: stray.critter },
+      run() {
+        changed();
+        const back = world.rareEvents.handBack(id);
+        if (!back) return null;
+        const given = `${name} gave you ${candy(back.candy)}.`;
+        return { lines: [back.line], aside: back.posted ? `${given} ${KEEPSAKE_POSTED}` : given };
+      },
+    });
   }
   if (world.finale.canCrown(id)) {
     actions.push({
