@@ -399,7 +399,16 @@ its season), so `wary` and a bite window by rarity apply to them as to any.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-S1 landed (PR #170). Next in this lane: S3.
+S1 landed (PR #170). **S3 in progress** on `claude/s3-safe` (decision 322, no save change).
+Done: the splash was L5's already (decision 295, ten launch screens); the service worker
+precaches the shell (`src/precache.ts`, the build's list written into `dist/sw.js` by the plugin
+in `vite.config.ts`, a cache per version, old ones pruned on activate) and `npm run
+smoke:offline` (`scripts/smoke-offline.mjs`, against `npm run preview`, a CI step) passes; the
+backup nudge and "last backed up" (`src/safekeeping.ts`, `src/systems/backupNudge.ts`), the
+photo kept (`src/hud/keepPhoto.ts`, `printOf`), the error notes (`src/errorNotes.ts`), `?perf`
+(`src/wiring/perf.ts`) and its method in `docs/architecture.md`, decision 322, and the 0.9
+`NOTES` row (three lines, all S3's, since a row needs three: a later 0.9 session folds them).
+Next: green CI, merge `v1-dev`, the PR's last commit (status line, this heading), merge.
 
 **For S3/S2 (from S1):** the sound is `src/audio/` (decision 321): `graph.ts`'s `Mixer` is the
 node graph, `SoundBoard` what plays when, `session.ts` the silent switch (`audioSession` or a

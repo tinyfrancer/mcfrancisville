@@ -1,6 +1,7 @@
 import type { Tile } from '../systems/pathfinding';
 import type { SceneView } from './scene';
 import { TILE_SIZE } from '../config/world';
+import { PALETTE } from '../sprites/palette';
 
 /** How much room the photo leaves round them, in tiles: a little either side, more above. */
 const ROOM = { side: 1.25, above: 2, below: 0.75 };
@@ -58,4 +59,45 @@ export function photoOf(
     picture.height,
   );
   return picture;
+}
+
+/** About how wide a saved print is, in pixels: her pixels are scaled up whole to fill it. */
+const PRINT_WIDTH = 1080;
+
+/**
+ * The photo as a print to keep (V1's S3): the picture at a whole scale, so it stays crisp in her
+ * camera roll, on a polaroid's card with the caption written under it. Null if no canvas.
+ */
+export function printOf(picture: HTMLCanvasElement, caption: string): HTMLCanvasElement | null {
+  const scale = Math.max(1, Math.floor(PRINT_WIDTH / Math.max(1, picture.width)));
+  const width = picture.width * scale;
+  const height = picture.height * scale;
+  const edge = Math.round(width * 0.05);
+  const foot = Math.round(width * 0.2);
+  const print = document.createElement('canvas');
+  print.width = width + edge * 2;
+  print.height = height + edge + foot;
+  const ctx = print.getContext('2d');
+  if (!ctx) return null;
+  ctx.fillStyle = PALETTE.white;
+  ctx.fillRect(0, 0, print.width, print.height);
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(picture, edge, edge, width, height);
+  ctx.fillStyle = PALETTE.ink;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.font = `${Math.round(foot * 0.26)}px ui-rounded, 'SF Pro Rounded', system-ui, sans-serif`;
+  ctx.fillText(caption, print.width / 2, edge + height + foot / 2, print.width - edge * 2);
+  return print;
+}
+
+/** A canvas as a PNG, or null if the browser won't make one. */
+export function pngOf(canvas: HTMLCanvasElement): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    try {
+      canvas.toBlob((blob) => resolve(blob), 'image/png');
+    } catch {
+      resolve(null);
+    }
+  });
 }

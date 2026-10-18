@@ -136,3 +136,16 @@ export const DEDICATION = {
   signed: 'Love, Cody',
   reply: '♥',
 };
+
+/**
+ * A line under his greeting about once a week (V1's S3), while the game is in a browser tab, or
+ * once it's installed when her last backup code is a fortnight old: what keeps her town safe.
+ */
+export const SAFE_KEEPING: Record<'install' | 'backup', string> = {
+  install:
+    "P.S. Pop the game on your Home Screen (Share, then Add to Home Screen) and the town's kept " +
+    'safe for good. I worry about it. A normal amount.',
+  backup:
+    "P.S. It's been a little while since your last backup code. Settings, Backup, Copy, and tuck " +
+    "it in Notes? Then the town's safe whatever happens to your phone.",
+};

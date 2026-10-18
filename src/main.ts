@@ -5,6 +5,7 @@ import {
   dayRequested,
   hourRequested,
   manualLoopRequested,
+  perfRequested,
   titleSkipped,
   weatherRequested,
 } from './config/flags';
@@ -43,6 +44,12 @@ import { fromSave, tileOf, World, type WorldEvent } from './world/World';
 import { sheetApis, type Waiting } from './wiring/apis';
 import { playMoments } from './wiring/moments';
 import { FixedStep } from './loop';
+import { catchErrors, readErrorNotes, troubleOf } from './errorNotes';
+import { NOTES } from './data/patchNotes';
+import { SAFE_KEEPING } from './data/greetings';
+import { backedUpLine, nudgeFor } from './systems/backupNudge';
+import { markBackedUp, markNudged, readBackedUpAt, readNudgedAt } from './safekeeping';
+import { showPerf } from './wiring/perf';
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
@@ -58,6 +65,9 @@ const TAP_SLOP_PX = 8;
 
 const root = document.getElementById('app') as HTMLElement;
 const canvas = document.getElementById('game') as HTMLCanvasElement;
+
+// Whatever goes wrong uncaught is noted for Settings to mention, and the game carries on (V1's S3).
+catchErrors(window);
 
 if (galleryRequested(location.search)) {
   showGallery(root);
@@ -187,7 +197,21 @@ function startGame(): void {
       return { ok: true };
     },
     status: async () => ({ persisted: await persisted, standalone: runningStandalone() }),
+    backedUpLine: () => backedUpLine(Date.now(), readBackedUpAt()),
+    backedUp: () => markBackedUp(Date.now()),
   };
+  // A word under Cody's hello about keeping the town safe, about once a week, never on the first
+  // (V1's S3); when it's said is the phone's, never the save's.
+  const nudgeNow = (kind: string): string | null => {
+    const now = Date.now();
+    const standalone = runningStandalone();
+    const keeping = { now, standalone, backedUpAt: readBackedUpAt(), nudgedAt: readNudgedAt() };
+    const nudge = kind === 'first' ? null : nudgeFor({ ...keeping, since: save.createdAt });
+    if (nudge) markNudged(now);
+    return nudge && SAFE_KEEPING[nudge];
+  };
+  // The ?perf corner (V1's S3): her phone's frame times, from her first tap.
+  const perf = perfRequested(location.search) ? showPerf(root) : null;
   // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
   world.events.on('home', () => autosave.markDirty());
   world.events.on('yard', () => autosave.markDirty());
@@ -204,6 +228,11 @@ function startGame(): void {
       setEffects: (on) => sound.setEffectsOn(on),
       setMusic: (on) => sound.setMusicOn(on),
       silentHint: () => sound.silentHint(),
+      trouble: () =>
+        troubleOf(readErrorNotes(), Date.now(), {
+          version: NOTES[NOTES.length - 1]!.version,
+          userAgent: navigator.userAgent,
+        }),
     },
     view: {
       closeness: () => closeness,
@@ -220,7 +249,9 @@ function startGame(): void {
   tickOnPress(root, () => sound.uiTick());
   // Cody's greeting, with what today's visit brought (decisions.md 24, 114, 115).
   const greet = ({ greeting, visit }: Welcome) => {
+    const nudge = nudgeNow(greeting.kind);
     hud.greet({
+      ...(nudge && { nudge }),
       from: 'cody',
       line: greeting.line,
       reply: greeting.reply,
@@ -311,6 +342,7 @@ function startGame(): void {
     const tap = press.travel <= TAP_SLOP_PX;
     press = null;
     if (tap) feelTap(view().tap(e.clientX, e.clientY), { world, effects, sound });
+    perf?.start();
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
@@ -341,12 +373,14 @@ function startGame(): void {
   };
   let last = performance.now();
   const frame = (now: number) => {
+    const started = performance.now();
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) steps.advance(delta, tick);
     if (fitFor() !== fitted) resize();
     drawFrame(now);
     placeBed();
+    perf?.frame(now, performance.now() - started);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

@@ -8,6 +8,10 @@ export interface SaveApi {
   /** Replaces the save with the code's town. Resolves only on failure: success reloads the page. */
   restore(code: string): Promise<{ ok: false; reason: string } | { ok: true }>;
   status(): Promise<{ persisted: boolean; standalone: boolean }>;
+  /** The Backup tab's "last backed up" (V1's S3), from this phone's own record. */
+  backedUpLine?(): string;
+  /** A code was copied or shared from this phone just now. */
+  backedUp?(): void;
 }
 
 /** Whether this phone plays the game's sounds and music. */
@@ -18,7 +22,13 @@ export interface SoundApi {
   setMusic(on: boolean): void;
   /** Whether to tell her about the silent switch: true the first time on this phone (V1's S1). */
   silentHint?(): boolean;
+  /** Whether something went wrong on this phone lately, and the note to copy (V1's S3). */
+  trouble?(): { on: string; note: string } | null;
 }
+
+/** What's said beside the silent switch's hint when something went wrong (V1's S3). */
+export const troubleLine = (on: string) =>
+  `Something went a bit wobbly on ${on}. If it keeps happening, copy this note for Cody.`;
 
 /** What's said about the silent switch, once, under the sound's switches (V1's S1). */
 export const SILENT_HINT = 'Sound off? Check the silent switch on the side of your phone.';
@@ -99,6 +109,14 @@ export function openSettings(
   });
   const copyMessage = el('p', { className: 'hud-message' });
   const copy = el('button', { type: 'button', textContent: 'Copy' });
+  // When a code last left this phone (V1's S3), told again as one does.
+  const lastBackup = el('p', { className: 'hud-backed-up' });
+  const showBackedUp = () => (lastBackup.textContent = api.backedUpLine?.() ?? '');
+  const backedUp = () => {
+    api.backedUp?.();
+    showBackedUp();
+  };
+  showBackedUp();
   const share = el('button', { type: 'button', textContent: 'Share' });
   const paste = el('textarea', {
     className: 'hud-paste',
@@ -145,6 +163,26 @@ export function openSettings(
         toggle('Music', sound.music, sound.setMusic),
       ),
     );
+  const trouble = sound.trouble?.();
+  if (trouble) {
+    const copied = el('p', { className: 'hud-message' });
+    const copyNote = el('button', { type: 'button', className: 'hud-trouble-copy' }, 'Copy note');
+    copyNote.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(trouble.note);
+        copied.textContent = 'Copied! Thank you.';
+      } catch {
+        copied.textContent = "The phone wouldn't copy it just now. Try once more?";
+      }
+    });
+    sheet
+      .panel('sound')
+      .append(
+        el('p', { className: 'hud-trouble' }, troubleLine(trouble.on)),
+        el('div', { className: 'hud-row' }, copyNote),
+        copied,
+      );
+  }
   if (sheet.tab() === 'sound') hintOnce();
   sheet
     .panel('notes')
@@ -164,6 +202,7 @@ export function openSettings(
       code,
       el('div', { className: 'hud-row' }, copy, ...('share' in navigator ? [share] : [])),
       copyMessage,
+      lastBackup,
       el('h3', {}, 'Bring a town back'),
       paste,
       el('div', { className: 'hud-row' }, restore),
@@ -183,13 +222,17 @@ export function openSettings(
     try {
       await navigator.clipboard.writeText(code.value);
       copyMessage.textContent = 'Copied!';
+      if (code.value.startsWith('MFV')) backedUp();
     } catch {
       code.select();
       copyMessage.textContent = 'Select the code above and copy it.';
     }
   });
   share.addEventListener('click', () => {
-    navigator.share?.({ title: 'McFrancisVille backup', text: code.value }).catch(() => {});
+    navigator
+      .share?.({ title: 'McFrancisVille backup', text: code.value })
+      .then(() => code.value.startsWith('MFV') && backedUp())
+      .catch(() => {});
   });
   restore.addEventListener('click', async () => {
     const text = paste.value.trim();
