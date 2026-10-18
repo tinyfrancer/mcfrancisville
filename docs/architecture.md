@@ -280,6 +280,19 @@ K2, decision 171) and how close the camera is (`src/settings.ts`, V1's L1, decis
 once in `main.ts` and handed to the fit and to Settings' View tab (`ViewApi`). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
 in `render/scene.ts`, so neither the world nor the save knows it.
 
+The cloud save (V1's S2, decision 323) is the one thing a server answers: `api/save.ts`, a Vercel
+function (Web `GET`/`PUT` handlers on the Node runtime, `handle(request, store)` testable with a
+faked store, Upstash's REST API through plain `fetch`), outside `src/` and `dist/`, with its own
+`api/tsconfig.json`. The phone's key is kept beside the save (`persistence/cloudKey.ts`: 128
+random bits, a 28-symbol Crockford code with two check symbols); `persistence/cloudSeal.ts`
+hashes it into the id the function files under and the AES-GCM key the town is sealed with;
+`persistence/cloud.ts` (`CloudSave`) is made in `main.ts`, told each local write by the
+`AutoSaver`'s write, and flushed on `visibilitychange`, `pagehide` and `online`. It asks the
+cloud once (`check`) before anything goes up, against the loaded save's `updatedAt`, and a newer
+town is offered by `hud/CloudCard.ts` after the title (`offerCloud`), never swapped in. What goes
+up is the backup code sealed, so restoring runs the backup's migrations. Settings' Backup tab
+shows the code and its QR (`hud/qr.ts`, our own encoder) through `SaveApi.cloud`.
+
 ## The loop
 
 `main.ts` runs the loop, and `src/loop.ts` (`FixedStep`) turns each frame into whole steps of

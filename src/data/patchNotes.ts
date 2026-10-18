@@ -202,6 +202,8 @@ export const NOTES: readonly PatchNotes[] = [
         'once a week when it has been a while. He worries. Nicely.',
       'Your party photo has a Keep it button for your camera roll. And if anything goes wobbly, ' +
         'Settings says so, with a little note to hand to Cody.',
+      'Your town floats up to the cloud as you play, sealed tight. Its code in Settings brings ' +
+        'it all back on a new phone. Clouds! Who knew.',
     ],
     ps: 'P.S. Nothing ever went wobbly in my day. We had no buttons. It was very peaceful.',
   },

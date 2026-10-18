@@ -58,7 +58,11 @@ const errors = [];
 /** @param {import('playwright').Page} p */
 function listen(p) {
   p.on('pageerror', (e) => errors.push(String(e)));
-  p.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+  // The cloud save asking with no signal (V1's S2) fails honestly: the browser's own line for
+  // that request is no error of the game's, which catches it. Anything else still counts.
+  const cloudAsked = (/** @type {import('playwright').ConsoleMessage} */ m) =>
+    m.text().startsWith('Failed to load resource') && m.location().url.includes('/api/save');
+  p.on('console', (m) => m.type() === 'error' && !cloudAsked(m) && errors.push(m.text()));
 }
 
 /** @param {import('playwright').Page} p */
