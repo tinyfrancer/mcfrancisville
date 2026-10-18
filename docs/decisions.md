@@ -7244,8 +7244,8 @@ reads is the warmest sensible default, nothing was asked._
   stops the uploads for the session until Settings asks again. After a PUT is kept,
   `markBackedUp(now)`, so the Backup tab's "last backed up" and Cody's nudge count it. A request
   that fails with no signal still gets the browser's own "Failed to load resource" line in the
-  console (CI's Chromium reports `navigator.onLine` true in a page opened under emulated
-  offline, so the check can't always be skipped), which `smoke:offline` excuses for
+  console (CI's run showed two, from the pages opened offline, which the `navigator.onLine`
+  guard didn't stop there though it did in the container), which `smoke:offline` excuses for
   `/api/save` alone; any other error still fails it.
 - **Last write wins, but she's asked first.** On opening, the cloud is asked once what it has
   for this key, and **nothing goes up until it has answered**, even for a key just made (that
