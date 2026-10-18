@@ -257,6 +257,8 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   for (const id of birthdaysOn(today.day, known)) todayBox.append(birthdayRow(id, true));
   for (const id of today.gatherings) todayBox.append(gatheringRow(id));
   for (const shop of today.visitors) {
+    // Up now says so already, with a tap to go (V1's R3).
+    if (lines.some((l) => l.kind === 'peddler' && l.shop === shop)) continue;
     todayBox.append(el('p', {}, `${SHOPS[shop].name} is in town today.`));
   }
   const busy =

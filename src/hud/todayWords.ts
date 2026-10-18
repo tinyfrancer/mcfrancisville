@@ -1,6 +1,7 @@
 import type { Glyph } from '../data/glyphs';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
+import { PASSERS, RARE_EVENTS } from '../data/rareEvents';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
 import { clockHour } from '../systems/critters';
@@ -135,5 +136,53 @@ export function todayWords(line: TodayLine): TodayWords {
         small: 'Cobweb Corner pays double for them.',
         glyph: { item: line.items[0]! },
       };
+    // V1's R3: what's out of the ordinary today.
+    case 'rare': {
+      const row = RARE_EVENTS[line.id];
+      return {
+        text:
+          line.id === 'wanderingStall' ? 'The wandering stall is in town till Sunday' : row.name,
+        small: row.small,
+        glyph: row.glyph,
+      };
+    }
+    case 'peddler':
+      return line.shop === 'moonPie'
+        ? {
+            text: "The Moon Pie Man's cart is in town today",
+            small: 'Chocolate. Banana. Watermelon. Moon pie.',
+            glyph: { item: 'moonPie' },
+          }
+        : {
+            text: 'Spirit Halloweenie has popped up in town today',
+            small: 'Costumes and spooky decor, for a season that never ends.',
+            glyph: 'skull',
+          };
+    case 'passer': {
+      const row = PASSERS[line.who];
+      const where = whereWords(line.zone);
+      return {
+        text:
+          line.who === 'moira'
+            ? `Moira is staying ${where} this week`
+            : `A wayfarer is passing through ${where}`,
+        small: line.now
+          ? `Go and say hello, by ${clockHour(row.until)}.`
+          : `About from ${clockHour(row.from)} to ${clockHour(row.until)}.`,
+        glyph: line.who === 'moira' ? 'shell' : 'footprints',
+      };
+    }
+    case 'stray':
+      return line.carrying
+        ? {
+            text: `Take ${line.name} home to ${nameOf(line.owner)}`,
+            small: `${capital(line.name)} is riding along with you.`,
+            glyph: { item: line.critter },
+          }
+        : {
+            text: `${nameOf(line.owner)}'s ${ITEMS[line.critter].name.toLowerCase()}, ${line.name}, has wandered off`,
+            small: `Someone saw it ${whereWords(line.zone)}.`,
+            glyph: 'lookingGlass',
+          };
   }
 }

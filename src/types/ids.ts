@@ -19,6 +19,8 @@ export type TileId =
   | 'longGrass';
 
 export type PropId =
+  // The wandering stall, in town for a week now and then (V1's R3).
+  | 'wanderingStall'
   | 'tree'
   | 'rock'
   | 'pumpkin'
@@ -294,6 +296,8 @@ export type ItemId =
   | 'toffeeApple'
   | 'ringTossRosette'
   | 'plushGhost'
+  // A keepsake the first time each rare event comes (V1's R3).
+  | RareKeepsakeId
   | DishId
   | FruitId
   | CritterId
@@ -696,7 +700,9 @@ export type ShopId =
   // Gourdon's workshop (0.3's S2), at his carpenter's bench.
   | 'workshop'
   // Rufus's flower buckets (V1's P4).
-  | 'flowers';
+  | 'flowers'
+  // The wandering stall's (V1's R3), in town for a week now and then.
+  | 'wandering';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
@@ -1168,11 +1174,23 @@ export type HappeningId =
   // The mayor says hello at the castle (V1's P3b), once, from the day of the promise.
   | 'unmasking'
   | WeeklyId
-  | PartyId;
+  | PartyId
+  | RhythmId;
 
 /** A happening of every neighbour's week (V1's P4), and Nessa's lanterns at dusk every day. */
 export type WeeklyId =
   'stargazing' | 'recital' | 'lanternNight' | 'parcelDay' | 'openDay' | 'lanternLighting';
+
+/**
+ * The weeks' new beats (V1's R3): a daytime happening on Monday, Tuesday and Thursday, and the
+ * weekly beat of each season's festival.
+ */
+export type RhythmId =
+  'marketRound' | 'cloudWatching' | 'herbWalk' | 'blossomPicnic' | 'sparklerNight' | 'lightsWalk';
+
+/** The keepsake each rare event leaves her the first time it comes (V1's R3). */
+export type RareKeepsakeId =
+  'starShard' | 'stallPennant' | 'wayfarerPostcard' | 'snowflakeCharm' | 'finderRosette';
 
 /** Whose birthday it is, of those with a day: Cody's is always tomorrow. */
 export type Celebrant = Exclude<VillagerId, 'cody'>;

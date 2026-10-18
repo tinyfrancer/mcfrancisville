@@ -106,6 +106,13 @@ export const HAPPENING_CALLED: Record<HappeningId, string> = {
   parcelDay: 'parcel day',
   stargazing: 'the stargazing',
   openDay: 'the open day',
+  // V1's R3: the daytime beats, and each season's festival week's.
+  marketRound: 'the market round',
+  cloudWatching: 'the cloud watching',
+  herbWalk: 'the herb walk',
+  blossomPicnic: 'the blossom picnic',
+  sparklerNight: 'sparkler night',
+  lightsWalk: 'the lights walk',
   ...(Object.fromEntries(PARTY_IDS.map((id) => [id, 'the birthday party'])) as Record<
     PartyId,
     string

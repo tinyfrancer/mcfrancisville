@@ -53,7 +53,11 @@ export function verbOf(e: WorldEvent): { verb: Verb; afterMs: number } | null {
     case 'unfitted':
     case 'potted':
     case 'foundLost':
+    case 'foundStray':
       return now('pick');
+    // Saying hello to someone passing through (V1's R3).
+    case 'metPasser':
+      return now('greet');
     case 'harvested':
       return now(e.first ? 'find' : 'pick');
     case 'shook':

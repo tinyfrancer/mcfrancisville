@@ -33,6 +33,11 @@ export class Moments {
     this.waiting.push(event);
   }
 
+  /** Whether nothing is waiting yet this step. */
+  get quiet(): boolean {
+    return this.waiting.length === 0;
+  }
+
   /** Everything waiting, oldest first, and none left after. */
   drain(): WorldEvent[] {
     const out = this.waiting;

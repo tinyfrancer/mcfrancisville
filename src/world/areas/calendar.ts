@@ -4,6 +4,8 @@ import { Finale } from '../services/Finale';
 import { Holidays } from '../services/Holidays';
 import type { Neighbourhood } from '../services/Neighbourhood';
 import { PumpkinPatch } from '../services/PumpkinPatch';
+import type { Mailbox } from '../services/Mailbox';
+import { RareEvents } from '../services/RareEvents';
 import { TrickOrTreat } from '../services/TrickOrTreat';
 import type { Stalls } from '../zones/Stalls';
 import type { Shared } from './shared';
@@ -15,6 +17,8 @@ export interface Festivals {
   trickOrTreat: TrickOrTreat;
   pumpkinPatch: PumpkinPatch;
   finale: Finale;
+  /** What's out of the ordinary today, and who's passing through (V1's R3). */
+  rareEvents: RareEvents;
 }
 
 interface FestivalParts {
@@ -22,6 +26,7 @@ interface FestivalParts {
   neighbourhood: Neighbourhood;
   /** The place outdoors she's in, or null indoors. */
   outside: () => MapZoneId | null;
+  mailbox: Mailbox;
 }
 
 export function festivals(s: Shared, parts: FestivalParts): Festivals {
@@ -42,5 +47,16 @@ export function festivals(s: Shared, parts: FestivalParts): Festivals {
     ),
     pumpkinPatch: new PumpkinPatch(ctx, { bag, takings }),
     finale: new Finale(ctx, takings, { ...town, look: () => s.wardrobe.look }),
+    rareEvents: new RareEvents(ctx, {
+      bag,
+      takings,
+      wallet: s.wallet,
+      mailbox: parts.mailbox,
+      stalls: parts.stalls,
+      thank: town.thank,
+      outside: parts.outside,
+      name: town.name,
+      lots: { popUp: s.map.popUpLots, peddler: s.map.peddlerSpots },
+    }),
   };
 }

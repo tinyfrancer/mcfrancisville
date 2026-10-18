@@ -8,7 +8,11 @@ import { isVisiting } from '../../systems/critters';
 import { venueOf } from '../../systems/happenings';
 import { inTown } from '../../systems/mayor';
 import type { Had } from '../../systems/milestones';
-import { callersOn } from '../../systems/today';
+import { callersOn, type TodayFacts } from '../../systems/today';
+import { PASSERS } from '../../data/rareEvents';
+import { passersOn } from '../../systems/rareEvents';
+import type { RareEvents } from '../services/RareEvents';
+import type { Stalls } from '../zones/Stalls';
 import { weatherOn } from '../../systems/weather';
 import type { MapZoneId } from '../../types/ids';
 import type { Calendar } from '../services/Calendar';
@@ -35,6 +39,43 @@ export interface UpNowParts {
   calendar: Calendar;
   firstDay: FirstDay;
   hasHad: (id: Had) => boolean;
+  /** What's out of the ordinary today (V1's R3), and the Moon Pie Man's and the pop-up's places. */
+  rareEvents: RareEvents;
+  stalls: Stalls;
+}
+
+/** What Today reads of the rare events, the passers-by and the peddlers (V1's R3). */
+function outOfTheOrdinary(
+  parts: UpNowParts,
+  day: string,
+): Pick<TodayFacts, 'rare' | 'peddlers' | 'passers' | 'stray'> {
+  const { rareEvents } = parts;
+  const rare = rareEvents.today();
+  const lost = rareEvents.stray();
+  const carried = rareEvents.carrying();
+  const stray = lost ?? carried;
+  return {
+    rare: rare ? { id: rare, began: rareEvents.began() } : null,
+    peddlers: [
+      ...(parts.stalls.moonPieCart()
+        ? [{ shop: 'moonPie' as const, tile: parts.stalls.moonPieCart()! }]
+        : []),
+      ...(parts.stalls.popUp() ? [{ shop: 'popUp' as const, tile: parts.stalls.popUp()! }] : []),
+    ].map(({ shop, tile }) => ({ shop, tile: { tx: tile.tx, ty: tile.ty } })),
+    passers: passersOn(day).map((who) => {
+      const { zone, from, until } = PASSERS[who];
+      return { who, zone, from, until };
+    }),
+    stray: stray
+      ? {
+          owner: stray.owner,
+          name: stray.name,
+          critter: stray.critter,
+          zone: stray.zone,
+          carrying: carried !== null,
+        }
+      : null,
+  };
 }
 
 const OUTDOORS = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
@@ -77,6 +118,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       venue: (id) => venueOf(id).zone,
       callers: callersOn(day, (who) => friends.hearts(who) >= BEST_HEARTS),
       critters: { visiting, fresh: visiting.filter((id) => !parts.hasHad(id)) },
+      ...outOfTheOrdinary(parts, day),
     };
   });
 }

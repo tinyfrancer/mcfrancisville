@@ -168,6 +168,10 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'decorated':
     case 'frozen':
     case 'dressedUp':
+    // V1's R3: something out of the ordinary told, a passer-by's hello, a stray found.
+    case 'heralded':
+    case 'metPasser':
+    case 'foundStray':
       return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';
@@ -233,6 +237,9 @@ const VOICES: Record<Figure, { base: number; wave: Part['wave'] }> = {
   robBoo: { base: 67, wave: 'sine' },
   moonPieMan: { base: 50, wave: 'triangle' },
   wes: { base: 48, wave: 'sine' },
+  // Passing through (V1's R3).
+  wayfarer: { base: 58, wave: 'triangle' },
+  moira: { base: 65, wave: 'sine' },
 };
 
 const STEPS = [0, 2, 4, 5, 7, 9];

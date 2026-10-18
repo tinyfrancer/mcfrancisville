@@ -1,6 +1,7 @@
 import { FURNITURE } from '../data/furniture';
 import { FIXTURES } from '../data/interiors';
 import type { Placed } from '../data/home';
+import type { PasserId } from '../data/rareEvents';
 import { isFish } from '../data/critters';
 import { dayKey } from '../systems/clock';
 import { BONE_KEY } from '../systems/pets';
@@ -57,7 +58,9 @@ type Visit =
   | { kind: 'pet'; pet: PetId }
   | { kind: 'thing'; thing: RoomThing }
   | { kind: 'ice'; toward: Tile }
-  | { kind: 'wes'; at: Tile };
+  | { kind: 'wes'; at: Tile }
+  /** Someone passing through (V1's R3): the wayfarer, or a visitor staying the week. */
+  | { kind: 'passer'; who: PasserId; at: Tile };
 
 /**
  * What a tap has set her off toward, for the view to outline for a beat (V1's E4, decision 283):
@@ -199,6 +202,7 @@ export class World extends WorldParts {
       case 'ice':
         return null;
       case 'wes':
+      case 'passer':
         return tile(visit.at);
     }
   }
@@ -226,6 +230,11 @@ export class World extends WorldParts {
     const staying = wes ? this.mystery.approach() : null;
     if (staying) return this.walkTo(this.around(staying), { kind: 'wes', at: staying });
     if (wes) return this.walkTo([wes], undefined);
+    const passer = this.rareEvents.passerAt(this.scene, tx, ty);
+    if (passer) {
+      const at = { tx: passer.tx, ty: passer.ty };
+      return this.walkTo(this.around(at), { kind: 'passer', who: passer.id, at });
+    }
     const critter = this.collecting.critterAt(tx, ty);
     if (critter) return this.stalk(critter);
     const pet = this.petCare.petAt(tx, ty);
@@ -340,6 +349,8 @@ export class World extends WorldParts {
     this.milestones.check();
     this.stall.check();
     this.decorating.check();
+    // Last, and only on a step with nothing else to say, so a letter's toast doesn't take its line.
+    this.rareEvents.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),
@@ -486,6 +497,11 @@ export class World extends WorldParts {
       const chat = this.mystery.chat(here);
       return chat ? [arrived, chat] : [arrived];
     },
+    passer: ({ who, at }, here, arrived) => {
+      arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
+      this.face(here, arrived.toward);
+      return [arrived, this.rareEvents.meet(who)];
+    },
     ice: ({ toward }, here, arrived) => {
       const ice = iceBeside(here, toward, this.slipsOn);
       if (!ice) return [arrived];
@@ -548,6 +564,8 @@ export class World extends WorldParts {
       outdoors.id === 'town' && !prop
         ? [...this.smallEvents.pickUp(here), ...this.holidays.pickUp(here)]
         : [];
+    // A critter gone astray, wherever it has wandered to (V1's R3).
+    if (!prop) found.push(...this.rareEvents.pickUp(outdoors.id, here));
     return [arrived, ...found, ...this.gathering.arriveAt(outdoors, here, prop)];
   }
 }

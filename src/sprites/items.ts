@@ -6,6 +6,7 @@ import { CRITTER_ART } from './critters';
 import { DOLL_ART } from './dolls';
 import { FOSSIL_ART } from './fossils';
 import { ORCHARD_ITEM_ART } from './orchard';
+import { RARE_KEEPSAKE_ART } from './rareEvents';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
 import type { Palette, SpriteSource } from './sprite';
@@ -2596,6 +2597,8 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   ...critterItemArt(),
   // A fossil in her bag is its picture as the Cabinet and the museum show it (0.3's C1).
   ...FOSSIL_ART,
+  // The rare events' keepsakes (V1's R3).
+  ...RARE_KEEPSAKE_ART,
 };
 
 /**

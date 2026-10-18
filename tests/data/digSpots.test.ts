@@ -5,6 +5,7 @@ import { EGG_SPOTS } from '../../src/data/holidays';
 import { HAPPENINGS } from '../../src/data/happenings';
 import { PROP_FOOTPRINT, SPOTS, doorStep } from '../../src/data/maps';
 import { LOST_SPOTS } from '../../src/data/smallEvents';
+import { PASSERS, WANDERING_STALL_AT } from '../../src/data/rareEvents';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { placeHabitats, townHabitats } from '../../src/systems/critters';
 import { parseMap, tileAt, walkable, type TileMap } from '../../src/systems/grid';
@@ -64,6 +65,12 @@ function keptClear(id: MapZoneId, map: TileMap): Set<string> {
     for (const row of Object.values(DECOR)) for (const p of row.pieces) set(p);
     for (const t of EGG_SPOTS) around(t, 1, clear);
     for (const { at } of LOST_SPOTS) around(at, 1, clear);
+    // The wandering stall's place (V1's R3).
+    set({ prop: 'wanderingStall', ...WANDERING_STALL_AT });
+  }
+  // Where those passing through stand (V1's R3).
+  for (const row of Object.values(PASSERS)) {
+    if (row.zone === id) for (const t of row.at) around(t, 1, clear);
   }
   return clear;
 }

@@ -6,6 +6,7 @@ import type {
   ItemId,
   PartyId,
   PropId,
+  RhythmId,
   VillagerId,
   WeeklyId,
   WorkId,
@@ -17,6 +18,7 @@ import type { SpotName } from './maps';
 import type { MapZoneId } from '../types/ids';
 import { WEEKLY_HAPPENINGS } from './weeklyHappenings';
 import { BIRTHDAY_PARTIES } from './birthdayParties';
+import { RHYTHM_HAPPENINGS } from './rhythmHappenings';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
@@ -146,7 +148,7 @@ const AT_THE_STAGE = "at the fairground's stage";
  * they say. They come before visits and schedules, and after her birthday party, which nobody
  * misses. Nothing is missed by not going: they come round again (decisions.md 11).
  */
-const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> = {
+const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId | RhythmId>, HappeningRow> = {
   bookClub: {
     name: 'Book club',
     icon: 'book',
@@ -749,6 +751,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   ...EVERYDAY,
   ...WEEKLY_HAPPENINGS,
   ...BIRTHDAY_PARTIES,
+  ...RHYTHM_HAPPENINGS,
 };
 
 export const HAPPENING_IDS = Object.keys(HAPPENINGS) as HappeningId[];

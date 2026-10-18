@@ -39,6 +39,8 @@ export function onceADay(key: string): boolean {
       'lesson:',
       'fortune:',
       'mound:',
+      // A rare event's doings (V1's R3): told of, met, found and carried home, once a day.
+      'rare:',
       // What she and Cody did together tonight (V1's P5).
       'together:',
     ].some((prefix) => key.startsWith(prefix))

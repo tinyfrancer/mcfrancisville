@@ -5,6 +5,7 @@ import { dayKey } from '../../systems/clock';
 import type { PlacedProp } from '../../systems/grid';
 import { happeningsOn, venueOf } from '../../systems/happenings';
 import { decorOn, isFrozen } from '../../systems/holidays';
+import { wanderingStallOn } from '../../systems/rareEvents';
 import { atTheFair } from '../../systems/venues';
 import { covers } from './Zone';
 
@@ -60,9 +61,13 @@ export class Decorations {
         ty: p.ty,
         ...PROP_FOOTPRINT[p.prop],
       });
-      const props = [...(decor ? DECOR[decor].pieces : []), ...sets.filter((p) => !p.hers)].map(
-        place,
-      );
+      // The wandering stall, the weeks it's in town (V1's R3).
+      const stall = town ? wanderingStallOn(day) : null;
+      const props = [
+        ...(decor ? DECOR[decor].pieces : []),
+        ...sets.filter((p) => !p.hers),
+        ...(stall ? [{ prop: 'wanderingStall' as const, ...stall }] : []),
+      ].map(place);
       const hers = sets.flatMap((p) => (p.hers ? [{ piece: p.hers, prop: place(p) }] : []));
       this.cache = { day, fair, props, hers, frozen: town && isFrozen(day) };
     }

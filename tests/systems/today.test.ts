@@ -28,6 +28,10 @@ const QUIET: TodayFacts = {
   venue: () => 'town',
   callers: [],
   critters: { visiting: [], fresh: [] },
+  rare: null,
+  peddlers: [],
+  passers: [],
+  stray: null,
 };
 
 describe("Today's lines (V1's R2)", () => {
