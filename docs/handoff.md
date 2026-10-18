@@ -359,16 +359,38 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R2 landed (PR #190). **R3 in progress** on `claude/r3-weeks-that-differ` (draft PR; no save bump
-planned: what she has seen is `Takings` for the day and the keepsakes are `rare:<id>` letters).
-Done: daytime happenings Mon/Tue/Thu and the three festival weeks' beats (`data/rhythmHappenings.ts`,
-verbs `data/rhythmVerbs.ts`); the festival weeks (`blossomWeek`, `fireworksWeek`, `lightsWeek` in
-`data/calendar.ts`, marks, shelves at Cobweb Corner, banners, Cody's hello `RHYTHM_GREETINGS`,
-`data/festivalLines.ts`); rare events (`data/rareEvents.ts`, `systems/rareEvents.ts`,
-`world.rareEvents`, the wandering stall through `Decorations`, the wayfarer and Moira drawn from
-the doll's parts, a stray critter carried home by a talk action, meteors `render/meteors.ts`, snow
-day snow); the Moon Pie Man and the pop-up told on arrival; Today lines; smoke's `rare`. Next:
-decision 313, the 0.8 `NOTES` line, the PR, merge.
+R3 landed (PR #192). Next in this lane: R4.
+
+**For R4/R6 (from R3, decision 313):** no save change; the 0.8 `NOTES` row is full at five lines
+(R1's three, R2's, R3's): **R4 folds two to make room**.
+
+- **To add a rare event**: a `RareEventId` and a `RARE_EVENTS` row in `data/rareEvents.ts` (its
+  `name`, `glyph`, the `heralds` toast, Today's `small`, a `keepsake` (a `RareKeepsakeId` with an
+  item row in `RARE_KEEPSAKES`, a 0 in `RARE_KEEPSAKE_VALUES`, art in `sprites/rareEvents.ts`, and
+  the selling test's kept list) and its `letter`; `months`, `clear` or `week` if it wants them),
+  a line in `RHYTHM_GREETINGS` (`data/greetings.ts`), and what it does: dealt by `rareEventOn`
+  (`systems/rareEvents.ts`, cached per day; a one-day event is any that `fits`), told and its
+  keepsake posted by `RareEvents.check` (`world.rareEvents`; quietly, the toast says "And there's
+  a letter", since a letter's toast takes the line), seen in the sky by `rareSkyAt` (the view's
+  `rareEvents.sky()`), stood in town through `Decorations` as the stall is, or someone passing
+  through (`PASSERS`, a `Figure` row in `sprites/villagers.ts` and a voice in `audio/cues.ts`).
+  Everything she has done of one is a `rare:` key in `Takings` (once a day). Rerun
+  `tests/systems/rareEvents.test.ts` (about one day in nine, never two at once).
+- **To add a festival**: a `FestivalId` and a `CALENDAR` row with a `from`/`until` span (never
+  overlapping another: `festivalOn` reads the first), a `banner`, a `CALENDAR_MARKS` row, a shelf
+  `on` it in `SHOPS`, a beat `on: { festival, weekdays }` in `RHYTHM_HAPPENINGS` (never on its
+  finale), a `RHYTHM_GREETINGS` line and `FESTIVAL_LINES` (said on its first day and Saturday). Only
+  `TunedFestival`s have a tune (`audio/music.ts`); add a `THEMES` row and widen it to give one.
+- **To add a daytime happening**: a `RhythmId`, a `RHYTHM_HAPPENINGS` row, a `HAPPENING_CALLED`
+  name and a `RHYTHM_VERBS` row. Mind the neighbours' stops that tests lean on (Rufus's Monday
+  wildflowers in `tests/world/travel.test.ts`), and that a happening beats a visit to hers:
+  `callersOn` now leaves out a caller at a happening.
+- **R4's projects**: a Today line is a `TodayFacts` field and a `TodayLine` member as R2 said;
+  `outOfTheOrdinary` in `systems/today.ts` shows where R3's went. A project in the world could
+  stand through `Decorations` as the wandering stall does (a prop row, `PROP_FOOTPRINT`, a tile kept
+  clear in `tests/data/digSpots.test.ts`'s `keptClear`). **R6b**: the wayfarer and Moira are taps
+  (`Visit` `passer`); a fair game could borrow `metPasser`'s toast. `tests/world/weeksDiffer.test.ts`
+  holds no two days alike in any month for two years: rerun it if a happening or event goes.
 
 **For R3/R4 (from R2, decision 312):** the calendar's Today is `todayLines(facts)` in
 `systems/today.ts`, worked out each time from `TodayFacts`, which `areas/upNow.ts` reads off the
