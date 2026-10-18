@@ -56,13 +56,13 @@ async function transform(
   return new Uint8Array(await new Response(body.pipeThrough(stream)).arrayBuffer());
 }
 
-function toBase64Url(bytes: Uint8Array): string {
+export function toBase64Url(bytes: Uint8Array): string {
   let binary = '';
   for (const b of bytes) binary += String.fromCharCode(b);
   return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
 
-function fromBase64Url(text: string): Uint8Array<ArrayBuffer> {
+export function fromBase64Url(text: string): Uint8Array<ArrayBuffer> {
   const padded = text.replace(/-/g, '+').replace(/_/g, '/');
   const binary = atob(padded + '='.repeat((4 - (padded.length % 4)) % 4));
   const bytes = new Uint8Array(binary.length);
