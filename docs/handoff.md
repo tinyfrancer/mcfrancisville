@@ -417,7 +417,12 @@ its season), so `wary` and a bite window by rarity apply to them as to any.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-S3 landed (PR #189). Next in this lane: S2.
+S3 landed (PR #189). **S2 in progress** on `claude/s2-cloud-save` (decision 323, no save change):
+the function (`api/save.ts`, its tsconfig), the key (`src/persistence/cloudKey.ts`), the seal
+(`cloudSeal.ts`), the client (`cloud.ts`, wired in `main.ts`), the QR (`src/hud/qr.ts`), the
+Backup tab's Cloud section and the offer card (`src/hud/CloudCard.ts`), tests, smoke's `cloud`
+section, README's "Cloud save", the decision, the 0.9 note: all written. Next: the suite, push,
+the draft PR, CI, merge `v1-dev`, mark ready, merge.
 
 **For S2 (from S3, decision 322):**
 

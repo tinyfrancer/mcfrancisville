@@ -9,8 +9,10 @@ user's wife. It is Animal Crossing and Stardew Valley by way of The Nightmare Be
 up, decorate a house, farm, befriend monster neighbours, and collect critters, pets, furniture and
 clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is lost (decision 11).
 
-It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
-installed on her iPhone as a home-screen app. Saves live in `localStorage`.
+It is a static site (TypeScript + Vite, Canvas 2D, and a backend, a tiny one: `api/save`, decision
+323), deployed by Vercel from `main` and installed on her iPhone as a home-screen app. Saves live
+in `localStorage`, and go up sealed to the cloud save beside it (`src/persistence/cloud.ts`; the
+store is the user's to link, README's "Cloud save").
 
 **The current plan is `docs/v1_plan.md`** (settled 2026-10-06, decisions 266–275, after
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
