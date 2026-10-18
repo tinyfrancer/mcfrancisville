@@ -363,14 +363,21 @@ R3 landed (PR #192). Next in this lane: R4.
 
 #### R6b (beside R4)
 
-**In progress** on `claude/r6b-fair-games` (decision 315, no save change). Done: the games in
-time (`patternOf`/`score`/`prizeRank`/`freeGoOn`/`fairTipOn` in `systems/activities.ts`), the
-service (`Round.next`, `hold`, `toss(id, at)`, `bestTapAt`, the free go as `fortune:freeGo` in
-`Takings`), the stage (`render/fairGames.ts`, `sprites/fairGames.ts`) and sheet (`hud/FairSheet.ts`,
-`hud/fairStyles.ts`), the duck pond and strength bell stalls (`9`, `0` in `FAIR_LEGEND`), the lucky
-duck squish (`data/fairPrizes.ts`), tests, smoke's `fair`, the decision and the 0.9 note. Next:
-run the whole suite and smoke, look at `.smoke/ring-toss*.png`, open the draft PR, merge
-`v1-dev`, mark ready, merge.
+R6b landed (PR #193). No save change.
+
+**For R6a/R6c/V1 (from R6b, decision 315):** a fair game's throw is `patternOf(game, seed, n,
+slow)` scored by `score(pattern, tapAt, startedAt, at)` on the world's clock
+(`systems/activities.ts`); the sheet's stage (`render/fairGames.ts`) draws from the same reads, so
+**a new game is a `Motion`, its position read and its `offBy`, a backdrop and pieces in
+`sprites/fairGames.ts`, and a case in `drawFairGame`**; a new stall is `drawStall` with wares, a
+`PropId`, a footprint, a legend character (`FAIR_LEGEND` has used `9` and `0`) and an `ACTIVITIES`
+row. R6a's reel can borrow the shape (a pattern dealt from the cast, graded 0–2, the floor always
+something). `world.activities.bestTapAt(id)` says when a tap does best, which smoke's `tapInTime`
+waits for. The free go is `fortune:freeGo` in `Takings` (the `fortune:` prefix makes it once a
+day); a **Today line for it** ("your first go at the duck pond is free") was left for later, as R4
+was growing Today beside this session: a `TodayFacts` field read from `activities.freeGo()` and
+`freeToday`. The 0.9 `NOTES` row is full at five lines (S3's three, S2's, R6b's): R6a and R6c fold
+two. A new squishy moves `figurines.test.ts`'s count and smoke's Cabinet "sets" count (now 17).
 
 **For R4/R6 (from R3, decision 313):** no save change; the 0.8 `NOTES` row is full at five lines
 (R1's three, R2's, R3's): **R4 folds two to make room**.
