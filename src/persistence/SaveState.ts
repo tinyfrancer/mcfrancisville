@@ -42,7 +42,7 @@ import type { WorksSnapshot } from '../world/Works';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 51;
+export const SAVE_VERSION = 52;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -282,7 +282,7 @@ export function newSave(
     recipes: [],
     friends: {},
     mail: [],
-    cabinet: { caught: {}, donated: [] },
+    cabinet: { caught: {}, donated: [], best: {} },
     pets: structuredClone(STARTER_PETS),
     mystery: { clues: {}, began: null, wes: { glimpses: 0, chats: 0, talked: null } },
     atlas: { found: ['town', 'home'], opened: [] },
@@ -512,7 +512,11 @@ function isCabinetShape(value: unknown): boolean {
     c.caught !== null &&
     !Array.isArray(c.caught) &&
     Object.values(c.caught).every((day) => typeof day === 'string') &&
-    isStringList(c.donated)
+    isStringList(c.donated) &&
+    typeof c.best === 'object' &&
+    c.best !== null &&
+    !Array.isArray(c.best) &&
+    Object.values(c.best).every((size) => typeof size === 'number')
   );
 }
 

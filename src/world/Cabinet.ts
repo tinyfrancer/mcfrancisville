@@ -9,8 +9,8 @@ import type { CritterId, FossilId } from '../types/ids';
 export interface CabinetSnapshot {
   caught: Partial<Record<CritterId, string>>;
   donated: (CritterId | FossilId)[];
-  /** The biggest of each fish she has landed, in quarters of a hand (V1's R6a). */
-  best?: Partial<Record<CritterId, number>>;
+  /** The biggest of each fish she has landed, in quarters of a hand (V1's R6a, save v52). */
+  best: Partial<Record<CritterId, number>>;
 }
 
 /**

@@ -245,6 +245,12 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   49: (state) => ({ ...state, firstDay: { done: [], over: true } }),
   // V1's R4: the town's projects. A town saved before them has none begun and none built.
   50: (state) => ({ ...state, projects: { current: null, given: {}, built: [] } }),
+  // V1's R6a: the biggest of each fish she lands. No fish was ever measured before, so none has a
+  // best yet; the next of each she lands is its first, and the Cabinet asks her to land another.
+  51: (state) => {
+    const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
+    return { ...state, cabinet: { ...cabinet, best: {} } };
+  },
 };
 
 /**
