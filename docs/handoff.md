@@ -121,7 +121,11 @@ rather than loosening the check. And the date chip's ellipsis with a meal's chip
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L5 landed (PR #185). Next in this lane: L7.
+L5 landed (PR #185). **L7 in progress** on `claude/l7-faces` (draft PR to `v1-dev`): the feelings
+drawn (`sprites/faces.ts`, `sprites/moodFaces.ts`), chosen by the line (`systems/moods.ts`,
+`data/moods.ts`), on the bust and the world sprite from one stance, her face through `poses`,
+tests, smoke's `faces` section, decision 296 and the 0.7 note are all done and committed. Next:
+the full smoke and CI green, merge `v1-dev`, mark ready, merge, then this heading to "L7 landed".
 
 **For L7 (from L5, decision 295):** the portrait is `drawBust(canvas, id, costume, mood, shadow)`
 in `render/villagers.ts`: the figure facing her (`bakeFigure(id, 'down', 0, costume)`), framed from
