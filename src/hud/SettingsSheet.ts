@@ -1,5 +1,6 @@
 import { NOTES, type PatchNotes } from '../data/patchNotes';
 import type { Closeness } from '../types/view';
+import { cloudSection, type CloudApi } from './CloudCard';
 import { el, openSheet } from './dom';
 
 /** What the sheet may ask of the game. It never reaches the world directly. */
@@ -12,6 +13,8 @@ export interface SaveApi {
   backedUpLine?(): string;
   /** A code was copied or shared from this phone just now. */
   backedUp?(): void;
+  /** The cloud save (V1's S2): this phone's cloud code, and bringing a town back from one. */
+  cloud?: CloudApi;
 }
 
 /** Whether this phone plays the game's sounds and music. */
@@ -208,6 +211,7 @@ export function openSettings(
       el('div', { className: 'hud-row' }, restore),
       restoreMessage,
     );
+  if (api.cloud) sheet.panel('backup').append(cloudSection(api.cloud));
 
   void api.backupCode().then((text) => (code.value = text));
   void api.status().then(({ persisted, standalone }) => {
