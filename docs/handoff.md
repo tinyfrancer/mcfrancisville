@@ -380,6 +380,20 @@ a later 0.8 session folds two.
 
 R3 landed (PR #192).
 
+#### R6a (beside R6c)
+
+**In progress** on `claude/r6a-fishing-catching` (will bump the save to the next free number after
+51 in its last commit; decision 316). Done and pushed: bites by rarity and the reel for rare and
+legendary fish (`systems/fishing.ts`, `world/services/Fishing.ts`, the bar in `render/fishing.ts`),
+a size per catch (`data/fishSizes.ts`, `systems/catchSize.ts`) and a best per fish on the
+`Cabinet` (`measure`, `bestOf`, `best` in its snapshot, optional until the bump), shy critters that
+drift a tile (`systems/drift.ts`, `Collecting.notice`, the hop in `render/critters.ts`), legendaries
+`wary` 2–3, toasts, effects, the Cabinet's card and hint, the 0.9 note (S3's first two folded),
+decision 316, tests and smoke's `fishing` and `drifter`. **Next:** the whole suite and smoke, then
+merge `v1-dev`, then the save bump as the last commit (`SAVE_VERSION`, a step in `migrations.ts`
+giving `cabinet.best = {}`, `isCabinetShape` wanting `best`, a migration test; check R6c's number
+first), then mark ready and merge.
+
 #### R6b (beside R4)
 
 R6b landed (PR #193). No save change.
