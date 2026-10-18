@@ -359,7 +359,11 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R1 landed (PR #187, save v50). Next in this lane: R2.
+R1 landed (PR #187, save v50). **R2 under way** on `claude/r2-today` (no save change): Today's
+lines (`systems/today.ts`, `world.upNow`, `areas/upNow.ts`), their words (`hud/todayWords.ts`) and
+taps (`wiring/todayGo.ts`, `Travel.fly`), the favour parcel bubble, the chip's dot
+(`hud/todaySeen.ts`), tests, smoke's `calendar`, decision 312 and the 0.8 note are written. Next:
+the full suite and smoke, push, the PR, merge.
 
 **For R2/R3 (from R1, decision 311):** her first day is `world.firstDay` (`FirstDay`, made by
 `areas/firstDay.ts`): six steps (`FIRST_DAY_STEPS`, `data/firstDay.ts`) worked out by

@@ -40,6 +40,8 @@ import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
 import { openFirstDay, type FirstDayApi } from './FirstDayCard';
 import { hintOnce } from './hints';
+import { markTodaySeen, todaySeen } from './todaySeen';
+import { hasFresh } from '../systems/today';
 import { CALENDAR } from '../data/calendar';
 import type { Glyph } from '../data/glyphs';
 import { trimOn } from '../data/trims';
@@ -226,6 +228,15 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   day.addEventListener('click', () => openCalendar(hud, options.calendar));
   // On her first day, the chip glows until she first taps it (V1's R1).
   const todayHint = hintOnce(day, 'today', options.firstDay.open);
+  // A dot on the chip while Today has something she hasn't seen since she last looked (V1's R2).
+  const showTodayDot = () =>
+    day.toggleAttribute('data-new', hasFresh(options.calendar.upNow(), todaySeen()));
+  day.addEventListener('click', () => {
+    markTodaySeen(options.calendar.upNow().map((line) => line.key));
+    showTodayDot();
+  });
+  showTodayDot();
+  options.calendar.onUpNow(showTodayDot);
   showDay();
   options.calendar.onChange(showDay);
   const settings = cornerButton('hud-settings', 'Settings', 'settings', () =>

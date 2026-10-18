@@ -20,6 +20,8 @@ import { glyph, glyphed } from './glyph';
 import type { Glyph } from '../data/glyphs';
 import { fitIcon } from './collection';
 import { countdown } from './messages';
+import type { TodayGo, TodayLine } from '../systems/today';
+import { todayWords } from './todayWords';
 
 /** What the calendar may ask of the game. Like the other sheets, it never reaches the world. */
 export interface CalendarApi {
@@ -35,6 +37,13 @@ export interface CalendarApi {
   plain(canvas: HTMLCanvasElement, mark: 'neighbourBirthday' | 'page'): void;
   /** The neighbours whose birthdays she knows (0.2's U4): everyone in town. */
   birthdays(): VillagerId[];
+  /** What's up now (V1's R2): a line each, read off the world. */
+  upNow(): TodayLine[];
+  /** Whether a line can take her there as things are, and taking her. */
+  canGo(to: TodayGo): boolean;
+  go(to: TodayGo): boolean;
+  /** Called when what's up now may have changed; returns a way to stop. */
+  onUpNow(listener: () => void): () => void;
 }
 
 export const MONTHS = [
@@ -155,6 +164,32 @@ function birthdayRow(id: VillagerId, today: boolean): HTMLElement {
   );
 }
 
+/**
+ * A line of what's up now (V1's R2): its picture and words, and where it can take her, a button
+ * that sends her off and closes the calendar so she sees herself go.
+ */
+function upNowLine(line: TodayLine, api: CalendarApi, close: () => void): HTMLElement {
+  const words = todayWords(line);
+  const body = [
+    el('span', { className: 'hud-cal-icon' }, glyph(words.glyph, 32)),
+    el('span', {}, el('strong', {}, words.text), el('small', {}, words.small)),
+  ];
+  const item = el('li', { className: 'hud-cal-line' });
+  item.dataset.today = line.kind;
+  const go = line.go && api.canGo(line.go) ? line.go : null;
+  if (!go) {
+    item.append(el('div', { className: 'hud-cal-event' }, ...body));
+    return item;
+  }
+  const button = el('button', { type: 'button', className: 'hud-cal-event hud-cal-go' }, ...body);
+  button.append(el('span', { className: 'hud-cal-go-mark' }, glyph('east')));
+  button.addEventListener('click', () => {
+    if (api.go(go)) close();
+  });
+  item.append(button);
+  return item;
+}
+
 /** The first and last day of a festival, around one of its days. */
 function spanOf(id: FestivalId, day: string): { first: string; last: string } {
   const { nth, of } = festivalDay(id, day);
@@ -210,6 +245,13 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
 
   const todayBox = el('section', { className: 'hud-cal-today' });
   todayBox.append(el('p', {}, windowLine(today.window)));
+  const lines = api.upNow();
+  if (lines.length > 0) {
+    const upNow = el('ul', { className: 'hud-cal-upnow' });
+    upNow.setAttribute('aria-label', 'Up now');
+    for (const line of lines) upNow.append(upNowLine(line, api, () => sheet.close()));
+    todayBox.append(upNow);
+  }
   if (today.festival) todayBox.append(festivalRow(today.festival));
   for (const id of today.happening) todayBox.append(happeningRow(id));
   for (const id of birthdaysOn(today.day, known)) todayBox.append(birthdayRow(id, true));
@@ -222,7 +264,7 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
     today.visitors.length +
     today.gatherings.length +
     birthdaysOn(today.day, known).length;
-  if (busy === 0 && !today.festival) {
+  if (busy === 0 && !today.festival && lines.length === 0) {
     todayBox.append(el('p', { className: 'hud-cal-quiet' }, 'A quiet day in McFrancisVille.'));
   }
 

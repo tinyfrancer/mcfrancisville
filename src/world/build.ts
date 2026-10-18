@@ -12,6 +12,7 @@ import { festivals } from './areas/calendar';
 import { catching } from './areas/collecting';
 import { fairground } from './areas/fairground';
 import { firstDay } from './areas/firstDay';
+import { upNow } from './areas/upNow';
 import { her } from './areas/her';
 import { homeServices } from './areas/home';
 import { making } from './areas/making';
@@ -64,6 +65,7 @@ import { Digging } from './services/Digging';
 import type { Finale } from './services/Finale';
 import type { Fishing } from './services/Fishing';
 import type { FirstDay } from './services/FirstDay';
+import type { UpNow } from './services/UpNow';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
@@ -247,6 +249,8 @@ export abstract class WorldParts {
   readonly marriage: Marriage;
   /** Cody's thread over her first day in a new town (V1's R1). */
   readonly firstDay: FirstDay;
+  /** What's up now, for the calendar's Today tab (V1's R2). */
+  readonly upNow: UpNow;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -367,6 +371,9 @@ export abstract class WorldParts {
     });
     ({ hands: this.hands, novelty: this.novelty, milestones: this.milestones } = hers);
     ({ sitting: this.sitting, poses: this.poses } = hers);
+    const { candyTree, stall, garden, noticeboard, fossils, shops, calendar } = this;
+    const today = { candyTree, stall, garden, noticeboard, fossils, shops, calendar };
+    this.upNow = upNow(shared, { ...today, neighbourhood, firstDay: this.firstDay, hasHad });
   }
 
   /**

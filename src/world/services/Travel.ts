@@ -142,6 +142,29 @@ export class Travel {
   }
 
   /**
+   * Whether she can fly to a place on the map (V1's R2): as `go` would, or out of a building (or
+   * her home) into the place it stands in.
+   */
+  canFly(to: ZoneId): boolean {
+    if (to === this.where || !this.isOpen(to)) return false;
+    if (outsideOf(this.where) === to) return this.reads.zones.outdoor(to) !== undefined;
+    return this.reads.atlas.hasFound(to) && ZONES[to].onMap !== undefined;
+  }
+
+  /**
+   * Flies her to a place, as the map does, for a line of the calendar's Today (V1's R2): from a
+   * building in that place, out onto its doorstep. False where she can't.
+   */
+  fly(to: ZoneId): boolean {
+    if (!this.canFly(to)) return false;
+    if (outsideOf(this.where) !== to) return this.go(to);
+    const entry = this.reads.zones.get(to).entry(this.where);
+    this.ctx.moments.push({ kind: 'flew', to });
+    this.ctx.moments.push(this.arrive(to, entry.tile, entry.facing));
+    return true;
+  }
+
+  /**
    * Swoops her home by broom, onto her mat (0.2's P1), keeping the spot she flew from so the
    * stand by the door can fly her back to it. False if she's home already.
    */

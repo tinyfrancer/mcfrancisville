@@ -595,9 +595,14 @@ function drawEmote(
 
 /** Each bubble's cache key: the first two keep the names `drawNeighbourBubbles` bakes them by. */
 function emoteKey(emote: Emote): string {
-  return { '!': 'news', '?': 'lost', '♥': 'emote:heart', '♪': 'emote:note', '…': 'emote:dots' }[
-    emote
-  ];
+  return {
+    '!': 'news',
+    '?': 'lost',
+    '♥': 'emote:heart',
+    '♪': 'emote:note',
+    '…': 'emote:dots',
+    '+': 'favour',
+  }[emote];
 }
 
 // ---- A tap (V1's E4, decision 283) -----------------------------------------------------------

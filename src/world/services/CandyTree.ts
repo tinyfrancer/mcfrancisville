@@ -81,6 +81,11 @@ export class CandyTree {
     return treeWindows(this.shaken, this.ctx.clock.now());
   }
 
+  /** The Candy a shake would bring down now. */
+  candy(): number {
+    return treeCandy(this.windows());
+  }
+
   look(): TreeLook {
     return treeLook(this.windows());
   }

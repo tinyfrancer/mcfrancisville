@@ -1,6 +1,7 @@
 import { THEME as T } from '../ui/theme';
 import { CARD_ICON } from './itemCard';
 import { FIRST_DAY_CSS } from './firstDayStyles';
+import { TODAY_CSS } from './todayStyles';
 
 const CSS = `
 .hud {
@@ -744,6 +745,7 @@ const CSS = `
 .hud-sheet .hud-hearts { margin: 4px 0 8px; font-size: 18px; letter-spacing: 2px; color: ${T.accent}; }
 .hud-sheet .hud-gift { margin: 8px 2px 0; font-size: 15px; color: ${T.accent}; }
 ${FIRST_DAY_CSS}
+${TODAY_CSS}
 /* The red Tesla's road: it drives across once, left to right, and parks just out of view. */
 .hud-road { container-type: inline-size; position: relative; height: 40px; overflow: hidden; margin-bottom: 6px; }
 .hud-red-one {

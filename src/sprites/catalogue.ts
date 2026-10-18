@@ -448,6 +448,8 @@ export function catalogue(): Entry[] {
   // What her neighbours have to tell her: news, or something lost (phase S2).
   grid('bubble:news', NEIGHBOUR_BUBBLES['!'].source, NEIGHBOUR_BUBBLES['!'].palette);
   grid('bubble:lost', NEIGHBOUR_BUBBLES['?'].source, NEIGHBOUR_BUBBLES['?'].palette);
+  // And a favour they're asking today (V1's R2).
+  grid('bubble:favour', NEIGHBOUR_BUBBLES['+'].source, NEIGHBOUR_BUBBLES['+'].palette);
   // The effects layer (V1's E1): the emotes, each kind of particle in each colour, and a pop's
   // pictures for Candy, a parcel and its count.
   for (const [emote, art] of Object.entries(EMOTE_BUBBLES)) {

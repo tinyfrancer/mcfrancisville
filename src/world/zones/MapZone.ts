@@ -180,6 +180,12 @@ export class MapZone implements Zone {
     return { tile: this.map.spawn, facing: 'down' };
   }
 
+  /** The building here whose door goes into `inside`, if one does (V1's R2). */
+  buildingOf(inside: ZoneId): PlacedProp | undefined {
+    const door = this.map.doors.find((d) => d.to === inside);
+    return door && (this.map.props.find((p) => p.id === door.prop) ?? this.lots?.house(door.prop));
+  }
+
   doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null {
     if (prop?.id === 'gate') {
       const gate = this.gates.find((g) => g.prop.tx === prop.tx && g.prop.ty === prop.ty);

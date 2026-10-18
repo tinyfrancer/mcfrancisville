@@ -24,7 +24,7 @@ import {
 } from '../../systems/farming';
 import { dayKey } from '../../systems/clock';
 import { growsQuick } from '../../systems/greenhouse';
-import type { CropId, ItemId } from '../../types/ids';
+import type { CropId, ItemId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
@@ -89,6 +89,16 @@ export class Garden {
       sprinkler: this.farm.hasSprinkler(bed),
       sprinkled: this.farm.sprinkled(bed),
     };
+  }
+
+  /** Every bed with something ripe in it, wherever it is, and what (V1's R2's Today). */
+  ripe(): { zone: ZoneId; tx: number; ty: number; crop: ItemId }[] {
+    const now = this.ctx.clock.now();
+    return this.farm.snapshot().flatMap((bed) => {
+      const { planting } = bed;
+      if (!planting || stageOf(planting, now, this.farm.sprinkled(bed)) !== 'ripe') return [];
+      return [{ zone: bed.zone, tx: bed.tx, ty: bed.ty, crop: CROPS[planting.crop].harvest.item }];
+    });
   }
 
   /** What has watered a bed today, for drawing it wet. */
