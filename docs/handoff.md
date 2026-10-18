@@ -1,54 +1,109 @@
-# Handoff: picking up version 0 cold
+# Handoff: picking up the game cold
 
-Written 2026-09-26, updated at the end of phase 12 for a fresh session. Version 0 is built; keep
-this current until it's in her hands, then trim it to what version 1 needs.
+Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
+V1's review (decision 324) for after 1.0. Read "In progress" first; "Where things stand" below it
+is the long history.
 
 ## In progress
 
-**V1 is under way (settled 2026-10-06, decisions 266–275; the plan is `docs/v1_plan.md`, the
-analysis behind it `docs/v1_analysis.md`).** Five lanes of sessions on `v1-dev`, **two lanes at a
-time**: lanes 1 (feel) and 2 (look) first, lane 5 (sound, platform, her fixes) when lane 2's L1
-and L3 are in, lanes 3 (people) and 4 (rhythm) as seats free, V1 (review and 1.0) alone after all
-five. Patches go to her phone at the user's word when a patch's sessions have merged (the table
-in the plan: 0.4 is L1, E4, S4, S1, R5). Each lane's heading below is kept by its running session;
-a session that starts cold and finds a heading mid-way resumes that work on its branch. **A session
-starting cold with no lane named reads the plan's status line and these headings and asks the
-user which lane to take.** `v1-dev` was made from `main` (0.3) on 2026-10-06 and is in
-`vercel.json`'s no-preview list; nothing merges into `v0.3-dev` now.
+**Nothing is in progress. The V1 plan is complete, and 1.0 is the release PR (#@@REL@@, `v1-dev`
+→ `main`), opened by V1 ready and green and left for the user to merge: the release is theirs.**
+Her phone has 0.4 (2026-10-07, PR #175), which carried 0.5's sessions too, so it last showed her
+the mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one
+card, `1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed
+nothing in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures,
+the 0.3 town's and a 1.0 town played by taps (`lived-in-v53.json`).
 
-**Patch 0.4 is on her phone** (2026-10-07, PR #175, `v1-dev` → `main` at the user's word): L1,
-E4, S4, S1 and R5, and with them 0.5's E1, E2, E3, E5 and L3, since a patch is whatever has
-merged. The mayor's notes now show every version since the one the phone last saw, a card each
-(PR #174), so she reads 0.4's note then 0.5's. The save is still v43 (no fixture needed). The next
-patch (0.5) wants L6, L2 and L4; its `NOTES` row is full at five lines, so a session adding to it
-folds two. `main` is an ancestor of `v1-dev` again (the merge went up, not down).
+**The user's two steps, after merging the release PR:**
 
-### The coordinating session (read this first if you are it)
+1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
+   Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
+   **Redeploy** the production deployment, since a deployment only sees the variables it was built
+   with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
+   set up yet". Check the deployment's Functions tab lists `api/save` (nobody has run it on Vercel
+   yet; if the build trips on TypeScript, the fallback is `api/save.js` with JSDoc types, decision
+   323), then README's `curl`, then Settings on her phone.
+2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
+   town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
+   readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
+   iPhone" in `docs/architecture.md`. Also worth asking her, from S1: whether the game is heard
+   with the silent switch on.
 
-Run V1 as 0.3 was run ("How 0.3 was run", below): one `Agent` call per plan session (`model:
-"opus"`, `isolation: "worktree"`), two at a time, with the prompt built from the plan's "Rules
-every lane session follows" and the paragraph below on GitHub; check in every half hour
-(`send_later`); when an agent returns, confirm on GitHub that its PR merged and its heading and
-the status line were written, then start the lane's next session; a cut-off agent is resumed by
-a fresh one on the same branch from its heading; save-bumping PRs merge one at a time; tell the
-user when a patch's sessions have all merged; never merge to `main`.
+**`v1-dev` ends with 1.0.** A later plan's integration branch is made from `main` after the
+release merges (as `v1-dev` was from 0.3's `main`), and added to `vercel.json`'s no-preview list
+the day it's made (decision 265). A session starting cold with nothing asked of it does nothing to
+the game and asks the user what they'd like next; 1.0.x's first candidates are "Where it hurts" 1
+and 7–9 in `docs/architecture.md`.
 
-What every agent needs in its prompt: the setup (`npm ci` in the worktree, never delete the
-lockfile; `git fetch origin v1-dev && git checkout -b claude/<session> origin/v1-dev`, checking
-the head matches GitHub's `v1-dev`); the suite line (`npm run lint && npm run format:check &&
-npm run typecheck && npm run test && npm run build`, then `npm run dev` on a port of its own and
-`CHROMIUM_PATH=/opt/pw-browsers/chromium npm run smoke`, the dev server killed after; never
-`playwright install`); the commit trailer; **and GitHub through the REST API, since GraphQL is
-blocked**: open a draft PR with a JSON body file and `gh api repos/tinyfrancer/mcfrancisville/pulls
---method POST --input body.json`; mark ready with `gh api …/pulls/<n>/ccr/ready_for_review
---method POST`; CI with `gh api …/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name):
-\(.status) \(.conclusion)"'` polled until both runs are `completed success`; merge with `gh api
-…/pulls/<n>/merge --method PUT -f merge_method=merge -f commit_title="Merge pull request #<n>
-from tinyfrancer/claude/<branch>"`.
+### V1 (after the lanes)
 
-### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
+**Under way** on `claude/v1-review` (from `v1-dev` at a163682; no save change so far). Done: the
+suite, smoke (622/622) and `smoke:offline` (10/10) green on `v1-dev`'s head; a new town played by
+real taps over four days (14–17 September 2026, a scratch Playwright driver under
+`?loop=manual&day=`) and saved as `tests/persistence/fixtures/lived-in-v53.json`, held by
+`livedIn.test.ts` (which now opens each save at its own `lastPlayedAt`); the 0.6–0.9 `NOTES` rows
+folded into one `1.0` row; two HUD fixes from the shakedown (a toast was half the room wide, so a
+three-line toast ran to ten; the quick bar's line ran off the left edge). Next, in order: the rest
+of the shakedown (a reel, a pet's trick, Rob Boo's reveal, winter, Far, sideways, the 0.3 town),
+perf at Close and Far by day and night, the architecture doc and "where it hurts", the art notes,
+`CLAUDE.md`, this handoff rewritten for after 1.0, decision 324, then merge and the release PR.
 
-E5 landed (PR #172). Lane 1 is finished.
+### How V1 was run, for whoever plans 1.1
+
+`docs/v1_analysis.md` found the game wide but not deep (five findings: nothing reacts, the
+neighbours don't know her, no direction or rhythm, the presentation sells it short, sound and
+platform), an interview with the user settled ten questions (decisions 266–275), and
+`docs/v1_plan.md` cut the answer into 29 sessions of one context window each, in five lanes by the
+files they own (feel, look, people, rhythm, sound/platform/her fixes), two lanes at a time, with
+this review alone after. One coordinating session ran each plan session as an Opus sub-agent in a
+worktree of its own, as 0.3 was run (below): `npm ci`, a branch from `v1-dev`, the whole suite and
+smoke on a dev-server port of its own before every push, a draft PR through the REST API (`gh
+api`; GraphQL is blocked in the container), merged by the session with a merge commit once CI was
+green, and its heading here and line on the plan's status line written as it went. What was new:
+**patches to her phone at the user's word** (0.4 went out with 0.5's first five sessions in it,
+since a patch is whatever has merged; the rest waited for 1.0, so four `NOTES` rows she never saw
+were folded into one); **ten save bumps** (v44–v53), each in a session's last commit
+after merging `v1-dev`, one at a time, with no collision; **cross-lane "For X" notes** that told the
+next session in another lane exactly which seam to use (E1's effects for everyone, L4's palette
+swaps for anything drawn outdoors, P3b's `inTown` for anything looping over neighbours, R2's
+`TodayFacts` for R3, R4 and R6), the best habit of the plan; and **smoke sections in second browser
+contexts** for anything that wanted a new town (R1's `firstDay`, S2's `cloud`). What cost the most:
+the suite and smoke grew to half an hour a push ("Where it hurts" 2), and lanes that both wanted
+the 0.x `NOTES` row spent lines folding each other's. Worth keeping for 1.1: the analysis before
+the plan, lanes by files owned, two at a time, the "For X" notes, saves bumped last, and a review
+that plays a real town by taps and keeps it as a fixture. Worth changing: smoke split by area, and
+the patch notes written once per release by the review rather than a line per session.
+
+### What V1 built (a line a session; the decisions hold the detail)
+
+- **Lane 1, feel:** E1 (PR #165, 280) the effects layer; E2 (PR #166, 281) her verbs have a body;
+  E3 (PR #168, 282) neighbours alive at their stops; E4 (PR #171, 283) taps felt and an iris through
+  doors; E5 (PR #172, 284) props and furniture animate, crows, bats and leaves.
+- **Lane 2, look:** L1 (PR #164, 290) Close and Far, rooms in a house; L3 (PR #167, 291) light; L6
+  (PR #177, 292) the art pass; L2 (PR #179, 293) the ground; L4 (PR #182, 294) the seasons; L5 (PR
+  #185, 295) the UI polished, glyphs for emoji; L7 (PR #188, 296) faces.
+- **Lane 3, people:** P1 (PR #178, 300, v44) talks with memory; P2 (PR #180, 301, v45) her voice and
+  heart moments; P3a (PR #181, 302, v46) the mystery chapter by chapter; P3b (PR #183, 303, v47) Rob
+  Boo; P4 (PR #184, 304, v48) jobs seen and happenings with a verb; P5 (PR #186, 305, v49) Cody,
+  married.
+- **Lane 4, rhythm:** R5 (PR #173, 310) critters for all; R1 (PR #187, 311, v50) the first day; R2
+  (PR #190, 312) Today; R3 (PR #192, 313) weeks that differ; R4 (PR #194, 314, v51) town projects;
+  R6b (PR #193, 315) the fair games; R6a (PR #196, 316, v52) fishing with a floor; R6c (PR #195, 317,
+  v53) pets that grow.
+- **Lane 5, sound, platform and her fixes:** S4 (PR #169, 320) her fixes; S1 (PR #170, 321) heard;
+  S3 (PR #189, 322) safe; S2 (PR #191, 323) the cloud save.
+- **V1** (PR #@@MINE@@, decision 324): the review and 1.0, below its heading above.
+
+### Notes for 1.1 (the lanes' "For" notes, kept as they left them)
+
+Each lane's running session left notes for the sessions after it: how to add a moment, a topic, a
+happening, a rare event, a project, a fish, a trick, a working pose; which seam to use; and what
+was left. They're kept here as written, the newest first in each lane, because they're the best
+how-to the code has; what they say about `NOTES` rows and patches is history now (the rows are
+folded into 1.0), and every "Left for the review" item is in "Where it hurts" in
+`docs/architecture.md`.
+
+#### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
 **For L6, L2 and L4 (from E5, decision 284):** what moves on its own is `frames` on a prop's,
 piece's or fixture's art (`sprites/frames.ts`): whole-size `sources` (each frame the art's size,
@@ -119,9 +174,7 @@ UTC the first walk south (at Close) fails "her, on the screen never shimmers" at
 the morning window, so re-run the CI job then (`gh api …/actions/jobs/<id>/rerun --method POST`)
 rather than loosening the check. And the date chip's ellipsis with a meal's chip up, fixed.
 
-### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
-
-L7 landed (PR #188). Lane 2 is finished.
+#### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
 **For V1's review (from L7, decision 296):** a face's feeling is a `Feeling` (`types/mood.ts`).
 **To give a line a feeling**: a heart moment's `moods` (parallel to its `lines`), a reply's `mood`
@@ -225,9 +278,7 @@ perf -- --view=far`. The scale is never read directly: everything reads it throu
 backing size, which is 390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized in
 tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile is off the view.
 
-### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
-
-P5 landed (PR #186, save v49). Lane 3 is finished.
+#### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
 **For R1 (from P5, decision 305):** on a new town, Cody's three reward letters are posted quietly
 (no toast) the first time a day is stepped once her first visit is counted (`Marriage.check`), so
@@ -237,8 +288,6 @@ the villager), at hers most evenings from seven (`atHers` in `systems/cody.ts`),
 asks "how was your day?" (`Marriage.tell`) until she answers, which stands alone with Bye like a
 question: a first-day card that wants him to say something else of an evening should come before
 it or after her answer. His story's scenes start on her third day (`OUR_STORY`).
-
-P4 landed (PR #184, save v48).
 
 **For P5 (from P4, decision 304):** **To add a talk action** (a button beside Chat and Give), add
 a block to `wiring/talkActions.ts` reading the service's own `canX`/`X`: a `TalkAction` is a
@@ -264,8 +313,6 @@ take an `errand(id)` (a place and a job, ahead of the plan; Ollie's post round i
 he has no birthday line, party or double gift; P5 may give him one. The 0.7 `NOTES` row has three
 lines, all P4's: P5, L5 and L7 add or fold, five at most.
 
-P3b landed (PR #183, save v47).
-
 **For P4/P5 (from P3b, decision 303):** Rob Boo is `robBoo`, a `VillagerId` like the rest
 (`data/robBoo.ts`, art `sprites/robBoo.ts`), but **he isn't about until she has met him**:
 `systems/mayor.ts` (`knowMayor`, told by `tellTheMayor` in `areas/mystery.ts` before the town is
@@ -288,8 +335,6 @@ met day is the `unmasked` clue (`UNMASKED`, `Mystery.met()`, `Around.met`); the 
 bell at New Year with her; if Cody's married evenings want the whole town anywhere, Rob is in
 `PARTY_SPOTS` (`wellFrontMiddle`) and `STAGE_SPOTS` (`crowdMiddleNear`). The 0.6 `NOTES` row is
 full at five lines (P3b's added): P4 and P5 fold two to make room.
-
-P3a landed (PR #181, save v46).
 
 **For P3b (from P3a, decision 302):** **the flag** is `world.mystery.ready()`: the day the chain's
 last clue, the mayor's promise (`CHAIN_LAST`, `promise`), was pinned, or null (`readyOn` in
@@ -357,10 +402,7 @@ set in `Neighbourhood.talk`/`remember` or `give`; one about her rather than a ne
 moments seen want a save field of their own, the next number being v45. The 0.6 `NOTES` row has
 three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five at most.
 
-### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
-
-R6c landed (PR #195, save v53). R6a landed (PR #196, save v52). R4 landed (PR #194, save v51).
-Lane 4 is finished.
+#### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
 **For R6/V1 (from R4, decision 314):** the save is v51 (`projects: { current, given, built }`).
 **To add a project**: a `ProjectId` in `types/ids.ts` and a `PROJECTS` row in `data/projects.ts`
@@ -379,11 +421,7 @@ dev build, and `npm run sprite -- 'stage:*'` draws each. **Gathering is capped**
 the town's. The 0.8 `NOTES` row is full at five lines (R1's two folded into one, R2's, R3's, R4's):
 a later 0.8 session folds two.
 
-R3 landed (PR #192).
-
-#### R6c (beside R6a)
-
-R6c landed (PR #195, save v53). Lane 4 is finished once R6a has landed too (it has: PR #196).
+##### R6c (beside R6a)
 
 **For V1 (from R6c, decision 317):** the save is v53 (`pets.affection`, a `Fondness` per pet:
 `points`, and the day's `pat`/`walk`/`treat` counts). Fondness rows are `data/affection.ts`
@@ -410,9 +448,7 @@ towards fondness, which felt right (they're his pats). The 0.9 `NOTES` row is fu
 a container: a stale vite from another worktree held 5176, so R6c ran its dev server on 5186
 (`SMOKE_URL`) and the preview on 5187 (`PREVIEW_URL`).
 
-#### R6a (beside R6c)
-
-R6a landed (PR #196, save v52). Bumps the save to v52 (`cabinet.best`).
+##### R6a (beside R6c)
 
 **For V1 (from R6a, decision 316):** the save is v52: the `Cabinet` keeps the biggest of each fish
 (`best`, by `CritterId`, in quarters of a hand; `measure`, `bestOf`). **A fish's bite** is
@@ -433,9 +469,7 @@ the night's water than over the day's. Smoke's `drifter` finds a shy critter by 
 S2's, R6b's, R6a's): R6c folds two. The rarity test is unchanged by this (9.1–10.2 months, the
 longest wait 30 days).
 
-#### R6b (beside R4)
-
-R6b landed (PR #193). No save change.
+##### R6b (beside R4)
 
 **For R6a/R6c/V1 (from R6b, decision 315):** a fair game's throw is `patternOf(game, seed, n,
 slow)` scored by `score(pattern, tapAt, startedAt, at)` on the world's clock
@@ -536,10 +570,7 @@ case (`RoomView.onShow`), so a family past 12 needs another `museumCase` row wit
 like the rest; the holiday critters and spiders are ordinary rows (`holiday` on a row only moves
 its season), so `wary` and a bite window by rarity apply to them as to any.
 
-### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
-
-S2 landed (PR #191). Lane 5 is finished. **The user must provision the store: see README.md's
-'Cloud save' steps.**
+#### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
 **For V1 (from S2, decision 323):**
 
@@ -599,19 +630,6 @@ session folds two to make room.
 **For S1/S3/S2:** any − n + or other button that should repeat while held takes `held(button,
 step)` from `hud/dom.ts` (timing in `HELD`/`heldGap`); smoke holds a button with a real touch
 through `holdElement`. The 0.4 `NOTES` row has four lines now (L1's three and S4's); one more fits.
-
-### V1 (after the lanes)
-
-**Under way** on `claude/v1-review` (from `v1-dev` at a163682; no save change so far). Done: the
-suite, smoke (622/622) and `smoke:offline` (10/10) green on `v1-dev`'s head; a new town played by
-real taps over four days (14–17 September 2026, a scratch Playwright driver under
-`?loop=manual&day=`) and saved as `tests/persistence/fixtures/lived-in-v53.json`, held by
-`livedIn.test.ts` (which now opens each save at its own `lastPlayedAt`); the 0.6–0.9 `NOTES` rows
-folded into one `1.0` row; two HUD fixes from the shakedown (a toast was half the room wide, so a
-three-line toast ran to ten; the quick bar's line ran off the left edge). Next, in order: the rest
-of the shakedown (a reel, a pet's trick, Rob Boo's reveal, winter, Far, sideways, the 0.3 town),
-perf at Close and Far by day and night, the architecture doc and "where it hurts", the art notes,
-`CLAUDE.md`, this handoff rewritten for after 1.0, decision 324, then merge and the release PR.
 
 ### How 0.3 was run, for whoever plans 0.4
 
@@ -1596,14 +1614,33 @@ plan's as decisions 78–83.
 ## Art notes for the final pass
 
 What still looks off, kept as sessions notice it (the user reviews the art all together: "Before
-phase G" in `docs/personal_touches.md`). **Empty since V1's L6 (decision 292)**, which rendered
-every critter, place and the scale sheet at phone size and fixed, found fixed, judged or handed on
-everything listed here: the banks, beds, frogs, newt, firefly, Hercules beetle, eel, pike, catfish,
-mourning cloak, tombstone toad, reed frog, rowboat, banner, garland bulbs, seeds and the scale
-sheet's tree redrawn (before and after in `docs/review/l6/`); the grass tufts and the old trees'
-crowns handed to L2, the noticeboard showing what's pinned to lane 4, and others skating on the
-frozen pond to L4 (each in that lane's "For" note under "In progress"). Add a line here when
-something new looks off.
+phase G" in `docs/personal_touches.md`). L6 emptied the list (decision 292); **V1's review**
+(decision 324) looked again after L6, L2, L4 and L7, at `npm run sprite -- 'place:*'`, the smoke
+screenshots and its own four days of play at phone size, and found:
+
+- **The lavender cobble still carries the town.** L2 gave the woods and farm dirt and the castle
+  gravel, but the town's roads, its square and the fairground's paths are all one cobble, and the
+  square is a big empty plaza with a small well in the middle; it draws the eye more than the
+  buildings round it. A worn middle, a second paving for the square (flagstones, a ring round the
+  well), benches or planters on it, or the square made smaller, would each help.
+- **Woods are walls of one crown.** Whisperwood, the shore and the castle hill are edged with the
+  same round teal crown over and over (the purple and orange ones and the conifers break it up, but
+  not much at a distance); the forms L2 added are few beside it. More variety in the edge crowns,
+  and an uneven edge rather than a straight hedge of trees.
+- **Ice and the creeks are flat paint.** The frozen creek in Whisperwood and the one feeding the
+  lake at Lantern Shore are a flat pale blue ribbon with hard edges, beside water that L6 gave banks
+  and glints; and a frozen creek running into an open lake reads oddly. A texture on the ice
+  (cracks, a sheen) and the banks' soft edge would bring it in line.
+- **Big empty lawns** in the hidden clearing's middle and the fairground's south-east: L2's decals
+  are there but thin. A meadow patch or a few standing props.
+- **The castle garden's beds are the same rectangle** four times over.
+- **She holds her rod indoors**: the quick bar hides at home, but what she held outside stays in
+  her hand in the house (seen with Cody on the sofa at 19:30). Harmless, a little odd.
+- **The tension bar is small** (44 world pixels, about a tile and a half at Close): it reads, but
+  only just, and its dark green window less well at night (R6a's note).
+- **Lane notes still open:** the body builds and the neutral faces on the noticeboard and the
+  neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c), the noticeboard's art
+  the same whatever is pinned (L6). Each is in "Where it hurts" too.
 
 ## Settled since
 
