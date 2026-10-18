@@ -118,7 +118,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
   const tab = (): CounterTab => (tabs ? (sheet.tab() as CounterTab) : 'buy');
 
   const render = () => {
-    purse.textContent = `${candy(api.candy())} Candy`;
+    purse.textContent = candy(api.candy());
     const at = tab();
     finder.hidden = at !== 'sell';
     bookFinder.hidden = at !== 'book';
