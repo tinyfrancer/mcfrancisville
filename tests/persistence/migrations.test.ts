@@ -525,6 +525,19 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's P4 step (47 to 48)", () => {
+  it('gives an old save an empty record of joining in, and reads one with picks after', () => {
+    const old = { ...structuredClone(SAVE), version: 47 } as Record<string, unknown>;
+    delete old.happenings;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.happenings).toEqual({});
+    const happenings = { bookClub: { on: '2026-11-11', choice: 'wutheringFrights' } };
+    expect(migrateSave({ ...SAVE, happenings })?.happenings).toEqual(happenings);
+    expect(migrateSave({ ...SAVE, happenings: { bookClub: { on: 3 } } })).toBeNull();
+  });
+});
+
 describe("V1's P3b step (46 to 47)", () => {
   it('keeps the mystery and every friendship as they were, with the mayor not met yet', () => {
     const old = { ...structuredClone(SAVE), version: 46 } as Record<string, unknown>;

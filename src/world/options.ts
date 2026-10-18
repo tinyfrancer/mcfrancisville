@@ -141,5 +141,6 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     ever: save.ever,
     orders: save.orders,
     lately: save.lately,
+    happenings: save.happenings,
   };
 }

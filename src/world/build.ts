@@ -412,6 +412,7 @@ export abstract class WorldParts {
       ...this.belongings.snapshot(),
       ...this.deliveries.snapshot(),
       ...this.lately.snapshot(),
+      ...this.joining.snapshot(),
     };
   }
 
