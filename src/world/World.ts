@@ -330,6 +330,7 @@ export class World extends WorldParts {
     this.mystery.check();
     this.mailbox.checkSpecialDay();
     this.neighbourhood.check();
+    this.marriage.check();
     this.deliveries.check();
     this.weather.check();
     this.holidays.check();

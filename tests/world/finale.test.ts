@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { FAIRGROUND, TOWN } from '../../src/data/maps';
 import { parseMap } from '../../src/systems/grid';
 import { DEFAULT_LOOK, STARTER_WARDROBE } from '../../src/data/outfits';
+import { QUESTIONS } from '../../src/data/questions';
 import { codyHalf, finaleLetterId, herHalf } from '../../src/systems/finale';
 import { letterOf, lettersOn } from '../../src/systems/friendship';
 import type { Look } from '../../src/types/look';
@@ -93,6 +94,8 @@ describe('the party (0.2 J4)', () => {
     expect(h.world.finale.costumeOf('cody')).toBe('bugCatcher');
     expect(h.world.finale.costumeOf('rufus')).toBe('own');
     const cody = h.world.neighbourhood.neighbour('cody');
+    // Her husband asks his question from the first day (V1's P5); she has answered it.
+    h.world.friends.update('cody', { answered: QUESTIONS.cody.answers[0]!.id });
     h.world.tapTile(cody.tile.tx, cody.tile.ty);
     h.until(() => h.world.neighbourhood.talkingTo === 'cody', 'walking up to Cody', 120_000);
     // His Halloween line and treat come first; the party's, and his chili, after.

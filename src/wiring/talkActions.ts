@@ -1,4 +1,6 @@
+import { TOGETHER, TOGETHER_IDS } from '../data/cody';
 import { TUNES } from '../data/instruments';
+import { isHusband } from '../systems/cody';
 import { VILLAGERS } from '../data/villagers';
 import { candy, quantity } from '../hud/messages';
 import type { TalkAction } from '../hud/TalkSheet';
@@ -71,6 +73,20 @@ export function talkActions(world: World, id: VillagerId, changed: () => void): 
         };
       },
     });
+  }
+  // At hers of an evening, what she and Cody do together, each once a night (V1's P5).
+  if (isHusband(id)) {
+    for (const what of TOGETHER_IDS) {
+      if (!world.marriage.canDo(what)) continue;
+      actions.push({
+        label: TOGETHER[what].label,
+        glyph: TOGETHER[what].glyph,
+        run() {
+          changed();
+          return world.marriage.together(what);
+        },
+      });
+    }
   }
   if (world.finale.canCrown(id)) {
     actions.push({

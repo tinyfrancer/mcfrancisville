@@ -5,7 +5,8 @@ import { ITEMS, type ItemKind } from '../data/items';
 import type { Ware } from '../data/shop';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import { MAX_HEARTS, tierOf } from '../systems/friendship';
+import { HUSBAND, MARRIED_BAND } from '../data/cody';
+import { MAX_HEARTS, tierOf, yearsMarried } from '../systems/friendship';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import type { Whereabout } from '../world/services/Neighbourhood';
 import { fitIcon, ROW_ICON, SLOT_ICON } from './collection';
@@ -72,12 +73,22 @@ export function likesLine(kinds: readonly ItemKind[]): string {
   return `${said.slice(0, -1).join(', ')} and ${said.at(-1)}`;
 }
 
-/** How close they are, in a word or two. */
-export function bandOf(hearts: number): string {
+/**
+ * How close they are, in a word or two; her husband is married to her, and how long, never
+ * "getting to know you" (V1's P5, decision 269).
+ */
+export function bandOf(hearts: number, id?: VillagerId, day?: string): string {
+  if (id === HUSBAND) {
+    const years = day ? yearsMarried(day) : 0;
+    return years > 0 ? `${MARRIED_BAND}, ${years} year${years === 1 ? '' : 's'}` : MARRIED_BAND;
+  }
   if (hearts >= MAX_HEARTS) return 'Best friends';
-  return { hello: 'Getting to know you', friend: 'Friends', close: 'Close friends' }[
-    tierOf(hearts)
-  ];
+  return {
+    hello: 'Getting to know you',
+    friend: 'Friends',
+    close: 'Close friends',
+    married: MARRIED_BAND,
+  }[tierOf(hearts)];
 }
 
 const IN: Partial<Record<ZoneId, string>> = {
@@ -230,7 +241,7 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
   const fact = (mark: Glyph, text: string) =>
     el('p', { className: 'hud-fact' }, glyphed(mark, text));
   const today = isBirthday(id, api.today()) ? " It's today!" : '';
-  about.append(hearts, fact('heart', bandOf(view.hearts)));
+  about.append(hearts, fact('heart', bandOf(view.hearts, id, api.today())));
   if (view.where) {
     about.append(fact('here', whereLine(id, view.where, api.found(view.where.zone))));
   }
@@ -253,7 +264,9 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
   about.append(el('p', {}, `${likes.charAt(0).toUpperCase()}${likes.slice(1)}.`));
 
   const gifts = sheet.panel('gifts');
-  gifts.append(el('p', { className: 'hud-fact' }, `As you grow close, ${row.name} will send you:`));
+  const sends =
+    id === HUSBAND ? `${row.name} has sent you:` : `As you grow close, ${row.name} will send you:`;
+  gifts.append(el('p', { className: 'hud-fact' }, sends));
   gifts.append(
     el(
       'div',

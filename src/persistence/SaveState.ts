@@ -40,7 +40,7 @@ import type { JoinedSnapshot } from '../systems/joining';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 48;
+export const SAVE_VERSION = 49;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -291,7 +291,7 @@ export function newSave(
     yard: { placed: [] },
     ever: [],
     orders: [],
-    lately: { placed: null, harvested: null, donated: null },
+    lately: { placed: null, harvested: null, donated: null, herDay: null, told: [] },
     happenings: {},
   };
 }
@@ -675,7 +675,16 @@ function isLatelyShape(value: unknown): boolean {
     const d = done as Record<string, unknown>;
     return typeof d[id] === 'string' && typeof d.day === 'string';
   };
-  return last('placed', 'piece') && last('harvested', 'crop') && last('donated', 'thing');
+  // What she told Cody, and the scenes he has told (save v49, V1's P5).
+  const told = isStringList(v.told);
+  const herDay = last('herDay', 'answer');
+  return (
+    last('placed', 'piece') &&
+    last('harvested', 'crop') &&
+    last('donated', 'thing') &&
+    herDay &&
+    told
+  );
 }
 
 /** What she did at their happenings (save v48): by happening, a day and maybe a pick. */

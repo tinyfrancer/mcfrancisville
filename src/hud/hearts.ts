@@ -8,7 +8,11 @@ import { glyph } from './glyph';
 export function heartsRow(hearts: number, was = hearts): HTMLElement[] {
   return Array.from({ length: MAX_HEARTS }, (_, k) => {
     const full = k < hearts;
-    const heart = glyph(full ? 'heart' : 'heartEmpty', 16, 'hud-heart');
+    const heart = glyph(
+      full ? 'heart' : 'heartEmpty',
+      16,
+      full ? 'hud-heart hud-heart-full' : 'hud-heart',
+    );
     if (full && k >= was) {
       heart.classList.add('hud-heart-pop');
       heart.style.setProperty('--i', String(k - was));

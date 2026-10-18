@@ -2165,8 +2165,11 @@ async function neighbours() {
   await reloadGame();
   const kept = await page.evaluate(() => ({
     points: window.world.friends.of('maude').points,
-    // October's story chapters come as the days do, so they're left out of the count.
-    mail: window.world.mailbox.view().filter((l) => !l.id.startsWith('story:')).length,
+    // October's story chapters come as the days do, so they're left out of the count, and so
+    // are Cody's letters, all in her mailbox from her first day (V1's P5).
+    mail: window.world.mailbox
+      .view()
+      .filter((l) => !l.id.startsWith('story:') && !l.id.startsWith('cody:')).length,
   }));
   check(
     'friendships and letters are still there after a reload',
@@ -5200,7 +5203,8 @@ async function interiors() {
     await stepUntil(() => !window.world.player.moving, 'she reaches the settee');
     await page.evaluate(() => window.view.step(40, 20));
     const said = (await page.locator('.hud-toast').textContent()) ?? '';
-    check('a keepsake not hers yet says he is saving one for her', /saving one/.test(said), said);
+    // Married to him from the first day (V1's P5), his keepsakes are hers to have at once.
+    check("a keepsake of her husband's is hers to have at once", /you can have/.test(said), said);
     // It's a seat too (0.2's G1): she sits on it, drawn on it, and a tap stands her up again.
     const sat = await page.evaluate(() => ({
       seat: window.world.sitting.seat,
@@ -5587,6 +5591,106 @@ async function robBoo() {
   await page.setViewportSize(PHONE);
   await page.waitForTimeout(300);
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
+}
+
+/**
+ * Cody, married (V1's P5): at eight on an evening he spends at hers, she goes home and finds him
+ * there; walked up to by a real tap, he asks how her day was with her three answers, and answers
+ * the one she taps; what they can do together is beside Chat; and his page calls him married.
+ * Upright and on its side.
+ */
+async function married() {
+  /** @type {string | null} */
+  let evening = null;
+  for (const day of ['2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09']) {
+    await openOn(day, 20);
+    if (await page.evaluate(() => window.world.marriage.atHers)) {
+      evening = day;
+      break;
+    }
+  }
+  if (!evening) return check('one of five evenings, Cody is at hers', false);
+  await page.evaluate(() => window.world.scene === 'home' || window.world.travel.home());
+  await stepUntil(
+    () => window.world.scene === 'home' && window.view.transition() === null,
+    'she flies home',
+  );
+  await closeSheets();
+  const there = await stepUntil(() => {
+    const cody = window.world.neighbourhood.neighbour('cody');
+    return cody.zone === 'home' && !cody.moving;
+  }, 'Cody is at hers of an evening');
+  if (!there) return;
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/married-home.png' });
+  const where = await page.evaluate(() => window.world.neighbourhood.whereIs('cody'));
+  check(
+    "the neighbours sheet's Cody is visiting her",
+    where?.zone === 'home' && JSON.stringify(where.doing) === '{"visiting":"her"}',
+    JSON.stringify(where),
+  );
+  const at = await page.evaluate(() => window.world.neighbourhood.neighbour('cody').tile);
+  await tapTile(at.tx, at.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Cody at hers opens a talk',
+  );
+  if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
+  const asked = await page.evaluate(() => ({
+    said: document.querySelector('.hud-talk-sheet .hud-speech')?.textContent ?? '',
+    chips: [...document.querySelectorAll('.hud-talk-sheet .hud-reply')].map(
+      (b) => b.textContent ?? '',
+    ),
+    hearts: document.querySelectorAll('.hud-talk-sheet .hud-hearts .hud-heart-full').length,
+  }));
+  check(
+    'Cody asks how her day was, with her three answers, his hearts full',
+    /day|today/i.test(asked.said) &&
+      JSON.stringify(asked.chips) === '["It was good!","Long day…","Tell you later"]' &&
+      asked.hearts === 10,
+    JSON.stringify(asked),
+  );
+  await page.screenshot({ path: '.smoke/married-ask.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: '.smoke/married-ask-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-talk-sheet .hud-reply:text-is("Long day…")');
+  const answered = await page.evaluate(() => ({
+    said: document.querySelector('.hud-talk-sheet .hud-speech')?.textContent ?? '',
+    kept: window.world.lately.last.herDay,
+    buttons: [...document.querySelectorAll('.hud-talk-sheet button')].map(
+      (b) => b.textContent?.trim() ?? '',
+    ),
+  }));
+  check(
+    'tapping "Long day…", he answers it, and what she said is kept for tomorrow',
+    answered.said !== asked.said &&
+      answered.said.length > 0 &&
+      answered.kept?.day === evening &&
+      answered.kept.answer === 'long',
+    JSON.stringify(answered),
+  );
+  check(
+    'what they can do together at hers is beside Chat',
+    answered.buttons.includes('Our song') && answered.buttons.includes('Chat'),
+    JSON.stringify(answered.buttons),
+  );
+  await page.screenshot({ path: '.smoke/married-answered.png' });
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  await tapElement('.hud-neighbours');
+  await tapElement('.hud-neighbours-sheet .hud-neighbour[data-villager="cody"]');
+  const band = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-neighbour-sheet .hud-fact')].map((f) => f.textContent),
+  );
+  check(
+    'his page calls him married, never "getting to know you"',
+    band.some((f) => /Married/.test(f ?? '')) && !band.some((f) => /Getting to know/.test(f ?? '')),
+    JSON.stringify(band),
+  );
+  await closeSheets();
 }
 
 /**
@@ -6572,6 +6676,7 @@ const SECTIONS = [
   ['finale', finale],
   ['jobs', jobs],
   ['robBoo', robBoo],
+  ['married', married],
   ['broom', broom],
   ['closer', closer],
   ['sideways', sideways],

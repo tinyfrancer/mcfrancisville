@@ -209,7 +209,18 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P4 landed (PR #184, save v48). Next in this lane: P5.
+P5 landed (PR #186, save v49). Lane 3 is finished.
+
+**For R1 (from P5, decision 305):** on a new town, Cody's three reward letters are posted quietly
+(no toast) the first time a day is stepped once her first visit is counted (`Marriage.check`), so
+her mailbox has his record, tee and portrait from her first day; R1's thread can point at them.
+He's `married` from the first day (`Friends.hearts('cody')` is always ten; `bandOf`/`tierOf` take
+the villager), at hers most evenings from seven (`atHers` in `systems/cody.ts`), and of an evening
+asks "how was your day?" (`Marriage.tell`) until she answers, which stands alone with Bye like a
+question: a first-day card that wants him to say something else of an evening should come before
+it or after her answer. His story's scenes start on her third day (`OUR_STORY`).
+
+P4 landed (PR #184, save v48).
 
 **For P5 (from P4, decision 304):** **To add a talk action** (a button beside Chat and Give), add
 a block to `wiring/talkActions.ts` reading the service's own `canX`/`X`: a `TalkAction` is a

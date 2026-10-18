@@ -30,6 +30,7 @@ import { Effects, resolverFor } from './render/effects';
 import { Transitions } from './render/transition';
 import { feelTap } from './wiring/taps';
 import { Chatter } from './wiring/chatter';
+import { Pats } from './wiring/codyHome';
 import { Hearing } from './wiring/hearing';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
@@ -85,6 +86,8 @@ function startGame(): void {
   });
   // Two neighbours standing together chatter, a bubble at a time (V1's E3).
   const chatter = new Chatter();
+  // Cody pats her pets at hers of an evening (V1's P5).
+  const pats = new Pats();
   // Between places, an iris on her and her broom seen flying; a wash as the day turns (V1's E4).
   const transitions = new Transitions(canvas, {
     reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -329,6 +332,7 @@ function startGame(): void {
     view().follow(stepMs);
     effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
     chatter.show(world, effects);
+    pats.show(world, effects);
     hearing.step(world, sound, clock.now());
     effects.step(stepMs, resolverFor(world));
     transitions.step(stepMs);

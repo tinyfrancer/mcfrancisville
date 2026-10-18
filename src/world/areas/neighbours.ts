@@ -7,7 +7,9 @@ import { Joining } from '../services/Joining';
 import { PostRound } from '../services/PostRound';
 import type { TuneId } from '../../data/instruments';
 import type { Mailbox } from '../services/Mailbox';
+import { Marriage } from '../services/Marriage';
 import { Neighbourhood } from '../services/Neighbourhood';
+import type { Tile } from '../../systems/pathfinding';
 import { Noticeboard } from '../services/Noticeboard';
 import { SmallEvents } from '../services/SmallEvents';
 import type { Zones } from '../zones/Zones';
@@ -24,6 +26,8 @@ export interface Neighbours {
   joining: Joining;
   /** Ollie walking her post to her mailbox (V1's P4). */
   postRound: PostRound;
+  /** Cody, married to her: his evening question, their story, nights in (V1's P5). */
+  marriage: Marriage;
 }
 
 interface NeighbourParts {
@@ -34,6 +38,12 @@ interface NeighbourParts {
   talk: () => Around;
   /** The tunes she has learnt from Boothoven, for his recital's requests (V1's P4). */
   learnt: () => readonly TuneId[];
+  /** Puts their song on where she stands, Cody dancing beside her (V1's P5). */
+  dance: () => void;
+  /** Where her pets are in the place she is, for Cody to pat one (V1's P5). */
+  pets: () => readonly Tile[];
+  /** How many days she has come to town, for his letters to wait for her first. */
+  visits: () => number;
 }
 
 export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
@@ -46,6 +56,12 @@ export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
     ctx,
     { wallet, takings, thank: town.thank },
     s.options.errand,
+  );
+  const marriage = new Marriage(
+    ctx,
+    { lately: s.lately, takings, bag, mailbox },
+    { scene: parts.talk, here: town.scene, dance: parts.dance, visits: parts.visits },
+    s.peopled,
   );
   const neighbourhood = new Neighbourhood(
     ctx,
@@ -60,6 +76,8 @@ export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
       scene: parts.talk,
       recall: (happening, id) => joining?.recall(happening, id) ?? null,
       errand: (id) => postRound?.errandOf(id) ?? null,
+      married: marriage,
+      pets: parts.pets,
     },
     parts.zones,
     s.peopled,
@@ -88,5 +106,14 @@ export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
     talkingTo: () => neighbourhood.talkingTo,
     postman: () => neighbourhood.neighbours.find((n) => n.id === 'ollie') ?? null,
   });
-  return { smallEvents, neighbourhood, noticeboard, baking, interiors, joining, postRound };
+  return {
+    smallEvents,
+    neighbourhood,
+    noticeboard,
+    baking,
+    interiors,
+    joining,
+    postRound,
+    marriage,
+  };
 }

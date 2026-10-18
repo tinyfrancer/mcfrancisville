@@ -1,6 +1,7 @@
 import type { PatchStage } from '../data/pumpkinPatch';
 import type { CalendarId } from '../data/calendar';
 import type { BroomLook } from '../data/broom';
+import type { TogetherId } from '../data/cody';
 import type { Placed } from '../data/home';
 import type { DecorId } from '../data/holidays';
 import type { ClueId } from '../data/mystery';
@@ -218,6 +219,8 @@ export type WorldEvent =
   | { kind: 'joined'; happening: HappeningId; villager: VillagerId }
   /** A beat of baking with Wrapunzel (V1's P4): pouring the mix, or down at the oven door. */
   | { kind: 'bakeStep'; does: 'pour' | 'crouch' }
+  /** Something she and Cody did together at hers (V1's P5): she holds it up, or waves at the sky. */
+  | { kind: 'together'; what: TogetherId; does: 'show' | 'greet' }
   /** A throw at a fairground game (0.2's M2), and whether it landed. */
   | { kind: 'tossed'; activity: ActivityId; landed: boolean }
   /** A go at a fairground game done, and what it won; `top` for the prize to win. */

@@ -1,3 +1,4 @@
+import { HUSBAND, MARRIED_LINES } from '../data/cody';
 import { ITEMS } from '../data/items';
 import { bestLetter, isBestLetter } from './bestFriends';
 import { deliveryLetter, isDeliveryLetter } from './catalogue';
@@ -81,9 +82,22 @@ export function rewardsBetween(villager: VillagerId, before: number, after: numb
   return VILLAGERS[villager].rewards.filter((r) => r.hearts > from && r.hearts <= to);
 }
 
-/** Which of a villager's lines they're choosing from: `close` from seven hearts, `friend` from three. */
-export function tierOf(hearts: number): Exclude<keyof Lines, 'night' | 'windows'> {
+/** A pool of a villager's lines: their band's, or her husband's (V1's P5). */
+export type Tier = Exclude<keyof Lines, 'night' | 'windows'> | 'married';
+
+/**
+ * Which of a villager's lines they're choosing from: `close` from seven hearts, `friend` from
+ * three; her husband's are `married` from the first day, never below (V1's P5, decision 269).
+ */
+export function tierOf(hearts: number, villager?: VillagerId): Tier {
+  if (villager === HUSBAND) return 'married';
   return hearts >= 7 ? 'close' : hearts >= 3 ? 'friend' : 'hello';
+}
+
+/** A tier's lines: a husband's are his `friend` and `close` lines, and a husband's own. */
+function poolOf(villager: VillagerId, tier: Tier): readonly string[] {
+  const lines = VILLAGERS[villager].lines;
+  return tier === 'married' ? [...lines.friend, ...lines.close, ...MARRIED_LINES] : lines[tier];
 }
 
 /** The special day a day key falls on, if any. */
@@ -171,7 +185,7 @@ export function dayLine(villager: VillagerId, day: string): string | null {
 export function linesNow(villager: VillagerId, hearts: number, hour: number): string[] {
   const lines = VILLAGERS[villager].lines;
   return [
-    ...lines[tierOf(hearts)],
+    ...poolOf(villager, tierOf(hearts, villager)),
     lines.windows[windowAtHour(hour)],
     ...(isNight(hour) ? lines.night : []),
   ];
