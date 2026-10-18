@@ -144,6 +144,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'carved':
       return event.first ? 'firstCatch' : 'made';
     case 'tossed':
+      if (event.grade === 2) return 'found';
       return event.landed ? 'pick' : 'tap';
     case 'won':
       return event.top ? 'firstCatch' : 'treat';

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ACTIVITIES } from '../../src/data/activities';
+import { FAIR_PRIZES } from '../../src/data/fairPrizes';
 import { BAKE_CANDY, BAKE_KEEPS, BAKES } from '../../src/data/baking';
 import { CRITTERS, PLACE_NAMES } from '../../src/data/critters';
 import { FOSSIL_IDS, FOSSILS, MOUND_BEADS, MOUND_CANDY, MOUND_ODDS } from '../../src/data/fossils';
@@ -239,6 +240,24 @@ describe('the economy', () => {
     for (const row of Object.values(ACTIVITIES)) {
       if (!('game' in row.does)) continue;
       for (const prize of row.does.game.prizes) expect(ITEM_VALUE[prize]).toBeLessThan(row.cost);
+    }
+  });
+
+  it('keeps what only the fairground gives worth less than a go, on no shelf and never ordered (R6b)', () => {
+    const shelved = new Set<string>();
+    for (const shop of Object.values(SHOPS))
+      for (const shelf of shop.shelves)
+        for (const pick of shelf.picks)
+          for (const w of pick.from) if ('item' in w) shelved.add(w.item);
+    for (const prize of FAIR_PRIZES) {
+      expect(ITEM_VALUE[prize], prize).toBeGreaterThan(0);
+      const won = Object.values(ACTIVITIES).filter(
+        (row) => 'game' in row.does && row.does.game.prizes.includes(prize),
+      );
+      expect(won.length, `${prize} is won at a game`).toBeGreaterThan(0);
+      for (const row of won) expect(ITEM_VALUE[prize]).toBeLessThan(row.cost);
+      expect(shelved.has(prize), `${prize} on a shelf`).toBe(false);
+      expect(orderPrice({ item: prize }), `${prize} in the catalogue`).toBeNull();
     }
   });
 

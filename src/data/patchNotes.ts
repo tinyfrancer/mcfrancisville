@@ -204,6 +204,8 @@ export const NOTES: readonly PatchNotes[] = [
         'Settings says so, with a little note to hand to Cody.',
       'Your town floats up to the cloud as you play, sealed tight. Its code in Settings brings ' +
         'it all back on a new phone. Clouds! Who knew.',
+      'The fairground games want a well-timed tap now, and every go still wins. A duck pond, ' +
+        'a bell to ring, and a free go somewhere each day!',
     ],
     ps: 'P.S. Nothing ever went wobbly in my day. We had no buttons. It was very peaceful.',
   },

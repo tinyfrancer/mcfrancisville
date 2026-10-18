@@ -107,6 +107,7 @@ import { frameCount, sourcesOf, type Frames } from './frames';
 import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
 import { Sketch } from './sketch';
 import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
+import { GAME_BACKDROPS, GAME_PALETTES, GAME_PIECES, type GamePiece } from './fairGames';
 import { LEAF_FRAMES, LEAF_PALETTES } from './leaves';
 import {
   GRASS_VARIANTS,
@@ -294,6 +295,18 @@ export function catalogue(): Entry[] {
   // The town's projects as the noticeboard shows them (V1's R4).
   for (const [id, picture] of Object.entries(PROJECT_PICTURES)) {
     grid(`project:${id}`, picture.source, picture.palette);
+  }
+  // The fair games' stages and what moves on them (V1's R6b), each in its stall's colours.
+  for (const [id, motion] of [
+    ['ringToss', 'swing'],
+    ['hookAGhost', 'bob'],
+    ['duckPond', 'ducks'],
+    ['strengthBell', 'bell'],
+  ] as const) {
+    grid(`fair:${id}`, GAME_BACKDROPS[motion], GAME_PALETTES[id]!);
+  }
+  for (const piece of Object.keys(GAME_PIECES) as GamePiece[]) {
+    grid(`fair:piece:${piece}`, GAME_PIECES[piece], GAME_PALETTES.duckPond!);
   }
   grid('greeting:redOne', RED_ONE, RED_ONE_PALETTE);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);

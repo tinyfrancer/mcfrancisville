@@ -7364,6 +7364,78 @@ neighbour with hearts and favours for one week a year would be a neighbour she c
 with); a theme of music per festival week (three tunes is a session of its own); new ware art for
 the festival shelves (what's already drawn and priced fits each week).
 
+## 315. The fair games reworked: taps in time with a floor, prizes by how well, a duck pond and a bell, and a free go a day (2026-10-18, V1's R6b)
+
+_Session R6b of the V1 plan, lane 4, beside R4, for decision 272 ("the fair games definitely need
+a rework") and `docs/v1_analysis.md` finding 3's "Almost no activity is fun in itself" (the glint
+showed before the throw and always landed: a win button). No save change: the free go is a
+`Takings` key. Personal touches parked (decision 177): the games, the prize, the words and the
+stalls' look are the warmest default; nothing was asked._
+
+- **A throw is a tap in time.** Each throw is a moving thing on a little stage in the game's sheet
+  (`src/hud/FairSheet.ts`, drawn every frame by `render/fairGames.ts` from `sprites/fairGames.ts`,
+  the stall's own inside in its own palette at whole pixels): at **ring toss** a ring swings along
+  a rail over five bottles and she taps to drop it as it passes over the one that winks; at
+  **hook-a-ghost** four ghosts bob along the tub and she taps as one is under the hook. Where it is
+  is worked out, never ticked: `patternOf(game, seed, throw, slow)` deals a sweep's length, where it
+  starts and the bottle to aim for from the day and the go (`${day}:${id}:${n}`), and
+  `score(pattern, tapAt, startedAt, at)` (`systems/activities.ts`) grades the tap by how far the
+  thing was from the mark: **2 near perfect, 1 good, 0 wide**, and wide still counts. The stage
+  draws with the very same reads (`ringAt`, `ghostsAt`, `ducksAt`, `puckAt`), so what she sees is
+  what's scored. Windows, tuned to a phone: the ring's perfect is within 6% of the track and good
+  16% (about ±80 ms and ±210 ms), the hook's 2.5% and 7% of a quarter-tub gap, the bell's top 7%
+  and 30% of its height on an eased sweep; the test holds at least 120 ms perfect and 300 ms good
+  for every timed game.
+- **Prizes by how well the go went**, never a loss: a go's points (two a perfect throw, one a good
+  one) pick a prize along the row, `prizeRank` rounding points × prizes ÷ most, so the floor is
+  every go's, three good rings are the third prize, and the rosette wants five of six points. A go
+  is still paid as it ends (decision 201); a go left half thrown costs nothing.
+- **Reduced motion is slower, never still** (`SLOW_SWEEP`, 1.6×): the sheet starts a go with
+  `slow` when the phone asks for less motion, and the same go is dealt, only gentler; the windows
+  along the track stay, so they're wider in time.
+- **Two stalls, from the one stall drawing** (`drawStall` with wares of their own, `9` and `0` in
+  `FAIR_LEGEND` on the ring's south row either side of the aisle, counters `duckPond` and
+  `strengthBell` in `FAIRGROUND_SPOTS`; two dig spots and a hay bale and barrel moved aside): the
+  **duck pond** (morning to night, every day), where ducks drift round and she taps one to pick it,
+  every duck a prize and what's under it dealt with the go (plain half the time, a star three in
+  ten, a crown two in ten): the one game of luck, as the plan asked; and the **strength bell**
+  (afternoons and evenings, all day in the festival), where she holds to wind up and lets go as
+  the puck reaches the top (`hold`, then `toss`; the puck eases up and down from her hold).
+- **A reason to go:** the **first go of the day is free at one stall** (`freeGoOn(day)`, dealt
+  among the games open of an evening, when she plays; `fortune:freeGo` in `Takings`, once a day by
+  its prefix), said on its Have a go ("Free go!") and at every other game ("Your first go at the
+  duck pond is free today"); **a prize only won there**, the **lucky duck squish** (`FAIR_PRIZES`
+  in `data/fairPrizes.ts`, a ghost duckling in a gold paper crown, art `sprites/fairPrizes.ts`), the
+  best at the duck pond and the bell: a squishy, so it joins her squishy shelf, the "every squishy"
+  shelf and Gourdon's figurines, worth 12 (less than a go), on no shelf, and never in Ollie's
+  catalogue (`orderPrice` turns it away); and **Agatha's fortune points there** one day in three
+  while the free go is still to be had (`fairTipOn`, `FAIR_TIPS`, `Reading.fair`).
+- **What she sees and hears:** each throw says how it went (`THROWN_LINES`), its mark in the tally
+  (a star for perfect), a burst where it landed on the stage, and in the world a `tossed` moment
+  with its `grade`: a perfect one sparkles more and she hums (`effectsOf`), and chimes `found`.
+- **Held by** `tests/systems/activities.test.ts` (the same go dealt the same; a tap at the best
+  moment perfect and some tap wide for 60 goes of each timed game; the windows' widths in ms;
+  reduced motion slower and aimed the same; every duck a prize and all three marks dealt; the free
+  go always at a game open of an evening, several over two months; the fortune's word by name, now
+  and then), `tests/world/activities.test.ts` (three perfect rings win the rosette and pay as it
+  ends; three late throws at each win the floor and are paid; the bell rung from a hold and the
+  floor for letting go at once; the duck picked is the prize; the free go free with an empty purse
+  and paid after; the fortune's word only while the go is to be had), `tests/data/economy.test.ts`
+  (the fair's prize worth less than a go, won at a game, on no shelf and never ordered) and smoke's
+  `fair` (a go of three real taps timed to the swinging ring, a prize better than the floor, the
+  stage at a whole scale and on screen upright and on its side).
+
+**Rejected:** keeping the glint and the 40-in-100 chance (a win button, decision 272); a miss
+that wins nothing or costs the go (decision 11: always something); Candy back as a prize (a loop to
+guard, decision 201); scoring on the HUD's clock (`performance.now()`) rather than the world's
+injected one (untestable with the fake clock, and the stage and the score would drift apart); a
+skill duck pond with the marks shown (the plan's "pick a duck, every duck wins" is a lucky dip,
+and one game of luck among three of timing is a change of pace); a tall strength tower as a prop
+of its own (a new footprint and art for one game; the stall's pole reads); a Today line for the
+free go (Today's lines are R4's to grow beside this session; the fortune and the sheets say it,
+and a later session can add it as a `TodayLine`); a fairground-only small piece of furniture
+instead of a squishy (she loves collecting, and a squishy joins three collections at once).
+
 ## 314. Something to build: four town projects funded at the noticeboard, going up in three stages, and the woods capped per window (2026-10-18, V1's R4)
 
 _Session R4 of the V1 plan, lane 4, carrying out decision 274 for `docs/v1_analysis.md` finding 3

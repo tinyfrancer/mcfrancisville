@@ -10,6 +10,7 @@ import type { FairApi } from '../hud/FairSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
 import { drawBedPicture } from '../render/garden';
+import { drawFairGame } from '../render/fairGames';
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { CalendarApi } from '../hud/CalendarSheet';
@@ -634,11 +635,25 @@ export function sheetApis({
   const fair: FairApi = {
     candy: () => world.wallet.candy,
     round: (id) => world.activities.round(id),
-    start: (id) => world.activities.start(id),
-    toss(id, target) {
+    start: (id, slow) => world.activities.start(id, slow),
+    // The games in time (V1's R6b).
+    hold: (id) => world.activities.hold(id),
+    toss(id, at) {
       changed();
-      return world.activities.toss(id, target);
+      return world.activities.toss(id, at);
     },
+    freeToday: (id) => world.activities.freeToday(id),
+    freeGo: () => {
+      const id = world.activities.freeGo();
+      return world.activities.freeToday(id) ? id : null;
+    },
+    stage: (canvas, id, last) =>
+      drawFairGame(canvas, {
+        activity: id,
+        round: world.activities.round(id),
+        last,
+        now: world.clock.now(),
+      }),
     readToday: () => world.activities.readToday,
     readFortune() {
       changed();
