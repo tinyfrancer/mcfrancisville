@@ -193,13 +193,7 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P4 landed (PR #184, save v48). **P5 in progress** on `claude/p5-cody-married` (draft PR): all of
-it built and green (decision 305 written, the 0.7 note added): his band, letters, evenings at hers,
-"how was your day", his topics, their story, nights in, smoke's `married`. **Left, in order:**
-merge `origin/v1-dev`, rerun the suite, then the save bump as the last commit (bumps the save to
-v49: `SAVE_VERSION`, a 48 → 49 step giving `lately` `herDay: null, told: []` with a test,
-`newSave`'s `lately` the same, `isLatelyShape` requiring both, `LatelySnapshot`'s two fields made
-required), the plan's status line and this heading, then ready and merge.
+P5 landed (PR #186, save v49). Lane 3 is finished.
 
 **For R1 (from P5, decision 305):** on a new town, Cody's three reward letters are posted quietly
 (no toast) the first time a day is stepped once her first visit is counted (`Marriage.check`), so
@@ -209,6 +203,8 @@ the villager), at hers most evenings from seven (`atHers` in `systems/cody.ts`),
 asks "how was your day?" (`Marriage.tell`) until she answers, which stands alone with Bye like a
 question: a first-day card that wants him to say something else of an evening should come before
 it or after her answer. His story's scenes start on her third day (`OUR_STORY`).
+
+P4 landed (PR #184, save v48).
 
 **For P5 (from P4, decision 304):** **To add a talk action** (a button beside Chat and Give), add
 a block to `wiring/talkActions.ts` reading the service's own `canX`/`X`: a `TalkAction` is a

@@ -234,6 +234,12 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // V1's P4: what she did at her neighbours' happenings, which the host remembers next time.
   // Nobody had a verb to join in with before, so there's nothing to remember: an empty record.
   47: (state) => ({ ...state, happenings: {} }),
+  // V1's P5: Cody, married. Nobody had asked her how her day was or told her their story before,
+  // so there's no answer to bring up and no scene told: each is still to come.
+  48: (state) => {
+    const lately = (state.lately ?? {}) as Record<string, unknown>;
+    return { ...state, lately: { ...lately, herDay: null, told: [] } };
+  },
 };
 
 /**

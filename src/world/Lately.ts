@@ -18,9 +18,9 @@ export interface LatelySnapshot {
    * What she told Cody the last time he asked how her day was, and the day (save v49, V1's P5),
    * which he brings up the next.
    */
-  herDay?: { day: string; answer: HerDayAnswer } | null;
+  herDay: { day: string; answer: HerDayAnswer } | null;
   /** The scenes from their story he has told her (save v49), by id. */
-  told?: string[];
+  told: string[];
 }
 
 /** Nothing done yet: a new town, or a save from before they remembered. */
