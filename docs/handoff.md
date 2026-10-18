@@ -399,16 +399,36 @@ its season), so `wary` and a bite window by rarity apply to them as to any.
 
 ### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-S1 landed (PR #170). **S3 in progress** on `claude/s3-safe` (decision 322, no save change).
-Done: the splash was L5's already (decision 295, ten launch screens); the service worker
-precaches the shell (`src/precache.ts`, the build's list written into `dist/sw.js` by the plugin
-in `vite.config.ts`, a cache per version, old ones pruned on activate) and `npm run
-smoke:offline` (`scripts/smoke-offline.mjs`, against `npm run preview`, a CI step) passes; the
-backup nudge and "last backed up" (`src/safekeeping.ts`, `src/systems/backupNudge.ts`), the
-photo kept (`src/hud/keepPhoto.ts`, `printOf`), the error notes (`src/errorNotes.ts`), `?perf`
-(`src/wiring/perf.ts`) and its method in `docs/architecture.md`, decision 322, and the 0.9
-`NOTES` row (three lines, all S3's, since a row needs three: a later 0.9 session folds them).
-Next: green CI, merge `v1-dev`, the PR's last commit (status line, this heading), merge.
+S3 landed (PR #189). Next in this lane: S2.
+
+**For S2 (from S3, decision 322):**
+
+- **The service worker** is `public/sw.js`; `vite build` writes its `PRECACHE` list and `VERSION`
+  in (the plugin in `vite.config.ts`, `precacheList`/`withPrecache` in `src/precache.ts`, marks
+  `/* precache */ []` and `/* version */ 'dev'` that must stay). The version hashes every file
+  and the worker's code, so any deploy makes a new cache and the old ones go on activate.
+  Navigation is network first, kept under `/`; `/assets/` cache first; anything else network
+  first with the cache behind it. **It never answers or keeps `/api/`** (an early `return` before
+  `respondWith`, held by `tests/pwa/precache.test.ts`), so `api/save` always reaches the network
+  and fails honestly offline: the client's debounced, offline-tolerant PUT has to queue and retry
+  itself, as the worker won't. Don't make an `api/` file under `public/` (it would be precached);
+  a Vercel function lives in the root `api/`, outside `dist/`. `npm run smoke:offline` (and its CI
+  step) runs the built game offline: if S2 adds a sync on boot, it must not throw or log a console
+  error with no signal, or that run fails its "no errors" check.
+- **What's the phone's** is a key beside the save in `localStorage`, read and written in
+  try/catch with a `Storage` parameter for tests, as `src/settings.ts`, `src/safekeeping.ts`
+  (`mcfrancisville:backedUpAt`, `:nudgedAt`) and `src/errorNotes.ts` (`:errors`) do. S2's secret
+  belongs there too (a new module of its own). A cloud save is a backup: S2 can call
+  `markBackedUp(now)` after a successful PUT, so the Backup tab's "last backed up" and Cody's
+  nudge (`nudgeFor` in `src/systems/backupNudge.ts`) count it.
+- **The error notes**: `catchErrors(window)` runs first in `main.ts` and notes every uncaught error
+  and unhandled rejection (the last five, repeats counted); Settings' Sound tab mentions the
+  newest for a month with Copy note. A sync's failures that are expected (offline, a 5xx) should be
+  caught where they happen, not left as unhandled rejections, or every walk through a tunnel
+  becomes a note.
+- **The 0.9 `NOTES` row** has three lines, all S3's (a row needs three to five): S2 and lane 4's
+  R6 sessions fold S3's into one or two to make room. `?perf` (production too) is for her phone's
+  number, which `docs/architecture.md` has a table waiting for.
 
 **For S3/S2 (from S1):** the sound is `src/audio/` (decision 321): `graph.ts`'s `Mixer` is the
 node graph, `SoundBoard` what plays when, `session.ts` the silent switch (`audioSession` or a
