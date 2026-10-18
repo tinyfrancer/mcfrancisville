@@ -184,7 +184,13 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'unearthed':
       return event.first ? 'firstCatch' : 'treat';
     case 'fled':
+    case 'drifted':
       return 'fled';
+    // A rare fish hooked rings like a bite; a slack line like one let go (V1's R6a).
+    case 'hooked':
+      return 'bite';
+    case 'slack':
+      return 'reeled';
     case 'cast':
     case 'nibble':
     case 'bite':

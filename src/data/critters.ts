@@ -267,7 +267,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'graves',
     where: ['town'],
     rarity: 'legendary',
-    wary: 1,
+    wary: 2,
     value: 400,
     plural: 'pairs of orbs',
     description:
@@ -480,7 +480,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'flowers',
     where: ['hiddenClearing'],
     rarity: 'legendary',
-    wary: 1,
+    wary: 3,
     value: 450,
     description:
       'Midnight-blue wings dusted with stars, found only in the hidden clearing. Catch one, and ' +
@@ -665,7 +665,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     habitat: 'trees',
     where: ['whisperwood', 'castleHill'],
     rarity: 'legendary',
-    wary: 1,
+    wary: 2,
     value: 480,
     description:
       'The biggest beetle anyone has ever seen, as long as your hand, with a horn out front like ' +
@@ -680,7 +680,7 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
     where: ['whisperwood'],
     rarity: 'legendary',
     weather: 'rain',
-    wary: 1,
+    wary: 2,
     value: 500,
     description:
       'Pink and soft, with frilly gills like a little crown and a smile that never, ever stops. It ' +

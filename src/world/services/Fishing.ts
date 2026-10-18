@@ -1,5 +1,20 @@
 import { CRITTERS } from '../../data/critters';
-import { lineAt, type LineAt } from '../../systems/fishing';
+import { sizeOf } from '../../systems/catchSize';
+import {
+  BITE_MS,
+  bestReelAfter,
+  CAST_MS,
+  lineAt,
+  needleAt,
+  nextBite,
+  reelGrade,
+  reelLength,
+  reelOf,
+  type LineAt,
+  type Nibbler,
+  type Reel,
+} from '../../systems/fishing';
+import type { Grade } from '../../systems/activities';
 import type { CritterId } from '../../types/ids';
 import type { WorldContext } from '../context';
 import type { Critter, WorldEvent } from '../events';
@@ -22,44 +37,72 @@ export interface Cast {
   critter: CritterId;
   tx: number;
   ty: number;
-  /** When she cast, which the fish's every nibble and bite are worked out from. */
+  /**
+   * When she cast, which the fish's every nibble and bite are worked out from; after the line goes
+   * slack, when the fish began to come round again.
+   */
   at: number;
   /** Whether the fish were biting sooner for her as she cast. */
   eager: boolean;
 }
 
+/** A rare fish hooked (V1's R6a): its tension bar, and where the needle is on it. */
+export interface Reeling {
+  reel: Reel;
+  /** When she hooked it. */
+  at: number;
+  /** Where the needle is along the bar, 0 to 1. */
+  needle: number;
+}
+
 /** Her line as the view draws it: where the float is, and what it's doing. */
-export type Line = Cast & LineAt;
+export type Line = Cast & LineAt & { reeling?: Reeling };
 
 /**
  * Her fishing rod (phase Q, decision 121). She casts to a fish's shadow from the bank beside it,
  * it nibbles and then bites, and a tap on the bite lands it, into her bag and her Curiosity
  * Cabinet like anything her net catches. A tap too soon reels in empty and a bite let go comes
- * round again, so nothing is lost for trying.
+ * round again, so nothing is lost for trying. Since V1's R6a the rarer the fish, the shorter its
+ * bite; a rare or legendary one is hooked on it and reeled in with a tap in time, and a tap out
+ * of time lets the line go slack, the fish still there to bite again. Every fish has its size.
  */
 export class Fishing {
   private readonly ctx: WorldContext;
   private readonly cues: FishingCues;
   private cast: Cast | null = null;
+  private hooked: { reel: Reel; at: number } | null = null;
   /** What the line was doing at the last step, so each nibble and bite is told once. */
   private was = '';
   /** She has been told a bite got away since she cast. */
   private toldOfLetGo = false;
+  /** She has been told a slack line comes round again, since she cast. */
+  private toldOfSlack = false;
 
   constructor(ctx: WorldContext, cues: FishingCues) {
     this.ctx = ctx;
     this.cues = cues;
   }
 
+  private static seed(cast: Cast): string {
+    return `${cast.key}@${cast.at}`;
+  }
+
+  private static nibbler(cast: Cast): Nibbler {
+    const row = CRITTERS[cast.critter];
+    return { wary: row.wary, biteMs: BITE_MS[row.rarity], eager: cast.eager };
+  }
+
   /** Her line, if it's in the water. */
   get line(): Line | null {
     const cast = this.cast;
     if (!cast) return null;
-    const wary = CRITTERS[cast.critter].wary;
-    return {
-      ...cast,
-      ...lineAt(`${cast.key}@${cast.at}`, wary, this.ctx.clock.now() - cast.at, cast.eager),
-    };
+    const now = this.ctx.clock.now();
+    const hooked = this.hooked;
+    if (hooked) {
+      const needle = needleAt(hooked.reel, now - hooked.at);
+      return { ...cast, state: 'reel', round: 0, reeling: { ...hooked, needle } };
+    }
+    return { ...cast, ...lineAt(Fishing.seed(cast), Fishing.nibbler(cast), now - cast.at) };
   }
 
   /** She casts to a fish from beside it. The first time ever, she's told what to wait for. */
@@ -67,21 +110,30 @@ export class Fishing {
     const { key, critter, tx, ty } = fish;
     const eager = this.cues.eager();
     this.cast = { key, critter, tx, ty, at: this.ctx.clock.now(), eager };
+    this.hooked = null;
     this.was = '';
     this.toldOfLetGo = false;
+    this.toldOfSlack = false;
     return this.cues.hasFished() ? { kind: 'cast' } : { kind: 'cast', hint: true };
   }
 
   /**
-   * Each nibble and bite as it comes, and a bite let go. Her line comes in by itself if she walks
-   * off, or if the fish has gone (the hour turned, or she went somewhere else).
+   * Each nibble and bite as it comes, and a bite let go; a reel left untapped goes slack. Her line
+   * comes in by itself if she walks off, or if the fish has gone (the hour turned, or she went
+   * somewhere else).
    */
   step(): WorldEvent[] {
     const line = this.line;
     if (!line) return [];
     if (this.cues.walking() || !this.cues.collecting.find(line.key)) {
       this.cast = null;
+      this.hooked = null;
       return [];
+    }
+    const hooked = this.hooked;
+    if (hooked) {
+      if (this.ctx.clock.now() - hooked.at < reelLength(hooked.reel)) return [];
+      return [this.slacken()];
     }
     const now = `${line.round}:${line.state}:${line.nibble ?? ''}`;
     if (now === this.was) return [];
@@ -97,13 +149,64 @@ export class Fishing {
     return [];
   }
 
-  /** She reels in: the fish, on a bite, or nothing yet, too soon. */
+  /** The line goes slack: the fish swims round to bite again, from now, as if newly cast to. */
+  private slacken(): WorldEvent {
+    const cast = this.cast!;
+    this.cast = { ...cast, at: this.ctx.clock.now() - CAST_MS };
+    this.hooked = null;
+    this.was = '';
+    const told = this.toldOfSlack;
+    this.toldOfSlack = true;
+    return told ? { kind: 'slack' } : { kind: 'slack', first: true };
+  }
+
+  /**
+   * She taps while her line is in: on a bite, the fish (a rare one hooked, to reel in); on the
+   * tension bar, landed if the needle's in its window and slack if not; and nothing yet, too soon.
+   */
   reel(): WorldEvent | null {
     const line = this.line;
-    if (!line) return null;
-    this.cast = null;
+    const cast = this.cast;
+    if (!line || !cast) return null;
     const fish = this.cues.collecting.find(line.key);
-    if (line.state === 'bite' && fish) return this.cues.collecting.keep(fish);
+    const now = this.ctx.clock.now();
+    const hooked = this.hooked;
+    if (hooked && fish) {
+      const grade = reelGrade(hooked.reel, now - hooked.at);
+      return grade > 0 ? this.land(fish, cast, grade) : this.slacken();
+    }
+    if (line.state === 'bite' && fish) {
+      const reel = reelOf(Fishing.seed(cast), CRITTERS[cast.critter].rarity);
+      if (!reel) return this.land(fish, cast);
+      this.hooked = { reel, at: now };
+      return { kind: 'hooked' };
+    }
+    this.cast = null;
+    this.hooked = null;
     return { kind: 'reeled' };
+  }
+
+  /** The fish landed, its size worked out from the cast it bit on. */
+  private land(fish: Critter, cast: Cast, grade?: Grade): WorldEvent {
+    this.cast = null;
+    this.hooked = null;
+    const caught = this.cues.collecting.keep(fish, sizeOf(fish.critter, Fishing.seed(cast)));
+    if (caught.kind !== 'caught') return caught;
+    const water = { tx: fish.tx, ty: fish.ty };
+    return grade ? { ...caught, grade, water } : { ...caught, water };
+  }
+
+  /**
+   * When a tap does best, from now: the middle of the bite (or now, if she's in it past its
+   * middle), or the needle on the window's middle; null with no line in. For the tests and smoke.
+   */
+  bestTapAt(): number | null {
+    const cast = this.cast;
+    if (!cast) return null;
+    const now = this.ctx.clock.now();
+    const hooked = this.hooked;
+    if (hooked) return hooked.at + bestReelAfter(hooked.reel, now - hooked.at);
+    const bite = nextBite(Fishing.seed(cast), Fishing.nibbler(cast), now - cast.at);
+    return Math.max(now, cast.at + (bite.from + bite.to) / 2);
   }
 }

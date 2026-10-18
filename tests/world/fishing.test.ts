@@ -56,7 +56,9 @@ describe('fishing', () => {
     // A tap anywhere reels in.
     expect(h.world.tapTile(1, 1)).toBe(true);
     const caught = h.tick(1);
-    expect(caught).toContainEqual({ kind: 'caught', critter: fish.critter, first: true });
+    expect(caught).toContainEqual(
+      expect.objectContaining({ kind: 'caught', critter: fish.critter, first: true }),
+    );
     expect(h.world.fishing.line).toBeNull();
     expect(h.world.bag.count(fish.critter)).toBe(1);
     expect(h.world.cabinet.caughtOn(fish.critter)).toBe('2026-09-26');
@@ -76,7 +78,9 @@ describe('fishing', () => {
     castTo(h, fish);
     wait(h, () => h.world.fishing.line?.state === 'bite', 'a bite');
     h.world.tapTile(1, 1);
-    expect(h.tick(1)).toContainEqual({ kind: 'caught', critter: fish.critter, first: true });
+    expect(h.tick(1)).toContainEqual(
+      expect.objectContaining({ kind: 'caught', critter: fish.critter, first: true }),
+    );
   });
 
   it('comes round to another bite after one let go, said only the first time', () => {
@@ -104,6 +108,49 @@ describe('fishing', () => {
     h.world.tendBed(...firstBed(h));
     h.tick(1);
     expect(h.world.fishing.line).toBeNull();
+  });
+});
+
+describe('a session at the pond (V1 R6a)', () => {
+  /** Casts to a fish and lands it with taps in time, through a reel if it's hooked. */
+  function land(h: Harness, fish: Critter): WorldEvent & { kind: 'caught' } {
+    castTo(h, fish);
+    for (let taps = 0; taps < 4; taps++) {
+      h.clock.set(h.world.fishing.bestTapAt()!);
+      h.tick(1);
+      expect(h.world.tapTile(1, 1)).toBe(true);
+      const caught = h.tick(1).find((e) => e.kind === 'caught');
+      if (caught) return caught;
+    }
+    return expect.fail(`never landed the ${fish.critter}`);
+  }
+
+  it('lands fish of different sizes, and keeps the biggest of each kind in the Cabinet', () => {
+    const h = harness();
+    const sizes = new Map<string, number[]>();
+    const bests: WorldEvent[] = [];
+    for (let day = 0; day < 3; day++) {
+      for (const hour of [8, 11, 14, 17]) {
+        h.clock.set(new Date(2026, 8, 26 + day, hour, 5));
+        for (let n = 0; n < 2; n++) {
+          const caught = land(h, aFish(h));
+          expect(caught.size, caught.critter).toBeGreaterThan(0);
+          sizes.set(caught.critter, [...(sizes.get(caught.critter) ?? []), caught.size!]);
+          if (caught.best === 'best') bests.push(caught);
+        }
+      }
+    }
+    const all = [...sizes.values()].flat();
+    expect(all.length).toBe(24);
+    expect(new Set(all).size).toBeGreaterThan(3);
+    for (const [id, got] of sizes) {
+      expect(h.world.cabinet.bestOf(id as Critter['critter'])).toBe(Math.max(...got));
+    }
+    // Some kind was caught again bigger than before, and said so.
+    expect(bests.length).toBeGreaterThan(0);
+    // Kept with the town.
+    const best = h.world.save().cabinet.best ?? {};
+    expect(Object.keys(best).sort()).toEqual([...sizes.keys()].sort());
   });
 });
 

@@ -15,7 +15,7 @@ import type { PetId, VillagerId } from '../types/ids';
 import { bedKey, placeOf, type Plot } from './Farm';
 import type { Pet } from './Pet';
 import { facingFor, type Neighbour } from './Neighbour';
-import { reach, tileCentre, type Player } from './Movement';
+import { reach, tileCentre, walkedTiles, type Player } from './Movement';
 import { worthVisiting, type RoomThing } from './zones/RoomZone';
 import { WorldParts } from './build';
 import type { Arrived, Critter, TileBox, WorldEvent } from './events';
@@ -365,6 +365,8 @@ export class World extends WorldParts {
     );
     const events = this.ctx.moments.drain();
     events.push(...this.fishing.step());
+    const walked = this.player.moving ? walkedTiles(this.player) : null;
+    events.push(...this.collecting.notice(this.movement.tile, walked));
     if (this.arrivedInPlace) {
       events.push(...this.arrival(this.arrivedInPlace));
       this.arrivedInPlace = null;
@@ -459,6 +461,8 @@ export class World extends WorldParts {
       // Gone by the time she got there, if the hour turned on the way.
       const critter = this.collecting.find(visit.critter);
       if (!critter || reach(here, critter) > 1) return [arrived];
+      // A shy one drifted off as she rushed up (V1's R6a): she stops, to creep up on it after.
+      if (this.collecting.shiedFrom(critter.key)) return [arrived];
       arrived.toward = { tx: critter.tx, ty: critter.ty, w: 1, h: 1 };
       const at = tileCentre(critter);
       if (reach(here, critter) > 0) {
