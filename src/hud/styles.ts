@@ -1155,6 +1155,36 @@ const CSS = `
   60% { transform: scale(1.3); }
   100% { transform: none; }
 }
+/* The title (V1's L5): it fades up out of the dark, and bats cross the sky over her house. */
+.hud-title { animation: hud-title-in 700ms ease-out both; }
+@keyframes hud-title-in { from { opacity: 0; } to { opacity: 1; } }
+.hud-title-art { position: relative; overflow: hidden; line-height: 0; }
+.hud-title-picture { display: block; max-width: 100%; image-rendering: pixelated; }
+.hud-title-bat {
+  position: absolute;
+  top: calc(var(--y) * 1%);
+  left: -12%;
+  width: calc(16px * var(--scale));
+  height: calc(11px * var(--scale));
+  animation: hud-bat-cross var(--seconds) linear var(--after) infinite both;
+}
+.hud-title-bat img { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+.hud-title-bat img:first-child { animation: hud-bat-flap 360ms steps(1) infinite; }
+.hud-title-bat img + img { animation: hud-bat-flap 360ms steps(1) -180ms infinite; }
+@keyframes hud-bat-cross {
+  0% { left: -12%; transform: translateY(0); }
+  25% { transform: translateY(calc(3px * var(--scale))); }
+  50% { transform: translateY(0); }
+  75% { transform: translateY(calc(-2px * var(--scale))); }
+  100% { left: 104%; transform: translateY(0); }
+}
+@keyframes hud-bat-flap { 0% { opacity: 1; } 50% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .hud-title { animation: none; }
+  .hud-title-bat { animation: none; left: calc(var(--x) * 1%); }
+  .hud-title-bat img:first-child { animation: none; }
+  .hud-title-bat img + img { animation: none; opacity: 0; }
+}
 @media (prefers-reduced-motion: reduce) {
   .hud-heart-pop, .hud-new, .hud-round[data-new]::after { animation: none; }
   .hud-round, .hud .hud-today { transition: none; }

@@ -92,7 +92,7 @@ export function easterOf(year: number): { month: number; date: number } {
 
 /** A new moon to count from (6 January 2000, 18:14 UTC), and how long a moon takes. */
 const NEW_MOON = Date.UTC(2000, 0, 6, 18, 14);
-const SYNODIC_DAYS = 29.530588853;
+export const SYNODIC_DAYS = 29.530588853;
 const DAY_MS = 86_400_000;
 
 /**
@@ -105,6 +105,13 @@ export function isFullMoon(day: string): boolean {
   const age = ((((noon - NEW_MOON) / DAY_MS) % SYNODIC_DAYS) + SYNODIC_DAYS) % SYNODIC_DAYS;
   const full = SYNODIC_DAYS / 2;
   return age >= full - 0.5 && age < full + 0.5;
+}
+
+/** How many days old the moon is at a day's noon (UTC), from 0 at the new moon (V1's L5). */
+export function moonAge(day: string): number {
+  const { year, month, date } = partsOf(day);
+  const noon = Date.UTC(year, month - 1, date, 12);
+  return ((((noon - NEW_MOON) / DAY_MS) % SYNODIC_DAYS) + SYNODIC_DAYS) % SYNODIC_DAYS;
 }
 
 /** Whether a rule falls on a day. */

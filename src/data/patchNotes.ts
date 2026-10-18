@@ -170,6 +170,8 @@ export const NOTES: readonly PatchNotes[] = [
         "Howl, pick the book, name a star. They'll remember next time.",
       'Birthdays are days now: a line first thing, a little party at theirs from five, and a ' +
         'gift that counts double. Mine is Groundhog Day. Ahem.',
+      'Every button has a hand-painted picture now, hearts pop, Candy counts up, portraits ' +
+        'sit properly, and bats fly over the front door.',
     ],
     ps: 'P.S. Nessa lights the lanterns every dusk. You may light one too. Bob goes first.',
   },

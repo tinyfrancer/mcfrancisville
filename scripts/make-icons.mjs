@@ -1,75 +1,67 @@
 /**
- * Draws the app icons from a pixel grid and writes them as PNGs into public/icons/.
+ * Draws the app icons and the launch screens and writes them as PNGs into public/.
  *
  * The icons are the one place the game needs image files (iOS will not take a canvas as a
- * home-screen icon), so they are generated from code like every other sprite (decisions.md 2) and
- * committed. Rerun with `npm run icons` after changing the grid.
+ * home-screen icon or a splash), so they are generated from code like every other sprite
+ * (decisions.md 2) and committed. The picture is `src/sprites/appIcon.ts` (V1's L5, decision
+ * 295), a 64-pixel grid, loaded through Vite's module runner as `npm run sprite` loads the
+ * catalogue. Rerun with `npm run icons` after changing it.
  */
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { crc32, deflateSync } from 'node:zlib';
+import { runnerImport } from 'vite';
 
-/** @type {Record<string, [number, number, number]>} */
-const COLORS = {
-  '.': [0x2a, 0x1f, 0x3d],
-  o: [0x7a, 0x3b, 0x12],
-  p: [0xf2, 0x8c, 0x28],
-  P: [0xff, 0xb3, 0x5c],
-  s: [0x4f, 0x6b, 0x4a],
-  f: [0xff, 0xd3, 0x7a],
-};
+/** @typedef {{ width: number, height: number, data: Uint8ClampedArray }} Raster */
 
-const PUMPKIN = [
-  '................',
-  '........ss......',
-  '.......ss.......',
-  '...ooooossoooo..',
-  '..oppPppppPpppo.',
-  '.oppPppppppPpppo',
-  '.opPpffppffpPppo',
-  '.opPpffppffpPppo',
-  '.opPppppppppPppo',
-  '.opPpfppppfpPppo',
-  '.opPppffffppPppo',
-  '.oppPppppppPpppo',
-  '..oppPppppPpppo.',
-  '...oooooooooo...',
-  '................',
-  '................',
+const { module } = /** @type {{ module: {
+  appIcon: () => Raster,
+  splash: (width: number, height: number) => Raster,
+  ICON_GRID: number,
+} }} */ (await runnerImport('/src/sprites/appIcon.ts', { logLevel: 'silent' }));
+
+/**
+ * The launch screens, a phone each by its screen in CSS pixels and its pixel ratio, upright:
+ * every iPhone since the X, and the SE. `index.html` names each with its media query.
+ * @type {[number, number, number][]}
+ */
+export const SPLASHES = [
+  [440, 956, 3],
+  [402, 874, 3],
+  [430, 932, 3],
+  [393, 852, 3],
+  [428, 926, 3],
+  [390, 844, 3],
+  [375, 812, 3],
+  [414, 896, 3],
+  [414, 896, 2],
+  [375, 667, 2],
 ];
 
-// Two cells of background on every side keeps the pumpkin inside the circle a maskable icon is
-// cropped to.
-const PAD = 2;
-const GRID = PUMPKIN.length + PAD * 2;
-
-/** @param {number} gx @param {number} gy */
-function colorAt(gx, gy) {
-  const row = PUMPKIN[gy - PAD];
-  const key = row?.[gx - PAD] ?? '.';
-  const color = COLORS[key];
-  if (!color) throw new Error(`no colour for '${key}'`);
-  return color;
-}
-
-/** @param {number} size */
-function png(size) {
+/**
+ * A raster as a PNG, `scale` device pixels to each of its pixels, cropped by `crop` of its own
+ * pixels on every side.
+ * @param {Raster} r @param {number} scale @param {number} [crop]
+ */
+function png(r, scale, crop = 0) {
+  const width = (r.width - crop * 2) * scale;
+  const height = (r.height - crop * 2) * scale;
   const rows = [];
-  for (let y = 0; y < size; y++) {
-    const row = Buffer.alloc(1 + size * 3);
-    for (let x = 0; x < size; x++) {
-      const [r, g, b] = colorAt(Math.floor((x * GRID) / size), Math.floor((y * GRID) / size));
-      row.set([r, g, b], 1 + x * 3);
+  for (let y = 0; y < height; y++) {
+    const row = Buffer.alloc(1 + width * 3);
+    for (let x = 0; x < width; x++) {
+      const at = ((Math.floor(y / scale) + crop) * r.width + Math.floor(x / scale) + crop) * 4;
+      row.set([r.data[at] ?? 0, r.data[at + 1] ?? 0, r.data[at + 2] ?? 0], 1 + x * 3);
     }
     rows.push(row);
   }
   const header = Buffer.alloc(13);
-  header.writeUInt32BE(size, 0);
-  header.writeUInt32BE(size, 4);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
   header.set([8, 2, 0, 0, 0], 8); // 8-bit RGB, no interlace
   return Buffer.concat([
     Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
     chunk('IHDR', header),
-    chunk('IDAT', deflateSync(Buffer.concat(rows))),
+    chunk('IDAT', deflateSync(Buffer.concat(rows), { level: 9 })),
     chunk('IEND', Buffer.alloc(0)),
   ]);
 }
@@ -84,13 +76,24 @@ function chunk(type, data) {
   return Buffer.concat([length, body, crc]);
 }
 
-const out = new URL('../public/icons/', import.meta.url);
-mkdirSync(out, { recursive: true });
-for (const [name, size] of /** @type {const} */ ([
-  ['icon-192.png', 192],
-  ['icon-512.png', 512],
-  ['apple-touch-icon.png', 180],
+const icons = new URL('../public/icons/', import.meta.url);
+mkdirSync(icons, { recursive: true });
+const icon = module.appIcon();
+const grid = module.ICON_GRID;
+for (const [name, scale, crop] of /** @type {const} */ ([
+  ['icon-192.png', 192 / grid, 0],
+  ['icon-512.png', 512 / grid, 0],
+  // 180 isn't a whole number of 64s: the middle 60 at three each, the sky's edge let go.
+  ['apple-touch-icon.png', 3, 2],
 ])) {
-  writeFileSync(new URL(name, out), png(size));
+  writeFileSync(new URL(name, icons), png(icon, scale, crop));
   console.log(`wrote public/icons/${name}`);
+}
+
+const splashes = new URL('../public/splash/', import.meta.url);
+mkdirSync(splashes, { recursive: true });
+for (const [w, h, ratio] of SPLASHES) {
+  const name = `${w * ratio}x${h * ratio}.png`;
+  writeFileSync(new URL(name, splashes), png(module.splash(w * ratio, h * ratio), 1));
+  console.log(`wrote public/splash/${name}`);
 }

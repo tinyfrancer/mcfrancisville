@@ -209,9 +209,10 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
 - **A ghost is the doll in pale tones**, not a see-through sprite: Boothoven (0.2's L1) is her
   body in ghostly white and lavender with wild hair; Maude, under her sheet, is the one drawn by
   hand. See-through and glowing is for the ghost pets.
-- **A portrait is the top 32 of the figure facing her** (`drawPortrait`, for the talk sheet, the
-  greeting and the neighbours sheet, decisions 179–180), lowered past a tall hat so the face sits
-  where it always does. A neighbour she hasn't met is the same portrait filled with one colour,
+- **A portrait is a bust** (`drawBust`, V1's L5, decision 295; for the talk sheet, the greeting,
+  the neighbours sheet and the corkboard): head and shoulders of the figure facing her, framed from
+  the top of the head down to just under the shoulders, drawn at 64 by Scale2x from the figure's
+  own pixels, in an oval of evening. Its `mood` is the face (only the neutral one until L7). A neighbour she hasn't met is the same portrait filled with one colour,
   a shape only (`drawShadowPortrait`), never a question mark.
 - **Idle and moods** move whole pixels: a bob is one pixel, a blink is one frame.
 
@@ -279,6 +280,14 @@ on purpose (decision 105): they read well in the sheets, and the world doubles t
   colour; a birthday is a lavender cake.
 - **A sheet's picture** (decision 179) is the thing it's about at 1×, sized by `fitIcon`: an item's
   icon, a piece's or fixture's art, a portrait. A sheet without one leaves the space to its title.
+
+- **The chrome's pictures are the game's own** (`src/sprites/ui.ts`, decision 295): a 16-pixel
+  glyph for every mark on a button, a toast, the map or a sheet, drawn like the calendar's marks,
+  outlined in ink so it holds against a plum button, and shown at 16 or 32 CSS pixels only. Where a
+  thing has a picture already (an item, a calendar mark, a tool) that picture is its glyph; never an
+  emoji.
+- **The app icon and the launch screens** (`src/sprites/appIcon.ts`) are her house at night at 64
+  pixels, the important part inside the middle 80% for a maskable icon's circle.
 
 ## Weather
 

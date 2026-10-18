@@ -1,6 +1,18 @@
 import type { CalendarId } from '../data/calendar';
 import { el, moving } from './dom';
 import { glyph } from './glyph';
+import { batFrames } from '../sprites/ui';
+
+/**
+ * The bats over the title (V1's L5): how far down the sky each flies (a percentage of the
+ * picture's height), where it hangs when nothing moves, how long a crossing takes and when it
+ * sets off.
+ */
+const BATS = [
+  { y: 3, x: 18, seconds: 11, after: 0.4 },
+  { y: 8, x: 62, seconds: 15, after: 4 },
+  { y: 5, x: 40, seconds: 19, after: 9 },
+] as const;
 
 /** How long the title takes to fade into the town (V1's E4); `styles.ts`'s `hud-title-out`. */
 export const TITLE_FADE_MS = 420;
@@ -40,7 +52,7 @@ function markSeen(): void {
  */
 export function openTitle(hud: HTMLElement, api: TitleApi, onStart: () => void): void {
   const { dedication } = api;
-  const art = el('canvas', { className: 'hud-title-art' });
+  const art = el('canvas', { className: 'hud-title-picture' });
   api.art(art);
   // At a whole scale of her pixels that fits the phone, so every one of them stays square.
   // On its side the picture stands beside the words, so it's the height it has to fit.
@@ -49,6 +61,21 @@ export function openTitle(hud: HTMLElement, api: TitleApi, onStart: () => void):
   const along = sideways ? art.height : art.width;
   const scale = Math.max(1, Math.floor(room / Math.max(1, along)));
   art.style.width = `${art.width * scale}px`;
+  // Bats cross its night sky (V1's L5), at its own scale, in the game's own pixels.
+  const scene = el('div', { className: 'hud-title-art' }, art);
+  scene.style.setProperty('--scale', String(scale));
+  BATS.forEach(({ y, x, seconds, after }, k) => {
+    const bat = el('span', { className: 'hud-title-bat' });
+    const [up, down] = batFrames();
+    bat.append(el('img', { src: up!, alt: '' }), el('img', { src: down!, alt: '' }));
+    bat.style.setProperty('--y', String(y));
+    bat.style.setProperty('--x', String(x));
+    bat.style.setProperty('--seconds', `${seconds}s`);
+    bat.style.setProperty('--after', `${after}s`);
+    bat.setAttribute('aria-hidden', 'true');
+    bat.dataset.bat = String(k);
+    scene.append(bat);
+  });
   const begin = el('button', {
     type: 'button',
     className: 'hud-primary hud-title-begin',
@@ -59,7 +86,7 @@ export function openTitle(hud: HTMLElement, api: TitleApi, onStart: () => void):
     { className: 'hud-title' },
     el('h1', { textContent: 'McFrancisVille' }),
     el('p', { className: 'hud-title-line', textContent: 'a cozy little spooky town' }),
-    art,
+    scene,
   );
   const festival = api.festival();
   if (festival) {

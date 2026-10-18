@@ -7,6 +7,7 @@ import { CLEAR, Sketch } from './sketch';
 import type { SpriteSource } from './sprite';
 import { svgOf, svgUrl } from './svg';
 import { TOOL_ART } from './tools';
+import { BAT_FLYING, BAT_PALETTE } from './sky';
 
 /*
  * The HUD's own pictures (V1's L5, decision 295): a 16-pixel drawing for each mark the chrome
@@ -735,4 +736,12 @@ export function glyphUrl(glyph: Glyph): string {
     urls.set(key, url);
   }
   return url;
+}
+
+let bats: string[] | undefined;
+
+/** A bat's two wingbeats (`BAT_FLYING`), as URLs, for the title's sky (V1's L5). */
+export function batFrames(): readonly string[] {
+  bats ??= BAT_FLYING.map((frame) => svgUrl(svgOf(frame, BAT_PALETTE, 0)));
+  return bats;
 }

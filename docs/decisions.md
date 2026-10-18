@@ -6778,3 +6778,78 @@ a birthday party at the square for everyone (twelve parties a year would empty t
 at theirs is a party she can find); the next week's line in every guest's mouth (only the host
 remembers, which keeps the lines few and the memory honest); a verb at every happening for every
 neighbour there (one each, the host's, so the talk's buttons stay few).
+
+## 295. The UI polished: the game's own pictures where every emoji sat, hearts that pop, Candy that counts, busts, a night-sky title, an icon and a splash (2026-10-17, V1's L5)
+
+_Session L5 of the V1 plan, lane 2, answering `docs/v1_analysis.md`'s finding 4 ("The HUD is a
+generic iOS web app": 120 emoji, sheets that pop, nothing moving, a gradient title). Decision 273
+kept the rounded style, so it's polished, not replaced: no pixel frames, no pixel font. No save
+change. Personal touches parked (decision 177): nothing was asked._
+
+- **Drawn glyphs, no emoji** (`src/sprites/ui.ts`, `GLYPHS`): 62 glyphs at 16 pixels, 59 drawn as
+  the calendar's marks are (decision 181), a few palette keys outlined in ink and lit from the top
+  left: the bars' buttons (two friends, the gear, the wing chair, her satchel, the frock on its
+  hanger, the Cabinet's book with its moth, the folded map, the potted plant, three lines), the
+  hearts full and empty, the sunrise, sun and moon of the day's windows, and for toasts, sheets
+  and places Skelly, the castle, a signpost, her house, the town, a door, a sparkle, a happy face,
+  drops, the piano, letters, a pin, a looking glass, a scroll, storm, rain and fog, a question
+  mark, four arrows, a map pin, footprints, a camera, a crown, the sort arrows, a tree, a paper
+  lantern, the big wheel, waves, a top hat, a telescope, a hammer, a bottle, a star, the ring-toss
+  tally, and the months' trims (snowflake, blossom, watermelon, shell, leaf). A **`Glyph`**
+  (`src/data/glyphs.ts`) is one of those or **anything that already has a picture**: `{ item }`
+  (a toast about a catch shows that critter, a fossil that fossil, a record that record, a sweet
+  that sweet), `{ mark }` (the calendar's own marks: the day chip, a decorated holiday, the
+  calendar's rows) or `{ tool }`. So a toast says what it's about in the thing's own pixels, and
+  only 59 things needed drawing for the ~120 emoji (the sweet, the parcel and the lavender cake were
+  there already). Data rows name theirs (`ZONES`, `HAPPENINGS`,
+  `BAR_TRIMS`, a verb's `glyph`); `CALENDAR` rows lost their `icon`, their mark being their picture.
+- **Shown as an SVG of whole squares** (`svgOf` in `src/sprites/svg.ts`: a path per colour, a
+  rectangle per run, `crispEdges`), an `<img>` from `glyph()` (`src/hud/glyph.ts`) at 16 CSS
+  pixels in a line or 32 on a button, so each pixel is a whole block at any pixel ratio, needs no
+  canvas (the HUD's tests run in jsdom) and is made once per glyph. A price on a button is
+  `price()`, the drawn sweet and the number; `candy()` now says "12 Candy" in a sentence.
+- **Held by `tests/hud/noEmoji.test.ts`**: no `\p{Extended_Pictographic}` in `src/hud/`, `src/data/`
+  (but `greetings.ts`, Cody's lines) or the wiring the chrome reads; every place, happening, verb
+  and month marked with a drawing; every glyph within 16 pixels in its palette's keys. The
+  world's emote bubbles stay keyed by the symbols they draw (♥ ♪ …), never shown as text.
+- **What moves** (reduced motion cuts all of it): a heart won while they talk **pops** in after the
+  last (`heartsRow(now, was)` in `hud/hearts.ts`, scaled up past full and settling, 110 ms apart);
+  **Candy counts** to what she has in 640 ms, easing out, its figures one width
+  (`hud/countUp.ts`); a **"new" mark drops in and settles**, and the dot on a button with new
+  things behind it; **sheets** rise in 260 ms on a long ease-out over a backdrop easing in a beat
+  behind (E4's `hud-sheet-up`/`-down` and backdrop names kept, `SHEET_LEAVE_MS` still 160); the
+  **title fades up** out of the dark, and **bats cross its sky** flapping (`BAT_FLYING`, E5's bats).
+- **The day chip reads as a button**: every button is now lit from the top left as the art is, a
+  lit edge over a lip, and sinks as it's pressed; her purse, which is only to read, sits in a
+  well, so the chip beside it is the raised one.
+- **Busts** (`drawBust` in `render/villagers.ts`): head and shoulders framed from wherever the
+  head starts in the sprite (the first row with anything in it, so a mummy's sheet or a hat sits
+  right), 25 rows over the shoulders' line and 7 under, **drawn at 64 by Scale2x**
+  (`render/scale2x.ts`: a diagonal step becomes a half-step, a straight edge stays crisp) in an
+  oval of evening like a cameo; `mood` defaults to `'neutral'` (`BustMood`) for L7's faces, and
+  `shadow` fills the figure for someone she hasn't met (the mayor). The talk sheet, the greeting,
+  the neighbours sheet, the corkboard's suspects and the fortune teller use it; the noticeboard's
+  48-pixel faces keep `drawPortrait`. `drawShadowPortrait` went.
+- **The title** (`render/title.ts`): a night sky 56 pixels deep over the town crop (bands of ink,
+  night, dusk and plum dithered into each other, stars, the woods dark along the horizon) with
+  **the moon at tonight's phase** (`moonAge` in `systems/calendar.ts`, from the full moons' own
+  count), the town under the dusk's multiply with its windows, lamps and pumpkins lit over it; the
+  crop is a row shorter so the whole fits a phone on its side at 1×. Season-free.
+- **The app icon** (`src/sprites/appIcon.ts`, `npm run icons` through Vite's module runner as
+  `npm run sprite` is): her plum house at night on its lawn, windows and attic lit, a lit
+  jack-o'-lantern, the moon, drawn at 64 so it's 8 to a pixel at 512, 3 at 192 and the middle 60
+  at 3 for the 180 apple-touch icon, what matters inside a maskable icon's circle. **Launch
+  screens** (`apple-touch-startup-image`, ten, every iPhone since the X and the SE, in
+  `index.html` by media query) are the night, the icon at the biggest whole scale that fits and
+  "MCFRANCISVILLE" in the signs' lettering; `tests/pwa/manifest.test.ts` holds each linked one
+  there at its phone's size.
+- **Perf unchanged**: nothing in a frame's drawing changed (the HUD is DOM; the title is one
+  picture drawn once, its bats a few DOM sprites while it's up).
+
+**Rejected:** emoji fonts or an icon font (a phone's look again, not the town's); a canvas per
+glyph (jsdom has none, and a stylesheet can't take one); drawing a picture for every emoji (a
+thing with art of its own is its own best picture); 24-pixel glyphs in text (one and a half to a
+pixel, uneven on a phone at 3×); a bust at 1× in a 64 square (a face too small to read), or the
+figure's pixels just doubled (the same as before); hand-drawn 64-pixel portraits for thirteen
+neighbours (a session of its own, and L7's moods would double it); a taller sky (the title must
+fit a phone on its side at a whole scale); a pixel font for the HUD (decision 273).

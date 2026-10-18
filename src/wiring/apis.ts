@@ -61,7 +61,7 @@ import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
-import { drawPortrait, drawShadowPortrait } from '../render/villagers';
+import { drawBust, drawPortrait } from '../render/villagers';
 import { VILLAGER_IDS } from '../data/villagers';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
@@ -384,7 +384,7 @@ export function sheetApis({
     },
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
-    portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
+    portrait: (canvas, id) => drawBust(canvas, id, world.finale.costumeOf(id)),
     redOne: drawRedOne,
     actions: (id) => talkActions(world, id, changed),
   };
@@ -400,8 +400,8 @@ export function sheetApis({
     today: () => dayKey(world.clock.now()),
     found: (zone) => world.atlas.hasFound(zone),
     seek: (id) => world.seek(id),
-    portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
-    shadow: (canvas, id) => drawShadowPortrait(canvas, id, PALETTE.stoneDark),
+    portrait: (canvas, id) => drawBust(canvas, id, world.finale.costumeOf(id)),
+    shadow: (canvas, id) => drawBust(canvas, id, null, 'neutral', PALETTE.stoneDark),
     icon: drawItemIcon,
     gift(canvas, ware) {
       if ('item' in ware) drawItemIcon(canvas, ware.item);
@@ -492,13 +492,12 @@ export function sheetApis({
   const mystery: MysteryApi = {
     foundOn: (id) => world.casebook.foundOn(id),
     suspects: () => suspectsOf(world.casebook.found),
-    portrait: drawPortrait,
+    portrait: (canvas, id) => drawBust(canvas, id),
     cleared: (id) => clearedOf(world.casebook.found).includes(id),
     daysUntil: (id) => world.mystery.daysUntil(id),
     inChain,
     ready: () => world.mystery.ready() !== null,
-    mayor: (canvas, seen) =>
-      seen ? drawPortrait(canvas, MAYOR) : drawShadowPortrait(canvas, MAYOR, PALETTE.ghost),
+    mayor: (canvas, seen) => drawBust(canvas, MAYOR, null, 'neutral', seen ? null : PALETTE.ghost),
   };
   const quick: QuickApi = {
     held: () => world.hands.held,
@@ -638,7 +637,7 @@ export function sheetApis({
     icon: drawItemIcon,
     reader(canvas) {
       if (world.neighbourhood.neighbour('agatha').zone === 'fortuneTent') {
-        drawPortrait(canvas, 'agatha');
+        drawBust(canvas, 'agatha');
       } else drawFixtureIcon(canvas, 'fortuneTable');
     },
   };
@@ -652,7 +651,7 @@ export function sheetApis({
     onChange: (listener) => world.events.on('today', listener),
   };
   const title: TitleApi = {
-    art: (canvas) => drawTitleScene(canvas, world.wardrobe.look),
+    art: (canvas) => drawTitleScene(canvas, world.wardrobe.look, dayKey(world.clock.now())),
     dedication: DEDICATION,
     festival: () => {
       const { festival } = world.calendar.today();
