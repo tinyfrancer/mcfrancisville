@@ -16,6 +16,7 @@
     "icons": "node scripts/make-icons.mjs",
     "sprite": "node scripts/sprite.mjs",
     "smoke": "node scripts/smoke.mjs",
+    "smoke:offline": "node scripts/smoke-offline.mjs",
     "perf": "node scripts/perf.mjs"
   },
   "devDependencies": {
