@@ -22,6 +22,7 @@ import type { CandyTreeSnapshot } from './services/CandyTree';
 import type { LatelySnapshot } from './Lately';
 import type { FreshSnapshot } from './services/Novelty';
 import type { VisitsSnapshot } from './services/Visits';
+import type { FirstDaySnapshot } from './services/FirstDay';
 import type { ClosetSnapshot } from './Wardrobe';
 
 /** What of her finds is saved: the bag, and what she has taken today. */
@@ -74,6 +75,8 @@ export interface WorldOptions {
   visits?: Partial<VisitsSnapshot>;
   /** When she last shook the candy tree. */
   candyTree?: Partial<CandyTreeSnapshot>;
+  /** Her first day's steps done (V1's R1); a new town's are all still to do. */
+  firstDay?: Partial<FirstDaySnapshot>;
   /** What's on the honesty stall, and in its tin. */
   stall?: Partial<StallSnapshot>;
   /** When she last ate for each of a meal's effects. */

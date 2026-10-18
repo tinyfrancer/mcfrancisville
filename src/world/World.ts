@@ -360,6 +360,8 @@ export class World extends WorldParts {
     }
     const arrivedAt = this.movement.step(deltaMs, this.kitchen.pace());
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
+    // A step of her first day done, by whatever just happened (V1's R1).
+    events.push(...this.firstDay.saw(events));
     this.poses.saw(events);
     this.poses.step(deltaMs);
     for (const e of events) {

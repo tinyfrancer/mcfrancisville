@@ -158,6 +158,7 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'pick';
     case 'joined':
     case 'together':
+    case 'firstDay':
       return 'treat';
     case 'keepsake':
     case 'dug':

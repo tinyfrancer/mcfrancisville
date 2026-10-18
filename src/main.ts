@@ -227,6 +227,8 @@ function startGame(): void {
       ...(visit && { gift: visitLine(visit.count, visit.gift) }),
       ...(greeting.after && { after: greeting.after }),
       ...(greeting.kind === 'redOne' && { redOne: true }),
+      // A new town's first hello is followed by his list for her first day (V1's R1).
+      ...(greeting.kind === 'first' && { then: () => hud.openFirstDay() }),
     });
     changed();
   };

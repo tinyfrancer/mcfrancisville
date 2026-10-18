@@ -341,7 +341,15 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R5 landed (PR #173). Next in this lane: R1.
+R5 landed (PR #173). **R1 in progress** on `claude/r1-first-day` (decision 311; bumps the save to
+v50 in its last commit). Done: the thread (`data/firstDay.ts`, `systems/firstDay.ts`,
+`world/services/FirstDay.ts`, `areas/firstDay.ts`), the `firstDay` moment's effects, toast and
+cue, the card (`hud/FirstDayCard.ts`, `FirstDayApi`), the tray's button and the one-time glows
+(`hud/hints.ts`), four starter seeds, the sampler, the 0.8 `NOTES` row, decision 311,
+`tests/world/firstDay.test.ts` and smoke's `firstDay` section (a town of its own). Still to do,
+in order: merge `v1-dev`; the save (`firstDay` in `SaveState`, `newSave`, `isSaveState`,
+`fromSave`, `World.save`, migration 49 → 50 making old towns' thread over, its test, a reload
+check in smoke's `firstDay`); the suite; mark ready; merge.
 
 **For R1/R2/R6a (from R5, decision 310):** whether a critter comes out on a day is `comesOut`
 (in its season and weather, or `isVisiting`: the day after a full moon, `isVisitDay`), read by
