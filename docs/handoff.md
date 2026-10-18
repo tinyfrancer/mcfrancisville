@@ -359,7 +359,7 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R4 landed (PR #194, save v51). Next in this lane: R6a (R6b is running beside it).
+R6a landed (PR #196, save v52). R4 landed (PR #194, save v51). R6c is running beside R6a.
 
 **For R6/V1 (from R4, decision 314):** the save is v51 (`projects: { current, given, built }`).
 **To add a project**: a `ProjectId` in `types/ids.ts` and a `PROJECTS` row in `data/projects.ts`
@@ -382,8 +382,8 @@ R3 landed (PR #192).
 
 #### R6c (beside R6a)
 
-**In progress** on `claude/r6c-pets-that-grow` (from `v1-dev` at 443e153). Pets that grow,
-decision 317 (to write). **Done:** fondness per pet from pats (1, three a day), walks (a point every
+**In progress** on `claude/r6c-pets-that-grow`, draft PR #195, `v1-dev` merged in after R6a.
+Pets that grow, decision 317. **Done:** fondness per pet from pats (1, three a day), walks (a point every
 `WALK_TILES` outdoors with her, four a day) and treats (the plainest snack or sweet in her bag, one
 a day for 3), rows in `data/affection.ts`, rules in `systems/affection.ts`, kept on `Pets`
 (`affection` in the pets snapshot, `setPoints` the dev handle); two levels (20, 60) each with three
@@ -401,6 +401,29 @@ calmed critter is caught by `World`'s critter arrival calling `keep` instead of 
 lands, read both in `Collecting` (its drift too). Then decision 317, the 0.9 `NOTES` line (fold
 two), merge `v1-dev`, and **the save bump last** (the next free number after R6a's; a migration
 giving every pet `affection: {}`, `isPetsShape` checking it with `isFondness`, a test).
+
+#### R6a (beside R6c)
+
+R6a landed (PR #196, save v52). Bumps the save to v52 (`cabinet.best`).
+
+**For V1 (from R6a, decision 316):** the save is v52: the `Cabinet` keeps the biggest of each fish
+(`best`, by `CritterId`, in quarters of a hand; `measure`, `bestOf`). **A fish's bite** is
+`BITE_MS[rarity]`; a tier in `REELS` (`systems/fishing.ts`, rare and legendary now) is hooked on its
+bite and reeled on the tension bar (`reelOf`, `needleAt`, `reelGrade`; drawn by `drawReel` in
+`render/fishing.ts` from `world.fishing.line.reeling`); `world.fishing.bestTapAt()` says when a tap
+does best, bite or bar, for tests and smoke. **A new fish** wants a `FISH_SIZES` row
+(`data/fishSizes.ts`) inside its shadow's band (`catchSize.test.ts` holds it); its size is said by
+`handsOf`. **Shy critters** are `drifts(id)` in `systems/drift.ts` (rare, legendary and the finer
+moths; never a fish or a creepy-crawly): `Collecting.notice(her, walked)` from `World.update` hops one
+a tile away (`Critter.hop`, drawn by `hopOf` in `render/critters.ts`) when she comes within
+`NOTICE_TILES` having walked more than `CREEP_TILES` since she last stood still, unless she's behind a
+flier (north of it, more than to its side); `shiedFrom` stops the net on that walk. **Left for the
+review:** the bar doesn't slow under reduced motion (the world doesn't know the phone's setting;
+a tap out of time costs nothing), and the bar's window is a dark green that reads less well over
+the night's water than over the day's. Smoke's `drifter` finds a shy critter by trying a few
+`?day=`s and hours; the 0.9 `NOTES` row is full at five (S3's first two folded into one, S3's other,
+S2's, R6b's, R6a's): R6c folds two. The rarity test is unchanged by this (9.1–10.2 months, the
+longest wait 30 days).
 
 #### R6b (beside R4)
 

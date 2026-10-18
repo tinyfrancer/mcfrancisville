@@ -12,6 +12,8 @@ import { FOSSIL_IDS, FOSSILS } from '../data/fossils';
 import { MUSEUM_GREETING } from '../data/museum';
 import { WEATHER_NAMES } from '../data/weather';
 import { hoursOf, nextChance } from '../systems/critters';
+import { handsOf } from '../systems/catchSize';
+import { drifts } from '../systems/drift';
 import { CALENDAR } from '../data/calendar';
 import { DECOR } from '../data/holidays';
 import { daysBetween } from '../systems/calendar';
@@ -27,8 +29,16 @@ import { dated } from './MailSheet';
 
 /** What the Curiosity Cabinet and the museum may ask of the game. Neither reaches the world directly. */
 export interface CabinetApi {
-  /** The day she first caught one, or null; whether one is on show; whether any are about now. */
-  critter(id: CritterId): { caughtOn: string | null; donated: boolean; outNow: boolean };
+  /**
+   * The day she first caught one, or null; whether one is on show; whether any are about now; and
+   * the biggest she has landed of a fish, in quarters of a hand (V1's R6a).
+   */
+  critter(id: CritterId): {
+    caughtOn: string | null;
+    donated: boolean;
+    outNow: boolean;
+    best?: number | null;
+  };
   /** How many she has in her bag. */
   inBag(id: CritterId | FossilId): number;
   /** Puts one from her bag on show: its label, or null if it couldn't be. */
@@ -160,12 +170,22 @@ export function whenAndWhere(id: CritterId, now?: { day: string; hour: number })
 
 /** What the Cabinet says to look out for, for one she hasn't found. */
 function lookOut(id: CritterId): string {
+  const shy = drifts(id) ? ` ${SHY}` : '';
   if (CRITTERS[id].rarity === 'legendary') {
-    return 'One of the rarest of all, and it waits for its moment. Be there when it says.';
+    return `One of the rarest of all, and it waits for its moment. Be there when it says.${shy}`;
   }
   return isFish(id)
     ? 'Look for its shadow in the water, and have your rod ready.'
-    : 'Keep an eye out, and have your net ready.';
+    : `Keep an eye out, and have your net ready.${shy}`;
+}
+
+/** The Cabinet's word on a shy one, which drifts off if she rushes at it (V1's R6a). */
+export const SHY = "It's shy: creep up on it slowly, or from behind.";
+
+/** A fish's biggest, as the Cabinet's card says it, or how to have one measured (V1's R6a). */
+function biggest(id: CritterId, best: number | null | undefined): string {
+  if (!isFish(id)) return '';
+  return best ? ` Your biggest: ${handsOf(best)} long.` : ' Land another to see how big it is.';
 }
 
 function critterCanvas(api: CabinetApi, id: CritterId, shadow: boolean): HTMLCanvasElement {
@@ -272,8 +292,11 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
       about.textContent = e.known ? row.description : lookOut(e.id);
       const out = entry.outNow ? ' Out now!' : '';
       const shownLine = entry.donated ? ' On show at Crumbs & Curios.' : '';
-      const caught = e.known ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}` : '';
-      when.textContent = `${whenAndWhere(e.id, api.now())}.${out}${caught}`;
+      const caught = e.known
+        ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}${biggest(e.id, entry.best)}`
+        : '';
+      const shy = e.known && drifts(e.id) ? ` ${SHY}` : '';
+      when.textContent = `${whenAndWhere(e.id, api.now())}.${out}${caught}${shy}`;
       if (e.known) api.icon(picture, e.id);
       else api.silhouette(picture, e.id);
       fitIcon(picture, CARD_ICON);

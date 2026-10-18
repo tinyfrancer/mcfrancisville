@@ -166,7 +166,7 @@ export const CRAWLIES = {
     where: ['booAcres'],
     rarity: 'legendary',
     weather: 'rain',
-    wary: 1,
+    wary: 2,
     value: 480,
     description:
       'A snail with a shell of real gold, out among the crops on rainy days only. It leaves a ' +
@@ -243,7 +243,7 @@ export const MORE_CRITTERS = {
     where: ['castleHill'],
     rarity: 'legendary',
     moon: true,
-    wary: 1,
+    wary: 3,
     value: 460,
     description:
       'A pale, glowing bat who only comes out round the castle on the night of a full moon. It ' +

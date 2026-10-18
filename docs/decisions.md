@@ -7510,3 +7510,83 @@ two, banks and all); her greenhouse anywhere in the yard she likes (a site she w
 be somewhere); a daily cap on gathering (a window's is the same rhythm the trees already keep);
 capping by Candy rather than things (a count she can feel, "the woods have shared plenty", reads
 better than a sum).
+
+## 316. Fishing and catching with a floor: bites by rarity, a reel for the rare ones, a size and a best per fish, and shy critters that drift (2026-10-18, V1's R6a)
+
+_Session R6a of the V1 plan, lane 4, beside R6c, for decision 272 ("a shorter bite window for a
+rarer fish, a rare critter that drifts off as she nears… nothing ever lost") and
+`docs/v1_analysis.md` finding 3's "Almost no activity is fun in itself" (a 1.5 s bite that can't be
+failed; netting a statue; `wary` only ever 1). Save v52 (`cabinet.best`). Personal touches parked
+(decision 177): the sizes, words and the bar's look are the warmest plain defaults; nothing was
+asked._
+
+- **A bite by rarity.** `BITE_MS` is a row by `Rarity` (`systems/fishing.ts`): 1.5 s common, 1.1 s
+  uncommon, 0.9 s rare, 0.7 s legendary. A bite let go still comes round again, forever, as
+  decision 121 had it.
+- **A reel for the rare and legendary fish** (`REELS`, `reelOf`, `needleAt`, `reelGrade`, R6b's
+  shape): a tap on the bite hooks it (`hooked`), and a tension bar over her head sweeps a needle
+  there and back across a glowing window dealt from the cast (its middle 0.3 to 0.7 along). A tap in
+  the window lands it (grade 1, or 2 near the middle, which sparkles more); a tap out of it, or
+  three sweeps untapped (`REEL_SWEEPS`), lets the line go `slack`: the fish comes round to bite
+  again from then, as if newly cast to, told once a cast. Nothing is lost. Windows: rare a 1.8 s
+  sweep, ±0.15 of the bar (270 ms a pass, twice a sweep), legendary 1.5 s, ±0.12 (180 ms); the test
+  holds at least 150 ms a pass. Common and uncommon fish land on the bite as before, with one tap.
+  The bar is drawn by `render/fishing.ts` from `world.fishing.line.reeling`, read off the world's
+  clock as the score is. `world.fishing.bestTapAt()` says when a tap does best, bite or bar, for the
+  tests and smoke.
+- **A size per catch** (`sizeOf` in `systems/catchSize.ts`): each fish has a range in quarters of
+  a hand (`FISH_SIZES` in `data/fishSizes.ts`, inside its shadow's band, `SHADOW_SIZES`), and a
+  catch is two rolls of the cast's hash averaged into it, so middling sizes are likeliest; the top
+  fifth of a range is a **whopper** (about one catch in twelve). Said in her hands ("half a hand",
+  "a hand and a half", "two and a half hands", `handsOf`) on the catch's toast. The `caught` moment
+  carries `size`, `best`, `whopper`, `grade` and the `water` it came from: the splash there is as
+  big as the fish (`effectsOf`), a whopper gets confetti and a "!", a new best a sparkle and a "♪",
+  and a whopper thrills her as a rare catch does.
+- **A personal best per fish** on the `Cabinet` by `CritterId` (`measure`, `bestOf`; `best` in the
+  snapshot, save v52, whose step gives an old town none measured: a fish caught before was never
+  sized, so the Cabinet's card says "Land another to see how big it is"). A new best says "your
+  biggest yet!" on its toast; the Cabinet's card says "Your biggest: two hands long."
+- **Shy critters drift** (`systems/drift.ts`): the rare and legendary ones and the moths finer than
+  common (never a fish, a creepy-crawly, which keeps to its spot, or a common one). As she comes
+  within two tiles (`NOTICE_TILES`) having walked more than three since she last stood still
+  (`CREEP_TILES`, read off `walkMs` by `walkedTiles`), it hops a tile directly away from her
+  (`driftTo`, onto open ground no other critter is on) and settles there; her walk ends beside where
+  it was without a swing (`Collecting.shiedFrom`), so a second tap from where she stopped creeps up
+  and nets it. Once a walk, at most twice in its hour (`DRIFTS_AN_HOUR`), then it's used to her;
+  `notice` in `Collecting`, called by `World.update`. **From behind:** every flier is drawn face on,
+  looking out of the screen, so its back is to the north; coming at a flier from any tile north of
+  it, it never notices her. The hop is drawn by `render/critters.ts` from `Critter.hop` (where from,
+  how far through `HOP_MS`, 320 ms): an eased slide with an 8-pixel arc and its shadow sliding
+  under it, never a jump cut. The first drift since the game opened is told ("It's shy: stop a few
+  steps away, then creep up on it slowly"); the Cabinet's hint says "It's shy: creep up on it
+  slowly, or from behind" for every drifting one, found or not.
+- **Legendaries `wary` 2–3** on the net (the orbs, the Hercules beetle, the axolotl and the golden
+  snail 2, the wishing moth and the ghost bat 3); the legendary fish stay at 1, since on a rod
+  wariness is more nibbles, and their bite and reel are their test. Commons stay 0 and never drift.
+- **The rarity test is untouched by it** (it catches everything dealt): from the first of every
+  month the Cabinet still fills in 9.1 to 10.2 months, and no critter waits more than 30 days.
+- **Held by** `tests/systems/fishing.test.ts` (each tier's bite length; the reel only for rare and
+  legendary, the same for the same cast, a tap on the middle perfect and the bar's ends slack,
+  each pass's window in ms, the next best moment from any time), `tests/systems/catchSize.test.ts`
+  (every fish a range in its shadow's, sizes the same per cast and different across, whoppers now
+  and then, the words), `tests/systems/drift.test.ts` (who is shy, legendaries wary 2–3, rushing
+  noticed and creeping or behind a flier not, a tile away or none), `tests/world/reel.test.ts` (a
+  common landed with one timed tap; a rare hooked and a perfect reel landed; a late tap slack,
+  nothing kept, the bite again and landed; untapped, slack by itself; bites shorter by tier),
+  `tests/world/fishing.test.ts` (a session of 24 catches over three days in more than three sizes,
+  a best said and every best kept in the save), `tests/world/drift.test.ts` (rushed, a hop of one
+  tile and no catch, then crept up and netted; drawn hopping then settled; stopped four off and
+  netted unnoticed; twice at most) and smoke's `fishing` (a common landed with one tap timed by
+  `bestTapAt`, measured) and `drifter` (rushed from six tiles, a one-tile hop drawn from where it
+  was, then netted).
+
+**Rejected:** a bar for every fish (commons stay a tap, as the plan says, and the reel is the rare
+ones' moment); a miss on the bar losing the fish, or the bait (decision 11 and 272); a tug of war
+(holding is hard on a phone, and decision 121 turned it down); sizes in inches or centimetres (her
+hands are the unit she'd smile at); a size for the net's critters (a moth isn't held up to be
+measured, and the plan asked it of fish); a critter that drifts more than a tile or for ever (that
+is a chase, and frustrating); fliers that turn to face left and right (they're drawn face on, so a
+back view per flier would be new art, and "facing away" couldn't be seen); a slower bar under
+reduced motion (the world doesn't know the phone's setting, unlike the fair's sheet; a tap out of
+time costs nothing, so it's left for V1's review); a hint that names the creep distance in tiles
+(the toast says "stop a few steps away", which is the whole of it).

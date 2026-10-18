@@ -30,11 +30,38 @@ function shadowPalette(id: CritterId): Palette {
 /** A critter is drawn a little under a tile across, in the middle of its tile. */
 const INSET = 4;
 
+/** How high a shy critter's hop a tile away arcs (V1's R6a). */
+const HOP_LIFT = 8;
+
+/**
+ * How far a shy critter still is from the tile it's hopping to (V1's R6a), easing in, and how high
+ * it's lifted on the way: a little arc, never a jump cut.
+ */
+function hopOf(c: Critter): { dx: number; dy: number; lift: number } {
+  if (!c.hop) return { dx: 0, dy: 0, lift: 0 };
+  const t = Math.min(1, Math.max(0, c.hop.t));
+  const left = (1 - t) * (1 - t);
+  return {
+    dx: Math.round((c.hop.tx - c.tx) * TILE_SIZE * left),
+    dy: Math.round((c.hop.ty - c.ty) * TILE_SIZE * left),
+    lift: Math.round(Math.sin(t * Math.PI) * HOP_LIFT),
+  };
+}
+
 /**
  * Where a critter is drawn this frame, its sprite's top left, as it flutters, hops or swims about
- * its tile.
+ * its tile, and on its way there if it's drifting off.
  */
 function pose(c: Critter, nowMs: number): { x: number; y: number; frame: number; flip: boolean } {
+  const at = settled(c, nowMs);
+  const hop = hopOf(c);
+  return { ...at, x: at.x + hop.dx, y: at.y + hop.dy - hop.lift };
+}
+
+function settled(
+  c: Critter,
+  nowMs: number,
+): { x: number; y: number; frame: number; flip: boolean } {
   const phase = tileHash(c.tx, c.ty) % 1000;
   const t = nowMs + phase * 7;
   const x = c.tx * TILE_SIZE + INSET;
@@ -90,7 +117,13 @@ export function critterDrawable(c: Critter, nowMs: number): Drawable {
   };
   if (!fish) {
     const aloft = flies(c.critter);
-    d.shadow = { cx: c.tx * TILE_SIZE + 16, cy: ground + 26, w: aloft ? 10 : 16, h: 4 };
+    const hop = hopOf(c);
+    d.shadow = {
+      cx: c.tx * TILE_SIZE + 16 + hop.dx,
+      cy: ground + 26 + hop.dy,
+      w: aloft ? 10 : 16,
+      h: 4,
+    };
   }
   if (art.glow) {
     d.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip });

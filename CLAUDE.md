@@ -519,7 +519,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   tapping one walks her to the bank and casts her rod (`world.fishing`,
   `src/world/services/Fishing.ts`), the line's nibbles and bite are worked out from the cast in
   `src/systems/fishing.ts`, any tap reels in, and `src/render/fishing.ts` draws the line, float
-  and "!". `src/world/Cabinet.ts` is the
+  and "!". Since V1's R6a (decision 316) a bite is shorter the rarer the fish (`BITE_MS`), a rare
+  or legendary one is reeled in on a tension bar (`REELS`; a tap out of time only slackens the
+  line), each catch has a size (`src/data/fishSizes.ts`, `src/systems/catchSize.ts`) and the
+  Cabinet keeps each fish's best (save v52); shy critters drift a tile from her as she rushes up
+  (`src/systems/drift.ts`, `Collecting.notice`). `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters; the museum's
   cases, three tiles wide, show each donated critter's 24-pixel art in a `nooks` box. Art is

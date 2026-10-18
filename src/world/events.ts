@@ -25,6 +25,7 @@ import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
 import type { ActivityId } from '../data/activities';
+import type { Grade } from '../systems/activities';
 import type { TuneId } from '../data/instruments';
 import type { PetJob, PetLevel } from '../data/affection';
 import type {
@@ -90,7 +91,10 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * `fled` one that fluttered off before she could, not far. With her rod (phase Q), `cast` is her
  * float going in (with a `hint` of what to wait for, until she has caught a fish), `nibble` and
  * `bite` what the fish does, `letGo` a bite she let pass (`first` since she cast), `reeled` a tap
- * too soon, and `caught` a fish landed.
+ * too soon, and `caught` a fish landed. Since V1's R6a a rare fish is `hooked` on the bite and
+ * reeled in on a tension bar, a tap out of its window going `slack` (the fish bites again); a
+ * fish landed has its `size` (in quarters of a hand), `best` if it's her biggest yet of its kind,
+ * `whopper` and how well the reel went (`grade`); and a shy critter rushed at has `drifted`.
  *
  * With her pets, `pet` is the one she walked up to. At her door, `potted` is a new plant in her pots.
  *
@@ -195,8 +199,21 @@ export type WorldEvent =
   | { kind: 'cooked'; recipe: RecipeId; item: DishId; used: Taken[]; night: boolean }
   /** She ate something from her bag, and it does its small thing till the window turns. */
   | { kind: 'ate'; item: ItemId; effect: Effect; until: DayWindow }
-  | { kind: 'caught'; critter: CritterId; first: boolean }
+  | {
+      kind: 'caught';
+      critter: CritterId;
+      first: boolean;
+      size?: number;
+      best?: 'first' | 'best';
+      whopper?: true;
+      grade?: Grade;
+      /** The water a fish came up out of. */
+      water?: Tile;
+    }
   | { kind: 'fled'; critter: CritterId }
+  | { kind: 'drifted'; critter: CritterId; first?: true }
+  | { kind: 'hooked' }
+  | { kind: 'slack'; first?: true }
   | { kind: 'cast'; hint?: true }
   | { kind: 'nibble' }
   | { kind: 'bite' }
@@ -385,6 +402,8 @@ export interface Signals extends Record<string, unknown> {
 /** A critter out in town now, where it is, and what its catch is remembered by. */
 export interface Critter extends OutCritter {
   key: string;
+  /** Hopping a tile away from her (V1's R6a): from where, and how far through the hop, 0 to 1. */
+  hop?: { tx: number; ty: number; t: number };
 }
 
 /** A rare catch, a loved gift, the first of a crop, or a letter from Cody. */

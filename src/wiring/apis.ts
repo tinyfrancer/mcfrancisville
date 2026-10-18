@@ -435,6 +435,7 @@ export function sheetApis({
     critter: (id) => ({
       caughtOn: world.cabinet.caughtOn(id),
       donated: world.cabinet.isDonated(id),
+      best: world.cabinet.bestOf(id),
       outNow: isAbout(
         id,
         dayKey(world.clock.now()),

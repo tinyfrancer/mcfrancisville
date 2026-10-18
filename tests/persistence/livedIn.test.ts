@@ -44,6 +44,8 @@ const ADDED: Record<string, readonly string[]> = {
   home: ['items'],
   // V1's P3a: the day the chain began, and Wes.
   mystery: ['began', 'wes'],
+  // V1's R6a: the biggest of each fish she has landed.
+  cabinet: ['best'],
   // V1's R6c: how fond each pet has grown of her.
   pets: ['affection'],
 };
