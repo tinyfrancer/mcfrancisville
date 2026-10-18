@@ -303,6 +303,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34). A tree whose crown hides her, or something near her she
   might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222).
+- **The seasons** (V1's L4, decision 294): `seasonOf(day)` (`src/systems/seasons.ts`) by the
+  month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
+  (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
+  (`seasonPiece` for the ground, `seasonLook` for a prop, baked under `<key>@<season>`), the ground
+  re-baked by `Ground.look`, the props by `OutdoorView.turn`; in winter snow lies on the lawn, the
+  tracks and the roofs and the rain falls as snow, and Nessa skates on the frozen pond
+  (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are

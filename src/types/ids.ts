@@ -461,7 +461,9 @@ export type WorkId =
   | 'conducting'
   | 'reading'
   | 'stirring'
-  | 'coffee';
+  | 'coffee'
+  // V1's L4: on the frozen pond in winter (`data/skating.ts`).
+  | 'skating';
 
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';

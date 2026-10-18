@@ -154,10 +154,11 @@ export class Lighting {
     lights: readonly ScreenLight[],
     soften = 0,
     tint: string | null = null,
+    season: string | null = null,
   ): void {
     const outside = this.outside;
     this.outside = null;
-    const g = gradeOf(light, tint, soften, outside !== null);
+    const g = gradeOf(light, tint, soften, outside !== null, season);
     const { width, height } = ctx.canvas;
     const shining = lights.filter(
       (l) =>

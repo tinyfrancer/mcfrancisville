@@ -5,6 +5,7 @@
  *   npm run sprite                       the scale sheet
  *   npm run sprite -- prop:house doll:*  sprites by name, `*` matching anything
  *   npm run sprite -- 'place:*'          every place outdoors drawn whole, to judge a layout
+ *   npm run sprite -- 'season:*:town'    the town in winter, spring, summer and November (V1's L4)
  *   npm run sprite -- --list [pattern]   the names, without drawing them
  *   --zoom=4                             pixels a side for each of the sprite's (default 4)
  *   --out=dir                            where the PNGs go (default .sprites)

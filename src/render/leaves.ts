@@ -2,6 +2,7 @@ import { FALLING_LEAVES } from '../data/leaves';
 import { bake } from '../sprites/bake';
 import { LEAF_FRAMES, LEAF_PALETTES } from '../sprites/leaves';
 import { tileHash } from '../sprites/terrain';
+import { seasonOf } from '../systems/seasons';
 import type { PropId } from '../types/ids';
 import type { Drawable } from './scene';
 
@@ -20,7 +21,7 @@ const ROCK_MS = 1300;
 
 /** Whether leaves fall on a day, by its key. */
 export function leavesFall(day: string): boolean {
-  return (FALLING_LEAVES.months as readonly number[]).includes(Number(day.slice(5, 7)));
+  return seasonOf(day) === FALLING_LEAVES.season;
 }
 
 /** Whether a prop is a tree that lets its leaves go. */

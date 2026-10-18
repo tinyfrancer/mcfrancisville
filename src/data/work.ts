@@ -27,6 +27,8 @@ export const WORKS: Record<WorkId, WorkRow> = {
   reading: { name: 'reading', faces: 'down', frameMs: 1500 },
   stirring: { name: 'stirring the cauldron', faces: 'left', frameMs: 500 },
   coffee: { name: 'a cup of coffee', faces: 'down', frameMs: 1200 },
+  // V1's L4: gliding on the frozen pond, arms out for balance (`data/skating.ts`).
+  skating: { name: 'skating', faces: 'down', frameMs: 700 },
 };
 
 export const WORK_IDS = Object.keys(WORKS) as WorkId[];

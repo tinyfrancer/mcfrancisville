@@ -5521,6 +5521,62 @@ async function openOn(day, hour) {
   await page.evaluate(() => window.view.step(40, 5));
 }
 
+/**
+ * The seasons (V1's L4): the town on a day in each, its lawn baked in the season's colours (snow
+ * in January, all four different), the drifts and snow in their looks, and the winter town on its
+ * side too. Clear weather, at noon, so each screenshot shows the season and not a rainy day.
+ */
+async function seasons() {
+  /** @type {Record<string, number[]>} */
+  const lawns = {};
+  /** @type {readonly (readonly [string, string])[]} */
+  const days = [
+    ['2027-01-15', 'winter'],
+    ['2027-04-15', 'spring'],
+    ['2027-07-15', 'summer'],
+    ['2026-10-15', 'autumn'],
+  ];
+  for (const [day, season] of days) {
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=12&weather=clear`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await closeSheets();
+    await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+    await stepUntil(() => window.world.scene === 'town', `she is in town on ${day}`);
+    // The flight's moment plays on the next step, so its transition only shows up after one.
+    await page.evaluate(() => window.view.step(40, 3));
+    await stepUntil(() => window.view.transition() === null, 'the way into town has drawn');
+    await page.evaluate(() => window.view.step(40, 20));
+    const shown = await page.evaluate(() => window.view.season());
+    check(`${day} draws the town in ${season}`, shown?.season === season, JSON.stringify(shown));
+    lawns[season] = shown?.lawn ?? [];
+    await page.screenshot({ path: `.smoke/season-${season}.png` });
+    if (season === 'winter') {
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.evaluate(() => window.view.step(40, 3));
+      await page.screenshot({ path: '.smoke/season-winter-sideways.png' });
+      await page.setViewportSize(PHONE);
+      await page.evaluate(() => window.view.step(40, 3));
+    }
+  }
+  const [r = 0, g = 0, b = 0] = lawns.winter ?? [];
+  check('the lawn lies under snow in winter', r > 180 && g > 180 && b > 190, JSON.stringify(lawns));
+  const greens = ['spring', 'summer', 'autumn'].map((s) => lawns[s] ?? []);
+  check(
+    'the lawn is green in spring, summer and autumn',
+    greens.every(([lr = 0, lg = 0, lb = 0]) => lg > lr && lg > lb),
+    JSON.stringify(lawns),
+  );
+  const keys = Object.values(lawns).map((c) => c.join(','));
+  check(
+    'the lawn is a different colour in every season',
+    new Set(keys).size === 4,
+    keys.join(' | '),
+  );
+}
+
 /** The Halloween Festival (0.2's J1): the banner, the chip's countdown, the calendar, the title. */
 async function festival() {
   await openOn('2026-10-05', 12);
@@ -6427,6 +6483,7 @@ const SECTIONS = [
   ['everyone', everyone],
   ['scarah', scarah],
   ['holidays', holidays],
+  ['seasons', seasons],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],
   ['october', october],
