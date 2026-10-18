@@ -606,6 +606,8 @@ const CSS = `
   position: absolute;
   top: 10px;
   left: 50%;
+  /* Its own width up to the max, not the half of the room that \`left: 50%\` leaves it. */
+  width: max-content;
   max-width: min(340px, calc(100% - 32px));
   box-sizing: border-box;
   padding: 10px 16px;
@@ -665,12 +667,14 @@ const CSS = `
   /* Over the world just above the bar, so saying it never moves the bar. */
   position: absolute;
   bottom: calc(100% + 12px);
-  left: 50%;
-  transform: translateX(-50%);
+  /* Centred over the bar it belongs to, and never wider, so it never runs off the screen. */
+  left: 0;
+  right: 0;
   width: max-content;
-  margin: 0;
+  margin: 0 auto;
   padding: 6px 12px;
-  max-width: 300px;
+  max-width: min(300px, 100%);
+  box-sizing: border-box;
   background: ${T.panel};
   border: 2px solid ${T.panelEdge};
   border-radius: ${T.radius}px;

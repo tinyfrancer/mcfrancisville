@@ -602,7 +602,16 @@ through `holdElement`. The 0.4 `NOTES` row has four lines now (L1's three and S4
 
 ### V1 (after the lanes)
 
-Not started.
+**Under way** on `claude/v1-review` (from `v1-dev` at a163682; no save change so far). Done: the
+suite, smoke (622/622) and `smoke:offline` (10/10) green on `v1-dev`'s head; a new town played by
+real taps over four days (14–17 September 2026, a scratch Playwright driver under
+`?loop=manual&day=`) and saved as `tests/persistence/fixtures/lived-in-v53.json`, held by
+`livedIn.test.ts` (which now opens each save at its own `lastPlayedAt`); the 0.6–0.9 `NOTES` rows
+folded into one `1.0` row; two HUD fixes from the shakedown (a toast was half the room wide, so a
+three-line toast ran to ten; the quick bar's line ran off the left edge). Next, in order: the rest
+of the shakedown (a reel, a pet's trick, Rob Boo's reveal, winter, Far, sideways, the 0.3 town),
+perf at Close and Far by day and night, the architecture doc and "where it hurts", the art notes,
+`CLAUDE.md`, this handoff rewritten for after 1.0, decision 324, then merge and the release PR.
 
 ### How 0.3 was run, for whoever plans 0.4
 
