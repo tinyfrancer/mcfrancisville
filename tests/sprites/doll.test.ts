@@ -35,6 +35,7 @@ import { rasterizeLayers, spriteSize } from '../../src/sprites/sprite';
 import { takeOff, wear } from '../../src/systems/wardrobe';
 import type { ActionPose, Facing, OutfitId } from '../../src/types/ids';
 import type { Look, Worn } from '../../src/types/look';
+import { FEELINGS } from '../../src/types/mood';
 
 const FACINGS: Facing[] = ['down', 'up', 'left', 'right'];
 const EVERYTHING = Object.keys(OUTFITS) as OutfitId[];
@@ -809,4 +810,63 @@ describe('what she does as she does something (V1 E2)', () => {
       dollKey(DEFAULT_LOOK, 'down', 0),
     );
   });
+});
+
+describe("her face, as she feels (V1's L7)", () => {
+  const look = (facing: Facing, rest: Parameters<typeof dollLayers>[4] = {}, pose?: ActionPose) =>
+    rasterizeLayers(dollLayers(DEFAULT_LOOK, facing, 0, pose, rest), {
+      flipX: facing === 'left',
+    }).data.join();
+
+  it('shows every feeling, facing us and side on, each a face of its own', () => {
+    for (const facing of ['down', 'right', 'left'] as const) {
+      const faces = new Set([look(facing)]);
+      for (const feel of FEELINGS) faces.add(look(facing, { feel }));
+      expect(faces.size, facing).toBe(FEELINGS.length + 1);
+    }
+    // From behind there's no face to feel with.
+    for (const feel of FEELINGS) expect(look('up', { feel })).toBe(look('up'));
+  });
+
+  it('keeps a feeling to her face, its eyes shut for a blink but its mouth kept', () => {
+    for (const feel of FEELINGS) {
+      const felt = dollLayers(DEFAULT_LOOK, 'down', 0, undefined, { feel });
+      const plain = dollLayers(DEFAULT_LOOK, 'down', 0);
+      felt.forEach((layer, i) => {
+        // Nothing changes below her chin.
+        expect(layer.source.rows.slice(24)).toEqual(plain[i]!.source.rows.slice(24));
+      });
+      const blinking = look('down', { feel, blink: true });
+      // A laugh's eyes are shut already.
+      if (feel !== 'laugh') expect(blinking, feel).not.toBe(look('down', { feel }));
+      expect(blinking, feel).not.toBe(look('down', { blink: true }));
+      expect(dollKey(DEFAULT_LOOK, 'down', 0, undefined, { feel })).not.toBe(
+        dollKey(DEFAULT_LOOK, 'down', 0),
+      );
+    }
+  });
+
+  it('feels as she crouches or waves, never over her find held up', () => {
+    expect(look('down', { feel: 'happy' }, 'crouch')).not.toBe(look('down', {}, 'crouch'));
+    expect(look('down', { feel: 'happy' }, 'holdUp')).toBe(look('down', {}, 'holdUp'));
+  });
+
+  it('feels in every piece and hairstyle she could have on', () => {
+    const looks: Look[] = [
+      DEFAULT_LOOK,
+      { ...DEFAULT_LOOK, freckles: true, nosePiercing: true },
+      ...idsOf(HAIR_STYLES).map((hairStyle) => ({ ...DEFAULT_LOOK, hairStyle })),
+      ...EVERYTHING.map((id) => wear(DEFAULT_LOOK, id, EVERYTHING)),
+    ];
+    for (const worn of looks) {
+      for (const feel of FEELINGS) {
+        for (const facing of ['down', 'right'] as const) {
+          const layers = dollLayers(worn, facing, 0, undefined, { feel, blink: true });
+          const tall = layers[0]!.source.rows.length;
+          for (const l of layers) expect(l.source.rows.length).toBe(tall);
+          expect(() => rasterizeLayers(layers)).not.toThrow();
+        }
+      }
+    }
+  }, 60_000);
 });

@@ -28,6 +28,7 @@ import type {
   WindowPaperId,
 } from '../types/ids';
 import type { Look } from '../types/look';
+import { FEELINGS } from '../types/mood';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
 import {
@@ -410,6 +411,28 @@ export function catalogue(): Entry[] {
       }
     }
   }
+  // How each feels about a line (V1's L7): every feeling facing her and side on, in costume, and
+  // blinking through it.
+  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
+    for (const feel of FEELINGS) {
+      for (const facing of ['down', 'right'] as const) {
+        entries.push({
+          name: `figure:${id}:mood:${feel}:${facing}`,
+          draw: () => rasterizeLayers(figureLayers(id, facing, 0, null, null, { feel })),
+        });
+      }
+      if (id !== 'moonPieMan' && id !== 'wes') {
+        entries.push({
+          name: `figure:${id}:mood:${feel}:costume`,
+          draw: () => rasterizeLayers(figureLayers(id, 'down', 0, 'own', null, { feel })),
+        });
+      }
+      entries.push({
+        name: `figure:${id}:mood:${feel}:blink`,
+        draw: () => rasterizeLayers(figureLayers(id, 'down', 0, null, null, { feel, blink: true })),
+      });
+    }
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
@@ -578,6 +601,20 @@ export function catalogue(): Entry[] {
             flipX: facing === 'left',
           },
         ),
+    });
+  }
+  // How she feels for a moment (V1's L7), facing us and side on, and blinking through it.
+  for (const feel of FEELINGS) {
+    for (const facing of ['down', 'right'] as const) {
+      entries.push({
+        name: `doll:feel:${feel}:${facing}`,
+        draw: () => rasterizeLayers(dollLayers(DEFAULT_LOOK, facing, 0, undefined, { feel })),
+      });
+    }
+    entries.push({
+      name: `doll:feel:${feel}:blink`,
+      draw: () =>
+        rasterizeLayers(dollLayers(DEFAULT_LOOK, 'down', 0, undefined, { feel, blink: true })),
     });
   }
   // Sitting (0.2's G1), facing us and facing away.
