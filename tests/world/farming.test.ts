@@ -124,6 +124,7 @@ describe('the garden', () => {
 
   it('keeps the garden through a save, and drops what this build no longer knows', () => {
     const h = harness(PLOT);
+    h.world.bag.add('hostaDivision', 1);
     plant(h, 'hostaDivision');
     tend(h);
     const { beds } = h.world.garden.snapshot();

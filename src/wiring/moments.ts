@@ -3,7 +3,7 @@ import { isRecord, RECORD_TUNES } from '../audio/records';
 import { PIANO_TUNES } from '../audio/pianos';
 import type { SoundBoard } from '../audio/SoundBoard';
 import type { Hud } from '../hud/Hud';
-import { eventToast, MARKET_SHUT, NO_SEEDS } from '../hud/messages';
+import { eventToast, FIRST_DAY_FINISHED, MARKET_SHUT, NO_SEEDS } from '../hud/messages';
 import { isDisplayPiece } from '../data/display';
 import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
@@ -119,5 +119,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     }
     const toast = eventToast(event);
     if (toast) hud.toast(toast);
+    // The last step of her first day, and his keepsake after it (V1's R1).
+    if (event.kind === 'firstDay' && event.keepsake) hud.toast(FIRST_DAY_FINISHED);
   }
 }

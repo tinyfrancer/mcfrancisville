@@ -6931,6 +6931,65 @@ figure's pixels just doubled (the same as before); hand-drawn 64-pixel portraits
 neighbours (a session of its own, and L7's moods would double it); a taller sky (the title must
 fit a phone on its side at a whole scale); a pixel font for the HUD (decision 273).
 
+## 311. The first day: Cody's little list, four seeds to start, and the chip and the tray shown once (2026-10-18, V1's R1)
+
+_Session R1 of the V1 plan, lane 4, for `docs/v1_analysis.md`'s finding 3 ("No first day": title,
+dedication, creator, Cody's card, three letter toasts, then nothing; 22 seeds on the quick bar).
+Bumps the save to v50. Personal touches parked (decision 177): his lines are the warmest default
+in his voice, married to her from the start ("babe" in two of the thirteen, mi amor, booby and
+honey bunny for the rest); the sampler is an invention; nothing was asked._
+
+**Decided:**
+
+- **A thread, not a tutorial** (`data/firstDay.ts`, `FIRST_DAY_STEPS`): six steps, shake the candy
+  tree, plant a seed, put something on the honesty stall, answer a note on the board, meet three
+  neighbours (Cody aside, already hers), eat something from the bag. Each has a title, a glyph,
+  his line before (how) and after (well done), and a small gift (a moon pie, two sunflower seeds,
+  50 and 40 Candy, a heart bead, two ghost mallows). With the last, whichever it is, **his
+  keepsake**: a welcome-home sampler he stitched (a wall piece, `welcomeSampler`, art in
+  `sprites/firstDay.ts`), in her storage chest, and his closing line.
+- **Worked out from what the town already keeps** (`systems/firstDay.ts`, `FirstDayFacts`): the
+  tree's `shakenAt`, any bed growing or a crop ever picked, the stall's stock, sales or tin, a
+  `notice:n` key in the day's takings, friendships' `talked` (her husband aside), any meal's time.
+  So no step is a lock, any order works, and something done before she looked counts as soon as
+  the thread begins. `world.firstDay` (`FirstDay`, made by `areas/firstDay.ts`) re-reads them only
+  when something happened (a moment, or the bag, Candy, friends or stall changing), keeps each step
+  done, gives its gift and returns a `firstDay` moment from `World.update`; E1's effects (the gift
+  popping from her a beat after what she did, sparkles, a heart), the purse or bag bumping, a
+  `treat` cue, and a toast with his line after and the gift; the last adds his closing toast.
+- **Begun by his hello**: the thread is open once her look is made and her first visit counted
+  (`begun`), until every step is done. Nothing expires: a step can wait for another day (the
+  stall usually does, wanting a crop or something made) and still counts.
+- **The card** (`hud/FirstDayCard.ts` through `FirstDayApi`): his bust, "Your first day", his
+  intro, a row a step (a full heart when done, his after-line and "Done! You got…"; an empty one
+  with his how-line and "For you:…", meeting counting "1 of 3"), Got it. It opens after his very
+  first hello (`GreetingCard.then`, the greeting's `first` kind only, so a reload never brings it
+  back) and from the tray behind "more", first in it, while a step is open (`hud-first-day-button`).
+  It never blocks: it's a sheet like any other, closed with a tap.
+- **The date chip and the tray shown once** (`hud/hints.ts`): each glows (`data-hint`, an outline
+  pulse, still with reduced motion) until first pressed, only while the thread is open, so an old
+  town never sees it. Kept per phone beside the dedication (`mcfrancisville:hintsSeen`), never in
+  the save.
+- **Four starter seed kinds, not 22** (`STARTER_BAG`: pumpkin, rose, moonflower, candy corn); the
+  rest are on Scarah's cart every day, which `tests/data/crops.test.ts` now holds. An old bag keeps
+  whatever seeds it has.
+- **What's saved** (v50, `firstDay`): the steps done and `over`. The migration 49 → 50 makes every
+  old town's thread over with nothing done: she knows her way round, so nothing new appears, no
+  gifts come and no glow lights. A step this build doesn't know is forgotten.
+- **Held by** `tests/world/firstDay.test.ts` (waits for the hello; kept, gifted and told once, in any
+  order; three neighbours, not Cody; counted when done before it began; the keepsake and over; a
+  step left for days later; kept through a save; nothing for an old town), the migration's test,
+  and smoke's `firstDay`, played in a town of its own (a second browser context) so the shared
+  town's sections are left as they were: the card after his hello, both glows and their going,
+  the card from the tray, on its side, each step done by a tap or the world's own calls with his
+  line in the toast, and the keepsake in the chest with the tray's button gone.
+
+**Rejected:** a step-by-step tutorial that waits on each step (a lock, and decision 11); counting
+the steps' own events in the save (the town already keeps what they read); the card after every
+hello on day one (smoke and she would see it on every reload); a skip button (Got it closes it,
+and it asks nothing of her); the hints in the save (a phone's, like the dedication); fewer seeds in
+an old bag (nothing is lost).
+
 ## 296. Faces: a feeling for every line, one face on the bust and in the world, and hers for a moment (2026-10-18, V1's L7)
 
 _Session L7 of the V1 plan, lane 2, the lane's last, answering `docs/v1_analysis.md`'s finding 4

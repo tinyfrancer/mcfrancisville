@@ -32,9 +32,10 @@ import { FOSSILS } from '../data/fossils';
 import type { MoundFind } from '../systems/fossils';
 import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
+import { FIRST_DAY, FIRST_DAY_STEPS } from '../data/firstDay';
 import { isMilestone } from '../systems/visits';
 import { aSweet } from '../systems/trickOrTreat';
-import type { CritterId, FigurineId, ItemId, PropId } from '../types/ids';
+import type { CritterId, FigurineId, FirstDayStepId, ItemId, PropId } from '../types/ids';
 import type { Glyph } from '../data/glyphs';
 import type { WorldEvent } from '../world/World';
 
@@ -532,6 +533,8 @@ export function eventToast(event: WorldEvent): Toast | null {
             text: 'A foggy day. The orbs and moths love it, and something grey is out in the trees.',
             icon: 'fog',
           };
+    case 'firstDay':
+      return firstDayToast(event.step, event.reward);
     case 'visit':
       return {
         text: `A new day! ${visitLine(event.count, event.gift)}`,
@@ -802,6 +805,19 @@ export function giftLine(gift: VisitGift): string {
   }
   return `${quantity(gift.item, gift.count)}, in your bag`;
 }
+
+/** A step of her first day done (V1's R1): Cody's line after it, and what it brought. */
+export function firstDayToast(step: FirstDayStepId, reward: VisitGift): Toast {
+  const after = FIRST_DAY_STEPS[step].after;
+  return { text: `Cody: "${after}" For you: ${giftLine(reward)}.`, icon: 'heart' };
+}
+
+/** Her whole first day done, and his keepsake for the house (V1's R1). */
+export const FIRST_DAY_FINISHED: Toast = {
+  text: `Cody: "${FIRST_DAY.finished}"`,
+  icon: 'house',
+  special: true,
+};
 
 /** What a visit brought, said on the greeting and when a day turns while she plays. */
 export function visitLine(count: number, gift: VisitGift): string {

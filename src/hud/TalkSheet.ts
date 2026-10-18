@@ -315,6 +315,8 @@ export interface GreetingCard {
   after?: string;
   /** The red Tesla drives across the card (personal_touches.md, "Version 0.1"). */
   redOne?: boolean;
+  /** What follows once she has answered, when nothing else has come up (V1's R1: her first day's list). */
+  then?: () => void;
 }
 
 /**
@@ -333,6 +335,8 @@ export function openGreeting(
     done: card.reply,
     onClose: () => {
       if (card.after) answered(card.after);
+      // After the sheet has gone, so whatever opens next isn't opened inside its closing.
+      if (card.then) setTimeout(card.then, 0);
     },
   });
   if (card.redOne) {

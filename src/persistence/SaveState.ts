@@ -35,12 +35,13 @@ import type { TuneId } from '../data/instruments';
 import type { Order } from '../systems/catalogue';
 import type { LatelySnapshot } from '../world/Lately';
 import type { JoinedSnapshot } from '../systems/joining';
+import type { FirstDaySnapshot } from '../world/services/FirstDay';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 49;
+export const SAVE_VERSION = 50;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -242,6 +243,11 @@ export interface SaveState {
    * forgotten.
    */
   happenings: JoinedSnapshot;
+  /**
+   * Her first day's steps done, and whether it's over (save v50, V1's R1). An old town's is over
+   * from the start. A step this build doesn't know is forgotten.
+   */
+  firstDay: FirstDaySnapshot;
 }
 
 export function newSave(
@@ -293,6 +299,7 @@ export function newSave(
     orders: [],
     lately: { placed: null, harvested: null, donated: null, herDay: null, told: [] },
     happenings: {},
+    firstDay: { done: [], over: false },
   };
 }
 
@@ -660,7 +667,8 @@ export function isSaveState(value: unknown): value is SaveState {
     isStringList(s.ever) &&
     isOrdersShape(s.orders) &&
     isLatelyShape(s.lately) &&
-    isJoinedShape(s.happenings)
+    isJoinedShape(s.happenings) &&
+    isFirstDayShape(s.firstDay)
   );
 }
 
@@ -685,6 +693,13 @@ function isLatelyShape(value: unknown): boolean {
     herDay &&
     told
   );
+}
+
+/** Her first day (save v50): the steps done, and whether it's over. */
+function isFirstDayShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return isStringList(v.done) && typeof v.over === 'boolean';
 }
 
 /** What she did at their happenings (save v48): by happening, a day and maybe a pick. */

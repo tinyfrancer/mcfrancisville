@@ -240,6 +240,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const lately = (state.lately ?? {}) as Record<string, unknown>;
     return { ...state, lately: { ...lately, herDay: null, told: [] } };
   },
+  // V1's R1: Cody's list for her first day. A town saved before it isn't new, and she knows her
+  // way round it already, so its first day is over, with no step counted and no gift given.
+  49: (state) => ({ ...state, firstDay: { done: [], over: true } }),
 };
 
 /**

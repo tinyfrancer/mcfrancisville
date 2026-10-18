@@ -870,7 +870,9 @@ export type FurnitureId =
   | CrawlyPiece
   // Gourdon's figurines (0.3's C3), carved from three of a kind, and the one he carved of himself.
   | FigurineId
-  | 'carvedGourdon';
+  | 'carvedGourdon'
+  // Cody's keepsake for her first day (V1's R1).
+  | 'welcomeSampler';
 
 /** The squishies she collects (0.2's F2), kept apart for the figurines (0.3's C3). */
 export type SquishyId =
@@ -1294,3 +1296,6 @@ export type ToolId = 'hands' | 'net' | 'can' | 'rod';
 
 /** The collections that mark what's new in them until she has looked (phase M). */
 export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';
+
+/** The steps of Cody's first-day thread (V1's R1), in any order. */
+export type FirstDayStepId = 'shake' | 'plant' | 'stall' | 'notice' | 'meet' | 'eat';

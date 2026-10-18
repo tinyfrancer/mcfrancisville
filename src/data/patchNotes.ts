@@ -177,6 +177,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Nessa lights the lanterns every dusk. You may light one too. Bob goes first.',
   },
+  {
+    version: '0.8',
+    lines: [
+      'New in town? Cody leaves a little list for the first day: the candy tree, a seed, the ' +
+        'stall, a note, three hellos and a snack. Any order. A present at the end.',
+      "A new town starts with four kinds of seed instead of all of them. Scarah's cart at Boo " +
+        'Acres has every other kind, every day. She insists.',
+      'On a first day, the date and the little tray of things glow until tapped, so nobody ' +
+        "misses the calendar. I missed it for a year. Don't tell anyone.",
+    ],
+    ps: 'P.S. If you know your way round already, Cody will not fuss. He will want to, mind.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

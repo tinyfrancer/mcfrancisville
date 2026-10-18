@@ -38,6 +38,8 @@ import { openFair, type FairApi } from './FairSheet';
 import type { ActivityId } from '../data/activities';
 import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
+import { openFirstDay, type FirstDayApi } from './FirstDayCard';
+import { hintOnce } from './hints';
 import { CALENDAR } from '../data/calendar';
 import type { Glyph } from '../data/glyphs';
 import { trimOn } from '../data/trims';
@@ -82,6 +84,8 @@ export interface HudOptions {
   bed: BedApi;
   title: TitleApi;
   notes: NotesApi;
+  /** Cody's list for her first day (V1's R1). */
+  firstDay: FirstDayApi;
   standalone: boolean;
 }
 
@@ -138,6 +142,8 @@ export interface Hud {
   greet(card: GreetingCard): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
+  /** Cody's list for her first day (V1's R1), unless a sheet is up; its button and glows woken. */
+  openFirstDay(): void;
   /** Their photo at the Halloween party, flash and all, over whatever's up (0.2's J4). */
   photo(picture: HTMLCanvasElement, caption: string): void;
   /** Fades the game in from dark, as she comes into a new place. */
@@ -218,6 +224,8 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     trim.title = season.name;
   };
   day.addEventListener('click', () => openCalendar(hud, options.calendar));
+  // On her first day, the chip glows until she first taps it (V1's R1).
+  const todayHint = hintOnce(day, 'today', options.firstDay.open);
   showDay();
   options.calendar.onChange(showDay);
   const settings = cornerButton('hud-settings', 'Settings', 'settings', () =>
@@ -276,6 +284,20 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     bottom.toggleAttribute('data-open', !bottom.hasAttribute('data-open')),
   );
   extras.addEventListener('click', () => bottom.removeAttribute('data-open'));
+  // Cody's list, first in the tray while a step of her first day is still to do (V1's R1), and
+  // the tray glowing until she first opens it.
+  const firstDay = cornerButton('hud-first-day-button', 'Your first day', 'scroll', () =>
+    openFirstDay(hud, options.firstDay),
+  );
+  extras.prepend(firstDay);
+  const moreHint = hintOnce(more, 'more', options.firstDay.open);
+  const showFirstDay = () => {
+    firstDay.hidden = !options.firstDay.open();
+    todayHint.refresh();
+    moreHint.refresh();
+  };
+  showFirstDay();
+  options.firstDay.onChange(showFirstDay);
   document.addEventListener('pointerdown', (e) => {
     const target = e.target as Node | null;
     if (target && !extras.contains(target) && !more.contains(target)) {
@@ -427,6 +449,10 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       openGreeting(hud, options.talk, card, (after) => api.toast({ text: after, icon: 'heart' }));
     },
     toast: toasts.show,
+    openFirstDay() {
+      showFirstDay();
+      if (!sheetOpen(hud) && options.firstDay.open()) openFirstDay(hud, options.firstDay);
+    },
     placeBed: bed.place,
     playerAt: toasts.playerAt,
     bump(what) {

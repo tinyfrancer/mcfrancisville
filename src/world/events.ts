@@ -33,6 +33,7 @@ import type {
   FixtureId,
   FossilId,
   CropId,
+  FirstDayStepId,
   FurnitureId,
   HappeningId,
   ItemId,
@@ -222,6 +223,11 @@ export type WorldEvent =
   | { kind: 'bakeStep'; does: 'pour' | 'crouch' }
   /** Something she and Cody did together at hers (V1's P5): she holds it up, or waves at the sky. */
   | { kind: 'together'; what: TogetherId; does: 'show' | 'greet' }
+  /**
+   * A step of her first day done (V1's R1), what it brought, and with the last, Cody's keepsake
+   * for her home.
+   */
+  | { kind: 'firstDay'; step: FirstDayStepId; reward: VisitGift; keepsake?: FurnitureId }
   /** A throw at a fairground game (0.2's M2), and whether it landed. */
   | { kind: 'tossed'; activity: ActivityId; landed: boolean }
   /** A go at a fairground game done, and what it won; `top` for the prize to win. */
@@ -305,6 +311,8 @@ export interface WorldState extends Record<string, unknown> {
   bed: Tile | null;
   /** Her broom's colours changed (0.2's P1). */
   broom: BroomLook;
+  /** A step of her first day was done (V1's R1): the steps done so far. */
+  firstDay: readonly FirstDayStepId[];
 }
 
 /**

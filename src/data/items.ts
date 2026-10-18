@@ -885,32 +885,15 @@ function critterItems(): Record<CritterId, ItemRow> {
 
 /**
  * What a new bag holds: her skates (decision 211), a few purse butters, as her real purse always
- * does, and seeds for her garden. Every harvest gives its seed back (decisions.md 39), so these
- * are enough forever.
+ * does, and seeds of four kinds for her garden (V1's R1, decision 311), the rest a walk away on
+ * Scarah's cart. Every harvest gives its seed back (decisions.md 39), so these are enough forever.
+ * An old bag keeps whatever seeds it has.
  */
 export const STARTER_BAG: readonly { id: ItemId; count: number }[] = [
   { id: 'iceSkates', count: 1 },
   { id: 'purseButter', count: 5 },
   { id: 'pumpkinSeed', count: 4 },
-  { id: 'roseSeed', count: 2 },
-  { id: 'moonflowerSeed', count: 2 },
-  { id: 'ghostPepperSeed', count: 2 },
-  { id: 'candyCornSeed', count: 2 },
-  { id: 'batWingBeanSeed', count: 2 },
-  { id: 'snapdragonSeed', count: 2 },
-  { id: 'spiderLilyBulb', count: 2 },
-  { id: 'hostaDivision', count: 2 },
-  { id: 'batFlowerSeed', count: 2 },
-  { id: 'tomatoSeed', count: 1 },
-  { id: 'garlicClove', count: 1 },
-  { id: 'basilSeed', count: 1 },
-  { id: 'avocadoPit', count: 1 },
-  { id: 'sweetcornSeed', count: 1 },
-  { id: 'glowGourdSeed', count: 1 },
-  { id: 'sunflowerSeed', count: 1 },
-  { id: 'tulipBulb', count: 1 },
-  { id: 'lavenderSeed', count: 1 },
-  { id: 'marigoldSeed', count: 1 },
-  { id: 'christmasRoseSeed', count: 1 },
-  { id: 'irisBulb', count: 1 },
+  { id: 'roseSeed', count: 3 },
+  { id: 'moonflowerSeed', count: 3 },
+  { id: 'candyCornSeed', count: 3 },
 ];
