@@ -18,6 +18,7 @@ import type { SavedBed, SavedSprinkler } from './Farm';
 import type { FriendsSnapshot } from './Friends';
 import type { MailEntry } from './Letters';
 import type { PorchSnapshot } from './Porch';
+import type { WorksSnapshot } from './Works';
 import type { CandyTreeSnapshot } from './services/CandyTree';
 import type { LatelySnapshot } from './Lately';
 import type { FreshSnapshot } from './services/Novelty';
@@ -101,6 +102,8 @@ export interface WorldOptions {
   lately?: Partial<LatelySnapshot>;
   /** What she did at each of their happenings last time, which the host remembers (V1's P4). */
   happenings?: JoinedSnapshot;
+  /** The town's projects: the one she's funding, what's in each, those built (V1's R4). */
+  projects?: Partial<WorksSnapshot>;
   clock?: Clock;
 }
 

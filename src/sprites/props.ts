@@ -1,3 +1,4 @@
+import { PROJECT_ART } from './projects';
 import { HOLIDAY_PROP_ART } from './holidays';
 import type { MapZoneId, PropId } from '../types/ids';
 import { formOf, variantOf } from './terrain';
@@ -247,6 +248,8 @@ const STORAGE_CHEST = (() => {
 export const PROP_ART: Record<PropId, PropArt> = {
   ...HOLIDAY_PROP_ART,
   ...FARM_PROP_ART,
+  // The town's projects going up (V1's R4).
+  ...PROJECT_ART,
   tree: {
     source: TREE,
     palette: TREE_LEAVES[0]!,

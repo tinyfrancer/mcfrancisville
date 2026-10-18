@@ -17,7 +17,9 @@ export function outdoors(s: Shared, zones: Zones, outside: () => MapZoneId | nul
     fountain: new Fountain(s.ctx, () => {
       const zone = zones.outdoor(s.town.scene());
       if (!zone) return null;
-      return { props: zone.map.props, tile: s.movement().tile };
+      // A built bandstand plays the fountain's music box too (V1's R4).
+      const props = [...zone.map.props, ...(zone.sites?.props() ?? [])];
+      return { props, tile: s.movement().tile };
     }),
   };
 }

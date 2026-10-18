@@ -23,6 +23,10 @@ import { Takings } from '../services/Takings';
 import { Wallet } from '../services/Wallet';
 import { Yard } from '../Yard';
 import { yardOf } from '../../systems/yard';
+import { TOWN } from '../../data/maps';
+import { PROJECT_IDS, PROJECTS } from '../../data/projects';
+import { Works } from '../Works';
+import { siteOf } from '../../systems/projects';
 
 /** What a service reads of her and her neighbours, the same for each that asks. */
 export interface TownReads {
@@ -54,6 +58,8 @@ export interface Keepers {
   yard: Yard;
   /** What she has done lately, which her neighbours remember (V1's P1). */
   lately: Lately;
+  /** The town's projects: the one she's funding, what's in each, those built (V1's R4). */
+  works: Works;
 }
 
 /** A place beyond the town with a map of its own, parsed once. */
@@ -94,6 +100,15 @@ export function keepersOf(
   bag.keepWorn((id) => wardrobe.wearing(id));
   const takings = new Takings(ctx.clock, options.finds?.taken);
   const home = new Home(options.home);
+  const works = new Works(options.projects);
+  // A project stands only in the town's own map, not a test's small one, as the square's pieces.
+  const real = (options.map ?? TOWN) === TOWN;
+  const projectBeds = (zone: ZoneId) =>
+    zone === 'town' && !real
+      ? []
+      : PROJECT_IDS.filter((id) => PROJECTS[id].zone === zone && works.isBuilt(id)).flatMap(
+          (id) => PROJECTS[id].beds ?? [],
+        );
   const farm = new Farm(
     {
       beds: Object.fromEntries([
@@ -104,6 +119,7 @@ export function keepersOf(
       ]),
       rows: rowsOf(map, beyond),
       planters: () => home.placedIn('main').filter((p) => FURNITURE[p.id].planter),
+      projects: projectBeds,
     },
     {
       beds: options.beds,
@@ -128,8 +144,24 @@ export function keepersOf(
     porch: new Porch(options.porch),
     keepsakes: new Keepsakes(options.keepsakes),
     dug: new Dug(options.dug),
-    yard: new Yard(yardOf(map), home, options.yard),
+    // A project's site in her yard is kept for it from the day she starts it (V1's R4).
+    yard: new Yard(yardOf(map), home, options.yard, real ? keptFor(works) : undefined),
     lately: new Lately(options.lately),
+    works,
+  };
+}
+
+/** Her lawn kept for the town's projects she has begun in her yard (V1's R4). */
+function keptFor(works: Works): (tx: number, ty: number) => boolean {
+  const sites = new Map(
+    PROJECT_IDS.filter((id) => PROJECTS[id].zone === 'town').map((id) => [
+      id,
+      new Set(siteOf(id).map((t) => `${t.tx},${t.ty}`)),
+    ]),
+  );
+  return (tx, ty) => {
+    for (const [id, tiles] of sites) if (works.begun(id) && tiles.has(`${tx},${ty}`)) return true;
+    return false;
   };
 }
 

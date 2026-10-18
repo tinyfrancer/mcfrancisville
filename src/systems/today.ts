@@ -5,10 +5,12 @@ import type {
   HappeningId,
   ItemId,
   MapZoneId,
+  ProjectId,
   PropId,
   VillagerId,
   ZoneId,
 } from '../types/ids';
+import type { ProjectStage } from '../data/projects';
 import { VILLAGER_IDS } from '../data/villagers';
 import { callOn } from './calls';
 import { shiftDay, weekOf } from './calendar';
@@ -110,6 +112,8 @@ export interface TodayFacts {
     zone: MapZoneId;
     carrying: boolean;
   } | null;
+  /** The town project she's funding (V1's R4), how it stands and how far along it is, 0 to 1. */
+  project: { id: ProjectId; stage: ProjectStage | null; progress: number } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -142,6 +146,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
       zone: MapZoneId;
       carrying: boolean;
     }
+  // V1's R4: the town project she's funding, while it's under way.
+  | { kind: 'project'; id: ProjectId; percent: number }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -210,6 +216,16 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       open: open.length,
       from: open.map((n) => n.from),
       key: `notes:${window}`,
+      go: { zone: 'town', prop: 'noticeboard' },
+    });
+  }
+  if (facts.project) {
+    const { id, stage, progress } = facts.project;
+    lines.push({
+      kind: 'project',
+      id,
+      percent: Math.floor(progress * 100),
+      key: `project:${id}:${stage ?? 'none'}:${weekOf(day)}`,
       go: { zone: 'town', prop: 'noticeboard' },
     });
   }

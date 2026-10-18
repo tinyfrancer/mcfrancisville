@@ -102,6 +102,11 @@ export interface HappeningRow {
    * it's in town, as `where` says, so she can always get to it (decisions.md 11).
    */
   fair?: { where: Outdoors<'fairground'>; place: string; set?: readonly SetPiece[] };
+  /**
+   * Where it moves once the bandstand on the square is built (V1's R4): Boothoven's recital, out
+   * of his parlour and under its roof.
+   */
+  bandstand?: { where: Outdoors<'town'>; place: string };
   /** What the host does there, a working pose (V1's P4): Nessa lighting the lanterns. */
   doing?: WorkId;
   /** Only on a clear day (V1's P4's stargazing): on a rainy or foggy one it isn't on. */

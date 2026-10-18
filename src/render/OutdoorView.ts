@@ -166,7 +166,7 @@ export class OutdoorView implements SceneView {
    */
   private reshaped: { tiles: TileId[]; life: Life } | null = null;
   /** What the ground was last baked as: whether the pond was frozen, and how many rows built. */
-  private groundShown = 'false:0';
+  private groundShown = 'false:0:0';
   private readonly props: Drawable[] = [];
   /** What moves on its own where it stands: the fountain, the wheel, a lamp (V1's E5). */
   private readonly moving: { id: PropId; drawable: Drawable; m: Moving }[] = [];
@@ -582,12 +582,14 @@ export class OutdoorView implements SceneView {
   private season(): Life {
     const frozen = this.zone.decorations?.frozen ?? false;
     const rows = this.town ? this.world.farm.rows : 0;
-    const shown = `${frozen}:${rows}`;
+    // A built project's deck and beds are ground too (V1's R4).
+    const built = this.zone.sites?.shown ?? '0';
+    const shown = `${frozen}:${rows}:${built}`;
     if (shown !== this.groundShown) {
       this.groundShown = shown;
       const { map } = this.zone;
       const tiles = this.zone.groundTiles();
-      this.reshaped = shown === 'false:0' ? null : { tiles, life: lifeOf({ ...map, tiles }) };
+      this.reshaped = shown === 'false:0:0' ? null : { tiles, life: lifeOf({ ...map, tiles }) };
       this.ground.retile(tiles);
     }
     return this.reshaped?.life ?? this.life;
@@ -796,10 +798,21 @@ export class OutdoorView implements SceneView {
    */
   private lotDrawables(nowMs: number): Drawable[] {
     const film = this.filmFrame();
-    return [...(this.zone.lots?.props() ?? []), ...(this.zone.decorations?.props() ?? [])].map(
-      (p) =>
+    return [
+      ...[
+        ...(this.zone.lots?.props() ?? []),
+        ...(this.zone.decorations?.props() ?? []),
+        // The town's projects as they stand (V1's R4).
+        ...(this.zone.sites?.props() ?? []),
+      ].map((p) =>
         p.id === 'filmScreen' && film !== null ? this.showing(p, film) : this.standing(p, nowMs),
-    );
+      ),
+      // A built footbridge is walked on: drawn from its top edge, under anyone on it.
+      ...(this.zone.sites?.flat() ?? []).map((p) => ({
+        ...this.standing(p, nowMs),
+        footY: p.ty * TILE_SIZE + 1,
+      })),
+    ];
   }
 
   /** Which frame of the film is on the screen, while film night is on (0.2's J3); null if not. */
@@ -1117,6 +1130,7 @@ export class OutdoorView implements SceneView {
     for (const p of [
       ...(this.zone.lots?.props() ?? []),
       ...(this.zone.decorations?.props() ?? []),
+      ...(this.zone.sites?.props() ?? []),
     ]) {
       lights.push(...this.stallLights(p, this.standing(p).sprite, p.id));
     }

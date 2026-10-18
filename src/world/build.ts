@@ -34,7 +34,7 @@ import { worldContext, type WorldContext } from './context';
 import type { Dug } from './Dug';
 import type { WorldState } from './events';
 import type { EventBus } from './eventBus';
-import type { Farm } from './Farm';
+import { placeOf, type Farm, type Plot } from './Farm';
 import type { Friends } from './Friends';
 import type { Home } from './Home';
 import type { Keepsakes } from './Keepsakes';
@@ -67,6 +67,7 @@ import type { Fishing } from './services/Fishing';
 import type { FirstDay } from './services/FirstDay';
 import type { UpNow } from './services/UpNow';
 import type { RareEvents } from './services/RareEvents';
+import { Projects } from './services/Projects';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
@@ -254,6 +255,8 @@ export abstract class WorldParts {
   readonly upNow: UpNow;
   /** What's out of the ordinary today, and who's passing through (V1's R3). */
   readonly rareEvents: RareEvents;
+  /** The town's projects, funded at the noticeboard and built where they stand (V1's R4). */
+  readonly projects: Projects;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -305,12 +308,23 @@ export abstract class WorldParts {
     this.zones = place.zones;
     const { zones } = this;
     const outside = () => zones.outdoor(this.scene)?.id ?? null;
-    this.garden = new Garden(ctx, this.bag, this.farm);
+    // Her greenhouse's planters, once it's built, are under glass (V1's R4).
+    const glass = (bed: Plot) =>
+      placeOf(bed) !== 'home' &&
+      this.zones.outdoor(placeOf(bed))?.sites?.isBed(bed.tx, bed.ty) === true;
+    this.garden = new Garden(ctx, this.bag, this.farm, glass);
     this.barn = new Barn(this.bag, this.garden);
     this.gathering = new Gathering(ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(ctx, this.wallet, this.bag, this.belongings, this.stalls);
     this.mailbox = new Mailbox(ctx, this.letters, this.belongings, this.wardrobe);
     const { mailbox, belongings } = this;
+    this.projects = new Projects(ctx, {
+      works: keepers.works,
+      bag: this.bag,
+      wallet: this.wallet,
+      mailbox,
+      yard: keepers.yard,
+    });
     const hasHad = (id: Had) => this.milestones.hasHad(id);
     const shop = shopping(shared, { mailbox, belongings, hasHad });
     ({ deliveries: this.deliveries, catalogue: this.catalogue, workshop: this.workshop } = shop);
@@ -385,6 +399,7 @@ export abstract class WorldParts {
       hasHad,
       rareEvents: this.rareEvents,
       stalls: this.stalls,
+      projects: this.projects,
     });
   }
 

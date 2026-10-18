@@ -126,7 +126,19 @@ export type PropId =
   | 'plumTree'
   | 'persimmonTree'
   // The town hall by the square (V1's P3b), Rob Boo's, on a lot of its own.
-  | 'townHall';
+  | 'townHall'
+  // The town's projects going up (V1's R4): the posts, each one's frame, and what's built.
+  | 'sitePost'
+  | 'bandstandFrame'
+  | 'bandstand'
+  | 'bedFrame'
+  | 'planks'
+  | 'flowerBed'
+  | 'gardenSeat'
+  | 'bridgeFrame'
+  | 'footbridge'
+  | 'greenhouseFrame'
+  | 'herGreenhouse';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -1317,3 +1329,6 @@ export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';
 
 /** The steps of Cody's first-day thread (V1's R1), in any order. */
 export type FirstDayStepId = 'shake' | 'plant' | 'stall' | 'notice' | 'meet' | 'eat';
+
+/** The town's projects (V1's R4), funded over weeks at the noticeboard. */
+export type ProjectId = 'bandstand' | 'castleGarden' | 'footbridge' | 'greenhouse';

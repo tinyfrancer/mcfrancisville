@@ -359,7 +359,14 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R3 landed (PR #192). Next in this lane: R4.
+**R4 in progress** on `claude/r4-town-projects` (decision 314; bumps the save to v51 in its last
+commit). Done: the four projects (`data/projects.ts`), their rules (`systems/projects.ts`), `Works`
+and `world.projects`, the sites in the world (`zones/Sites.ts`, art `sprites/projects.ts`), the
+noticeboard's Projects tab, Today's line, the recital at the bandstand, the greenhouse's beds, the
+cap on gathering and the economy test. Next: the save bump (`projects` in `SaveState`, v51, a
+migration, `isSaveState`, `fromSave`, the lived-in fixtures), merge `v1-dev`, the suite, ready.
+
+R3 landed (PR #192).
 
 **For R4/R6 (from R3, decision 313):** no save change; the 0.8 `NOTES` row is full at five lines
 (R1's three, R2's, R3's): **R4 folds two to make room**.

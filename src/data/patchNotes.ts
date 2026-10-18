@@ -182,14 +182,14 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'New in town? Cody leaves a little list for the first day: the candy tree, a seed, the ' +
         'stall, a note, three hellos and a snack. Any order. A present at the end.',
-      "A new town starts with four kinds of seed instead of all of them. Scarah's cart at Boo " +
-        'Acres has every other kind, every day. She insists.',
-      'On a first day, the date and the little tray of things glow until tapped, so nobody ' +
-        "misses the calendar. I missed it for a year. Don't tell anyone.",
+      "A new town starts with four seeds (Scarah's cart has the rest), and on a first " +
+        'day the date and the tray glow until tapped. I missed the calendar for a year.',
       "The calendar's Today says what's waiting (the tree, notes, ripe beds, who's coming " +
         'round) and who wants a favour: look for a parcel over them. Tap a line to go.',
       'Daytime doings on Mondays, Tuesdays and Thursdays, a festival week each season, and ' +
         'now and then a surprise: shooting stars, a stranger, a snow day. Look out!',
+      'Something to build! The noticeboard has projects: a bandstand, the castle garden, a ' +
+        'footbridge, a greenhouse. Give a little at a time and watch them go up.',
     ],
     ps: 'P.S. If you know your way round already, Cody will not fuss. He will want to, mind.',
   },

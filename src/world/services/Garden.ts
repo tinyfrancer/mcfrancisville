@@ -42,11 +42,19 @@ export class Garden {
   /** Which beds are tilled, and what's growing in each. */
   readonly farm: Farm;
   private lookingAt: Plot | null = null;
+  /** Whether a bed outdoors is under glass: her greenhouse's planters (V1's R4). */
+  private readonly glass: (bed: Plot) => boolean;
 
-  constructor(ctx: WorldContext, bag: Bag, farm: Farm) {
+  constructor(
+    ctx: WorldContext,
+    bag: Bag,
+    farm: Farm,
+    glass: (bed: Plot) => boolean = () => false,
+  ) {
     this.ctx = ctx;
     this.bag = bag;
     this.farm = farm;
+    this.glass = glass;
     if (farm.strayed > 0) bag.add(SPRINKLER, farm.strayed);
     for (const seed of farm.strayedSeeds) bag.add(seed, 1);
     // A planter carries what's growing in it across her room; put away, it gives her what was in it.
@@ -174,7 +182,7 @@ export class Garden {
     const crop = cropFromSeed(seed);
     if (!crop || !this.farm.isTilled(bed) || this.farm.planting(bed)) return null;
     if (!this.bag.remove(seed)) return null;
-    const quick = growsQuick(crop, placeOf(bed), this.ctx.clock.now());
+    const quick = growsQuick(crop, placeOf(bed), this.ctx.clock.now(), this.glass(bed));
     const planting: Planting = {
       crop,
       plantedAt: this.ctx.clock.now(),

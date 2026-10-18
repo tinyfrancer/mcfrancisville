@@ -101,7 +101,7 @@ describe('sitting', () => {
     for (const [id, row] of Object.entries(FURNITURE)) {
       if (row.seat) expect(row.layer, id).toBe('floor');
     }
-    expect(Object.keys(PROP_SEATS).sort()).toEqual(['bench', 'log', 'stump']);
+    expect(Object.keys(PROP_SEATS).sort()).toEqual(['bench', 'gardenSeat', 'log', 'stump']);
     expect(FURNITURE.makeupChair.seat).toBeDefined();
     const h = harness();
     const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;

@@ -277,6 +277,11 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return event.gift ? [pop({ item: event.gift }, 1, head), emote('♥')] : [emote('♪')];
     case 'foundStray':
       return [burst('sparkle', feet, 5, 10), pop({ item: event.critter }, 1, feet), emote('!')];
+    // V1's R4: something given to a town project, and one built.
+    case 'pitchedIn':
+      return event.raised ? [burst('sparkle', head, 5, 14), emote('!')] : [];
+    case 'built':
+      return [burst('confetti', head), burst('sparkle', head, 6, 18), emote('♪')];
     case 'frozen':
       return [burst('sparkle', head, 6, 20), emote('♪')];
     case 'dressedUp':

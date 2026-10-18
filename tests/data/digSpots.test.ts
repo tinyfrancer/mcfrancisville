@@ -8,6 +8,7 @@ import { LOST_SPOTS } from '../../src/data/smallEvents';
 import { PASSERS, WANDERING_STALL_AT } from '../../src/data/rareEvents';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { placeHabitats, townHabitats } from '../../src/systems/critters';
+import { projectsIn, siteOf } from '../../src/systems/projects';
 import { parseMap, tileAt, walkable, type TileMap } from '../../src/systems/grid';
 import type { MapZoneId, PropId } from '../../src/types/ids';
 
@@ -72,6 +73,8 @@ function keptClear(id: MapZoneId, map: TileMap): Set<string> {
   for (const row of Object.values(PASSERS)) {
     if (row.zone === id) for (const t of row.at) around(t, 1, clear);
   }
+  // Where the town's projects go up (V1's R4): every stage of each, its deck and its beds.
+  for (const project of projectsIn(id)) for (const t of siteOf(project)) around(t, 1, clear);
   return clear;
 }
 

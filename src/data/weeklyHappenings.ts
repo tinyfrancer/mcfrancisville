@@ -51,6 +51,8 @@ export const WEEKLY_HAPPENINGS: Record<WeeklyId, HappeningRow> = {
     from: 19,
     until: 21,
     where: { inside: 'boothovenParlour' },
+    // Under the bandstand's roof, once the town has built it (V1's R4).
+    bandstand: { where: { at: 'bySalonCorner' }, place: 'at the bandstand on the square' },
     who: ['boothoven', 'maude', 'wrapunzel'],
     doing: 'conducting',
     says: {

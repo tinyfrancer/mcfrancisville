@@ -26,7 +26,9 @@ import { FINALE_FESTIVAL, FINALE_LETTER } from '../data/finale';
 import { finaleLetterId } from './finale';
 import { VILLAGERS, type Favour, type Lines, type Reward } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import type { ItemId, MilestoneId, VillagerId, ZoneId } from '../types/ids';
+import type { ItemId, MilestoneId, ProjectId, VillagerId, ZoneId } from '../types/ids';
+import { PROJECTS } from '../data/projects';
+import { MAYOR, mayorMet } from './mayor';
 import { isNight, windowAtHour } from './clock';
 import { festivalDay, festivalsOn, partsOf } from './calendar';
 import { topicsNow, type TalkScene } from './dialogue';
@@ -321,6 +323,11 @@ export function letterOf(id: string): Letter | null {
   if (key === 'rare') {
     const rare = n && n in RARE_EVENTS ? RARE_EVENTS[n as RareEventId] : undefined;
     return rare ? { ...rare.letter, gift: { item: rare.keepsake } } : null;
+  }
+  // A town project built (V1's R4): the mayor's thanks, signed by name once she has met him.
+  if (key === 'project') {
+    const project = n && n in PROJECTS ? PROJECTS[n as ProjectId] : undefined;
+    return project ? { from: mayorMet() ? MAYOR : 'mayor', text: project.letter } : null;
   }
   if (key === 'shelf') {
     const milestone = n && n in MILESTONES ? MILESTONES[n as MilestoneId] : undefined;

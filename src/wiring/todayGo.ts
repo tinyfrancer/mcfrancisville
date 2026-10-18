@@ -15,6 +15,8 @@ export const TODAY_TOLD_BY: readonly (keyof WorldState)[] = [
   'stall',
   'firstDay',
   'scene',
+  // A town project given to, started or built (V1's R4).
+  'projects',
 ];
 
 /**

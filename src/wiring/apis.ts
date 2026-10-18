@@ -40,6 +40,8 @@ import type { SoundBoard } from '../audio/SoundBoard';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
+import { drawProjectPicture } from '../render/projects';
+import { FURNITURE } from '../data/furniture';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import {
   drawFixtureIcon,
@@ -593,6 +595,15 @@ export function sheetApis({
     },
     icon: drawItemIcon,
     portrait: drawPortrait,
+    // The town's projects (V1's R4).
+    projects: () => world.projects.view(),
+    startProject: (id) => world.projects.start(id)?.map((piece) => FURNITURE[piece].name) ?? null,
+    giveProject(gift) {
+      const given = world.projects.give(gift);
+      if (given) play([given]);
+      return given !== null;
+    },
+    projectPicture: drawProjectPicture,
   };
   const stall: StallApi = {
     stall: () => world.stall.view(),

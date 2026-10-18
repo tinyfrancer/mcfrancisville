@@ -98,6 +98,13 @@ function holds(h: Harness, line: TodayLine): boolean {
       const stray = line.carrying ? w.rareEvents.carrying() : w.rareEvents.stray();
       return stray?.owner === line.owner && stray.zone === line.zone;
     }
+    // V1's R4.
+    case 'project': {
+      const view = w.projects.view().find((p) => p.id === line.id);
+      return (
+        w.projects.current === line.id && Math.floor((view?.progress ?? -1) * 100) === line.percent
+      );
+    }
   }
 }
 

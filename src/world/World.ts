@@ -539,6 +539,8 @@ export class World extends WorldParts {
     if (prop?.id === 'candyTree') return [arrived, this.candyTree.shake()];
     if (prop?.id === 'saplingPlot') return [arrived, this.candyTree.tend(prop)];
     if (prop?.id === 'pumpkinPatch') return [arrived, this.pumpkinPatch.visit()];
+    // A built bandstand plays a tune as she walks up, Boothoven's she has learnt too (V1's R4).
+    if (prop?.id === 'bandstand') return [arrived, this.instruments.play('piano')];
     if (prop?.id === 'honestyStall') {
       const sold = this.stall.collect();
       return sold ? [arrived, sold] : [arrived];

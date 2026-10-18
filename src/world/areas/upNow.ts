@@ -12,6 +12,7 @@ import { callersOn, type TodayFacts } from '../../systems/today';
 import { PASSERS } from '../../data/rareEvents';
 import { passersOn } from '../../systems/rareEvents';
 import type { RareEvents } from '../services/RareEvents';
+import type { Projects } from '../services/Projects';
 import type { Stalls } from '../zones/Stalls';
 import { weatherOn } from '../../systems/weather';
 import type { MapZoneId } from '../../types/ids';
@@ -42,6 +43,8 @@ export interface UpNowParts {
   /** What's out of the ordinary today (V1's R3), and the Moon Pie Man's and the pop-up's places. */
   rareEvents: RareEvents;
   stalls: Stalls;
+  /** The town project she's funding (V1's R4). */
+  projects: Projects;
 }
 
 /** What Today reads of the rare events, the passers-by and the peddlers (V1's R3). */
@@ -76,6 +79,12 @@ function outOfTheOrdinary(
         }
       : null,
   };
+}
+
+/** The town project she's funding, if one's under way (V1's R4). */
+function underWay(projects: Projects): TodayFacts['project'] {
+  const view = projects.view().find((p) => p.current);
+  return view ? { id: view.id, stage: view.stage, progress: view.progress } : null;
 }
 
 const OUTDOORS = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
@@ -119,6 +128,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       callers: callersOn(day, (who) => friends.hearts(who) >= BEST_HEARTS),
       critters: { visiting, fresh: visiting.filter((id) => !parts.hasHad(id)) },
       ...outOfTheOrdinary(parts, day),
+      project: underWay(parts.projects),
     };
   });
 }

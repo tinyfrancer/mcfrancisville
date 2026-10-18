@@ -7,6 +7,7 @@ import { Lots } from '../zones/Lots';
 import { MapZone } from '../zones/MapZone';
 import { Mounds } from '../zones/Mounds';
 import { RoomZone } from '../zones/RoomZone';
+import { Sites } from '../zones/Sites';
 import { Stalls } from '../zones/Stalls';
 import { Zones } from '../zones/Zones';
 import type { Shared } from './shared';
@@ -29,17 +30,20 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
     home.everyPiece.some((p) => p.id === piece) ||
     home.stored.some((st) => st.id === piece) ||
     s.yard.placed.some((p) => p.id === piece);
+  // The square's holiday pieces stand in the town's own map, not a test's small one; and so do
+  // the town's projects (V1's R4).
+  const real = (s.options.map ?? TOWN) === TOWN;
   const townZone = new MapZone(
     'town',
     s.map,
     stalls,
     isOpen,
     lotsIn('town'),
-    // The square's holiday pieces stand in the town's own map, not a test's small one.
-    (s.options.map ?? TOWN) === TOWN ? new Decorations(now, hers) : null,
+    real ? new Decorations(now, hers) : null,
     () => s.farm.rows,
     s.yard,
     new Mounds('town', s.map.digSpots, ctx.clock),
+    real ? new Sites(s.works, 'town') : null,
   );
   const homeZone = new HomeZone(home);
   const zones = new Zones(
@@ -50,7 +54,9 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
         // What's set out for a happening at the fairground's stage (0.2's M3).
         const set = id === 'fairground' ? new Decorations(now, hers, id) : null;
         const mounds = new Mounds(id, map.digSpots, ctx.clock);
-        return new MapZone(id, map, null, isOpen, lotsIn(id), set, () => s.farm.rows, null, mounds);
+        const sites = new Sites(s.works, id);
+        const rows = () => s.farm.rows;
+        return new MapZone(id, map, null, isOpen, lotsIn(id), set, rows, null, mounds, sites);
       }),
     ],
     INTERIOR_IDS.map((id) => new RoomZone(id)),
