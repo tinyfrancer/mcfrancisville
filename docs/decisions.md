@@ -6989,3 +6989,87 @@ the steps' own events in the save (the town already keeps what they read); the c
 hello on day one (smoke and she would see it on every reload); a skip button (Got it closes it,
 and it asks nothing of her); the hints in the save (a phone's, like the dedication); fewer seeds in
 an old bag (nothing is lost).
+
+## 296. Faces: a feeling for every line, one face on the bust and in the world, and hers for a moment (2026-10-18, V1's L7)
+
+_Session L7 of the V1 plan, lane 2, the lane's last, answering `docs/v1_analysis.md`'s finding 4
+("One body, one face": five moods used only by idle poses, a talk never changing a face). No save
+change. Personal touches parked (decision 177): nothing was asked, and every feeling is the
+warmest default the lines suggested._
+
+- **Six feelings** (`Feeling`, `types/mood.ts`): happy, surprised, sad, a laugh, shy and cross (the
+  fond kind); no feeling is the face as it always was. A doll `Mood` is now any of the old five,
+  the blink or a feeling, so a feeling goes through `faceRows` like the rest.
+- **Drawn into the doll's face** (`sprites/faces.ts`, lines added to `drawFace`): an eye grid per
+  feeling (a smile's lower lid, a laugh's two arcs, a surprise a row taller, a sad droop at the
+  outer corner, shy looking down, cross low at the inner corner), brows by pixel, a deeper blush
+  for happy, laugh and shy, and a mouth per feeling in lip keys with `m` for inside an open one
+  (`facePalette`), from the front and side on. **A blink over a feeling** shuts its eyes and keeps
+  its brows and mouth (`faceRows`' `blink`), so a laughing neighbour still blinks; a laugh's eyes
+  are shut already. Freckles go under a feeling's mouth. **The faces of their own** are
+  `sprites/moodFaces.ts`: Gourdon's carving cut to each feeling (and his candlelit glow with it,
+  `pumpkinHead(…, feel)`), Barty's sockets and grin, the Moon Pie Man's mouth under his shades,
+  Maude's eyes behind her glasses and her mouth over her chain; Wes's moustache keeps his mouth
+  and his eyes say it. **Scarah's smile is stitched** (`FaceTouches.stitched`, `stitchMouth`): a
+  stitch at each end of her mouth in whatever shape it's in, her seams' thread. A `Touch` takes the
+  feeling as a fourth argument, which the faces of their own read and the rest ignore.
+- **One face, the world's and the bust's.** The feeling is `Stance.feel`, so `figureLayers` and
+  `bakeFigure` (keyed by it) draw it, and `drawBust`'s `mood` (`BustMood`, now `'neutral' |
+Feeling`) bakes the figure with that stance before the frame is cut and scaled, as L5 preferred:
+  no stamp after Scale2x, no second drawing.
+- **Chosen by the line** (`systems/moods.ts`, rows in `data/moods.ts`): a row's own feeling first
+  (a heart moment's `moods`, a reply's `mood`, null meaning "as usual"), then its topic's
+  (`TOPIC_MOODS`: a storm surprises, a costume makes them laugh, a bracelet makes them shy…), then
+  the line's own words (`FEELING_CUES`: "Ha!", "Hmph", "sorry", "Um", "Oh!", a line ending glad),
+  then the kind of line (`KIND_MOODS`: a puff is bashful, a happening and a drop-by glad), then
+  how close they are (`BAND_MOODS`: close and best friends and her husband smile). A gift is
+  `GIFT_MOODS`: **a loved one makes them laugh for joy**, a liked one smile, a second in a day is
+  turned down shyly. `Neighbourhood` puts it on every `Chat` (`feels`, and `moreFeels` for a
+  moment's other lines), `GiftResult`, a reply and a favour's thanks; topic lines with their topic
+  give a feeling about half the time, so faces change often but not on every line (held by
+  `tests/systems/moods.test.ts`). Four heart moments carry moods of their own (Maude's eight and
+  ten, Rufus's eight) and the four topics' chips a feeling each (`feels`); the rest are worked out.
+- **The sheet says which line is showing.** The talk sheet draws the bust with each line's
+  feeling as it shows it ("Go on…" included, a talk action's lines worked out from their words)
+  and tells the world (`TalkApi.feel` → `Neighbourhood.feel`), so the face on them in the world is
+  the one on their bust; it holds while she talks and `FEEL_AFTER_MS` (2.4 s) after Bye
+  (`Neighbourhood.feelingOf`, read by `neighbourDrawables` into the stance). The bust's canvas
+  carries `data-feel`.
+- **Her face for a moment, as E2's verbs are** (`feelOf` beside `verbOf` in
+  `world/services/Poses.ts`, `FEEL_MS` in `systems/poses.ts`): glad at a catch and surprised at a
+  first one, laughing at a gift they loved and glad at one they liked, surprised by Wes darting
+  off or dropping his clue (the fright, gentle) and by a clue pinned, laughing at a shelf finished,
+  glad at a first harvest, a fair prize or an egg. It shows once what she's doing is done (the
+  find held up, the rock-out) and for `FEEL_MS` (2.4 s) after, walking or still, crouching or
+  waving, but never over a pose's own face (her phone, the rock-out, the find held up). **A chip
+  that's a feeling** ("Thank you!", "I love the rain!", a row's `feels`; "I picked it just for
+  today." isn't) shows on her face as she says it (`herFeeling`, the `felt` signal). It's `Rest`'s
+  `feel` to `bakeDoll`, keyed.
+- **Blinks**: E3 had already made the neighbours' blink the `blink` mood, so it shares the
+  machinery; what's new is blinking through a feeling. A pumpkin, a skull and dark glasses still
+  don't blink.
+- **Held by** `tests/sprites/doll.test.ts` (every feeling facing us and side on a face of its own,
+  nothing below her chin changed, the blink over each, her crouch feeling and her find held up
+  not, every piece and hairstyle in every feeling) and `tests/sprites/villagers.test.ts` (every
+  neighbour, the Moon Pie Man and Wes in every feeling, facing her, side on and in costume, each a
+  face of its own and nothing from behind; blinking through each; Gourdon's glow carved with
+  him), `tests/world/faces.test.ts`, `tests/hud/talkFaces.test.ts`, and smoke's `faces` section (a
+  loved gift changes the bust's canvas and the same face is on the neighbour and on her through
+  `view.faces()`, upright and on its side). The gallery's `figure:<id>:mood:<feeling>` and
+  `doll:feel:<feeling>` rows show them all, each a strip (facing her, side on, in costume,
+  blinking) so the gallery grows by 96 pictures, not 400: it had grown past what CI's Chromium will
+  capture in one full-page screenshot, which smoke's `gallery` now falls back from to its top.
+- **No new bodies.** The plan's "two or three body builds" (`docs/v1_analysis.md`: "below the neck
+  every neighbour is the same silhouette") is out of scope for one session: every piece of
+  clothing, every action pose and every work pose is painted onto the one body's regions
+  (decision 27), so a second build is a pass over all of them. It's left for V1's review to weigh.
+- Two purses said "Candy Candy" since L5's `candy()` started saying the word itself (the shop's
+  and the catalogue's); fixed in passing.
+
+**Rejected:** a feeling stamped over the bust after the crop (a second face to keep in step with
+the world's, at the wrong density after Scale2x); a mood field on every small-talk line (thousands
+of lines to tag by hand, where the topic and the line's own words say it); a feeling on every line
+(a face that never rests reads as noise); her face reacting to every line she reads (only a chip
+she picks is hers to feel); a sad face when a critter flees or a fish gets away (nothing
+punishes, decision 11); a new face drawn per neighbour per feeling (thirteen times six faces to
+keep, where the doll's face and a few faces of their own cover everyone).

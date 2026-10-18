@@ -36,6 +36,9 @@ import { atHers, isHusband } from '../../systems/cody';
 import { footprint } from '../../systems/decor';
 import { answerSaid, momentDue, questionDue, repliesTo } from '../../systems/voice';
 import { inTown } from '../../systems/mayor';
+import { FEEL_AFTER_MS, feelingOf, giftFeeling, herFeeling } from '../../systems/moods';
+import type { LineKind } from '../../data/moods';
+import type { Feeling } from '../../types/mood';
 import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import { holidayOn } from '../../systems/holidays';
@@ -154,6 +157,8 @@ export class Neighbourhood {
   private chatMs = 0;
   /** What she can say back to the last line, and to whom (V1's P2). */
   private pending: { id: VillagerId; replies: readonly Answering[] } | null = null;
+  /** The feeling on the face of whoever she's talking to, and until when after (V1's L7). */
+  private feeling: { id: VillagerId; feel: Feeling | null; until: number } | null = null;
   /** The day each last told her a heart moment, and asked their question: one a day. */
   private told = new Map<VillagerId, string>();
   private asked = new Map<VillagerId, string>();
@@ -291,6 +296,34 @@ export class Neighbourhood {
   endTalk(): void {
     this.talking = null;
     this.pending = null;
+    // Their face keeps the last line's feeling a moment as she goes (V1's L7).
+    if (this.feeling) this.feeling.until = this.ctx.clock.now() + FEEL_AFTER_MS;
+  }
+
+  /**
+   * How a neighbour feels about the line she's reading (V1's L7): the talk sheet says so as it
+   * shows each line, so their face in the world is the one on their bust.
+   */
+  feel(id: VillagerId, feel: Feeling | null): void {
+    this.feeling = { id, feel, until: this.ctx.clock.now() + FEEL_AFTER_MS };
+  }
+
+  /** The feeling on a neighbour's face now: while she talks to them, and a moment after. */
+  feelingOf(id: VillagerId): Feeling | null {
+    const f = this.feeling;
+    if (!f || f.id !== id) return null;
+    return this.talking === id || this.ctx.clock.now() < f.until ? f.feel : null;
+  }
+
+  /** How a line is said (V1's L7), from what it is and how close they are now. */
+  private feelingFor(
+    id: VillagerId,
+    kind: LineKind,
+    text: string,
+    extra: { topic?: string | null; mood?: Feeling | null } = {},
+  ): Feeling | null {
+    const band = bandOf(this.keeps.friends.hearts(id), id);
+    return feelingOf({ kind, text, band, ...extra });
   }
 
   /**
@@ -700,6 +733,29 @@ export class Neighbourhood {
     }
     const story = isHusband(id) && this.keeps.married?.hasToTell() === true;
     if (!told && (story || this.hasToTell(id, day))) chat.waiting = true;
+    // How they feel saying it (V1's L7): the row's feeling, or one worked out from the line.
+    const kind: LineKind = told
+      ? (told.kind ?? 'question')
+      : puff
+        ? 'puff'
+        : at
+          ? 'happening'
+          : dropping
+            ? 'dropBy'
+            : small
+              ? 'small'
+              : own?.topic
+                ? 'topic'
+                : 'pool';
+    const moodAt = (k: number) =>
+      told?.moods && k < told.moods.length ? told.moods[k] : undefined;
+    chat.feels = this.feelingFor(id, kind, chat.line, { topic: own?.topic, mood: moodAt(0) });
+    if (chat.more) {
+      chat.moreFeels = chat.more.map((l, k) =>
+        this.feelingFor(id, kind, l, { mood: moodAt(k + 1) }),
+      );
+    }
+    this.feel(id, chat.feels);
     return chat;
   }
 
@@ -713,9 +769,14 @@ export class Neighbourhood {
     this.pending = null;
     if (answering.answer) this.keeps.friends.update(id, { answered: answering.answer });
     if (answering.herDay) this.keeps.married?.answered(answering.herDay);
+    // A chip that's a feeling shows on her face as she says it (V1's L7).
+    const hers = herFeeling(answering.say, answering.feels);
+    if (hers) this.ctx.signals.emit('felt', { feeling: hers });
     const day = dayKey(this.ctx.clock.now());
     const line = fill(answering.back, { name: this.name, years: yearsMarried(day) });
-    return { line, bonus: false, puff: false };
+    const feels = this.feelingFor(id, 'reply', line, { mood: answering.mood });
+    this.feel(id, feels);
+    return { line, bonus: false, puff: false, feels };
   }
 
   /**
@@ -736,7 +797,10 @@ export class Neighbourhood {
         this.ctx.events.emit('bag', bag.contents);
       }
       const [line, ...more] = moment.lines;
-      return { line: line!, more, replies: moment.replies ?? [], gift: moment.gift };
+      const told: Told = { line: line!, more, replies: moment.replies ?? [], kind: 'moment' };
+      if (moment.gift) told.gift = moment.gift;
+      if (moment.moods) told.moods = moment.moods;
+      return told;
     }
     const asking =
       this.asked.get(id) === day ? null : questionDue(id, friends.hearts(id), friendship.answered);
@@ -892,7 +956,9 @@ export class Neighbourhood {
     if (bag.spare(item) === 0 || isKept(item)) return null;
     const day = dayKey(this.ctx.clock.now());
     if (friends.of(id).gifted === day) {
-      return { declined: true, line: fill(declineLine(id), { name: this.name }) };
+      const feels = giftFeeling(null);
+      this.feel(id, feels);
+      return { declined: true, line: fill(declineLine(id), { name: this.name }), feels };
     }
     bag.remove(item);
     this.ctx.events.emit('bag', bag.contents);
@@ -905,7 +971,16 @@ export class Neighbourhood {
     if (reaction === 'loved') this.ctx.signals.emit('thrilled', { by: 'gift' });
     this.ctx.moments.push({ kind: 'gave', villager: id, item, reaction });
     const line = fill(giftLine(id, item), { name: this.name });
-    return { declined: false, reaction, line, ...(birthday ? { birthday: true as const } : {}) };
+    // A loved gift makes them laugh for joy, on their face and their bust alike (V1's L7).
+    const feels = giftFeeling(reaction);
+    this.feel(id, feels);
+    return {
+      declined: false,
+      reaction,
+      line,
+      feels,
+      ...(birthday ? { birthday: true as const } : {}),
+    };
   }
 
   /** What a neighbour has to ask of her today, until she's done it. */
@@ -919,7 +994,7 @@ export class Neighbourhood {
    * Hands over what a neighbour asked for, and takes their thanks and some Candy. Null if they
    * asked nothing today or she hasn't enough of it.
    */
-  doFavour(id: VillagerId): { line: string; candy: number } | null {
+  doFavour(id: VillagerId): { line: string; candy: number; feels: Feeling | null } | null {
     const favour = this.favour(id);
     const { bag, wallet } = this.keeps;
     if (!favour || !bag.remove(favour.item, favour.count)) return null;
@@ -927,7 +1002,10 @@ export class Neighbourhood {
     this.ctx.events.emit('bag', bag.contents);
     wallet.earn(candy);
     this.befriend(id, FAVOUR_POINTS, { favour: dayKey(this.ctx.clock.now()) });
-    return { line: fill(VILLAGERS[id].thanks, { name: this.name }), candy };
+    const line = fill(VILLAGERS[id].thanks, { name: this.name });
+    const feels = this.feelingFor(id, 'favour', line);
+    this.feel(id, feels);
+    return { line, candy, feels };
   }
 
   /** A little more friendship for something done for them away from a talk: a note answered. */
@@ -976,6 +1054,10 @@ export interface Told {
   more: string[];
   replies: readonly Answering[];
   gift?: ItemId;
+  /** A heart moment or a question (V1's L7), for how it's said; a question if not said. */
+  kind?: 'moment' | 'question';
+  /** How each line is said, where the row says (V1's L7). */
+  moods?: readonly (Feeling | null)[];
 }
 
 /** Above, either side, then below: where to look round a tile for a seat or a door. */

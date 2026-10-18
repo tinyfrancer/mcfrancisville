@@ -494,7 +494,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   by `Neighbour.roam`/`notice`, a seat beside the stop sits them (`seated`), and a `doing` on a
   `Stop` names their job (`WORKS` in `src/data/work.ts`, two frames of arms and what they hold
   in `src/sprites/working.ts`); `figureLayers` takes a `Stance`, and chatter's bubbles go to the
-  effects layer from `src/wiring/chatter.ts`.
+  effects layer from `src/wiring/chatter.ts`. How a face feels (V1's L7, decision 296) is a
+  `Feeling` on the stance (`feel`) and on her `Rest`, drawn by `src/sprites/faces.ts` and
+  `moodFaces.ts`, chosen by the line in `src/systems/moods.ts` (rows `src/data/moods.ts`): the
+  talk sheet's bust and the world sprite are one face, and hers feels a moment through `poses`.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
   rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
   where, is `src/systems/critters.ts`: habitats found from each place's map, and each place's

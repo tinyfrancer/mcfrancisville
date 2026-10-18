@@ -390,6 +390,12 @@ function startGame(): void {
             stanceOf({ ...n, seated: n.seat !== null }, performance.now()) ?? 'walking',
           ),
         })),
+      faces: () => ({
+        her: world.poses.face(),
+        neighbours: world.neighbourhood
+          .neighboursIn(world.scene)
+          .map((n) => ({ id: n.id, feel: world.neighbourhood.feelingOf(n.id) })),
+      }),
     };
     Object.assign(window, { world, view: debug, sound });
   }

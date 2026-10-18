@@ -59,5 +59,10 @@ export function answerComesUp(villager: VillagerId, day: string): boolean {
 export function repliesTo(villager: VillagerId, topic: string | null): Reply[] {
   const row = topic ? REPLIES[topic as Topic] : undefined;
   if (!row) return [];
-  return row.say.map((say, i) => ({ say, back: row.back[villager][i] ?? row.back[villager][0]! }));
+  return row.say.map((say, i) => {
+    const back = row.back[villager][i] ?? row.back[villager][0]!;
+    // How she feels saying it (V1's L7), where the row says.
+    const feels = row.feels?.[i];
+    return feels !== undefined ? { say, back, feels } : { say, back };
+  });
 }

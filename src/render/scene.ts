@@ -139,10 +139,12 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const look = world.wardrobe.look;
   // Standing as usual, she breathes and blinks (V1's E2).
   const rest = dancing ? null : world.poses.rest();
+  // And how she feels about what just happened, walking or still (V1's L7).
+  const feel = dancing ? null : world.poses.face();
   const frame = isAction(pose ?? undefined) ? world.poses.frame() : index;
   const sprite = dancing
     ? bakeDoll(look, step.facing, step.frame)
-    : bakeDoll(look, p.facing, frame, pose ?? undefined, rest ?? {});
+    : bakeDoll(look, p.facing, frame, pose ?? undefined, { ...rest, ...(feel ? { feel } : {}) });
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
   const left = x - sprite.width / 2;

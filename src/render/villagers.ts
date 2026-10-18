@@ -16,6 +16,7 @@ import { workPose } from '../sprites/working';
 import { MAYOR_LIFT, MAYOR_PORTRAIT_DROP } from '../sprites/robBoo';
 import { stanceOf } from '../systems/neighbourLife';
 import type { BraceletId, Facing, VillagerId, ZoneId } from '../types/ids';
+import type { Feeling } from '../types/mood';
 import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
 import { TILE_SIZE } from '../config/world';
@@ -50,7 +51,8 @@ export function bakeFigure(
 /** Names a stance for the bake cache; standing plainly is no name at all. */
 function stanceKey(stance: Stance): string {
   const act = stance.act ? `:${stance.act}${stance.frame ?? 0}` : '';
-  return `${act}${stance.sit ? ':sit' : ''}${stance.out ? ':out' : ''}${stance.blink ? ':blink' : ''}`;
+  const feel = stance.feel ? `:${stance.feel}` : '';
+  return `${act}${stance.sit ? ':sit' : ''}${stance.out ? ':out' : ''}${stance.blink ? ':blink' : ''}${feel}`;
 }
 
 /** Maude's soft glow after dark: all of her sheet, in its own pale colour, as she stands. */
@@ -68,7 +70,7 @@ export function maudeGlow(facing: Facing, frame = 0, stance: Stance = {}): HTMLC
 /** Gourdon's carved face after dark, candlelit from inside his pumpkin, as he stands. */
 function gourdonGlow(facing: Facing, frame: number, stance: Stance): HTMLCanvasElement {
   const f = stance.act ? 0 : frame % DOLL_FRAMES;
-  const head = pumpkinHead(facing, f);
+  const head = pumpkinHead(facing, f, stance.feel ?? null);
   const [layer] = stanceFolded([{ source: { rows: head.rows }, palette: head.palette }], stance);
   return glowOf(
     `glow:gourdon:${facing}:${f}${stanceKey(stance)}`,
@@ -116,7 +118,10 @@ export function neighbourDrawables(
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
       const wears = world.friends.of(n.id).wears ?? null;
       // Standing, they breathe, blink, wave, sit and work (V1's E3).
-      const stance = stanceOf({ ...n, seated: n.seat !== null }, nowMs) ?? {};
+      const life = stanceOf({ ...n, seated: n.seat !== null }, nowMs) ?? {};
+      // And how they feel about what they're telling her, the face on their bust (V1's L7).
+      const feel = world.neighbourhood.feelingOf(n.id);
+      const stance: Stance = feel ? { ...life, feel } : life;
       const costume = world.finale.costumeOf(n.id);
       const sprite = bakeFigure(n.id, n.facing, frame, costume, wears, stance);
       const ghost = n.id === 'maude';
@@ -181,8 +186,8 @@ export function drawPortrait(
   ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
 }
 
-/** How a face looks on the bust (V1's L5). Only the one for now; L7 adds the moods. */
-export type BustMood = 'neutral';
+/** How a face looks on the bust (V1's L5): as it always does, or a feeling (V1's L7). */
+export type BustMood = 'neutral' | Feeling;
 
 /**
  * A bust's frame (V1's L5): head and shoulders in a square of 32 of the figure's pixels, drawn at 64
@@ -211,8 +216,9 @@ function firstRow(sprite: HTMLCanvasElement): number {
  * Draws a neighbour into a canvas of the HUD's as a bust (V1's L5): their head and shoulders
  * framed whole wherever their head starts in the sprite (a mummy's sheet, a tall hat), drawn at
  * 64 from their own pixels (`scale2x`: diagonals half-stepped, edges kept), in an oval of evening
- * like a cameo's. `mood` picks the face once there are moods to pick (L7); `shadow` fills the
- * figure with one colour, for someone she hasn't met.
+ * like a cameo's. `mood` is the face, the one they have in the world as they say it (V1's L7,
+ * baked through `bakeFigure` with it, so the world and the bust share one face); `shadow` fills
+ * the figure with one colour, for someone she hasn't met.
  */
 export function drawBust(
   canvas: HTMLCanvasElement,
@@ -221,9 +227,8 @@ export function drawBust(
   mood: BustMood = 'neutral',
   shadow: string | null = null,
 ): void {
-  // One face so far: L7 draws the others and picks them by this.
-  void mood;
-  const sprite = bakeFigure(id, 'down', 0, costume);
+  const stance: Stance = mood === 'neutral' ? {} : { feel: mood };
+  const sprite = bakeFigure(id, 'down', 0, costume, null, stance);
   const shoulders = sprite.height - DOLL_HEIGHT + 24;
   const top = Math.max(firstRow(sprite) - 1, shoulders - BUST.above, 0);
   const rows = Math.min(sprite.height, shoulders + BUST.below) - top;

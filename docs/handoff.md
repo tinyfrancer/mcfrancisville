@@ -121,7 +121,25 @@ rather than loosening the check. And the date chip's ellipsis with a meal's chip
 
 ### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L5 landed (PR #185). Next in this lane: L7.
+L7 landed (PR #188). Lane 2 is finished.
+
+**For V1's review (from L7, decision 296):** a face's feeling is a `Feeling` (`types/mood.ts`).
+**To give a line a feeling**: a heart moment's `moods` (parallel to its `lines`), a reply's `mood`
+(theirs) or `feels` (hers, on her chip; a `TopicReplies` row's `feels` by chip), a topic's
+`TOPIC_MOODS` row (`data/moods.ts`); everything else is worked out by `feelingOf`
+(`systems/moods.ts`: row, topic, the words' `FEELING_CUES`, `KIND_MOODS`, `BAND_MOODS`), and a
+gift by `GIFT_MOODS`. `Neighbourhood` puts it on `Chat.feels`/`moreFeels`, `GiftResult.feels` and a
+favour's thanks; the talk sheet shows it on the bust and calls `TalkApi.feel`, and
+`Neighbourhood.feelingOf` puts it in the world sprite's `Stance.feel` while she talks and 2.4 s
+after. **To draw a new face of its own** (a neighbour without the doll's eyes): its touch reads the
+`feel` passed as a `Touch`'s fourth argument (`sprites/moodFaces.ts` has the four), and
+`tests/sprites/villagers.test.ts` wants every feeling different from the face as usual. **Her**
+face: `feelOf` beside `verbOf` (`world/services/Poses.ts`) and the `felt` signal; `poses.face()`
+goes into `bakeDoll` as `Rest.feel`. `view.faces()` in a dev build says hers and the neighbours'.
+**Left for the review:** the plan's two or three body builds (every clothing cut, action and work
+pose is painted on the one body, so it's a pass of its own); the noticeboard's 48-pixel
+`drawPortrait` faces and the greeting/neighbours-sheet busts are still neutral (`drawBust`'s
+`mood` takes a feeling if a caller wants one).
 
 **For L7 (from L5, decision 295):** the portrait is `drawBust(canvas, id, costume, mood, shadow)`
 in `render/villagers.ts`: the figure facing her (`bakeFigure(id, 'down', 0, costume)`), framed from

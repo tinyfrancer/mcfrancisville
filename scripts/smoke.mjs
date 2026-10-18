@@ -3664,6 +3664,79 @@ async function seeThrough() {
 }
 
 /**
+ * V1's L7, faces: a loved gift (a bracelet) changes the face on the neighbour's bust in the talk
+ * sheet, read from its canvas, and the same face is on them in the world and on her, read through
+ * `view.faces()`; upright and on its side, a neighbour each.
+ */
+async function faces() {
+  await openOn('2026-09-28', 13);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  const given = new Set();
+  for (const sideways of [false, true]) {
+    const way = sideways ? 'on its side' : 'upright';
+    if (sideways) {
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.waitForTimeout(300);
+    }
+    // Someone in town she hasn't given anything to today, so the gift is taken.
+    const friend = await page.evaluate(
+      (done) => {
+        const n = window.world.neighbourhood
+          .neighboursIn('town')
+          .find(
+            (n) => !done.includes(n.id) && window.world.friends.of(n.id).gifted !== '2026-09-28',
+          );
+        if (!n) return null;
+        window.world.bag.add('loveBracelet', 1);
+        window.world.seek(n.id);
+        return n.id;
+      },
+      [...given],
+    );
+    if (!friend) {
+      check(`somebody is out in town to give a gift to, ${way}`, false);
+      break;
+    }
+    given.add(friend);
+    const talking = await stepUntil(
+      () => document.querySelector('.hud-talk-sheet') !== null,
+      `she walks up to ${friend}`,
+    );
+    if (!talking) break;
+    const bust = () =>
+      page.evaluate(() => {
+        const c = /** @type {HTMLCanvasElement | null} */ (
+          document.querySelector('.hud-talk-sheet .hud-portrait')
+        );
+        return { url: c?.toDataURL() ?? '', feel: c?.dataset['feel'] ?? 'neutral' };
+      });
+    const before = await bust();
+    await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
+    await tapElement('.hud-talk-sheet .hud-slot[aria-label="Give LOVE bracelet"]');
+    await page.evaluate(() => window.view.step(40));
+    const after = await bust();
+    check(
+      `a loved gift changes ${friend}'s face on the bust, ${way}`,
+      after.feel === 'laugh' && (before.feel === 'laugh' || after.url !== before.url),
+      `${before.feel} -> ${after.feel}`,
+    );
+    const faces = await page.evaluate(() => window.view.faces());
+    check(
+      `and on ${friend} in the world, and on her, the same face, ${way}`,
+      faces.neighbours.some((f) => f.id === friend && f.feel === 'laugh') && faces.her === 'laugh',
+      JSON.stringify(faces),
+    );
+    await page.screenshot({ path: `.smoke/faces-${sideways ? 'sideways' : 'gift'}.png` });
+    await tapElement('.hud-talk-sheet button:text-is("Bye")');
+    await page.evaluate(() => window.view.step(40, 100));
+  }
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapToastAway();
+}
+
+/**
  * V1's E1, the effects layer: a real tap on a rock pops the stone over her head, and a loved gift
  * (a bracelet: everyone loves one) puts a ♥ over the neighbour. Smoke asks for reduced motion, so
  * these are the still ones; upright and on its side.
@@ -6439,12 +6512,17 @@ async function gallery() {
   check('the gallery shows every sprite', count > 20, `${count} sprites`);
   // The gallery is a very long page; a full-page picture of it takes a while, and is taken at one
   // pixel a CSS pixel, since at the phone's three it's more than Chromium will capture.
-  await page.screenshot({
-    path: '.smoke/gallery.png',
-    fullPage: true,
-    scale: 'css',
-    timeout: 120_000,
-  });
+  /** @type {import('playwright').PageScreenshotOptions} */
+  const shot = { path: '.smoke/gallery.png', fullPage: true, scale: 'css', timeout: 120_000 };
+  try {
+    await page.screenshot(shot);
+  } catch (error) {
+    // Grown past what Chromium will capture in one (CI's runner gives up before a container
+    // does): the top of it, which is what a look at it starts with anyway.
+    console.log(`note  the gallery is too long to picture whole, so its top is: ${error}`);
+    const width = await page.evaluate(() => document.documentElement.scrollWidth);
+    await page.screenshot({ ...shot, clip: { x: 0, y: 0, width, height: 16_000 } });
+  }
 }
 
 /**
@@ -6842,6 +6920,7 @@ const SECTIONS = [
   ['places', places],
   ['seeThrough', seeThrough],
   ['effects', effects],
+  ['faces', faces],
   ['verbs', verbs],
   ['alive', alive],
   ['moves', moves],

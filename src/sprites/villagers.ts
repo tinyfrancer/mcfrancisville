@@ -1,5 +1,6 @@
 import type { CodyHalf, Costume } from '../data/finale';
 import type { BraceletId, Facing, VillagerId } from '../types/ids';
+import type { Feeling } from '../types/mood';
 import type { Stance } from '../types/stance';
 import { WORKS } from '../data/work';
 import type { Worn } from '../types/look';
@@ -45,6 +46,7 @@ import { EMOTE_BUBBLES } from './effects';
 import { workPose, type Held } from './working';
 import type { Layer, Palette, SpriteSource } from './sprite';
 import { MAYOR_BLUSH, MAYOR_SASH } from './robBoo';
+import { carvePumpkin, maudeEye, maudeMouth, shadesMouth, skullFace } from './moodFaces';
 
 /*
  * Her neighbours, drawn to her scale (32×48) with the paper doll's own parts: its body, its
@@ -62,11 +64,12 @@ interface Dressed {
   tone?: Tone;
 }
 
-/** Something of their own, drawn from the body for one view and frame. */
+/** Something of their own, drawn from the body for one view and frame, and how they feel. */
 type Touch = (
   view: View,
   body: Grid,
   facing: Facing,
+  feel?: Feeling | null,
 ) => { rows: readonly string[]; palette: Palette } | null;
 
 interface FigureArt {
@@ -139,8 +142,12 @@ function bandaged(
 }
 
 /** A face drawn over the head, one sketch for each way they face. */
-function face(draw: (view: Exclude<View, 'back'>) => Sketch, palette: Palette): Touch {
-  return (view) => (view === 'back' ? null : { rows: draw(view).rows, palette });
+function face(
+  draw: (view: Exclude<View, 'back'>, feel: Feeling | null) => Sketch,
+  palette: Palette,
+): Touch {
+  return (view, _body, _facing, feel = null) =>
+    view === 'back' ? null : { rows: draw(view, feel ?? null).rows, palette };
 }
 
 /** A hat or the like, drawn by hand and outlined all round, like her hats. */
@@ -433,26 +440,10 @@ const CRESCENT = face(
 
 /** His skull: round sockets with a twinkle in each, a little heart of a nose, and a grin. */
 const SKULL = face(
-  (view) => {
+  (view, feel) => {
     const s = sketch();
-    const socket = (x: number) =>
-      s
-        .rect(x + 1, 14, 2, 1, 'k')
-        .rect(x, 15, 4, 2, 'k')
-        .rect(x + 1, 17, 2, 1, 'k')
-        .set(x + 1, 15, 'w');
-    if (view === 'front') {
-      socket(10);
-      socket(18);
-      s.set(10, 18, 'c').set(21, 18, 'c');
-      s.rect(15, 19, 2, 1, 'k').set(14, 19, 'c').set(17, 19, 'c');
-      s.set(12, 20, 'k').set(19, 20, 'k').rect(13, 21, 6, 1, 'k');
-      for (const x of [14, 16, 18]) s.set(x, 22, 'c');
-    } else {
-      socket(19);
-      s.set(23, 18, 'c').rect(23, 19, 1, 1, 'k');
-      s.rect(19, 21, 4, 1, 'k').set(18, 20, 'k').set(20, 22, 'c');
-    }
+    // In every feeling (V1's L7): `moodFaces.ts`.
+    skullFace(s, view, feel);
     return s;
   },
   { '.': null, k: C.inkFabric, w: C.white, c: C.boneShade },
@@ -505,23 +496,20 @@ const DAISY: Touch = (view) => {
 
 /** Dark glasses, a glint of light on each lens, so nobody knows who he is, and a smile. */
 const SHADES = face(
-  (view) =>
-    view === 'front'
-      ? sketch()
-          .rect(10, 14, 5, 4, 'k')
-          .rect(17, 14, 5, 4, 'k')
-          .rect(15, 15, 2, 1, 'k')
-          .set(11, 15, 'w')
-          .set(18, 15, 'w')
-          .rect(14, 21, 4, 1, 'm')
-          .set(13, 20, 'm')
-          .set(18, 20, 'm')
-      : sketch()
-          .rect(19, 14, 5, 4, 'k')
-          .rect(14, 15, 5, 1, 'k')
-          .set(21, 15, 'w')
-          .rect(21, 21, 2, 1, 'm')
-          .set(20, 20, 'm'),
+  (view, feel) => {
+    const s =
+      view === 'front'
+        ? sketch()
+            .rect(10, 14, 5, 4, 'k')
+            .rect(17, 14, 5, 4, 'k')
+            .rect(15, 15, 2, 1, 'k')
+            .set(11, 15, 'w')
+            .set(18, 15, 'w')
+        : sketch().rect(19, 14, 5, 4, 'k').rect(14, 15, 5, 1, 'k').set(21, 15, 'w');
+    // His smile, in every feeling (V1's L7).
+    shadesMouth(s, view, feel);
+    return s;
+  },
   { '.': null, k: C.ink, w: C.white, m: C.skinHoneyShade },
 );
 
@@ -718,7 +706,7 @@ const SHELL: Touch = (view) => {
  * carved face (triangle eyes and nose, a toothy grin) that isn't there behind. The pumpkin's
  * pale flesh shows along the lower edge of each cut, where its wall is seen.
  */
-const PUMPKIN_HEAD: Touch = (view, body) => {
+const PUMPKIN_HEAD: Touch = (view, body, _facing, feel = null) => {
   const s = sketch();
   const cx = view === 'side' ? 15 : 16;
   for (const [dx, rx] of [
@@ -742,20 +730,8 @@ const PUMPKIN_HEAD: Touch = (view, body) => {
     .set(cx - 3, 2, 'G')
     .set(cx - 3, 4, 'G');
   if (view !== 'back') {
-    const eye = (x: number) =>
-      s
-        .set(x, 11, 'c')
-        .rect(x - 1, 12, 3, 1, 'c')
-        .rect(x - 2, 13, 5, 1, 'c');
-    const at = view === 'front' ? [cx - 5, cx + 4] : [cx + 6];
-    for (const x of at) eye(x);
-    const nose = view === 'front' ? cx - 1 : cx + 9;
-    s.set(nose, 15, 'c').rect(nose, 16, 2, 1, 'c');
-    const [left, w] = view === 'front' ? [cx - 6, 12] : [cx + 3, 8];
-    s.set(left, 18, 'c').set(left + w - 1, 18, 'c');
-    s.rect(left, 19, w, 1, 'c').rect(left + 1, 20, w - 2, 1, 'c');
-    // A tooth hanging from the top, and one standing up from the bottom.
-    s.set(left + 3, 19, 'm').set(left + w - 4, 20, 'm');
+    // Carved to how he feels (V1's L7): `moodFaces.ts`.
+    carvePumpkin(s, view, cx, feel ?? null);
     for (let y = 22; y > 10; y--) {
       for (let x = 0; x < DOLL_WIDTH; x++) {
         const under = s.get(x, y);
@@ -808,9 +784,10 @@ export const PUMPKIN_HEAD_GLOW: Palette = { c: C.candle };
 export function pumpkinHead(
   facing: Facing,
   frame: number,
+  feel: Feeling | null = null,
 ): { rows: readonly string[]; palette: Palette } {
   const view = viewOf(facing);
-  return PUMPKIN_HEAD(view, BODY[view][frame % DOLL_FRAMES]!, facing)!;
+  return PUMPKIN_HEAD(view, BODY[view][frame % DOLL_FRAMES]!, facing, feel)!;
 }
 
 // ---- Hazel: a stargazer, with a star in her hair ----
@@ -1061,7 +1038,7 @@ const FIGURES: Record<Exclude<Figure, 'maude'>, FigureArt> = {
   scarah: {
     skin: tone(C.rope, C.wood),
     eyes: C.eyeBrown,
-    face: { lashes: true, freckles: true },
+    face: { lashes: true, freckles: true, stitched: true },
     lips: C.rose,
     hair: { style: strawy(shaggy(HAIR.bob)), tones: solidHair(tone(C.candle, C.goldShade)) },
     clothes: [worn('sundressGingham', 'sky'), worn('stompyBoots', 'ink', tone(C.wood, C.bark))],
@@ -1228,6 +1205,8 @@ export interface MaudeLook {
   wave?: number | null;
   blink?: boolean;
   read?: number | null;
+  /** How she feels, behind her glasses (V1's L7). */
+  feel?: Feeling | null;
 }
 
 /** How far her hem swings, by walk frame: still, then one way and the other. */
@@ -1279,17 +1258,17 @@ function maudeSheet(view: View, look: MaudeLook = {}): string[] {
   // A little light on the crown of her head.
   s.rect(cx - 5, 10, 3, 1, 'l').rect(cx - 6, 11, 2, 2, 'l');
   if (view === 'back') return s.rows;
+  const feel = look.feel ?? null;
   const lens = (x: number) => {
     s.rect(x, 15, 5, 5, 'g').rect(x + 1, 16, 3, 3, 'w');
-    if (look.blink) s.rect(x + 1, 18, 3, 1, 'e');
-    else s.rect(x + 1, 16, 2, 2, 'e').set(x + 1, 16, 'l');
+    maudeEye(s, x, feel, look.blink === true);
   };
   if (view === 'front') {
     lens(10);
     lens(17);
     s.set(15, 16, 'g').set(16, 16, 'g');
     s.rect(9, 21, 2, 1, 'c').rect(21, 21, 2, 1, 'c');
-    s.rect(15, 22, 2, 1, 'u');
+    maudeMouth(s, 'front', feel);
     // Her glasses' chain, looped under her chin.
     for (const [x, y] of [
       [10, 20],
@@ -1327,7 +1306,7 @@ function maudeSheet(view: View, look: MaudeLook = {}): string[] {
     lens(19);
     s.rect(15, 16, 4, 1, 'g');
     s.rect(22, 21, 2, 1, 'c');
-    s.set(23, 22, 'u');
+    maudeMouth(s, 'side', feel);
     s.set(19, 21, 'g').set(19, 23, 'g').set(20, 25, 'g');
     // The book held out in front, seen edge on: its cover and pages.
     s.rect(22, 28, 3, 7, 'B').rect(25, 29, 1, 5, 'p');
@@ -1340,7 +1319,7 @@ const MAUDE_SHEETS = new Map<string, readonly string[]>();
 
 /** Maude's sheet for one view and look, drawn once. */
 function maudeOf(view: View, look: MaudeLook = {}): readonly string[] {
-  const key = `${view}:${look.hem ?? 0}:${look.wave ?? '-'}:${look.blink ? 1 : 0}:${look.read ?? '-'}`;
+  const key = `${view}:${look.hem ?? 0}:${look.wave ?? '-'}:${look.blink ? 1 : 0}:${look.read ?? '-'}:${look.feel ?? '-'}`;
   let rows = MAUDE_SHEETS.get(key);
   if (!rows) {
     rows = maudeSheet(view, look);
@@ -1418,6 +1397,7 @@ export function figureLayers(
       wave: stance.act === 'wave' ? (stance.frame ?? 0) % 2 : null,
       blink: stance.blink ?? false,
       read: stance.act === 'reading' ? (stance.frame ?? 0) % 2 : null,
+      feel: stance.feel ?? null,
     };
     const sheet: Layer = { source: { rows: maudeOf(view, look) }, palette: MAUDE_PALETTE };
     if (!costumed) return stanceFolded([sheet], stance);
@@ -1448,8 +1428,9 @@ export function figureLayers(
       const rows = backRows(d.worn, view, body, part);
       if (rows) add(rows, paletteOf(d));
     });
+  const feel = stance.feel ?? null;
   const touch = (t: Touch) => {
-    const drawn = t(view, body, facing);
+    const drawn = t(view, body, facing, feel);
     if (drawn) add(drawn.rows, drawn.palette);
   };
 
@@ -1459,8 +1440,9 @@ export function figureLayers(
   if (art.eyes && view !== 'back') {
     const palette = facePalette(art.eyes, art.skin);
     const lips: Palette = art.lips ? { U: art.lips, u: mix(art.lips, C.white, 0.25) } : {};
-    const mood: Mood = stance.blink ? 'blink' : 'open';
-    add(faceRows(view, mood, art.face ?? {}), { ...palette, ...lips });
+    // How they feel about what they're saying (V1's L7), blinking through it as usual.
+    const mood: Mood = feel ?? (stance.blink ? 'blink' : 'open');
+    add(faceRows(view, mood, art.face ?? {}, !!feel && !!stance.blink), { ...palette, ...lips });
   }
   shoesUnderHems(art.clothes, (d) => d.worn, view).forEach(dress);
   art.under?.forEach(touch);

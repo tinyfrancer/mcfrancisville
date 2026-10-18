@@ -116,7 +116,7 @@ export function openCatalogue(hud: HTMLElement, api: CatalogueApi): () => void {
   }
 
   function render(): void {
-    purse.textContent = `${candy(api.candy())} Candy`;
+    purse.textContent = candy(api.candy());
     const browsing = sheet.tab() === 'pages';
     finder.hidden = !browsing;
     if (browsing) pages.refresh();

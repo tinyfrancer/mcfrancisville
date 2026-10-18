@@ -115,3 +115,16 @@ export function blinking(ms: number): boolean {
   const again = 2 * BLINK_EVERY_MS + 2 * BLINK_MS;
   return t % BLINK_EVERY_MS < BLINK_MS || (t >= again && t < again + BLINK_MS);
 }
+
+// ---- How she feels for a moment (V1's L7, decision 296) -----------------------------------
+
+/**
+ * How long a feeling stays on her face once what brought it is done (the find held up, the
+ * rock-out): long enough to see, as an action is.
+ */
+export const FEEL_MS = 2_400;
+
+/** Until when a feeling felt at `from` shows, after whatever she's doing first finishes `after`. */
+export function feelingUntil(from: number, after: number): number {
+  return Math.max(from, after) + FEEL_MS;
+}

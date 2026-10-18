@@ -28,6 +28,7 @@ import type {
   WindowPaperId,
 } from '../types/ids';
 import type { Look } from '../types/look';
+import { FEELINGS } from '../types/mood';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
 import {
@@ -410,6 +411,24 @@ export function catalogue(): Entry[] {
       }
     }
   }
+  // How each feels about a line (V1's L7): every feeling in a strip, facing her, side on, in
+  // costume and blinking through it, so the gallery stays short enough to picture whole.
+  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
+    for (const feel of FEELINGS) {
+      entries.push({
+        name: `figure:${id}:mood:${feel}`,
+        draw: () =>
+          beside([
+            rasterizeLayers(figureLayers(id, 'down', 0, null, null, { feel })),
+            rasterizeLayers(figureLayers(id, 'right', 0, null, null, { feel })),
+            ...(id === 'moonPieMan' || id === 'wes'
+              ? []
+              : [rasterizeLayers(figureLayers(id, 'down', 0, 'own', null, { feel }))]),
+            rasterizeLayers(figureLayers(id, 'down', 0, null, null, { feel, blink: true })),
+          ]),
+      });
+    }
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
@@ -577,6 +596,20 @@ export function catalogue(): Entry[] {
           {
             flipX: facing === 'left',
           },
+        ),
+    });
+  }
+  // How she feels for a moment (V1's L7): facing us, side on and blinking through it, a strip.
+  for (const feel of FEELINGS) {
+    entries.push({
+      name: `doll:feel:${feel}`,
+      draw: () =>
+        beside(
+          [{ feel }, { feel, blink: true }].flatMap((rest) =>
+            (['down', 'right'] as const).map((facing) =>
+              rasterizeLayers(dollLayers(DEFAULT_LOOK, facing, 0, undefined, rest)),
+            ),
+          ),
         ),
     });
   }
@@ -767,5 +800,22 @@ function tile(rows: readonly (readonly Raster[])[]): Raster {
       }
     }),
   );
+  return { width, height, data };
+}
+
+/** Pictures side by side, their feet on one row, a pixel apart (V1's L7's strips). */
+function beside(pictures: readonly Raster[]): Raster {
+  const width = pictures.reduce((w, p) => w + p.width + 1, -1);
+  const height = Math.max(...pictures.map((p) => p.height));
+  const data = new Uint8ClampedArray(width * height * 4);
+  let left = 0;
+  for (const p of pictures) {
+    const top = height - p.height;
+    for (let y = 0; y < p.height; y++) {
+      const from = y * p.width * 4;
+      data.set(p.data.subarray(from, from + p.width * 4), ((top + y) * width + left) * 4);
+    }
+    left += p.width + 1;
+  }
   return { width, height, data };
 }

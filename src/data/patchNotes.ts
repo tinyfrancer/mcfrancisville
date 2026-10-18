@@ -164,16 +164,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.7',
     lines: [
-      "Jobs you can see: Rufus's flower buckets are a shop, Wrapunzel bakes in view (bake " +
-        'with her, she narrates), and Ollie brings your post to the box.',
-      'Everyone has a night of the week, and every gathering has something for you to do. ' +
-        "Howl, pick the book, name a star. They'll remember next time.",
+      "Jobs you can see (Rufus's buckets, Wrapunzel baking, Ollie with your post), and a " +
+        "night a week each with something for you to do. They'll remember.",
       'Birthdays are days now: a line first thing, a little party at theirs from five, and a ' +
         'gift that counts double. Mine is Groundhog Day. Ahem.',
       "Cody is married to you (he asked me to type that in bold; I can't). He's round most " +
         'evenings now, and he will ask how your day was.',
       'Every button has a hand-painted picture now, hearts pop, Candy counts up, portraits ' +
         'sit properly, and bats fly over the front door.',
+      'Faces! Everyone shows how they feel as they talk to you, and so do you. Give someone a ' +
+        'thing they love and watch. I went pink. It shows, on a ghost.',
     ],
     ps: 'P.S. Nessa lights the lanterns every dusk. You may light one too. Bob goes first.',
   },
