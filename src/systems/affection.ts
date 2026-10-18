@@ -50,6 +50,20 @@ export function fonder(
   return { fondness: today, gained };
 }
 
+/** Whether a saved fondness is one: whole points and counts, and a day or none. */
+export function isFondness(value: unknown): value is Fondness {
+  if (typeof value !== 'object' || value === null) return false;
+  const f = value as Record<string, unknown>;
+  const count = (n: unknown) => Number.isInteger(n) && (n as number) >= 0;
+  return (
+    count(f.points) &&
+    count(f.pat) &&
+    count(f.walk) &&
+    count(f.treat) &&
+    (f.day === null || typeof f.day === 'string')
+  );
+}
+
 /** Whether a kind still counts today: a pat, a walk or a treat that would make it fonder. */
 export function countsToday(was: Fondness | undefined, kind: FondKind, day: string): boolean {
   return fonder(was, kind, day).gained > 0;

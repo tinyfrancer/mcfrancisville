@@ -10,7 +10,7 @@ import {
 } from '../data/pets';
 import type { AccessoryId, PetId } from '../types/ids';
 import { NO_FONDNESS, type FondKind, type Fondness, type PetLevel } from '../data/affection';
-import { fonder, levelOf } from '../systems/affection';
+import { fonder, isFondness, levelOf } from '../systems/affection';
 
 /**
  * What she has of her pets that's worth keeping: their names, what they wear, the accessories she
@@ -167,18 +167,4 @@ export class Pets {
       affection,
     };
   }
-}
-
-/** Whether a saved fondness is one: whole points and counts, and a day or none. */
-export function isFondness(value: unknown): value is Fondness {
-  if (typeof value !== 'object' || value === null) return false;
-  const f = value as Record<string, unknown>;
-  const count = (n: unknown) => Number.isInteger(n) && (n as number) >= 0;
-  return (
-    count(f.points) &&
-    count(f.pat) &&
-    count(f.walk) &&
-    count(f.treat) &&
-    (f.day === null || typeof f.day === 'string')
-  );
 }
