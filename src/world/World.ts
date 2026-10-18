@@ -345,6 +345,7 @@ export class World extends WorldParts {
     );
     const heading = this.visiting?.kind === 'villager' ? this.visiting.villager : null;
     this.neighbourhood.step(deltaMs, this.player, heading);
+    this.postRound.step(deltaMs);
     this.petCare.step(
       deltaMs,
       this.visiting?.kind === 'pet' ? this.visiting.pet : null,

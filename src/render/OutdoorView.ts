@@ -848,7 +848,9 @@ export class OutdoorView implements SceneView {
   private mailboxDrawables(): Drawable[] {
     if (!this.mailbox) return [];
     const { drawable, full } = this.mailbox;
-    return [this.world.letters.unread > 0 ? { ...drawable, sprite: full } : drawable];
+    // Up once Ollie has put it in, if he's walking it over (V1's P4).
+    const up = this.world.letters.unread > 0 && !this.world.postRound.carrying;
+    return [up ? { ...drawable, sprite: full } : drawable];
   }
 
   /** The floating lanterns, each bobbing a pixel up and down in its own time. */

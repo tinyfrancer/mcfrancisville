@@ -153,6 +153,11 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'coin';
     case 'ate':
       return 'munch';
+    // V1's P4: a beat of baking, and joining in at a happening.
+    case 'bakeStep':
+      return 'pick';
+    case 'joined':
+      return 'treat';
     case 'keepsake':
     case 'dug':
     case 'foundLost':

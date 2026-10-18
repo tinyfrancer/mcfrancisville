@@ -184,6 +184,9 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       ];
     case 'ate':
       return [emote('♥')];
+    // A puff of flour at the bowl, a twinkle at the oven door (V1's P4).
+    case 'bakeStep':
+      return [burst('sparkle', event.does === 'pour' ? head : feet, 3, 10)];
     case 'caught': {
       const from = box ? there : (at.float ?? source);
       const shown: Effect[] = [pop({ item: event.critter }, 1, from)];
@@ -277,6 +280,12 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
     // V1's P3b: meeting the mayor is the sheet's.
     case 'unmasked':
       return [];
+    // Joining in at a happening (V1's P4): the host is delighted.
+    case 'joined':
+      return [
+        burst('sparkle', { villager: event.villager }, 4, 12),
+        emote('♥', { villager: event.villager }),
+      ];
     case 'crowned':
       return [
         burst('confetti', { villager: event.villager }),

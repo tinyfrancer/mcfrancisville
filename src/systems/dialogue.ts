@@ -98,7 +98,9 @@ export function comingUp(villager: VillagerId, day: string, hour: number): Happe
   return (
     happeningsOn(day).find((id) => {
       const row = HAPPENINGS[id];
-      return row.who.includes(villager) && h < row.from;
+      // Something on every day (Nessa's lanterns at dusk, V1's P4) is their day, not news.
+      const daily = 'weekdays' in row.on && row.on.weekdays.length === 7;
+      return !daily && row.who.includes(villager) && h < row.from;
     }) ?? null
   );
 }

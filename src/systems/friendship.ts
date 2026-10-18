@@ -14,6 +14,8 @@ import { MUSEUM_FORMERLY_FULL, MUSEUM_LETTERS } from '../data/museum';
 import { MILESTONES } from '../data/milestones';
 import { HOLIDAY_LETTERS } from '../data/holidays';
 import { HOLIDAY_LINES } from '../data/holidayLines';
+import { BIRTHDAY_LINES } from '../data/birthdayParties';
+import { isBirthday } from '../data/birthdays';
 import type { HolidayId } from '../data/calendar';
 import { MAYOR_LETTERS } from '../data/mystery';
 import { CHAPTERS } from '../data/story';
@@ -157,6 +159,8 @@ export interface LineContext {
 export function dayLine(villager: VillagerId, day: string): string | null {
   const special = specialDayOf(day);
   if (special) return SPECIAL_LINES[special][villager];
+  // Their own birthday (V1's P4) comes before a holiday's line.
+  if (villager !== 'cody' && isBirthday(villager, day)) return BIRTHDAY_LINES[villager];
   const holiday = holidayOn(day);
   return holiday ? HOLIDAY_LINES[holiday][villager] : null;
 }

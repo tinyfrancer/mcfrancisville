@@ -5362,6 +5362,87 @@ async function scarah() {
  * taps, the dust sheet comes off, Rob Boo says hello and the corkboard's last pin is his. The next
  * morning, after a reload by `?day=`, he's on the town hall's steps, and a tap on him talks to him.
  */
+/**
+ * Jobs seen, and happenings that do something (V1's P4): Rufus's flower buckets open as a shop,
+ * and at book club Maude's talk has its verb, picking next week's book from three, through the
+ * talk's list of actions, upright and on its side.
+ */
+async function jobs() {
+  await page.evaluate(() => window.view.saveNow());
+  // A Wednesday evening in November, out of the festival: book club is on at Maude's.
+  await openOn('2026-11-11', 20);
+  await goOut();
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  if (!(await goInto('rufusHouse', 'rufusCabin'))) return;
+  await page.evaluate(() => window.world.wallet.earn(1000));
+  await tapFixture('flowerBuckets');
+  const shop = (await page.locator('.hud-shop-sheet').count()) === 1;
+  const title = shop ? ((await page.locator('.hud-shop-sheet h2').textContent()) ?? '') : '';
+  check(
+    "walking up to Rufus's flower buckets opens them as a shop",
+    shop && /flower buckets/.test(title),
+    title,
+  );
+  if (!shop) return goOut();
+  await framed('.hud-shop-sheet');
+  const wares = await page.locator('.hud-shop-sheet .hud-ware').count();
+  check('his buckets have something in them today', wares > 3, String(wares));
+  await page.screenshot({ path: '.smoke/flower-buckets.png' });
+  await tapElement('.hud-shop-sheet .hud-done');
+  await goOut();
+
+  if (!(await goInto('maudeHouse', 'library'))) return;
+  const settled = await stepUntil(() => {
+    const m = window.world.neighbourhood.neighbour('maude');
+    return m.zone === 'library' && !m.moving;
+  }, 'Maude in her library for book club');
+  if (!settled) return goOut();
+  const maude = await page.evaluate(() => window.world.neighbourhood.neighbour('maude').tile);
+  await tapTile(maude.tx, maude.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Maude opens a talk',
+  );
+  if (!talking) return goOut();
+  const verb = `.hud-talk-sheet button:text-is("📚 Pick next week's book")`;
+  check("at book club, Maude's talk has its verb", (await page.locator(verb).count()) === 1);
+  await page.screenshot({ path: '.smoke/talk-actions.png' });
+  const fits = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].every((b) => {
+        const r = b.getBoundingClientRect();
+        return r.height >= 44 && r.right <= window.innerWidth && r.bottom <= window.innerHeight;
+      }),
+    );
+  check("upright, every one of the talk's actions is on screen", await fits());
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  check("on its side, every one of the talk's actions is on screen", await fits());
+  await page.screenshot({ path: '.smoke/talk-actions-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  if ((await page.locator(verb).count()) !== 1) return;
+  await tapElement(verb);
+  const picks = await page.locator('.hud-talk-sheet .hud-reply').count();
+  check("picking next week's book offers three", picks === 3, String(picks));
+  await page.screenshot({ path: '.smoke/talk-picks.png' });
+  if (picks === 0) return;
+  await tapElement('.hud-talk-sheet .hud-reply >> nth=0');
+  const joined = await page.evaluate(() => window.world.joining.lastJoined('bookClub'));
+  const said = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
+  check(
+    'her pick is kept for next week, and Maude answers it',
+    joined?.on === '2026-11-11' && typeof joined.choice === 'string' && said.length > 0,
+    `${JSON.stringify(joined)} ${said}`,
+  );
+  check('the verb is done for tonight', (await page.locator(verb).count()) === 0);
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  await goOut();
+}
+
 async function robBoo() {
   const evening = '2026-11-17';
   const morning = '2026-11-18';
@@ -6488,6 +6569,7 @@ const SECTIONS = [
   ['trickOrTreat', trickOrTreat],
   ['october', october],
   ['finale', finale],
+  ['jobs', jobs],
   ['robBoo', robBoo],
   ['broom', broom],
   ['closer', closer],

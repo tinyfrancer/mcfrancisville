@@ -214,6 +214,10 @@ export type WorldEvent =
   | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
   /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
   | { kind: 'baked'; item: ItemId; candy: number }
+  /** She joined in at a neighbour's happening (V1's P4): howled, picked the book, named a star. */
+  | { kind: 'joined'; happening: HappeningId; villager: VillagerId }
+  /** A beat of baking with Wrapunzel (V1's P4): pouring the mix, or down at the oven door. */
+  | { kind: 'bakeStep'; does: 'pour' | 'crouch' }
   /** A throw at a fairground game (0.2's M2), and whether it landed. */
   | { kind: 'tossed'; activity: ActivityId; landed: boolean }
   /** A go at a fairground game done, and what it won; `top` for the prize to win. */
@@ -323,6 +327,8 @@ export interface Signals extends Record<string, unknown> {
   donated: { thing: CritterId | FossilId };
   /** She took a piece out of her chest and set it down at home or in her yard (V1's P1). */
   placed: { piece: FurnitureId };
+  /** A letter came to her mailbox by the post (V1's P4), for Ollie to walk over. */
+  posted: { letter: string };
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */
@@ -355,7 +361,8 @@ export interface Chat {
 
 /** How a villager took a gift, or that they'd rather she kept it for another day. */
 export type GiftResult =
-  { declined: false; reaction: Reaction; line: string } | { declined: true; line: string };
+  | { declined: false; reaction: Reaction; line: string; birthday?: true }
+  | { declined: true; line: string };
 
 /** A letter in her mailbox, as she reads it. */
 export interface MailView extends Letter {

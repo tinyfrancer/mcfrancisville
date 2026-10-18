@@ -34,12 +34,13 @@ import { FIRST_BROOM } from '../data/broom';
 import type { TuneId } from '../data/instruments';
 import type { Order } from '../systems/catalogue';
 import type { LatelySnapshot } from '../world/Lately';
+import type { JoinedSnapshot } from '../systems/joining';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 47;
+export const SAVE_VERSION = 48;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -235,6 +236,12 @@ export interface SaveState {
    * know is forgotten.
    */
   lately: LatelySnapshot;
+  /**
+   * What she did at each of her neighbours' happenings last time (save v48, V1's P4): the day,
+   * and her pick's id, by happening, which the host remembers. One this build doesn't know is
+   * forgotten.
+   */
+  happenings: JoinedSnapshot;
 }
 
 export function newSave(
@@ -285,6 +292,7 @@ export function newSave(
     ever: [],
     orders: [],
     lately: { placed: null, harvested: null, donated: null },
+    happenings: {},
   };
 }
 
@@ -651,7 +659,8 @@ export function isSaveState(value: unknown): value is SaveState {
     isYardShape(s.yard) &&
     isStringList(s.ever) &&
     isOrdersShape(s.orders) &&
-    isLatelyShape(s.lately)
+    isLatelyShape(s.lately) &&
+    isJoinedShape(s.happenings)
   );
 }
 
@@ -667,6 +676,16 @@ function isLatelyShape(value: unknown): boolean {
     return typeof d[id] === 'string' && typeof d.day === 'string';
   };
   return last('placed', 'piece') && last('harvested', 'crop') && last('donated', 'thing');
+}
+
+/** What she did at their happenings (save v48): by happening, a day and maybe a pick. */
+function isJoinedShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  return Object.values(value).every((j) => {
+    if (typeof j !== 'object' || j === null) return false;
+    const r = j as Record<string, unknown>;
+    return typeof r.on === 'string' && (r.choice === undefined || typeof r.choice === 'string');
+  });
 }
 
 /** Ollie's round (0.3's S1): each order's ware key and the day it was ordered. */

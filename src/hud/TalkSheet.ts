@@ -1,4 +1,3 @@
-import { TUNES, type TuneId } from '../data/instruments';
 import { isKept, ITEMS } from '../data/items';
 import { CODY_COMEBACKS, HER_REPLY, VILLAGERS, type Favour } from '../data/villagers';
 import { MAX_HEARTS } from '../systems/friendship';
@@ -27,18 +26,43 @@ export interface TalkApi {
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
   /** Draws the little red Tesla at 1×, for a greeting it drives across. */
   redOne(canvas: HTMLCanvasElement): void;
-  /** At the Halloween finale (0.2's J4): whether she can crown them best costume, and doing it. */
-  canCrown(id: VillagerId): boolean;
-  crown(id: VillagerId): { line: string; aside: string } | null;
-  /** At Crumbs & Curios (0.2's E1): whether she can bake with them today, and doing it. */
-  canBake(id: VillagerId): boolean;
-  bake(id: VillagerId): { line: string; item: ItemId; count: number; candy: number } | null;
-  /** In his parlour (0.2's L2): whether Boothoven can give her a piano lesson today, and having it. */
-  canLearn(id: VillagerId): boolean;
-  learn(id: VillagerId): { line: string; tune: TuneId } | null;
-  /** Whether Cody's there for their photo, and taking it, which closes the talk. */
-  canPhoto(id: VillagerId): boolean;
-  photo(): void;
+  /**
+   * What else she can do with them just now (V1's P4, "where it hurts" 11): crown a costume, bake,
+   * a lesson, their photo, a happening's verb. Asked afresh each time the buttons are drawn.
+   */
+  actions(id: VillagerId): readonly TalkAction[];
+}
+
+/** Something she can do with a neighbour as they talk, a button beside Chat (V1's P4). */
+export interface TalkAction {
+  /** On the button: "🧁 Bake together". */
+  label: string;
+  /** Lit as the one to press. */
+  lit?: boolean;
+  /** Pressed: what comes of it, or null if it can't be done after all. */
+  run(): TalkOutcome | null;
+}
+
+/** What comes of a talk action. */
+export interface TalkOutcome {
+  /** What's said, one line after another, "Go on…" between them. */
+  lines: readonly string[];
+  /** Under the last line, unless a beat says something of its own. */
+  aside?: string;
+  /** As each line is shown, by its place: a scene's beat, which may say something under it. */
+  beat?(k: number): string | void;
+  /** What she can pick from after the last line, instead of the talk's buttons. */
+  choices?: readonly TalkAction[];
+  /** The talk is over (their photo). */
+  close?: true;
+}
+
+/** Under their thanks: what she gave, and on their birthday that it counts double (V1's P4). */
+function givenAside(given: GiftResult, what: string): string {
+  if (given.declined) return '';
+  return given.birthday
+    ? `You gave ${what}. On their birthday, it means twice as much!`
+    : `You gave ${what}.`;
 }
 
 /** "♥♥♥♡♡♡♡♡♡♡": how close they are, out of ten. */
@@ -128,6 +152,47 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
 
   const chat = () => show(api.talk(id));
 
+  /** A talk action's button (V1's P4): pressed, its lines one after another, then its picks. */
+  const actionButton = (action: TalkAction): HTMLElement =>
+    button(
+      action.label,
+      () => {
+        const outcome = action.run();
+        if (!outcome) return render();
+        if (outcome.close) return close();
+        play(outcome);
+      },
+      action.lit ?? true,
+    );
+
+  const play = (outcome: TalkOutcome) => {
+    const { lines } = outcome;
+    let at = 0;
+    // After the last line, her picks if there are any, or the talk's buttons again.
+    const finish = () => {
+      const picks = (outcome.choices ?? []).map((c) => {
+        const chip = actionButton(c);
+        chip.classList.add('hud-reply');
+        return chip;
+      });
+      if (picks.length > 0)
+        sheet.actions(
+          ...picks,
+          button('Never mind', () => render()),
+        );
+      else render();
+    };
+    const next = () => {
+      const last = at === lines.length - 1;
+      const aside = outcome.beat?.(at);
+      say(lines[at]!, typeof aside === 'string' ? aside : last ? (outcome.aside ?? '') : '');
+      if (++at < lines.length) sheet.actions(button('Go on…', next, true));
+      else finish();
+    };
+    if (lines.length > 0) next();
+    else finish();
+  };
+
   const render = (puffed = false, waiting = false, chips: readonly HTMLElement[] = []) => {
     gifts.hidden = true;
     const row: HTMLElement[] = [...chips];
@@ -160,64 +225,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
       hand.disabled = have < favour.count;
       row.push(hand);
     }
-    if (api.canBake(id)) {
-      row.push(
-        button(
-          '🧁 Bake together',
-          () => {
-            const baked = api.bake(id);
-            if (baked) {
-              const home = quantity(baked.item, baked.count);
-              const paid = `${VILLAGERS[id].name} paid you ${candy(baked.candy)}`;
-              say(baked.line, `${paid}, and sent you home with ${home}.`);
-            }
-            render();
-          },
-          true,
-        ),
-      );
-    }
-    if (api.canLearn(id)) {
-      row.push(
-        button(
-          '🎹 A lesson',
-          () => {
-            const learnt = api.learn(id);
-            if (learnt) {
-              const name = TUNES[learnt.tune].name;
-              say(learnt.line, `You learnt "${name}". Every piano you play knows it now.`);
-            }
-            render();
-          },
-          true,
-        ),
-      );
-    }
-    if (api.canCrown(id)) {
-      row.push(
-        button(
-          '👑 Best costume!',
-          () => {
-            const crowned = api.crown(id);
-            if (crowned) say(crowned.line, crowned.aside);
-            render();
-          },
-          true,
-        ),
-      );
-    }
-    if (api.canPhoto(id)) {
-      row.push(
-        button(
-          '📸 Our photo',
-          () => {
-            close();
-            api.photo();
-          },
-          true,
-        ),
-      );
-    }
+    for (const action of api.actions(id)) row.push(actionButton(action));
     // With a story waiting (V1's P2), Chat is the one to press.
     row.push(button('Chat', chat, waiting), button('Give a gift', pickGift), button('Bye', close));
     sheet.actions(...row);
@@ -240,7 +248,7 @@ export function openTalk(hud: HTMLElement, api: TalkApi, id: VillagerId): () => 
         if (stack.count > 1) b.append(el('span', { className: 'hud-count' }, String(stack.count)));
         b.addEventListener('click', () => {
           const given = api.give(id, stack.id);
-          if (given) say(given.line, given.declined ? '' : `You gave ${ITEMS[stack.id].name}.`);
+          if (given) say(given.line, givenAside(given, ITEMS[stack.id].name));
           render();
         });
         return b;

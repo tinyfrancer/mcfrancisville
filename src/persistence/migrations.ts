@@ -231,6 +231,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // in `mystery.clues`, and his friendship goes in `friends` as anyone's. Nobody had met him
   // before, so nothing changes: the mystery and every friendship stay as they were.
   46: (state) => state,
+  // V1's P4: what she did at her neighbours' happenings, which the host remembers next time.
+  // Nobody had a verb to join in with before, so there's nothing to remember: an empty record.
+  47: (state) => ({ ...state, happenings: {} }),
 };
 
 /**

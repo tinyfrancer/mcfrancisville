@@ -193,7 +193,33 @@ tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile
 
 ### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-P3b landed (PR #183, save v47). Next in this lane: P4.
+P4 landed (PR #184, save v48). Next in this lane: P5.
+
+**For P5 (from P4, decision 304):** **To add a talk action** (a button beside Chat and Give), add
+a block to `wiring/talkActions.ts` reading the service's own `canX`/`X`: a `TalkAction` is a
+`label`, `lit` and `run()`, whose `TalkOutcome` is `lines` said one after another ("Go on…"
+between), an `aside`, a `beat(k)` as each line shows (the bake's steps; return a string to say it
+under that line), `choices` (more `TalkAction`s, drawn as `.hud-reply` chips with "Never mind")
+or `close`. Never a field on `TalkApi`. Cody's "how was your day" can be one, or P2's question
+shape. **To add a happening**, a row in a const of its own spread into `HAPPENINGS` (the weekly
+ones are `WEEKLY_HAPPENINGS`, the parties `BIRTHDAY_PARTIES`), a `HappeningId` (add to `WeeklyId`
+or a union of its own), a `HAPPENING_CALLED` name in `data/smallTalk.ts`, and **its verb** in
+`VERBS` (`data/happeningVerbs.ts`: a `label`, `ask` and `choices` dealt by the week with `deal`,
+or `done` for one press; `remembers` with `{choice}` for what the host says next time, and the
+choice ids are saved in `happenings`, so never change one once out); `tests/data/happeningVerbs.test.ts`
+reads them all. A row may stand beyond the town (`where: { zone, at }`), want a clear day
+(`clear`) and give the host a working pose there (`doing`). Cody's evenings at hers aren't a
+happening (her home isn't an interior): P2's calls (`CALLING` in `Neighbourhood`) are the way in. **To add a working pose**, as E3 said: a `WorkId`, a row (`P4_WORKS` in
+`data/work.ts` shows a const of its own), two frames in `FRAMES` (`sprites/working.ts`) and
+`doing` on a stop; `tests/world/jobsSeen.test.ts` wants every stop job someone's (skating is L4's,
+by rule) and every neighbour at a job some stop weekday and weekend, and
+`tests/sprites/villagers.test.ts` counts the jobs (14). **Errands:** `Neighbourhood`'s keeps
+take an `errand(id)` (a place and a job, ahead of the plan; Ollie's post round is the one), and a
+`recall(happening, id)` for a host's remembering line. Cody's birthday is "always tomorrow", so
+he has no birthday line, party or double gift; P5 may give him one. The 0.7 `NOTES` row has three
+lines, all P4's: P5, L5 and L7 add or fold, five at most.
+
+P3b landed (PR #183, save v47).
 
 **For P4/P5 (from P3b, decision 303):** Rob Boo is `robBoo`, a `VillagerId` like the rest
 (`data/robBoo.ts`, art `sprites/robBoo.ts`), but **he isn't about until she has met him**:

@@ -14,6 +14,12 @@ export interface WorkRow {
   kneels?: true;
 }
 
+/** Jobs seen (V1's P4): Wrapunzel mixing at her oven, and the mayor stamping his papers. */
+const P4_WORKS: Record<'baking' | 'stamping', WorkRow> = {
+  baking: { name: 'mixing a bowl of batter', faces: 'down', frameMs: 340 },
+  stamping: { name: 'stamping papers APPROVED', faces: 'down', frameMs: 520 },
+};
+
 export const WORKS: Record<WorkId, WorkRow> = {
   flowers: { name: 'a bucket of flowers', faces: 'down', frameMs: 700 },
   sawing: { name: 'sawing a plank', faces: 'down', frameMs: 260 },
@@ -29,6 +35,7 @@ export const WORKS: Record<WorkId, WorkRow> = {
   coffee: { name: 'a cup of coffee', faces: 'down', frameMs: 1200 },
   // V1's L4: gliding on the frozen pond, arms out for balance (`data/skating.ts`).
   skating: { name: 'skating', faces: 'down', frameMs: 700 },
+  ...P4_WORKS,
 };
 
 export const WORK_IDS = Object.keys(WORKS) as WorkId[];

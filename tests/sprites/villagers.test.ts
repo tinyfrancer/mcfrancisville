@@ -122,7 +122,8 @@ describe("the villagers alive (V1's E3)", () => {
         jobs += 1;
       }
     }
-    expect(jobs).toBe(12);
+    // V1's P4: Wrapunzel's mixing bowl beside her tray, and the mayor's stamp.
+    expect(jobs).toBe(14);
   });
 
   it("hold what they're working with inside their picture, and light Nessa's lantern", () => {

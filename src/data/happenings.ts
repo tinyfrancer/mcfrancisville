@@ -4,13 +4,18 @@ import type {
   HappeningId,
   InteriorId,
   ItemId,
+  PartyId,
   PropId,
   VillagerId,
+  WeeklyId,
+  WorkId,
 } from '../types/ids';
 import type { FestivalId, HolidayId } from './calendar';
 import type { SpecialDayId } from './specialDays';
 import type { SpotName } from './maps';
 import type { MapZoneId } from '../types/ids';
+import { WEEKLY_HAPPENINGS } from './weeklyHappenings';
+import { BIRTHDAY_PARTIES } from './birthdayParties';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
@@ -26,7 +31,9 @@ export type HappeningDays =
   | { festival: FestivalId; weekdays: readonly number[] }
   | { special: SpecialDayId }
   /** The mayor's hello (V1's P3b): from the day of the promise until the evening she's there. */
-  | { unmasking: true };
+  | { unmasking: true }
+  /** A neighbour's birthday (V1's P4), by `BIRTHDAYS`. */
+  | { birthday: VillagerId };
 
 /**
  * Gathered outdoors in a place: round the host at a spot, everyone at their own place for a party
@@ -35,6 +42,11 @@ export type HappeningDays =
  */
 export type Outdoors<Z extends MapZoneId> =
   { at: SpotName<Z> } | { party: true } | { seats: readonly SpotName<Z>[] };
+
+type Beyond = Exclude<MapZoneId, 'town' | 'fairground'>;
+
+/** Gathered round the host at a spot in a place beyond the town (V1's P4: the pier). */
+export type Away = { [Z in Beyond]: { zone: Z; at: SpotName<Z> } }[Beyond];
 
 /** A piece set out for a happening, standing all its day, by its top left. */
 export interface SetPiece {
@@ -63,7 +75,7 @@ export interface HappeningRow {
    * their place at her birthday party (`PARTY_SPOTS`), for a party the whole town comes to, or
    * each in a seat of their own, in the order of `who` (0.2's J3's film night).
    */
-  where: { inside: InteriorId } | Outdoors<'town'>;
+  where: { inside: InteriorId } | Outdoors<'town'> | Away;
   /** Who's there, the host first, standing at the place; the rest gather round them. */
   who: readonly VillagerId[];
   /** What each says to her the first time she talks to them there. `{name}` is her name. */
@@ -87,6 +99,10 @@ export interface HappeningRow {
    * it's in town, as `where` says, so she can always get to it (decisions.md 11).
    */
   fair?: { where: Outdoors<'fairground'>; place: string; set?: readonly SetPiece[] };
+  /** What the host does there, a working pose (V1's P4): Nessa lighting the lanterns. */
+  doing?: WorkId;
+  /** Only on a clear day (V1's P4's stargazing): on a rainy or foggy one it isn't on. */
+  clear?: true;
 }
 
 /** Where each stands at a gathering before the fairground's stage (0.2's M3). */
@@ -129,7 +145,7 @@ const AT_THE_STAGE = "at the fairground's stage";
  * they say. They come before visits and schedules, and after her birthday party, which nobody
  * misses. Nothing is missed by not going: they come round again (decisions.md 11).
  */
-export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
+const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId>, HappeningRow> = {
   bookClub: {
     name: 'Book club',
     icon: '📚',
@@ -725,6 +741,13 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     },
     welcome: 'The great hall is full to the doors, and everyone is whispering.',
   },
+};
+
+/** Every happening: the everyday, and every neighbour's week and birthday (V1's P4). */
+export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
+  ...EVERYDAY,
+  ...WEEKLY_HAPPENINGS,
+  ...BIRTHDAY_PARTIES,
 };
 
 export const HAPPENING_IDS = Object.keys(HAPPENINGS) as HappeningId[];

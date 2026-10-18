@@ -149,6 +149,8 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     layer: 'floor',
     size: { w: 2, h: 1 },
     says: 'Roses, moonflowers and forget-me-boos, sorted by colour with enormous, careful paws.',
+    // His job, seen (V1's P4): his buckets are a shop, an honesty jar beside them.
+    opens: { shop: 'flowers' },
   },
   bigCauldron: {
     name: 'Great cauldron',

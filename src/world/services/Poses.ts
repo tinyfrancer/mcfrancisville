@@ -61,6 +61,8 @@ export function verbOf(e: WorldEvent): { verb: Verb; afterMs: number } | null {
       return e.picked ? now('pick') : null;
     case 'watered':
       return now('water');
+    case 'bakeStep':
+      return now(e.does === 'pour' ? 'water' : 'pick');
     case 'dug':
     case 'foundEgg':
       return now('find');
