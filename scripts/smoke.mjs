@@ -1065,10 +1065,21 @@ async function calendar() {
     !!chip && chip.bottom - chip.top >= 44 && others.every((b) => clear(chip, b)),
     JSON.stringify(chip),
   );
+  // V1's R2: a dot on the chip while Today has something she hasn't seen, gone once she looks.
+  check(
+    'the chip wears a dot while Today has something new',
+    (await page.locator('.hud-today[data-new]').count()) === 1,
+  );
   await tapElement('.hud-today');
+  check(
+    "the chip's dot goes once she has looked",
+    (await page.locator('.hud-today[data-new]').count()) === 0,
+  );
   // U4: today's mark (or a plain page) beside the title, and a tab each for today, the month and
   // what's coming up.
   await framed('.hud-calendar-sheet', { picture: true, tabs: ['Today', 'Month', 'Coming up'] });
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
+  await upNow();
   await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Month")');
   const days = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-cal-day')].map((el) => el.getBoundingClientRect()),
@@ -1093,6 +1104,72 @@ async function calendar() {
   await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
   await tapElement('.hud-calendar-sheet button:text("Done")');
   check('Done closes the calendar', (await page.locator('.hud-sheet').count()) === 0);
+  // A tap on the tree's line sends her off to it and closes the calendar; she's stopped short,
+  // so the passive section still finds it full.
+  await tapElement('.hud-today');
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
+  await tapElement('.hud-cal-line[data-today="tree"] .hud-cal-go');
+  const aim = await page.evaluate(() => {
+    const tree = window.world.map.props.find((p) => p.id === 'candyTree');
+    const aimed = window.world.aim;
+    const box = aimed && 'box' in aimed ? aimed.box : null;
+    const here = window.world.movement.tile;
+    window.world.tapTile(here.tx, here.ty);
+    return { tree, box, scene: window.world.scene };
+  });
+  check(
+    "a tap on the tree's line closes the calendar and sets her off to the tree",
+    (await page.locator('.hud-sheet').count()) === 0 &&
+      aim.scene === 'town' &&
+      !!aim.box &&
+      aim.box.tx === aim.tree?.tx &&
+      aim.box.ty === aim.tree?.ty,
+    JSON.stringify(aim),
+  );
+  await stepUntil(() => !window.world.player.moving, 'she stops');
+}
+
+/**
+ * The calendar's Today (V1's R2): a line for what's up now, the tree's among them, each true of
+ * the world and on screen upright and on its side.
+ */
+async function upNow() {
+  const tree = await page.locator('.hud-cal-line[data-today="tree"]').textContent();
+  const candy = await page.evaluate(() => window.world.candyTree.candy());
+  check(
+    "Today has the candy tree's line, saying what it holds",
+    candy > 0 && !!tree && tree.includes(`${candy} Candy`),
+    `${tree} (${candy})`,
+  );
+  /** @returns {Promise<{ kind: string, left: number, right: number, height: number }[]>} */
+  const lines = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.hud-cal-line')].map((el) => {
+        const r = el.getBoundingClientRect();
+        const kind = el instanceof HTMLElement ? (el.dataset.today ?? '') : '';
+        return { kind, left: r.left, right: r.right, height: r.height };
+      }),
+    );
+  const upright = await lines();
+  const kinds = await page.evaluate(() => window.world.upNow.lines().map((l) => l.kind));
+  check(
+    'every line of Today is one the world says, a thumb tall and on screen',
+    upright.length === kinds.length &&
+      upright.every((l, i) => l.kind === kinds[i] && l.height >= 44 && l.right <= PHONE.width),
+    JSON.stringify(upright.map((l) => l.kind)),
+  );
+  await page.screenshot({ path: '.smoke/today.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => window.view.step(40));
+  const side = await lines();
+  check(
+    'on its side, Today keeps every line on screen',
+    side.length === upright.length && side.every((l) => l.left >= 0 && l.right <= PHONE.height),
+    JSON.stringify(side.map((l) => [l.left, l.right])),
+  );
+  await page.screenshot({ path: '.smoke/today-side.png' });
+  await page.setViewportSize(PHONE);
+  await page.evaluate(() => window.view.step(40));
 }
 
 /** The noticeboard by the square: walked up to, it opens its notes, and one can be answered. */

@@ -69,6 +69,7 @@ import { isAbout } from '../systems/critters';
 import { clearedOf, suspectsOf } from '../systems/mystery';
 import { inChain } from '../systems/mysteryChain';
 import { inTown, MAYOR, townsfolk } from '../systems/mayor';
+import { canGoToday, goToday, TODAY_TOLD_BY } from './todayGo';
 import { PALETTE } from '../sprites/palette';
 import type { Plot } from '../world/Farm';
 import { sellValue } from '../systems/shop';
@@ -653,6 +654,14 @@ export function sheetApis({
     plain: drawPlainMark,
     birthdays: () => townsfolk(),
     onChange: (listener) => world.events.on('today', listener),
+    // What's up now (V1's R2), and where a line of it takes her.
+    upNow: () => world.upNow.lines(),
+    canGo: (to) => canGoToday(world, to),
+    go: (to) => goToday(world, to),
+    onUpNow: (listener) => {
+      const offs = TODAY_TOLD_BY.map((key) => world.events.on(key, listener));
+      return () => offs.forEach((off) => off());
+    },
   };
   const title: TitleApi = {
     art: (canvas) => drawTitleScene(canvas, world.wardrobe.look, dayKey(world.clock.now())),

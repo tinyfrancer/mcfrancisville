@@ -15,6 +15,7 @@ import {
 import { workPose } from '../sprites/working';
 import { MAYOR_LIFT, MAYOR_PORTRAIT_DROP } from '../sprites/robBoo';
 import { stanceOf } from '../systems/neighbourLife';
+import { bubblesOver } from '../systems/today';
 import type { BraceletId, Facing, VillagerId, ZoneId } from '../types/ids';
 import type { Feeling } from '../types/mood';
 import type { World } from '../world/World';
@@ -315,7 +316,7 @@ export function drawSpellSparkles(
 
 /**
  * A "!" over a neighbour with news for her, and a "?" over one who has lost something, bobbing a
- * little. Drawn after the light, so she can see them across the town at night.
+ * little, and beside either a parcel over one asking a favour today (V1's R2). Drawn after the light, so she can see them across the town at night.
  */
 export function drawNeighbourBubbles(
   ctx: CanvasRenderingContext2D,
@@ -325,13 +326,21 @@ export function drawNeighbourBubbles(
   nowMs: number,
 ): void {
   for (const n of world.neighbourhood.neighboursIn(zone)) {
-    const bubble = world.smallEvents.bubble(n.id);
-    if (!bubble) continue;
-    const art = NEIGHBOUR_BUBBLES[bubble];
-    const sprite = bakeIcon(`bubble:${bubble === '!' ? 'news' : 'lost'}`, art.source, art.palette);
+    const bubbles = bubblesOver(
+      world.smallEvents.bubble(n.id),
+      world.neighbourhood.favour(n.id) !== null,
+    );
+    if (bubbles.length === 0) continue;
     const bob = 2 * (Math.floor(nowMs / 500) % 2);
     const head = overHead(world, n);
-    ctx.drawImage(sprite, head.x + 4 - cam.x, head.y - sprite.height - bob - cam.y);
+    let x = head.x + 4;
+    for (const bubble of bubbles) {
+      const art = NEIGHBOUR_BUBBLES[bubble];
+      const key = { '!': 'news', '?': 'lost', '+': 'favour' }[bubble];
+      const sprite = bakeIcon(`bubble:${key}`, art.source, art.palette);
+      ctx.drawImage(sprite, x - cam.x, head.y - sprite.height - bob - cam.y);
+      x += sprite.width + 2;
+    }
   }
 }
 

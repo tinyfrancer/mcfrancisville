@@ -359,7 +359,25 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-R1 landed (PR #187, save v50). Next in this lane: R2.
+R2 landed (PR #190). Next in this lane: R3.
+
+**For R3/R4 (from R2, decision 312):** the calendar's Today is `todayLines(facts)` in
+`systems/today.ts`, worked out each time from `TodayFacts`, which `areas/upNow.ts` reads off the
+services (`world.upNow.lines()`); nothing is kept. **To add a Today line** (R3's rare event, a
+travelling stall, a visitor for the week; R4's project to fund): add a field to `TodayFacts` and
+its read in `areas/upNow.ts` (a plain read of a service, made before `upNow` in `build.ts`), a
+member of the `TodayLine` union with a `key` (it changes when the line is news again: put the day,
+window or week in it, so the date chip's dot comes back) and a `go` if a tap should take her
+somewhere (`{ zone, prop }` walks up to a prop, `{ zone, tile, bed }` to a bed, `{ villager }` to
+a neighbour; `wiring/todayGo.ts` flies her there first by `Travel.fly` when she's elsewhere), its
+push in `todayLines` where it belongs in the order, its words in `hud/todayWords.ts` (a case:
+`text`, `small`, a `Glyph`, never an emoji), and a case in `holds()` in `tests/world/today.test.ts`
+asking the world itself whether it's true. If what it reads changes without one of
+`TODAY_TOLD_BY`'s events (`wiring/todayGo.ts`), add the event there so the dot is asked again.
+R3's rare events can be Today's lines first and toasts second; R4's projects a line while one's
+being funded (what it still wants) with a `go` to the noticeboard. The favour parcel is `+` in
+`NEIGHBOUR_BUBBLES`, picked by `bubblesOver`; a new bubble over a head goes beside it there. The
+0.8 `NOTES` row has four lines (R1's three, R2's one): R3 and R4 fold to stay at five.
 
 **For R2/R3 (from R1, decision 311):** her first day is `world.firstDay` (`FirstDay`, made by
 `areas/firstDay.ts`): six steps (`FIRST_DAY_STEPS`, `data/firstDay.ts`) worked out by

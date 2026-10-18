@@ -1488,8 +1488,11 @@ function masked(rows: readonly string[], part: Grid): string[] {
   );
 }
 
-/** The bubbles that show over a head: a neighbour's news and lost things, and V1's E1 emotes. */
-export type Emote = '!' | '?' | '♥' | '♪' | '…';
+/**
+ * The bubbles that show over a head: a neighbour's news and lost things, and V1's E1 emotes; and
+ * a favour they're asking today (V1's R2), keyed `+` and drawn as a little parcel.
+ */
+export type Emote = '!' | '?' | '♥' | '♪' | '…' | '+';
 
 /**
  * What shows over a neighbour's head (phase S2): "!" when they've news for her, "?" when they've
@@ -1529,5 +1532,21 @@ export const NEIGHBOUR_BUBBLES: Record<Emote, { source: SpriteSource; palette: P
       ],
     },
     palette: { '.': null, o: C.ink, w: C.white, x: C.plum },
+  },
+  '+': {
+    source: {
+      rows: [
+        '.ooooooo.',
+        'owwywywwo',
+        'owwwywwwo',
+        'owxxyxxwo',
+        'owxxyxxwo',
+        'owxxyxxwo',
+        'owwwwwwwo',
+        '.oowoooo.',
+        '..oo.....',
+      ],
+    },
+    palette: { '.': null, o: C.ink, w: C.white, x: C.pumpkin, y: C.plum },
   },
 };

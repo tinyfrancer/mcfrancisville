@@ -7149,3 +7149,55 @@ than a noted one, and changing the loop's shape wasn't asked); `?perf` sampling 
 and the draw apart (perf.mjs does that on the container; on her phone what matters is the frame);
 splitting the 1.66 MB chunk (precached once a version, it costs her a download per deploy, not a
 launch; worth it only if a launch is ever slow on her phone).
+
+## 312. Today: what's waiting, each line read off the world, a tap away; a parcel over a favour; a dot on the chip (2026-10-18, V1's R2)
+
+_Session R2 of the V1 plan, lane 4, for `docs/v1_analysis.md`'s finding 3 ("No today": goals live
+only inside sheets, favours are invisible until she talks, nothing says "three notes are up,
+Barty's asking for a rose, the tree is full, two beds are ripe"). No save change. Personal touches
+parked (decision 177): nothing was asked; the words are the warmest default._
+
+- **A line each for what's up now, at the top of the calendar's Today tab** (above the day's own
+  rows, which stay): Cody's list while it's open ("2 of 6 done"), the candy tree's Candy, the
+  honesty stall's tin and what sold, ripe beds by place, the notes still up on the board and who
+  pinned them, each neighbour asking a favour today (what, and where they are now), the day's
+  mounds not yet dug, who's coming round to hers today and when (the visit dealt to hers, a best
+  friend's call, Cody's evening), tonight's happening (or whichever is on or next, with where and
+  who), the critters visiting out of their time on R5's visit day (and the ones new to her by
+  name), or "critters come visiting in two days" when one is near, and Cobweb Corner's wanted list.
+- **Worked out each time it's asked, never kept** (`systems/today.ts`, `todayLines` from
+  `TodayFacts`): `world.upNow` (`UpNow`, made by `areas/upNow.ts`) reads the facts off the services
+  as they are (`candyTree.candy()`, `stall.view()`, `garden.ripe()`, `noticeboard.notices()`,
+  `neighbourhood.favour`/`whereIs`, `fossils.mound`/`isDug`, `shops.wanted()`, the calendar's
+  gatherings, `callersOn`, `isVisiting`, `firstDay`), so a line is there only while it's true. The
+  words are the HUD's (`hud/todayWords.ts`); the system's lines are data, so the test can ask the
+  world about each.
+- **A tap takes her there** where that makes sense (`wiring/todayGo.ts`): up to a neighbour where
+  she is (`world.seek`), into a building by walking to its door when it's in the place she's in
+  (`MapZone.buildingOf`), and otherwise by broom (`Travel.fly`: as the map's `go`, or out of a
+  building or her house onto its doorstep into the place it stands in, `canFly`), then up to the
+  tree, stall, board, mound or ripe bed (`tendBed`), so arriving does the thing. A line that can't
+  take her anywhere as things are (a place not yet found, a neighbour indoors elsewhere) isn't a
+  button. The calendar closes as she sets off.
+- **A favour bubble**: a little parcel (`+`, `NEIGHBOUR_BUBBLES`, pumpkin with a plum ribbon)
+  over a neighbour asking a favour today, beside the `!` or `?` if there is one (`bubblesOver`),
+  until it's done. The gallery has it as `bubble:favour`.
+- **A dot on the date chip** while Today has a line she hasn't seen since she last opened the
+  calendar: each line has a `key` that changes when it's news again (the tree and the notes each
+  window, a favour or mound each day, the wanted list each week, a ripe count when it changes), and
+  the keys seen are kept per phone (`mcfrancisville:todaySeen`, `hud/todaySeen.ts`), never in the
+  save. Asked again as the world says the day, bag, Candy, friends, stall, first day or scene
+  changed (`TODAY_TOLD_BY`).
+- **Held by** `tests/world/today.test.ts` (every line true of the world it was built from, asked of
+  the services and rules themselves, through a new town and a week of windows; lines going once
+  done; ripe beds, mounds and the stall counted; news only for a key unseen; the tree reached from
+  town and from her house; a favour's neighbour reached), `tests/systems/today.test.ts`, and
+  smoke's `calendar` (the dot and its going, the tree's line with what it holds, every line the
+  world's and on screen upright and on its side, a tap on the tree's line setting her off to it).
+
+**Rejected:** a pip on the HUD with its own sheet (the calendar's Today was already the place, and
+the chip already opens it); lines kept in the save (they'd go stale; everything is a read); the
+dot in the save (a phone's, like R1's hints); a favour bubble showing the thing they want (a
+16-pixel icon in an 18-pixel bubble doesn't read; the line in Today says what); hopping her to a
+neighbour indoors in another building (the neighbours sheet's Find never hops either; she's flown
+to the place, or walked to the door).

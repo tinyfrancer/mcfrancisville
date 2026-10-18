@@ -186,6 +186,8 @@ export const NOTES: readonly PatchNotes[] = [
         'Acres has every other kind, every day. She insists.',
       'On a first day, the date and the little tray of things glow until tapped, so nobody ' +
         "misses the calendar. I missed it for a year. Don't tell anyone.",
+      "The calendar's Today says what's waiting (the tree, notes, ripe beds, who's coming " +
+        'round) and who wants a favour: look for a parcel over them. Tap a line to go.',
     ],
     ps: 'P.S. If you know your way round already, Cody will not fuss. He will want to, mind.',
   },
