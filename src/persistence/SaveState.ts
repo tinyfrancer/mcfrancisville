@@ -675,7 +675,16 @@ function isLatelyShape(value: unknown): boolean {
     const d = done as Record<string, unknown>;
     return typeof d[id] === 'string' && typeof d.day === 'string';
   };
-  return last('placed', 'piece') && last('harvested', 'crop') && last('donated', 'thing');
+  // What she told Cody, and the scenes he has told (save v49, V1's P5).
+  const told = v.told === undefined || isStringList(v.told);
+  const herDay = v.herDay === undefined || last('herDay', 'answer');
+  return (
+    last('placed', 'piece') &&
+    last('harvested', 'crop') &&
+    last('donated', 'thing') &&
+    herDay &&
+    told
+  );
 }
 
 /** What she did at their happenings (save v48): by happening, a day and maybe a pick. */

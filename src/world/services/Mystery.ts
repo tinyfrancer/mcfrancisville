@@ -13,6 +13,7 @@ import type { PropId } from '../../types/ids';
 import { daysBetween as daysApart } from '../../systems/calendar';
 import { fill } from '../../systems/friendship';
 import { knowMayor } from '../../systems/mayor';
+import { isHusband } from '../../systems/cody';
 import { daysUntil, dueStep, readyOn, stillNews, wesBand } from '../../systems/mysteryChain';
 import { VILLAGER_IDS } from '../../data/villagers';
 import { dayKey } from '../../systems/clock';
@@ -135,7 +136,9 @@ export class Mystery {
       this.storyOn = day;
       for (const n of chaptersDue(day)) if (!CHAPTERS[n]!.wes) mailbox.post(chapterId(n), day);
     }
-    if (!this.casebook.foundOn('rumour') && VILLAGER_IDS.some((v) => friends.hearts(v) >= 3)) {
+    // A friend's rumour: her husband, close from the first day (V1's P5), isn't the friend made.
+    const friend = VILLAGER_IDS.some((v) => !isHusband(v) && friends.hearts(v) >= 3);
+    if (!this.casebook.foundOn('rumour') && friend) {
       this.pin('rumour');
     }
     if (cabinet.found >= VISITOR_BOOK_CRITTERS) this.pin('visitorBook');

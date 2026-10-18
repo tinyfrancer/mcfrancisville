@@ -2,6 +2,7 @@ import { isCritter } from '../data/critters';
 import { CROPS } from '../data/crops';
 import { isFossil } from '../data/fossils';
 import { FURNITURE } from '../data/furniture';
+import { HER_DAY_ANSWERS, OUR_STORY, type HerDayAnswer } from '../data/cody';
 import type { CritterId, CropId, FossilId, FurnitureId } from '../types/ids';
 
 /**
@@ -13,10 +14,23 @@ export interface LatelySnapshot {
   placed: { piece: FurnitureId; day: string } | null;
   harvested: { crop: CropId; day: string } | null;
   donated: { thing: CritterId | FossilId; day: string } | null;
+  /**
+   * What she told Cody the last time he asked how her day was, and the day (save v49, V1's P5),
+   * which he brings up the next.
+   */
+  herDay?: { day: string; answer: HerDayAnswer } | null;
+  /** The scenes from their story he has told her (save v49), by id. */
+  told?: string[];
 }
 
 /** Nothing done yet: a new town, or a save from before they remembered. */
-export const NOTHING_LATELY: LatelySnapshot = { placed: null, harvested: null, donated: null };
+export const NOTHING_LATELY: Required<LatelySnapshot> = {
+  placed: null,
+  harvested: null,
+  donated: null,
+  herDay: null,
+  told: [],
+};
 
 function dayOf(value: unknown): string | null {
   const day = (value as { day?: unknown } | null)?.day;
@@ -38,16 +52,32 @@ function known<K extends string, T extends string>(
 const isPiece = (id: string): id is FurnitureId => id in FURNITURE;
 const isCrop = (id: string): id is CropId => id in CROPS;
 const isThing = (id: string): id is CritterId | FossilId => isCritter(id) || isFossil(id);
+const isAnswer = (id: string): id is HerDayAnswer =>
+  (HER_DAY_ANSWERS as readonly string[]).includes(id);
+const STORY_IDS: readonly string[] = OUR_STORY.map((s) => s.id);
 
 export class Lately {
-  private kept: LatelySnapshot;
+  private kept: Required<LatelySnapshot>;
 
   constructor(saved?: Partial<LatelySnapshot>) {
     this.kept = {
       placed: known(saved?.placed, 'piece', isPiece),
       harvested: known(saved?.harvested, 'crop', isCrop),
       donated: known(saved?.donated, 'thing', isThing),
+      // An answer or a scene this build doesn't know is forgotten: asked or told again.
+      herDay: known(saved?.herDay, 'answer', isAnswer),
+      told: Array.isArray(saved?.told) ? saved.told.filter((id) => STORY_IDS.includes(id)) : [],
     };
+  }
+
+  /** She told Cody how her day was (V1's P5). */
+  answered(answer: HerDayAnswer, day: string): void {
+    this.kept.herDay = { day, answer };
+  }
+
+  /** He told her a scene from their story. */
+  tell(id: string): void {
+    if (!this.kept.told.includes(id)) this.kept.told = [...this.kept.told, id];
   }
 
   /** She put a piece out at home or in her yard. */
@@ -66,11 +96,11 @@ export class Lately {
   }
 
   /** The last of each, for a talk. */
-  get last(): LatelySnapshot {
-    return { ...this.kept };
+  get last(): Required<LatelySnapshot> {
+    return { ...this.kept, told: [...this.kept.told] };
   }
 
   snapshot(): { lately: LatelySnapshot } {
-    return { lately: { ...this.kept } };
+    return { lately: this.last };
   }
 }

@@ -11,6 +11,7 @@ import {
   puffsOnTalk,
   reactionTo,
   rewardsBetween,
+  linesNow,
   specialDayOf,
   specialLetterId,
   yearsMarried,
@@ -87,7 +88,8 @@ describe('special days', () => {
     const context = { hearts: 0, day: '2027-04-08', hour: 12, talks: 0 };
     expect(lineFor('cody', context)).toMatch(/Happy birthday/);
     expect(lineFor('agatha', context)).toMatch(/tomorrow/);
-    expect(VILLAGERS.cody.lines.hello).toContain(lineFor('cody', { ...context, talks: 1 }));
+    // Her husband's lines are a husband's from the first day (V1's P5).
+    expect(linesNow('cody', 0, 12)).toContain(lineFor('cody', { ...context, talks: 1 }));
   });
 
   it('bring a letter a year, on the birthday and the anniversary', () => {
