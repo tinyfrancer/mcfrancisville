@@ -212,9 +212,13 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
 - **A portrait is a bust** (`drawBust`, V1's L5, decision 295; for the talk sheet, the greeting,
   the neighbours sheet and the corkboard): head and shoulders of the figure facing her, framed from
   the top of the head down to just under the shoulders, drawn at 64 by Scale2x from the figure's
-  own pixels, in an oval of evening. Its `mood` is the face (only the neutral one until L7). A neighbour she hasn't met is the same portrait filled with one colour,
+  own pixels, in an oval of evening. Its `mood` is the face, the same feeling the figure has in the world (V1's L7, decision 296). A neighbour she hasn't met is the same portrait filled with one colour,
   a shape only (`drawShadowPortrait`), never a question mark.
 - **Idle and moods** move whole pixels: a bob is one pixel, a blink is one frame.
+- **A feeling is the face's own pixels** (V1's L7, decision 296: `sprites/faces.ts`): eyes, brows,
+  blush and mouth only, nothing below the chin, readable at 1× (Tomodachi Life's rule above). A
+  face of its own (a carving, a skull, glasses) has its feelings drawn in its own keys
+  (`sprites/moodFaces.ts`); a feeling never makes a face less friendly, cross is the fond kind.
 
 ## Spiders
 
