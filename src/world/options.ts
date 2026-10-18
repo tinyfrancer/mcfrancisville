@@ -149,5 +149,6 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     lately: save.lately,
     happenings: save.happenings,
     firstDay: save.firstDay,
+    projects: save.projects,
   };
 }

@@ -3,6 +3,7 @@ import { PROJECT_IDS, PROJECTS, CANDY_LOT } from '../../src/data/projects';
 import { GATHERS_PER_WINDOW } from '../../src/systems/gathering';
 import { siteOf } from '../../src/systems/projects';
 import { venueOf } from '../../src/systems/happenings';
+import { fromSave } from '../../src/world/options';
 import { yardOf } from '../../src/systems/yard';
 import type { ProjectId } from '../../src/types/ids';
 import { tileOf } from '../../src/world/World';
@@ -210,6 +211,25 @@ describe("the town's projects (V1's R4)", () => {
     after.clock.set(tuesday);
     expect(venueOf('recital')).toMatchObject({ zone: 'town', where: { at: 'bySalonCorner' } });
     void before;
+  });
+
+  it('keeps what she has given and built with her town', () => {
+    const { world } = harness();
+    world.projects.start('bandstand');
+    stock(world, 'bandstand');
+    world.projects.give({ item: 'wood', count: 7 });
+    world.projects.give({ candy: 3 });
+    const saved = world.save();
+    expect(saved.projects).toEqual({
+      current: 'bandstand',
+      given: { bandstand: { candy: 300, items: { wood: 7 } } },
+      built: [],
+    });
+    const again = harness(undefined, fromSave(saved));
+    expect(again.world.projects.current).toBe('bandstand');
+    expect(again.world.townZone.propAt(26, 19)?.id).toBe('sitePost');
+    const built = harness(undefined, { projects: { built: ['bandstand', 'nonsense' as never] } });
+    expect(built.world.save().projects.built).toEqual(['bandstand']);
   });
 
   it('lists every project for the board, with what each still wants and what she has', () => {

@@ -359,12 +359,24 @@ three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five
 
 ### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
 
-**R4 in progress** on `claude/r4-town-projects` (decision 314; bumps the save to v51 in its last
-commit). Done: the four projects (`data/projects.ts`), their rules (`systems/projects.ts`), `Works`
-and `world.projects`, the sites in the world (`zones/Sites.ts`, art `sprites/projects.ts`), the
-noticeboard's Projects tab, Today's line, the recital at the bandstand, the greenhouse's beds, the
-cap on gathering and the economy test. Next: the save bump (`projects` in `SaveState`, v51, a
-migration, `isSaveState`, `fromSave`, the lived-in fixtures), merge `v1-dev`, the suite, ready.
+R4 landed (PR #194, save v51). Next in this lane: R6a (R6b is running beside it).
+
+**For R6/V1 (from R4, decision 314):** the save is v51 (`projects: { current, given, built }`).
+**To add a project**: a `ProjectId` in `types/ids.ts` and a `PROJECTS` row in `data/projects.ts`
+(its `zone`, `where`, `candy`, `needs` of things she gathers or grows, never sold, its pieces at
+each of `posts`, `frames` and `done` by top-left tile, `picture`, and `deck` or `beds` if it's
+walked on or grown in), a `PropId`, `PROP_FOOTPRINT` row and art in `sprites/projects.ts` for its
+frame and what's built (the posts are `sitePost` at the corners, `corners()`), a picture in
+`PROJECT_PICTURES`, and what it does once built (a case in `World.arriveOn`, a `PROP_SEATS` row, a
+happening's `bandstand`-style move). `tests/data/projectSites.test.ts` holds its tiles clear and
+nothing cut off; `economy.test.ts` its worth between three and fourteen thorough days. A site in her
+yard is kept from the day she starts it (`keptFor` in `areas/shared.ts`, `Yard.makeRoom`). What's
+drawn is `Sites` per place, read off `Works`; `world.projects.preview(id, stage)` shows a stage in a
+dev build, and `npm run sprite -- 'stage:*'` draws each. **Gathering is capped** at
+`GATHERS_PER_WINDOW` (48) a place a window (`gatheredIn` from `Takings`): a new place with more than
+48 things is capped too, and the economy test holds every place's best capped round within 1.6 of
+the town's. The 0.8 `NOTES` row is full at five lines (R1's two folded into one, R2's, R3's, R4's):
+a later 0.8 session folds two.
 
 R3 landed (PR #192).
 

@@ -144,6 +144,10 @@ export class Projects {
     return { kind: 'pitchedIn', project: id, ...(stage !== was && stage ? { raised: stage } : {}) };
   }
 
+  snapshot(): ReturnType<Works['snapshot']> {
+    return this.keeps.works.snapshot();
+  }
+
   /** Shows a project at a stage, or as it is with `undefined`: a dev build's handle (V1's R4). */
   preview(id: ProjectId, stage: ProjectStage | null | undefined): void {
     this.keeps.works.preview(id, stage);

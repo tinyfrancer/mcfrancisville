@@ -36,12 +36,13 @@ import type { Order } from '../systems/catalogue';
 import type { LatelySnapshot } from '../world/Lately';
 import type { JoinedSnapshot } from '../systems/joining';
 import type { FirstDaySnapshot } from '../world/services/FirstDay';
+import type { WorksSnapshot } from '../world/Works';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 50;
+export const SAVE_VERSION = 51;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -248,6 +249,11 @@ export interface SaveState {
    * from the start. A step this build doesn't know is forgotten.
    */
   firstDay: FirstDaySnapshot;
+  /**
+   * The town's projects (save v51, V1's R4): the one she's funding, what she has given each by
+   * Candy and by thing, and those built. One this build doesn't know is let go.
+   */
+  projects: WorksSnapshot;
 }
 
 export function newSave(
@@ -300,6 +306,7 @@ export function newSave(
     lately: { placed: null, harvested: null, donated: null, herDay: null, told: [] },
     happenings: {},
     firstDay: { done: [], over: false },
+    projects: { current: null, given: {}, built: [] },
   };
 }
 
@@ -668,7 +675,36 @@ export function isSaveState(value: unknown): value is SaveState {
     isOrdersShape(s.orders) &&
     isLatelyShape(s.lately) &&
     isJoinedShape(s.happenings) &&
-    isFirstDayShape(s.firstDay)
+    isFirstDayShape(s.firstDay) &&
+    isProjectsShape(s.projects)
+  );
+}
+
+/**
+ * The town's projects (save v51): the current one null or a string, what's given to each as Candy
+ * and counts, and those built. Ids are checked by `Works`, which lets go of one it doesn't know.
+ */
+function isProjectsShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const given = v.given;
+  return (
+    (v.current === null || typeof v.current === 'string') &&
+    isStringList(v.built) &&
+    typeof given === 'object' &&
+    given !== null &&
+    !Array.isArray(given) &&
+    Object.values(given).every((g) => {
+      if (typeof g !== 'object' || g === null) return false;
+      const { candy, items } = g as Record<string, unknown>;
+      return (
+        typeof candy === 'number' &&
+        typeof items === 'object' &&
+        items !== null &&
+        !Array.isArray(items) &&
+        Object.values(items).every((n) => typeof n === 'number')
+      );
+    })
   );
 }
 

@@ -1299,9 +1299,22 @@ async function projects() {
     await page.screenshot({ path: `.smoke/project-${stage}.png` });
   }
   check('the posts, the frame and the bandstand each draw', new Set(shots).size === 3);
+  await page.evaluate(() => window.world.projects.preview('bandstand', undefined));
+  // What she gave is kept with her town (save v51).
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => ({
+    current: window.world.projects.current,
+    wood: window.world.projects.view()[0]?.items.find((i) => i.item === 'wood')?.given,
+    post: window.world.townZone.propAt(26, 19)?.id ?? null,
+  }));
+  check(
+    'the project and what she gave it survive a reload',
+    kept.current === 'bandstand' && kept.wood === 3 && kept.post === 'sitePost',
+    JSON.stringify(kept),
+  );
   // What was put in her bag and purse for this goes again, for the sections after.
   await page.evaluate(() => {
-    window.world.projects.preview('bandstand', undefined);
     window.world.bag.remove('wood', 77);
     window.world.bag.remove('stone', 40);
     window.world.bag.remove('pumpkin', 6);

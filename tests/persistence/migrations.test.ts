@@ -526,6 +526,27 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's R4 step (50 to 51)", () => {
+  it('gives an old town no project begun or built, keeping the rest', () => {
+    const old = { ...structuredClone(SAVE), version: 50 } as Record<string, unknown>;
+    delete old.projects;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.projects).toEqual({ current: null, given: {}, built: [] });
+    expect(up).toEqual(SAVE);
+    const funding = {
+      current: 'bandstand',
+      given: { bandstand: { candy: 300, items: { wood: 12 } } },
+      built: ['footbridge'],
+    };
+    expect(migrateSave({ ...SAVE, projects: funding })?.projects).toEqual(funding);
+    expect(migrateSave({ ...SAVE, projects: { ...funding, built: 'footbridge' } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, projects: { ...funding, given: { bandstand: { candy: '3' } } } }),
+    ).toBeNull();
+  });
+});
+
 describe("V1's R1 step (49 to 50)", () => {
   it("ends an old town's first day before it starts, with nothing counted", () => {
     const old = { ...structuredClone(SAVE), version: 49 } as Record<string, unknown>;
