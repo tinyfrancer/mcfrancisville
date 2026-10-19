@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { catalogue } from '../../src/sprites/catalogue';
+import { catalogue, GALLERY_PAGE_ROWS, pageOf } from '../../src/sprites/catalogue';
 
 describe('the catalogue', () => {
   const entries = catalogue();
@@ -17,5 +17,19 @@ describe('the catalogue', () => {
       const seen = raster.data.some((v, i) => i % 4 === 3 && v > 0);
       expect(seen, entry.name).toBe(true);
     }
+  });
+
+  it('pages the gallery: every sprite once, in order, a fixed number a page', () => {
+    const { pages } = pageOf(entries, null);
+    expect(pageOf(entries, null).entries.map((e) => e.name)).toEqual(entries.map((e) => e.name));
+    expect(pages).toBe(Math.ceil(entries.length / GALLERY_PAGE_ROWS));
+    const paged = [];
+    for (let page = 1; page <= pages; page++) {
+      const shown = pageOf(entries, page).entries;
+      if (page < pages) expect(shown).toHaveLength(GALLERY_PAGE_ROWS);
+      paged.push(...shown.map((e) => e.name));
+    }
+    expect(paged).toEqual(entries.map((e) => e.name));
+    expect(pageOf(entries, pages + 1).entries).toEqual([]);
   });
 });

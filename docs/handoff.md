@@ -32,7 +32,14 @@ open (decision 330).
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
-T1 (`claude/t1-smoke-split`): not started.
+**T1 landed (PR #205, decision 335). Next: T2.** Smoke is `scripts/smoke/`: `run.mjs` (the
+browser, `ORDER`, `NEEDS`, the arguments), `lib.mjs` (the helpers, the shared `page`, swapped by
+`setPage`) and nineteen area files, each exporting `sections`; `npm run smoke -- town fair`, a
+section's own name, `--section=`, `-- --list`. 622 checks before and after. **A new section goes
+in its area's list and in `ORDER`** (the runner refuses to start otherwise), and if it leans on
+a section in another area, a line in `NEEDS`. Every area passes alone (12 s to 78 s; `gallery`
+four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&page=n`, 50 rows.
+For T2: the vitest suite was 2,611 tests in 219 files, 346 s in the container on this branch.
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
@@ -695,7 +702,7 @@ its season), so `wary` and a bite window by rarity apply to them as to any.
   the game; until then Settings says "The cloud isn't set up yet" and nothing else changes.
 - The QR holds the code as text (the camera shows it to copy); restoring is typed or pasted on
   the new phone. The backup code stays and is still the way for a phone with no signal.
-- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke.mjs`) on the
+- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke/lib.mjs`, since T1) on the
   main context and the `cloud` section's own; other contexts reach the dev server, which serves
   `api/save.ts` as JavaScript, read as out of reach, so nothing is ever PUT there.
 

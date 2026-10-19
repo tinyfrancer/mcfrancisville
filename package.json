@@ -15,7 +15,7 @@
     "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.scripts.json && tsc --noEmit -p api",
     "icons": "node scripts/make-icons.mjs",
     "sprite": "node scripts/sprite.mjs",
-    "smoke": "node scripts/smoke.mjs",
+    "smoke": "node scripts/smoke/run.mjs",
     "smoke:offline": "node scripts/smoke-offline.mjs",
     "perf": "node scripts/perf.mjs"
   },
