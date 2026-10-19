@@ -7933,6 +7933,15 @@ the gallery's foot. Personal touches parked (decision 177): nothing was asked._
   `-- --list` lists the areas and their sections without starting a browser. Each section is
   announced (`--- farm: plots`) so a log says where a check came from. **The old path is gone**,
   not a shim: `package.json` is how it's run, and every live mention is updated.
+- **Every area passes run alone**, which three didn't at first: a section can lean on one in
+  another area before it (the bag's first slot is `gather`'s wood; Scarah is walked up to once
+  `booAcres` has been; Agatha's letter's toast stands in front of the woods' in `zones` until a
+  reload, `save`'s, sends it off). `NEEDS` in `run.mjs` names each, and a run that picks the one
+  without the other brings it along, with a note. **Rejected:** changing the sections to stand
+  alone (it changes what the 622 do, which T1 doesn't); moving `bag` into `town` beside `gather`
+  (it's the HUD's bag, and the other two have no such neighbour). Alone in the container, an
+  area takes 12 s (`look`) to 78 s (`seasons`), most under a minute; `gallery` four and a half
+  minutes, picturing its 66 pages.
 - **`smoke:offline` stays its own** (`scripts/smoke-offline.mjs`): it drives a production
   preview with a service worker and no signal, against another URL, and shares only `check` and
   the phone's size, a few lines each, its failures annotated as its own; CI runs it before the

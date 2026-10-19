@@ -905,8 +905,10 @@ V1's weight on it.
    browser, the whole run's `ORDER`, the arguments, the summary), `lib.mjs` (the helpers and the
    shared page) and nineteen area files of 83 sections, 622 checks before and after;
    `npm run smoke -- town fair` runs those areas (after `boot`), a section's name runs it alone,
-   `-- --list` lists them. Run alone, an area takes from under a minute (`gallery`, `look`) to
-   about four (`neighbours`). The gallery is paged (`?gallery&page=n`, 50 rows a page, 66 pages,
+   `-- --list` lists them, and a section that leans on one in another area brings it along
+   (`NEEDS`: the bag on `gather`, Scarah on `booAcres`, the woods on `save`'s reload). Run alone in
+   the container, an area takes 12 s (`look`) to 78 s (`seasons`), most under a minute, and
+   `gallery` four and a half minutes, picturing its pages. The gallery is paged (`?gallery&page=n`, 50 rows a page, 66 pages,
    the tallest about 18,000 CSS pixels against the whole's 438,914), and smoke pictures every page
    whole instead of the whole's top.
 3. **One body under every look.** Every clothing cut, action pose (E2), working pose (E3, P4) and

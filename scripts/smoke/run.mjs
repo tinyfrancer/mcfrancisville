@@ -14,7 +14,8 @@
  * Usage: npm run dev, then `npm run smoke [-- [--headed] [--list] [name…]]`. No names runs every
  * area; `npm run smoke -- town fair` runs those areas' sections, in `ORDER`; a name that is no
  * area's but a section's runs that section (`--section=a,b` names sections only, as before the
- * split); `--list` lists the areas and their sections. `SMOKE_URL` points it at another server.
+ * split); `--list` lists the areas and their sections. A section that leans on one in another
+ * area brings it along (`NEEDS`). `SMOKE_URL` points it at another server.
  * Screenshots land in .smoke/.
  */
 import { mkdirSync } from 'node:fs';
@@ -165,6 +166,20 @@ const ORDER = [
   'gallery',
 ];
 
+/**
+ * What a section leans on from a section before it in another area, found by running each area
+ * alone (T1): pulled into a run that picks the one without the other. A whole run has them all.
+ * @type {Record<string, string[]>}
+ */
+const NEEDS = {
+  // Her bag's first slot is the wood she gathered.
+  bag: ['gather'],
+  // Scarah is walked up to at Boo Acres once she has been there.
+  scarah: ['booAcres'],
+  // Agatha's letter's toast stands in front of the woods' until a reload sends it off.
+  zones: ['save'],
+};
+
 /** @type {Map<string, { area: string, run: () => Promise<void> }>} */
 const SECTIONS = new Map();
 for (const [area, list] of Object.entries(AREAS)) {
@@ -177,6 +192,13 @@ const unordered = [...SECTIONS.keys()].filter((name) => !ORDER.includes(name));
 const unlisted = ORDER.filter((name) => !SECTIONS.has(name));
 if (unordered.length > 0) fail(`not in run.mjs's ORDER: ${unordered.join(', ')}`);
 if (unlisted.length > 0) fail(`in ORDER but no area's: ${unlisted.join(', ')}`);
+for (const [name, needs] of Object.entries(NEEDS)) {
+  for (const need of needs) {
+    if (!(ORDER.indexOf(need) >= 0 && ORDER.indexOf(need) < ORDER.indexOf(name))) {
+      fail(`${name} needs ${need}, which must come before it in ORDER`);
+    }
+  }
+}
 
 const args = process.argv.slice(2);
 const headed = args.includes('--headed');
@@ -214,6 +236,13 @@ if (unknown.length > 0) {
   process.exit(2);
 }
 const all = named.length === 0 && sectionsNamed.length === 0;
+for (const name of [...ORDER].reverse()) {
+  if (!chosen.has(name)) continue;
+  for (const need of NEEDS[name] ?? []) {
+    if (!chosen.has(need)) console.log(`note  ${need} runs too, since ${name} needs it`);
+    chosen.add(need);
+  }
+}
 
 mkdirSync('.smoke', { recursive: true });
 
