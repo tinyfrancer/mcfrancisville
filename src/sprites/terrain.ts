@@ -266,12 +266,22 @@ interface Edge {
   along: number;
 }
 
+/** Each shape's field, worked out once: a field is only ever read, never changed. */
+const FIELDS = new Map<number, readonly Edge[]>();
+
 /**
  * The distance to the edge for every pixel of a tile of the given shape. Open sides are straight
  * edges; where two open sides meet the corner is rounded to `radius`; where two closed sides meet
  * an open corner, the edge wraps round the point of it.
  */
-function edges(mask: number, radius: number): Edge[] {
+function edges(mask: number, radius: number): readonly Edge[] {
+  const key = mask * 64 + radius;
+  let field = FIELDS.get(key);
+  if (!field) FIELDS.set(key, (field = fieldOf(mask, radius)));
+  return field;
+}
+
+function fieldOf(mask: number, radius: number): Edge[] {
   const open = (bit: number) => (mask & bit) === 0;
   const out: Edge[] = [];
   const r = radius;
