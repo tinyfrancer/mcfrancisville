@@ -12,7 +12,16 @@ Each lane's heading says where it is; the rules are the plan's "Running it in pa
 
 ### Lane H: heard (H1 → H2; decisions from 330; never the save)
 
-**H1 landed (PR #203, decision 330). Next: H2.** What it left for H2: Play on silent (off by
+**Lane H is finished: H2 landed (PR #204, decision 331), and ⬆ 1.1 is ready to cut** (the
+release PR `v1.1-dev` → `main`, at the user's word). The crickets are a chorus of two in runs
+and rests (`chorus(seed)` in `audio/ambience.ts`, held by `tests/audio/ambience.test.ts`: at
+most 34 chirps a minute over 200 seeds, 12.7 on average, from 270; a silence of 22 s or more
+in every two minutes), every noise layer ebbs on its `EBB` row, the levels trimmed, the `1.1`
+notes' fourth line in (four lines and H1's P.S.); rendered before and after through the real
+`Mixer`, the numbers in decision 331. For her phone: whether the nights now sound like a place
+and not a tick, and whether any bed is still too much (the Ambience switch is hers).
+
+**H1 landed (PR #203, decision 330).** What it left for H2: Play on silent (off by
 default) and Ambience are in `audio/settings.ts`; `SilentSwitch` touches nothing while it's off,
 and `set(false)` puts the session's type back and pauses the silence at once; the Ambience
 switch fades the bed out through `applyAmbience` (Sounds off still hushes it too). The `1.1`

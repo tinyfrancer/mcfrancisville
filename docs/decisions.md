@@ -7899,6 +7899,80 @@ Personal touches parked (decision 177): nothing was asked._
   switch) and a P.S.; H2 adds the crickets as a fourth line. Smoke's sound section reads the
   four switches (its one check changed in place); `smoke:offline` never read the Sound tab.
 
+## 331. The crickets tamed: a chorus of two that sings in runs and rests, and every other layer given an ebb (2026-10-19, 1.1's H2)
+
+_Session H2 of the 1.1 plan, lane H, answering her phone ("it sounds like maybe a cricket
+chirping but it is almost non-stop and annoying"; decision 328). No save change. Personal
+touches parked (decision 177): nothing was asked._
+
+- **The cause.** `CRICKET_SONGS` was three cricket `Tune`s at 240 bpm looping together (12, 12
+  and 6 chirps over 23, 29 and 31 beats): about 270 chirps a minute, the longest silence 0.8 s,
+  from 20:00 to 04:00, April to October, in every place outdoors, and she plays at night. It
+  measured quiet (0.0022 RMS in town at night) but peaked at 0.074, near the music's 0.117: a
+  thin, high, never-ending tick on top of everything.
+- **The chorus** (`chorus(seed)` in `src/audio/ambience.ts`, the shape in `CHORUS`): two
+  crickets (`CRICKETS`), one near (B7, gain 0.25, `q` 4, a little left) and one farther off and
+  softer (G7, gain 0.13, `q` 3, right); the third, the C8 one, is gone (it was the one in the
+  ear). The chorus is phrases: one cricket's run of 4–8 chirps, a chirp every 0.45–0.65 s (each
+  wobbling up to 0.05 s, so 0.4–0.7), swelling to the middle of the run and fading at its ends
+  (a chirp's level 0.55–1); answered by the other cricket 60% of the time, 1 s over the end of
+  the run to 4 s after it (the only time they sing together); then **both rest 20–60 s**. The
+  first phrase comes 1–4 s after she steps out. Dealt by a seeded generator (mulberry32), from
+  the clock's milliseconds each time the crickets start, so no two nights are alike and nothing
+  repeats; the same seed is always the same chorus (the tests read it). `SoundBoard` sets each
+  chirp going (`chirpInto`, three pulses of 17.5 ms, 30 ms apart, the old chirp's shape) as its
+  time comes inside the lookahead, so nothing is generated ahead but the next chirp.
+- **The numbers**, over 200 seeds and every minute of ten: at most 34 chirps a minute (0.57 a
+  second), 12.7 on average (from 270), as few as 1; every two minutes holds a silence of at least
+  22.4 s; the two crickets sing together 1.5% of the time they're singing. **The test**
+  (`tests/audio/ambience.test.ts`, 80 seeds, small ones and clock-sized): no more than one chirp
+  a second over any minute of ten, at least 20 s with no chirp in every two minutes, the two
+  together under a quarter of the time, runs of 4–8 chirps 0.4–0.7 s apart swelling in the
+  middle, the same seed the same chorus and no phrase twice in ten minutes; and `heard.test.ts`
+  holds `SoundBoard` singing the chirps as their time comes and none once the layer has gone.
+- **Lower in the bed** (`CRICKETS_IN`, about halved; the levels stay at a tenth, as `ambienceFor`
+  rounds them): Whisperwood, the hidden clearing and Boo Acres 0.9 → 0.4, Lantern Shore 0.8 →
+  0.4, the town (and anywhere else, `CRICKETS_ELSEWHERE`) 0.6 → 0.3, the castle hill 0.5 → 0.2,
+  the fairground 0.35 (heard as 0.4) → 0.1. **Heard**, rendered through the real `Mixer` on an
+  `OfflineAudioContext` in Chromium (three minutes at 22,050 Hz, the second minute measured): the
+  town at night 0.0022 → 0.0001 RMS over the minute, its peak 0.074 → 0.016, chirps in its three
+  minutes 274, 270, 271 → 14, 6, 13, its longest silence 0.8 → 57.1 s.
+- **Every other layer listened to for the same fault.** Each second's level over three minutes,
+  against the loudest second (a layer whose quietest tenth is above 60% of its loudest is
+  constant to the ear): before, the rain 0.95, a storm 0.89, the hum indoors 0.87, the roof 0.94,
+  the fair's murmur 0.46 (two quick flutters, steady over a minute), the shore's water (with
+  crickets) 0.42, the wind 0.15 (it gusted already). So **every layer of noise now ebbs** (`EBB`,
+  `ebbOf`): the whole layer rides between a `floor` and its full level on two slow sines, a long
+  one of 67–113 s carrying four fifths of the swing and a shorter one of 26–47 s, out of step,
+  the fifth; each long trough is under 60% whatever the short one does (held by the test). The
+  floors: rain and roof 0.4, water 0.4, murmur 0.35, wind and hum 0.5 (the wind only for a
+  calmer minute now and then). After: rain 0.49, a storm 0.51, the hum 0.53, the hum with rain on
+  the roof 0.61 (two layers ebbing apart fill each other in; each alone dips), the murmur 0.30,
+  the shore 0.22, the castle's wind 0.12.
+- **Levels trimmed** where a layer sat loudest under the music (the town's night tune is 0.0204
+  RMS): the fair's murmur 0.55 (heard as 0.6) → 0.5, the castle hill's wind 0.7 → 0.6,
+  Whisperwood's 0.45 (heard as 0.5) → 0.4, the shore's water 0.45 (0.5) → 0.4, the hum indoors
+  0.4 → 0.3, the rain 0.7 → 0.6 and in a storm 0.9 → 0.8, the roof 0.45 (0.5) → 0.4 and in a
+  storm 0.6 → 0.5. Over a minute, with the ebb: the rain 0.0080 → 0.0052 RMS, a storm 0.0106 →
+  0.0071, the castle's wind 0.0052 → 0.0031, the fair by day 0.0059 → 0.0035, the shore at night
+  0.0067 → 0.0036, the woods at night 0.0049 → 0.0021, indoors 0.0031 → 0.0015, indoors in rain
+  0.0057 → 0.0032. All of it a fifth of the music or less.
+- **Her notes**: the `1.1` card's fourth line, "And the crickets have learnt to take a breath: a
+  little song each, then a good long rest, so the night gets its quiet back." H1's P.S. kept.
+- **Rejected:** a long fixed schedule written into a `Tune` and looped (it would come round again
+  within minutes, and hold minutes of notes for a sound that is mostly silence); a scheduler of
+  timeouts starting a short run tune each time (timers drift and stop in a hidden tab; the
+  lookahead on the context's clock is how every other note is played); the two crickets dealt
+  independently, each with its own rests (their rests would interleave into gaps of ten seconds
+  or less, so the night would never be quiet for twenty; one rest shared between phrases is what
+  holds the test); a random seed per chirp or `Math.random` (the tests need a seed to read);
+  seeding from the day (the same chorus every time she stepped out that night); dropping the
+  crickets after midnight or in town (a night outdoors with no sound is the flatness V1 was for,
+  decision 328, and the Ambience switch is hers); an ebb on the crickets' layer (their rests are
+  the ebb); ebbing the bus instead of each layer (every layer would swell and fall together, the
+  bed breathing as one); a random phase per ebb (an `OscillatorNode` starts at zero; a layer
+  starts at its middle and rises, which is as good as any).
+
 ## 335. Smoke split by area, run whole in its old order, and the gallery paged (2026-10-19, 1.1's T1)
 
 _Session T1 of the 1.1 plan, lane T (decision 328). No save change; nothing she sees changes but

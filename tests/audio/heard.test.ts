@@ -1,7 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ambienceFor,
-  CRICKET_SONGS,
   FOOTFALL_MS,
   Footfalls,
   FOOTSTEPS,
@@ -253,6 +252,44 @@ describe('the Ambience switch (1.1’s H1)', () => {
     expect(board.ambiencePlaying.sort()).toEqual(['water', 'wind']);
   });
 
+  it('sings the crickets chirp by chirp as their time comes, and stops when they go (1.1’s H2)', async () => {
+    vi.useFakeTimers();
+    try {
+      const made: string[] = [];
+      let ctx: { currentTime: number } | undefined;
+      const board = new SoundBoard(START, { silence: () => silence() }, () => {
+        const c = fakeContext([], made);
+        ctx = c as unknown as { currentTime: number };
+        return c;
+      });
+      const target = document.createElement('div');
+      board.listen(target);
+      target.dispatchEvent(new Event('pointerdown'));
+      await Promise.resolve();
+      board.setAmbience({ crickets: 0.3 });
+      expect(board.ambiencePlaying).toEqual(['crickets']);
+      const sources = () => made.filter((k) => k === 'createBufferSource').length;
+      const before = sources();
+      ctx!.currentTime = 120;
+      vi.advanceTimersByTime(150);
+      const sung = sources() - before;
+      // Three pulses a chirp; two minutes of the chorus is a few phrases, never a constant chirp.
+      expect(sung % 3).toBe(0);
+      expect(sung / 3).toBeGreaterThanOrEqual(4);
+      expect(sung / 3).toBeLessThanOrEqual(120);
+
+      board.setAmbience({});
+      vi.advanceTimersByTime(4000);
+      expect(board.ambiencePlaying).toEqual([]);
+      const after = sources();
+      ctx!.currentTime = 240;
+      vi.advanceTimersByTime(150);
+      expect(sources()).toBe(after);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   function silence() {
     return { paused: true, play() {}, pause() {} };
   }
@@ -371,7 +408,7 @@ describe('the ambience (V1’s S1)', () => {
     expect(ambienceFor({ ...day, zone: 'fairground', hour: 3 }).murmur).toBeUndefined();
     const inside = ambienceFor({ ...day, zone: 'home', outdoors: false });
     expect(Object.keys(inside)).toEqual(['hum']);
-    expect(ambienceFor({ ...day, zone: 'home', outdoors: false, weather: 'rain' }).roof).toBe(0.5);
+    expect(ambienceFor({ ...day, zone: 'home', outdoors: false, weather: 'rain' }).roof).toBe(0.4);
     // Under the music: no layer above full, and only a handful at once.
     const loud = ambienceFor({
       ...night,
@@ -419,14 +456,6 @@ describe('the ambience (V1’s S1)', () => {
     expect(fell).toEqual([1, 0, 1, 0]);
     expect(f.step({ moving: false, walkMs: 0 })).toBeNull();
     expect(f.step({ moving: true, walkMs: 0 })).toBeNull();
-  });
-
-  it('sings its crickets as loops of uneven lengths, high and quiet', () => {
-    for (const song of CRICKET_SONGS) {
-      wellFormed('cricket', song);
-      expect(song.parts.every((p) => p.wave === 'brush')).toBe(true);
-    }
-    expect(new Set(CRICKET_SONGS.map((s) => s.beats)).size).toBe(CRICKET_SONGS.length);
   });
 });
 
