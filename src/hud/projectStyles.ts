@@ -44,4 +44,12 @@ export const PROJECT_CSS = `
 .hud-project-need[data-done] { opacity: 0.6; }
 .hud-project-stage { color: ${T.accent}; font-weight: 600; }
 .hud-project-need .hud-primary { grid-column: 2 / span 2; }
+.hud-project-ask {
+  margin-top: 8px;
+  padding: 10px;
+  background: ${T.panel};
+  border: 2px solid ${T.accent};
+  border-radius: ${T.radius}px;
+}
+.hud-project-ask .hud-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 `;

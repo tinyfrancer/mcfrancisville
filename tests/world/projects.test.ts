@@ -159,7 +159,13 @@ describe("the town's projects (V1's R4)", () => {
     // Her lawn is hers until she starts it: the lantern stays where she put it.
     expect(yardOf(world.map)!.lawn.has(1 * world.map.width + 5)).toBe(true);
     expect(world.yard.placed.map((p) => p.id)).toEqual(['yardLantern', 'gardenBench']);
+    // She's asked first (1.0.1): what would move is said, and asking moves nothing.
+    expect(world.projects.inTheWay('greenhouse')).toEqual(['yardLantern']);
+    expect(world.projects.inTheWay('bandstand')).toEqual([]);
+    expect(world.yard.placed.map((p) => p.id)).toEqual(['yardLantern', 'gardenBench']);
     expect(world.projects.start('greenhouse')).toEqual(['yardLantern']);
+    // Once one's under way there's nothing more to ask.
+    expect(world.projects.inTheWay('greenhouse')).toEqual([]);
     expect(world.yard.placed.map((p) => p.id)).toEqual(['gardenBench']);
     expect(world.home.stored.some((s) => s.id === 'yardLantern')).toBe(true);
     // Nothing of hers may stand there now, nor is it marked as lawn while she decorates.

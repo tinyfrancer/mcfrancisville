@@ -32,6 +32,8 @@ export interface NoticeApi {
    * storage chest to make room for it.
    */
   startProject(id: ProjectId): readonly string[] | null;
+  /** The names of what of hers would go in the chest were it started now, to ask first (1.0.1). */
+  inTheWay(id: ProjectId): readonly string[];
   /** Gives the project under way lots of Candy or so many of a thing; false if nothing went. */
   giveProject(gift: Gift): boolean;
   /** Draws a project as it'll look built, at 1×. */

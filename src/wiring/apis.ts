@@ -610,6 +610,7 @@ export function sheetApis({
     // The town's projects (V1's R4).
     projects: () => world.projects.view(),
     startProject: (id) => world.projects.start(id)?.map((piece) => FURNITURE[piece].name) ?? null,
+    inTheWay: (id) => world.projects.inTheWay(id).map((piece) => FURNITURE[piece].name),
     giveProject(gift) {
       const given = world.projects.give(gift);
       if (given) play([given]);

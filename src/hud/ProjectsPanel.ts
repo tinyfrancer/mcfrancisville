@@ -3,7 +3,7 @@ import { CANDY_LOT, PROJECTS, type ProjectStage } from '../data/projects';
 import type { ItemId, ProjectId } from '../types/ids';
 import type { Gift, ProjectView } from '../world/services/Projects';
 import { fitIcon } from './collection';
-import { el } from './dom';
+import { button, el } from './dom';
 import { glyph, price } from './glyph';
 import { howMany } from './itemCard';
 
@@ -11,6 +11,7 @@ import { howMany } from './itemCard';
 export interface ProjectsPanelApi {
   projects(): readonly ProjectView[];
   startProject(id: ProjectId): readonly string[] | null;
+  inTheWay(id: ProjectId): readonly string[];
   giveProject(gift: Gift): boolean;
   projectPicture(canvas: HTMLCanvasElement, id: ProjectId): void;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
@@ -26,6 +27,40 @@ const STAGE_WORDS: Record<ProjectStage | 'none', string> = {
   frames: 'The frame is up! Not long now.',
   done: 'Built!',
 };
+
+/** What she's told before a project goes up where things of hers stand (1.0.1). */
+export function askFirstLine(name: string, moving: readonly string[]): string {
+  const things = moving.join(' and ').toLowerCase();
+  const them = moving.length > 1 ? 'They' : 'It';
+  return (
+    `${name} goes up right where your ${things} ${moving.length > 1 ? 'stand' : 'stands'}. ` +
+    `${them}'ll tuck into your storage chest for now, safe and sound, ` +
+    `to come out again wherever you like.`
+  );
+}
+
+/** A little card in place of Start: what would move, then Go ahead or Not yet. */
+function askFirst(
+  name: string,
+  moving: readonly string[],
+  go: () => void,
+  notYet: () => void,
+): HTMLElement {
+  const card = el(
+    'div',
+    { className: 'hud-project-ask' },
+    el('p', {}, askFirstLine(name, moving)),
+    el('div', { className: 'hud-actions' }, button('Not yet', notYet), button('Go ahead', go, true)),
+  );
+  card.setAttribute('role', 'group');
+  card.setAttribute('aria-label', `Before ${name} starts`);
+  return card;
+}
+
+/** Not yet: the card goes, and Start is back as it was. */
+function askFirstAgain(section: HTMLElement, start: HTMLElement): void {
+  section.querySelector('.hud-project-ask')?.replaceWith(start);
+}
 
 /**
  * The noticeboard's Projects tab (V1's R4): the town's projects, one funded at a time. With none
@@ -147,25 +182,32 @@ export function projectsPanel(panel: HTMLElement, api: ProjectsPanelApi): { rend
       `${row.candy} Candy`,
       ...row.needs.map((n) => `${n.count} ${ITEMS[n.item].name.toLowerCase()}`),
     ].join(', ');
-    const start = el('button', { type: 'button', className: 'hud-primary' }, 'Start this one');
-    start.disabled = !free;
-    start.addEventListener('click', () => {
+    const go = () => {
       const moved = api.startProject(p.id);
       if (moved === null) return;
       message.textContent =
         `${row.name}: here we go! Give a little whenever you like.` +
         (moved.length > 0
-          ? ` To make room, your ${moved.join(' and ').toLowerCase()} went in your storage chest.`
+          ? ` Your ${moved.join(' and ').toLowerCase()} ${moved.length > 1 ? 'are' : 'is'} snug in your storage chest.`
           : '');
       render();
-    });
-    return el(
+    };
+    const start = el('button', { type: 'button', className: 'hud-primary' }, 'Start this one');
+    start.disabled = !free;
+    const section = el(
       'section',
       { className: 'hud-project' },
       ...head(p),
       el('small', {}, `It asks ${asks}.`),
       start,
     );
+    start.addEventListener('click', () => {
+      const moving = api.inTheWay(p.id);
+      if (moving.length === 0) return go();
+      // Something of hers stands where it'll go up: asked first, kindly (1.0.1).
+      start.replaceWith(askFirst(row.name, moving, go, () => askFirstAgain(section, start)));
+    });
+    return section;
   };
 
   const built = (p: ProjectView) =>
