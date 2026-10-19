@@ -20,7 +20,7 @@ import {
   WHITE,
 } from './buildings';
 import { FIRE, FIRE_LIGHT, slab } from './furnish';
-import { PALETTE as C, ramp } from './palette';
+import { mix, PALETTE as C, ramp } from './palette';
 import { Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -101,6 +101,61 @@ export const PUMPKIN_PALETTE: Palette = {
 
 /** A lantern's carved face after dark: candlelit, brightest in the middle. */
 export const PUMPKIN_LIT: Palette = { [FIRE]: C.candle, [FIRE_LIGHT]: C.candleBright };
+
+/**
+ * A snow lantern (1.0.1, decision 327): the town's jack-o'-lanterns in winter, packed out of
+ * snowballs into a pumpkin's three lobes where each pumpkin stood, a little snowball for its stem
+ * and a sprig of holly, and the same face carved in it, a candle inside. The face keeps its keys,
+ * so it glows and flickers after dark as the pumpkin's does.
+ */
+function snowLantern(face: Face): SpriteSource {
+  const s = new Sketch(32, 32);
+  s.sphere(9, 22, 7, 7, 'KaA');
+  s.sphere(23, 22, 7, 7, 'KaA');
+  s.sphere(16, 21, 9, 9, 'KaAl');
+  // Where the snowballs meet, a soft seam rather than a pumpkin's deep groove.
+  for (let y = 18; y < 28; y++) {
+    if (y % 3 !== 0) s.set(11, y, shadeOf(ACCENT)).set(20, y, shadeOf(ACCENT));
+  }
+  // A last little snowball on top, and the sprig of holly tucked in beside it.
+  s.sphere(16, 11, 4, 3.5, 'aAl');
+  s.ellipse(21, 12, 3, 1.5, fillOf(LEAVES)).set(20, 11, lightOf(LEAVES));
+  s.ellipse(11, 13, 2.5, 1.5, fillOf(LEAVES));
+  s.set(19, 13, lightOf(ACCENT_TWO))
+    .set(18, 14, fillOf(ACCENT_TWO))
+    .set(20, 14, fillOf(ACCENT_TWO));
+  // Glints of frost on the lit side.
+  for (const [x, y] of [
+    [12, 15],
+    [6, 19],
+    [15, 14],
+  ] as const) {
+    s.set(x, y, WHITE);
+  }
+  face(s);
+  return finish(s);
+}
+
+export const SNOW_LANTERN_FORMS: readonly SpriteSource[] = FACES.map(snowLantern);
+
+/** Snow in the cool whites of `sprites/seasons.ts`, holly, and its face a candle's warm by day. */
+export const SNOW_LANTERN_PALETTE: Palette = {
+  ...buildingPalette({
+    wall: C.cream,
+    roof: C.plum,
+    trim: C.moss,
+    door: C.berry,
+    accentTwo: C.scarlet,
+    leaves: C.leafDark,
+  }),
+  k: mix(C.snowDeep, C.night, 0.45),
+  K: C.snowDeep,
+  a: C.snowShade,
+  A: C.snow,
+  l: C.snowLight,
+  [FIRE]: mix(C.candle, C.pumpkin, 0.35),
+  [FIRE_LIGHT]: C.candle,
+};
 
 // ---- Lamps ------------------------------------------------------------------------------------
 

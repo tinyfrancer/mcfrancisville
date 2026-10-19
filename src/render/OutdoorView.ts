@@ -616,7 +616,7 @@ export class OutdoorView implements SceneView {
           e.giver.spent = bake(`${key}:spent`, PROP_ART[e.prop.id].spent!, palette);
         }
         if (e.entrance) Object.assign(e.entrance, { key, palette });
-        if (e.m) Object.assign(e.m, { key, palette });
+        if (e.m) Object.assign(e.m, { key, palette, source });
       }
     }
     return { season, snow: GROUND_LOOKS[look].snow === true };

@@ -8,6 +8,7 @@ import { takeOff, wear } from '../systems/wardrobe';
 import { CANDY_SAPLING, CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
+import { PUMPKIN_LIT, SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
 import { SIGNPOSTS } from '../data/signposts';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
@@ -284,6 +285,11 @@ export function catalogue(): Entry[] {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  // The jack-o'-lanterns as snow lanterns in winter (1.0.1), by day and lit.
+  SNOW_LANTERN_FORMS.forEach((form, f) => {
+    grid(`prop:pumpkin:winter${f}`, form, SNOW_LANTERN_PALETTE);
+    if (f === 0) grid('prop:pumpkin:winter:lit', form, lit(SNOW_LANTERN_PALETTE, PUMPKIN_LIT));
+  });
   grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
   grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
   grid('prop:saplingPlot:sapling', CANDY_SAPLING, SAPLING_PALETTE);
