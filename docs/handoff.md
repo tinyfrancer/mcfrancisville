@@ -23,15 +23,14 @@ open (decision 330).
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
-**T1 in progress** (`claude/t1-smoke-split`, decision 335, draft PR into `v1.1-dev`). Done, a
-commit each: `scripts/smoke.mjs` split into `scripts/smoke/` (`run.mjs`, `lib.mjs` and nineteen
-area files, every declaration moved whole, the run's order kept in `run.mjs`'s `ORDER`;
-`npm run smoke -- <area>…`, `-- --list`); Rob Boo's section's comment put back above it; the
-gallery paged (`?gallery&page=n`, 50 rows, `pageOf` in `sprites/catalogue.ts`, `galleryPage` in
-`config/flags.ts`) and smoke picturing each page. The whole run was 622/622 before the split.
-Next: the docs (CLAUDE.md, architecture's "Where it hurts" 2, decision 335), each area timed
-alone, then merge `origin/v1.1-dev` (H2 may have added a smoke section at the end of the old
-`scripts/smoke.mjs`: move it into `scripts/smoke/sound.mjs` and `ORDER`), the suite, land.
+**T1 landed (PR #205, decision 335). Next: T2.** Smoke is `scripts/smoke/`: `run.mjs` (the
+browser, `ORDER`, `NEEDS`, the arguments), `lib.mjs` (the helpers, the shared `page`, swapped by
+`setPage`) and nineteen area files, each exporting `sections`; `npm run smoke -- town fair`, a
+section's own name, `--section=`, `-- --list`. 622 checks before and after. **A new section goes
+in its area's list and in `ORDER`** (the runner refuses to start otherwise), and if it leans on
+a section in another area, a line in `NEEDS`. Every area passes alone (12 s to 78 s; `gallery`
+four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&page=n`, 50 rows.
+For T2: the vitest suite was 2,611 tests in 219 files, 346 s in the container on this branch.
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
