@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   dayRequested,
+  galleryPage,
   galleryRequested,
   hourRequested,
   manualLoopRequested,
@@ -19,6 +20,15 @@ describe('flags', () => {
     expect(galleryRequested('?gallery')).toBe(true);
     expect(galleryRequested('?x=1&gallery=1')).toBe(true);
     expect(galleryRequested('?loop=manual')).toBe(false);
+  });
+
+  it('reads ?gallery&page= as a page from 1, or the whole gallery', () => {
+    expect(galleryPage('?gallery&page=2')).toBe(2);
+    expect(galleryPage('?gallery&page=1')).toBe(1);
+    expect(galleryPage('?gallery')).toBeNull();
+    expect(galleryPage('?gallery&page=0')).toBeNull();
+    expect(galleryPage('?gallery&page=1.5')).toBeNull();
+    expect(galleryPage('?gallery&page=two')).toBeNull();
   });
 
   it('reads ?hour= as an hour of the day, or not at all', () => {
