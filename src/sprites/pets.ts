@@ -423,18 +423,43 @@ function spiral(s: Sketch, cx: number, cy: number): void {
   }
 }
 
-/** Gary facing her: his shell up behind him, his face and both eye stalks. */
+/**
+ * Gary facing her (1.0.1's redraw): his shell up behind him, its coils wound round it, his round
+ * face in front with a little smile and pink cheeks, his foot spread on the floor, and his two
+ * stalks leaning out with an eye on each, shining.
+ */
 function snailFront(): SpriteSource {
-  const s = new Sketch(22, 20);
-  s.ellipse(11, 17, 9, 2.5, 'f');
-  const shell = new Sketch(22, 20).sphere(11, 8.5, 7, 7, 'CCcc');
+  const s = new Sketch(22, 24);
+  const shell = new Sketch(22, 24).sphere(11, 12.5, 6.5, 6, 'CCcc');
+  // The coils, seen from the front: two bands wound round the shell, high on the left.
+  for (let x = 5; x <= 17; x++) {
+    const t = (x - 11) / 6.5;
+    shell.set(x, Math.round(10 + t * 2 + t * t * 2), 'C');
+    if (x > 6 && x < 16) shell.set(x, Math.round(14 + t * 1.5 - t * t), 'C');
+  }
   s.stamp(shell, 0, 0);
-  spiral(s, 11, 8);
-  s.ellipse(11, 13.5, 4, 3.5, 'f');
-  s.rect(8, 4, 1, 7, 'f').rect(14, 4, 1, 7, 'f');
-  s.set(8, 3, 'e').set(14, 3, 'e');
-  s.set(10, 14, 'e').set(12, 14, 'e');
-  neckwear(s, (x, y) => y === 16 && x >= 8 && x <= 14, [[11, 17]]);
+  s.ellipse(11, 22, 9.5, 1.8, 'f');
+  s.ellipse(11, 17.5, 4.5, 4, 'f');
+  // His stalks lean out from the top of his head past his shell, an eye at each tip.
+  for (const [x, y] of [
+    [9, 13],
+    [8, 12],
+    [7, 11],
+    [7, 10],
+    [6, 9],
+    [6, 8],
+    [5, 7],
+    [5, 6],
+    [4, 5],
+  ] as const) {
+    s.set(x, y, 'f').set(22 - x, y, 'f');
+  }
+  eye(s, 3, 3);
+  eye(s, 18, 3);
+  // A small smile, and cheeks.
+  s.set(10, 18, 'e').set(11, 19, 'e').set(12, 18, 'e');
+  s.set(8, 17, 'p').set(14, 17, 'p');
+  neckwear(s, (x, y) => y === 21 && x >= 7 && x <= 15, [[11, 22]]);
   return finishPet(s);
 }
 
@@ -476,37 +501,61 @@ function snailTaDa(): SpriteSource {
   return finishPet(s);
 }
 
-/** Florence on her side, belly to her, paws out, her blanket over her back end: rolling over. */
-function florenceRolling(onBack: boolean): SpriteSource {
-  const s = new Sketch(32, 20);
-  if (onBack) {
-    // Belly up, all four paws in the air, her head upside down at the end.
-    s.ellipse(15, 13, 10, 4.5, 'f');
-    for (const x of [8, 12, 18, 22]) s.rect(x, 4, 3, 6, 'f');
-    s.ellipse(26.5, 12, 5, 4.5, 'f');
-    // Her ears point down, her head being upside down.
-    for (const tip of [24, 29]) {
-      for (let i = 0; i < 4; i++) {
-        const half = Math.floor(i / 2);
-        s.rect(tip - half, 19 - i, half * 2 + 1, 1, 'f');
-      }
-    }
-    s.rect(24, 12, 2, 1, 's').rect(28, 12, 1, 1, 's').set(26, 10, 'p');
-    s.ellipse(15, 14.5, 6, 2, 'l');
-  } else {
-    s.ellipse(15, 13, 10, 4.5, 'f');
-    s.rect(9, 16, 4, 2, 'f').rect(19, 16, 4, 2, 'f');
-    s.ellipse(26.5, 10, 5, 4.5, 'f');
-    ear(s, 24, 3, 5);
-    ear(s, 29, 4, 4);
-    eye(s, 26, 9);
-    s.set(30, 11, 'p');
-  }
-  // Her blanket, still over her back half, as it always is.
+/** Her blanket over her back half, as it always is: blue, with its cream stripes. */
+function blanket(s: Sketch): void {
   s.ellipse(8, 13, 7.5, 5, 'b').rect(1, 13, 13, 5, 'b');
   for (const x of [4, 9]) for (let y = 7; y < 18; y++) if (s.get(x, y) === 'b') s.set(x, y, 'c');
   s.bevel('bc', null, 'B');
+}
+
+/** Florence on her side, belly to her, paws out, her blanket over her back end: rolling over. */
+function florenceRolling(onBack: boolean): SpriteSource {
+  if (onBack) return florenceOnBack();
+  const s = new Sketch(32, 20);
+  s.ellipse(15, 13, 10, 4.5, 'f');
+  s.rect(9, 16, 4, 2, 'f').rect(19, 16, 4, 2, 'f');
+  s.ellipse(26.5, 10, 5, 4.5, 'f');
+  ear(s, 24, 3, 5);
+  ear(s, 29, 4, 4);
+  eye(s, 26, 9);
+  s.set(30, 11, 'p');
+  blanket(s);
   neckwear(s, (x, y) => (x === 20 || x === 21) && y >= 9 && y <= 16, [[22, 17]]);
+  return finishPet(s);
+}
+
+/**
+ * Florence halfway over (1.0.1's redraw): flat on her back, her pale tummy up, her front paws
+ * flopped over at the wrist with their pink beans showing and a back paw poking up out of her
+ * blanket, and her head upside down on the floor, ears down, looking at her all the same.
+ */
+function florenceOnBack(): SpriteSource {
+  const s = new Sketch(32, 20);
+  s.ellipse(14.5, 14.5, 9, 4, 'f');
+  // Her front paws up in the air, each flopped over toward her head.
+  for (const x of [14, 18]) {
+    s.rect(x, 8, 2, 4, 'f');
+    s.rect(x, 6, 3, 2, 'f').set(x, 6, CLEAR);
+    s.set(x + 1, 6, 'p').set(x + 2, 6, 'p');
+  }
+  // Her head, upside down: ears down to the floor, her eyes under the bridge of her nose.
+  s.ellipse(26, 13.5, 5, 4.5, 'f');
+  for (const tip of [23, 29]) {
+    for (let i = 0; i < 3; i++)
+      s.rect(tip - Math.floor(i / 2), 19 - i, 1 + Math.floor(i / 2) * 2, 1, 'f');
+    s.set(tip, 17, 'p');
+  }
+  eye(s, 23, 13);
+  eye(s, 27, 13);
+  s.set(25, 11, 'p').set(26, 11, 'p');
+  // The wrinkles a sphynx has on her brow, under her chin now.
+  s.set(25, 16, 's').set(27, 16, 's');
+  // Her tummy, paler, and a little pink.
+  s.ellipse(15, 12, 5, 1.2, 'l').set(13, 12, 'p');
+  blanket(s);
+  // A back paw poking up out of the blanket.
+  s.rect(10, 5, 2, 4, 'f').rect(9, 4, 3, 1, 'f').set(10, 4, 'p');
+  neckwear(s, (x, y) => (x === 21 || x === 22) && y >= 10 && y <= 17, [[21, 18]]);
   return finishPet(s);
 }
 
