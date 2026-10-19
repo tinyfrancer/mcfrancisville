@@ -39,6 +39,17 @@ export function heldLine(held: string, seeds: readonly Stack[]): string {
   return `${row.name} ×${count}: tap a bed to plant one, or a whole row.`;
 }
 
+/** Which ends of a scrolling strip have more beyond them, give or take a pixel's rounding. */
+export function scrollMore(
+  left: number,
+  width: number,
+  shown: number,
+): 'start' | 'end' | 'both' | null {
+  const before = left > 1;
+  const after = left + shown < width - 1;
+  return before && after ? 'both' : before ? 'start' : after ? 'end' : null;
+}
+
 /**
  * The quick bar (phase M): what she's holding, along the bottom while she's outdoors. Her hands,
  * her net and her watering can are always there, and then each seed in her bag. A tap picks one
@@ -87,6 +98,17 @@ export function quickBar(
     return b;
   };
 
+  // A slot cut off at the strip's end reads as clipped, so the end with more beyond it fades out
+  // instead, as a "this way" (1.0.1: sideways, four seeds ran up against the bag).
+  const edges = () => {
+    const more = scrollMore(slots.scrollLeft, slots.scrollWidth, slots.clientWidth);
+    if (more) slots.dataset.more = more;
+    else delete slots.dataset.more;
+  };
+  slots.addEventListener('scroll', edges, { passive: true });
+  // Turning the phone, or the bar's row changing round it, moves where its end is.
+  if (typeof ResizeObserver !== 'undefined') new ResizeObserver(edges).observe(slots);
+
   const render = () => {
     element.hidden = !api.shown();
     if (element.hidden) return;
@@ -96,6 +118,7 @@ export function quickBar(
       ...TOOL_IDS.map((id) => slot(id, TOOLS[id].name, (c) => api.toolIcon(c, id))),
       ...seeds.map((s) => slot(s.id, ITEMS[s.id].name, (c) => api.itemIcon(c, s.id), s.count)),
     );
+    edges();
   };
   render();
   return { element, render };
