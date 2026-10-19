@@ -401,6 +401,12 @@ const EVERGREEN = fresh(C.canopyDark, C.canopy);
 /** Which of the tree's forms is the conifer (`MORE_TREE_FORMS`, after the three round ones). */
 const CONIFER = 3;
 
+/**
+ * Snow settled on the broken tree's break in winter (1.1's A2): its pale heartwood (`x`, the
+ * tree's key for it) under a cap, the ring in it a shade.
+ */
+const BREAK_SNOW: Palette = { x: C.snow, X: C.snowShade };
+
 /** Snow on a roof in winter: its texture and its lit edge white, its eaves still in shade. */
 const ROOF_SNOW: Palette = { [ROOF[2]!]: C.snowShade, [ROOF[3]!]: C.snow, [ROOF[4]!]: C.snowLight };
 
@@ -454,6 +460,7 @@ export function seasonLook(prop: StandingProp, season: SeasonId): ReturnType<typ
     ...base.palette,
     ...(leaves ?? {}),
     ...(roofed ? ROOF_SNOW : {}),
+    ...(season === 'winter' && prop.id === 'tree' ? BREAK_SNOW : {}),
   }));
   return { ...base, palette, key };
 }

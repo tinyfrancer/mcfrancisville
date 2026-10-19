@@ -101,6 +101,18 @@ describe('the seasons on what stands', () => {
     }
   });
 
+  // 1.1's A2 (decision 351): the broken tree's heartwood takes a cap of snow, as a roof does.
+  it('caps the broken tree’s break with snow in winter, and only then', () => {
+    const broken = town.props.find((p) => p.id === 'tree' && lookOf(p).form === 8)!;
+    expect(broken).toBeDefined();
+    expect(lookOf(broken).source.rows.some((row) => row.includes('x'))).toBe(true);
+    const snow = seasonLook(broken, 'winter').palette.x;
+    for (const s of ['spring', 'summer', 'autumn'] as const) {
+      expect(seasonLook(broken, s).palette.x, s).not.toBe(snow);
+    }
+    expect(snow).toBe(seasonLook(broken, 'winter').palette[3]);
+  });
+
   it('lays snow on the roofs in winter, but not on a pumpkin with no roof', () => {
     const house = town.props.find((p) => p.id === 'homeHouse')!;
     expect(seasonLook(house, 'winter').key).toMatch(/@winter$/);
