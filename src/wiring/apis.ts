@@ -367,35 +367,35 @@ export function sheetApis({
     hearts: (id) => world.friends.hearts(id),
     talk(id) {
       changed();
-      const chat = world.neighbourhood.talk(id);
+      const chat = world.talk.talk(id);
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
     reply(id, k) {
       changed();
-      const chat = world.neighbourhood.reply(id, k);
+      const chat = world.talk.reply(id, k);
       if (chat) sound.cue(voiceOf(id, chat.line));
       return chat;
     },
     bag: () => world.bag.spares,
     give(id, item) {
       changed();
-      const given = world.neighbourhood.give(id, item);
+      const given = world.talk.give(id, item);
       if (given && !given.declined && given.reaction === 'loved') sound.cue(CUES.heart);
       else if (given) sound.cue(voiceOf(id, given.line));
       return given;
     },
-    favour: (id) => world.neighbourhood.favour(id),
+    favour: (id) => world.talk.favour(id),
     doFavour(id) {
       changed();
-      return world.neighbourhood.doFavour(id);
+      return world.talk.doFavour(id);
     },
-    endTalk: () => world.neighbourhood.endTalk(),
+    endTalk: () => world.talk.endTalk(),
     icon: drawItemIcon,
     // One face for the line (V1's L7): on their bust here, and in the world through `feel`.
     portrait: (canvas, id, feel) =>
       drawBust(canvas, id, world.finale.costumeOf(id), feel ?? 'neutral'),
-    feel: (id, feel) => world.neighbourhood.feel(id, feel),
+    feel: (id, feel) => world.talk.feel(id, feel),
     redOne: drawRedOne,
     actions: (id) => talkActions(world, id, changed),
   };

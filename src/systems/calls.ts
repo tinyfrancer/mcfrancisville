@@ -1,6 +1,8 @@
 import { BEST_CALLS } from '../data/bestFriends';
 import { DAY_WINDOWS } from '../data/windows';
 import type { VillagerId } from '../types/ids';
+import { BEST_HEARTS } from './bestFriends';
+import { isHusband } from './cody';
 import { specialDayOf } from './friendship';
 import { happeningOf } from './happenings';
 import { hashMixed } from './random';
@@ -10,7 +12,7 @@ import { VISIT_HOURS, visitOf, visitsOn, type Visit } from './schedules';
  * A best friend's call at her house by choice (V1's P2, decision 301): about one day in six, for a
  * window's visiting hours, when nothing of theirs is on then (a happening, a visit, a guest of
  * their own). Worked out from the day key alone, as the town's visits are; only whether they're
- * best friends comes from her, which `Neighbourhood` asks before it reads this. Cody's evenings
+ * best friends comes from her, which `callNow` is handed. Cody's evenings
  * at hers are his session's (P5).
  */
 
@@ -36,4 +38,18 @@ export function callOn(villager: VillagerId, day: string): Visit | null {
 export function callOf(villager: VillagerId, hour: number, day: string): Visit | null {
   const call = callOn(villager, day);
   return call && call.from <= hour && hour < call.until ? call : null;
+}
+
+/**
+ * A best friend's call at her house by choice, if they're paying one now, from how close they are
+ * (`hearts`). Never Cody's: his evenings at hers are his own (P5).
+ */
+export function callNow(
+  villager: VillagerId,
+  hearts: number,
+  hour: number,
+  day: string,
+): Visit | null {
+  if (isHusband(villager)) return null;
+  return hearts >= BEST_HEARTS ? callOf(villager, hour, day) : null;
 }

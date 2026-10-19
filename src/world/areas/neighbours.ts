@@ -12,6 +12,7 @@ import { Neighbourhood } from '../services/Neighbourhood';
 import type { Tile } from '../../systems/pathfinding';
 import { Noticeboard } from '../services/Noticeboard';
 import { SmallEvents } from '../services/SmallEvents';
+import { Talk } from '../services/Talk';
 import type { Zones } from '../zones/Zones';
 import type { Shared } from './shared';
 
@@ -19,6 +20,8 @@ import type { Shared } from './shared';
 export interface Neighbours {
   smallEvents: SmallEvents;
   neighbourhood: Neighbourhood;
+  /** Talking with them: the hello, heart moments, questions, replies, gifts and favours (1.1's W3). */
+  talk: Talk;
   noticeboard: Noticeboard;
   baking: Baking;
   interiors: Interiors;
@@ -63,20 +66,25 @@ export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
     { scene: parts.talk, here: town.scene, dance: parts.dance, visits: parts.visits },
     s.peopled,
   );
+  // Made before the neighbourhood, which reads who she's talking to (1.1's W3); it hears nothing.
+  const talk = new Talk(ctx, {
+    friends: s.friends,
+    bag,
+    wallet,
+    mailbox,
+    wardrobe: s.wardrobe,
+    takings,
+    smallEvents,
+    scene: parts.talk,
+    recall: (happening, id) => joining?.recall(happening, id) ?? null,
+    married: marriage,
+  });
   const neighbourhood = new Neighbourhood(
     ctx,
     {
       friends: s.friends,
-      bag,
-      wallet,
-      mailbox,
-      wardrobe: s.wardrobe,
-      takings,
-      smallEvents,
-      scene: parts.talk,
-      recall: (happening, id) => joining?.recall(happening, id) ?? null,
+      talk,
       errand: (id) => postRound?.errandOf(id) ?? null,
-      married: marriage,
       pets: parts.pets,
     },
     parts.zones,
@@ -103,12 +111,13 @@ export function neighbours(s: Shared, parts: NeighbourParts): Neighbours {
   joining = new Joining(ctx, bag, { ...town, learnt: parts.learnt }, s.options.happenings);
   postRound = new PostRound(ctx, {
     here: town.scene,
-    talkingTo: () => neighbourhood.talkingTo,
+    talkingTo: () => talk.talkingTo,
     postman: () => neighbourhood.neighbours.find((n) => n.id === 'ollie') ?? null,
   });
   return {
     smallEvents,
     neighbourhood,
+    talk,
     noticeboard,
     baking,
     interiors,

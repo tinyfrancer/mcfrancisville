@@ -84,6 +84,7 @@ import { Mailbox } from './services/Mailbox';
 import type { Milestones } from './services/Milestones';
 import type { Mystery } from './services/Mystery';
 import type { Neighbourhood } from './services/Neighbourhood';
+import type { Talk } from './services/Talk';
 import type { Noticeboard } from './services/Noticeboard';
 import type { Novelty } from './services/Novelty';
 import type { PetCare } from './services/PetCare';
@@ -169,8 +170,10 @@ export abstract class WorldParts {
   readonly postRound: PostRound;
   /** The Hollow Fairground's games, fortune and snack stalls (0.2's M2). */
   readonly activities: Activities;
-  /** Her neighbours: their walks, talking, gifts, favours and friendships. */
+  /** Her neighbours: where each is, and their walks. */
   readonly neighbourhood: Neighbourhood;
+  /** Talking with them: the hello, heart moments, questions, gifts, favours and friendships. */
+  readonly talk: Talk;
   /** The window's small event: a neighbour's news, or something one of them has lost. */
   readonly smallEvents: SmallEvents;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
@@ -269,7 +272,7 @@ export abstract class WorldParts {
       scene: () => this.scene,
       zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
       hearts: (villager) => this.friends.hearts(villager),
-      thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      thank: (villager, points) => this.talk.thank(villager, points),
     };
     this.map = parseMap(options.map ?? TOWN);
     this.clock = options.clock ?? systemClock;
@@ -350,7 +353,7 @@ export abstract class WorldParts {
     this.joining = near.joining;
     this.marriage = near.marriage;
     this.postRound = near.postRound;
-    ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
+    ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood, talk: this.talk } = near);
     ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
     this.mystery = mystery(shared, mailbox, this.townZone);
     const festival = festivals(shared, {
@@ -398,7 +401,7 @@ export abstract class WorldParts {
     const hers = her(shared, {
       workbench,
       mailbox,
-      neighbourhood,
+      talk: this.talk,
       petCare,
       decorating,
       recordPlayer,
@@ -412,6 +415,7 @@ export abstract class WorldParts {
     this.upNow = upNow(shared, {
       ...today,
       neighbourhood,
+      talk: this.talk,
       firstDay: this.firstDay,
       hasHad,
       rareEvents: this.rareEvents,

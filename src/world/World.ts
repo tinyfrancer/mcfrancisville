@@ -220,7 +220,7 @@ export class World extends WorldParts {
     const looking = this.garden.looking;
     this.garden.lookAt(null);
     this.recordPlayer.stop();
-    this.neighbourhood.endTalk();
+    this.talk.endTalk();
     this.petCare.endPet();
     const neighbour = this.neighbourhood.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
@@ -292,7 +292,7 @@ export class World extends WorldParts {
     this.garden.lookAt(null);
     this.poses.stir();
     this.recordPlayer.stop();
-    this.neighbourhood.endTalk();
+    this.talk.endTalk();
     this.petCare.endPet();
     return this.walkTo(this.zone.standBeside(bed.tx, bed.ty), { kind: 'bed', bed, job });
   }
@@ -310,7 +310,7 @@ export class World extends WorldParts {
     if (reeled) this.ctx.moments.push(reeled);
     this.garden.lookAt(null);
     this.recordPlayer.stop();
-    this.neighbourhood.endTalk();
+    this.talk.endTalk();
     this.petCare.endPet();
     return this.follow(neighbour, 0);
   }
@@ -339,7 +339,7 @@ export class World extends WorldParts {
     this.travel.check();
     this.mystery.check();
     this.mailbox.checkSpecialDay();
-    this.neighbourhood.check();
+    this.talk.check();
     this.marriage.check();
     this.deliveries.check();
     this.weather.check();
@@ -487,7 +487,7 @@ export class World extends WorldParts {
       const n = this.neighbourhood.neighbour(visit.villager);
       if (n.zone === this.scene && reach(n.tile, here) <= 1) {
         arrived.villager = n.id;
-        this.neighbourhood.startTalk(n.id);
+        this.talk.startTalk(n.id);
         this.player.facing = facingFor(n.x - this.player.x, n.y - this.player.y);
         n.face(this.player.x, this.player.y);
         return [arrived];
