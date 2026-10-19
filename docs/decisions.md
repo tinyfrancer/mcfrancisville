@@ -7849,3 +7849,52 @@ the user: the sessions pick.
 **Rejected:** on by default (she turns sound off with the switch; the default must be the
 phone's way); removing S1's work (it's the only way to hear the game on silent, and one switch
 keeps it).
+
+## 330. The silent switch obeyed: Play on silent off by default and undone at once, an Ambience switch that hushes the bed, and a line that says which way it's set (2026-10-19, 1.1's H1)
+
+_Session H1 of the 1.1 plan, lane H, at the user's word (decisions 328 and 329). No save change.
+Personal touches parked (decision 177): nothing was asked._
+
+- **Play on silent, off by default** (`src/audio/settings.ts`, beside Sounds and Music, per
+  phone and never in the save or a backup code). `SilentSwitch` (`src/audio/session.ts`) takes
+  it in its constructor and `unlock()` does nothing while it's off: no `audioSession` hint, no
+  silent element made, so Web Audio stays in the category the switch on the side of the phone
+  mutes. On, it does exactly what S1 built (decision 321). A phone that kept its switches before
+  1.1 reads with Play on silent off and Ambience on, so her phone, which played through the
+  switch since 1.0, obeys it from 1.1 on: the change she asked for.
+- **Flipped, it takes hold in that tap** (`SilentSwitch.set`, from `SoundBoard.setPlayOnSilent`).
+  Off undoes it at once: the session's `type` is put back to **what the switch found there
+  before its hint** (normally `auto`, Safari's own default, under which a page with only Web
+  Audio plays in the ambient category and the switch mutes it), and only if this switch was the
+  one that changed it; the silent element is paused. On calls `unlock()` there and then, since
+  the tap on the switch is itself a touch. **Rejected:** setting `ambient` outright (it is what
+  `auto` comes to for this page, but it's a value the page never had before S1; putting back
+  what was found is the exact reverse and leaves anyone else's choice alone); waiting for the
+  next touch's `unlock()` (a touch's `pointerdown` unlocks before its `click` flips the switch,
+  so it would always be one touch behind); asking for a reload. **For her phone, not the
+  container:** on an iPhone older than iOS 17 (the silent element's way), whether Web Audio falls
+  back to ambient the moment the element pauses, or only when the page is next opened, can't be
+  heard here; either way the next open obeys the switch.
+- **The Ambience switch** (`SoundBoard.setAmbienceOn`) hushes the bed the way the Sounds switch
+  already did: each layer fades out over its two seconds and its sources are stopped, the
+  ambience bus left as it is; cues, the music and records play on. The Sounds switch still
+  hushes the ambience too, so a phone that had Sounds off before 1.1 doesn't start hearing
+  crickets. **Rejected:** the ambience bus's gain at zero (the noise sources and the crickets'
+  loops would run on unheard, which costs her battery for nothing); Ambience independent of
+  Sounds (Sounds off has always meant no sound but the music).
+- **The line under Play on silent says which way it's set, always, and again as it's flipped**
+  (`silentLine`, `SILENT_HINT.off` and `.on` in `src/hud/SettingsSheet.ts`, the class
+  `hud-sound-hint` kept), as the View tab's line under Close and Far does. Off: "The switch on the
+  side of your phone turns the game's sound off. Want it to play anyway? Turn on Play on
+  silent." On: "Playing through the silent switch: the town keeps humming even with your phone
+  on silent." **Rejected:** told once per phone as S1's tip was (a line about a switch's setting
+  is wanted whenever she looks at the switch); so the once-key (`mcfrancisville:sound:hinted`),
+  `SoundBoard.silentHint` and `SoundApi.silentHint` are gone, the key left harmless on a phone
+  that has it.
+- **Settings' Sound tab:** Sounds, Music and Ambience in one row, Play on silent on a row of its
+  own with its line under it (it's a different kind of switch: not what plays, but whether the
+  phone's own switch is heeded). `SoundApi` grows `ambience`, `playOnSilent` and their setters,
+  wired in `main.ts`.
+- **Her notes:** a `1.1` `NOTES` row with three lines (the switch, Play on silent, the Ambience
+  switch) and a P.S.; H2 adds the crickets as a fourth line. Smoke's sound section reads the
+  four switches (its one check changed in place); `smoke:offline` never read the Sound tab.

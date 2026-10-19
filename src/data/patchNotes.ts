@@ -183,6 +183,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Small fixes, so I typed them small. The W still sticks.',
   },
+  {
+    version: '1.1',
+    lines: [
+      'The little switch on the side of your phone hushes the whole town now, as a good switch ' +
+        'should. Shh, everyone.',
+      "If you'd like us heard anyway, Settings has Play on silent. Flip it on and we'll play " +
+        'right through.',
+      'There is an Ambience switch beside Sounds and Music now, for the wind, the rain and the ' +
+        'crickets. The music stays.',
+    ],
+    ps: 'P.S. Typed very quietly, in case your phone is on silent.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

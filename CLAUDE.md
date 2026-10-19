@@ -611,9 +611,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`inTown` in `src/systems/mayor.ts`).
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
-  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch, the
-  silent switch got round first (`session.ts`: `audioSession` `playback`, or a loop of made
-  silence; V1's S1, decision 321). Every voice goes through `graph.ts`'s `Mixer`: four buses
+  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
+  switch on the side of her phone mutes the game unless she turns on **Play on silent** in
+  Settings (1.1's H1, decision 330): then the switch is got round first in each touch
+  (`session.ts`'s `SilentSwitch`: `audioSession` `playback`, or a loop of made silence; V1's S1,
+  decision 321), and turning it off puts the session back at once. Every voice goes through `graph.ts`'s `Mixer`: four buses
   (effects, music, records, ambience) into a master compressor, a send each to one reverb made
   from a generated impulse, a lowpass on triangle and square voices, a `pan` per part. The
   music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar, a
@@ -629,7 +631,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   fountain (0.2's H2, decision 173) plays after dark while she's on its bank (`world.fountain`,
   `systems/fountain.ts`): any theme on its music box (`musicBox`, the key `fountain@musicBox`), its
   lamps pulsing to `SoundBoard.musicBeat` and notes floating off it (`src/render/fountain.ts`,
-  through the view's `fountainBeat`). The switches are per phone (`settings.ts`), in Settings. Walk
+  through the view's `fountainBeat`). The switches (Sounds, Music, Ambience, which
+  hushes only the ambience's bed, and Play on silent) are per phone (`audio/settings.ts`), on
+  Settings' Sound tab, the line under Play on silent saying which way it's set. Walk
   the Tomb gets her dancing (`world.recordPlayer.dance()`), with Cody.
 - **What plays** (0.2's G2, decision 190) is anything with a `plays` on its furniture or fixture
   row: her `piano` (a card at Cobweb Corner), Boothoven's grand, the hall's grand and its music box

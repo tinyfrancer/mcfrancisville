@@ -298,7 +298,10 @@ function startGame(): void {
       music: () => sound.musicOn,
       setEffects: (on) => sound.setEffectsOn(on),
       setMusic: (on) => sound.setMusicOn(on),
-      silentHint: () => sound.silentHint(),
+      ambience: () => sound.ambienceOn,
+      setAmbience: (on) => sound.setAmbienceOn(on),
+      playOnSilent: () => sound.playOnSilent,
+      setPlayOnSilent: (on) => sound.setPlayOnSilent(on),
       trouble: () =>
         troubleOf(readErrorNotes(), Date.now(), {
           version: NOTES[NOTES.length - 1]!.version,
