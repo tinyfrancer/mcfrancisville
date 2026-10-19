@@ -32,14 +32,21 @@ open (decision 330).
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
-**T1 landed (PR #205, decision 335). Next: T2.** Smoke is `scripts/smoke/`: `run.mjs` (the
+**T2 in progress** on `claude/t2-suite-speed` (draft PR against `v1.1-dev`): the suite is two
+vitest projects, `dom` (`tests/hud/` and five named files, a fresh jsdom each) and `node` (the
+other 193 files, plain Node, `isolate: false`, `tests/setup.ts` putting back the fairground,
+bandstand and mayor before each file); `finale.test.ts`'s settling describes take a stated
+30 s. 346 s to 121 s in a quiet container, 2,622 tests and the same assertions. Decision 336
+is written; what's left: CI's times on the PR into the PR body and decision 336, the plan's
+status line, merge `origin/v1.1-dev`, rerun, merge. No question for the user.
+
+**T1 landed (PR #205, decision 335).** Smoke is `scripts/smoke/`: `run.mjs` (the
 browser, `ORDER`, `NEEDS`, the arguments), `lib.mjs` (the helpers, the shared `page`, swapped by
 `setPage`) and nineteen area files, each exporting `sections`; `npm run smoke -- town fair`, a
 section's own name, `--section=`, `-- --list`. 622 checks before and after. **A new section goes
 in its area's list and in `ORDER`** (the runner refuses to start otherwise), and if it leans on
 a section in another area, a line in `NEEDS`. Every area passes alone (12 s to 78 s; `gallery`
 four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&page=n`, 50 rows.
-For T2: the vitest suite was 2,611 tests in 219 files, 346 s in the container on this branch.
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 

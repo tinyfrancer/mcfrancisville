@@ -894,15 +894,22 @@ V1's weight on it.
    same file as `api/save.js` with JSDoc types. And no frame has been timed on her iPhone: `?perf`
    (production too, `wiring/perf.ts`) is waiting, with a table under "On her iPhone" above. Both
    are 1.0.x's first jobs.
-2. **The suite and smoke are slow, ~~and smoke is one file~~.** 2,568 tests in 216 files take about
-   340 s in the container (90 s at 0.3's V1, 24 s at phase K), most of it building whole worlds
-   through `harness()` and the simulated years of the rarity and weeks tests; smoke is 622 checks
-   in about twenty minutes, and a session's suite-then-smoke before a push is half an hour.
-   Services are made from plain parts and can be tested alone; a slow file should share one world
-   across cases that don't touch each other (1.1's T2). ~~Smoke wants splitting into a file per
-   area with the runner and its helpers in one, and the gallery paging~~: done in 1.1's T1
-   (decision 335). The 7,800 lines of `scripts/smoke.mjs` are `scripts/smoke/`: `run.mjs` (the
-   browser, the whole run's `ORDER`, the arguments, the summary), `lib.mjs` (the helpers and the
+2. ~~**The suite and smoke are slow, and smoke is one file.**~~ The suite: done in 1.1's T2
+   (decision 336). It was 346 s in a quiet container (2,622 tests in 220 files, one worker on
+   its two CPUs), two thirds of it per file rather than per test: a jsdom set up for every file
+   (147 s summed) and the game imported afresh for each (52 s), against 104 s of the tests
+   themselves. Now two vitest projects: `dom` (`tests/hud/` and five named files, each in a
+   fresh jsdom) and `node` (the other 193, in plain Node, sharing their modules with
+   `isolate: false`, what a world tells the rules from outside put back before each file in
+   `tests/setup.ts`). **121 s**, the same tests and assertions; on CI, Node 25's test step was
+   84 to 153 s and Node 22's coverage 168 to 258 s before. What's left is the tests' own work,
+   and its biggest share is a world test's step: 0.5 ms quiet, up to 1.8 ms loaded, mostly
+   `happeningsAt` (`systems/happenings.ts`) filtering every happening row for every neighbour on
+   every step through `whereabouts`; the hour's happenings kept for the hour and day would make
+   every world test, and her phone's frame, cheaper, and `finale.test.ts`'s settling cases could
+   drop their stated timeout. Building a world is about 50 ms and needs no seam. Smoke: done in
+   1.1's T1 (decision 335). The 7,800 lines of `scripts/smoke.mjs` are `scripts/smoke/`:
+   `run.mjs` (the browser, the whole run's `ORDER`, the arguments, the summary), `lib.mjs` (the helpers and the
    shared page) and nineteen area files of 83 sections, 622 checks before and after;
    `npm run smoke -- town fair` runs those areas (after `boot`), a section's name runs it alone,
    `-- --list` lists them, and a section that leans on one in another area brings it along
