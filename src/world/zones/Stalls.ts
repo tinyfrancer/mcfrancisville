@@ -2,12 +2,14 @@ import { PROP_FOOTPRINT } from '../../data/maps';
 import type { Clock } from '../../systems/clock';
 import type { PlacedProp, TileMap } from '../../systems/grid';
 import { peddlerSpot, popUpLot } from '../../systems/shop';
+import type { Overlay } from './Overlay';
+import { covers } from './Zone';
 
 /**
  * What stands in town only on some days: the pop-up shop on one of its lots, and the Moon Pie
  * Man's cart on one of his spots, each solid over its footprint while it's there.
  */
-export class Stalls {
+export class Stalls implements Overlay {
   private readonly clock: Clock;
   private readonly map: TileMap;
   /** Worked out at most once a minute each: pathfinding asks on every step. */
@@ -45,5 +47,18 @@ export class Stalls {
       this.cartCache = { minute, prop };
     }
     return this.cartCache.prop;
+  }
+
+  /** The pop-up or the cart, whichever stands on a tile today. */
+  propAt(tx: number, ty: number): PlacedProp | undefined {
+    const popUp = this.popUp();
+    if (popUp && covers(popUp, tx, ty)) return popUp;
+    const cart = this.moonPieCart();
+    if (cart && covers(cart, tx, ty)) return cart;
+    return undefined;
+  }
+
+  blocks(tx: number, ty: number): boolean {
+    return this.propAt(tx, ty) !== undefined;
   }
 }

@@ -15,6 +15,7 @@ import type { Tile } from '../systems/pathfinding';
 import { inBox, standsOn, yardFit, yardRefusal, type Kept, type YardGround } from '../systems/yard';
 import type { FurnitureId, ItemId } from '../types/ids';
 import type { Home } from './Home';
+import type { Overlay } from './zones/Overlay';
 
 /**
  * Her yard (0.3's H5): what of hers stands on the grass round her house. It keeps the pieces and
@@ -22,7 +23,7 @@ import type { Home } from './Home';
  * chest is her home's, shared, so a piece put away from the yard goes in it and one taken out comes
  * from it. Nothing is ever lost: a saved piece that no longer fits waits in the chest.
  */
-export class Yard {
+export class Yard implements Overlay {
   private readonly ground: YardGround | null;
   private readonly home: Home;
   private readonly pieces: Placed[] = [];

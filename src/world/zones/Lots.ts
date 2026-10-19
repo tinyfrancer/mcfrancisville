@@ -1,13 +1,14 @@
 import type { PlacedProp } from '../../systems/grid';
 import { LOTS } from '../../systems/lots';
 import type { MapZoneId } from '../../types/ids';
+import type { Overlay } from './Overlay';
 import { covers } from './Zone';
 
 /**
  * The houses on a place's lots (phase T), standing from her first day (decision 211). Each is
  * solid over its footprint, like the stalls.
  */
-export class Lots {
+export class Lots implements Overlay {
   private readonly houses: readonly PlacedProp[];
 
   constructor(zone: MapZoneId) {
@@ -31,5 +32,9 @@ export class Lots {
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
     return this.houses.find((p) => covers(p, tx, ty));
+  }
+
+  blocks(tx: number, ty: number): boolean {
+    return this.propAt(tx, ty) !== undefined;
   }
 }
