@@ -12,7 +12,15 @@ Each lane's heading says where it is; the rules are the plan's "Running it in pa
 
 ### Lane H: heard (H1 → H2; decisions from 330; never the save)
 
-H1 (`claude/h1-silent-switch`): not started.
+H1 (`claude/h1-silent-switch`, decision 330): **built and pushed, the PR a draft into
+`v1.1-dev`.** Done: Play on silent (off by default) and Ambience in `audio/settings.ts`;
+`SilentSwitch` touches nothing while it's off and `set(false)` puts the session's type back and
+pauses the silence at once; `SoundBoard.setAmbienceOn`/`setPlayOnSilent`; Settings' Sound tab
+with the four switches and the line under Play on silent (`silentLine`); `SoundApi` in
+`main.ts`; the `1.1` `NOTES` row (three lines; H2 adds the crickets); smoke's sound check reads
+the four switches; tests in `tests/audio/heard.test.ts`, `audio.test.ts`,
+`tests/systems/patchNotes.test.ts`; `CLAUDE.md`'s Sound bullet. Next: smoke green, CI green,
+merge `origin/v1.1-dev`, mark ready and merge.
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
