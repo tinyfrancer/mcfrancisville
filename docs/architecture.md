@@ -121,13 +121,18 @@ plays when, so a script can build the same graph on an `OfflineAudioContext` to 
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`,
-`Dug`, `Lately`, `Works` (in `src/world/`; `Lately`, V1's P1, keeps the last piece she placed, crop she picked and thing she gave the museum, for her neighbours to remember, and since P5 her answer to Cody's "how was your day?" and the scenes of their story told; `Works`, V1's R4, the project under way, what she has given each and what's built). V1 also grew keepers' snapshots rather than adding keepers: `Friendship` keeps the moments told and the question answered (P1, P2), the `Casebook` the chain's clues and Wes (P3a), the `Cabinet` each fish's best (R6a), `Pets` each pet's fondness (R6c). Since 0.3 `Home` keeps her rooms (H4: `rooms`, each its pieces, paper,
-floor and size, and `here`, the one she's in, which everything that read "the room" reads), the
-chest's furniture and her things from her bag (`stored`, `items`, H1), what a display piece shows
-(`Placed.shows`, H2) and what stands on a surface (`Placed.on`, H3); `Yard` keeps what stands on the
-grass round her house and puts what it takes out and away through `Home`'s chest (H5). Both are
-`Decorable`, so `Decorator` works on whichever she's in. A keeper doesn't
+`Home`, `Rooms`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`,
+`Dug`, `Lately`, `Works` (in `src/world/`; `Lately`, V1's P1, keeps the last piece she placed, crop she picked and thing she gave the museum, for her neighbours to remember, and since P5 her answer to Cody's "how was your day?" and the scenes of their story told; `Works`, V1's R4, the project under way, what she has given each and what's built). V1 also grew keepers' snapshots rather than adding keepers: `Friendship` keeps the moments told and the question answered (P1, P2), the `Casebook` the chain's clues and Wes (P3a), the `Cabinet` each fish's best (R6a), `Pets` each pet's fondness (R6c). Her rooms (0.3's H4) are `Rooms` since 1.1's W2 (decision 341, `src/world/Rooms.ts`): each
+room's pieces, with what a display piece shows (`Placed.shows`, H2) and what stands on a surface
+(`Placed.on`, H3), since both belong to the piece, its paper, floor and size, and `here`, the one
+she's in, which everything that reads "the room" reads; building a room, growing the front one,
+and the decorating moves. `Home` is what the rooms share: the storage chest's furniture and her
+things from her bag (`stored`, `items`, H1), and the papers and floors she owns, with its rooms
+as `home.rooms`; it still answers every read of the room she's in (`home.placed`, `home.room`,
+`home.pieceAt`…) through `Rooms`, so the views, sheets and tests read her home as they did.
+`Yard` keeps what stands on the grass round her house and puts what it takes out and away
+through `Home`'s chest (H5). `Rooms` and `Yard` are both `Decorable`, so `Decorator` works on
+whichever she's in, and both take the chest rather than owning one. A keeper doesn't
 know the clock or the other keepers, but for two narrow functions `keepersOf` (`world/areas/shared.ts`) hands across (0.2's W1,
 decision 164): the `Wardrobe` asks the bag how many of each bracelet she has, so none is worn that
 isn't there, and the `Bag` asks the wardrobe how many she has on (`keepWorn`), which `remove`
@@ -248,7 +253,7 @@ own critters (decision 102) and gathering (trees, toadstools, flowers, keyed wit
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
 key themselves, and the views from `world.weather`; beds
 grow in town, by the creek, by the lake and in her planters (`Farm` keys them by place, decision
-165), each crop a day sooner where it `thrives` and in its `season`, read from the day it was
+165, and a planter's by its room too, decision 341), each crop a day sooner where it `thrives` and in its `season`, read from the day it was
 planted (`ripeDays`, decision 176); the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
 bone).
 
@@ -998,13 +1003,17 @@ V1's weight on it.
    come on a festival's ordinary days (not its first, its finale or a day with one of its beats),
    about two an October; the wandering stall still keeps out of festivals. The heralds of the
    stall's week toast once a day all week.
-10. **Her home's bed key doesn't know the room.** A planter's bed is keyed `home` and its tile, so
-    planters stay in the front room (`refusesHere`, decision 233). A planter in the back room needs
-    the key to carry the room, a save change; until then the refusal says so kindly.
-11. **`Home` holds four features.** Her rooms, the chest's two lists, what's on show and what
-    stands on what are one 480-line keeper, with `Yard` beside it reusing the surface rules through
-    `Decorable`. A fifth (a second chest, a room of the yard's own) should take rooms out into a
-    `Room` keeper first.
+10. ~~**Her home's bed key doesn't know the room.**~~ Done in 1.1's W2 (decision 341, save v55):
+    a bed at home names its room (`Plot.room`, saved on its bed and sprinkler), the farm keeps it
+    by place, room and tile, and a planter stands in any room. A plot at home asked about with no
+    room is the room she's in, which is how the view (`HomeView`) still asks; the bed's own name
+    (`bedKey`), which deals its harvest, is the same in every room.
+11. ~~**`Home` holds four features.**~~ Done in 1.1's W2 (decision 341): her rooms, what's on
+    show and what stands on what (each the placed piece's) are `Rooms`; `Home` is the chest and
+    the papers and floors she owns. What's left: `Home` still answers the room's reads by
+    forwarding to `Rooms` (about twenty one-liners, kept so `src/render/`, the sheets and the
+    tests didn't move while lane A ran); a later session can point those readers at `home.rooms`
+    and drop them.
 12. **Big view, wiring and service files.** `render/OutdoorView.ts` is 1,240 lines (the yard, the
     mounds, the sites, the see-through crowns, the fishing line and reel, film night, the fountain
     and the effects all hand it something to sort), `services/Neighbourhood.ts` 1,100 (P1–P5 each

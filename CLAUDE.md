@@ -379,7 +379,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   `season` a day sooner again, read from the day it went in (`plantedInSeason`, 0.2's N2,
   decision 176; `thrives` may name `home`, where basil likes a planter); the farm's extension rows are grass
   kept in the town map (`1`, `2`: `TileMap.plots`) until a `{ beds }` recipe builds them; and a
-  `planter` piece at home is a bed wherever it stands, carried by the decorator's `moved` signal. What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
+  `planter` piece at home is a bed wherever it stands, in any of her rooms (keyed by its room,
+  1.1's W2), carried by the decorator's `moved` signal. What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
   decisions 118–120): the first tap looks (`world.garden.looking`, a card from
   `src/hud/BedCard.ts` through `BedApi`, placed each frame by `main.ts`) and the second, or the
   card's button, walks up and does it (`world.tendBed`, `world.garden.visit`); with a seed in hand
@@ -427,14 +428,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   piece is a row, a drawing at 32 in `src/sprites/pieces.ts` or its family's file, and a place on
   a shop's shelf). Furniture is drawn in the building kit's materials with the helpers in
   `src/sprites/furnish.ts` (decision 105); walls, floors and the mat are `src/sprites/surfaces.ts`. What fits
-  where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
+  where is `src/systems/decor.ts`, `src/world/Rooms.ts` keeps the rooms and `src/world/Home.ts`
+  the storage chest, and
   decorating is `world.decorating` (`Decorator`). `src/render/HomeView.ts` draws it (shared drawing is
   `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`. Her home
-  is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, `Home` keeping each
-  room's pieces, walls, floor and size with the chest shared, and everything that reads "the
+  is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, kept by `Rooms` since
+  1.1's W2 (decision 341: each room's pieces with what they show and what stands on what, walls,
+  floor and size, `home.rooms`), `Home` keeping what they share (the chest, the papers and
+  floors she owns) and answering the room's reads through `Rooms`, and everything that reads "the
   room" reading the one she's in (`home.here`). They're all the one place, `home`: a doorway in
   a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
-  within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe.
+  within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe. A
+  planter stands in any room, its bed keyed by its room (`Plot.room`, save v55).
   The chest takes things from her bag too (0.3's H1, decision 230): `home.items`, moved by
   `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
   or what's on her wrist), put away from the bag's card at home and taken out on the chest
