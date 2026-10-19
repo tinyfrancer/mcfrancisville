@@ -19,9 +19,12 @@ store is the user's to link, README's "Cloud save").
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
 word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
 (V1's review, decision 324) and **1.0 is on her phone** (2026-10-18, PR #198 from `v1-dev`, save
-v53; 0.4 before it, 2026-10-07, PR #175, save v43). **`v1.1-dev` is the integration branch now**,
-for the 1.0.x fixes from "Where it hurts" and the art notes; there is no plan after V1 yet.
-`docs/v0.3_plan.md`, `docs/v0.2_plan.md` and the plans before them are complete.
+v53; 0.4 before it, 2026-10-07, PR #175, save v43). 1.0.1 followed the next day (PR
+#201, save v54, decisions 325 and 327). **The plan now is `docs/v1.1_plan.md`** (settled
+2026-10-19, decision 328): four lanes from `v1.1-dev`, the sound first (the silent switch
+silences the game, the crickets tamed: ⬆ 1.1), then the refactors in "Where it hurts" and the
+art redesigns (⬆ 1.2); its status line says which have landed. `docs/v1_plan.md`,
+`docs/v0.3_plan.md` and the plans before them are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative

@@ -10,6 +10,13 @@ Nothing is in progress.
 
 ## After 1.0
 
+**The plan now is `docs/v1.1_plan.md`** (settled 2026-10-19, decision 328; the user's ask that
+morning: everything logged, the "Where it hurts" refactors and the art redesigns, with two sound
+complaints from her phone folded in, the near-constant crickets and the silent switch that
+doesn't silence the game). Its coordinating session starts lanes H and T first; the "In
+progress" section above is theirs. The cloud save's store and the phone's first timings stay
+the user's (below).
+
 **The V1 plan is complete, and 1.0 is on her phone** (PR #198, `v1-dev` → `main`, merged at the
 user's word on 2026-10-18 by the coordinating session). Before it her phone had 0.4 (2026-10-07,
 PR #175), which carried 0.5's sessions too, so it last showed her the
