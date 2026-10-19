@@ -12,15 +12,14 @@ Each lane's heading says where it is; the rules are the plan's "Running it in pa
 
 ### Lane H: heard (H1 → H2; decisions from 330; never the save)
 
-H1 (`claude/h1-silent-switch`, decision 330): **built and pushed, the PR a draft into
-`v1.1-dev`.** Done: Play on silent (off by default) and Ambience in `audio/settings.ts`;
-`SilentSwitch` touches nothing while it's off and `set(false)` puts the session's type back and
-pauses the silence at once; `SoundBoard.setAmbienceOn`/`setPlayOnSilent`; Settings' Sound tab
-with the four switches and the line under Play on silent (`silentLine`); `SoundApi` in
-`main.ts`; the `1.1` `NOTES` row (three lines; H2 adds the crickets); smoke's sound check reads
-the four switches; tests in `tests/audio/heard.test.ts`, `audio.test.ts`,
-`tests/systems/patchNotes.test.ts`; `CLAUDE.md`'s Sound bullet. Next: smoke green, CI green,
-merge `origin/v1.1-dev`, mark ready and merge.
+**H1 landed (PR #203, decision 330). Next: H2.** What it left for H2: Play on silent (off by
+default) and Ambience are in `audio/settings.ts`; `SilentSwitch` touches nothing while it's off,
+and `set(false)` puts the session's type back and pauses the silence at once; the Ambience
+switch fades the bed out through `applyAmbience` (Sounds off still hushes it too). The `1.1`
+`NOTES` row has **three lines; H2 adds the crickets as the fourth** (and may change the P.S.).
+Smoke's sound section reads the four switches. For her phone: whether the switch now mutes the
+game, and on iOS before 17 whether Play on silent turned off mutes it at once or from the next
+open (decision 330).
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
