@@ -943,8 +943,9 @@ V1's weight on it.
    themselves. Now two vitest projects: `dom` (`tests/hud/` and five named files, each in a
    fresh jsdom) and `node` (the other 193, in plain Node, sharing their modules with
    `isolate: false`, what a world tells the rules from outside put back before each file in
-   `tests/setup.ts`). **121 s**, the same tests and assertions; on CI, Node 25's test step was
-   84 to 153 s and Node 22's coverage 168 to 258 s before. What's left is the tests' own work,
+   `tests/setup.ts`). **121 s**, the same tests and assertions (125 s with W1's in, 2,640 tests
+   in 223 files); on CI, Node 25's test step was 84 to 161 s and Node 22's coverage 168 to 258 s
+   before, and 37 s and 164 s after (coverage's own instrumenting is most of that). What's left is the tests' own work,
    and its biggest share is a world test's step: 0.5 ms quiet, up to 1.8 ms loaded, mostly
    `happeningsAt` (`systems/happenings.ts`) filtering every happening row for every neighbour on
    every step through `whereabouts`; the hour's happenings kept for the hour and day would make

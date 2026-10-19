@@ -8172,8 +8172,11 @@ and nothing in `src/` does. Personal touches parked (decision 177): nothing was 
   settle the town take a stated `SETTLING` timeout of 30 s with a comment saying why.
 - **After**: **121 s** wall in the same quiet container (35% of before) and 141 s of CPU (32%):
   jsdom 17 s (27 files), imports 16 s, the tests 81 s. The same 2,622 tests, the same
-  assertions, none removed. CI before (three runs on 2026-10-19): Node 25's `npm run test` 84 s,
-  86 s and 153 s; Node 22's `npm run coverage` 168 s, 253 s and 258 s. After: see the PR.
+  assertions, none removed. With W1 merged in (PR #206: 2,640 tests in 223 files) it's 125 s.
+  CI before (four runs on 2026-10-19, the last W1's merge): Node 25's `npm run test` 84 s, 86 s,
+  153 s and 161 s; Node 22's `npm run coverage` 168 s, 209 s, 253 s and 258 s. After (PR #207's run): Node 25's
+  test step 37 s, Node 22's coverage 164 s, most of which is now Istanbul instrumenting the game
+  (its transform alone is over a minute), which the projects don't change.
 - **The slowest files, before → after** (seconds, file total): `sprites/doll` 10.3 → 10.0,
   `world/finale` 7.2 → 7.4, `world/petsGrow` 7.0 → 3.8, `audio/audio` 6.0 → 4.8,
   `sprites/catalogue` 5.9 → 4.7, `world/travel` 5.6 → 3.6, `world/fishing` 4.7 → 2.6,

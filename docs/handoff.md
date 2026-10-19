@@ -32,13 +32,19 @@ open (decision 330).
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
-**T2 in progress** on `claude/t2-suite-speed` (draft PR against `v1.1-dev`): the suite is two
-vitest projects, `dom` (`tests/hud/` and five named files, a fresh jsdom each) and `node` (the
-other 193 files, plain Node, `isolate: false`, `tests/setup.ts` putting back the fairground,
-bandstand and mayor before each file); `finale.test.ts`'s settling describes take a stated
-30 s. 346 s to 121 s in a quiet container, 2,622 tests and the same assertions. Decision 336
-is written; what's left: CI's times on the PR into the PR body and decision 336, the plan's
-status line, merge `origin/v1.1-dev`, rerun, merge. No question for the user.
+**T2 landed (PR #207, decision 336). Lane T is finished.** The suite is two vitest
+projects (`vitest.config.ts`): `dom`, `tests/hud/` and the five files named in `DOM`, each in a
+fresh jsdom; and `node`, everything else, in plain Node with `isolate: false`, its files sharing
+their modules. **A test outside `tests/hud/` that needs `document` or `window` is named in
+`DOM`**, and a module-level `let` in `src/` that a world sets from outside goes in
+`tests/setup.ts`'s resets (today `knowFairground`, `knowBandstand`, `knowMayor`), or a file
+finds it as the one before left it. 346 s to 121 s in a quiet container (125 s with W1's tests);
+CI's Node 25 test step 84 to 161 s to 37 s, Node 22's coverage 168 to 258 s to 164 s.
+`finale.test.ts`'s settling describes take a stated 30 s: a world step is slow because
+`happeningsAt` filters every happening row for every neighbour on every step ("Where it hurts"
+2), which a session in `src/systems/` could fix. Smoke's `cloud` check "what the cloud keeps is
+sealed" can fail by chance (its `/player|wardrobe|MFV/` can match the sealed base64); it failed
+once and passed on the rerun.
 
 **T1 landed (PR #205, decision 335).** Smoke is `scripts/smoke/`: `run.mjs` (the
 browser, `ORDER`, `NEEDS`, the arguments), `lib.mjs` (the helpers, the shared `page`, swapped by
