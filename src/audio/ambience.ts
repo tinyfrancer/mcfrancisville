@@ -9,7 +9,8 @@ import { line, midi, type Part, type Tune } from './tune';
  * the creek, the fairground's murmur, a soft hum indoors; and her footsteps and the HUD's tick.
  * What's heard is worked out here from what the music reads (the place, the hour, the weather)
  * and how near water she stands; `SoundBoard` plays it. A bed of sound is a generated node (noise
- * through filters, swelling on slow oscillators) or, for the crickets, a `Tune` on a loop.
+ * through filters, swelling on slow oscillators and ebbing over a minute or two) or, for the
+ * crickets, a chorus of two dealt chirp by chirp, which sings in runs and rests (1.1's H2).
  */
 
 /** Each kind of sound a place can have behind it. */
@@ -34,30 +35,41 @@ export interface Surroundings {
 }
 
 /** When the crickets sing: from dusk until the small hours, from spring until the frosts. */
-const CRICKETS = { from: 20, until: 4, months: [4, 5, 6, 7, 8, 9, 10] } as const;
+const CRICKET_NIGHTS = { from: 20, until: 4, months: [4, 5, 6, 7, 8, 9, 10] } as const;
 
-/** How the crickets carry in each place outdoors; the rest have the town's. */
-const CRICKETS_IN: Partial<Record<ZoneId, number>> = {
-  whisperwood: 0.9,
-  hiddenClearing: 0.9,
-  lanternShore: 0.8,
-  booAcres: 0.9,
-  castleHill: 0.5,
-  fairground: 0.35,
+/**
+ * How the crickets carry in each place outdoors (about half of what they were before 1.1's H2,
+ * decision 331); the rest have the town's.
+ */
+export const CRICKETS_IN: Partial<Record<ZoneId, number>> = {
+  whisperwood: 0.4,
+  hiddenClearing: 0.4,
+  lanternShore: 0.4,
+  booAcres: 0.4,
+  castleHill: 0.2,
+  fairground: 0.1,
 };
+
+/** The crickets anywhere not in `CRICKETS_IN`: the town's. */
+export const CRICKETS_ELSEWHERE = 0.3;
 
 /** The wind in each place it blows, on any day. */
 const WIND_IN: Partial<Record<ZoneId, number>> = {
-  whisperwood: 0.45,
-  castleHill: 0.7,
+  whisperwood: 0.4,
+  castleHill: 0.6,
   hiddenClearing: 0.3,
 };
 
 /** Water a place has all over, whatever tile she's on: the lake is the shore's whole sound. */
-const WATER_IN: Partial<Record<ZoneId, number>> = { lanternShore: 0.45 };
+const WATER_IN: Partial<Record<ZoneId, number>> = { lanternShore: 0.4 };
 
 /** The fairground's crowd, while it's open. */
-const MURMUR = { from: 10, until: 23, level: 0.55 } as const;
+const MURMUR = { from: 10, until: 23, level: 0.5 } as const;
+
+/** The rain outdoors and on the roof indoors, on a wet day and in a storm; the hum indoors. */
+const RAIN = { rain: 0.6, storm: 0.8 } as const;
+const ROOF = { rain: 0.4, storm: 0.5 } as const;
+const HUM = 0.3;
 
 const round = (n: number) => Math.round(n * 10) / 10;
 
@@ -70,15 +82,15 @@ export function ambienceFor(s: Surroundings): Bed {
   };
   const raining = s.weather === 'rain';
   if (!s.outdoors) {
-    set('hum', 0.4);
-    if (raining) set('roof', s.stormy ? 0.6 : 0.45);
+    set('hum', HUM);
+    if (raining) set('roof', s.stormy ? ROOF.storm : ROOF.rain);
     return bed;
   }
-  const late = s.hour >= CRICKETS.from || s.hour < CRICKETS.until;
-  if (late && !raining && (CRICKETS.months as readonly number[]).includes(s.month)) {
-    set('crickets', CRICKETS_IN[s.zone] ?? 0.6);
+  const late = s.hour >= CRICKET_NIGHTS.from || s.hour < CRICKET_NIGHTS.until;
+  if (late && !raining && (CRICKET_NIGHTS.months as readonly number[]).includes(s.month)) {
+    set('crickets', CRICKETS_IN[s.zone] ?? CRICKETS_ELSEWHERE);
   }
-  if (raining) set('rain', s.stormy ? 0.9 : 0.7);
+  if (raining) set('rain', s.stormy ? RAIN.storm : RAIN.rain);
   const wind = (WIND_IN[s.zone] ?? 0) + (s.stormy ? 0.3 : 0) + (s.weather === 'fog' ? 0.1 : 0);
   set('wind', wind);
   set('water', Math.max(WATER_IN[s.zone] ?? 0, s.water * 0.8));
@@ -196,28 +208,128 @@ export const FOOTSTEPS: Record<Ground, readonly [Tune, Tune]> = {
 export const TICK: Tune = blip(brush('E7:.05', 0.15, 2.5), knock('E6:.05', 0.06));
 
 /**
- * One cricket: a chirp is three quick pulses of a narrow band of noise, high up, and the chirps
- * come unevenly, at `chirps` (in beats), round a loop `beats` long.
+ * One cricket: how high it sings, how loud, how narrow its band of noise, and where it sits. A
+ * chirp is three quick pulses of it.
  */
-function cricket(pitch: string, chirps: readonly number[], beats: number, pan: number): Tune {
-  const notes = chirps.flatMap((at) =>
-    [0, 0.12, 0.24].map((after) => ({ at: at + after, beats: 0.07, pitch: midi(pitch) })),
-  );
-  return { bpm: 240, beats, parts: [{ wave: 'brush', notes, gain: 0.45, q: 8, pan }] };
+export interface Cricket {
+  pitch: string;
+  gain: number;
+  /** The brush's band: wide enough to be a chirp, not a whistle in the ear. */
+  q: number;
+  pan: number;
 }
 
 /**
- * Three crickets, one each side and one farther off, each round a loop of its own length so
- * together they never fall into step.
+ * The chorus (1.1's H2, decision 331): one cricket near and one farther off and softer. A third
+ * sang once, highest of all, and was the one in the ear.
  */
-export const CRICKET_SONGS: readonly Tune[] = [
-  cricket('B7', [0, 1.6, 3.1, 4.8, 6.3, 9.2, 10.7, 12.3, 13.8, 17.1, 18.6, 20.2], 23, -0.55),
-  cricket('A7', [0.9, 2.6, 4.2, 7.4, 9.0, 10.6, 14.1, 15.7, 17.3, 18.9, 24.6, 26.2], 29, 0.6),
-  cricket('C8', [2.2, 5.0, 7.9, 12.6, 15.4, 21.0], 31, 0.1),
+export const CRICKETS: readonly [Cricket, Cricket] = [
+  { pitch: 'B7', gain: 0.25, q: 4, pan: -0.4 },
+  { pitch: 'G7', gain: 0.13, q: 3, pan: 0.55 },
 ];
 
+/**
+ * How the chorus goes (1.1's H2): a phrase is one cricket's run of chirps, answered by the other
+ * more often than not, now and then a little over the end of it (the swell); then both rest.
+ * Each range is in chirps or seconds, and each draw is anywhere within it.
+ */
+export const CHORUS = {
+  /** Chirps in a run. */
+  chirps: [4, 8],
+  /** Seconds from one chirp to the next within a run, before each chirp's own little wobble. */
+  every: [0.45, 0.65],
+  wobble: 0.05,
+  /** How often a run is answered by the other cricket. */
+  answered: 0.6,
+  /** Seconds from the last chirp of a run to its answer: below zero, they sing together a moment. */
+  answer: [-1, 4],
+  /** Seconds of quiet between phrases. */
+  rest: [20, 60],
+  /** Seconds before the first phrase, as she steps out. */
+  lead: [1, 4],
+} as const;
+
+/** One chirp of the chorus: when, in seconds from its start, which cricket, and how loud, 0–1. */
+export interface Chirp {
+  at: number;
+  cricket: 0 | 1;
+  level: number;
+}
+
+/** A little seeded generator, 0 to 1 (mulberry32), so a chorus is the same from the same seed. */
+function dealer(seed: number): () => number {
+  let s = seed >>> 0;
+  return () => {
+    s = (s + 0x6d2b79f5) >>> 0;
+    let t = Math.imul(s ^ (s >>> 15), 1 | s);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * The crickets' chorus, chirp by chirp in time order, forever, dealt from `seed` (1.1's H2):
+ * runs that swell and fade, softest at their ends, and rests long enough to hear the night
+ * between them. `SoundBoard` sets each chirp going as its time comes near; the tests read it
+ * for minutes at a time.
+ */
+export function* chorus(seed: number): Generator<Chirp, never> {
+  const deal = dealer(seed);
+  const within = ([lo, hi]: readonly [number, number]) => lo + (hi - lo) * deal();
+  const run = (cricket: 0 | 1, from: number): Chirp[] => {
+    const n = Math.min(
+      CHORUS.chirps[1],
+      Math.floor(within([CHORUS.chirps[0], CHORUS.chirps[1] + 1])),
+    );
+    const every = within(CHORUS.every);
+    const out: Chirp[] = [];
+    let at = from;
+    for (let i = 0; i < n; i++) {
+      out.push({ at, cricket, level: 0.55 + 0.45 * Math.sin((Math.PI * (i + 0.5)) / n) });
+      at += every + (deal() * 2 - 1) * CHORUS.wobble;
+    }
+    return out;
+  };
+  let at = within(CHORUS.lead);
+  for (;;) {
+    const first: 0 | 1 = deal() < 0.5 ? 0 : 1;
+    const phrase = run(first, at);
+    if (deal() < CHORUS.answered) {
+      const last = phrase[phrase.length - 1]!.at;
+      phrase.push(...run(first === 0 ? 1 : 0, Math.max(at, last + within(CHORUS.answer))));
+    }
+    phrase.sort((a, b) => a.at - b.at);
+    yield* phrase;
+    at = phrase[phrase.length - 1]!.at + within(CHORUS.rest);
+  }
+}
+
+/** A chirp is three quick pulses of noise, each this long and this far apart, in seconds. */
+const PULSE = { length: 0.0175, apart: 0.03 } as const;
+
+/** Sets one chirp of the chorus going at `at` (the context's time), into `out`. */
+export function chirpInto(
+  mixer: Mixer,
+  chirp: Chirp,
+  at: number,
+  out: AudioNode,
+  sources?: Set<AudioScheduledSourceNode>,
+): void {
+  const cricket = CRICKETS[chirp.cricket];
+  const part: Part = {
+    wave: 'brush',
+    notes: [],
+    gain: cricket.gain * chirp.level,
+    q: cricket.q,
+    pan: cricket.pan,
+  };
+  // At a beat a second, a note's beats are its seconds.
+  const note = { at: 0, beats: PULSE.length, pitch: midi(cricket.pitch) };
+  for (let i = 0; i < 3; i++) mixer.voice(part, note, at + i * PULSE.apart, 1, out, sources);
+}
+
 /** How much louder or softer each noise layer is made, at a level of 1. */
-const LAYER_GAIN: Record<Exclude<Layer, 'crickets'>, number> = {
+const LAYER_GAIN: Record<NoiseLayer, number> = {
   rain: 0.08,
   roof: 0.16,
   wind: 0.24,
@@ -226,16 +338,39 @@ const LAYER_GAIN: Record<Exclude<Layer, 'crickets'>, number> = {
   hum: 0.2,
 };
 
+/** The layers of noise, every layer but the crickets. */
+export type NoiseLayer = Exclude<Layer, 'crickets'>;
+
+/**
+ * How each layer of noise ebbs and swells over a minute or two (1.1's H2, decision 331), so none
+ * is a constant hiss: the whole layer rides between `floor` and its full level on two slow
+ * waves, the first `periods[0]` seconds round and carrying four parts of the swing, the second
+ * shorter and out of step with it, carrying the fifth. Its quick movements (a gust, a lap, the
+ * patter) ride on top, as before.
+ */
+export const EBB: Record<NoiseLayer, { floor: number; periods: readonly [number, number] }> = {
+  rain: { floor: 0.4, periods: [71, 29] },
+  roof: { floor: 0.4, periods: [83, 31] },
+  // The wind gusted already: its ebb only brings a calmer minute now and then.
+  wind: { floor: 0.5, periods: [97, 41] },
+  water: { floor: 0.4, periods: [67, 26] },
+  murmur: { floor: 0.35, periods: [89, 37] },
+  hum: { floor: 0.5, periods: [113, 47] },
+};
+
+/** Where an ebb sits, and how far each of its two waves moves it either side, from its row. */
+export function ebbOf(layer: NoiseLayer): { middle: number; long: number; short: number } {
+  const { floor } = EBB[layer];
+  const swing = (1 - floor) / 2;
+  return { middle: (1 + floor) / 2, long: swing * 0.8, short: swing * 0.2 };
+}
+
 /**
  * A layer of noise, made once when it starts: the noise through its filters, swelling and
  * moving on slow oscillators of its own, into `out`. Nothing in it is touched again until it
  * stops: the oscillators do all the moving.
  */
-export function noiseLayer(
-  mixer: Mixer,
-  layer: Exclude<Layer, 'crickets'>,
-  out: GainNode,
-): () => void {
+export function noiseLayer(mixer: Mixer, layer: NoiseLayer, out: GainNode): () => void {
   const ctx = mixer.ctx;
   const sources: AudioScheduledSourceNode[] = [];
   const noise = (from: number) => {
@@ -268,7 +403,11 @@ export function noiseLayer(
     sources.push(o);
   };
   const body = level(LAYER_GAIN[layer]);
-  body.connect(out);
+  const ebb = ebbOf(layer);
+  const ebbing = level(ebb.middle);
+  sway(ebbing.gain, 1 / EBB[layer].periods[0], ebb.long);
+  sway(ebbing.gain, 1 / EBB[layer].periods[1], ebb.short);
+  body.connect(ebbing).connect(out);
   switch (layer) {
     case 'rain': {
       // A steady hiss, with a brighter patter over it coming and going.
@@ -354,5 +493,6 @@ export function noiseLayer(
       }
     }
     body.disconnect();
+    ebbing.disconnect();
   };
 }

@@ -1,9 +1,11 @@
 import {
-  CRICKET_SONGS,
+  chirpInto,
+  chorus,
   FOOTSTEPS,
   noiseLayer,
   TICK,
   type Bed,
+  type Chirp,
   type Ground,
   type Layer,
 } from './ambience';
@@ -40,6 +42,15 @@ interface Playing {
   sources: Set<AudioScheduledSourceNode>;
 }
 
+/** The crickets singing (1.1's H2): their chorus, the next chirp of it, and when it began. */
+interface Singing {
+  chirps: Generator<Chirp, never>;
+  next: Chirp;
+  start: number;
+  out: GainNode;
+  sources: Set<AudioScheduledSourceNode>;
+}
+
 /** A bed of ambience playing: its fader on the ambience bus, and how to stop it. */
 interface Bedded {
   fader: GainNode;
@@ -70,8 +81,8 @@ export class SoundBoard {
   private mixer: Mixer | null = null;
   private music: Playing | null = null;
   private record: Playing | null = null;
-  /** The ambience's looping tunes (the crickets). */
-  private loops: Playing[] = [];
+  /** The crickets' chorus, while they sing (one, or two for a moment as one fades under the next). */
+  private choruses: Singing[] = [];
   private timer: ReturnType<typeof setInterval> | null = null;
   private musicKey: MusicKey | null = null;
   private settings: SoundSettings;
@@ -323,8 +334,12 @@ export class SoundBoard {
     setTimeout(() => playing.fader?.disconnect(), FADE_S * 1000 + 200);
   }
 
-  private begin(tune: Tune, bus: AudioNode, loop: boolean): Playing {
+  private wake(): void {
     if (!this.timer) this.timer = setInterval(() => this.schedule(), TICK_MS);
+  }
+
+  private begin(tune: Tune, bus: AudioNode, loop: boolean): Playing {
+    this.wake();
     return {
       tune,
       events: eventsOf(tune),
@@ -343,7 +358,14 @@ export class SoundBoard {
     const ctx = this.running();
     if (!ctx || !this.mixer) return;
     const horizon = ctx.currentTime + LOOKAHEAD_S;
-    for (const playing of [this.music, this.record, ...this.loops]) {
+    for (const singing of this.choruses) {
+      while (singing.start + singing.next.at <= horizon) {
+        const at = singing.start + singing.next.at;
+        chirpInto(this.mixer, singing.next, at, singing.out, singing.sources);
+        singing.next = singing.chirps.next().value;
+      }
+    }
+    for (const playing of [this.music, this.record]) {
       if (!playing) continue;
       while (playing.at < playing.events.length) {
         const e = playing.events[playing.at]!;
@@ -359,7 +381,7 @@ export class SoundBoard {
       this.record = null;
       this.startMusic();
     }
-    if (!this.music && !this.record && this.loops.length === 0 && this.timer) {
+    if (!this.music && !this.record && this.choruses.length === 0 && this.timer) {
       clearInterval(this.timer);
       this.timer = null;
     }
@@ -419,14 +441,25 @@ export class SoundBoard {
     }
   }
 
-  /** The crickets: each one's song looping into `fader`, until stopped. */
+  /**
+   * The crickets (1.1's H2): their chorus sung into `fader` chirp by chirp, until stopped, dealt
+   * afresh from the clock each time they start, so no two nights' are the same.
+   */
   private crickets(fader: GainNode): () => void {
-    const songs = CRICKET_SONGS.map((tune) => this.begin(tune, fader, true));
-    this.loops.push(...songs);
+    const chirps = chorus(Date.now() % 2 ** 31);
+    const singing: Singing = {
+      chirps,
+      next: chirps.next().value,
+      start: this.ctx!.currentTime + 0.1,
+      out: fader,
+      sources: new Set(),
+    };
+    this.choruses.push(singing);
+    this.wake();
     this.schedule();
     return () => {
-      for (const song of songs) stopAll(song.sources);
-      this.loops = this.loops.filter((l) => !songs.includes(l));
+      stopAll(singing.sources);
+      this.choruses = this.choruses.filter((s) => s !== singing);
     };
   }
 }
