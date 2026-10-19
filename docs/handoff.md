@@ -56,6 +56,22 @@ four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&pag
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
+**W2 in progress** (`claude/w2-rooms`, a draft PR into `v1.1-dev`; decision 341; **save v55 in
+its last commit only**, after merging `origin/v1.1-dev`). Done and pushed: her rooms are a
+keeper of their own, `Rooms` (`src/world/Rooms.ts`: each room's pieces, what they show and what
+stands on what, walls, floor, size, `here`, building and growing, the decorating moves; it is
+`Decorable`, and `Decorator` and `HomeZone` use `home.rooms`), and `Home` keeps the chest's two
+lists and the papers and floors she owns, reading its rooms through `Rooms` for everything that
+read it before; then a planter's bed knows its room (`Plot.room`, `SavedBed.room`,
+`SavedSprinkler.room`; the farm keeps a bed at home by `bed:home:<room>:<tx>,<ty>`, `bedKey`,
+the harvest's seed, unchanged; a plot at home with no room is the room she's in, a saved one the
+front room's), and the front room's refusal is lifted. Next, in order: `npm run perf` before and
+after (two runs each, alternating), the docs (architecture's keepers and "Where it hurts" 10 and
+11, `CLAUDE.md`'s "Her home", decision 341, the plan's status line), then merge
+`origin/v1.1-dev`, the bump commit (`SAVE_VERSION` 55, step 54 writing `room: 'main'` on every
+bed and sprinkler at home, `isSaveState` checking a `room` is a string where there is one, a
+migration test and one from the 1.0 fixture), the suite and smoke, push, CI, merge.
+
 **W1 landed (PR #206, decision 340; no save change). Next: W2.** Arriving at a prop is a
 table by prop id (`world/arrivals.ts`, `PropArrivals`): each area returns its rows as `arrivals`
 beside its services (`making`, `passive`, `festivals`, `catching`, `homeServices`), the
