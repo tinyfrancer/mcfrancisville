@@ -133,6 +133,14 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   tiles, inside a kerb wherever they stop, and a darker ring of setts round the well in courses
   that run round it. A paving laid like this is drawn for where its tile sits in its repeat, and
   takes moss in its joints in spring and summer and frost in winter.
+- **A wood's edge steps in and out** (1.1's A2): round a place in the woods, trees stand in its
+  hedge and a tile inside it, never a whole side of hedge with a row of trees behind it, and a
+  rock or a stump sits in a gap here and there. Among them stand the edge's own trees, a tall
+  thin poplar, a leaning one and an old broken one (`src/sprites/treeForms.ts`), so the edge reads
+  as a wood and not a wall of one round crown.
+- **Flower beds in a garden have shapes of their own** (1.1's A2): the castle garden's milkweed
+  is a cross, a corner, a long ribbon and a horseshoe, laid in the map as tiles; a bed rounds off
+  wherever it ends (`src/sprites/flowerBeds.ts`), so a shape is just where its tiles are.
 - **A new place has a legend of its own** (`FAIR_LEGEND`, decision 200; Boo Acres'
   `FARM_LEGEND`, 0.3's F1) for its props, rather than taking more of the town's map characters.
 - **A farm is the kit in work clothes** (Boo Acres, `src/sprites/farm.ts`): the farmhouse, the

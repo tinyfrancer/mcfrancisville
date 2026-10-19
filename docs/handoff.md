@@ -94,6 +94,17 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
+**A2 in progress** (branch `claude/a2-woods-edges`, decision 351 to come). Done and pushed: three
+more tree forms in `sprites/treeForms.ts` (a poplar, a leaning tree, a broken one; the tree's
+forms dealt from nine, the broken one's heartwood `x` snowed in winter, `BREAK_SNOW`); the
+woods' edges (Whisperwood, Lantern Shore, the castle hill: trees in the hedge and stepping in,
+a rock or stump in a gap; held by `tests/data/maps.test.ts`'s "the places' edges"); the lawns
+(the clearing's middle, the fairground's south-east); the castle garden's milkweed beds as a
+cross, a corner, a ribbon and a horseshoe; the noticeboard's pumpkin a snowball in winter
+(`RESHAPED`, `noticeboardLook(open, poster, winter)`). W1's snapshots re-taken for exactly the
+tiles changed. Next: the season sprites and smoke's pictures looked at, `npm run perf`, the docs
+(decision 351, the art notes, `CLAUDE.md`, the plan's status line), then ready and merge.
+
 **A1 landed (PR #209, decision 350; no save change). Next: A2.** The square is flagstones
 (`flagstones`, `_` in the map: a 10×9 rectangle, cols 15–24, rows 18–26, a tile narrower each
 side than the cobbles were, its four lanterns on the lawn at its corners), the well on setts
