@@ -4,7 +4,8 @@
  * busy, like their letters in `mystery.ts`. Oldest first, and only ever added to: the last row is
  * the version on her phone, and a release to `main` adds its row (or finishes the newest one).
  * A row her phone never saw may be folded into the next one (1.0 holds 0.6 to 0.9, decision 324),
- * so she reads one card; a row she has seen is never changed.
+ * so she reads one card; a row she has seen is never changed (but for L5's emoji, put in words,
+ * decision 295).
  */
 export interface PatchNotes {
   /** How the version is named on the card: "0.2". Unique, and never reused. */
@@ -138,28 +139,31 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.5',
     lines: [
-      'Finds fly to you now with bubbles and confetti, and you turn to things, crouch, tip ' +
-        'your can, wave and hold up what you find. You also blink. We checked.',
+      'Whatever you find flies to you now, with confetti for a finished shelf, and little ' +
+        'bubbles pop up over you and the neighbours. Gifts they love show hearts.',
+      'You turn to whatever you walk up to now, crouch for a stone, tip your can, wave hello ' +
+        'and hold up what you find. You also blink. We checked.',
       'The light is redone: sunny cloud shadows by day, soft glowing lamps at night, silver under a full moon, puddles in the rain. Nights are best. I checked.',
-      'The neighbours stroll, wave, chat and do their jobs, and the town moves: the fountain splashes, the wheel turns, doors open, crows fly over and leaves fall.',
-      'The ground is new: grass in sun and shade, tracks, gravel, meadows, long grass, wiggly banks, castle flower beds, froggier frogs, pines, birches and bare trees.',
-      'The town turns with the seasons: blossom in spring, deep green summers, leaves piling up in autumn and snow all winter. Somebody skates on the frozen pond.',
+      "The neighbours aren't statues now: they stroll, breathe, blink, wave hello, chat in " +
+        'pairs, sit on benches and do their jobs. Maude floats properly too.',
+      'The town moves on its own: the fountain splashes, the big wheel turns, candles ' +
+        'flicker, doors open for you, crows and bats fly over and leaves fall in autumn.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },
   {
     version: '1.0',
     lines: [
-      'Your neighbours remember what you gave, wore and grew, ask you things, keep your answers ' +
-        'and tell you their stories. And I have said hello, in person!',
+      'The ground is all new, and the town turns with the seasons: blossom in spring, green ' +
+        'summers, leaves piling up in autumn and snow all winter. Somebody skates!',
+      'Your neighbours remember what you gave, wore and grew, ask you things, keep your ' +
+        'answers, and their faces show how they feel. And I have said hello, in person!',
       "Cody is married to you (he asked me to type it in bold; I can't) and round most " +
         'evenings to ask how your day was. Birthdays are parties now!',
-      'Everyone does their jobs where you can see, and their faces show how they feel. Give ' +
-        'someone a thing they love and watch. I went pink. It shows.',
-      "A new town gets Cody's list for its first day, Today says what's waiting, the weeks " +
-        'have surprises, and the noticeboard has things to build!',
-      'Fish come in sizes, the fair wants a well-timed tap, pets grow fond enough to help and ' +
-        'learn a trick, and your town can float up to the cloud.',
+      "Today says what's waiting, the weeks bring surprises (a meteor shower, if you're " +
+        'lucky), and the noticeboard has things for the whole town to build!',
+      'Fish come in sizes, the fair wants a well-timed tap, and pets grow fond enough to help ' +
+        'on walks and learn a trick. Every button has a little drawing now.',
     ],
     ps: 'P.S. A big one, so I typed it on my best paper. The W still sticks. It always will.',
   },
