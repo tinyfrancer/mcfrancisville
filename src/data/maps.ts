@@ -252,6 +252,13 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   herGreenhouse: { w: 3, h: 1 },
 };
 
+/**
+ * The characters every place shares (each place's own legend spreads it). It's nearly full: about
+ * a dozen are left (1.1's A1 counted `( ) < > ? \ ] { }` and the backtick), so a prop that stands
+ * in one place only goes in that place's own legend, as the fairground's (`FAIR_LEGEND`) and Boo
+ * Acres' (`FARM_LEGEND`) do, never in a new character here (1.1's W3, "Where it hurts" 15). A
+ * character here is for something more than one place stands.
+ */
 export const LEGEND: Record<string, LegendEntry> = {
   '#': { tile: 'hedge', solid: true },
   '.': { tile: 'grass' },
