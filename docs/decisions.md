@@ -7738,3 +7738,62 @@ empty); putting everything she holds down at the door (a seed in hand is how she
 planter); hiding a held tool in the renderer (a rule, decision 9); asking only when the first stage
 stands (things move at Start); a right padding on the quick bar's strip (it moves the end, not the
 cut at rest); leaving the pet sheet up with the trick behind it.
+
+## 327. 1.0.1, the art: snow lanterns in winter, a tension bar that reads at night, feelings on the sheets' busts, Florence and Gary redrawn, and a noticeboard that shows what's up (2026-10-18, 1.0.1's X2)
+
+_Session X2 of the fixes after 1.0, beside X1 (decision 325), from "Where it hurts" 4 and 8 and
+the art notes. No save change (still v54). Personal touches parked (decision 177): every look and
+word is the warmest default; nothing was asked._
+
+- **The jack-o'-lanterns are snow lanterns in winter, and carved pumpkins the rest of the year.**
+  They're map props, so in January they sat in the snow. L4's `seasonLook` takes another shape for
+  a prop through a season now, form for form (`RESHAPED` in `sprites/seasons.ts`): in winter each
+  is a snow lantern (`SNOW_LANTERN_FORMS` in `sprites/townProps.ts`), snowballs packed into a
+  pumpkin's three lobes, a snowball for a stem and a sprig of holly, carved with the same face it
+  wears the rest of the year, its face in the same keys so it's candlelit and flickers after dark
+  as before. Autumn is the town as it always was (decision 294), so October's carved faces are
+  untouched; spring and summer keep them too, because McFrancisVille is a Halloween town all year
+  (the brief's Nightmare Before Christmas) and a pumpkin on a green lawn doesn't look out of place
+  the way one in the snow does. It's all drawing, chosen by the view from the day as the other
+  seasonal looks are: the props, the critters that live by the pumpkins, the lamplight pools and
+  the flicker stay as they were. `OutdoorView.turn` hands the new shape to the flicker too.
+- **The tension bar is two tiles wide and lit at its rim.** 64 world pixels by 12 (was 44 by 10),
+  so it reads at Close; a light rim (`ghost`) outside its ink frame, so its edge holds over the
+  night's water as over the day's; a dusky track; the window a light green with a dark edge at each
+  end and its middle brighter still (was a dark green on a near-black track). It's drawn over the
+  night as before. `reelBarAt` (`render/fishing.ts`) puts it over her head, or under her feet when
+  her float is up there (she fishes facing up the screen), never over her or the float, and inside
+  the view at its edge; `tests/render/fishing.test.ts` holds it for a cast each way.
+- **The sheets' busts have a feeling**, each from a rule in `systems/moods.ts` with the faces the
+  world already has (decision 296): a neighbour's page by how close they are
+  (`closenessFeeling`, `BAND_MOODS`: as usual to a friend, glad from close, Cody always); Cody's
+  greeting by his line's own words, or else a married man's warmth (`greetingFeeling`, a `feel` on
+  the `GreetingCard`); and a note's face on the noticeboard by its words ("…for a bouquet!!!"),
+  glad once she has answered it (`noteFeeling`; `drawPortrait` takes a mood as `drawBust` does).
+  The corkboard's suspects, the fortune teller at her table and Cody on the first day's list stay
+  as they are: nothing they show says how they feel.
+- **Florence on her back and Gary's front, redrawn.** Florence halfway through rolling over is
+  flat on her back, her pale tummy up, her front paws flopped over at the wrist with their pink
+  beans showing, a back paw poking out of her blanket, her head upside down with her ears to the
+  floor (were four straight legs like fingers and a head that didn't read). Gary facing her has his
+  round face in front of his shell, a smile and pink cheeks, coils wound round the shell, and his
+  stalks leaning out past it with an eye on each (his eyes sat on the shell and his stalks were lost
+  in it; the frame is 22×24 now, drawn from its foot as before).
+- **The noticeboard shows what's pinned on it** (`noticeboardLook` in `sprites/clutter.ts`):
+  Cobweb Corner's wanted list always, a note in each of three slots for the window's notes she
+  hasn't answered, a pin and a torn corner where one has come down, and an orange poster with a
+  pale star while the day has an event posted (`postersOn`). The view reads `notices()` and
+  `posters()` off the world a second at a time of its clock and picks the look, as it does the
+  mailbox's flag; the world names no art. In October the festival's evenings are posted every
+  day, so the poster is nearly always up then: that's the board telling the truth.
+
+**Rejected:** `DECOR` for the jack-o'-lanterns, October only (it takes them off the map, and the
+pumpkins' critters, lamplight and flicker with them, for a change that's only a look); plain
+pumpkins in September and November (L4 keeps autumn as the town always was, and the month's faces
+are the festival's run-up and its afterglow); snowmen (a new shape with no face of hers to keep,
+and nothing to light); a smaller rim or a darker window over a lighter track (the window must be
+the brightest thing in the bar, as the target is); moving the bar into the HUD (it's the world's
+moment, over her, as the "!" is); a feeling for every bust in the HUD (only where something says
+how they feel); a poster for each event (one bright sheet says "something's on", the sheet says
+what); counting answered notes on the board (a note she's answered is taken down, as the sheet
+says).

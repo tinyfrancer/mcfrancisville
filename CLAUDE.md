@@ -334,8 +334,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
   (`seasonPiece` for the ground, `seasonLook` for a prop, baked under `<key>@<season>`), the ground
   re-baked by `Ground.look`, the props by `OutdoorView.turn`; in winter snow lies on the lawn, the
-  tracks and the roofs and the rain falls as snow, and Nessa skates on the frozen pond
-  (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
+  tracks and the roofs and the rain falls as snow, the jack-o'-lanterns are snow lanterns (a
+  prop's other shape for a season is `RESHAPED`, 1.0.1's X2, decision 327), and Nessa skates on
+  the frozen pond (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are
@@ -689,7 +690,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`birthdaysOn`, `CalendarApi.birthdays`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
-  `src/hud/NoticeSheet.ts` (`NoticeApi`). **Today** (V1's R2, decision 312) is the calendar's
+  `src/hud/NoticeSheet.ts` (`NoticeApi`); the board's art shows what's up, picked by the view
+  (`noticeboardLook` in `src/sprites/clutter.ts`, decision 327). **Today** (V1's R2, decision 312) is the calendar's
   first tab: `todayLines` in `src/systems/today.ts` worked out each time from `TodayFacts`, which
   `src/world/areas/upNow.ts` reads off the services (`world.upNow`), its words in
   `src/hud/todayWords.ts`, a tap on a line walking or flying her there (`src/wiring/todayGo.ts`),

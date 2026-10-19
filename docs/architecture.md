@@ -910,10 +910,10 @@ V1's weight on it.
    size) were left for a pass of their own: a `Build` on a figure row picking a body grid in
    `sprites/doll.ts`, with every cut's regions redrawn for it, would touch most of `doll.ts`'s 3,000
    lines and the tailoring, so it wants a session that does nothing else.
-4. **Faces aren't everywhere yet.** The noticeboard's 48-pixel faces (`drawPortrait`) and the
-   greeting's and the neighbours sheet's busts are still neutral; `drawBust`'s `mood` takes a
-   `Feeling` when a caller wants one (L7). The noticeboard's own art is the same whatever is
-   pinned (an L6 note, still true).
+4. ~~**Faces aren't everywhere yet.**~~ Done in 1.0.1 (X2, decision 327): the neighbours sheet's
+   busts by closeness, Cody's greeting by his line and the noticeboard's faces by their notes, each
+   a rule in `systems/moods.ts`; and the noticeboard's art shows what's pinned up
+   (`noticeboardLook`, picked by the view).
 5. **Arriving at a prop is a chain of `if`s.** `World.arriveOn` asks the prop's id in turn: the
    porch pots, the candy tree, a sapling, the pumpkin patch, the bandstand (R4), the honesty stall,
    a goose, a mound (today's fossil first, then the buried keys), a way out, then gathering and
@@ -927,12 +927,14 @@ V1's weight on it.
 7. ~~**A project in her yard moves her things without asking.**~~ Done in 1.0.1 (X1, decision
    325): Start asks first with a card naming what goes in the chest (`Projects.inTheWay`,
    `Yard.wouldMove`), Not yet or Go ahead.
-8. **The reel and the tricks, R6's rough edges.** ~~The tension bar doesn't slow under reduced
-   motion~~ (done in 1.0.1, decision 325: `WorldOptions.slow`, `reelOf`'s `slow`). Its window's
-   dark green reads less well over the night's water than the day's. ~~A trick asked for on the
-   pet sheet can happen behind the sheet~~ (done in 1.0.1: the sheet closes first, the line a
-   toast). Florence's on-her-back frame and Gary's front are serviceable rather than lovely. V1's
-   review took the "!" off the hooked moment, which sat over the bar's right end.
+8. ~~**The reel and the tricks, R6's rough edges.**~~ Done in 1.0.1. ~~The tension bar doesn't
+   slow under reduced motion~~ (decision 325: `WorldOptions.slow`, `reelOf`'s `slow`). ~~Its
+   window's dark green reads less well over the night's water~~ (decision 327: two tiles wide, a
+   light rim, a light window, placed clear of her and the float by `reelBarAt`). ~~A trick asked
+   for on the pet sheet can happen behind the sheet~~ (decision 325: the sheet closes first, the
+   line a toast). ~~Florence's on-her-back frame and Gary's front are serviceable rather than
+   lovely~~ (decision 327: redrawn). V1's review took the "!" off the hooked moment, which sat over
+   the bar's right end.
 9. ~~**October has no rare events.**~~ Done in 1.0.1 (X1, decision 325): a day's rare event may
    come on a festival's ordinary days (not its first, its finale or a day with one of its beats),
    about two an October; the wandering stall still keeps out of festivals. The heralds of the
