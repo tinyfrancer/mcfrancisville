@@ -894,16 +894,21 @@ V1's weight on it.
    same file as `api/save.js` with JSDoc types. And no frame has been timed on her iPhone: `?perf`
    (production too, `wiring/perf.ts`) is waiting, with a table under "On her iPhone" above. Both
    are 1.0.x's first jobs.
-2. **The suite and smoke are slow, and smoke is one file.** 2,568 tests in 216 files take about
+2. **The suite and smoke are slow, ~~and smoke is one file~~.** 2,568 tests in 216 files take about
    340 s in the container (90 s at 0.3's V1, 24 s at phase K), most of it building whole worlds
-   through `harness()` and the simulated years of the rarity and weeks tests; smoke is 7,800 lines
-   in one file, 622 checks, about twenty minutes, and a session's suite-then-smoke before a push
-   is half an hour. Services are made from plain parts and can be tested alone; a slow file should
-   share one world across cases that don't touch each other; smoke wants splitting into a file per
-   area (`scripts/smoke/*.mjs`) with the runner and its helpers in one, so a session can run its
-   own area and the whole on the last push. The gallery has grown past what CI's Chromium will
-   capture in one full-page screenshot (L7, decision 296), and smoke's `gallery` falls back to its
-   top: the next catalogue rows should page it rather than grow it.
+   through `harness()` and the simulated years of the rarity and weeks tests; smoke is 622 checks
+   in about twenty minutes, and a session's suite-then-smoke before a push is half an hour.
+   Services are made from plain parts and can be tested alone; a slow file should share one world
+   across cases that don't touch each other (1.1's T2). ~~Smoke wants splitting into a file per
+   area with the runner and its helpers in one, and the gallery paging~~: done in 1.1's T1
+   (decision 335). The 7,800 lines of `scripts/smoke.mjs` are `scripts/smoke/`: `run.mjs` (the
+   browser, the whole run's `ORDER`, the arguments, the summary), `lib.mjs` (the helpers and the
+   shared page) and nineteen area files of 83 sections, 622 checks before and after;
+   `npm run smoke -- town fair` runs those areas (after `boot`), a section's name runs it alone,
+   `-- --list` lists them. Run alone, an area takes from under a minute (`gallery`, `look`) to
+   about four (`neighbours`). The gallery is paged (`?gallery&page=n`, 50 rows a page, 66 pages,
+   the tallest about 18,000 CSS pixels against the whole's 438,914), and smoke pictures every page
+   whole instead of the whole's top.
 3. **One body under every look.** Every clothing cut, action pose (E2), working pose (E3, P4) and
    face (L7) is painted onto the one 32×48 body, so every neighbour below the neck is her
    silhouette in other colours. The plan's two or three body builds (decision 79 still holds the

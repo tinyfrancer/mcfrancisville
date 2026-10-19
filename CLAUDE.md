@@ -46,11 +46,15 @@ npm run format:check # what CI runs
 npm run icons        # regenerate public/icons/ from the pixel grid in scripts/make-icons.mjs
 npm run sprite       # render sprites to PNGs in .sprites/ (`-- 'prop:*' --zoom=6`, `--list`, `--sheet`)
 npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs `npm run dev` running
+npm run smoke -- town fair # only those areas (files in scripts/smoke/); `-- --list` names them
 npm run smoke:offline # the first launch with no signal; needs `npm run build` and `npm run preview`
 ```
 
 In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
-`playwright install` there.
+`playwright install` there. Smoke is a file per area in `scripts/smoke/` (`run.mjs` the runner and
+the whole run's order, `lib.mjs` the helpers; T1, decision 335): run your own area as you work, and
+the whole before each push, as below; a new section goes in its area's list and in
+`run.mjs`'s `ORDER`.
 
 CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage, build and browser smoke in one
 job on Node 22, and typecheck, tests and build on Node 25, on every push to a PR, draft or ready
@@ -184,7 +188,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   row and a map legend character. Big art is drawn with `Sketch` (`src/sprites/sketch.ts`: shapes,
   lit spheres, bevels, outlines from a mask) and `ramp` in `palette.ts`. Every sprite is a row in
   `src/sprites/catalogue.ts` (decision 87), which `?gallery` shows, in production too (decision
-  21), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
+  21), a page of 50 at a time with `&page=n` (decision 335), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
   `npm run sprite -- 'place:*'` draws each place outdoors whole (`src/render/overview.ts`), to
   judge a layout.
   What moves on its own (V1's E5, decision 284) is `frames` on a prop's, piece's or fixture's
@@ -788,7 +792,7 @@ imports are held by `tests/architecture.test.ts`, and the economy's shape (what 
 against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Lived-in saves from the releases on her phone are
 fixtures in `tests/persistence/fixtures/`, held by `tests/persistence/livedIn.test.ts`: nothing in
 them is lost (decision 210); a release that changes the save's shape adds its own. Smoke
-(`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
+(`scripts/smoke/`, a file per area) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.
 

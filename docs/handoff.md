@@ -23,7 +23,15 @@ open (decision 330).
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
-T1 (`claude/t1-smoke-split`): not started.
+**T1 in progress** (`claude/t1-smoke-split`, decision 335, draft PR into `v1.1-dev`). Done, a
+commit each: `scripts/smoke.mjs` split into `scripts/smoke/` (`run.mjs`, `lib.mjs` and nineteen
+area files, every declaration moved whole, the run's order kept in `run.mjs`'s `ORDER`;
+`npm run smoke -- <area>…`, `-- --list`); Rob Boo's section's comment put back above it; the
+gallery paged (`?gallery&page=n`, 50 rows, `pageOf` in `sprites/catalogue.ts`, `galleryPage` in
+`config/flags.ts`) and smoke picturing each page. The whole run was 622/622 before the split.
+Next: the docs (CLAUDE.md, architecture's "Where it hurts" 2, decision 335), each area timed
+alone, then merge `origin/v1.1-dev` (H2 may have added a smoke section at the end of the old
+`scripts/smoke.mjs`: move it into `scripts/smoke/sound.mjs` and `ORDER`), the suite, land.
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
@@ -686,7 +694,7 @@ its season), so `wary` and a bite window by rarity apply to them as to any.
   the game; until then Settings says "The cloud isn't set up yet" and nothing else changes.
 - The QR holds the code as text (the camera shows it to copy); restoring is typed or pasted on
   the new phone. The backup code stays and is still the way for a phone with no signal.
-- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke.mjs`) on the
+- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke/lib.mjs`, since T1) on the
   main context and the `cloud` section's own; other contexts reach the dev server, which serves
   `api/save.ts` as JavaScript, read as out of reach, so nothing is ever PUT there.
 

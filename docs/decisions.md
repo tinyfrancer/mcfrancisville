@@ -7898,3 +7898,57 @@ Personal touches parked (decision 177): nothing was asked._
 - **Her notes:** a `1.1` `NOTES` row with three lines (the switch, Play on silent, the Ambience
   switch) and a P.S.; H2 adds the crickets as a fourth line. Smoke's sound section reads the
   four switches (its one check changed in place); `smoke:offline` never read the Sound tab.
+
+## 335. Smoke split by area, run whole in its old order, and the gallery paged (2026-10-19, 1.1's T1)
+
+_Session T1 of the 1.1 plan, lane T (decision 328). No save change; nothing she sees changes but
+the gallery's foot. Personal touches parked (decision 177): nothing was asked._
+
+- **`scripts/smoke.mjs` (7,800 lines) is `scripts/smoke/`**: `run.mjs` (the browser launch with
+  `CHROMIUM_PATH`, the arguments, the whole run's order, the summary and exit code), `lib.mjs`
+  (the constants, `check` and its results, the shared page, the cranked waits, the real taps,
+  the sheet frame, the faked cloud) and a file per area exporting its `sections`: `boot`,
+  `firstDay`, `town`, `look`, `hud`, `feel`, `sound`, `cloud`, `projects`, `farm`, `shops`,
+  `home`, `neighbours`, `critters`, `pets`, `fair`, `places`, `seasons`, `gallery`. **Every
+  top-level declaration was moved whole**, checked word for word (whitespace aside) by a script
+  in the session, the only edits `export`, `setPage(p)` for `page = p` (an imported binding
+  can't be assigned; `firstDay` and `cloud` swap in another phone's page) and one more `../` on
+  the type imports. Section names are unchanged, so `.smoke/*.png` are too, but the gallery's.
+  622 checks before and after, all passing.
+- **The grouping is by what a section tests, not by where it sat in the file**: the old order
+  interleaves areas (a farm section after the fair, a home section after the shops). A helper
+  used by one area lives in that area's file (`tapCard` in `farm.mjs`, `toTheFair` in
+  `seasons.mjs`), one used by two or more in `lib.mjs`. `look` (the closet and salon) and `feel`
+  (V1's lane E: effects, verbs, what moves, taps) are areas of their own because they fit none
+  of the others; `notes` is in `boot` (it's part of opening the game), `safe` in `cloud`.
+- **A whole run keeps the old order** (`ORDER` in `run.mjs`, the old `SECTIONS` list's): the
+  sections share one page and one town, and a section may lean on what one before it left (her
+  Candy, what's in her chest, the day). **Rejected:** running area by area in file order (it
+  would change what each section starts from, so the 622 would no longer be the same checks);
+  the order in each area file alone (a whole run needs one order across files). So a new section
+  goes in its area's list and in `ORDER`; `run.mjs` refuses to start if the two disagree.
+- **`npm run smoke -- town fair`** runs those areas' sections in `ORDER`, after `boot` as always;
+  a name that is no area's but a section's runs that section (`-- edges`); `--section=a,b` still
+  names sections only (so `--section=home` is the one section where `home` is the area);
+  `-- --list` lists the areas and their sections without starting a browser. Each section is
+  announced (`--- farm: plots`) so a log says where a check came from. **The old path is gone**,
+  not a shim: `package.json` is how it's run, and every live mention is updated.
+- **`smoke:offline` stays its own** (`scripts/smoke-offline.mjs`): it drives a production
+  preview with a service worker and no signal, against another URL, and shares only `check` and
+  the phone's size, a few lines each, its failures annotated as its own; CI runs it before the
+  dev server is up. CI is unchanged: `npm run smoke` with no names runs every area
+  in the one job.
+- **The gallery is paged** (`?gallery&page=n`): a page is `GALLERY_PAGE_ROWS` (50) of the
+  catalogue's rows (`pageOf` in `src/sprites/catalogue.ts`; `galleryPage` in
+  `src/config/flags.ts` reads the page, a whole number from 1), with "Page n of m" and a Next
+  link at its foot; `?gallery` alone is still the whole catalogue. The 3,284 sprites are 66
+  pages, the tallest about 18,000 CSS pixels against the whole's 438,914, which CI's Chromium
+  wouldn't picture in one (decision 296's note). **Rejected:** 100 rows a page (pages ran to
+  36,000 pixels, as uneven as the art is: the buildings and the doll's rows are tall); pages by
+  height rather than rows (the plan asked for a fixed number, and a page then moves when a
+  sprite above it is redrawn); `?gallery=n` (the plan's `&page=` reads as what it is). Smoke's
+  `gallery` counts the whole, then follows the Next links from page 1, picturing each whole as
+  `.smoke/gallery-<n>.png` (the fallback to the whole's top is gone); its one check now also
+  holds the pages' sprites to the whole's count and every page pictured.
+- Rob Boo's section's comment, which had stood above `jobs` since P4 put that one in, is above
+  `robBoo` again.
