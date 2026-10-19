@@ -109,9 +109,7 @@ export class Rooms implements Decorable {
       if (piece.on && refusal(state.shape, state.pieces, piece, null) !== null) delete piece.on;
       // What was on show stays on show, or waits in the chest if it can't, never lost (0.3's H2).
       const shows = p.shows !== undefined && p.shows in ITEMS ? p.shows : undefined;
-      const fits =
-        refusal(state.shape, state.pieces, piece, null) === null &&
-        refusesIn(state.id, p.id) === null;
+      const fits = refusal(state.shape, state.pieces, piece, null) === null;
       if (shows && fits && isDisplayPiece(p.id) && takes(p.id, shows)) piece.shows = shows;
       else if (shows) this.chest.keep(shows, 1);
       if (fits) state.pieces.push(piece);
@@ -253,18 +251,19 @@ export class Rooms implements Decorable {
     return isOpenFloor(this.room, this.at.pieces, tx, ty);
   }
 
-  /** Why a piece can't come out in the room she's in at all (0.3's H4), or null if it can. */
-  refusesHere(id: FurnitureId): Refusal | null {
-    return refusesIn(this.at.id, id);
+  /**
+   * Why a piece can't come out in the room she's in at all: never, since 1.1's W2 gave a
+   * planter's bed its room (planters stayed in the front room before, decision 233).
+   */
+  refusesHere(): Refusal | null {
+    return null;
   }
 
   /**
    * Takes a piece out of the chest and puts it wherever it fits nearest `near`. Null, and the
-   * piece left in the chest, if she has none, it can't come out in this room, or there's no room
-   * anywhere.
+   * piece left in the chest, if she has none or there's no room anywhere.
    */
   takeOut(id: FurnitureId, near: Tile, standing: Tile | null): Placed | null {
-    if (this.refusesHere(id)) return null;
     const piece = nearestFit(this.room, this.at.pieces, id, near, standing);
     if (!piece || !this.chest.unstore(id)) return null;
     this.at.pieces.push(piece);
@@ -383,14 +382,6 @@ export class Rooms implements Decorable {
     for (const r of this.rooms.values()) if (r.id !== 'main') rooms[r.id] = room(r);
     return { rooms, here: this.at.id };
   }
-}
-
-/**
- * Why a piece can't stand in a room at all (0.3's H4): a planter is a bed, kept by the garden in
- * the front room only, so it stays there.
- */
-function refusesIn(room: RoomId, id: FurnitureId): Refusal | null {
-  return FURNITURE[id].planter && room !== 'main' ? 'frontRoom' : null;
 }
 
 /** A wallpaper or flooring she owns, or the first she owns if not. */

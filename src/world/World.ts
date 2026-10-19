@@ -287,6 +287,8 @@ export class World extends WorldParts {
   /** Walks up to a bed to do `job` there, as its pop-up offers. */
   tendBed(bed: Plot, job: BedJob): boolean {
     if (placeOf(bed) !== this.scene || !this.farm.isBed(bed) || this.decorating.state) return false;
+    // A planter's bed in another of her rooms (1.1's W2) is through a doorway, not walked up to.
+    if (bed.room && bed.room !== this.home.here) return false;
     this.garden.lookAt(null);
     this.poses.stir();
     this.recordPlayer.stop();

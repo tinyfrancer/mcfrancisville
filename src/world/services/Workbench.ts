@@ -1,3 +1,4 @@
+import { ROOMS } from '../../data/home';
 import { RECIPE_IDS, RECIPES, STARTER_RECIPES, stationOf } from '../../data/recipes';
 import { hourOf, isNight } from '../../systems/clock';
 import {
@@ -101,8 +102,14 @@ export class Workbench {
     else if ('room' in made) this.home.grow();
     else if ('newRoom' in made) {
       // Anything that stood in the doorway's way goes in the chest, a planter's crop with it.
+      const room = ROOMS[made.newRoom].through?.from ?? 'main';
       for (const p of this.home.build(made.newRoom) ?? []) {
-        this.ctx.signals.emit('moved', { piece: p.id, from: { tx: p.tx, ty: p.ty }, to: null });
+        this.ctx.signals.emit('moved', {
+          piece: p.id,
+          room,
+          from: { tx: p.tx, ty: p.ty },
+          to: null,
+        });
       }
     } else if ('shelf' in made) this.stall.addShelf();
     else this.farm.extend();

@@ -2,19 +2,25 @@ import { CROPS } from '../data/crops';
 import type { Tile } from '../systems/pathfinding';
 import { inReach, SPRINKLER_REACH } from '../systems/beds';
 import type { Planting, Sprinkled } from '../systems/farming';
-import type { CropId, ItemId, ZoneId } from '../types/ids';
+import type { CropId, ItemId, RoomId, ZoneId } from '../types/ids';
 
 /**
  * A bed, by the place it's in and its tile there (0.2's N1). A plot with no zone is in town, where
- * every bed was before beds grew anywhere else.
+ * every bed was before beds grew anywhere else. At home it is in one of her rooms (1.1's W2): a
+ * plot there with no room is in the room she's in, as everything that reads "the room" is.
  */
 export interface Plot extends Tile {
   zone?: ZoneId;
+  room?: RoomId;
 }
 
-/** A bed she has tilled, where it is, and what's growing in it, if anything. */
+/**
+ * A bed she has tilled, where it is, and what's growing in it, if anything. A bed at home names
+ * its room (save v55); one saved before then is the front room's, where every planter stood.
+ */
 export interface SavedBed {
   zone: ZoneId;
+  room?: RoomId;
   tx: number;
   ty: number;
   planting: Planting | null;
@@ -23,6 +29,7 @@ export interface SavedBed {
 /** A sprinkler in a bed's corner (phase P), and the day key it has watered from. */
 export interface SavedSprinkler {
   zone: ZoneId;
+  room?: RoomId;
   tx: number;
   ty: number;
   since: string;
@@ -30,7 +37,11 @@ export interface SavedSprinkler {
 
 export const placeOf = (p: Plot): ZoneId => p.zone ?? 'town';
 
-/** A town bed's key is what it was before beds grew elsewhere, so a rose stays blue across saves. */
+/**
+ * The bed's own name, which deals its harvest (`plantingSeed`). A town bed's is what it was before
+ * beds grew elsewhere, so a rose stays blue across saves; a planter's is the same in any room
+ * (1.1's W2), so one in her front room grows as it always has. The farm keeps beds by `slotOf`.
+ */
 export const bedKey = (p: Plot) =>
   placeOf(p) === 'town' ? `bed:${p.tx},${p.ty}` : `bed:${placeOf(p)}:${p.tx},${p.ty}`;
 
@@ -43,8 +54,10 @@ export interface FarmLand {
    * Boo Acres' (0.3's F1). A tile with no zone is in town.
    */
   rows: readonly (readonly Plot[])[];
-  /** Where her planters stand at home (0.2's N1), each with one bed in it. */
-  planters: () => readonly Tile[];
+  /** Where her planters stand in a room of her home (0.2's N1), each with one bed in it. */
+  planters: (room: RoomId) => readonly Tile[];
+  /** The room of her home she's in, where a plot at home with no room is (1.1's W2). */
+  here: () => RoomId;
   /** The beds a built project has made in a place (V1's R4): her greenhouse's planters. */
   projects?: (zone: ZoneId) => readonly Tile[];
 }
@@ -57,6 +70,9 @@ export interface SavedFarm {
   /** How many of the extension rows she has built. */
   rows?: number;
 }
+
+/** A bed's place and tile as the farm keeps and saves it, with its room if it's at home. */
+type Pinned = { zone: ZoneId; room?: RoomId; tx: number; ty: number };
 
 /**
  * Her garden: which beds are tilled and what's in them, in town, beyond it and at home. It only
@@ -92,20 +108,47 @@ export class Farm {
     this.picked = new Set((saved.harvested ?? []).filter((id): id is CropId => id in CROPS));
     for (const bed of saved.beds ?? []) {
       const known = bed.planting && bed.planting.crop in CROPS ? { ...bed.planting } : null;
-      if (!this.isBed(bed)) {
+      const at = fromSave(bed);
+      if (!this.isBed(at)) {
         if (known) this.strayedSeeds.push(CROPS[known.crop].seed);
         continue;
       }
-      this.beds.set(bedKey(bed), { zone: bed.zone, tx: bed.tx, ty: bed.ty, planting: known });
+      this.beds.set(this.slotOf(at), { ...this.pinned(at), planting: known });
     }
     let strayed = 0;
-    for (const { zone, tx, ty, since } of saved.sprinklers ?? []) {
-      const key = bedKey({ zone, tx, ty });
-      if (this.isBed({ zone, tx, ty }) && !this.sprinklers.has(key)) {
-        this.sprinklers.set(key, { zone, tx, ty, since });
+    for (const sprinkler of saved.sprinklers ?? []) {
+      const at = fromSave(sprinkler);
+      const key = this.slotOf(at);
+      if (this.isBed(at) && !this.sprinklers.has(key)) {
+        this.sprinklers.set(key, { ...this.pinned(at), since: sprinkler.since });
       } else strayed++;
     }
     this.strayed = strayed;
+  }
+
+  /** Which of her rooms a bed at home is in: its own, or the one she's in (1.1's W2). */
+  private roomOf(p: Plot): RoomId {
+    return p.room ?? this.land.here();
+  }
+
+  /**
+   * Where the farm keeps a bed: by its own name, and at home by its room as well (1.1's W2), so a
+   * planter on the same tile of each room is a bed of its own.
+   */
+  private slotOf(p: Plot): string {
+    return placeOf(p) === 'home' ? `bed:home:${this.roomOf(p)}:${p.tx},${p.ty}` : bedKey(p);
+  }
+
+  private pinned(p: Plot): Pinned {
+    const zone = placeOf(p);
+    return zone === 'home'
+      ? { zone, room: this.roomOf(p), tx: p.tx, ty: p.ty }
+      : { zone, tx: p.tx, ty: p.ty };
+  }
+
+  /** The same bed with its place, and at home the room it's in, written on it, to keep hold of. */
+  pin(p: Plot): Plot {
+    return this.pinned(p);
   }
 
   isBed(p: Plot): boolean {
@@ -114,13 +157,13 @@ export class Farm {
     const at = (t: Tile) => t.tx === p.tx && t.ty === p.ty;
     if (this.builtIn(zone).some(at)) return true;
     if (this.land.projects?.(zone).some(at)) return true;
-    return zone === 'home' && this.land.planters().some(at);
+    return zone === 'home' && this.land.planters(this.roomOf(p)).some(at);
   }
 
-  /** Every bed in a place, as it stands now. */
+  /** Every bed in a place, as it stands now: at home, those in the room she's in. */
   bedsIn(zone: ZoneId): Plot[] {
     const fixed = this.land.beds[zone] ?? [];
-    const more = zone === 'home' ? this.land.planters() : this.builtIn(zone);
+    const more = zone === 'home' ? this.land.planters(this.land.here()) : this.builtIn(zone);
     const built = this.land.projects?.(zone) ?? [];
     return [...fixed, ...more, ...built].map((t) => ({ zone, tx: t.tx, ty: t.ty }));
   }
@@ -151,42 +194,42 @@ export class Farm {
   }
 
   isTilled(p: Plot): boolean {
-    return this.beds.has(bedKey(p));
+    return this.beds.has(this.slotOf(p));
   }
 
   planting(p: Plot): Planting | null {
-    return this.beds.get(bedKey(p))?.planting ?? null;
+    return this.beds.get(this.slotOf(p))?.planting ?? null;
   }
 
   till(p: Plot): void {
     if (this.isBed(p) && !this.isTilled(p)) {
-      this.beds.set(bedKey(p), { zone: placeOf(p), tx: p.tx, ty: p.ty, planting: null });
+      this.beds.set(this.slotOf(p), { ...this.pinned(p), planting: null });
     }
   }
 
   /** Puts `planting` in a tilled bed, or clears it with null. */
   set(p: Plot, planting: Planting | null): void {
-    const bed = this.beds.get(bedKey(p));
+    const bed = this.beds.get(this.slotOf(p));
     if (bed) bed.planting = planting;
   }
 
   /** A bed that has moved (a planter carried across her room): it goes with what's in it. */
   move(from: Plot, to: Plot): void {
-    const bed = this.beds.get(bedKey(from));
+    const bed = this.beds.get(this.slotOf(from));
     if (!bed) return;
-    this.beds.delete(bedKey(from));
-    this.beds.set(bedKey(to), { ...bed, zone: placeOf(to), tx: to.tx, ty: to.ty });
+    this.beds.delete(this.slotOf(from));
+    this.beds.set(this.slotOf(to), { ...this.pinned(to), planting: bed.planting });
   }
 
   /** A bed that's gone (a planter put away): what was growing in it, which is no longer kept. */
   uproot(p: Plot): Planting | null {
     const planting = this.planting(p);
-    this.beds.delete(bedKey(p));
+    this.beds.delete(this.slotOf(p));
     return planting;
   }
 
   hasSprinkler(p: Plot): boolean {
-    return this.sprinklers.has(bedKey(p));
+    return this.sprinklers.has(this.slotOf(p));
   }
 
   /** Every sprinkler, where it stands and since when. */
@@ -197,10 +240,10 @@ export class Farm {
   /** The day key the earliest sprinkler reaching this bed has watered it from, if any does. */
   sprinkled(p: Plot): Sprinkled {
     let from: Sprinkled = null;
+    const { zone, room } = this.pinned(p);
     for (const s of this.sprinklers.values()) {
-      if (s.zone === placeOf(p) && inReach(s, p) && (from === null || s.since < from)) {
-        from = s.since;
-      }
+      if (s.zone !== zone || s.room !== room || !inReach(s, p)) continue;
+      if (from === null || s.since < from) from = s.since;
     }
     return from;
   }
@@ -209,10 +252,11 @@ export class Farm {
   reachOf(p: Plot): Plot[] {
     const beds: Plot[] = [];
     const r = SPRINKLER_REACH;
-    const zone = placeOf(p);
+    const { zone, room } = this.pinned(p);
+    const place: Plot = room ? { zone, room, tx: 0, ty: 0 } : { zone, tx: 0, ty: 0 };
     for (let ty = p.ty - r; ty <= p.ty + r; ty++) {
       for (let tx = p.tx - r; tx <= p.tx + r; tx++) {
-        if (this.isBed({ zone, tx, ty })) beds.push({ zone, tx, ty });
+        if (this.isBed({ ...place, tx, ty })) beds.push({ ...place, tx, ty });
       }
     }
     return beds;
@@ -221,12 +265,12 @@ export class Farm {
   /** Stands a sprinkler in a bed that has none, watering from `since`. */
   fit(p: Plot, since: string): boolean {
     if (!this.isBed(p) || this.hasSprinkler(p)) return false;
-    this.sprinklers.set(bedKey(p), { zone: placeOf(p), tx: p.tx, ty: p.ty, since });
+    this.sprinklers.set(this.slotOf(p), { ...this.pinned(p), since });
     return true;
   }
 
   unfit(p: Plot): boolean {
-    return this.sprinklers.delete(bedKey(p));
+    return this.sprinklers.delete(this.slotOf(p));
   }
 
   /** Notes that she picked a crop. True the first time she ever has. */
@@ -250,4 +294,9 @@ export class Farm {
       planting: b.planting ? { ...b.planting } : null,
     }));
   }
+}
+
+/** A bed or sprinkler at home saved before beds knew their room (save v55) is the front room's. */
+function fromSave(p: Plot): Plot {
+  return placeOf(p) === 'home' && p.room === undefined ? { ...p, room: 'main' } : p;
 }

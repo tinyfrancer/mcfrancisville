@@ -50,6 +50,7 @@ import type {
   ProjectId,
   PropId,
   RecipeId,
+  RoomId,
   ShelfId,
   ShopId,
   VillagerId,
@@ -394,8 +395,11 @@ export interface Signals extends Record<string, unknown> {
   felt: { feeling: Feeling };
   /** She went from one place to another, and is standing in the new one. */
   crossed: { from: ZoneId; to: ZoneId };
-  /** A piece of furniture was moved across her room (`to`), or put away in the chest (null). */
-  moved: { piece: FurnitureId; from: Tile; to: Tile | null };
+  /**
+   * A piece of furniture was moved across one of her rooms (`to`), or put away in the chest (null);
+   * the room it was in, for a planter's bed (1.1's W2).
+   */
+  moved: { piece: FurnitureId; room: RoomId; from: Tile; to: Tile | null };
   /** She picked a crop (V1's P1), for her neighbours to remember. */
   harvested: { crop: CropId };
   /** She gave the museum a critter or a fossil (V1's P1). */

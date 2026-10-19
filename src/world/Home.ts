@@ -185,10 +185,6 @@ export class Home {
     return this.rooms.canWalk(tx, ty);
   }
 
-  refusesHere(id: FurnitureId): Refusal | null {
-    return this.rooms.refusesHere(id);
-  }
-
   takeOut(id: FurnitureId, near: Tile, standing: Tile | null): Placed | null {
     return this.rooms.takeOut(id, near, standing);
   }
