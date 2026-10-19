@@ -9,7 +9,7 @@ import { CANDY_SAPLING, CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE } from '
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
 import { PUMPKIN_LIT, SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
-import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE, noticeboardLook, signpostTo } from './clutter';
 import { SIGNPOSTS } from '../data/signposts';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type {
@@ -298,6 +298,15 @@ export function catalogue(): Entry[] {
     grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
   }
   grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
+  // The noticeboard with its notes all answered, and with the day's event up too (1.0.1).
+  for (const [open, poster] of [
+    [0, false],
+    [1, true],
+    [3, true],
+  ] as const) {
+    const look = noticeboardLook(open, poster);
+    grid(look.key, look.source, PROP_ART.noticeboard.palette);
+  }
   // The town's projects as the noticeboard shows them (V1's R4).
   for (const [id, picture] of Object.entries(PROJECT_PICTURES)) {
     grid(`project:${id}`, picture.source, picture.palette);
