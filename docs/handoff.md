@@ -1,20 +1,25 @@
 # Handoff: picking up the game cold
 
 Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
-V1's review (decision 324) for after 1.0. Read "In progress" first; "Where things stand" below it
-is the long history.
+V1's review (decision 324) for after 1.0. Read "In progress" and "After 1.0" first; "Where
+things stand" further down is the long history.
 
 ## In progress
 
-**Nothing is in progress. The V1 plan is complete, and 1.0 is the release PR (#@@REL@@, `v1-dev`
-→ `main`), opened by V1 ready and green and left for the user to merge: the release is theirs.**
-Her phone has 0.4 (2026-10-07, PR #175), which carried 0.5's sessions too, so it last showed her
-the mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one
-card, `1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed
-nothing in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures,
-the 0.3 town's and a 1.0 town played by taps (`lived-in-v53.json`).
+Nothing is in progress.
 
-**The user's two steps, after merging the release PR:**
+## After 1.0
+
+**The V1 plan is complete, and 1.0 is the release PR (#@@REL@@, `v1-dev` → `main`), opened by
+V1's review ready and green and left for the user to merge: the release is theirs.** Her phone
+has 0.4 (2026-10-07, PR #175), which carried 0.5's sessions too, so it last showed her the
+mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one card,
+`1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed nothing
+in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures, the 0.3
+town's and a 1.0 town played by taps (`lived-in-v53.json`). **Her notes leave the cloud save
+out** (decision 324): it does nothing until the store is linked, so nothing promises her it.
+
+**The user's steps, after merging the release PR:**
 
 1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
    Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
@@ -26,27 +31,31 @@ the 0.3 town's and a 1.0 town played by taps (`lived-in-v53.json`).
 2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
    town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
    readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
-   iPhone" in `docs/architecture.md`. Also worth asking her, from S1: whether the game is heard
-   with the silent switch on.
+   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 are the table just above it
+   (town at Close 32.6–32.8 ms mean at 21:30 and 22.3 at noon, 4× throttled Chromium).
+3. **Listen**: whether the game is heard with the silent switch on (S1, decision 321).
 
 **`v1-dev` ends with 1.0.** A later plan's integration branch is made from `main` after the
 release merges (as `v1-dev` was from 0.3's `main`), and added to `vercel.json`'s no-preview list
 the day it's made (decision 265). A session starting cold with nothing asked of it does nothing to
-the game and asks the user what they'd like next; 1.0.x's first candidates are "Where it hurts" 1
-and 7–9 in `docs/architecture.md`.
+the game and asks the user what they'd like next. **The 1.1 notes are collected already**: "Where
+it hurts" in `docs/architecture.md` (1.0.x's first candidates are 1 and 7–9: Vercel and her
+phone's first readings, a card before a project moves her things, the reel under reduced motion,
+rare events in October), the "Art notes for the final pass" below, and each lane's "For" notes
+under "Notes for 1.1".
 
 ### V1 (after the lanes)
 
-**Under way** on `claude/v1-review-1.0` (from `v1-dev` at a163682; no save change so far). Done: the
-suite, smoke (622/622) and `smoke:offline` (10/10) green on `v1-dev`'s head; a new town played by
-real taps over four days (14–17 September 2026, a scratch Playwright driver under
-`?loop=manual&day=`) and saved as `tests/persistence/fixtures/lived-in-v53.json`, held by
-`livedIn.test.ts` (which now opens each save at its own `lastPlayedAt`); the 0.6–0.9 `NOTES` rows
-folded into one `1.0` row; two HUD fixes from the shakedown (a toast was half the room wide, so a
-three-line toast ran to ten; the quick bar's line ran off the left edge). Next, in order: the rest
-of the shakedown (a reel, a pet's trick, Rob Boo's reveal, winter, Far, sideways, the 0.3 town),
-perf at Close and Far by day and night, the architecture doc and "where it hurts", the art notes,
-`CLAUDE.md`, this handoff rewritten for after 1.0, decision 324, then merge and the release PR.
+**V1's review landed** (PR #197, decision 324; no save change). It played a new town by real taps
+over four days (14–17 September 2026, a scratch Playwright driver under `?loop=manual&day=`) and
+kept it as `tests/persistence/fixtures/lived-in-v53.json`; opened the 0.3 lived-in town as her
+phone will, at Close, Far and sideways (one 1.0 card, Cody's hello, no errors); looked at smoke's
+reel, trick, reveal, winter, Far and sideways screenshots; fixed three small things (a toast half
+the room wide, the quick bar's line off the left edge, the hooked "!" over the tension bar); put
+the 0.5 notes row back as it shipped (L6, L2 and L4 had written into it after it was on her phone,
+so the ground and seasons now open 1.0's card); timed 1.0 at Close and Far by day and night
+(`docs/architecture.md`, "V1's review"); and brought `docs/architecture.md`, its "Where it hurts",
+the art notes, `CLAUDE.md`, the README and this file up to 1.0.
 
 ### How V1 was run, for whoever plans 1.1
 
@@ -92,7 +101,7 @@ the patch notes written once per release by the review rather than a line per se
   v53) pets that grow.
 - **Lane 5, sound, platform and her fixes:** S4 (PR #169, 320) her fixes; S1 (PR #170, 321) heard;
   S3 (PR #189, 322) safe; S2 (PR #191, 323) the cloud save.
-- **V1** (PR #@@MINE@@, decision 324): the review and 1.0, below its heading above.
+- **V1** (PR #197, decision 324): the review and 1.0, under "After 1.0" above.
 
 ### Notes for 1.1 (the lanes' "For" notes, kept as they left them)
 

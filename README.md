@@ -38,7 +38,7 @@ code. Setting it up is a one-time job in the Vercel dashboard:
    `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN`, work too.
 6. Redeploy, since a deployment only sees the variables it was built with: **Deployments** →
    the newest Production deployment → **⋯** → **Redeploy**. (Or let the next patch to `main`
-   do it; the function only exists from the patch that brought it, 0.9.)
+   do it; the function only exists from the patch that brought it, 1.0.)
 7. On the phone, Settings → Backup → **Kept in the cloud** should say "Your town goes up to the
    cloud as you play" a few seconds after anything changes in the game.
 

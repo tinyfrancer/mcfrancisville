@@ -319,7 +319,16 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34). A tree whose crown hides her, or something near her she
-  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222).
+  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222). Since
+  V1's L3 (decision 291) the light is graded by the sky (`GRADE` in `src/render/grade.ts`), with
+  dithered lamp pools (`dither.ts`), bloom, a night vignette, moonlight, cloud shadows and puddles
+  (`bloom.ts`, `moonlight.ts`, `clouds.ts`, `puddles.ts`).
+- **What reacts** (V1's E1 and E4, decisions 280 and 283): one effects queue, `Effects`
+  (`src/render/effects.ts`, art `src/sprites/effects.ts`), shared by every view and stepped with
+  the world: pops of what she got, particles and emotes, pushed from the moments by
+  `src/wiring/effectsOf.ts` (the world never names an effect). A tap shows a ring and brackets
+  round what she set off toward (`feelTap` in `src/wiring/taps.ts`, `World.aim`), a shrug where
+  she can't go, and places pass through an iris (`src/render/transition.ts`).
 - **The seasons** (V1's L4, decision 294): `seasonOf(day)` (`src/systems/seasons.ts`) by the
   month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
   (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
@@ -755,7 +764,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   what went wrong) is `src/safekeeping.ts` and `src/errorNotes.ts`, the nudge's rule
   `src/systems/backupNudge.ts`; the party photo is kept through the share sheet
   (`src/hud/keepPhoto.ts`); `?perf`, in production too, times her phone's frames
-  (`src/wiring/perf.ts`).
+  (`src/wiring/perf.ts`). **The cloud save** (V1's S2, decision 323) is `api/save.ts`, a Vercel
+  function over an Upstash Redis store, which does nothing until the user links one (README's
+  "Cloud save"; it answers 503 till then): a key each phone makes once (`cloudKey.ts`), the town
+  sealed with it (`cloudSeal.ts`), sent and fetched by `src/persistence/cloud.ts`, its card in
+  Settings `src/hud/CloudCard.ts`.
 
 ## Verifying a change
 

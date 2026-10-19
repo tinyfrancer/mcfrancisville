@@ -832,7 +832,31 @@ Close on a container shared with another session's runs (draw means, ms (p50), h
 than L2's table by about what a busy machine costs, with no drawing code in the frame changed, so
 the next quiet run should be compared against `v1-dev` side by side.
 
-@@V1PERF@@
+**V1's review** (2026-10-18, decision 324), 1.0 as it goes to her phone, against L1's Close
+baseline above. `npm run perf` on `v1-dev`'s head with V1's fixes, on a quiet container (nothing
+else running), two runs at 21:30 at Close and Far and one at noon each (`-- --hour=12`,
+`-- --view=far`); draw means, ms (p50), updates in ms, the heap in MB:
+
+| Scene       | Close, 21:30          | Close, noon | Far, 21:30            | Far, noon   | Updates (Close) | Heap      |
+| ----------- | --------------------- | ----------- | --------------------- | ----------- | --------------- | --------- |
+| Town        | 32.6–32.8 (22.2–22.9) | 22.3 (15.3) | 53.6–58 (36.6–39.8)   | 29.9 (17.1) | 1.11–1.13       | 28.5–29.1 |
+| Home        | 19.1–20 (11.3–12.1)   | 5.6 (2.4)   | 20.3–21.9 (11.7–12.8) | 5.5 (2.3)   | 0.89–0.96       | 29.2–29.6 |
+| Fairground  | 22.1 (15.1–15.2)      | 9 (4.9)     | 41.7–42.3 (28.6–29.6) | 12.9 (5.4)  | 0.72–0.75       | 29.5–31   |
+| Whisperwood | 25.6–28 (17.7–19.4)   | 9.2 (4.3)   | 51.2–51.9 (34.8–35.4) | 15.8 (5.8)  | 0.86–0.93       | 30.5–30.7 |
+| Boo Acres   | 20–20.7 (13.3–13.4)   | 7.5 (3.7)   | 38–39.2 (25.6–26.3)   | 12.8 (4.7)  | 0.78–0.79       | 30.7–31.7 |
+| Her yard    | 32.1–32.5 (24.6–25.1) | 21.9 (16.8) | 54.6–55.5 (39.4–40.3) | 29.7 (18.5) | 0.99–1.04       | 31.1–31.8 |
+| Back room   | 22.6–22.7 (15.1–15.3) | 8.5 (4.7)   | 21.7–23.3 (14.6–15.6) | 8.5 (4.8)   | 1.36–1.4        | 31.2–32.1 |
+
+Against L1's baseline the whole plan cost about 2–4 ms of a Close night's mean (town 28.6–29.3
+→ 32.6–32.8, its median 21.2–22 → 22.2–22.9), a little more at Far (town 49–50 → 54–58), and no
+frame doubled: the light (L3), the frames (E5), the ground's tones (L2) and the seasons each added
+a millisecond or two and were measured as they landed (above). Updates are up by a few tenths
+(town 0.87–0.93 → 1.1, the back room 1–1.1 → 1.4): Cody at hers, the neighbours' strolls, jobs,
+faces and chatter, the pets' jobs and rest spots, all stepped where she is. The heap is 28.5–32
+MB against 21–22, the lanes' rows and baked art (faces, frames, the seasons' swaps, busts). Noon is
+dearer in town than E5 measured (22.3 against 13.1 ms), mostly L2's lawn tones baked as perf walks
+into chunks it hasn't seen; the second-pass check under L2 holds. Her phone is the real test:
+"On her iPhone" below.
 
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
