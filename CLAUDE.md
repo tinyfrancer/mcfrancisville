@@ -624,7 +624,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`variationOf`: a counter-melody, an octave, a bar left out; `tuneOf(key, pass)`);
   `musicFor(zone, window, occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to
   it. Behind it, `ambience.ts` (`ambienceFor`: crickets, rain, wind, water, the fair's murmur, a
-  hum indoors, by place, hour, weather and `waterNear`), read by `wiring/hearing.ts`, which also
+  hum indoors, by place, hour, weather and `waterNear`; the crickets a chorus of two that sings
+  in runs and rests, `chorus(seed)`, and every noise layer ebbing on its `EBB` row, 1.1's H2,
+  decision 331), read by `wiring/hearing.ts`, which also
   puts her footsteps down by ground (`FOOTSTEPS`); every HUD button ticks (`tickOnPress` in
   `hud/dom.ts`), and a question lifts at its end (`voiceOf`). The hall strums like "Wonderwall";
   the festival's tune plays in town, and Christmas's jingle while the tree is up. The pond's

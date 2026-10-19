@@ -192,6 +192,8 @@ export const NOTES: readonly PatchNotes[] = [
         'right through.',
       'There is an Ambience switch beside Sounds and Music now, for the wind, the rain and the ' +
         'crickets. The music stays.',
+      'And the crickets have learnt to take a breath: a little song each, then a good long ' +
+        'rest, so the night gets its quiet back.',
     ],
     ps: 'P.S. Typed very quietly, in case your phone is on silent.',
   },

@@ -12,7 +12,13 @@ Each lane's heading says where it is; the rules are the plan's "Running it in pa
 
 ### Lane H: heard (H1 → H2; decisions from 330; never the save)
 
-**H1 landed (PR #203, decision 330). Next: H2.** What it left for H2: Play on silent (off by
+**H2 (`claude/h2-crickets`, decision 331): done in its branch, in review.** The crickets are a
+chorus of two in runs and rests (`chorus(seed)` in `audio/ambience.ts`, held by
+`tests/audio/ambience.test.ts`), every noise layer ebbs on its `EBB` row, the levels trimmed,
+the `1.1` notes' fourth line in; rendered before and after (the numbers in decision 331). Next:
+the suite, smoke, its PR green and merged; then lane H is finished and ⬆ 1.1 is ready to cut.
+
+**H1 landed (PR #203, decision 330).** What it left for H2: Play on silent (off by
 default) and Ambience are in `audio/settings.ts`; `SilentSwitch` touches nothing while it's off,
 and `set(false)` puts the session's type back and pauses the silence at once; the Ambience
 switch fades the bed out through `applyAmbience` (Sounds off still hushes it too). The `1.1`
