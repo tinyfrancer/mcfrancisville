@@ -6,13 +6,39 @@ things stand" further down is the long history.
 
 ## In progress
 
-Nothing is in progress.
+**1.0.1, the fixes after 1.0** (asked for by the user on 2026-10-18, the evening 1.0 shipped:
+"fix whatever callouts you have or are logged"). Two sessions run at once from `v1.1-dev`, as
+Opus sub-agents of the coordinating session, by the files they own, each a draft PR into
+`v1.1-dev`, merged with a merge commit when green; `main` gets 1.0.1 as one PR from `v1.1-dev` at
+the user's word. Decisions from **325**. Each session's heading below says where it is.
+
+### X1: the rules and the HUD (`claude/x1-rules-hud`)
+
+Not started. Owns `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main.ts`, the
+`1.0.1` `NOTES` row and the save (v54 if it changes it, in its last commit). Its list: she holds
+her rod indoors (art notes); the quick bar's seeds run under the bag sideways (art notes); the
+reel doesn't slow under reduced motion ("Where it hurts" 8); a trick can happen behind the pet
+sheet (8); a card before a project puts her things in the chest (7); the one-day rare events on
+the festival's ordinary days (9); a Today line for the fair's free go (R6b's note); what she ate
+saved so the chip is right after a reload (16, the save change).
+
+### X2: the art (`claude/x2-art`)
+
+Not started. Owns `sprites/`, `render/`, `data/seasons.ts`, `data/holidays.ts` and the art
+tests. Its list: jack-o'-lanterns in the snow (art notes: `seasonLook` or `DECOR`, October only);
+the tension bar small and its window dark over night water (art notes, 8); the noticeboard's and
+the neighbours sheet's busts without a feeling ("Where it hurts" 4); Florence's on-her-back
+frame and Gary's front (8); the noticeboard's art the same whatever is pinned (4).
+
+Left logged, not for 1.0.1: the refactors in "Where it hurts" (2, 3, 5, 6, 10–15, 17), and the
+art notes that are a redesign (the cobble and the square, the woods' crowns, the ice, the lawns,
+the castle beds), for the user's art review.
 
 ## After 1.0
 
-**The V1 plan is complete, and 1.0 is the release PR (#198, `v1-dev` → `main`), opened by
-V1's review ready and green and left for the user to merge: the release is theirs.** Her phone
-has 0.4 (2026-10-07, PR #175), which carried 0.5's sessions too, so it last showed her the
+**The V1 plan is complete, and 1.0 is on her phone** (PR #198, `v1-dev` → `main`, merged at the
+user's word on 2026-10-18 by the coordinating session). Before it her phone had 0.4 (2026-10-07,
+PR #175), which carried 0.5's sessions too, so it last showed her the
 mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one card,
 `1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed nothing
 in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures, the 0.3
@@ -35,9 +61,10 @@ out** (decision 324): it does nothing until the store is linked, so nothing prom
    (town at Close 32.6–32.8 ms mean at 21:30 and 22.3 at noon, 4× throttled Chromium).
 3. **Listen**: whether the game is heard with the silent switch on (S1, decision 321).
 
-**`v1-dev` ends with 1.0.** A later plan's integration branch is made from `main` after the
-release merges (as `v1-dev` was from 0.3's `main`), and added to `vercel.json`'s no-preview list
-the day it's made (decision 265). A session starting cold with nothing asked of it does nothing to
+**`v1-dev` ended with 1.0; `v1.1-dev` is the integration branch now**, made from `main` the
+day the release merged (as `v1-dev` was from 0.3's `main`) and added to `vercel.json`'s
+no-preview list (decision 265), for the 1.0.x fixes the user asked for the same evening (the
+"In progress" section above says which are under way). A session starting cold with nothing asked of it does nothing to
 the game and asks the user what they'd like next. **The 1.1 notes are collected already**: "Where
 it hurts" in `docs/architecture.md` (1.0.x's first candidates are 1 and 7–9: Vercel and her
 phone's first readings, a card before a project moves her things, the reel under reduced motion,

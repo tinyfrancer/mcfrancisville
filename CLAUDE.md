@@ -18,10 +18,10 @@ store is the user's to link, README's "Cloud save").
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
 word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
-(V1's review, decision 324): all 29 sessions are on `v1-dev`, and **1.0 goes to her phone at the
-user's word** as the release PR from `v1-dev` to `main`. **0.4 is on her phone** (2026-10-07, PR
-#175, with 0.5's first sessions; save v43); 1.0 brings the save to v53. `docs/v0.3_plan.md`,
-`docs/v0.2_plan.md` and the plans before them are complete; there is no plan after V1 yet.
+(V1's review, decision 324) and **1.0 is on her phone** (2026-10-18, PR #198 from `v1-dev`, save
+v53; 0.4 before it, 2026-10-07, PR #175, save v43). **`v1.1-dev` is the integration branch now**,
+for the 1.0.x fixes from "Where it hurts" and the art notes; there is no plan after V1 yet.
+`docs/v0.3_plan.md`, `docs/v0.2_plan.md` and the plans before them are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
@@ -61,15 +61,15 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1-dev` was the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
-212), and it ends with 1.0:** a later plan's integration branch is made from `main` once 1.0 has
-merged, and added to `vercel.json`'s no-preview list the day it's made (decision 265). While a
+**`v1.1-dev` is the integration branch after 1.0** (`v1-dev` was V1's, decision 266, and ended
+with 1.0; `v0.3-dev` was 0.3's, decision 212), made from `main` the day the release merged and
+added to `vercel.json`'s no-preview list (decision 265). While a
 plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
 0.6–0.9, decision 324). A session that changes the save bumps `SAVE_VERSION` only in its last
-commit, after merging the latest `v1-dev`, and says so in its handoff heading; save-bumping PRs
+commit, after merging the latest integration branch, and says so in its handoff heading; save-bumping PRs
 merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
