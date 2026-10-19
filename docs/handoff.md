@@ -37,7 +37,7 @@ and 7–9 in `docs/architecture.md`.
 
 ### V1 (after the lanes)
 
-**Under way** on `claude/v1-review` (from `v1-dev` at a163682; no save change so far). Done: the
+**Under way** on `claude/v1-review-1.0` (from `v1-dev` at a163682; no save change so far). Done: the
 suite, smoke (622/622) and `smoke:offline` (10/10) green on `v1-dev`'s head; a new town played by
 real taps over four days (14–17 September 2026, a scratch Playwright driver under
 `?loop=manual&day=`) and saved as `tests/persistence/fixtures/lived-in-v53.json`, held by
