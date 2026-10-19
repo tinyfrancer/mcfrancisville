@@ -15,20 +15,27 @@ const HOLDABLE: readonly (ItemKind | undefined)[] = ['seed', 'gear'];
 export class Hands {
   private readonly ctx: WorldContext;
   private readonly bag: Bag;
+  private readonly outdoors: () => boolean;
   private holding: Held;
 
   /** A saved seed she has none of any more, or anything this build doesn't know, is her hands. */
-  constructor(ctx: WorldContext, bag: Bag, saved?: string) {
+  constructor(ctx: WorldContext, bag: Bag, saved?: string, outdoors: () => boolean = () => true) {
     this.ctx = ctx;
     this.bag = bag;
+    this.outdoors = outdoors;
     this.holding = saved !== undefined && this.canHold(saved) ? saved : 'hands';
     ctx.events.on('bag', () => {
       if (!this.canHold(this.holding)) this.put('hands');
     });
   }
 
+  /**
+   * What's in her hand where she is. Her net, can and rod are outdoor things, so she leaves them
+   * by the door going in and picks them up again on the way out (1.0.1); a seed or a sprinkler
+   * stays in her hand, for the planters inside.
+   */
   get held(): Held {
-    return this.holding;
+    return isTool(this.holding) && !this.outdoors() ? 'hands' : this.holding;
   }
 
   /** The seed in her hand, if it's one. */

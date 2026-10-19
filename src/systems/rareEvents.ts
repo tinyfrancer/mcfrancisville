@@ -14,9 +14,18 @@ import {
 } from '../data/rareEvents';
 import { ZONES } from '../data/zones';
 import type { ItemId, MapZoneId } from '../types/ids';
-import { fallsOn, festivalsOn, happeningOn, partsOf, shiftDay, weekOf } from './calendar';
+import { HAPPENINGS } from '../data/happenings';
+import {
+  fallsOn,
+  festivalOn,
+  festivalsOn,
+  happeningOn,
+  partsOf,
+  shiftDay,
+  weekOf,
+} from './calendar';
 import { moundSpot } from './fossils';
-import { hourOfNight } from './happenings';
+import { happeningsOn, hourOfNight } from './happenings';
 import type { Tile } from './pathfinding';
 import { hashMixed } from './random';
 import { weatherOn } from './weather';
@@ -32,6 +41,19 @@ function isSpoken(day: string): boolean {
     const { kind } = CALENDAR[id];
     return kind === 'holiday' || kind === 'special';
   });
+}
+
+/**
+ * A festival's own day: its first, its finale, or one with something of the festival's on (film
+ * night's Saturdays, a week's picnic or sparklers). The rest of its days are ordinary, and a day's
+ * rare event may come on one (1.0.1, decision 325): October is all festival, and the month she
+ * plays most.
+ */
+function isFestivals(day: string): boolean {
+  const festival = festivalOn(day);
+  if (!festival) return false;
+  if (festival.nth === 1 || (festival.finale !== null && festival.left === 0)) return true;
+  return happeningsOn(day).some((id) => 'festival' in HAPPENINGS[id].on);
 }
 
 /** The days of the week a day key is in, Monday first. */
@@ -63,8 +85,8 @@ function fits(id: RareEventId, day: string): boolean {
 
 /**
  * The rare event on a day, if there is one: the wandering stall all its week, or about one other
- * day in `RARE_ONE_IN` one of the rest that fits it, never on a holiday, her days or a festival's,
- * and never two at once. On a winter day's roll, a snow day comes first half the time.
+ * day in `RARE_ONE_IN` one of the rest that fits it, never on a holiday, her days or a festival's
+ * own (a festival's ordinary days are open since 1.0.1), and never two at once. On a winter day's roll, a snow day comes first half the time.
  */
 export function rareEventOn(day: string): RareEventId | null {
   // Asked every frame by the view and every step by the world, so the last few days are kept.
@@ -80,7 +102,7 @@ const dealt = new Map<string, RareEventId | null>();
 
 function deal(day: string): RareEventId | null {
   if (isStallWeek(day)) return 'wanderingStall';
-  if (isSpoken(day) || festivalsOn(day).length > 0) return null;
+  if (isSpoken(day) || isFestivals(day)) return null;
   const roll = hashMixed(`rare:${day}`);
   if (roll % RARE_ONE_IN !== 0) return null;
   const fitting = RARE_EVENT_IDS.filter((id) => fits(id, day));

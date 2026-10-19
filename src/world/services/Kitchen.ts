@@ -1,9 +1,10 @@
 import type { Family } from '../../data/critters';
 import { DISH_IDS, DISHES, effectOf, isDish, type Effect } from '../../data/dishes';
+import { ITEMS } from '../../data/items';
 import type { DayWindow } from '../../data/windows';
 import { RECIPES, stationOf } from '../../data/recipes';
 import { hourOf, isNight, nextWindowStart, windowOf } from '../../systems/clock';
-import { lasts, lureKey, NO_MEALS, PEP, type Meals } from '../../systems/cooking';
+import { lasts, lureKey, NO_MEALS, PEP, type Course, type Meals } from '../../systems/cooking';
 import type { CantMake } from '../../systems/crafting';
 import type { ItemId, RecipeId } from '../../types/ids';
 import type { Bag } from '../Bag';
@@ -21,9 +22,6 @@ export interface Buff {
   item: ItemId;
   until: DayWindow;
 }
-
-/** Which of her meals an effect is kept under. */
-type Course = keyof Meals;
 
 const courseOf = (effect: Effect): Course => (typeof effect === 'object' ? 'lure' : effect);
 
@@ -61,7 +59,7 @@ export class Kitchen {
   private readonly ctx: WorldContext;
   private readonly keeps: KitchenKeeps;
   private meals: Meals;
-  /** What she ate for each, while the game is open: the save keeps only when (decision 223). */
+  /** What she ate for each (decision 223; kept in the save since 1.0.1). */
   private readonly ate: Partial<Record<Course, ItemId>> = {};
 
   constructor(ctx: WorldContext, keeps: KitchenKeeps, saved?: Partial<Meals>) {
@@ -78,6 +76,11 @@ export class Kitchen {
           ? { family: lure.family, at: lure.at }
           : null,
     };
+    // Only a dish this build knows, kept under the course it does.
+    for (const [course, item] of Object.entries(saved?.ate ?? {})) {
+      const effect = typeof item === 'string' && item in ITEMS ? effectOf(item) : null;
+      if (effect !== null && courseOf(effect) === course) this.ate[course as Course] = item;
+    }
   }
 
   /** Every dish she knows how to cook, in the order the stove shows them. */
@@ -156,6 +159,8 @@ export class Kitchen {
   }
 
   snapshot(): { kitchen: Meals } {
-    return { kitchen: { ...NO_MEALS, ...this.meals } };
+    // Kept once she has eaten since (1.0.1), so a town that hasn't saves as it did.
+    const ate = Object.keys(this.ate).length > 0 ? { ate: { ...this.ate } } : {};
+    return { kitchen: { ...NO_MEALS, ...this.meals, ...ate } };
   }
 }

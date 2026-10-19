@@ -9,7 +9,16 @@ import {
   WANDERING_STALL_AT,
 } from '../../src/data/rareEvents';
 import { ZONES } from '../../src/data/zones';
-import { festivalsOn, happeningOn, partsOf, shiftDay, weekOf } from '../../src/systems/calendar';
+import { HAPPENINGS } from '../../src/data/happenings';
+import {
+  festivalOn,
+  festivalsOn,
+  happeningOn,
+  partsOf,
+  shiftDay,
+  weekOf,
+} from '../../src/systems/calendar';
+import { happeningsOn } from '../../src/systems/happenings';
 import { moundSpot } from '../../src/systems/fossils';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { findPath } from '../../src/systems/pathfinding';
@@ -54,8 +63,30 @@ describe('rare events (V1 R3)', () => {
       const row = RARE_EVENTS[id];
       if (row.months) expect(row.months, `${id} ${day}`).toContain(partsOf(day).month);
       if (row.clear) expect(weatherOn(day), `${id} ${day}`).toBe('clear');
-      if (id !== 'wanderingStall') expect(festivalsOn(day), day).toEqual([]);
+      if (id === 'wanderingStall') expect(festivalsOn(day), day).toEqual([]);
     }
+  });
+
+  it('come on a festival’s ordinary days, never its first, its finale or its own beats (1.0.1)', () => {
+    const octobers = DAYS.filter((d) => partsOf(d).month === 10 && rareEventOn(d) !== null);
+    // October is all festival, and the month she plays most: a day's event most Octobers.
+    expect(octobers.length).toBeGreaterThanOrEqual(YEARS);
+    for (const day of DAYS) {
+      const id = rareEventOn(day);
+      const festival = festivalOn(day);
+      if (!id || !festival) continue;
+      expect(id, day).not.toBe('wanderingStall');
+      expect(festival.nth, day).toBeGreaterThan(1);
+      expect(festival.left === 0 && festival.finale !== null, day).toBe(false);
+      const own = happeningsOn(day).filter((h) => 'festival' in HAPPENINGS[h].on);
+      expect(own, day).toEqual([]);
+    }
+    // Film night's Saturdays are the festival's, so never a stranger's.
+    const saturdays = DAYS.filter(
+      (d) => partsOf(d).month === 10 && partsOf(d).weekday === 6 && partsOf(d).date < 31,
+    );
+    expect(saturdays.length).toBeGreaterThan(YEARS * 3);
+    expect(saturdays.filter((d) => rareEventOn(d) !== null)).toEqual([]);
   });
 
   it('bring a snow day most winters', () => {

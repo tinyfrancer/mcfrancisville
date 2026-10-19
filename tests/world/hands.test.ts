@@ -92,3 +92,26 @@ describe('the quick bar', () => {
     expect(new World({ map: PLOT, held: 'somethingOld' }).hands.held).toBe('hands');
   });
 });
+
+describe('her tools by the door (1.0.1)', () => {
+  it('leaves her rod outside while she is in, and picks it up on the way out', () => {
+    const h = harness();
+    h.world.hands.hold('rod');
+    expect(h.world.travel.home()).toBe(true);
+    h.tick(2);
+    expect(h.world.scene).toBe('home');
+    expect(h.world.hands.held).toBe('hands');
+    expect(h.world.save().held).toBe('rod');
+    expect(h.world.travel.back()).toBe(true);
+    h.tick(2);
+    expect(h.world.hands.held).toBe('rod');
+  });
+
+  it('keeps a seed in her hand indoors, for the planters', () => {
+    const h = harness();
+    h.world.hands.hold('roseSeed');
+    h.world.travel.home();
+    h.tick(2);
+    expect(h.world.hands.held).toBe('roseSeed');
+  });
+});

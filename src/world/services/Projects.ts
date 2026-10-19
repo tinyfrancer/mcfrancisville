@@ -5,6 +5,7 @@ import {
   candyIn,
   candyLots,
   progressOf,
+  siteOf,
   stillWants,
   type ProjectNeedLeft,
 } from '../../systems/projects';
@@ -93,6 +94,17 @@ export class Projects {
    * Starts funding a project: null if one is under way already, or it's built. Anything of hers
    * standing on its site in her yard goes in the storage chest, to make room; those are returned.
    */
+  /**
+   * What of hers would go in the storage chest to make room were this one started now, so the
+   * noticeboard can ask her first (1.0.1); none if it can't be started or stands nowhere of hers.
+   */
+  inTheWay(id: ProjectId): FurnitureId[] {
+    const { works, yard } = this.keeps;
+    if (works.current !== null || works.isBuilt(id) || PROJECTS[id].zone !== 'town') return [];
+    const site = new Set(siteOf(id).map((t) => `${t.tx},${t.ty}`));
+    return yard.wouldMove((tx, ty) => site.has(`${tx},${ty}`));
+  }
+
   start(id: ProjectId): FurnitureId[] | null {
     const { works, yard } = this.keeps;
     if (!works.start(id)) return null;

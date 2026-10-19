@@ -33,6 +33,7 @@ const QUIET: TodayFacts = {
   passers: [],
   stray: null,
   project: null,
+  freeGo: null,
 };
 
 describe("Today's lines (V1's R2)", () => {
@@ -162,5 +163,29 @@ describe("Today's lines (V1's R2)", () => {
     }
     const favour = lines.find((l) => l.kind === 'favour')!;
     expect(todayWords(favour).text).toBe('Barty is asking for 2 roses');
+  });
+});
+
+describe("Today's free go at the fair (1.0.1)", () => {
+  it('says which stall’s first go is free, and takes her up to it', () => {
+    const [line] = todayLines({ ...QUIET, freeGo: { id: 'duckPond', open: true } }).filter(
+      (l) => l.kind === 'freeGo',
+    );
+    expect(line).toMatchObject({
+      kind: 'freeGo',
+      id: 'duckPond',
+      key: 'freeGo:2026-10-14',
+      go: { zone: 'fairground', prop: 'duckPondStall' },
+    });
+    expect(todayWords(line!).text).toBe('Your first go at the duck pond is free today');
+    expect(todayWords(line!).small).toContain('whenever you like');
+    const shut = todayLines({ ...QUIET, freeGo: { id: 'strengthBell', open: false } }).find(
+      (l) => l.kind === 'freeGo',
+    )!;
+    expect(todayWords(shut).small).toContain('once its stall opens');
+  });
+
+  it('says nothing once it’s had', () => {
+    expect(todayLines(QUIET).some((l) => l.kind === 'freeGo')).toBe(false);
   });
 });

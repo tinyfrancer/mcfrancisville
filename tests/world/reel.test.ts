@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { FakeClock } from '../../src/systems/clock';
-import { needleAt } from '../../src/systems/fishing';
+import { SLOW_SWEEP } from '../../src/systems/activities';
+import { needleAt, REELS } from '../../src/systems/fishing';
 import { worldContext } from '../../src/world/context';
 import type { Critter, WorldEvent } from '../../src/world/events';
 import type { Collecting } from '../../src/world/services/Collecting';
@@ -14,7 +15,7 @@ import type { CritterId } from '../../src/types/ids';
  */
 
 /** Her rod over one fish, its keeping counted, with a clock the test moves. */
-function rodOver(critter: CritterId) {
+function rodOver(critter: CritterId, slow = false) {
   const clock = new FakeClock(new Date(2026, 9, 2, 21));
   const fish: Critter = { slot: 4, critter, tx: 5, ty: 5, key: 'critter:21:4' };
   const kept: { size: number | null }[] = [];
@@ -30,6 +31,7 @@ function rodOver(critter: CritterId) {
     walking: () => false,
     hasFished: () => true,
     eager: () => false,
+    slow: () => slow,
   });
   /** Steps the clock 16 ms at a time until `done`, gathering what the line does. */
   const wait = (done: () => boolean, budget = 30_000): WorldEvent[] => {
@@ -117,5 +119,24 @@ describe('reeling in a rare fish', () => {
     expect(lengths.booKoi).toBeGreaterThan(lengths.ghostPike!);
     expect(lengths.ghostPike).toBeGreaterThan(lengths.glowJelly!);
     expect(Math.abs(lengths.glowJelly! - 700)).toBeLessThanOrEqual(16);
+  });
+
+  it('sweeps gentler under reduced motion, the same window, and still lands it (1.0.1)', () => {
+    const quick = rodOver('ghostPike');
+    const gentle = rodOver('ghostPike', true);
+    quick.tapInTime();
+    gentle.tapInTime();
+    const a = quick.rod.line!.reeling!.reel;
+    const b = gentle.rod.line!.reeling!.reel;
+    expect(a.period).toBe(REELS.rare!.period);
+    expect(b.period).toBe(Math.round(REELS.rare!.period * SLOW_SWEEP));
+    expect(b.target).toBe(a.target);
+    // Untapped, it takes longer to go slack too.
+    const from = gentle.clock.now();
+    gentle.wait(() => gentle.rod.line?.state !== 'reel', 60_000);
+    expect(gentle.clock.now() - from).toBeGreaterThan(3 * a.period);
+    gentle.wait(() => gentle.rod.line?.state === 'bite');
+    gentle.tapInTime();
+    expect(gentle.tapInTime()).toMatchObject({ kind: 'caught', critter: 'ghostPike', grade: 2 });
   });
 });

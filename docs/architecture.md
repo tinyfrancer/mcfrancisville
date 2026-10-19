@@ -924,23 +924,19 @@ V1's weight on it.
    stalls, a shut gate, the lots, the decorations, the farm's built rows, her yard, today's mound
    and, since R4, the project sites, after the map. A new thing standing in a place should make
    them a list of overlays, each with its own `propAt` and `blocks`, rather than a ninth line.
-7. **A project in her yard moves her things without asking.** Starting the greenhouse (R4) keeps
-   its tiles from that day, and `Yard.makeRoom` puts any piece of hers standing there in the storage
-   chest, what stands on it too; the Projects tab says so after, but she isn't asked first. Nothing is lost (decision 11 holds), but a card before the start ("your bench will go
-   in the chest") would be kinder.
-8. **The reel and the tricks, R6's rough edges.** The tension bar doesn't slow under reduced
-   motion, because the world doesn't know the phone's setting (a tap out of time only slackens the
-   line, so nothing is lost; the fair games, drawn by the HUD, do slow): a `slow` in
-   `WorldOptions` read from `matchMedia` in `main.ts` would let `reelOf` stretch the period. Its
-   window's dark green reads less well over the night's water than the day's. A trick asked for on
-   the pet sheet can happen behind the sheet when the pet is low on the screen; Florence's
-   on-her-back frame and Gary's front are serviceable rather than lovely. V1's review took the
-   "!" off the hooked moment, which sat over the bar's right end.
-9. **October has no rare events.** `rareEventOn` never deals one during a festival, and the
-   Halloween Festival is all of October, so a phone that takes 1.0 in October sees its first rare
-   event on 10 November (a stranger) and the wandering stall's week from 16 November. By design,
-   but October is the month she plays most; 1.1 could let the one-day events in on the festival's
-   ordinary days. The heralds of the stall's week toast once a day all week.
+7. ~~**A project in her yard moves her things without asking.**~~ Done in 1.0.1 (X1, decision
+   325): Start asks first with a card naming what goes in the chest (`Projects.inTheWay`,
+   `Yard.wouldMove`), Not yet or Go ahead.
+8. **The reel and the tricks, R6's rough edges.** ~~The tension bar doesn't slow under reduced
+   motion~~ (done in 1.0.1, decision 325: `WorldOptions.slow`, `reelOf`'s `slow`). Its window's
+   dark green reads less well over the night's water than the day's. ~~A trick asked for on the
+   pet sheet can happen behind the sheet~~ (done in 1.0.1: the sheet closes first, the line a
+   toast). Florence's on-her-back frame and Gary's front are serviceable rather than lovely. V1's
+   review took the "!" off the hooked moment, which sat over the bar's right end.
+9. ~~**October has no rare events.**~~ Done in 1.0.1 (X1, decision 325): a day's rare event may
+   come on a festival's ordinary days (not its first, its finale or a day with one of its beats),
+   about two an October; the wandering stall still keeps out of festivals. The heralds of the
+   stall's week toast once a day all week.
 10. **Her home's bed key doesn't know the room.** A planter's bed is keyed `home` and its tile, so
     planters stay in the front room (`refusesHere`, decision 233). A planter in the back room needs
     the key to carry the room, a save change; until then the refusal says so kindly.
@@ -966,8 +962,7 @@ V1's weight on it.
 15. **The town's legend is running out of characters.** About a dozen are left in `data/maps.ts`'s
     shared legend; the fairground (`FAIR_LEGEND`, `9` and `0` used by R6b) and Boo Acres have their
     own, which is the way for the next new place.
-16. **What she ate isn't saved** (A4, decision 223): after a reload a meal's chip shows the first
-    dish with the same effect. One optional field in `kitchen` for the next session that changes
-    the save anyway.
+16. ~~**What she ate isn't saved**~~ Done in 1.0.1 (X1, decision 325, save v54): `kitchen.ate`
+    keeps the dish for each course, so the chip is right after a reload.
 17. **Pets walk tile to tile.** She and her neighbours walk paths pulled taut; the pets' pottering
     would look smoother the same way (`stringPull`), if an art pass wants it.

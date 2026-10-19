@@ -19,12 +19,16 @@ describe("the mayor's notes", () => {
     expect(notesToShow(NOTES[NOTES.length - 2]!.version, true)).toEqual([newest]);
   });
 
-  it("shows her phone one card for 1.0: it last saw 0.5's, which is kept as it shipped", () => {
+  it("showed her phone one card for 1.0: it last saw 0.5's, which is kept as it shipped", () => {
     // 0.4 went to her phone with 0.5's notes (PR #175), and 0.6 to 0.9 were folded into 1.0.
-    expect(notesToShow('0.5', true).map((n) => n.version)).toEqual(['1.0']);
+    expect(notesToShow('0.5', true).map((n) => n.version)).toEqual(['1.0', '1.0.1']);
     const shipped = NOTES.find((n) => n.version === '0.5')!;
     expect(shipped.lines[0]).toMatch(/^Whatever you find flies to you now/);
     expect(shipped.lines).toHaveLength(5);
+  });
+
+  it('shows her phone, which has 1.0, one card for 1.0.1', () => {
+    expect(notesToShow('1.0', true).map((n) => n.version)).toEqual(['1.0.1']);
   });
 
   it('shows the newest to a phone that last saw a version these notes no longer know', () => {

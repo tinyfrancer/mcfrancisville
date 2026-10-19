@@ -105,6 +105,11 @@ export interface WorldOptions {
   /** The town's projects: the one she's funding, what's in each, those built (V1's R4). */
   projects?: Partial<WorksSnapshot>;
   clock?: Clock;
+  /**
+   * Whether her phone asks for reduced motion, read when it matters (1.0.1): the phone's, never
+   * the save's, so a test or the game passes it in.
+   */
+  slow?: () => boolean;
 }
 
 /** Everything of the world a save keeps; the save itself adds only its version and times. */

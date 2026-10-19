@@ -1,4 +1,5 @@
 import { CRITTER_IDS } from '../../data/critters';
+import { isInterior } from '../../data/interiors';
 import type { Collecting } from '../services/Collecting';
 import type { Decorator } from '../services/Decorator';
 import type { Fishing } from '../services/Fishing';
@@ -38,7 +39,10 @@ interface HerParts {
 
 export function her(s: Shared, parts: HerParts): Her {
   const { ctx, options, bag, wardrobe, home, cabinet } = s;
-  const hands = new Hands(ctx, bag, options.held);
+  const hands = new Hands(ctx, bag, options.held, () => {
+    const here = s.town.scene();
+    return here !== 'home' && !isInterior(here);
+  });
   const novelty = new Novelty(
     ctx,
     {

@@ -12,15 +12,31 @@ Opus sub-agents of the coordinating session, by the files they own, each a draft
 `v1.1-dev`, merged with a merge commit when green; `main` gets 1.0.1 as one PR from `v1.1-dev` at
 the user's word. Decisions from **325**. Each session's heading below says where it is.
 
-### X1: the rules and the HUD (`claude/x1-rules-hud`)
+### X1: the rules and the HUD (`claude/x1-rules-hud`) · landed, save v54
 
-Not started. Owns `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main.ts`, the
-`1.0.1` `NOTES` row and the save (v54 if it changes it, in its last commit). Its list: she holds
-her rod indoors (art notes); the quick bar's seeds run under the bag sideways (art notes); the
-reel doesn't slow under reduced motion ("Where it hurts" 8); a trick can happen behind the pet
-sheet (8); a card before a project puts her things in the chest (7); the one-day rare events on
-the festival's ordinary days (9); a Today line for the fair's free go (R6b's note); what she ate
-saved so the chip is right after a reload (16, the save change).
+**Landed** (PR #199 into `v1.1-dev`, decision 325; **save v53 → v54**, `kitchen.ate`, in its last
+commit). Owned `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main.ts`, the `1.0.1`
+`NOTES` row and the save. A commit each:
+
+- **Her rod indoors**: `Hands.held` is her hands while she's indoors and carries a tool, the tool
+  again on the way out, the save keeping it; a seed or sprinkler stays in hand. No renderer change.
+- **The quick bar sideways**: its strip fades at an end with more beyond it (`scrollMore` in
+  `QuickBar.ts`, a mask in `styles.ts`).
+- **The reel under reduced motion**: `WorldOptions.slow` (one `matchMedia` read in `main.ts`,
+  shared with the effects and the iris), `reelOf`'s `slow` by the fair's `SLOW_SWEEP`.
+- **A trick behind the pet sheet**: Trick closes the sheet first; the line is a toast off
+  `petTrick`'s `line`. Smoke's `petsThatGrow` checks it.
+- **A card before a project moves her things**: `Projects.inTheWay`, `Yard.wouldMove`, `askFirst`
+  in `ProjectsPanel.ts` (Not yet / Go ahead), held by `tests/hud/projectsPanel.test.ts`.
+- **October's rare events**: `isFestivals` in `systems/rareEvents.ts` keeps only a festival's own
+  days clear (its first, its finale, a day with one of its beats); the roll is unchanged, about 1
+  in 8.2 overall and two an October. **Smoke's October days now meet some** (5, 6 and 9 October
+  2026 are a stray critter's); smoke passed as it is.
+- **Today's free go**: `TodayFacts.freeGo`, a `freeGo` line, a tap flying her to the stall.
+- **What she ate**: `kitchen.ate` (optional; a town saved before has none, migration step 53 is
+  the identity), written only once she has eaten since.
+- The `1.0.1` `NOTES` row has **four lines; X2 adds the fifth**. "Where it hurts" 7, 8 (X1's
+  parts), 9 and 16, the art notes' rod and seeds, and `CLAUDE.md` are brought up to date.
 
 ### X2: the art (`claude/x2-art`)
 
@@ -1670,15 +1686,15 @@ screenshots and its own four days of play at phone size, and found:
 - **Big empty lawns** in the hidden clearing's middle and the fairground's south-east: L2's decals
   are there but thin. A meadow patch or a few standing props.
 - **The castle garden's beds are the same rectangle** four times over.
-- **She holds her rod indoors**: the quick bar hides at home, but what she held outside stays in
-  her hand in the house (seen with Cody on the sofa at 19:30). Harmless, a little odd.
+- ~~**She holds her rod indoors**~~: done in 1.0.1 (X1, decision 325); her net, can and rod wait
+  by the door while she's in (`Hands.held`).
 - **The tension bar is small** (44 world pixels, about a tile and a half at Close): it reads, but
   only just, and its dark green window less well at night (R6a's note).
 - **Jack-o'-lanterns all year.** The town's jack-o'-lanterns are map props, so in January they
   sit in the snow (smoke's `season-winter-sideways.png`). A `seasonLook` that turns them to snowmen
   or lanterns outside autumn, or `DECOR` for October only, would fit L4's seasons.
-- **Sideways, the quick bar's seeds run under the bag**: with four kinds of seed the last packet is
-  cut off at the bag button (it scrolls, so nothing is lost, but it reads as clipped).
+- ~~**Sideways, the quick bar's seeds run under the bag**~~: done in 1.0.1 (X1, decision 325);
+  the strip fades at an end with more beyond it, so the packet at the bag reads as "this way".
 - **Lane notes still open:** the body builds and the neutral faces on the noticeboard and the
   neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c), the noticeboard's art
   the same whatever is pinned (L6). Each is in "Where it hurts" too.

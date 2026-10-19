@@ -41,6 +41,7 @@ export function catching(s: Shared, parts: CatchingParts): Catching {
     walking: () => s.movement().walking,
     hasFished: () => CRITTER_IDS.some((id) => isFish(id) && cabinet.caughtOn(id) !== null),
     eager: () => kitchen.eager(),
+    slow: () => s.options.slow?.() ?? false,
   });
   const fossils = new Fossils(ctx, {
     bag: s.bag,

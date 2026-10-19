@@ -609,6 +609,8 @@ export function eventToast(event: WorldEvent): Toast | null {
         special: true,
         icon: 'heart',
       };
+    case 'petTrick':
+      return event.line ? { text: event.line, icon: 'sparkle' } : null;
     case 'petHelped':
       return event.job === 'sniff'
         ? { text: `${event.name} is sitting by today's mound. What a good nose!`, icon: 'sparkle' }

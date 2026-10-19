@@ -43,7 +43,7 @@ import type { WorksSnapshot } from '../world/Works';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 53;
+export const SAVE_VERSION = 54;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -192,7 +192,9 @@ export interface SaveState {
   stall: StallSnapshot;
   /**
    * When she last ate for each effect of a meal (save v23): a spring in her step, eager fish, and
-   * the family a lure brings out. Only checked for shape; a family this build doesn't lure is let go.
+   * the family a lure brings out; and since v54 what she ate for each (`ate`, absent in a town
+   * saved before). Only checked for shape; a family this build doesn't lure, or a dish it doesn't
+   * know, is let go.
    */
   kitchen: Meals;
   /**
@@ -574,11 +576,17 @@ function isKitchenShape(value: unknown): boolean {
   const k = value as Record<string, unknown>;
   const time = (t: unknown) => t === null || (typeof t === 'number' && Number.isFinite(t));
   const lure = k.lure as Record<string, unknown> | null;
+  const ate = k.ate;
   return (
     time(k.pep) &&
     time(k.bites) &&
     (lure === null ||
-      (typeof lure === 'object' && typeof lure.family === 'string' && time(lure.at)))
+      (typeof lure === 'object' && typeof lure.family === 'string' && time(lure.at))) &&
+    (ate === undefined ||
+      (typeof ate === 'object' &&
+        ate !== null &&
+        !Array.isArray(ate) &&
+        Object.values(ate).every((item) => typeof item === 'string')))
   );
 }
 

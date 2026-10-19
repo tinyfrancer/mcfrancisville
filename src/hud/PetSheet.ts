@@ -128,9 +128,11 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
     );
     if (pet.level >= 2) {
       row.push(
+        // Down first, so the trick is seen wherever the pet is on the screen (1.0.1); its line
+        // comes as a toast.
         button('Trick', () => {
-          speech.textContent = api.trick(id) ?? speech.textContent;
-          note.textContent = '';
+          close();
+          api.trick(id);
         }),
       );
     }
