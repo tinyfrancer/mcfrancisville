@@ -6,11 +6,52 @@ things stand" further down is the long history.
 
 ## In progress
 
-**1.0.1, the fixes after 1.0** (asked for by the user on 2026-10-18, the evening 1.0 shipped:
-"fix whatever callouts you have or are logged"). Two sessions run at once from `v1.1-dev`, as
-Opus sub-agents of the coordinating session, by the files they own, each a draft PR into
-`v1.1-dev`, merged with a merge commit when green; `main` gets 1.0.1 as one PR from `v1.1-dev` at
-the user's word. Decisions from **325**. Each session's heading below says where it is.
+Nothing is in progress.
+
+## After 1.0
+
+**The V1 plan is complete, and 1.0 is on her phone** (PR #198, `v1-dev` → `main`, merged at the
+user's word on 2026-10-18 by the coordinating session). Before it her phone had 0.4 (2026-10-07,
+PR #175), which carried 0.5's sessions too, so it last showed her the
+mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one card,
+`1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed nothing
+in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures, the 0.3
+town's and a 1.0 town played by taps (`lived-in-v53.json`). **Her notes leave the cloud save
+out** (decision 324): it does nothing until the store is linked, so nothing promises her it.
+
+**The user's steps, after merging the release PR:**
+
+1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
+   Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
+   **Redeploy** the production deployment, since a deployment only sees the variables it was built
+   with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
+   set up yet". Check the deployment's Functions tab lists `api/save` (nobody has run it on Vercel
+   yet; if the build trips on TypeScript, the fallback is `api/save.js` with JSDoc types, decision
+   323), then README's `curl`, then Settings on her phone.
+2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
+   town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
+   readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
+   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 are the table just above it
+   (town at Close 32.6–32.8 ms mean at 21:30 and 22.3 at noon, 4× throttled Chromium).
+3. **Listen**: whether the game is heard with the silent switch on (S1, decision 321).
+
+**`v1-dev` ended with 1.0; `v1.1-dev` is the integration branch now**, made from `main` the
+day the release merged (as `v1-dev` was from 0.3's `main`) and added to `vercel.json`'s
+no-preview list (decision 265). **1.0.1, the fixes the user asked for the same evening, is whole
+on it** (X1 and X2 below, save v54) and goes to her phone as **the release PR `v1.1-dev` → `main`
+(#201), the user's to merge**. A session starting cold with nothing asked of it does
+nothing to the game and asks the user what they'd like next. **The 1.1 notes are collected
+already**: what's still open in "Where it hurts" in `docs/architecture.md` (1 is the user's: Vercel
+and her phone's first readings; the rest are refactors), the redesigns left in the "Art notes for
+the final pass" below, and each lane's "For" notes under "Notes for 1.1".
+
+### 1.0.1, the fixes after 1.0 (X1 and X2, 2026-10-18/19)
+
+Asked for by the user the evening 1.0 shipped ("fix whatever callouts you have or are logged").
+Two sessions from `v1.1-dev`, Opus sub-agents of the coordinating session, by the files they
+owned, each a draft PR into `v1.1-dev` merged with a merge commit when green (X1 PR #199, X2 PR
+#200); **1.0.1 is the release PR from `v1.1-dev` to `main`, the user's to merge** (its number is
+in the "After 1.0" paragraph above). Decisions 325 and 327 (326 unused).
 
 ### X1: the rules and the HUD (`claude/x1-rules-hud`) · landed, save v54
 
@@ -64,43 +105,6 @@ refactors in "Where it hurts" and the art notes that are a redesign (above).
 Left logged, not for 1.0.1: the refactors in "Where it hurts" (2, 3, 5, 6, 10–15, 17), and the
 art notes that are a redesign (the cobble and the square, the woods' crowns, the ice, the lawns,
 the castle beds), for the user's art review.
-
-## After 1.0
-
-**The V1 plan is complete, and 1.0 is on her phone** (PR #198, `v1-dev` → `main`, merged at the
-user's word on 2026-10-18 by the coordinating session). Before it her phone had 0.4 (2026-10-07,
-PR #175), which carried 0.5's sessions too, so it last showed her the
-mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one card,
-`1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed nothing
-in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures, the 0.3
-town's and a 1.0 town played by taps (`lived-in-v53.json`). **Her notes leave the cloud save
-out** (decision 324): it does nothing until the store is linked, so nothing promises her it.
-
-**The user's steps, after merging the release PR:**
-
-1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
-   Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
-   **Redeploy** the production deployment, since a deployment only sees the variables it was built
-   with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
-   set up yet". Check the deployment's Functions tab lists `api/save` (nobody has run it on Vercel
-   yet; if the build trips on TypeScript, the fallback is `api/save.js` with JSDoc types, decision
-   323), then README's `curl`, then Settings on her phone.
-2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
-   town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
-   readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
-   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 are the table just above it
-   (town at Close 32.6–32.8 ms mean at 21:30 and 22.3 at noon, 4× throttled Chromium).
-3. **Listen**: whether the game is heard with the silent switch on (S1, decision 321).
-
-**`v1-dev` ended with 1.0; `v1.1-dev` is the integration branch now**, made from `main` the
-day the release merged (as `v1-dev` was from 0.3's `main`) and added to `vercel.json`'s
-no-preview list (decision 265), for the 1.0.x fixes the user asked for the same evening (the
-"In progress" section above says which are under way). A session starting cold with nothing asked of it does nothing to
-the game and asks the user what they'd like next. **The 1.1 notes are collected already**: "Where
-it hurts" in `docs/architecture.md` (1.0.x's first candidates are 1 and 7–9: Vercel and her
-phone's first readings, a card before a project moves her things, the reel under reduced motion,
-rare events in October), the "Art notes for the final pass" below, and each lane's "For" notes
-under "Notes for 1.1".
 
 ### V1 (after the lanes)
 
