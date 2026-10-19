@@ -266,8 +266,32 @@ interface Edge {
   along: number;
 }
 
-/** Each shape's field, worked out once: a field is only ever read, never changed. */
-const FIELDS = new Map<number, readonly Edge[]>();
+/** The corners cut along a diagonal, and the way out toward each. */
+const CUTS = [
+  [CUT_NW, -1, -1],
+  [CUT_NE, 1, -1],
+  [CUT_SE, 1, 1],
+  [CUT_SW, -1, 1],
+] as const;
+
+/** The inner corners: the two sides beside each, the corner, its point, and its two notches. */
+const INNER = [
+  [N, W, NW, 0, 0, NOTCH_NW_Y, NOTCH_NW_X],
+  [N, E, NE, TILE, 0, NOTCH_NE_Y, NOTCH_NE_X],
+  [S, W, SW, 0, TILE, NOTCH_SW_Y, NOTCH_SW_X],
+  [S, E, SE, TILE, TILE, NOTCH_SE_Y, NOTCH_SE_X],
+] as const;
+
+/** The cuts and notches, which only a tile with an open side or corner has. */
+const SLOPED = 0xfff00;
+
+/** A tile with ground on every side has no edge near: one field for all of them, only read. */
+const WHOLE: readonly Edge[] = Array.from({ length: TILE * TILE }, (_, i) => ({
+  d: Infinity,
+  nx: 0,
+  ny: 0,
+  along: i % TILE,
+}));
 
 /**
  * The distance to the edge for every pixel of a tile of the given shape. Open sides are straight
@@ -275,16 +299,16 @@ const FIELDS = new Map<number, readonly Edge[]>();
  * an open corner, the edge wraps round the point of it.
  */
 function edges(mask: number, radius: number): readonly Edge[] {
-  const key = mask * 64 + radius;
-  let field = FIELDS.get(key);
-  if (!field) FIELDS.set(key, (field = fieldOf(mask, radius)));
-  return field;
-}
-
-function fieldOf(mask: number, radius: number): Edge[] {
+  if ((mask & 0xff) === 0xff && !(mask & SLOPED)) return WHOLE;
   const open = (bit: number) => (mask & bit) === 0;
   const out: Edge[] = [];
   const r = radius;
+  const rounded = [
+    [N, W, r, r, CUT_NW],
+    [N, E, TILE - r, r, CUT_NE],
+    [S, W, r, TILE - r, CUT_SW],
+    [S, E, TILE - r, TILE - r, CUT_SE],
+  ] as const;
   for (let y = 0; y < TILE; y++) {
     for (let x = 0; x < TILE; x++) {
       const px = x + 0.5;
@@ -299,24 +323,14 @@ function fieldOf(mask: number, radius: number): Edge[] {
       if (open(E)) take(TILE - px, 1, 0, y);
       // A corner cut along the diagonal, where a staircase of tiles is smoothed into a slope: the
       // line through the tile's two other corners.
-      for (const [cut, sx, sy] of [
-        [CUT_NW, -1, -1],
-        [CUT_NE, 1, -1],
-        [CUT_SE, 1, 1],
-        [CUT_SW, -1, 1],
-      ] as const) {
+      for (const [cut, sx, sy] of CUTS) {
         if (!(mask & cut)) continue;
         // How far out toward the corner, measured along the diagonal from the tile's middle.
         const out = ((px - TILE / 2) * sx + (py - TILE / 2) * sy) / Math.SQRT2;
         take(-out, sx / Math.SQRT2, sy / Math.SQRT2, x);
       }
       // Rounded outer corners: inside the corner's square, the arc is the edge.
-      for (const [a, b, cx, cy, cut] of [
-        [N, W, r, r, CUT_NW],
-        [N, E, TILE - r, r, CUT_NE],
-        [S, W, r, TILE - r, CUT_SW],
-        [S, E, TILE - r, TILE - r, CUT_SE],
-      ] as const) {
+      for (const [a, b, cx, cy, cut] of rounded) {
         if (!open(a) || !open(b) || mask & cut) continue;
         const inX = cx < TILE / 2 ? px < cx : px > cx;
         const inY = cy < TILE / 2 ? py < cy : py > cy;
@@ -328,12 +342,7 @@ function fieldOf(mask: number, radius: number): Edge[] {
       }
       // Inner corners: the ground beyond the diagonal comes to a point at the corner, unless a
       // cut runs into it from a side, when on that side the edge follows the cut's line instead.
-      for (const [a, b, corner, cx, cy, notchY, notchX] of [
-        [N, W, NW, 0, 0, NOTCH_NW_Y, NOTCH_NW_X],
-        [N, E, NE, TILE, 0, NOTCH_NE_Y, NOTCH_NE_X],
-        [S, W, SW, 0, TILE, NOTCH_SW_Y, NOTCH_SW_X],
-        [S, E, SE, TILE, TILE, NOTCH_SE_Y, NOTCH_SE_X],
-      ] as const) {
+      for (const [a, b, corner, cx, cy, notchY, notchX] of INNER) {
         if (open(a) || open(b) || !open(corner)) continue;
         const dx = cx - px;
         const dy = cy - py;
@@ -927,7 +936,11 @@ export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
   flagstones: {
     palette: PAVING_PALETTE,
     variants: 1,
-    draw: (m, _v, at, own) => drawFlagstones(edges(m, 4), edges(own & 0xff, 4), own >> 8, at),
+    draw: (m, _v, at, own) => {
+      const lawn = edges(m, 4);
+      const kin = (own & 0xff) === (m & 0xff) ? lawn : edges(own & 0xff, 4);
+      return drawFlagstones(lawn, kin, own >> 8, at);
+    },
     laid: true,
   },
   setts: {
