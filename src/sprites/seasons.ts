@@ -111,10 +111,15 @@ const swap =
 /** Dried seed heads and straw through the snow. */
 const STRAW = mix(C.rope, C.snowShade, 0.25);
 
+/** Moss in the joints of the square's paving in spring and summer (1.1's A1), frost in winter. */
+const MOSSY = shift('jq', C.moss, 0.4);
+const FROSTED = shift('jqk', C.snowShade, 0.45);
+
 /**
  * What a season does to the ground laid over the grass, by kind, from the piece's own palette:
  * greener meadows, long grass and hedges in spring and summer; in winter snow on them, on the
- * grass at a cliff's top and along the top of a bank.
+ * grass at a cliff's top and along the top of a bank. The square's flagstones and setts take moss
+ * in their joints while the grass grows, and frost in winter.
  */
 const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Palette>>> = {
   autumn: {},
@@ -122,11 +127,15 @@ const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Pal
     meadow: shift('mMc', C.springGrass, 0.4),
     longGrass: shift('nNLok', C.springGrass, 0.35),
     hedge: shift('dhHL', C.springGrass, 0.3),
+    flagstones: MOSSY,
+    setts: MOSSY,
   },
   summer: {
     meadow: shift('mMc', C.summerGrass, 0.3),
     longGrass: shift('nNLok', C.summerGrass, 0.3),
     hedge: shift('dhHL', C.summerGrass, 0.2),
+    flagstones: MOSSY,
+    setts: MOSSY,
   },
   winter: {
     // Each in a snow of its own, so the snow isn't all one white (`tests/sprites/seasons.test.ts`).
@@ -152,6 +161,8 @@ const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Pal
     cliff: swap({ g: C.snow, G: C.snowLight }),
     water: swap({ G: C.snow }),
     ice: swap({ G: C.snow }),
+    flagstones: FROSTED,
+    setts: FROSTED,
   },
 };
 
@@ -178,8 +189,18 @@ export function seasonPiece(piece: GroundPiece, season: SeasonId): GroundPiece {
   };
 }
 
-/** The tracks snow drifts in along in winter: the cobbles, dirt, gravel and a pier's boards. */
-const DUSTED: ReadonlySet<TileId | undefined> = new Set(['path', 'dirt', 'gravel', 'boards']);
+/**
+ * The tracks snow drifts in along in winter: the cobbles, the square's paving (1.1's A1), dirt,
+ * gravel and a pier's boards.
+ */
+const DUSTED: ReadonlySet<TileId | undefined> = new Set([
+  'path',
+  'flagstones',
+  'setts',
+  'dirt',
+  'gravel',
+  'boards',
+]);
 
 /** How far in from a track's open edge snow drifts, in pixels, before it thins to flecks. */
 const DRIFT = 5;

@@ -74,7 +74,16 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-Not started; after H and T.
+**A1 in progress** (`claude/a1-square-cobble`, draft PR). Done: the square is flagstones (`_`,
+a 10×9 rectangle, cols 15–24, rows 18–26, a tile narrower each side, its four lanterns on the
+lawn at its corners), the well on setts (`W`'s tile) with a ring of setts a tile out round it laid
+by the flagstones (`sprites/paving.ts`), two benches on its north edge either side of the way in
+(`[`, a bench on flagstones; Rufus's two flower stops beside one keep him standing,
+`sits: false`), the cobbles worn smooth down the middle stone by stone (`path` in
+`sprites/terrain.ts`), moss and frost in the paving's joints by season and snow on it in winter
+(`sprites/seasons.ts`), puddles on the flagstones and her footsteps on them. Town commonest
+colour 15.7% → 15.8% (the lawn); the cobble's lavender 10.3% → 6.2%. Next: perf before and
+after, the docs (decision 350, CLAUDE.md's Art bullet, the art note), mark ready, merge.
 
 ## After 1.0
 

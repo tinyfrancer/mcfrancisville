@@ -272,7 +272,8 @@ export const LEGEND: Record<string, LegendEntry> = {
   g: { tile: 'grass', prop: 'gravestone' },
   f: { tile: 'grass', prop: 'fence' },
   '|': { tile: 'grass', prop: 'fencePost' },
-  W: { tile: 'path', prop: 'well' },
+  // The well stands on setts, which the square's flagstones lay a ring of round it (1.1's A1).
+  W: { tile: 'setts', prop: 'well' },
   H: { tile: 'grass', prop: 'homeHouse' },
   S: { tile: 'grass', prop: 'shopHouse' },
   M: { tile: 'grass', prop: 'salonHouse' },
@@ -326,6 +327,9 @@ export const LEGEND: Record<string, LegendEntry> = {
   // The ground's open lawns (V1's L2): a meadow of little flowers, and long grass.
   "'": { tile: 'meadow' },
   '/': { tile: 'longGrass' },
+  // The square's flagstones, and a bench on them (1.1's A1).
+  _: { tile: 'flagstones' },
+  '[': { tile: 'flagstones', prop: 'bench' },
 };
 
 /**
@@ -550,15 +554,15 @@ export const TOWN: MapSource = {
     '========================================',
     '#s.................==..................#',
     '#vT..........p.....==..NN.pjj..........#',
-    '#....SSSSS....l==========l....MMMMM....#',
-    '#...dSSSSS....============....MMMMM....#',
-    '#...dSSSSS..T.============....MMMMM...T#',
-    '#.:..SSSSS....====WWWW====....MMMMM....#',
-    '#......===========WWWW===========......#',
-    '#.............============.............#',
-    '#............T============.............#',
-    '#.UUUUU....,..============....bbbbbb.d.#',
-    '#.UUUUU...;...l==========l....bbbbbb...#',
+    '#....SSSSS....L__[[__[[__L....MMMMM....#',
+    '#...dSSSSS.....__________.....MMMMM....#',
+    '#...dSSSSS..T..__________.....MMMMM...T#',
+    '#.:..SSSSS.....___WWWW___.....MMMMM....#',
+    '#......========___WWWW___========......#',
+    '#..............__________..............#',
+    '#............T.__________..............#',
+    '#.UUUUU....,...__________.....bbbbbb.d.#',
+    '#.UUUUU...;...L__________L....bbbbbb...#',
     '#.UUUUU..AAAAp.....==.....=..dbbbbbb.,.#',
     "#...=''''AAAA......==.....=...bbbbbb,..#",
     "#.R.=''''AAAA......==...T.=======....T.#",

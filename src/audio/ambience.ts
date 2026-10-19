@@ -133,6 +133,8 @@ export function groundOf(tile: TileId | undefined, outdoors: boolean, slippery: 
   if (slippery || tile === 'ice') return 'ice';
   if (tile === 'boards') return 'boards';
   if (tile === 'path' || tile === 'steps' || tile === 'dirt' || tile === 'gravel') return 'path';
+  // The square's flagstones and the setts round the well (1.1's A1) sound as the cobbles do.
+  if (tile === 'flagstones' || tile === 'setts') return 'path';
   return 'grass';
 }
 

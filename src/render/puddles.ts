@@ -17,8 +17,15 @@ export interface Puddle {
 /** About one path tile in this many holds a puddle when it rains. */
 const ONE_IN = 6;
 
-/** What holds a puddle: the town's cobbles and a dirt track; gravel drains (V1's L2). */
-const HOLDS_WATER: ReadonlySet<TileId | undefined> = new Set<TileId>(['path', 'dirt']);
+/**
+ * What holds a puddle: the town's cobbles, the square's flagstones (1.1's A1) and a dirt track;
+ * gravel drains (V1's L2).
+ */
+const HOLDS_WATER: ReadonlySet<TileId | undefined> = new Set<TileId>([
+  'path',
+  'flagstones',
+  'dirt',
+]);
 
 /**
  * Where the puddles lie on a rainy day (V1's L3): on about one open path or dirt tile in six, the same
