@@ -1,3 +1,6 @@
+import { knowMayor } from '../src/systems/mayor';
+import { knowBandstand, knowFairground } from '../src/systems/venues';
+
 /**
  * Node 25 defines its own `localStorage` global (the `--localstorage-file`
  * warning on startup), and vitest's jsdom environment leaves that in place as a
@@ -53,3 +56,13 @@ if (typeof window !== 'undefined' && window !== globalThis) {
   install(window, 'localStorage', globalThis.localStorage);
   install(window, 'sessionStorage', globalThis.sessionStorage);
 }
+
+/*
+ * The plain tests share their modules from file to file (`isolate: false` in vitest.config.ts;
+ * 1.1's T2, decision 336), so what a world tells the rules as it's made (the fairground's gate,
+ * the bandstand, the mayor met) is put back to a new page's before each file, as a file of its
+ * own would have found it. A new module-level `let` set from outside belongs here too.
+ */
+knowFairground(false);
+knowBandstand(false);
+knowMayor(null, null);

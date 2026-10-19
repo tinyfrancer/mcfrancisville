@@ -802,7 +802,14 @@ Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock
 imports are held by `tests/architecture.test.ts`, and the economy's shape (what gathering pays
 against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Lived-in saves from the releases on her phone are
 fixtures in `tests/persistence/fixtures/`, held by `tests/persistence/livedIn.test.ts`: nothing in
-them is lost (decision 210); a release that changes the save's shape adds its own. Smoke
+them is lost (decision 210); a release that changes the save's shape adds its own. The suite
+is two vitest projects (`vitest.config.ts`, 1.1's T2, decision 336): `dom`, `tests/hud/` and the
+few files named in `DOM`, each in a fresh jsdom; and `node`, everything else, in plain Node with
+its files sharing their modules (`isolate: false`). A test outside `tests/hud/` that needs
+`document` or `window` is named in `DOM`; a module-level `let` in `src/` that a world sets from
+outside (as `knowFairground` does) is put back in `tests/setup.ts`, or a file finds it as the one
+before left it. A world test is slow by its steps, not its building (about 50 ms): one that
+settles the town for long takes a stated timeout saying why, as `finale.test.ts` does. Smoke
 (`scripts/smoke/`, a file per area) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.

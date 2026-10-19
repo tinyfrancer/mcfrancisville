@@ -8123,3 +8123,76 @@ nothing was asked._
   the unsteady ones, so their new walk can't be told from a picture; the test says it.
 - **The lived-in fixtures pass unchanged**; the suite is 2,640 tests in 223 files, W1's three
   new files 18 of them; `smoke:offline` 10/10.
+
+## 336. The suite made quick: plain tests in Node sharing their modules, the HUD's in jsdom (2026-10-19, 1.1's T2)
+
+_Session T2 of the 1.1 plan, lane T (decision 328). No save change; nothing she sees changes,
+and nothing in `src/` does. Personal touches parked (decision 177): nothing was asked._
+
+- **Measured first.** In a quiet container (two CPUs, so vitest's default of one worker, CPUs
+  less one) the suite was **346 s** wall and 442 s of CPU, 2,622 tests (2,621 passing, one
+  skipped) in 220 files. Summed over the files: setting up jsdom 147 s (0.67 s a file, every
+  file), importing the game 52 s (each file afresh), the setup file 10 s, and the tests
+  themselves 104 s; the rest is vitest's own. **Two thirds was per file, not per test.** Under
+  another session's smoke the same suite took 490 s to 1,079 s, and one of petsGrow's cases
+  timed out at vitest's 5 s.
+- **The plan's suspects weren't the cost.** The simulated years already run once a file at
+  module level (`rarity`'s `YEARS` and `DIGS`, 2.5 s with its import), `weeksDiffer` and
+  `rareEvents` are pure deals under a second, and `livedIn` opens each fixture once. Building a
+  world through `harness()` is about 50 ms (the eight maps parsed, habitats found, the rooms'
+  reachability; honest work, nothing a test seam could skip, and `src/render/` is never
+  touched), some 540 times. **A world test is slow by the step**: 0.5 ms a step quiet and up to
+  1.8 ms loaded, most of it `happeningsAt` (`systems/happenings.ts`) filtering every happening
+  row for every neighbour on every step, through `whereabouts` (`systems/schedules.ts`). That's
+  the game's code, not the tests', so it's logged in "Where it hurts" 2 for a session that may
+  change `src/systems/`.
+- **Two vitest projects** (`vitest.config.ts`): **`dom`**, `tests/hud/**` and five named files
+  that make elements, fire DOM events or spy on a canvas (`audio/heard`, `errorNotes`,
+  `render/ground`, `render/transition`, `wiring/perf`), each file in a fresh jsdom as before;
+  and **`node`**, the other 193 files, in plain Node (decision 9: nothing but `render/` knows
+  it's drawing) with **`isolate: false`**, so a worker imports the game once and its files share
+  the modules. The list was found by running the whole suite in Node: the 22 files that failed
+  did so on `document`, `window` or `HTMLCanvasElement` being undefined (and three slow world
+  cases on the 5 s, the machine being loaded). All of `tests/hud/` stays in jsdom, six of its
+  files that would pass in Node too, so the rule is a directory and a short list. Nothing in
+  `src/` outside the HUD and the view branches on whether there's a DOM (the one `typeof` guard
+  is `crypto` in `cloudSeal.ts`, which Node has).
+- **What a file must find as a fresh one did is put back in `tests/setup.ts`**, which runs
+  before every file: the three things a world tells the rules from outside as it's made
+  (`knowFairground`, `knowBandstand`, `knowMayor`), every module-level `let` in `src/` set from
+  outside. Without it two files failed (`systems/holidays`' party round the well and
+  `systems/venues`, both finding the fairground open from a file before); with it the node
+  project passes with its files shuffled under three seeds (`--sequence.shuffle.files`, seeds
+  11, 222 and 3333). The other module-level state is caches keyed by everything they read
+  (`happensOn`'s day, `visitsOn`'s day and mayor, `decorOn`'s day, the sprite caches), and no
+  test changes a data row or mocks a module.
+- **`finale.test.ts`'s flaky timeout**: settling the town on Halloween is thousands of steps
+  (until nobody at the fairground has moved for 1,500), each paying for `happeningsAt` as above,
+  1 to 3 s a case in the container. The cause is in `src/systems/`, so its three describes that
+  settle the town take a stated `SETTLING` timeout of 30 s with a comment saying why.
+- **After**: **121 s** wall in the same quiet container (35% of before) and 141 s of CPU (32%):
+  jsdom 17 s (27 files), imports 16 s, the tests 81 s. The same 2,622 tests, the same
+  assertions, none removed. With W1 merged in (PR #206: 2,640 tests in 223 files) it's 125 s.
+  CI before (four runs on 2026-10-19, the last W1's merge): Node 25's `npm run test` 84 s, 86 s,
+  153 s and 161 s; Node 22's `npm run coverage` 168 s, 209 s, 253 s and 258 s. After (PR #207's run): Node 25's
+  test step 37 s, Node 22's coverage 164 s, most of which is now Istanbul instrumenting the game
+  (its transform alone is over a minute), which the projects don't change.
+- **The slowest files, before → after** (seconds, file total): `sprites/doll` 10.3 → 10.0,
+  `world/finale` 7.2 → 7.4, `world/petsGrow` 7.0 → 3.8, `audio/audio` 6.0 → 4.8,
+  `sprites/catalogue` 5.9 → 4.7, `world/travel` 5.6 → 3.6, `world/fishing` 4.7 → 2.6,
+  `world/villagers` 4.1 → 2.9, `sprites/seasons` 4.1 → 1.2, `render/lawn` 3.7 → 2.1,
+  `systems/critters` 3.5 → 2.7, `world/interiors` 3.5 → 2.2, `data/dialogue` 3.5 → 2.5,
+  `sprites/villagers` 3.3 → 2.0, `world/holidays` 3.1 → 1.9, `world/neighbourLife` 3.1 → 1.7,
+  `world/mysteryChain` 2.7 → 1.1, `world/pets` 2.7 → 1.2, `systems/rarity` 2.5 → 1.8,
+  `sprites/frames` 2.4 → 0.3. What's left is the tests' own work: the doll drawn in every piece,
+  facing and frame, and the town stepped.
+- **Tried and dropped**: the `threads` pool (119 s against forks' 121 s, no gain; forks, the
+  default, kept); more workers in the container (two lanes run in it at once, so a second
+  worker races the other session's suite, and CI's four CPUs already get three); a world shared
+  across a describe's cases (nearly every world case steps or changes the town, building one is
+  50 ms, and the one pair that could share in `finale` has a case that crowns; a rule that saves
+  nothing wasn't added to CLAUDE.md); `isolate: false` for the `dom` project too (the HUD keeps
+  module state: the open sheets' count, remembered tabs and filters, the injected styles);
+  `@vitest-environment` comments file by file (one list in the config reads better, and
+  `tests/hud/` is the rule); happy-dom (a different DOM is a different test); memoising
+  `happeningsAt` (it's `src/`, and W1's lane is in `src/systems/` as T2 runs).

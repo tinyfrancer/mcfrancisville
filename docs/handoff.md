@@ -32,14 +32,27 @@ open (decision 330).
 
 ### Lane T: tooling (T1 → T2; decisions from 335; never the save)
 
-**T1 landed (PR #205, decision 335). Next: T2.** Smoke is `scripts/smoke/`: `run.mjs` (the
+**T2 landed (PR #207, decision 336). Lane T is finished.** The suite is two vitest
+projects (`vitest.config.ts`): `dom`, `tests/hud/` and the five files named in `DOM`, each in a
+fresh jsdom; and `node`, everything else, in plain Node with `isolate: false`, its files sharing
+their modules. **A test outside `tests/hud/` that needs `document` or `window` is named in
+`DOM`**, and a module-level `let` in `src/` that a world sets from outside goes in
+`tests/setup.ts`'s resets (today `knowFairground`, `knowBandstand`, `knowMayor`), or a file
+finds it as the one before left it. 346 s to 121 s in a quiet container (125 s with W1's tests);
+CI's Node 25 test step 84 to 161 s to 37 s, Node 22's coverage 168 to 258 s to 164 s.
+`finale.test.ts`'s settling describes take a stated 30 s: a world step is slow because
+`happeningsAt` filters every happening row for every neighbour on every step ("Where it hurts"
+2), which a session in `src/systems/` could fix. Smoke's `cloud` check "what the cloud keeps is
+sealed" can fail by chance (its `/player|wardrobe|MFV/` can match the sealed base64); it failed
+once and passed on the rerun.
+
+**T1 landed (PR #205, decision 335).** Smoke is `scripts/smoke/`: `run.mjs` (the
 browser, `ORDER`, `NEEDS`, the arguments), `lib.mjs` (the helpers, the shared `page`, swapped by
 `setPage`) and nineteen area files, each exporting `sections`; `npm run smoke -- town fair`, a
 section's own name, `--section=`, `-- --list`. 622 checks before and after. **A new section goes
 in its area's list and in `ORDER`** (the runner refuses to start otherwise), and if it leans on
 a section in another area, a line in `NEEDS`. Every area passes alone (12 s to 78 s; `gallery`
 four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&page=n`, 50 rows.
-For T2: the vitest suite was 2,611 tests in 219 files, 346 s in the container on this branch.
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 

@@ -40,7 +40,15 @@ function halloween(hour: number, look: Look = { ...DEFAULT_LOOK, name: 'Em' }) {
   return h;
 }
 
-describe('the costume contest (0.2 J4)', () => {
+/**
+ * Settling the town on Halloween is thousands of steps of the world, and each step works out
+ * every neighbour's whereabouts afresh, filtering the hour's happenings for each
+ * (`happeningsAt` through `whereabouts`): 1 to 3 s a case in the container, and past vitest's
+ * 5 s on a busy CI runner (1.1's T2, decision 336).
+ */
+const SETTLING = { timeout: 30_000 };
+
+describe('the costume contest (0.2 J4)', SETTLING, () => {
   it('lines the town up before the stage on the 31st, facing her, the judge', () => {
     const h = halloween(18);
     const rufus = h.world.neighbourhood.neighbour('rufus');
@@ -74,7 +82,7 @@ describe('the costume contest (0.2 J4)', () => {
   });
 });
 
-describe('the party (0.2 J4)', () => {
+describe('the party (0.2 J4)', SETTLING, () => {
   it("puts out the chili and the pumpkins before the stage, and hers only if she's carved it", () => {
     const h = halloween(21);
     const set = () =>
@@ -133,7 +141,7 @@ describe("Cody's letter the morning after (0.2 J4)", () => {
   });
 });
 
-describe('the finale at the fairground (0.2 M3)', () => {
+describe('the finale at the fairground (0.2 M3)', SETTLING, () => {
   /** Halloween at an hour, the fairground open and her there. */
   function atTheFair(hour: number) {
     const h = harness(TOWN, {
