@@ -877,6 +877,29 @@ dearer in town than E5 measured (22.3 against 13.1 ms), mostly L2's lawn tones b
 into chunks it hasn't seen; the second-pass check under L2 holds. Her phone is the real test:
 "On her iPhone" below.
 
+**1.1's W1** (2026-10-19, decision 340), the arrivals table, the overlays as a list and the pets'
+pulled paths, changes no drawing. `canWalk` was timed directly, as the hot path it is: 400 A\*
+paths between seeded open tiles across the town (722,889 `canWalk` calls, every project built),
+three runs each, alternating, on a quiet container: 958–1,023 ms (median of seven) on `v1.1-dev`
+against 984–1,072 ms on W1, and `canWalk` alone 981–1,040 ns against 952–1,066 ns a call, so the
+list costs nothing measurable over the inline checks (each path across town is about 2.5 ms, both
+ways). `npm run perf` at Close, 21:30, two runs each alternating, on a container shared with
+another session (draw means, ms (p50); updates, ms):
+
+| Scene       | Draw, W1              | Draw, v1.1-dev        | Update W1 → v1.1-dev  |
+| ----------- | --------------------- | --------------------- | --------------------- |
+| Town        | 36.7–37.4 (25.5–26.9) | 34.5–38.2 (24.5–27.9) | 1.18–1.25 → 1.12–1.35 |
+| Home        | 17–18 (10.6–11.1)     | 16.5–17.9 (10.5–11.1) | 0.92 → 0.89–1.03      |
+| Fairground  | 24–24.1 (15.8–17.1)   | 22.4–22.7 (15.2–16)   | 0.79–0.85 → 0.7–0.77  |
+| Whisperwood | 26.8–27.5 (17.6–18.4) | 28–28.3 (18.3–19.2)   | 0.89–0.94 → 0.96–1.01 |
+| Boo Acres   | 18.1–18.8 (12.1–12.4) | 19.8–22 (13.2–13.3)   | 0.65–0.69 → 0.72–0.81 |
+| Her yard    | 33–33.5 (26.5–26.8)   | 33.3–39.2 (26.7–29.1) | 1.04–1.1 → 1.07–1.24  |
+| Back room   | 21.1–21.7 (14.7–15.4) | 20–21.4 (14.8–15.1)   | 1.15–1.38 → 1.17–1.32 |
+
+Every row within the other's spread or a millisecond of it, one way and the other: the
+container's noise. A pet's pulled path is planned when its goal moves, as before, with a
+`stringPull` over a path of a few tiles.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -947,10 +970,11 @@ V1's weight on it.
 6. ~~**`MapZone` asks eight overlays where it can walk.**~~ Done in 1.1's W1 (decision 340): one
    list of `Overlay`s (`zones/Overlay.ts`), the gates and the farm's rows given classes of their own
    (`Gates`, `Plots`), held by a snapshot of every tile of every place for each lived-in save. One
-   thing found on the way: `canWalk` costs about 2 µs a call in the container (each overlay works
-   out its day, `Sites` and `Decorations` from the clock, on every call), so a long A* across town
-   is a few milliseconds; nothing she feels at two walks a tap, but a cache by minute (as `Stalls`
-   has) would be the first thing to try if paths ever show in `?perf`.
+   thing found on the way, the same before and after: `canWalk` in town costs about 1 µs a call in
+   the container, most of it `Decorations` and `Mounds` working out the day key (`dayKey`) on every
+   call, and the pond's ice asking `Decorations` again, so a long A\* across town is a few
+   milliseconds; nothing she feels at a walk a tap, but keeping the day by the minute (as `Stalls`
+   does) would be the first thing to try if paths ever show in `?perf`.
 7. ~~**A project in her yard moves her things without asking.**~~ Done in 1.0.1 (X1, decision
    325): Start asks first with a card naming what goes in the chest (`Projects.inTheWay`,
    `Yard.wouldMove`), Not yet or Go ahead.
