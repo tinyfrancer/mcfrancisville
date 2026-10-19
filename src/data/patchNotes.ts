@@ -167,6 +167,20 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. A big one, so I typed it on my best paper. The W still sticks. It always will.',
   },
+  {
+    version: '1.0.1',
+    lines: [
+      "Today says which stall's first go at the fair is free, and a tap takes you there. The " +
+        'ducks have been asked to look lucky.',
+      'Before your greenhouse goes up where your things stand, a little card asks first. ' +
+        'Anything in the way waits, snug, in your storage chest.',
+      "October's quieter days have room for a surprise now. A wayfarer may wander through. Do " +
+        'wave.',
+      "Your rod waits by the door while you're in, tricks happen where you can see them, the " +
+        'reel goes gently on a calm phone, and your snack remembers what it was.',
+    ],
+    ps: 'P.S. Small fixes, so I typed them small. The W still sticks.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */
