@@ -406,6 +406,7 @@ export abstract class WorldParts {
       rareEvents: this.rareEvents,
       stalls: this.stalls,
       projects: this.projects,
+      activities: this.activities,
     });
   }
 

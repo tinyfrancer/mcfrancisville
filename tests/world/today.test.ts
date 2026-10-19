@@ -13,6 +13,7 @@ import { PASSERS } from '../../src/data/rareEvents';
 import { passersOn, rareEventOn } from '../../src/systems/rareEvents';
 import { canGoToday, goToday } from '../../src/wiring/todayGo';
 import type { World } from '../../src/world/World';
+import { FREE_GO_KEY } from '../../src/world/services/Activities';
 import { harness, type Harness } from './harness';
 
 const HOUR = 3_600_000;
@@ -105,6 +106,13 @@ function holds(h: Harness, line: TodayLine): boolean {
         w.projects.current === line.id && Math.floor((view?.progress ?? -1) * 100) === line.percent
       );
     }
+    // 1.0.1.
+    case 'freeGo':
+      return (
+        w.activities.freeGo() === line.id &&
+        w.activities.freeToday(line.id) &&
+        w.activities.isOpen(line.id) === line.open
+      );
   }
 }
 
@@ -228,5 +236,22 @@ describe("Today (V1's R2)", () => {
       }
       expect(goToday(h.world, line.go)).toBe(true);
     }
+  });
+
+  it('says where the fair’s free go is, flies her up to its stall, and goes once it’s had (1.0.1)', () => {
+    const h = harness(TOWN);
+    h.clock.set(new Date(2026, 8, 19, 19));
+    h.tick(1);
+    const line = expectTrue(h).find((l) => l.kind === 'freeGo')!;
+    expect(line).toMatchObject({ id: h.world.activities.freeGo(), open: true });
+    // Once she has been to the fairground, as any flight by the map.
+    h.world.atlas.find('fairground');
+    expect(goToday(h.world, line.go!)).toBe(true);
+    expect(h.world.scene).toBe('fairground');
+    const arrived = h.until(() => !h.world.player.moving, 'walking to the stall');
+    const prop = line.go && 'prop' in line.go ? line.go.prop : null;
+    expect(arrived.concat(h.tick(1))).toContainEqual(expect.objectContaining({ at: prop }));
+    h.world.takings.take(FREE_GO_KEY);
+    expect(h.world.upNow.lines().some((l) => l.kind === 'freeGo')).toBe(false);
   });
 });

@@ -1,3 +1,4 @@
+import { ACTIVITIES, type ActivityId } from '../data/activities';
 import { HAPPENINGS } from '../data/happenings';
 import { WANDERING_STALL_AT, type PasserId, type RareEventId } from '../data/rareEvents';
 import type {
@@ -114,6 +115,8 @@ export interface TodayFacts {
   } | null;
   /** The town project she's funding (V1's R4), how it stands and how far along it is, 0 to 1. */
   project: { id: ProjectId; stage: ProjectStage | null; progress: number } | null;
+  /** The fair's free go today (V1's R6b), until she has had it, and whether its stall is open. */
+  freeGo: { id: ActivityId; open: boolean } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -148,6 +151,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
     }
   // V1's R4: the town project she's funding, while it's under way.
   | { kind: 'project'; id: ProjectId; percent: number }
+  // 1.0.1: the day's first go at one of the fair's stalls is free, until she has had it.
+  | { kind: 'freeGo'; id: ActivityId; open: boolean }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -270,6 +275,17 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       now: isOn(hour, row.from, row.until),
       key: `happening:${next}:${day}`,
       go: { zone },
+    });
+  }
+  if (facts.freeGo) {
+    const { id, open } = facts.freeGo;
+    const at = ACTIVITIES[id].at;
+    lines.push({
+      kind: 'freeGo',
+      id,
+      open,
+      key: `freeGo:${day}`,
+      ...('prop' in at ? { go: { zone: 'fairground' as const, prop: at.prop } } : {}),
     });
   }
   if (facts.critters.visiting.length > 0) {

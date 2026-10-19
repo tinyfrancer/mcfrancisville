@@ -1,3 +1,4 @@
+import { ACTIVITIES } from '../data/activities';
 import type { Glyph } from '../data/glyphs';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
@@ -179,6 +180,15 @@ export function todayWords(line: TodayLine): TodayWords {
         text: `${PROJECTS[line.id].name} is ${line.percent}% of the way there`,
         small: 'Give a little more at the noticeboard, whenever you like.',
         glyph: 'hammer',
+      };
+    // 1.0.1: the fair's free go.
+    case 'freeGo':
+      return {
+        text: `Your first go at the ${ACTIVITIES[line.id].name.toLowerCase()} is free today`,
+        small: line.open
+          ? 'Over at the Hollow Fairground, whenever you like.'
+          : 'At the Hollow Fairground, once its stall opens.',
+        glyph: 'wheel',
       };
     case 'stray':
       return line.carrying

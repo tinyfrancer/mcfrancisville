@@ -13,6 +13,7 @@ import { PASSERS } from '../../data/rareEvents';
 import { passersOn } from '../../systems/rareEvents';
 import type { RareEvents } from '../services/RareEvents';
 import type { Projects } from '../services/Projects';
+import type { Activities } from '../services/Activities';
 import type { Stalls } from '../zones/Stalls';
 import { weatherOn } from '../../systems/weather';
 import type { MapZoneId } from '../../types/ids';
@@ -45,6 +46,8 @@ export interface UpNowParts {
   stalls: Stalls;
   /** The town project she's funding (V1's R4). */
   projects: Projects;
+  /** The fair's games, for the day's free go (1.0.1). */
+  activities: Activities;
 }
 
 /** What Today reads of the rare events, the passers-by and the peddlers (V1's R3). */
@@ -85,6 +88,12 @@ function outOfTheOrdinary(
 function underWay(projects: Projects): TodayFacts['project'] {
   const view = projects.view().find((p) => p.current);
   return view ? { id: view.id, stage: view.stage, progress: view.progress } : null;
+}
+
+/** The fair's free go today, while it's still to be had (1.0.1). */
+function freeGoOf(activities: Activities): TodayFacts['freeGo'] {
+  const id = activities.freeGo();
+  return activities.freeToday(id) ? { id, open: activities.isOpen(id) } : null;
 }
 
 const OUTDOORS = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
@@ -129,6 +138,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       critters: { visiting, fresh: visiting.filter((id) => !parts.hasHad(id)) },
       ...outOfTheOrdinary(parts, day),
       project: underWay(parts.projects),
+      freeGo: freeGoOf(parts.activities),
     };
   });
 }
