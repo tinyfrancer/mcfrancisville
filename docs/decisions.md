@@ -7833,3 +7833,19 @@ refactors as their own patch (a patch she can't notice costs a deployment for no
 with 1.2's art); the chunk split ("Where it hurts" 14: one chunk precached once a version is the
 right shape for an installed app); a new neighbour (a release with no theme gets none, decision
 270).
+
+## 329. A "Play on silent" switch in Settings, off by default (2026-10-19, amending 328)
+
+**Context:** Decision 328 had the game respect the silent switch with no way to play through
+it. Asked, the user wanted the switch in Settings.
+
+**Decision:** Settings' Sound tab gets **Play on silent**, off by default, kept per phone beside
+Sounds, Music and the new Ambience (`settings.ts`). Off, `SilentSwitch` (`src/audio/session.ts`)
+does nothing and the phone's switch mutes the game; on, it does what S1 built (the `playback`
+hint, or the looping silent element), so the game is heard with the switch down. The silent
+hint on the Sound tab says which way it's set. The bodies (A5a, A5b) get no named shapes from
+the user: the sessions pick.
+
+**Rejected:** on by default (she turns sound off with the switch; the default must be the
+phone's way); removing S1's work (it's the only way to hear the game on silent, and one switch
+keeps it).
