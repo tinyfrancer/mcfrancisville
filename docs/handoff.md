@@ -56,7 +56,18 @@ four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&pag
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
-**W2 landed (PR #208, decision 341; save v55). Next: W3.** Her rooms are a keeper of their
+**W3 in progress** (branch `claude/w3-talk-apis`, draft PR #210; no save change). Done and
+committed: `Talk` out of `Neighbourhood` (`services/Talk.ts`, made in `neighbours` just before the
+neighbourhood, which reads `talkingTo` from it and forwards the talk's ten reads for the view and
+the tests); `wiring/apis.ts` split into `wiring/apis/<area>.ts` (a pure move) with `apis.ts`
+composing; `main.ts` down to the boot, the loop and the views (the save and cloud
+`wiring/keeping.ts`, Settings' Apis `wiring/apis/settings.ts`, going in `wiring/greeting.ts`,
+touch, music, the dev handles); the areas' order named in `world/areas/order.ts` (`AREAS`, held
+by `tests/world/areaOrder.test.ts` through `options.areaMade`); the legend's note in
+`data/maps.ts`. Left: the numbers (`npm run perf` and a talk and a window turn timed, before on
+`v1.1-dev` and after), decision 342, the docs' last lines, merge `v1.1-dev`, rerun, merge.
+
+**W2 landed (PR #208, decision 341; save v55).** Her rooms are a keeper of their
 own, `Rooms` (`src/world/Rooms.ts`: each room's pieces with what they show and what stands on
 what, walls, floor, size, `here`, building and growing, the decorating moves; `Decorable`, as
 `Yard` is), and `Home` is the chest's two lists and the papers and floors she owns, with its
