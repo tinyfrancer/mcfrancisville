@@ -209,6 +209,23 @@ const DISPLAY_SAMPLES: readonly (readonly [DisplayPiece, ItemId])[] = [
 ];
 
 /**
+ * The catalogue's rows to a page of `?gallery&page=n` (T1, decision 335): few enough that a page
+ * of the tallest of them is still one full-page screenshot, which the whole gallery outgrew.
+ */
+export const GALLERY_PAGE_ROWS = 50;
+
+/** Page `page` (from 1) of `entries` and how many pages there are; all of them for no page. */
+export function pageOf(
+  entries: readonly Entry[],
+  page: number | null,
+): { entries: Entry[]; pages: number } {
+  const pages = Math.max(1, Math.ceil(entries.length / GALLERY_PAGE_ROWS));
+  if (page === null) return { entries: [...entries], pages };
+  const from = (page - 1) * GALLERY_PAGE_ROWS;
+  return { entries: entries.slice(from, from + GALLERY_PAGE_ROWS), pages };
+}
+
+/**
  * Every sprite in the game, named: what `?gallery` shows and `npm run sprite` renders to a PNG.
  * Pure, so it runs in Node as well as the browser. The scale sheet comes first, since it's the
  * page that's being judged while the art is redrawn.

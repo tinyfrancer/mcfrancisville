@@ -10,6 +10,14 @@ export function galleryRequested(search: string): boolean {
   return new URLSearchParams(search).has('gallery');
 }
 
+/** `?gallery&page=2` shows one page of it (T1); null for the whole gallery, or not a page. */
+export function galleryPage(search: string): number | null {
+  const raw = new URLSearchParams(search).get('page');
+  if (raw === null || !/^\d+$/.test(raw)) return null;
+  const page = Number(raw);
+  return page >= 1 ? page : null;
+}
+
 /**
  * `?hour=21.5` draws the town in the light of that hour, so the night art can be reviewed on a
  * phone at lunchtime. In production it changes only the light: every rule still reads the real

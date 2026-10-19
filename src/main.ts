@@ -1,6 +1,7 @@
 import { photoOf } from './render/photo';
 import type { Tile } from './systems/pathfinding';
 import {
+  galleryPage,
   galleryRequested,
   dayRequested,
   hourRequested,
@@ -79,7 +80,7 @@ const canvas = document.getElementById('game') as HTMLCanvasElement;
 catchErrors(window);
 
 if (galleryRequested(location.search)) {
-  showGallery(root);
+  showGallery(root, galleryPage(location.search));
 } else {
   startGame();
 }
