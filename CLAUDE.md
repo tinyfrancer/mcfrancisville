@@ -317,11 +317,20 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/world/options.ts`. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
-  a building goes in. Arriving is also how she gathers: trees, rocks and flower patches (yields in
+  a building goes in. Arriving at a prop is a table keyed by prop id (`PropArrivals`,
+  `src/world/arrivals.ts`; 1.1's W1, decision 340): each row given by the area that makes the
+  service doing it (`arrivals` on its return, joined by `arrivalsOf`, which refuses a prop claimed
+  twice), asked before a door, a way out and gathering, which stay in `World.arriveOn`; a new one
+  is a row in its area, and `tests/world/arrivingAtProps.test.ts` holds what each prop does.
+  What stands over a place's map (the lots, decorations, sites, stalls, a shut gate, today's
+  mound, the farm's built rows, her yard) is one list of `Overlay`s in `MapZone`
+  (`src/world/zones/Overlay.ts`: `propAt` and `blocks`), so a new thing standing there is an
+  `Overlay` and a line in that list. Arriving is also how she gathers: trees, rocks and flower patches (yields in
   `src/data/gathering.ts`, rules in `src/systems/gathering.ts`, `world.gathering`), and the night's
   snack.
 - **Walking and the camera:** `src/world/Movement.ts` walks her along an A\* path pulled taut
-  (`stringPull` in `src/systems/pathfinding.ts`); `FollowCamera` (`src/render/camera.ts`) eases
+  (`stringPull` in `src/systems/pathfinding.ts`), as her neighbours and, since 1.1's W1, her pets
+  (`Pet.walk`) walk theirs; `FollowCamera` (`src/render/camera.ts`) eases
   after her by whole pixels. Smoke's `smooth` section fails on any pixel that shimmers (decision 85).
 - **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows

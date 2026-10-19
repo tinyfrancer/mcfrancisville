@@ -43,7 +43,16 @@ For T2: the vitest suite was 2,611 tests in 219 files, 346 s in the container on
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
-Not started; after H and T.
+**W1 in progress** on `claude/w1-arrivals-overlays` (from `v1.1-dev`; decision 340; no save
+change). Done and committed: the two snapshot tests taken from the old code first
+(`tests/world/arrivingAtProps.test.ts`, every prop walked up to in every place;
+`tests/world/overlays.test.ts`, `canWalk`/`propAt` on every tile for a new town, every project
+built and each lived-in save on four days); arriving at a prop as a table (`world/arrivals.ts`,
+rows from `making`, `passive`, `festivals`, `catching`, which now makes `Digging`, and
+`homeServices`); `MapZone`'s overlays as one list (`zones/Overlay.ts`, `Gates.ts`, `Plots.ts`);
+pets on a pulled path (`Pet.walk`, `tests/world/petPaths.test.ts`). Both snapshots unchanged.
+Next: smoke's screenshots against `v1.1-dev`'s (taken before, 622/622), perf before and after,
+decision 340, the PR made ready and merged. Nothing asked of the user.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 

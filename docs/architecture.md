@@ -67,7 +67,8 @@ its services (0.3's W1, decision 218): `keepersOf` and the `Shared` parts in `sh
 the keepers, `town`, the options, and `movement` read late), then `making` (the stall, workbench,
 stove and `Belongings`), `passive` (visits, the candy tree), `places` (the zones and stalls),
 `shopping` (Ollie's deliveries and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2; his figurines, C3), `neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
-`fairground`, `catching` (`collecting.ts`: the net, the rod and, since 0.3's C1, the fossils),
+`fairground`, `catching` (`collecting.ts`: the net, the rod and, since 0.3's C1, the fossils;
+since 1.1's W1 the buried keys' `Digging` too, so the mound's two owners are in one area),
 `going` (`travel.ts`: her movement, travel, the broom), `homeServices` (`home.ts`: decorating, the
 record player, what plays, and since 0.3's H1 and H2 the chest and what's on show), `petServices`
 (`pets.ts`), `her` (hands, novelty, milestones, sitting, poses), and V1's two: `firstDay`
@@ -76,7 +77,10 @@ services made before it), in that order. V1 also put `Joining` (P4's verbs at a 
 `PostRound` (Ollie's walk to her box) and `Marriage` (P5) in `neighbours`, `Projects` (R4, over
 the `Works` keeper and the `Sites` overlay) in `places`, and `RareEvents` (R3) in `festivals`: a service listens for its signals in the order it
 was made, and anything made later is read through a function. A new service is a line in its
-area's function and its interface, a field here and its assignment. The options a world is made
+area's function and its interface, a field here and its assignment. An area whose service does
+something when she walks up to a prop also returns its rows of the arrivals table (`arrivals`, a
+`PropArrivals`, 1.1's W1, decision 340), which the constructor joins into `propArrivals` with
+`arrivalsOf` (see "Taps and arrivals"). The options a world is made
 from (`WorldOptions`, `fromSave`) are `src/world/options.ts`. What the services that talk with
 her neighbours read of the town (her name, where she is, where a neighbour is, their hearts,
 whether they live here, and `thank`) is one `TownReads` object made at the top of the constructor
@@ -217,9 +221,13 @@ key and solid like a stall; the fairground has its own `Decorations` for what's 
 happening that has moved there (0.2's M3). A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104).
 Every place has its `Mounds` (0.3's C1): today's mound on one of its map's `digSpots`, solid and
-walked up to. The town's yard (0.3's H5) is solid under each piece of hers standing there. So
-`MapZone.canWalk` and `propAt` ask eight overlays besides the map (the stalls, a shut gate, the lots,
-the decorations, the farm's built rows, the yard, the mound and, since R4, the project sites). `HomeZone` is her home: the room
+walked up to. The town's yard (0.3's H5) is solid under each piece of hers standing there. Each
+of these is an `Overlay` (`zones/Overlay.ts`, 1.1's W1, decision 340: an optional `propAt` and a
+`blocks`), and `MapZone` holds them as one list, in the order `propAt` asks them: the lots, the
+decorations, the sites, the stalls (the pop-up, then the cart), a shut gate (`Gates`), today's
+mound, the farm's built rows (`Plots`) and the yard, the last two only in the way. `canWalk` is the
+map (or the ice) and no overlay `blocks`; `propAt` is the first overlay's prop on the tile, else
+the map's. A ninth thing standing in a place is an `Overlay` and a line in that list. `HomeZone` is her home: the room
 she's in and its furniture, and since 0.3's H4 a doorway in the front room's back wall into the
 back room, crossed within `home` (`doorAt` gives a `Crossing` with a `room`, which `Travel.cross`
 turns into `HomeZone.through`, which enters it), so the rooms are one place to the pets, guests and music. A `RoomZone` is the inside
@@ -249,7 +257,9 @@ heads straight for the farthest point along it she can reach in a clear line, wh
 body, just under half a tile either side of her middle, never overlapping anything solid
 (`clearLine`, exact rather than sampled). So she walks straight across open ground and turns only
 at corners, and a new tap mid-step heads straight on from wherever she is. Her neighbours' paths
-are pulled the same way since phase S; pets still walk tile to tile.
+are pulled the same way since phase S, and her pets' since 1.1's W1 (`Pet.walk`, against her
+`BODY_RADIUS`, decision 340): where a pet goes is still `systems/pets.ts`'s, only the way there is
+pulled; the zoomies' lap stays a ring of tiles.
 
 Where a neighbour should be is worked out from the hour and the day key alone
 (`systems/schedules.ts`, phase S): the day's schedule (weekday or weekend, a stop in every window,
@@ -277,10 +287,19 @@ the nearest open tile beside it. A visit carries its `kind`, and her arrival loo
 `arrivals`, one handler per kind (phase K): talk, swing the net, pat the pet, tend the bed, use a
 thing in a building (`Interiors`), or a piece at home (its line, and the record player); anything whose row `plays` adds a `tune` from `Instruments`. The table
 is typed over every kind, so a new kind (a fishing spot, a stove) doesn't compile until it says
-what arriving does. A prop, or open ground, goes through `arriveOn`: the porch pots, a mound to dig
-(today's fossil mound first, `Fossils.isToday`, then the buried keys' `Digging`), a way out
-(`Travel.cross`), then whatever there is to gather (the orchard's trees among it). These are a
-chain of `if`s on the prop's id in `World.arriveOn` (see "Where it hurts"). A `piece` arrival is
+what arriving does. A prop, or open ground, goes through `arriveOn`: she faces it, sits if it's a
+seat and reads a signpost, then its row in the **arrivals table** (`propArrivals`, a
+`PropArrivals` keyed by prop id, `src/world/arrivals.ts`, 1.1's W1, decision 340), then a door or
+a way out (`Travel.cross`, a knock first on a festival evening), then, outdoors, whatever there is
+to gather (the orchard's trees among it), and on open ground what lies there and the stray. Each
+row is given by the area that makes the service doing it: `making` the honesty stall's tin,
+`passive` the porch pots, the candy tree and its saplings, `festivals` the pumpkin patch and the
+geese, `catching` the mound (today's fossil mound first, `Fossils.isToday`, then the buried keys'
+`Digging`, in one row), `homeServices` the built bandstand. A row returns the moments after her
+arrival, or null to let the prop go on to the door (a goose or a mound indoors). `arrivalsOf`
+refuses a prop two areas claim, so no two rows race, and a new one is a row in its area.
+`tests/world/arrivingAtProps.test.ts` walks up to every kind of prop in every place and holds what
+each does to a snapshot taken from the chain of `if`s the table replaced. A `piece` arrival is
 a piece at home or in her yard: its line, the record player, a seat, or (from the `arrived`
 moment in `main.ts`) a display piece's sheet. Every arrival comes from
 `update`, even one with no walk, so the moments have one source.
@@ -921,16 +940,17 @@ V1's weight on it.
    busts by closeness, Cody's greeting by his line and the noticeboard's faces by their notes, each
    a rule in `systems/moods.ts`; and the noticeboard's art shows what's pinned up
    (`noticeboardLook`, picked by the view).
-5. **Arriving at a prop is a chain of `if`s.** `World.arriveOn` asks the prop's id in turn: the
-   porch pots, the candy tree, a sapling, the pumpkin patch, the bandstand (R4), the honesty stall,
-   a goose, a mound (today's fossil first, then the buried keys), a way out, then gathering and
-   the stray (R3). The order matters, and each feature that does something on arrival has added a
-   line. The next should make them a table keyed by prop id, as phase K made `arrivals` one keyed
-   by visit kind, with the mound's two owners asked in one handler.
-6. **`MapZone` asks eight overlays where it can walk.** `canWalk` and `propAt` each check the
-   stalls, a shut gate, the lots, the decorations, the farm's built rows, her yard, today's mound
-   and, since R4, the project sites, after the map. A new thing standing in a place should make
-   them a list of overlays, each with its own `propAt` and `blocks`, rather than a ninth line.
+5. ~~**Arriving at a prop is a chain of `if`s.**~~ Done in 1.1's W1 (decision 340): a table keyed
+   by prop id (`PropArrivals`, `world/arrivals.ts`), each row given by the area that makes its
+   service, the mound's fossil and keys in one row, asked before the door, the way out and
+   gathering, which stay in `arriveOn`; held by a snapshot of every prop walked up to.
+6. ~~**`MapZone` asks eight overlays where it can walk.**~~ Done in 1.1's W1 (decision 340): one
+   list of `Overlay`s (`zones/Overlay.ts`), the gates and the farm's rows given classes of their own
+   (`Gates`, `Plots`), held by a snapshot of every tile of every place for each lived-in save. One
+   thing found on the way: `canWalk` costs about 2 µs a call in the container (each overlay works
+   out its day, `Sites` and `Decorations` from the clock, on every call), so a long A* across town
+   is a few milliseconds; nothing she feels at two walks a tap, but a cache by minute (as `Stalls`
+   has) would be the first thing to try if paths ever show in `?perf`.
 7. ~~**A project in her yard moves her things without asking.**~~ Done in 1.0.1 (X1, decision
    325): Start asks first with a card naming what goes in the chest (`Projects.inTheWay`,
    `Yard.wouldMove`), Not yet or Go ahead.
@@ -973,5 +993,6 @@ V1's weight on it.
     own, which is the way for the next new place.
 16. ~~**What she ate isn't saved**~~ Done in 1.0.1 (X1, decision 325, save v54): `kitchen.ate`
     keeps the dish for each course, so the chip is right after a reload.
-17. **Pets walk tile to tile.** She and her neighbours walk paths pulled taut; the pets' pottering
-    would look smoother the same way (`stringPull`), if an art pass wants it.
+17. ~~**Pets walk tile to tile.**~~ Done in 1.1's W1 (decision 340): `Pet.walk` pulls its path
+    with `stringPull` against her body's radius, so pets trot straight across open ground and turn
+    at corners, as she and her neighbours do.
