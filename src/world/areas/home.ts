@@ -1,3 +1,4 @@
+import type { PropArrivals } from '../arrivals';
 import { Chest } from '../services/Chest';
 import { Decorator } from '../services/Decorator';
 import { Display } from '../services/Display';
@@ -12,14 +13,17 @@ export interface HomeServices {
   decorating: Decorator;
   chest: Chest;
   display: Display;
+  /** A built bandstand plays a tune as she walks up (V1's R4). */
+  arrivals: PropArrivals;
 }
 
 /** `forget` leaves behind whatever she was on her way to do, as picking a piece up does. */
 export function homeServices(s: Shared, forget: () => void): HomeServices {
   const { ctx, town } = s;
+  const instruments = new Instruments(ctx, s.takings, town, s.options.tunes);
   return {
     recordPlayer: new RecordPlayer(ctx, s.bag, s.home),
-    instruments: new Instruments(ctx, s.takings, town, s.options.tunes),
+    instruments,
     decorating: new Decorator(ctx, s, {
       standing: () => s.movement().tile,
       atHome: () => town.scene() === 'home',
@@ -38,5 +42,7 @@ export function homeServices(s: Shared, forget: () => void): HomeServices {
     }),
     chest: new Chest(ctx, { bag: s.bag, home: s.home, atHome: () => town.scene() === 'home' }),
     display: new Display(ctx, { bag: s.bag, home: s.home, atHome: () => town.scene() === 'home' }),
+    // Boothoven's tunes she has learnt too.
+    arrivals: { bandstand: () => [instruments.play('piano')] },
   };
 }

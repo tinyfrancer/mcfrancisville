@@ -1,11 +1,14 @@
 import { doorStep } from '../../data/maps';
 import { tileAt, walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
-import { alongExit, exitAt, gateOf, landingOf } from '../../systems/zones';
+import { alongExit, exitAt, landingOf } from '../../systems/zones';
 import type { MapZoneId, TileId, ZoneId } from '../../types/ids';
 import type { Decorations } from './Decorations';
+import { Gates } from './Gates';
 import type { Lots } from './Lots';
 import type { Mounds } from './Mounds';
+import type { Overlay } from './Overlay';
+import { Plots } from './Plots';
 import type { Sites } from './Sites';
 import type { Stalls } from './Stalls';
 import type { Yard } from '../Yard';
@@ -13,9 +16,10 @@ import { footprint } from '../../systems/decor';
 import { covers, ringOf, type Crossing, type Entry, type Zone } from './Zone';
 
 /**
- * A place outdoors, drawn from a map: the town, Whisperwood, Lantern Shore. The town also has the
- * stalls that stand in it on their days and what stands in its square for a holiday (phase U), and
- * a place may have newcomers' lots (phase T).
+ * A place outdoors, drawn from a map: the town, Whisperwood, Lantern Shore. Over the map stand its
+ * overlays (1.1's W1, decision 340): the newcomers' lots (phase T), the day's decorations (phase
+ * U), the project sites (V1's R4), the town's stalls on their days, a shut gate, today's mound
+ * (0.3's C1), the farm's built rows (0.2's N1) and her yard (0.3's H5).
  */
 export class MapZone implements Zone {
   readonly id: MapZoneId;
@@ -23,15 +27,17 @@ export class MapZone implements Zone {
   readonly stalls: Stalls | null;
   readonly lots: Lots | null;
   readonly decorations: Decorations | null;
-  /** Whether a place is open yet, for a way out with a gate across it. */
-  private readonly isOpen: (zone: ZoneId) => boolean;
-  /** Every gate across a way out, and the place it opens to. */
-  private readonly gates: readonly { to: ZoneId; prop: PlacedProp }[];
+  /** The gates across its ways out, standing while the place beyond is shut. */
+  private readonly gates: Gates;
   /** Its open water, with nothing standing in it: what freezes over in winter (phase U). */
   private readonly water: ReadonlySet<number>;
-  /** The farm's extension rows (0.2's N1): each kept tile's row, and how many are built. */
-  private readonly plots: ReadonlyMap<number, number>;
-  private readonly rowsBuilt: () => number;
+  /** The farm's extension rows (0.2's N1), beds once built. */
+  private readonly plots: Plots;
+  /**
+   * What stands over the map, asked in this order what stands on a tile (the first to answer is
+   * the prop there) and whether it's in the way; a new thing standing in a place is a line here.
+   */
+  private readonly overlays: readonly Overlay[];
   /** Her yard, in the town (0.3's H5): what of hers stands there is solid too. */
   readonly yard: Yard | null;
   /** The day's mound (0.3's C1), solid like any. */
@@ -55,15 +61,23 @@ export class MapZone implements Zone {
     this.sites = sites?.any ? sites : null;
     this.mounds = mounds;
     this.yard = yard?.exists ? yard : null;
-    this.rowsBuilt = rowsBuilt;
-    this.plots = new Map(
-      map.plots.flatMap((row, i) => row.map((t) => [t.ty * map.width + t.tx, i + 1] as const)),
-    );
+    this.plots = new Plots(map, rowsBuilt);
     this.map = map;
     this.stalls = stalls;
     this.lots = lots?.any ? lots : null;
     this.decorations = decorations;
-    this.isOpen = isOpen;
+    this.gates = new Gates(map, isOpen);
+    const over: (Overlay | null)[] = [
+      this.lots,
+      this.decorations,
+      this.sites,
+      this.stalls,
+      this.gates.any ? this.gates : null,
+      this.mounds,
+      this.plots.any ? this.plots : null,
+      this.yard,
+    ];
+    this.overlays = over.filter((o) => o !== null);
     const standing = new Set(
       map.props.flatMap((p) =>
         Array.from(
@@ -75,9 +89,6 @@ export class MapZone implements Zone {
     this.water = new Set(
       map.tiles.flatMap((t, i) => (t === 'water' && decorations && !standing.has(i) ? [i] : [])),
     );
-    this.gates = map.exits
-      .filter((e) => e.gate)
-      .map((e) => ({ to: e.to, prop: { id: 'gate' as const, ...gateOf(e, map) } }));
   }
 
   /**
@@ -85,13 +96,7 @@ export class MapZone implements Zone {
    * gate stands like a prop she walks up to, and the way through it opens with the place.
    */
   shutGates(): PlacedProp[] {
-    return this.gates.filter((g) => !this.isOpen(g.to)).map((g) => g.prop);
-  }
-
-  /** The shut gate on a tile, if there is one: checked on every step of a path, so it's cheap. */
-  private shutGateAt(tx: number, ty: number): PlacedProp | undefined {
-    for (const g of this.gates) if (covers(g.prop, tx, ty) && !this.isOpen(g.to)) return g.prop;
-    return undefined;
+    return this.gates.shut();
   }
 
   get width(): number {
@@ -102,29 +107,16 @@ export class MapZone implements Zone {
     return this.map.height;
   }
 
-  /**
-   * Open ground (or the pond, frozen over in winter), and not where the pop-up shop or the Moon Pie
-   * Man's cart stands today, nor anything on a newcomer's lot, nor a holiday's piece in the square,
-   * nor a piece of hers in her yard (0.3's H5).
-   */
-  canWalk = (tx: number, ty: number): boolean =>
-    (walkable(this.map, tx, ty) || this.isIce(tx, ty)) &&
-    !covers(this.stalls?.popUp(), tx, ty) &&
-    !covers(this.stalls?.moonPieCart(), tx, ty) &&
-    this.shutGateAt(tx, ty) === undefined &&
-    this.lots?.propAt(tx, ty) === undefined &&
-    this.decorations?.propAt(tx, ty) === undefined &&
-    !this.isBuiltPlot(tx, ty) &&
-    !this.yard?.blocks(tx, ty) &&
-    !covers(this.mounds?.today(), tx, ty) &&
-    this.sites?.propAt(tx, ty) === undefined &&
-    !this.sites?.isBed(tx, ty);
+  /** Open ground (or the pond, frozen over in winter), with nothing standing over it. */
+  canWalk = (tx: number, ty: number): boolean => {
+    if (!walkable(this.map, tx, ty) && !this.isIce(tx, ty)) return false;
+    for (const overlay of this.overlays) if (overlay.blocks(tx, ty)) return false;
+    return true;
+  };
 
   /** Whether a tile kept for the farm is a bed now, its row built (0.2's N1). */
   isBuiltPlot(tx: number, ty: number): boolean {
-    if (this.plots.size === 0 || tx < 0 || tx >= this.map.width) return false;
-    const row = this.plots.get(ty * this.map.width + tx);
-    return row !== undefined && row <= this.rowsBuilt();
+    return this.plots.blocks(tx, ty);
   }
 
   /** The ground's tiles as they are now: the farm's built rows are beds, the pond frozen in winter. */
@@ -154,20 +146,10 @@ export class MapZone implements Zone {
     (tileAt(this.map, tx, ty) === 'ice' || this.isIce(tx, ty)) && !this.sites?.isDeck(tx, ty);
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
-    const onLot = this.lots?.propAt(tx, ty);
-    if (onLot) return onLot;
-    const decoration = this.decorations?.propAt(tx, ty);
-    if (decoration) return decoration;
-    const site = this.sites?.propAt(tx, ty);
-    if (site) return site;
-    const popUp = this.stalls?.popUp();
-    if (covers(popUp, tx, ty)) return popUp!;
-    const cart = this.stalls?.moonPieCart();
-    if (covers(cart, tx, ty)) return cart!;
-    const gate = this.shutGateAt(tx, ty);
-    if (gate) return gate;
-    const mound = this.mounds?.today();
-    if (covers(mound, tx, ty)) return mound!;
+    for (const overlay of this.overlays) {
+      const prop = overlay.propAt?.(tx, ty);
+      if (prop) return prop;
+    }
     return this.map.props.find((p) => covers(p, tx, ty));
   }
 
@@ -199,8 +181,8 @@ export class MapZone implements Zone {
 
   doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null {
     if (prop?.id === 'gate') {
-      const gate = this.gates.find((g) => g.prop.tx === prop.tx && g.prop.ty === prop.ty);
-      return gate ? { to: gate.to, along: 0 } : null;
+      const to = this.gates.to(prop);
+      return to ? { to, along: 0 } : null;
     }
     if (prop) {
       const door = this.map.doors.find((d) => d.prop === prop.id);

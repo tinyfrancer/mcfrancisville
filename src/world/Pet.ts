@@ -1,7 +1,7 @@
 import { TILE_SIZE } from '../config/world';
 import { JOBS, TRICKS, type PetLevel } from '../data/affection';
 import { PETS } from '../data/pets';
-import { findPath, type Tile } from '../systems/pathfinding';
+import { findPath, stringPull, type Tile } from '../systems/pathfinding';
 import type { RestSpot } from '../systems/petRest';
 import {
   barkTarget,
@@ -20,6 +20,7 @@ import {
   type PetFinds,
 } from '../systems/pets';
 import type { Facing, PetId, ZoneId } from '../types/ids';
+import { BODY_RADIUS } from './Movement';
 import type { Ground } from './Neighbour';
 
 /**
@@ -119,7 +120,8 @@ export class Pet {
   /** Wybie on his way to a dropped thing, or back to her with it. */
   fetching: 'out' | 'back' | null = null;
   private said: { bubble: Bubble; until: number } | null = null;
-  private path: Tile[] = [];
+  /** The corners of its way, in world pixels. */
+  private path: { x: number; y: number }[] = [];
   private headedFor: Tile | null = null;
   private barkedAt = -Infinity;
   /** Where Dolly is hiding from, while she hides behind her. */
@@ -461,7 +463,7 @@ export class Pet {
           0,
         );
         const lap = [...ring.slice(start), ...ring.slice(0, start)];
-        this.path = [...lap, ...lap, lap[0]!];
+        this.path = [...lap, ...lap, lap[0]!].map(centreOf);
         this.headedFor = null;
       }
     }
@@ -510,18 +512,28 @@ export class Pet {
     return sides.find((t) => s.ground.canWalk(t.tx, t.ty)) ?? this.behind(s);
   }
 
-  /** Heads for `goal` by the quickest way, planning afresh whenever the goal moves. */
+  /**
+   * Heads for `goal` by the quickest way, planning afresh whenever the goal moves: an A* path
+   * pulled taut as hers is (1.1's W1, decision 340), so it trots straight across open ground.
+   */
   private walk(deltaMs: number, goal: Tile, speed: number, ground: Ground): void {
     if (!sameTile(goal, this.headedFor)) {
       this.headedFor = goal;
-      const path = findPath(this.tile, goal, ground.canWalk, ground.width, ground.height);
+      const from = this.tile;
+      const path = findPath(from, goal, ground.canWalk, ground.width, ground.height);
       if (path === null) {
         this.path = [];
         this.settle(deltaMs, ground);
         return;
       }
-      // Back to the middle of its own tile first, so it never cuts a corner.
-      this.path = [this.tile, ...path];
+      // From where it is, with its own tile's middle first, which the pull leaves out whenever
+      // heading straight on wouldn't shave a corner.
+      const start = { x: this.x / TILE_SIZE, y: this.y / TILE_SIZE };
+      const middles = [from, ...path].map((t) => ({ x: t.tx + 0.5, y: t.ty + 0.5 }));
+      this.path = stringPull(start, middles, ground.canWalk, BODY_RADIUS).map((t) => ({
+        x: t.x * TILE_SIZE,
+        y: t.y * TILE_SIZE,
+      }));
     }
     this.pose = 'walk';
     this.stepPath(deltaMs, speed);
@@ -532,7 +544,7 @@ export class Pet {
     const here = this.tile;
     const c = centreOf(here);
     if (c.x !== this.x || c.y !== this.y) {
-      this.path = [here];
+      this.path = [c];
       this.headedFor = null;
       this.stepPath(deltaMs, PETS[this.id].speed);
       return;
@@ -557,7 +569,7 @@ export class Pet {
     this.walkMs += deltaMs;
     let budget = (speed * TILE_SIZE * deltaMs) / 1000;
     while (budget > 0 && this.path.length > 0) {
-      const next = centreOf(this.path[0]!);
+      const next = this.path[0]!;
       const dx = next.x - this.x;
       const dy = next.y - this.y;
       const dist = Math.hypot(dx, dy);

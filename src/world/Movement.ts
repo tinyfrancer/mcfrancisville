@@ -55,7 +55,7 @@ export function besideGoals(at: Tile, here: Tile, zone: Zone, within: 0 | 1): Ti
  * How far her body reaches either side of her middle, in tiles, for cutting corners: a shade under
  * half a tile, so she can walk a one-tile gap but never brushes what's solid beside it.
  */
-const BODY_RADIUS = 7 / 16;
+export const BODY_RADIUS = 7 / 16;
 
 /** How far onto the ice she gets before her feet go, in tiles. */
 const SLIP = 0.6;

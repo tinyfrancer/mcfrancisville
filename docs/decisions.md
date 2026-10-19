@@ -8036,6 +8036,94 @@ the gallery's foot. Personal touches parked (decision 177): nothing was asked._
 - Rob Boo's section's comment, which had stood above `jobs` since P4 put that one in, is above
   `robBoo` again.
 
+## 340. Arriving at a prop is a table by prop id, `MapZone`'s overlays a list, and pets walk pulled paths (2026-10-19, 1.1's W1)
+
+_Session W1 of the 1.1 plan, lane W (decision 328), "Where it hurts" 5, 6 and 17. No save
+change; nothing she sees changes but the pets' walk. Personal touches parked (decision 177):
+nothing was asked._
+
+- **The tests came first, from the old code.** `tests/world/arrivingAtProps.test.ts` walks her
+  up to every kind of prop (two of each) in every place outdoors, on 26 September at noon and on
+  a festival evening (30 October, 7pm) with every project built in town, the castle hill and
+  Whisperwood, and snapshots every moment each arrival gave; `tests/world/overlays.test.ts`
+  hashes `canWalk` and `propAt` over every tile of every place (and a ring outside) for a new
+  town, one with every project built and each of the five lived-in saves, on four days (an
+  ordinary Saturday, a film night, Christmas Eve with the square's tree and the pond frozen, a
+  day in May). Both snapshots were written on `v1.1-dev`'s code and committed before the
+  refactor; neither changed after. **Rejected:** computing old and new side by side in one test
+  (it means keeping the old code alive in the tree until the end); a hand-written table of
+  expected moments (it would hold what the session believed, not what the code did).
+- **Arriving at a prop is `PropArrivals`** (`src/world/arrivals.ts`): a partial record by
+  `PropId` of `OnArrival` rows, each `({ prop, here, arrived, place }) => WorldEvent[] | null`,
+  the moments after her arrival, or null to let the prop go on (a goose or a mound indoors, as
+  the chain's `&& outdoors` did). **Each row is given by the area that makes the service doing
+  it**, returned as `arrivals` beside its services: `making` the honesty stall's tin, `passive`
+  the porch pots (the `Porch` keeper, from `Shared`), the candy tree and a sapling, `festivals`
+  the pumpkin patch and the geese (who's whose read from `place.map`), `catching` the mound,
+  `homeServices` the built bandstand; the constructor joins them with `arrivalsOf`, which throws
+  on a prop two areas both claim. **Keyed by id, not by predicate**: every row of the chain
+  asked one prop's id, so no predicate was needed; a kind of prop that wants one can be a row
+  per id. **The order kept is the chain's shape, not the rows'**: no two rows ever share a prop,
+  so the order among them was never observable; what is ordered (her facing, a seat, a
+  signpost's place, then the table, then a door or way out with the knock first, then gathering
+  and, on open ground, what lies there and the stray) stays in `World.arriveOn`. **Rejected:** a
+  list of `{ matches, handle }` in the chain's order (it keeps an order that means nothing and
+  costs a scan per arrival); rows registered on `WorldContext` as services are made (a mutable
+  registry any service could add to at any time, where a returned table is seen whole in the
+  constructor); moving the door and gathering into the table (they aren't keyed by prop: a way
+  out is open ground, and gathering reads the place's yields for any prop or none).
+- **The mound's two owners are one row**, in `catching`: today's fossil mound (`Fossils.isToday`)
+  first, else the buried keys' `Digging`. So **`Digging` is made in `catching` now**, not in the
+  constructor after `going`; it listens for nothing and reads nothing at construction, so moving
+  it earlier changes no order anything is heard in (decision 218's rule). **Rejected:** a row in
+  the constructor reaching both (the one row with no area); `Fossils` taking `Digging` (it would
+  make one service the other's front).
+- **`MapZone`'s overlays are one list of `Overlay`s** (`src/world/zones/Overlay.ts`: an optional
+  `propAt(tx, ty)` and `blocks(tx, ty)`), held in `propAt`'s order: the lots, the decorations,
+  the sites, the stalls (the pop-up, then the cart), a shut gate, today's mound, the farm's built
+  rows and her yard. `Lots`, `Decorations`, `Sites`, `Stalls`, `Mounds` and `Yard` implement it
+  (`Sites.blocks` is its props or a built planter); the gates and the farm's rows, which were
+  `MapZone`'s own fields, are classes of their own (`zones/Gates.ts`, `zones/Plots.ts`), and
+  `MapZone.shutGates`, `isBuiltPlot` and `doorAt` ask them. `canWalk` is the map (or the frozen
+  pond) and no overlay blocking; `propAt` the first overlay's prop, else the map's. **The list is
+  `propAt`'s order** because only `propAt`'s answers depend on order (where two overlap, the
+  first wins); `canWalk` is an and of pure checks, so its old order, which differed, never showed.
+  **`propAt` optional**: the yard and the farm's rows only stand in the way (a yard piece is
+  walked up to through `Yard.pieceAt`, as before), and a stub returning undefined would say they
+  had props. **`MapZone`'s constructor keeps its arguments** (the zone test builds one), and an
+  overlay that a place doesn't have (no lots, no sites, no gates, no kept rows) is left out of its
+  list, as the `?.` chain skipped it. **Rejected:** overlays passed in as a list by `places`
+  (render reads `zone.lots`, `zone.stalls`, `zone.sites` and the rest by name, so `MapZone` would
+  keep both); one `Overlay` per prop (a list of hundreds to scan, where each overlay finds its own).
+- **Measured** (architecture.md's "1.1's W1"): 400 A\* paths across town, 722,889 `canWalk`
+  calls, three runs each alternating: 958–1,023 ms on `v1.1-dev`, 984–1,072 ms on W1; `canWalk`
+  alone about 1 µs a call both ways. `npm run perf`'s seven scenes within each other's spread.
+  Found on the way and left alone (a refactor changes nothing): most of that microsecond is
+  `Decorations` and `Mounds` working out the day key on every call, and the pond's ice asking the
+  decorations again; keeping the day by the minute, as `Stalls` does, is the first thing to try
+  if paths ever show in `?perf` ("Where it hurts" 6's note).
+- **Pets walk a path pulled taut** (`Pet.walk`): the A\* path, from where the pet is with its
+  own tile's middle first, through `stringPull` against her `BODY_RADIUS` (7/16 of a tile,
+  exported from `Movement.ts`), so it heads straight for the farthest point it can reach in a
+  clear line and turns only at corners, as she and her neighbours do. Its path is world points;
+  settling onto its tile is the tile's middle, and Wybie's zoomies lap stays the ring of tiles
+  round her, unpulled (a lap is the point of it). The first point is kept even when it is where
+  the pet stands, so a walk to its own tile ends exactly as before (a zero step, then `stand`).
+  Where a pet goes (`systems/pets.ts`) is untouched. `tests/world/petPaths.test.ts`: a pet's walk
+  across an open room lies on the straight line from its tile's middle to the goal's (it fails
+  on the old code), and it still goes round a pillar. **Rejected:** a smaller radius for the
+  pets (they're smaller, but the plan asked for her walk, and the same body never brushes a
+  corner); pulling the zoomies.
+- **Smoke's screenshots:** 622/622 on `v1.1-dev` and on W1. Smoke's pictures aren't reproducible
+  run to run (the real clock deals the light, clouds, critters and walks), so `v1.1-dev` and W1
+  were each run twice, the second runs side by side: 196 of 298 pictures differed between
+  `v1.1-dev`'s own two runs and 218 between W1's; of the 79 that came out the same in both runs
+  of both, every one is byte-for-byte the same on W1 as on `v1.1-dev`. None differs between the
+  branches that doesn't differ between two runs of the same code. The pets' screenshots are among
+  the unsteady ones, so their new walk can't be told from a picture; the test says it.
+- **The lived-in fixtures pass unchanged**; the suite is 2,640 tests in 223 files, W1's three
+  new files 18 of them; `smoke:offline` 10/10.
+
 ## 336. The suite made quick: plain tests in Node sharing their modules, the HUD's in jsdom (2026-10-19, 1.1's T2)
 
 _Session T2 of the 1.1 plan, lane T (decision 328). No save change; nothing she sees changes,

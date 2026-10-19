@@ -1,3 +1,4 @@
+import type { PropArrivals } from '../arrivals';
 import { Belongings } from '../services/Belongings';
 import { HonestyStall } from '../services/HonestyStall';
 import { Kitchen } from '../services/Kitchen';
@@ -11,6 +12,8 @@ export interface Making {
   workbench: Workbench;
   kitchen: Kitchen;
   belongings: Belongings;
+  /** Walking up to the honesty stall takes in its tin. */
+  arrivals: PropArrivals;
 }
 
 export function making(s: Shared): Making {
@@ -23,5 +26,11 @@ export function making(s: Shared): Making {
     { bag, wardrobe: s.wardrobe, home, workbench, pets: s.pets, yard: s.yard },
     options.ever,
   );
-  return { stall, workbench, kitchen, belongings };
+  const arrivals: PropArrivals = {
+    honestyStall: () => {
+      const sold = stall.collect();
+      return sold ? [sold] : [];
+    },
+  };
+  return { stall, workbench, kitchen, belongings, arrivals };
 }

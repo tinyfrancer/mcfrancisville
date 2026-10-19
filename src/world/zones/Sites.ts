@@ -4,6 +4,7 @@ import type { Tile } from '../../systems/pathfinding';
 import { FLAT, piecesAt, projectsIn } from '../../systems/projects';
 import type { MapZoneId } from '../../types/ids';
 import type { Works } from '../Works';
+import type { Overlay } from './Overlay';
 import { covers } from './Zone';
 
 /**
@@ -12,7 +13,7 @@ import { covers } from './Zone';
  * footbridge, whose deck is walked on (wood, not ice), and a built greenhouse's planters, which
  * are beds. Worked out again whenever what's been given changes.
  */
-export class Sites {
+export class Sites implements Overlay {
   private readonly works: Works;
   private readonly zone: MapZoneId;
   private cache: {
@@ -78,6 +79,11 @@ export class Sites {
 
   isBed(tx: number, ty: number): boolean {
     return this.now().beds.some((b) => b.tx === tx && b.ty === ty);
+  }
+
+  /** What stands going up, or built, and a built project's planters, which are beds. */
+  blocks(tx: number, ty: number): boolean {
+    return this.propAt(tx, ty) !== undefined || this.isBed(tx, ty);
   }
 
   /** A key that changes whenever the ground here does (a built project's beds), for the view. */
