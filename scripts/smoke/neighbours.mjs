@@ -742,12 +742,6 @@ async function scarah() {
 }
 
 /**
- * Rob Boo (V1's P3b, decision 303): on a plain Tuesday evening, the mayor's chain done by the dev
- * handles (`world.mystery.pin`), the town is gathered in the castle's great hall; walking in by real
- * taps, the dust sheet comes off, Rob Boo says hello and the corkboard's last pin is his. The next
- * morning, after a reload by `?day=`, he's on the town hall's steps, and a tap on him talks to him.
- */
-/**
  * Jobs seen, and happenings that do something (V1's P4): Rufus's flower buckets open as a shop,
  * and at book club Maude's talk has its verb, picking next week's book from three, through the
  * talk's list of actions, upright and on its side.
@@ -828,6 +822,12 @@ async function jobs() {
   await goOut();
 }
 
+/**
+ * Rob Boo (V1's P3b, decision 303): on a plain Tuesday evening, the mayor's chain done by the dev
+ * handles (`world.mystery.pin`), the town is gathered in the castle's great hall; walking in by real
+ * taps, the dust sheet comes off, Rob Boo says hello and the corkboard's last pin is his. The next
+ * morning, after a reload by `?day=`, he's on the town hall's steps, and a tap on him talks to him.
+ */
 async function robBoo() {
   const evening = '2026-11-17';
   const morning = '2026-11-18';
