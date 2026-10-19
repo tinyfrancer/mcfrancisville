@@ -304,7 +304,14 @@ export type WorldEvent =
   /** A pet grew fond enough of her for a new level (V1's R6c): its job at one, its trick at two. */
   | { kind: 'petGrew'; pet: PetId; name: string; level: PetLevel; at: { x: number; y: number } }
   /** A pet did its trick (V1's R6c), asked on its sheet, or `own` of its own accord. */
-  | { kind: 'petTrick'; pet: PetId; at: { x: number; y: number }; own?: true }
+  | {
+      kind: 'petTrick';
+      pet: PetId;
+      at: { x: number; y: number };
+      own?: true;
+      /** What she sees it do, when she asked for it on its sheet (said once the sheet is down). */
+      line?: string;
+    }
   /** A pet did its job on a walk (V1's R6c), `at` what it found, barked out or drew in. */
   | { kind: 'petHelped'; pet: PetId; name: string; job: PetJob; at: { x: number; y: number } };
 

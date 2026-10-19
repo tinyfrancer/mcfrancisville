@@ -3,6 +3,7 @@ import { FONDNESS, LEVEL_AT, TRICKS, WALK_TILES } from '../../src/data/affection
 import { CRITTERS } from '../../src/data/critters';
 import { isKept } from '../../src/data/items';
 import { PETS } from '../../src/data/pets';
+import { eventToast } from '../../src/hud/messages';
 import { windowKey } from '../../src/systems/clock';
 import { smallEventOf } from '../../src/systems/smallEvents';
 import type { PetId } from '../../src/types/ids';
@@ -169,6 +170,18 @@ describe('a trick', () => {
     expect(shown(LEVEL_AT[2])).toBe(true);
     expect(shown(LEVEL_AT[1])).toBe(false);
   }, 30_000);
+
+  it('asked for, says what it does as a toast, since its sheet is down first (1.0.1)', () => {
+    const h = harness();
+    h.world.pets.setPoints('dolly', LEVEL_AT[2]);
+    goHome(h);
+    const line = h.world.petCare.trick('dolly')!;
+    const trick = h.tick(1).find((e) => e.kind === 'petTrick');
+    expect(trick).toMatchObject({ pet: 'dolly', line });
+    expect(eventToast(trick!)?.text).toBe(line);
+    // One done on its own is only seen.
+    expect(eventToast({ kind: 'petTrick', pet: 'dolly', at: { x: 0, y: 0 }, own: true })).toBeNull();
+  });
 });
 
 describe('jobs on walks', () => {

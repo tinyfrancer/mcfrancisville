@@ -3722,18 +3722,6 @@ async function petsThatGrow() {
     JSON.stringify(fond),
   );
   await page.screenshot({ path: '.smoke/pet-grown.png' });
-  await tapElement('.hud-pet-sheet button:text-is("Trick")');
-  const tricked = await page.evaluate(() => ({
-    pose: window.world.petCare.pet('dolly').pose,
-    said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',
-  }));
-  check(
-    'Trick makes her spin, there in the world',
-    tricked.pose === 'trick' && tricked.said.includes('spins'),
-    JSON.stringify(tricked),
-  );
-  await page.evaluate(() => window.view.step(40, 8));
-  await page.screenshot({ path: '.smoke/pet-trick.png' });
   await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
   await page.evaluate(() => window.view.step(40));
   const side = await page.evaluate(() => {
@@ -3752,7 +3740,21 @@ async function petsThatGrow() {
   await page.screenshot({ path: '.smoke/pet-sheet-side.png' });
   await page.setViewportSize(PHONE);
   await page.evaluate(() => window.view.step(40));
-  await tapElement('.hud-pet-sheet button:text-is("Bye")');
+  // The sheet goes down first, so the trick is seen wherever she is on the screen (1.0.1).
+  await tapElement('.hud-pet-sheet button:text-is("Trick")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const tricked = await page.evaluate(() => ({
+    pose: window.world.petCare.pet('dolly').pose,
+    sheet: document.querySelector('.hud-pet-sheet:not(.hud-sheet-leaving)') !== null,
+    said: document.querySelector('.hud-toast')?.textContent ?? '',
+  }));
+  check(
+    'Trick puts her sheet away and makes her spin, there in the world, saying so',
+    tricked.pose === 'trick' && !tricked.sheet && tricked.said.includes('spins'),
+    JSON.stringify(tricked),
+  );
+  await page.evaluate(() => window.view.step(40, 8));
+  await page.screenshot({ path: '.smoke/pet-trick.png' });
 }
 
 /** The mayor's letter pins the first clue, and her corkboard at home shows the case so far. */
