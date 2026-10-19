@@ -17,9 +17,11 @@ store is the user's to link, README's "Cloud save").
 **The current plan is `docs/v1_plan.md`** (settled 2026-10-06, decisions 266–275, after
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
-word, 1.0 when it is all in; its status line says which have landed. **0.3 is on her phone**
-(`docs/v0.3_plan.md` complete, released 2026-10-05, PR #156, save v43); `docs/v0.2_plan.md` and
-the plans before it are complete.
+word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
+(V1's review, decision 324): all 29 sessions are on `v1-dev`, and **1.0 goes to her phone at the
+user's word** as the release PR from `v1-dev` to `main`. **0.4 is on her phone** (2026-10-07, PR
+#175, with 0.5's first sessions; save v43); 1.0 brings the save to v53. `docs/v0.3_plan.md`,
+`docs/v0.2_plan.md` and the plans before them are complete; there is no plan after V1 yet.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
@@ -59,11 +61,14 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1-dev` is the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
-212).** Each session branches from it, its PR targets it, and it is merged with a merge commit as
+**`v1-dev` was the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
+212), and it ends with 1.0:** a later plan's integration branch is made from `main` once 1.0 has
+merged, and added to `vercel.json`'s no-preview list the day it's made (decision 265). While a
+plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
-`v1-dev`, because Vercel deployments are limited. Each release adds its own `NOTES` row in
-`src/data/patchNotes.ts`. A session that changes the save bumps `SAVE_VERSION` only in its last
+the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
+row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
+0.6–0.9, decision 324). A session that changes the save bumps `SAVE_VERSION` only in its last
 commit, after merging the latest `v1-dev`, and says so in its handoff heading; save-bumping PRs
 merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
@@ -314,7 +319,16 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34). A tree whose crown hides her, or something near her she
-  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222).
+  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222). Since
+  V1's L3 (decision 291) the light is graded by the sky (`GRADE` in `src/render/grade.ts`), with
+  dithered lamp pools (`dither.ts`), bloom, a night vignette, moonlight, cloud shadows and puddles
+  (`bloom.ts`, `moonlight.ts`, `clouds.ts`, `puddles.ts`).
+- **What reacts** (V1's E1 and E4, decisions 280 and 283): one effects queue, `Effects`
+  (`src/render/effects.ts`, art `src/sprites/effects.ts`), shared by every view and stepped with
+  the world: pops of what she got, particles and emotes, pushed from the moments by
+  `src/wiring/effectsOf.ts` (the world never names an effect). A tap shows a ring and brackets
+  round what she set off toward (`feelTap` in `src/wiring/taps.ts`, `World.aim`), a shrug where
+  she can't go, and places pass through an iris (`src/render/transition.ts`).
 - **The seasons** (V1's L4, decision 294): `seasonOf(day)` (`src/systems/seasons.ts`) by the
   month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
   (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
@@ -507,12 +521,30 @@ what each owns, and where it hurts. Update it when a seam moves.
   `Feeling` on the stance (`feel`) and on her `Rest`, drawn by `src/sprites/faces.ts` and
   `moodFaces.ts`, chosen by the line in `src/systems/moods.ts` (rows `src/data/moods.ts`): the
   talk sheet's bust and the world sprite are one face, and hers feels a moment through `poses`.
+  **They know her** (V1's lane 3): what a neighbour brings up is a `Topic` (`TOPICS` in
+  `src/data/smallTalk.ts`, three lines each, memory topics in `src/data/memoryTalk.ts`, the rules
+  in `src/systems/remembering.ts` and `dialogue.ts`), from what she wore, gave, grew, put out and
+  how long it's been (`Friendship`'s history, `src/world/Lately.ts`; P1, decision 300). A talk is
+  the hello, then a **heart moment** or a **question** when one is due (`src/systems/voice.ts`:
+  `HEART_MOMENTS` at 2, 4, 5, 8 and 10 hearts in `src/data/heartMoments.ts`, one `QUESTIONS` row
+  each in `src/data/questions.ts`, kept in `Friendship.moments`/`answered`), and her answers are
+  reply chips (`.hud-reply`; `REPLIES` in `src/data/replies.ts`); best friends miss her, ask her
+  along, call and write (`src/systems/calls.ts`; P2, decision 301). Their jobs are seen and each
+  has a happening with something to do (`VERBS` in `src/data/happeningVerbs.ts`, `world.joining`,
+  kept in `happenings`; birthdays a day with a party, `src/data/birthdayParties.ts`); a talk's
+  buttons are `TalkAction`s from `src/wiring/talkActions.ts` (P4, decision 304). **Cody is
+  married to her** from the first day (P5, decision 305): `world.marriage`, `src/systems/cody.ts`
+  and `src/data/cody.ts` (his evenings at hers, "how was your day?" with three answers he brings
+  up the next day, `OUR_STORY` from her third day, nights in), his hearts always ten.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
   rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
   where, is `src/systems/critters.ts`: habitats found from each place's map, and each place's
   critters dealt from the day key (decision 102). Rarity is four tiers, 12:5:2:1, with a
   legendary one waiting for its hours, weather or full moon, and `isAbout` is the one test of
-  whether a critter could be out (0.2's F1, decision 150). `tests/systems/rarity.test.ts` holds
+  whether a critter could be out (0.2's F1, decision 150); since V1's R5 (decision 310) every
+  critter comes out the day after each full moon when out of its season or weather (`comesOut`,
+  `isVisiting`), never more than 29 days away, and the Cabinet says when (`nextChance`); seven
+  holiday critters and three jumping spiders stay all year. `tests/systems/rarity.test.ts` holds
   a simulated year filling the Cabinet in about ten months: rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
   too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
@@ -555,11 +587,24 @@ what each owns, and where it hurts. Update it when a seam moves.
   where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `world.petCare` has `walkWith`,
   `patPet`, `rename`, `dress` and `returnBone`; tapping a pet walks up to it and arrives with `pet`,
   which opens `src/hud/PetSheet.ts` (through `PetApi`). Ghost pets are see-through and glow.
+  **They grow fond of her** (V1's R6c, decision 317, save v53): pats, walks and a treat a day
+  (`FONDNESS` in `src/data/affection.ts`, rules `src/systems/affection.ts`, kept as `Pets`'
+  `affection`), never less; at the first level a job on walks (`JOBS`, decided in `Pet.follow`,
+  done by `PetCare.deed`) and three new pat lines (`GROWN_PATS`), at the second a trick (`TRICKS`,
+  frames in `PET_ART[id].trick`, beats `TRICK_STEPS`, a Trick button); they rest by the fire, on
+  the bed or sofa or a rug at home (`PET_RESTS`, `src/systems/petRest.ts`).
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
   moment); walking up to her corkboard opens `src/hud/CorkboardSheet.ts` (through `MysteryApi`).
   Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
+  Since V1's P3a (decision 302) the mystery comes a step a week, a letter or a clue at a prop
+  (`CHAIN` in `src/data/mysteryChain.ts`, `src/systems/mysteryChain.ts`), to the mayor's promise
+  (`world.mystery.ready()`); Wes stays for a chat after the third glimpse (`src/data/wes.ts`,
+  `src/hud/WesSheet.ts`), and the town theorises (`src/data/mysteryTalk.ts`). Then the unmasking
+  (P3b, decision 303): a happening at the castle's great hall any evening from the promise until
+  she comes, the dust sheet off on `src/hud/RevealSheet.ts`, and Rob Boo a neighbour from then
+  (`inTown` in `src/systems/mayor.ts`).
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
   `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch, the
@@ -643,7 +688,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`birthdaysOn`, `CalendarApi.birthdays`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
-  `src/hud/NoticeSheet.ts` (`NoticeApi`).
+  `src/hud/NoticeSheet.ts` (`NoticeApi`). **Today** (V1's R2, decision 312) is the calendar's
+  first tab: `todayLines` in `src/systems/today.ts` worked out each time from `TodayFacts`, which
+  `src/world/areas/upNow.ts` reads off the services (`world.upNow`), its words in
+  `src/hud/todayWords.ts`, a tap on a line walking or flying her there (`src/wiring/todayGo.ts`),
+  and a dot on the date chip while something's new (`src/hud/todaySeen.ts`, kept per phone); a
+  neighbour asking a favour wears a parcel. **Weeks that differ** (V1's R3, decision 313): a
+  daytime happening on Monday, Tuesday and Thursday and a festival week each spring, summer and
+  winter (`RHYTHM_HAPPENINGS`, festivals as `CALENDAR` rows with a span), and rare events about one
+  day in nine, never during a festival (`RARE_EVENTS` in `src/data/rareEvents.ts`, dealt by
+  `rareEventOn`, told by `world.rareEvents` with a keepsake the first time; the wandering stall for
+  a week, a meteor shower, a wayfarer, a snow day, a stray critter), Moira at the shore every July,
+  and the Moon Pie Man and the pop-up told when they arrive.
 - **Holidays in town** (phase U, decisions 126–127): each big holiday's decorations are a row in
   `DECOR` (`src/data/holidays.ts`), up for days either side of it by `decorOn`
   (`src/systems/holidays.ts`, from the day key); `world.holidays` (`Holidays`) says whose are up,
@@ -658,6 +714,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   Halloween (`HOLIDAY_TREATS`); the day's letters are `HOLIDAY_LETTERS`. Castle Mac-A-Boo's great
   hall (`castleHall`, art in `src/sprites/hall.ts`) is open from the start; its heart key is still
   buried in Whisperwood, a keepsake.
+- **Her first day** (V1's R1, decision 311, save v50): Cody's little list of six steps in any
+  order (shake the tree, plant, the stall, a note, three hellos, a snack; `FIRST_DAY_STEPS` in
+  `src/data/firstDay.ts`), worked out by `src/systems/firstDay.ts` from what the town keeps and
+  kept by `world.firstDay`, his line and a small gift for each and his stitched sampler with the
+  last; the card is `src/hud/FirstDayCard.ts` (`FirstDayApi`), after his first hello and first in
+  the tray while it's open; the date chip and the tray glow once per phone (`src/hud/hints.ts`). A
+  new town starts with four seed kinds; an old town's first day is over before it starts.
 - **The title screen** (decision 130): `src/hud/TitleScreen.ts` (`TitleApi`), every time she opens
   the game, its picture `src/render/title.ts`; the first time, his dedication to her follows it
   (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. The first
@@ -701,7 +764,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   what went wrong) is `src/safekeeping.ts` and `src/errorNotes.ts`, the nudge's rule
   `src/systems/backupNudge.ts`; the party photo is kept through the share sheet
   (`src/hud/keepPhoto.ts`); `?perf`, in production too, times her phone's frames
-  (`src/wiring/perf.ts`).
+  (`src/wiring/perf.ts`). **The cloud save** (V1's S2, decision 323) is `api/save.ts`, a Vercel
+  function over an Upstash Redis store, which does nothing until the user links one (README's
+  "Cloud save"; it answers 503 till then): a key each phone makes once (`cloudKey.ts`), the town
+  sealed with it (`cloudSeal.ts`), sent and fetched by `src/persistence/cloud.ts`, its card in
+  Settings `src/hud/CloudCard.ts`.
 
 ## Verifying a change
 

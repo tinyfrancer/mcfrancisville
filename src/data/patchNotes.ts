@@ -3,6 +3,9 @@
  * 142): nobody has met the mayor, so the notes come off their typewriter, warm and a little too
  * busy, like their letters in `mystery.ts`. Oldest first, and only ever added to: the last row is
  * the version on her phone, and a release to `main` adds its row (or finishes the newest one).
+ * A row her phone never saw may be folded into the next one (1.0 holds 0.6 to 0.9, decision 324),
+ * so she reads one card; a row she has seen is never changed (but for L5's emoji, put in words,
+ * decision 295).
  */
 export interface PatchNotes {
   /** How the version is named on the card: "0.2". Unique, and never reused. */
@@ -136,78 +139,33 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '0.5',
     lines: [
-      'Finds fly to you now with bubbles and confetti, and you turn to things, crouch, tip ' +
-        'your can, wave and hold up what you find. You also blink. We checked.',
+      'Whatever you find flies to you now, with confetti for a finished shelf, and little ' +
+        'bubbles pop up over you and the neighbours. Gifts they love show hearts.',
+      'You turn to whatever you walk up to now, crouch for a stone, tip your can, wave hello ' +
+        'and hold up what you find. You also blink. We checked.',
       'The light is redone: sunny cloud shadows by day, soft glowing lamps at night, silver under a full moon, puddles in the rain. Nights are best. I checked.',
-      'The neighbours stroll, wave, chat and do their jobs, and the town moves: the fountain splashes, the wheel turns, doors open, crows fly over and leaves fall.',
-      'The ground is new: grass in sun and shade, tracks, gravel, meadows, long grass, wiggly banks, castle flower beds, froggier frogs, pines, birches and bare trees.',
-      'The town turns with the seasons: blossom in spring, deep green summers, leaves piling up in autumn and snow all winter. Somebody skates on the frozen pond.',
+      "The neighbours aren't statues now: they stroll, breathe, blink, wave hello, chat in " +
+        'pairs, sit on benches and do their jobs. Maude floats properly too.',
+      'The town moves on its own: the fountain splashes, the big wheel turns, candles ' +
+        'flicker, doors open for you, crows and bats fly over and leaves fall in autumn.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
   },
   {
-    version: '0.6',
+    version: '1.0',
     lines: [
-      'Your neighbours remember what you gave them, wore and picked, and when it has been a ' +
-        'while, with three times the small talk. They do go on.',
-      'You can answer back now! They ask you things and keep your answers, and as you grow ' +
-        'close, each has a little story to tell you.',
-      'Some promises are now kept: the seed swap is Sunday mornings at the farm gate, and ' +
-        "Nessa lights the lake's lanterns at dusk. Do go and watch.",
-      "I'm writing to you more, a week or so apart, and everyone has theories about me. Wes " +
-        'stays for a chat now, third time lucky. He is a dear.',
-      "The town hall by the square is open! Once I've promised to say hello, come to the " +
-        "castle's great hall any evening, and I will. In person. Knees permitting.",
+      'The ground is all new, and the town turns with the seasons: blossom in spring, green ' +
+        'summers, leaves piling up in autumn and snow all winter. Somebody skates!',
+      'Your neighbours remember what you gave, wore and grew, ask you things, keep your ' +
+        'answers, and their faces show how they feel. And I have said hello, in person!',
+      "Cody is married to you (he asked me to type it in bold; I can't) and round most " +
+        'evenings to ask how your day was. Birthdays are parties now!',
+      "Today says what's waiting, the weeks bring surprises (a meteor shower, if you're " +
+        'lucky), and the noticeboard has things for the whole town to build!',
+      'Fish come in sizes, the fair wants a well-timed tap, and pets grow fond enough to help ' +
+        'on walks and learn a trick. Every button has a little drawing now.',
     ],
-    ps: 'P.S. Rufus remembers everything too. Everything. He would like you to know.',
-  },
-  {
-    version: '0.7',
-    lines: [
-      "Jobs you can see (Rufus's buckets, Wrapunzel baking, Ollie with your post), and a " +
-        "night a week each with something for you to do. They'll remember.",
-      'Birthdays are days now: a line first thing, a little party at theirs from five, and a ' +
-        'gift that counts double. Mine is Groundhog Day. Ahem.',
-      "Cody is married to you (he asked me to type that in bold; I can't). He's round most " +
-        'evenings now, and he will ask how your day was.',
-      'Every button has a hand-painted picture now, hearts pop, Candy counts up, portraits ' +
-        'sit properly, and bats fly over the front door.',
-      'Faces! Everyone shows how they feel as they talk to you, and so do you. Give someone a ' +
-        'thing they love and watch. I went pink. It shows, on a ghost.',
-    ],
-    ps: 'P.S. Nessa lights the lanterns every dusk. You may light one too. Bob goes first.',
-  },
-  {
-    version: '0.8',
-    lines: [
-      'New in town? Cody leaves a little list for the first day: the candy tree, a seed, the ' +
-        'stall, a note, three hellos and a snack. Any order. A present at the end.',
-      "A new town starts with four seeds (Scarah's cart has the rest), and on a first " +
-        'day the date and the tray glow until tapped. I missed the calendar for a year.',
-      "The calendar's Today says what's waiting (the tree, notes, ripe beds, who's coming " +
-        'round) and who wants a favour: look for a parcel over them. Tap a line to go.',
-      'Daytime doings on Mondays, Tuesdays and Thursdays, a festival week each season, and ' +
-        'now and then a surprise: shooting stars, a stranger, a snow day. Look out!',
-      'Something to build! The noticeboard has projects: a bandstand, the castle garden, a ' +
-        'footbridge, a greenhouse. Give a little at a time and watch them go up.',
-    ],
-    ps: 'P.S. If you know your way round already, Cody will not fuss. He will want to, mind.',
-  },
-  {
-    version: '0.9',
-    lines: [
-      'The town opens with no signal at all now (I tried a tunnel), and Settings says when ' +
-        'you last saved a backup code. Cody mentions it about once a week. Nicely.',
-      'Your town floats up to the cloud, sealed tight, and comes back on a new phone. Your ' +
-        'party photo can be kept, and Settings notes anything wobbly.',
-      'The fairground games want a well-timed tap now, and every go still wins. A duck pond, ' +
-        'a bell to ring, and a free go somewhere each day!',
-      'Fish come in sizes, and the Cabinet keeps your biggest! Rare ones want reeling in, and ' +
-        'shy critters drift off if you rush them. Creep up slowly.',
-      'Your pets grow fonder of you with pats, walks and treats. Fond enough, they help out ' +
-        'on walks, nap by the fire, and each learns a trick!',
-    ],
-    ps: 'P.S. Nothing ever went wobbly in my day. We had no buttons. It was very peaceful.',
+    ps: 'P.S. A big one, so I typed it on my best paper. The W still sticks. It always will.',
   },
 ];
 

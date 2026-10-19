@@ -7644,3 +7644,44 @@ pet shown as a number (two hearts and a bar read better); several pets walking a
 67); jobs that hand her Candy or things outright (the economy test, and a job that helps her do
 what she was doing is gentler); a bark that catches the critter for her (the net is still hers to
 swing).
+
+## 324. 1.0: the review after the lanes, one card for her, the 0.5 card kept as shipped, and the cloud left out of her notes (2026-10-18, V1's review)
+
+_Session V1 of the V1 plan, the last: the architecture review, perf against L1's Close baseline,
+the art notes, a lived-in fixture, `CLAUDE.md` and the handoff for after 1.0, and the release PR
+from `v1-dev` to `main`, left for the user to merge. No save change (still v53). Personal touches
+parked (decision 177): the notes card's words are the warmest default; nothing was asked._
+
+- **One card for her, `1.0`.** Her phone has 0.4 (PR #175), which carried 0.5's notes too, so it
+  last showed the mayor's 0.5 card. The four rows after it (0.6–0.9), which no phone saw, are
+  folded into one 1.0 row of five lines, so `notesToShow('0.5', …)` gives exactly one card
+  (`tests/systems/patchNotes.test.ts` holds it).
+- **The 0.5 row is put back as it shipped.** L6, L2 and L4 had written their news into the 0.5
+  row after 0.5 was on her phone, so the ground and the seasons would never have reached her: the
+  row is main's again, word for word, and the ground and the seasons are 1.0's first line. A row
+  she has seen is never changed, but for L5's emoji put in words (decision 295), which the Settings
+  copy shows.
+- **The cloud save is left out of her notes.** It does nothing until the user links an Upstash
+  Redis store in Vercel (README's "Cloud save"); a line promising her town is in the cloud could
+  be untrue the day she reads it. Settings → Backup says what it is once it's on, and the handoff
+  and the release PR tell the user the steps.
+- **The shakedown** played a new town by real taps over four days and kept it as
+  `tests/persistence/fixtures/lived-in-v53.json` (held by `livedIn.test.ts`, which now opens each
+  save at its own `lastPlayedAt`), and opened the 0.3 lived-in town as her phone will (notes last
+  seen 0.5) at Close, Far and sideways: one 1.0 card, Cody's hello, the first day already over,
+  no errors. It fixed three small things: a toast took half the room's width, so a three-line
+  toast ran to ten; the quick bar's line ran off the left edge; and the hooked moment's "!" sat
+  over the tension bar's right end. The rest (the reel, a trick, Rob Boo's reveal, winter, Far,
+  sideways) is smoke's, whose screenshots were looked at; what's left is "Where it hurts" in
+  `docs/architecture.md` and the art notes in the handoff.
+- **Perf** at Close is 2–4 ms of a night's mean dearer than L1's baseline after all 29 sessions,
+  Far a little more, no frame doubled, updates a few tenths up, the heap 28.5–32 MB; the table is
+  in `docs/architecture.md`, beside the empty one for her iPhone's `?perf`.
+- **`v1-dev` ends with 1.0.** A later plan makes its integration branch from `main` once the
+  release has merged, and adds it to `vercel.json`'s no-preview list that day (decision 265).
+
+**Rejected:** a card for each of 0.6–0.9 (four cards at one opening, of a release she gets at
+once); leaving the 0.5 row as the lanes left it (the ground and the seasons never told); a cloud
+line worded as something Cody can switch on (it asks her to ask, and the switch is the user's
+job, not hers); fixing the larger rough edges the shakedown confirmed (body builds, the reel
+under reduced motion, rare events in October) in the review rather than in 1.1.

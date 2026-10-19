@@ -212,7 +212,8 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
     case 'drifted':
       return [emote('…')];
     case 'hooked':
-      return at.float ? [burst('splash', at.float, 7, 4), emote('!')] : [emote('!')];
+      // No "!" over her: the tension bar takes that place, and a bubble would hide its end.
+      return at.float ? [burst('splash', at.float, 7, 4)] : [];
     case 'slack':
       return [emote('…')];
     case 'cast':
