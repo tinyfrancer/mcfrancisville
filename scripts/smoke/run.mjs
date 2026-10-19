@@ -231,7 +231,10 @@ listen(first);
 
 try {
   for (const name of ORDER) {
-    if (name === 'boot' || all || chosen.has(name)) await SECTIONS.get(name)?.run();
+    const section = SECTIONS.get(name);
+    if (!section || !(name === 'boot' || all || chosen.has(name))) continue;
+    console.log(`--- ${section.area}: ${name}`);
+    await section.run();
   }
   check('no console errors', consoleErrors.length === 0, consoleErrors.join(' | '));
 } catch (error) {
