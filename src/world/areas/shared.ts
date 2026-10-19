@@ -118,7 +118,8 @@ export function keepersOf(
         ...INTERIOR_IDS.map((id) => [id, bedsInRoom(id)]).filter(([, beds]) => beds!.length > 0),
       ]),
       rows: rowsOf(map, beyond),
-      planters: () => home.placedIn('main').filter((p) => FURNITURE[p.id].planter),
+      planters: (room) => home.placedIn(room).filter((p) => FURNITURE[p.id].planter),
+      here: () => home.here,
       projects: projectBeds,
     },
     {

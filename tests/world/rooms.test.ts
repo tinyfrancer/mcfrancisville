@@ -117,19 +117,16 @@ describe('a second room (0.3’s H4)', () => {
     expect(home.here).toBe('main');
   });
 
-  it('keeps her planters in the front room, by the garden', () => {
+  it('lets a planter stand in the back room too, once its bed knows its room (1.1’s W2)', () => {
     const home = new Home({ rooms: { main: { placed: [] } }, stored: [] });
     home.build('back');
     home.store('planterBox');
     home.enter('back');
-    expect(home.refusesHere('planterBox')).toBe('frontRoom');
-    expect(home.takeOut('planterBox', { tx: 5, ty: 6 }, null)).toBeNull();
-    expect(home.stored).toEqual([{ id: 'planterBox', count: 1 }]);
-    const saved = home.snapshot();
-    saved.rooms.back!.placed = [{ id: 'planterBox', tx: 5, ty: 6, turn: 0 }];
-    expect(new Home(saved).placedIn('back')).toEqual([]);
-    home.enter('main');
-    expect(home.takeOut('planterBox', { tx: 5, ty: 6 }, null)).not.toBeNull();
+    expect(home.rooms.refusesHere()).toBeNull();
+    const planter = home.takeOut('planterBox', { tx: 5, ty: 6 }, null);
+    expect(planter).toEqual({ id: 'planterBox', tx: 5, ty: 6, turn: 0 });
+    expect(home.stored).toEqual([]);
+    expect(new Home(home.snapshot()).placedIn('back')).toEqual([planter]);
   });
 
   it('keeps the pets’ open floor to the room she is in', () => {
@@ -232,5 +229,84 @@ describe('building it and going through', () => {
       ).toBe(true);
     }
     expect(h.world.petCare.lostBone()?.scene).not.toBe('home');
+  });
+});
+
+describe('a planter in each room (1.1’s W2)', () => {
+  const PLANTER = { id: 'planterBox' as const, tx: 6, ty: 6, turn: 0 };
+  const BED = { zone: 'home' as const, tx: PLANTER.tx, ty: PLANTER.ty };
+
+  /** At home in the front room, with a planter on the same tile of each room, and seeds. */
+  function twoPlanters(): H {
+    const main = STARTER_HOME.rooms.main;
+    return harness(undefined, {
+      player: { zone: 'home', tx: 3, ty: 9, facing: 'up' },
+      home: {
+        ...STARTER_HOME,
+        rooms: {
+          main: { ...main, placed: [...main.placed, PLANTER] },
+          back: { placed: [PLANTER] },
+        },
+      },
+      finds: {
+        bag: [
+          { id: 'pumpkinSeed', count: 2 },
+          { id: 'basilSeed', count: 2 },
+        ],
+      },
+    });
+  }
+
+  /** Digs over the planter's bed in the room she's in and plants it. */
+  function plant(h: H, seed: 'pumpkinSeed' | 'basilSeed') {
+    h.world.farm.till(BED);
+    expect(h.world.garden.plant(BED, seed)).toMatchObject({ kind: 'planted' });
+  }
+
+  it('keeps a bed of its own in each room, on the same tile, through a save', () => {
+    const h = twoPlanters();
+    expect(h.world.home.placedIn('back')).toEqual([PLANTER]);
+    plant(h, 'pumpkinSeed');
+    walkOnto(h, DOORWAY.tx, DOORWAY.ty);
+    expect(h.world.home.here).toBe('back');
+    // The back room's planter is a bed of its own, empty until she plants it.
+    expect(h.world.farm.bedsIn('home')).toEqual([BED]);
+    expect(h.world.farm.isTilled(BED)).toBe(false);
+    plant(h, 'basilSeed');
+    expect(h.world.farm.planting(BED)?.crop).toBe('basil');
+    expect(h.world.farm.planting({ ...BED, room: 'main' })?.crop).toBe('pumpkin');
+    const saved = h.world.save();
+    const homeBeds = saved.beds.filter((b) => b.zone === 'home');
+    expect(homeBeds.map((b) => [b.room, b.planting?.crop])).toEqual([
+      ['main', 'pumpkin'],
+      ['back', 'basil'],
+    ]);
+    const again = new World({ clock: new FakeClock(h.clock.now()), ...fromSave(saved) });
+    expect(again.home.here).toBe('back');
+    expect(again.farm.planting(BED)?.crop).toBe('basil');
+    expect(again.farm.planting({ ...BED, room: 'main' })?.crop).toBe('pumpkin');
+  });
+
+  it('carries the bed with its planter across the back room, and gives back only its crop', () => {
+    const h = twoPlanters();
+    plant(h, 'pumpkinSeed');
+    walkOnto(h, DOORWAY.tx, DOORWAY.ty);
+    plant(h, 'basilSeed');
+    const piece = h.world.home.pieceAt(PLANTER.tx, PLANTER.ty)!;
+    h.world.decorating.start(piece);
+    expect(h.world.decorating.tap(PLANTER.tx + 2, PLANTER.ty)).toBe(true);
+    const moved = { ...BED, tx: piece.tx, ty: piece.ty };
+    expect(moved).not.toEqual(BED);
+    expect(h.world.farm.planting(moved)?.crop).toBe('basil');
+    expect(h.world.farm.planting(BED)).toBeNull();
+    expect(h.world.farm.planting({ ...BED, room: 'main' })?.crop).toBe('pumpkin');
+    const basil = h.world.bag.count('basilSeed');
+    h.world.decorating.start(piece);
+    expect(h.world.decorating.putAwaySelected()).toBe(true);
+    expect(h.world.bag.count('basilSeed')).toBe(basil + 1);
+    expect(h.world.farm.bedsIn('home')).toEqual([]);
+    expect(h.world.save().beds.filter((b) => b.zone === 'home')).toEqual([
+      expect.objectContaining({ room: 'main', tx: BED.tx, ty: BED.ty }),
+    ]);
   });
 });

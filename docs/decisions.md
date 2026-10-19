@@ -8196,3 +8196,79 @@ and nothing in `src/` does. Personal touches parked (decision 177): nothing was 
   `@vitest-environment` comments file by file (one list in the config reads better, and
   `tests/hud/` is the rule); happy-dom (a different DOM is a different test); memoising
   `happeningsAt` (it's `src/`, and W1's lane is in `src/systems/` as T2 runs).
+
+## 341. Her rooms a keeper of their own, `Rooms`, and a planter's bed that knows its room (2026-10-19, 1.1's W2)
+
+_Session W2 of the 1.1 plan, lane W (decision 328), "Where it hurts" 10 and 11. **Save v55.**
+Nothing she sees changes but that a planter may now stand in the back room, its bed its own.
+Personal touches parked (decision 177): nothing was asked._
+
+- **`Rooms` (`src/world/Rooms.ts`) keeps her rooms**: each room's pieces, its paper, floor and
+  size, `here` (the one she's in, which every read of "the room" reads), building a room and
+  growing the front one, and the decorating moves (`pieceAt`, `move`, `turn`, `takeOut`,
+  `putAway`, `showIn`…). **What's on show and what stands on what stay with the pieces**: both
+  are fields of a `Placed` (`shows`, `on`), so they are the room's, not a fifth thing beside it;
+  `onShow` and `everyPiece` count across rooms there. **`Home` keeps what the rooms share**: the
+  storage chest's two lists (pieces and her things, H1) and the papers and floors she owns, with
+  its rooms as `home.rooms`. `Rooms` takes the chest as `Yard` does (`RoomsChest`: `store`,
+  `unstore`, `keep`; and `Owned`, the papers and floors), so neither owns one and nothing is ever
+  lost. `Rooms` is `Decorable`, as `Yard` is, and `Decorator` works on `home.rooms` or the yard;
+  `HomeZone` reads `home.rooms`; `Yard` still `implements Overlay` (W1) and is untouched.
+  **`Home` still answers every read of the room she's in** (`home.placed`, `home.room`,
+  `home.pieceAt`, `home.move`…, twenty-seven one-liners forwarding to `Rooms`), because
+  `src/render/` (lane A's while W2 ran), the sheets, `wiring/apis.ts` and the tests read them,
+  and the plan asked for the tests unchanged. **The save's shape for rooms is unchanged**
+  (`home.rooms`, `here` and the chest as v39–v54 wrote them): only the keeper moved.
+  **Rejected:** naming the keeper `Room` (that's the room's shape in `data/home.ts`, imported by
+  the views and sprites; renaming it is lane A's files); a `Room` class per room with `Rooms`
+  holding them (one room's state is four fields and every rule needs the room she's in, so a
+  class per room would be a second set of forwarders); `Home extends Rooms` (the chest isn't a
+  kind of room); pointing every reader at `home.rooms` now and dropping the forwarders (it moves
+  `src/render/` and a few hundred calls in the tests for no change she sees; noted for later in
+  "Where it hurts" 11).
+- **A planter's bed knows its room.** A `Plot` at home has a `room` (`Plot.room`, saved on its
+  `SavedBed` and `SavedSprinkler` from v55), and the farm keeps a bed at home by place, room and
+  tile (`slotOf`: `bed:home:<room>:<tx>,<ty>`), so a planter on the same tile of each room is a
+  bed of its own; `FarmLand.planters` is asked by room, and `FarmLand.here` says which room she's
+  in. **A plot at home with no room is in the room she's in**, as everything that reads "the
+  room" is: that's how `HomeView` asks after the crop in each planter it draws, and how a tap
+  makes a bed, so `src/render/` didn't change; `bedsIn('home')` is the room she's in, and the bed
+  her card is about is pinned to its room (`Farm.pin`) so it can't drift. **A saved bed at home
+  with no room is the front room's**, where every planter stood before (and is what step 54
+  writes). **The bed's own name, `bedKey`, is unchanged** (`bed:home:<tx>,<ty>` in every room):
+  it deals the harvest (`plantingSeed`) and the rare look (`plantingIsRare`), so a front-room
+  planter's pumpkin is the size it was going to be, as decision 165 kept the town's keys; two
+  rooms' planters on the same tile share a deal, which nobody could tell. A sprinkler waters only
+  its own room's beds; the decorator's `moved` signal says the room (`moved.room`: the room she
+  decorates, or for a new room's doorway the room it's built through), so `Garden` moves or
+  uproots the right bed. `World.tendBed` won't walk to a bed in another room. The greenhouse's
+  raised beds (`INTERIORS.greenhouse`, decision 242) were keyed by their room's zone already and
+  are untouched, as are `rowsOf` and `plotPlace` (outdoor rows, no rooms).
+  **Rejected:** `home:<room>` as the place (a `ZoneId` that isn't a zone, in every `'home'` check
+  of the pets, guests, music and views); the room in `bedKey` itself (every front-room planter's
+  crop would be dealt afresh, a change she could see at harvest); every plot at home needing a
+  room (the view's one line in `HomeView.ts` would have to change, in lane A's files, for what
+  the room she's in already says); requiring `room` on a v55 bed at home in `isSaveState` (a save
+  set aside over a missing field the farm can read as the front room's is too dear; a `room`
+  that's there must be a string).
+- **The front room's refusal is lifted**: `refusesHere` on `Rooms` is always null (it stays on
+  `Decorable` for the yard's `indoors`), `Refusal` loses `frontRoom` and its line in
+  `hud/messages.ts`, and a saved planter in the back room stands where it was rather than going
+  in the chest. `tests/world/rooms.test.ts`'s "keeps her planters in the front room" became
+  "lets a planter stand in the back room too", the one test that changed what it holds; two new
+  ones play a planter on the same tile of each room through a save, a move and putting away.
+- **Save v55** (the last commit, after merging `v1.1-dev`): step 54 writes `room: 'main'` on
+  every bed and sprinkler at home, and nothing else; `isSaveState` checks a bed's and a
+  sprinkler's `room` is a string where there is one. No fixture was added: the shape changed
+  only by the key, and no lived-in fixture has a planter out, so `livedIn.test.ts` gains a case
+  built from 1.0's fixture by code (a planter in its front room, a crop growing and a sprinkler
+  in it, saved as v54 wrote them), which comes through in the front room with its crop, its
+  watering and nothing given back.
+- **Measured** (architecture.md's "1.1's W2"): `npm run perf` at Close, 21:30, four runs each
+  alternating with `v1.1-dev`, each served from its own copy: every scene's draw and update
+  within the other's spread (Home's update 0.83–1.44 ms on W2 against 0.87–1.47, the back room's
+  1.12–1.76 against 1.34–1.79), the spread the container's, shared with lane A's session.
+- **Checked**: the suite unchanged but for the one test above and the new ones (W1's `overlays`
+  and `arrivingAtProps` snapshots pass without `-u`, the lived-in fixtures unchanged); smoke
+  622/622 after each commit (its cloud check's known chance match once, passing on the rerun);
+  `smoke:offline` 10/10.
