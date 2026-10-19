@@ -1647,6 +1647,11 @@ screenshots and its own four days of play at phone size, and found:
   her hand in the house (seen with Cody on the sofa at 19:30). Harmless, a little odd.
 - **The tension bar is small** (44 world pixels, about a tile and a half at Close): it reads, but
   only just, and its dark green window less well at night (R6a's note).
+- **Jack-o'-lanterns all year.** The town's jack-o'-lanterns are map props, so in January they
+  sit in the snow (smoke's `season-winter-sideways.png`). A `seasonLook` that turns them to snowmen
+  or lanterns outside autumn, or `DECOR` for October only, would fit L4's seasons.
+- **Sideways, the quick bar's seeds run under the bag**: with four kinds of seed the last packet is
+  cut off at the bag button (it scrolls, so nothing is lost, but it reads as clipped).
 - **Lane notes still open:** the body builds and the neutral faces on the noticeboard and the
   neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c), the noticeboard's art
   the same whatever is pinned (L6). Each is in "Where it hurts" too.
