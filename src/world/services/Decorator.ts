@@ -90,7 +90,7 @@ export class Decorator {
 
   /** Where she decorates now: the room she's in, or her yard. */
   private get place(): Decorable {
-    return this.outside ? this.yard : this.home;
+    return this.outside ? this.yard : this.home.rooms;
   }
 
   /** Says what changed, for the HUD and the save: her home, or her yard. */
