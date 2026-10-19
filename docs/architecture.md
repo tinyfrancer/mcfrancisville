@@ -905,6 +905,25 @@ Every row within the other's spread or a millisecond of it, one way and the othe
 container's noise. A pet's pulled path is planned when its goal moves, as before, with a
 `stringPull` over a path of a few tiles.
 
+**1.1's W2** (2026-10-19, decision 341), her rooms a keeper of their own and a planter's bed
+keyed by its room, changes no drawing; `Home`'s reads are one call deeper, through `Rooms`, and
+the farm asks which room she's in for a bed at home. `npm run perf` at Close, 21:30, four runs
+each alternating, `v1.1-dev` and W2 each served from a copy of its own, on a container shared
+with lane A's session (draw means, ms (p50); updates, ms):
+
+| Scene       | Draw, W2              | Draw, v1.1-dev        | Update W2 → v1.1-dev  |
+| ----------- | --------------------- | --------------------- | --------------------- |
+| Town        | 33.7–47.3 (25.6–32.4) | 34.2–44.5 (25.3–31.1) | 1.22–1.69 → 1.19–1.51 |
+| Home        | 15.6–23.6 (10.2–14.2) | 15.4–23.5 (9.8–14.5)  | 0.83–1.44 → 0.87–1.47 |
+| Fairground  | 22.1–30.3 (15.7–20.4) | 20.5–35.8 (14.4–23.1) | 0.77–1.03 → 0.69–1.35 |
+| Whisperwood | 24.7–33.2 (16.7–22.9) | 23.5–37.2 (16.2–24.2) | 0.8–1.26 → 0.77–1.41  |
+| Boo Acres   | 21.8–29.5 (13.4–18)   | 21.2–29.4 (13.1–18.8) | 0.83–1.16 → 0.74–1.13 |
+| Her yard    | 35.4–44.1 (26.6–34.9) | 34.8–49.7 (27.2–37.7) | 1.14–1.52 → 1.08–1.58 |
+| Back room   | 19.7–28 (14.1–19.3)   | 21.5–27.8 (14.5–19)   | 1.12–1.76 → 1.34–1.79 |
+
+Every row within the other's spread, one way and the other; the spread itself is the container
+(a quiet pair, the second, had Home at 15.6 against 17.2 and the back room at 19.7 against 22.7).
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -1011,7 +1030,7 @@ V1's weight on it.
 11. ~~**`Home` holds four features.**~~ Done in 1.1's W2 (decision 341): her rooms, what's on
     show and what stands on what (each the placed piece's) are `Rooms`; `Home` is the chest and
     the papers and floors she owns. What's left: `Home` still answers the room's reads by
-    forwarding to `Rooms` (about twenty one-liners, kept so `src/render/`, the sheets and the
+    forwarding to `Rooms` (twenty-seven one-liners, kept so `src/render/`, the sheets and the
     tests didn't move while lane A ran); a later session can point those readers at `home.rooms`
     and drop them.
 12. **Big view, wiring and service files.** `render/OutdoorView.ts` is 1,240 lines (the yard, the
