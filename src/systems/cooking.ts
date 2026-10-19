@@ -1,5 +1,5 @@
 import { CRITTER_IDS, CRITTERS, type Family, type Habitat } from '../data/critters';
-import type { CritterId, MapZoneId } from '../types/ids';
+import type { CritterId, ItemId, MapZoneId } from '../types/ids';
 import { dayKey, hourOf, windowKey } from './clock';
 import { comesOut, isOut } from './critters';
 import { hashString } from './random';
@@ -19,7 +19,15 @@ export interface Meals {
   pep: number | null;
   bites: number | null;
   lure: { family: Family; at: number } | null;
+  /**
+   * What she ate for each (1.0.1, save v54), so a meal's chip shows the dish after a reload; a
+   * town saved before kept none, and shows the first dish that does the same.
+   */
+  ate?: Partial<Record<Course, ItemId>>;
 }
+
+/** Which of her meals an effect is kept under. */
+export type Course = 'pep' | 'bites' | 'lure';
 
 export const NO_MEALS: Meals = { pep: null, bites: null, lure: null };
 

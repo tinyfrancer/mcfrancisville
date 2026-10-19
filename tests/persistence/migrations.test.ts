@@ -526,6 +526,22 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe('the 1.0.1 step (53 to 54)', () => {
+  it('leaves what she ate unkept, as it was, and checks it once it is', () => {
+    const old = { ...structuredClone(SAVE), version: 53 } as Record<string, unknown>;
+    const meals = { pep: 1000, bites: null, lure: null };
+    old.kitchen = meals;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.kitchen).toEqual(meals);
+    const kept = { ...meals, ate: { pep: 'midnightPizza' } };
+    expect(migrateSave({ ...SAVE, kitchen: kept })?.kitchen).toEqual(kept);
+    expect(migrateSave({ ...SAVE, kitchen: { ...meals, ate: { pep: 3 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, kitchen: { ...meals, ate: ['midnightPizza'] } })).toBeNull();
+    expect(migrateSave({ ...SAVE, kitchen: { ...meals, ate: null } })).toBeNull();
+  });
+});
+
 describe("V1's R6c step (52 to 53)", () => {
   it('gives every pet no fondness yet, keeping its names, clothes and bones', () => {
     const old = { ...structuredClone(SAVE), version: 52 } as Record<string, unknown>;

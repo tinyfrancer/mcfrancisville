@@ -12,28 +12,31 @@ Opus sub-agents of the coordinating session, by the files they own, each a draft
 `v1.1-dev`, merged with a merge commit when green; `main` gets 1.0.1 as one PR from `v1.1-dev` at
 the user's word. Decisions from **325**. Each session's heading below says where it is.
 
-### X1: the rules and the HUD (`claude/x1-rules-hud`)
+### X1: the rules and the HUD (`claude/x1-rules-hud`) · landed, save v54
 
-Under way, draft PR into `v1.1-dev`. Owns `world/`, `systems/`, `data/` (not art), `hud/`,
-`wiring/`, `main.ts`, the `1.0.1` `NOTES` row and the save (v54, in its last commit). Its list:
-she holds her rod indoors (art notes); the quick bar's seeds run under the bag sideways (art
-notes); the reel doesn't slow under reduced motion ("Where it hurts" 8); a trick can happen behind
-the pet sheet (8); a card before a project puts her things in the chest (7); the one-day rare
-events on the festival's ordinary days (9); a Today line for the fair's free go (R6b's note); what
-she ate saved so the chip is right after a reload (16, the save change).
+**Landed** (PR #199 into `v1.1-dev`, decision 325; **save v53 → v54**, `kitchen.ate`, in its last
+commit). Owned `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main.ts`, the `1.0.1`
+`NOTES` row and the save. A commit each:
 
-- **Done** (a commit each): the rod (`Hands.held` is her hands indoors when she carries a tool,
-  the save keeping the tool; no renderer change), the quick bar (its strip fades at an end with
-  more beyond, `scrollMore` in `QuickBar.ts`), the reel (`WorldOptions.slow`, `reelOf`'s `slow`
-  by `SLOW_SWEEP`), the trick (the sheet closes first, the line a toast off `petTrick`'s `line`),
-  the project card (`Projects.inTheWay`, `Yard.wouldMove`, `askFirst` in `ProjectsPanel.ts`),
-  rare events on a festival's ordinary days (`isFestivals` in `systems/rareEvents.ts`), the free
-  go's Today line (`freeGo`), the `1.0.1` `NOTES` row (four lines; **X2 adds one**), decision 325,
-  and the docs ("Where it hurts" 7, 8, 9, 16; the art notes' rod and seeds; `CLAUDE.md`).
-- **Next, in order:** merge `origin/v1.1-dev`, and last the meal's dish in the save
-  (`kitchen.ate`, v54, one commit), then mark the PR ready and merge it.
-- **For X2:** no renderer change was needed for the rod (`Hands.held` is her hands indoors). The
-  `1.0.1` notes row has four lines; add yours as the fifth.
+- **Her rod indoors**: `Hands.held` is her hands while she's indoors and carries a tool, the tool
+  again on the way out, the save keeping it; a seed or sprinkler stays in hand. No renderer change.
+- **The quick bar sideways**: its strip fades at an end with more beyond it (`scrollMore` in
+  `QuickBar.ts`, a mask in `styles.ts`).
+- **The reel under reduced motion**: `WorldOptions.slow` (one `matchMedia` read in `main.ts`,
+  shared with the effects and the iris), `reelOf`'s `slow` by the fair's `SLOW_SWEEP`.
+- **A trick behind the pet sheet**: Trick closes the sheet first; the line is a toast off
+  `petTrick`'s `line`. Smoke's `petsThatGrow` checks it.
+- **A card before a project moves her things**: `Projects.inTheWay`, `Yard.wouldMove`, `askFirst`
+  in `ProjectsPanel.ts` (Not yet / Go ahead), held by `tests/hud/projectsPanel.test.ts`.
+- **October's rare events**: `isFestivals` in `systems/rareEvents.ts` keeps only a festival's own
+  days clear (its first, its finale, a day with one of its beats); the roll is unchanged, about 1
+  in 8.2 overall and two an October. **Smoke's October days now meet some** (5, 6 and 9 October
+  2026 are a stray critter's); smoke passed as it is.
+- **Today's free go**: `TodayFacts.freeGo`, a `freeGo` line, a tap flying her to the stall.
+- **What she ate**: `kitchen.ate` (optional; a town saved before has none, migration step 53 is
+  the identity), written only once she has eaten since.
+- The `1.0.1` `NOTES` row has **four lines; X2 adds the fifth**. "Where it hurts" 7, 8 (X1's
+  parts), 9 and 16, the art notes' rod and seeds, and `CLAUDE.md` are brought up to date.
 
 ### X2: the art (`claude/x2-art`)
 

@@ -257,6 +257,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const pets = (state.pets ?? {}) as Record<string, unknown>;
     return { ...state, pets: { ...pets, affection: {} } };
   },
+  // 1.0.1: what she ate for each of a meal's effects (`kitchen.ate`). Nothing was kept of it
+  // before, so it's left absent, and a meal still on shows the first dish that does the same, as
+  // it did; the next she eats is kept.
+  53: (state) => state,
 };
 
 /**
