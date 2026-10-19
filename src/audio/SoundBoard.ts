@@ -10,13 +10,7 @@ import {
 import { Mixer } from './graph';
 import { tuneOf, type MusicKey } from './music';
 import { browserPhone, SilentSwitch, type Phone } from './session';
-import {
-  readSilentHint,
-  readSoundSettings,
-  writeSilentHint,
-  writeSoundSettings,
-  type SoundSettings,
-} from './settings';
+import { readSoundSettings, writeSoundSettings, type SoundSettings } from './settings';
 import { secondsOf, type Note, type Part, type Tune } from './tune';
 
 /** How far ahead the next notes of a long tune are set going, in seconds. */
@@ -65,7 +59,8 @@ function browserContext(): AudioContext | null {
 /**
  * Every sound the game makes, synthesised with Web Audio (decisions.md 2, for sound too: no
  * files). iOS only lets a page start making sound from inside a touch, so nothing plays until
- * her first tap (`listen`), and then the silent switch is got round first (V1's S1). The music
+ * her first tap (`listen`), and then, if she has asked to play on silent, the silent switch is
+ * got round first (V1's S1; asked for since 1.1's H1, decision 330). The music
  * loops quietly, A and B in turn and varied each time round, crossfading as she crosses into
  * another place or a window turns (0.2's H1); a record on her record player stops it until the
  * record ends; the place's ambience plays under it all.
@@ -94,7 +89,7 @@ export class SoundBoard {
     makeContext: MakeContext = browserContext,
   ) {
     this.settings = settings;
-    this.silent = new SilentSwitch(phone);
+    this.silent = new SilentSwitch(phone, settings.playOnSilent);
     this.makeContext = makeContext;
   }
 
@@ -104,6 +99,14 @@ export class SoundBoard {
 
   get musicOn(): boolean {
     return this.settings.music;
+  }
+
+  get ambienceOn(): boolean {
+    return this.settings.ambience;
+  }
+
+  get playOnSilent(): boolean {
+    return this.settings.playOnSilent;
   }
 
   /** Starts the sound on her first touch, and wakes it again on any touch after iOS hushed it. */
@@ -169,6 +172,23 @@ export class SoundBoard {
     }
   }
 
+  /** The ambience's own switch (1.1's H1): off, the bed fades out and the cues play on. */
+  setAmbienceOn(on: boolean): void {
+    this.settings = { ...this.settings, ambience: on };
+    writeSoundSettings(this.settings);
+    this.applyAmbience();
+  }
+
+  /**
+   * Whether the game is heard with the switch on the side of the phone down (1.1's H1): on, the
+   * switch is got round in this tap; off, it's undone at once.
+   */
+  setPlayOnSilent(on: boolean): void {
+    this.settings = { ...this.settings, playOnSilent: on };
+    writeSoundSettings(this.settings);
+    this.silent.set(on);
+  }
+
   /** Plays a short sound at once. */
   cue(tune: Tune): void {
     const ctx = this.running();
@@ -200,7 +220,7 @@ export class SoundBoard {
 
   /**
    * What's behind the music where she is (V1's S1): each layer comes in, goes, or moves to its
-   * new level over a couple of seconds. Only the sounds' switch hushes it.
+   * new level over a couple of seconds. The sounds' switch hushes it, and its own (1.1's H1).
    */
   setAmbience(bed: Bed): void {
     this.bed = bed;
@@ -215,16 +235,6 @@ export class SoundBoard {
   /** The layers of ambience actually sounding, for smoke. */
   get ambiencePlaying(): Layer[] {
     return [...this.layers.keys()];
-  }
-
-  /**
-   * Whether to tell her about the silent switch in Settings: true the first time only, on this
-   * phone (V1's S1).
-   */
-  silentHint(): boolean {
-    if (readSilentHint()) return false;
-    writeSilentHint();
-    return true;
   }
 
   /** Puts a record on: the music stops for it, and comes back once it's over. */
@@ -253,8 +263,9 @@ export class SoundBoard {
   }
 
   /**
-   * In her touch: the silent switch got round first (the session's hint, or the silence started),
-   * and only then the context made or resumed, so it starts in the playback category.
+   * In her touch: the silent switch got round first if she plays on silent (the session's hint,
+   * or the silence started), and only then the context made or resumed, so it starts in the
+   * playback category.
    */
   private unlock(): void {
     this.silent.unlock();
@@ -377,7 +388,7 @@ export class SoundBoard {
   private applyAmbience(): void {
     const ctx = this.running();
     if (!ctx || !this.mixer) return;
-    const want: Bed = this.settings.effects ? this.bed : {};
+    const want: Bed = this.settings.effects && this.settings.ambience ? this.bed : {};
     const now = ctx.currentTime;
     for (const [layer, bedded] of this.layers) {
       if (want[layer]) continue;

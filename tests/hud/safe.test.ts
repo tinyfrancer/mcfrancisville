@@ -11,8 +11,12 @@ import { openGreeting } from '../../src/hud/TalkSheet';
 const sound = (trouble: SoundApi['trouble']): SoundApi => ({
   effects: () => true,
   music: () => true,
+  ambience: () => true,
+  playOnSilent: () => false,
   setEffects() {},
   setMusic() {},
+  setAmbience() {},
+  setPlayOnSilent() {},
   trouble,
 });
 

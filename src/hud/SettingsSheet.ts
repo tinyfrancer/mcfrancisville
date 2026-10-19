@@ -17,24 +17,38 @@ export interface SaveApi {
   cloud?: CloudApi;
 }
 
-/** Whether this phone plays the game's sounds and music. */
+/** Whether this phone plays the game's sounds, music and ambience, and plays on silent. */
 export interface SoundApi {
   effects(): boolean;
   music(): boolean;
+  /** The bed under it all, the crickets, rain and wind (1.1's H1). */
+  ambience(): boolean;
+  /** Whether the game is heard with the switch on the side of the phone down (1.1's H1). */
+  playOnSilent(): boolean;
   setEffects(on: boolean): void;
   setMusic(on: boolean): void;
-  /** Whether to tell her about the silent switch: true the first time on this phone (V1's S1). */
-  silentHint?(): boolean;
+  setAmbience(on: boolean): void;
+  setPlayOnSilent(on: boolean): void;
   /** Whether something went wrong on this phone lately, and the note to copy (V1's S3). */
   trouble?(): { on: string; note: string } | null;
 }
 
-/** What's said beside the silent switch's hint when something went wrong (V1's S3). */
+/** What's said on the Sound tab when something went wrong (V1's S3). */
 export const troubleLine = (on: string) =>
   `Something went a bit wobbly on ${on}. If it keeps happening, copy this note for Cody.`;
 
-/** What's said about the silent switch, once, under the sound's switches (V1's S1). */
-export const SILENT_HINT = 'Sound off? Check the silent switch on the side of your phone.';
+/**
+ * What's said about the silent switch under Play on silent, whichever way it's set (V1's S1;
+ * 1.1's H1, decision 330).
+ */
+export const SILENT_HINT = {
+  off:
+    "The switch on the side of your phone turns the game's sound off. Want it to play anyway? " +
+    'Turn on Play on silent.',
+  on: 'Playing through the silent switch: the town keeps humming even with your phone on silent.',
+} as const;
+
+export const silentLine = (playOnSilent: boolean) => SILENT_HINT[playOnSilent ? 'on' : 'off'];
 
 /** How close the camera is on this phone (decision 290). */
 export interface ViewApi {
@@ -72,7 +86,12 @@ function closenessPicker(view: ViewApi): HTMLElement {
 }
 
 /** A switch that says what it is and whether it's on, big enough for a thumb. */
-function toggle(label: string, on: () => boolean, set: (on: boolean) => void): HTMLButtonElement {
+function toggle(
+  label: string,
+  on: () => boolean,
+  set: (on: boolean) => void,
+  flipped?: () => void,
+): HTMLButtonElement {
   const button = el('button', { type: 'button', className: 'hud-toggle' });
   const show = () => {
     button.textContent = `${label}: ${on() ? 'on' : 'off'}`;
@@ -81,6 +100,7 @@ function toggle(label: string, on: () => boolean, set: (on: boolean) => void): H
   button.addEventListener('click', () => {
     set(!on());
     show();
+    flipped?.();
   });
   show();
   return button;
@@ -88,7 +108,7 @@ function toggle(label: string, on: () => boolean, set: (on: boolean) => void): H
 
 /**
  * Settings (0.2's U4), on the sheet frame: whether this phone is keeping the town safe under the
- * title, then a tab each for how close the camera is (decision 290), the sound and music switches, the mayor's notes on this version to
+ * title, then a tab each for how close the camera is (decision 290), the sound switches (with Play on silent, 1.1's H1), the mayor's notes on this version to
  * read again, and the backup code with restoring from one.
  */
 export function openSettings(
@@ -142,19 +162,14 @@ export function openSettings(
     ],
     memory: 'settings',
     className: 'hud-settings-sheet',
-    onTab: (id) => id === 'sound' && hintOnce(),
   });
-  // The silent switch, told the first time the Sound tab is shown on this phone (V1's S1).
-  let hinted = false;
-  function hintOnce(): void {
-    if (hinted) return;
-    hinted = true;
-    if (!sound.silentHint?.()) return;
-    sheet.panel('sound').append(el('p', { className: 'hud-sound-hint' }, SILENT_HINT));
-  }
   if (view) {
     sheet.panel('view').append(el('p', {}, 'Just for this phone.'), closenessPicker(view));
   }
+  // Which way the silent switch is set, said under its switch and again as it's flipped.
+  const silentHint = el('p', { className: 'hud-sound-hint' });
+  const showSilent = () => (silentHint.textContent = silentLine(sound.playOnSilent()));
+  showSilent();
   sheet
     .panel('sound')
     .append(
@@ -164,7 +179,14 @@ export function openSettings(
         { className: 'hud-row' },
         toggle('Sounds', sound.effects, sound.setEffects),
         toggle('Music', sound.music, sound.setMusic),
+        toggle('Ambience', sound.ambience, sound.setAmbience),
       ),
+      el(
+        'div',
+        { className: 'hud-row' },
+        toggle('Play on silent', sound.playOnSilent, sound.setPlayOnSilent, showSilent),
+      ),
+      silentHint,
     );
   const trouble = sound.trouble?.();
   if (trouble) {
@@ -186,7 +208,6 @@ export function openSettings(
         copied,
       );
   }
-  if (sheet.tab() === 'sound') hintOnce();
   sheet
     .panel('notes')
     .append(

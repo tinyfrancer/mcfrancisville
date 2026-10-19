@@ -3908,8 +3908,8 @@ async function sound() {
   await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Sound")');
   const switches = await page.locator('.hud-toggle').allTextContents();
   check(
-    'settings has switches for the sounds and the music',
-    switches.join('|') === 'Sounds: on|Music: on',
+    'settings has switches for the sounds, the music, the ambience and playing on silent (off)',
+    switches.join('|') === 'Sounds: on|Music: on|Ambience: on|Play on silent: off',
     switches.join('|'),
   );
   await tapElement('.hud-toggle:has-text("Music")');

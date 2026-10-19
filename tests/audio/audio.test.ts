@@ -150,13 +150,22 @@ describe('the cues', () => {
 });
 
 describe('sound settings', () => {
-  it('start on, and remember being turned off on this phone', () => {
+  const start = { effects: true, music: true, ambience: true, playOnSilent: false };
+
+  it('start on, obeying the silent switch, and remember being changed on this phone', () => {
     localStorage.removeItem(SOUND_KEY);
-    expect(readSoundSettings()).toEqual({ effects: true, music: true });
-    writeSoundSettings({ effects: true, music: false });
-    expect(readSoundSettings()).toEqual({ effects: true, music: false });
+    expect(readSoundSettings()).toEqual(start);
+    const changed = { effects: true, music: false, ambience: false, playOnSilent: true };
+    writeSoundSettings(changed);
+    expect(readSoundSettings()).toEqual(changed);
     localStorage.setItem(SOUND_KEY, 'not json');
-    expect(readSoundSettings()).toEqual({ effects: true, music: true });
+    expect(readSoundSettings()).toEqual(start);
+  });
+
+  it('read a phone that kept its switches before 1.1: ambience on, the silent switch obeyed', () => {
+    localStorage.setItem(SOUND_KEY, JSON.stringify({ effects: false, music: true }));
+    expect(readSoundSettings()).toEqual({ ...start, effects: false });
+    localStorage.removeItem(SOUND_KEY);
   });
 });
 
