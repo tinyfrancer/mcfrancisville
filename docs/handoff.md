@@ -38,9 +38,9 @@ commit). Owned `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main
 - The `1.0.1` `NOTES` row has **four lines; X2 adds the fifth**. "Where it hurts" 7, 8 (X1's
   parts), 9 and 16, the art notes' rod and seeds, and `CLAUDE.md` are brought up to date.
 
-### X2: the art (`claude/x2-art`) · in progress, no save change
+### X2: the art (`claude/x2-art`) · landed, no save change
 
-Owns `sprites/`, `render/`, `data/seasons.ts`, `data/holidays.ts` and the art tests, and (X1
+**Landed** (PR #200 into `v1.1-dev`, decision 327; the save stays v54). Owned `sprites/`, `render/`, `data/seasons.ts`, `data/holidays.ts` and the art tests, and (X1
 having landed) the few lines of `systems/moods.ts`, `hud/`, `wiring/apis.ts` and `main.ts` the
 busts' feelings needed. Decision 327. **Done, a commit each:**
 
@@ -55,8 +55,11 @@ busts' feelings needed. Decision 327. **Done, a commit each:**
 - **The noticeboard** shows what's pinned (`noticeboardLook`, read by `OutdoorView`).
 - The `1.0.1` `NOTES` row's **fifth line**; "Where it hurts" 4 and 8, the art notes and
   `CLAUDE.md` brought up to date.
+- `tests/persistence/cloud.test.ts` looks for a backup code's whole prefix (`MFV0-`/`MFV1-`) in
+  the sealed text: "MFV" alone turned up in its base64url by chance about one run in 150.
 
-**Next:** the whole suite and smoke on the last commit, push, CI green, mark the PR ready, merge.
+**1.0.1 is whole on `v1.1-dev`**: the `NOTES` row has its five lines. What's left logged is the
+refactors in "Where it hurts" and the art notes that are a redesign (above).
 
 Left logged, not for 1.0.1: the refactors in "Where it hurts" (2, 3, 5, 6, 10–15, 17), and the
 art notes that are a redesign (the cobble and the square, the woods' crowns, the ice, the lawns,
