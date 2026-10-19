@@ -29,6 +29,8 @@ export interface FishingCues {
   hasFished(): boolean;
   /** She ate something the fish can smell on her, and they bite sooner (phase R). */
   eager(): boolean;
+  /** Her phone asks for reduced motion, so the tension bar sweeps gentler (1.0.1). */
+  slow(): boolean;
 }
 
 /** Her float in the water, over the fish she cast to. */
@@ -176,7 +178,7 @@ export class Fishing {
       return grade > 0 ? this.land(fish, cast, grade) : this.slacken();
     }
     if (line.state === 'bite' && fish) {
-      const reel = reelOf(Fishing.seed(cast), CRITTERS[cast.critter].rarity);
+      const reel = reelOf(Fishing.seed(cast), CRITTERS[cast.critter].rarity, this.cues.slow());
       if (!reel) return this.land(fish, cast);
       this.hooked = { reel, at: now };
       return { kind: 'hooked' };

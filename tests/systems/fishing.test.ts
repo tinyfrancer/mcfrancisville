@@ -137,6 +137,22 @@ describe('the reel (V1 R6a)', () => {
     }
   });
 
+  it('sweeps slower under reduced motion, its window wider in time (1.0.1)', () => {
+    for (const rarity of ['rare', 'legendary'] as const) {
+      const quick = reelOf('s', rarity)!;
+      const slow = reelOf('s', rarity, true)!;
+      expect(slow.period).toBeGreaterThan(quick.period * 1.5);
+      expect({ ...slow, period: 0 }).toEqual({ ...quick, period: 0 });
+      const pass = (reel: typeof quick) => {
+        let landed = 0;
+        for (let t = 0; t < reel.period; t++) if (reelGrade(reel, t) > 0) landed++;
+        return landed / 2;
+      };
+      expect(pass(slow)).toBeGreaterThan(pass(quick) * 1.5);
+      expect(reelGrade(slow, bestReelAfter(slow, 0))).toBe(2);
+    }
+  });
+
   it('finds the next best moment from any time', () => {
     const reel = reelOf('n', 'legendary')!;
     for (let from = 0; from < reelLength(reel); from += 97) {

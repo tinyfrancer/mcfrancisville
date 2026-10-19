@@ -96,19 +96,17 @@ function startGame(): void {
       : hour !== null
         ? clockFromHour(hour)
         : systemClock;
-  const world = new World({ clock, ...fromSave(loaded) });
+  // Her phone asking for less motion: the effects calm down, and the reel sweeps gentler (1.0.1).
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const world = new World({ clock, ...fromSave(loaded), slow: reduced });
   // What the moments look like where they happen (V1's E1), shared by every view.
-  const effects = new Effects({
-    reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
-  });
+  const effects = new Effects({ reduced });
   // Two neighbours standing together chatter, a bubble at a time (V1's E3).
   const chatter = new Chatter();
   // Cody pats her pets at hers of an evening (V1's P5).
   const pats = new Pats();
   // Between places, an iris on her and her broom seen flying; a wash as the day turns (V1's E4).
-  const transitions = new Transitions(canvas, {
-    reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
-  });
+  const transitions = new Transitions(canvas, { reduced });
   const ctx = canvas.getContext('2d');
   const leaving = () =>
     transitions.leaving(`${world.scene}:${world.scene === 'home' ? world.home.here : ''}`);
