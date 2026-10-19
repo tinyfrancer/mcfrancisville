@@ -8272,3 +8272,91 @@ Personal touches parked (decision 177): nothing was asked._
   and `arrivingAtProps` snapshots pass without `-u`, the lived-in fixtures unchanged); smoke
   622/622 after each commit (its cloud check's known chance match once, passing on the rerun);
   `smoke:offline` 10/10.
+
+## 350. The square in flagstones round the well's setts, a tile narrower, two benches on it, and the cobbles worn down the middle (2026-10-19, 1.1's A1)
+
+_Session A1 of the 1.1 plan, lane A (decision 328), for V1's review's art note "The lavender
+cobble still carries the town". No save change. Personal touches parked (decision 177): the
+stone, the benches' places and the worn middle are the warmest default; nothing was asked._
+
+- **The square is flagstones** (a new ground, `flagstones`, `_` in the town's map): random slabs
+  two to four eight-pixel units a side, fitted together across a 256-pixel repeat (the first of a
+  shuffle of shapes that fits each gap), each a joint along its foot and right, lit along its top
+  and left, its face one of three close stones with a pit or a hairline crack here and there, in
+  a warm sandstone grey (`stone` a third of the way to `creamShade`) apart from the cobbles'
+  lavender. They're **laid on the world's grid**: a piece is drawn for where its tile sits in an
+  eight-tile repeat (`laid` on its `TERRAIN_ART` row), so slabs run over the seams and the square
+  is one floor, not a grid of tiles. Wherever the square stops, at the lawn or the cobbles, it
+  stops at a kerb: a dark lip, kerbstones sixteen pixels long lit along their top, a joint inside
+  (the town's one built edge; the cobbles and tracks keep L2's thinning).
+- **The well stands on setts** (`setts`, the well's `W` is on them), and **the flagstones lay a
+  ring of setts a tile out round it themselves**, from which of their neighbours are setts
+  (`ownMask`'s upper byte), so the ring rounds off at its corners and is a ring, not a frame of
+  tiles: courses six pixels deep that run round the footprint, setts eight long, each course set
+  half a sett on, inside their own kerb, in a darker plum stone so the well sits in it. Under the
+  well the courses run on inward. The leaves blown up against the well lie on the ring.
+- **The square is a tile narrower each side**: cols 15–24, rows 18–26, a plain 10×9 rectangle (it
+  was 12 wide with notched corners where the lanterns stood); the four lanterns stay where they
+  were, now on the lawn at its corners, so the garlands hang as before. Every spot, set piece,
+  lot, snack and dig spot, the bandstand's site and the town hall's lot are where they were; the
+  ones on the two columns given back to the lawn (`squareCorner`, two of the Halloween party's
+  pumpkins, the heart arch's end) stand on grass now.
+- **Two benches on its north edge** (`[`, a bench on flagstones; `j` is a bench on grass), at
+  17–18 and 21–22 on row 18, either side of the way in from the high street, facing the well. A
+  bench beside a neighbour's stop sits them (`seatBeside`, V1's E3): the east one is above
+  `squareNorth`, Rufus's flower stop, and his two stops there say `sits: false`, so he stands at
+  his buckets as before (`tests/world/neighbourLife.test.ts` unchanged). Nowhere else on the
+  square was clear: the finale's pumpkins and chili, the decorations, the pop-up's lot and the
+  spots fill its edges, a south bench at 16–17 stood in the line from the high street to the
+  avenue (smoke's walk south turned round it), and the east half's free tiles are all beside a
+  spot. With the bench by the noticeboard, three benches look onto the square from the north.
+- **The cobbles are worn smooth down the middle** (`path` in `sprites/terrain.ts`), from the same
+  field that thins them into the lawn: from 11 pixels in to 21 a cobble is worn by chance, past
+  21 always, **a whole stone at a time** (by where its middle is; the mortar by pixel, dust in the
+  joints), paler, warmer and barely shaded. A road two tiles wide has a worn line down its middle,
+  a narrow path a little, a crossing all over. **The fairground's paths keep their cobbles and
+  get the worn middle too**: its avenues read as trodden, and the square before the stage, where
+  the crowds stand, worn all over.
+- **Paving runs on into itself**: cobbles, flagstones and setts continue each other (`PAVED` in
+  `continues`), so neither the cobbles' thinning nor a drift of snow comes between them.
+- **The seasons**: moss in the paving's joints in spring and summer and frost in winter (palette
+  swaps in `GROUND_SHIFTS`), and snow drifted onto the square from the lawn and flecked across it
+  in winter, as on the tracks (`DUSTED`). Puddles lie on the flagstones in the rain; her
+  footsteps on them sound as on the cobbles (one line in `audio/ambience.ts`'s `groundOf`).
+- **Measured, the commonest colour (L2's measure)**: the town's is still the lawn's mid green,
+  15.7% → 15.8% (the lawn grew by the two columns); the cobble's lavender, third at 10.3%, is
+  6.2% and fourth, and the cobble's five colours together 20.5% → 11.4%. The fairground 22.5%
+  (the lawn) unchanged, its cobble 9.9% → 5.4%. Every season the same way (winter's commonest is
+  the snow, 15.4% → 15.6%).
+- **Measured, the bake**: the town has 769 distinct ground pieces against 696 (the flagstones'
+  64 places in their repeat). `edges`, which every ground piece asks for, made a closure and
+  three tables a pixel, which made the square's pieces dear; it hoists the tables and hands
+  every whole tile one shared field now, and every place, its winter and every ground piece draw
+  pixel for pixel as before. The town's ground baked whole in Node: 805–887 ms of CPU before,
+  777–863 after. `npm run perf` within the spread everywhere, the heap half a megabyte up
+  (`docs/architecture.md`).
+- **Looked at**: `npm run sprite -- 'place:town' 'place:fairground' 'season:*:town'`, the
+  ground sample (which shows flagstones round setts meeting the cobbles now), and the square at
+  phone size at Close and Far, upright and on its side, at noon and 21:30, in October, January,
+  April and July. Smoke's `town`, `seasons` and `neighbours` pass alone and the whole run before
+  each push.
+- **Held by** `tests/data/maps.test.ts` (the square flagstones round the well's setts and nothing
+  else in town, benches on it that seat her), `tests/sprites/terrain.test.ts` (paving runs on
+  into itself and nothing else; the kerb by the cobbles and none by the setts; the ring a tile
+  out and round at a corner; slabs over the seams; the cobbles worn in the middle and never at
+  the edge), `tests/render/light.test.ts` (puddles on the cobbles or the flagstones), and W1's
+  snapshots, re-taken for exactly the benches' four tiles (`overlays`: those tiles now solid and
+  a bench, compared tile by tile against the old map; `arrivingAtProps`: the bench on the square
+  is the second bench its sample meets).
+
+**Rejected:** the setts as a ground of their own in a ring of tiles round the well (a frame of
+tiles reads as a frame; the ring is laid from the well's footprint, and costs no character) or a
+decal (decals are a tile each, and a ring needs its corners); flagstones in running courses (they
+read as a brick wall); a stone paler than the cobbles (it made the square the brightest thing in
+town, which is the note's complaint); flagstones in a tile's own pattern (the grid of tiles shows
+in the joints); worn pixels dithered across the stones (a checker on every stone at the band's
+edge); keeping every field (6–10 MB of heap); a bench above `squareNorth` sitting Rufus down at
+his flowers (his stop is his stall); benches on the square's south edge or its east half (each
+in a walking line, a set piece's tile or beside a spot); new planter props (the benches and
+the shrink were enough, and a new prop wants seasons of its own); the square left 12 wide (the
+notched corners where the lanterns stood read as a cross, not a square).

@@ -94,7 +94,21 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-Not started; after H and T.
+**A1 landed (PR #209, decision 350; no save change). Next: A2.** The square is flagstones
+(`flagstones`, `_` in the map: a 10×9 rectangle, cols 15–24, rows 18–26, a tile narrower each
+side than the cobbles were, its four lanterns on the lawn at its corners), the well on setts
+(`W`'s tile is `setts`) and a ring of setts a tile out round it that the flagstones lay
+themselves from which neighbours are setts (`ownMask`'s upper byte; `sprites/paving.ts`), two
+benches on its north edge either side of the way in (`[`, a bench on flagstones). The cobbles
+are worn smooth down the middle, a stone at a time (`path` in `sprites/terrain.ts`, the
+fairground's too). Paving is `PAVED` (cobbles, flagstones, setts run on into each other) and a
+laid ground draws for an eight-tile repeat (`laid` on its `TERRAIN_ART` row). **For A2**: the
+legend has `( ) < > ? \ ] { }` and the backtick left (A1 took `_` and `[`); a bench placed
+beside a neighbour's stop sits them there (`seatBeside`, above, either side, below), so check
+`SPOTS` beside any bench or log you stand in the woods, or give the stop `sits: false` as A1 did
+Rufus's flowers; `edges` hands every whole tile one shared field now, so a new ground's middle is
+free. For her phone: whether the square reads as the heart of town without shouting, and the
+worn middle of the roads at Close.
 
 ## After 1.0
 
@@ -1784,11 +1798,9 @@ phase G" in `docs/personal_touches.md`). L6 emptied the list (decision 292); **V
 (decision 324) looked again after L6, L2, L4 and L7, at `npm run sprite -- 'place:*'`, the smoke
 screenshots and its own four days of play at phone size, and found:
 
-- **The lavender cobble still carries the town.** L2 gave the woods and farm dirt and the castle
-  gravel, but the town's roads, its square and the fairground's paths are all one cobble, and the
-  square is a big empty plaza with a small well in the middle; it draws the eye more than the
-  buildings round it. A worn middle, a second paving for the square (flagstones, a ring round the
-  well), benches or planters on it, or the square made smaller, would each help.
+- ~~**The lavender cobble still carries the town.**~~: done in 1.1 (A1, decision 350); the
+  square is flagstones a tile narrower each side, with a ring of setts round the well and two
+  benches, and the roads' cobbles are worn smooth down the middle (the fairground's too).
 - **Woods are walls of one crown.** Whisperwood, the shore and the castle hill are edged with the
   same round teal crown over and over (the purple and orange ones and the conifers break it up, but
   not much at a distance); the forms L2 added are few beside it. More variety in the edge crowns,

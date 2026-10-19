@@ -162,11 +162,13 @@ describe('puddles in the rain', () => {
   const puddles = puddlesOf(town);
 
   it('lie on about one open path tile in six, wholly inside their tile', () => {
-    const paths = town.tiles.filter((t) => t === 'path').length;
+    // The town's cobbles, and the square's flagstones since 1.1's A1.
+    const paved = (t: string | undefined) => t === 'path' || t === 'flagstones';
+    const paths = town.tiles.filter(paved).length;
     expect(puddles.length).toBeGreaterThan(paths * 0.08);
     expect(puddles.length).toBeLessThan(paths * 0.3);
     for (const p of puddles) {
-      expect(tileAt(town, p.tx, p.ty)).toBe('path');
+      expect(paved(tileAt(town, p.tx, p.ty))).toBe(true);
       const { width, height } = spriteSize(PUDDLE_ART[p.look]!);
       expect(p.x).toBeGreaterThanOrEqual(p.tx * TILE_SIZE);
       expect(p.y).toBeGreaterThanOrEqual(p.ty * TILE_SIZE);

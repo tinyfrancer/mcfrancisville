@@ -74,6 +74,7 @@ exports[`arriving at a prop (1.1 W1) > does what it always did on a festival eve
   "noticeboard@23,17 went: {"kind":"arrived","tx":22,"ty":16,"at":"noticeboard","toward":{"tx":23,"ty":17,"w":2,"h":1}}",
   "bench@27,17 went: {"kind":"arrived","tx":26,"ty":16,"at":"bench","toward":{"tx":27,"ty":17,"w":2,"h":1}}",
   "shopHouse@5,18 went: {"kind":"arrived","tx":4,"ty":17,"at":"shopHouse","toward":{"tx":5,"ty":18,"w":5,"h":4}} {"kind":"entered","scene":"cobwebCorner"}",
+  "bench@17,18 went: {"kind":"arrived","tx":16,"ty":17,"at":"bench","toward":{"tx":17,"ty":18,"w":2,"h":1}}",
   "salonHouse@30,18 went: {"kind":"arrived","tx":29,"ty":17,"at":"salonHouse","toward":{"tx":30,"ty":18,"w":5,"h":4}} {"kind":"entered","scene":"muse"}",
   "barrel@4,19 went: {"kind":"arrived","tx":3,"ty":18,"at":"barrel","toward":{"tx":4,"ty":19,"w":1,"h":1}}",
   "bandstand@26,19 went: {"kind":"arrived","tx":26,"ty":18,"at":"bandstand","toward":{"tx":26,"ty":19,"w":3,"h":2}} {"kind":"tune","tune":"skeletonRag"}",
@@ -96,7 +97,6 @@ exports[`arriving at a prop (1.1 W1) > does what it always did on a festival eve
   "gravestone@6,39 went: {"kind":"arrived","tx":5,"ty":38,"at":"gravestone","toward":{"tx":6,"ty":39,"w":1,"h":1}}",
   "stump@15,39 went: {"kind":"arrived","tx":14,"ty":38,"at":"stump","toward":{"tx":15,"ty":39,"w":1,"h":1}}",
   "fountain@25,41: nowhere to stand",
-  "bench@20,46 went: {"kind":"arrived","tx":19,"ty":45,"at":"bench","toward":{"tx":20,"ty":46,"w":2,"h":1}}",
 ]
 `;
 
@@ -319,6 +319,7 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in town 1`] = `
   "bench@27,17 went: {"kind":"arrived","tx":26,"ty":16,"at":"bench","toward":{"tx":27,"ty":17,"w":2,"h":1}}",
   "moonPieCart@37,17 went: {"kind":"arrived","tx":36,"ty":16,"at":"moonPieCart","toward":{"tx":37,"ty":17,"w":2,"h":2}}",
   "shopHouse@5,18 went: {"kind":"arrived","tx":4,"ty":17,"at":"shopHouse","toward":{"tx":5,"ty":18,"w":5,"h":4}} {"kind":"entered","scene":"cobwebCorner"}",
+  "bench@17,18 went: {"kind":"arrived","tx":16,"ty":17,"at":"bench","toward":{"tx":17,"ty":18,"w":2,"h":1}}",
   "salonHouse@30,18 went: {"kind":"arrived","tx":29,"ty":17,"at":"salonHouse","toward":{"tx":30,"ty":18,"w":5,"h":4}} {"kind":"entered","scene":"muse"}",
   "barrel@4,19 went: {"kind":"arrived","tx":3,"ty":18,"at":"barrel","toward":{"tx":4,"ty":19,"w":1,"h":1}}",
   "barrel@4,20 went: {"kind":"arrived","tx":3,"ty":19,"at":"barrel","toward":{"tx":4,"ty":20,"w":1,"h":1}}",
@@ -337,7 +338,6 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in town 1`] = `
   "gravestone@6,39 went: {"kind":"arrived","tx":5,"ty":38,"at":"gravestone","toward":{"tx":6,"ty":39,"w":1,"h":1}}",
   "stump@15,39 went: {"kind":"arrived","tx":14,"ty":38,"at":"stump","toward":{"tx":15,"ty":39,"w":1,"h":1}}",
   "fountain@25,41: nowhere to stand",
-  "bench@20,46 went: {"kind":"arrived","tx":19,"ty":45,"at":"bench","toward":{"tx":20,"ty":46,"w":2,"h":1}}",
 ]
 `;
 

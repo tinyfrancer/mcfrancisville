@@ -359,7 +359,8 @@ back the way it came, so while the camera keeps pace she and the ground move by 
 pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
 (decision 2); `render/ground.ts` bakes the ground in 8×8-tile chunks (`render/chunks.ts`, decision
 138), each the first time the camera reaches it, each tile grass with its ground laid over it by
-neighbour mask (`sprites/terrain.ts`, decision 93), and a frame copies only the chunks under the
+neighbour mask (`sprites/terrain.ts`, decision 93; the square's paving, laid on the world's grid,
+also by which neighbours are its own kind, `ownMask`, decision 350), and a frame copies only the chunks under the
 view; the day the pond freezes or thaws only the chunks it touches are baked again, and a view
 she has left `rest`s, letting its chunks go until she's back; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
@@ -923,6 +924,29 @@ with lane A's session (draw means, ms (p50); updates, ms):
 
 Every row within the other's spread, one way and the other; the spread itself is the container
 (a quiet pair, the second, had Home at 15.6 against 17.2 and the back room at 19.7 against 22.7).
+
+**1.1's A1** (2026-10-19, decision 350), the square's flagstones and setts and the cobbles' worn
+middle, adds no pass: it is all baked into the ground's chunks. What it costs is baking: the
+flagstones are drawn for 64 places in their eight-tile repeat, so the town has 769 distinct
+pieces against 696. `edges`, which every ground piece asks for its field, made a closure and
+three tables a pixel; it hoists the tables now and hands every tile with ground on all sides one
+shared field (a cache of every field was tried and held 6–10 MB of heap). Every place, its
+winter and every ground piece draw pixel for pixel as before that change. The town's whole
+ground drawn and rasterized fresh in Node (CPU ms, three runs): 805–887 on `v1.1-dev`, 777–863 on
+A1; the fairground's 475–503 and 428–546. `npm run perf` at Close, alternating, on a container
+shared with lane W's session (draw means, ms (p50); heap, MB):
+
+| Scene       | 21:30, A1             | 21:30, v1.1-dev       | Noon, A1 / v1.1-dev       | Heap, A1 / v1.1-dev   |
+| ----------- | --------------------- | --------------------- | ------------------------- | --------------------- |
+| Town        | 34–35.8 (23.8–24.8)   | 33.2–47.6 (23.2–33.9) | 32.6 (22.6) / 34.2 (24.8) | 29.5–29.6 / 28.9–29.2 |
+| Home        | 17–17.6 (10.1–10.6)   | 16.1–18.6 (10.1–11.1) | 5.4 (2.3) / 4.8 (1.8)     | 30.2–30.7 / 29.5–30   |
+| Fairground  | 22.9–23.5 (15.1–15.5) | 22.7–27.9 (15.3–19)   | 23.5 (15.9) / 23.6 (16.4) | 30.8 / 30.1–30.6      |
+| Whisperwood | 25.6–26 (16.8–16.9)   | 25.3–32.4 (16.1–22.9) | 25.6 (16.7) / 29 (19.7)   | 31.5–31.8 / 30.8–31   |
+| Boo Acres   | 20.7–20.9 (12.7–12.9) | 19.3–26.5 (12.3–17)   | 21.7 (14.1) / 21.4 (14.7) | 32.1–32.3 / 31.3–31.5 |
+| Her yard    | 34.9–36.6 (26.4–27.3) | 33.5–42.9 (25.7–34.8) | 33.7 (25.1) / 31.4 (24.8) | 31.9–32 / 31.4–31.7   |
+| Back room   | 20.4–20.9 (13.4–13.8) | 21.1–25.5 (13.6–17.8) | 7.5 (4.3) / 7.4 (4.4)     | 32.2 / 31.5–32        |
+
+Within the spread everywhere; the heap half a megabyte up, the square's pieces.
 
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read

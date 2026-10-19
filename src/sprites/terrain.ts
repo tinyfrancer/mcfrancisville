@@ -3,6 +3,7 @@ import { mix, PALETTE as C, ramp } from './palette';
 import { bankField, wetAround } from './banks';
 import { drawLawn, LAWN_LOOKS, LAWN_PALETTE, MID, type LawnField } from './lawn';
 import { CLEAR, Sketch } from './sketch';
+import { drawFlagstones, drawSetts, PAVING_PALETTE } from './paving';
 import {
   DIRT_PALETTE,
   drawDirt,
@@ -14,6 +15,7 @@ import {
   inward,
   LONG_GRASS_PALETTE,
   MEADOW_PALETTE,
+  grainOf,
   wavy,
   type Phase,
 } from './tracks';
@@ -26,7 +28,9 @@ import { rasterize, type Palette, type Raster, type SpriteSource } from './sprit
  * and a cliff a face where the ground drops away. Each piece is still a grid of keys and a palette
  * (decision 2); the grids are drawn once per shape and cached. Since V1's L2 the grass is a lawn in
  * tones (`sprites/lawn.ts`), and the cobbles are the town's: the wilds' tracks are dirt and the
- * castle hill's gravel, with meadow and long grass on the open lawns (`sprites/tracks.ts`).
+ * castle hill's gravel, with meadow and long grass on the open lawns (`sprites/tracks.ts`). Since
+ * 1.1's A1 the square is flagstones with setts round its well (`sprites/paving.ts`), and the
+ * cobbles are worn smooth down the middle.
  */
 
 export const TILE = 32;
@@ -88,7 +92,21 @@ export const TERRAINS: readonly Terrain[] = [
   'gravel',
   'meadow',
   'longGrass',
+  'flagstones',
+  'setts',
 ];
+
+/** The town's paving (1.1's A1): cobbles, flagstones and setts run on into each other. */
+const PAVED: ReadonlySet<TileId | undefined> = new Set<TileId>(['path', 'flagstones', 'setts']);
+
+/**
+ * What a laid ground counts as its own, for where it stops at a kerb: the flagstones run on up to
+ * the setts under the well, and lay the ring round it themselves; the setts stop at anything else.
+ */
+const KIN: Partial<Record<TileId, ReadonlySet<TileId | undefined>>> = {
+  flagstones: new Set<TileId | undefined>(['flagstones', 'setts', undefined]),
+  setts: new Set<TileId | undefined>(['setts', undefined]),
+};
 
 /**
  * Whether `other` carries on the ground `self` is, so no edge is drawn between them. Off the map
@@ -97,6 +115,7 @@ export const TERRAINS: readonly Terrain[] = [
  */
 export function continues(self: TileId, other: TileId | undefined): boolean {
   if (other === undefined || other === self) return true;
+  if (PAVED.has(self) && PAVED.has(other)) return true;
   // Steps carry on any track up to them: the town's cobbles, a dirt track or gravel (V1's L2).
   if (self === 'path' || self === 'dirt' || self === 'gravel') return other === 'steps';
   if (self === 'steps') return other === 'path' || other === 'dirt' || other === 'gravel';
@@ -174,6 +193,31 @@ function slopesOf(c: (dx: number, dy: number) => boolean): number {
   return out;
 }
 
+/**
+ * Which neighbours of a laid ground (flagstones, setts) are its own kind (`KIN`), as bits, a corner
+ * counting only between two sides: where it ends at a kerb, as `neighbourMask` is where it ends at
+ * the lawn. For the flagstones, which of its neighbours are setts follow, eight bits up, every
+ * corner counting, for the ring they lay round the well. Any other ground's own neighbours are its
+ * continuing ones.
+ */
+export function ownMask(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): number {
+  const self = tileAt(tx, ty);
+  const kin = self === undefined ? undefined : KIN[self];
+  if (!kin) return neighbourMask(tileAt, tx, ty) & 0xff;
+  let mask = 0;
+  let setts = 0;
+  for (const [dx, dy, bit] of AROUND) {
+    const other = tileAt(tx + dx, ty + dy);
+    if (kin.has(other)) mask |= bit;
+    if (self === 'flagstones' && other === 'setts') setts |= bit;
+  }
+  return reduce(mask) | (setts << 8);
+}
+
 function reduce(mask: number): number {
   let out = mask & (N | E | S | W);
   for (const [corner, a, b] of [
@@ -222,15 +266,49 @@ interface Edge {
   along: number;
 }
 
+/** The corners cut along a diagonal, and the way out toward each. */
+const CUTS = [
+  [CUT_NW, -1, -1],
+  [CUT_NE, 1, -1],
+  [CUT_SE, 1, 1],
+  [CUT_SW, -1, 1],
+] as const;
+
+/** The inner corners: the two sides beside each, the corner, its point, and its two notches. */
+const INNER = [
+  [N, W, NW, 0, 0, NOTCH_NW_Y, NOTCH_NW_X],
+  [N, E, NE, TILE, 0, NOTCH_NE_Y, NOTCH_NE_X],
+  [S, W, SW, 0, TILE, NOTCH_SW_Y, NOTCH_SW_X],
+  [S, E, SE, TILE, TILE, NOTCH_SE_Y, NOTCH_SE_X],
+] as const;
+
+/** The cuts and notches, which only a tile with an open side or corner has. */
+const SLOPED = 0xfff00;
+
+/** A tile with ground on every side has no edge near: one field for all of them, only read. */
+const WHOLE: readonly Edge[] = Array.from({ length: TILE * TILE }, (_, i) => ({
+  d: Infinity,
+  nx: 0,
+  ny: 0,
+  along: i % TILE,
+}));
+
 /**
  * The distance to the edge for every pixel of a tile of the given shape. Open sides are straight
  * edges; where two open sides meet the corner is rounded to `radius`; where two closed sides meet
  * an open corner, the edge wraps round the point of it.
  */
-function edges(mask: number, radius: number): Edge[] {
+function edges(mask: number, radius: number): readonly Edge[] {
+  if ((mask & 0xff) === 0xff && !(mask & SLOPED)) return WHOLE;
   const open = (bit: number) => (mask & bit) === 0;
   const out: Edge[] = [];
   const r = radius;
+  const rounded = [
+    [N, W, r, r, CUT_NW],
+    [N, E, TILE - r, r, CUT_NE],
+    [S, W, r, TILE - r, CUT_SW],
+    [S, E, TILE - r, TILE - r, CUT_SE],
+  ] as const;
   for (let y = 0; y < TILE; y++) {
     for (let x = 0; x < TILE; x++) {
       const px = x + 0.5;
@@ -245,24 +323,14 @@ function edges(mask: number, radius: number): Edge[] {
       if (open(E)) take(TILE - px, 1, 0, y);
       // A corner cut along the diagonal, where a staircase of tiles is smoothed into a slope: the
       // line through the tile's two other corners.
-      for (const [cut, sx, sy] of [
-        [CUT_NW, -1, -1],
-        [CUT_NE, 1, -1],
-        [CUT_SE, 1, 1],
-        [CUT_SW, -1, 1],
-      ] as const) {
+      for (const [cut, sx, sy] of CUTS) {
         if (!(mask & cut)) continue;
         // How far out toward the corner, measured along the diagonal from the tile's middle.
         const out = ((px - TILE / 2) * sx + (py - TILE / 2) * sy) / Math.SQRT2;
         take(-out, sx / Math.SQRT2, sy / Math.SQRT2, x);
       }
       // Rounded outer corners: inside the corner's square, the arc is the edge.
-      for (const [a, b, cx, cy, cut] of [
-        [N, W, r, r, CUT_NW],
-        [N, E, TILE - r, r, CUT_NE],
-        [S, W, r, TILE - r, CUT_SW],
-        [S, E, TILE - r, TILE - r, CUT_SE],
-      ] as const) {
+      for (const [a, b, cx, cy, cut] of rounded) {
         if (!open(a) || !open(b) || mask & cut) continue;
         const inX = cx < TILE / 2 ? px < cx : px > cx;
         const inY = cy < TILE / 2 ? py < cy : py > cy;
@@ -274,12 +342,7 @@ function edges(mask: number, radius: number): Edge[] {
       }
       // Inner corners: the ground beyond the diagonal comes to a point at the corner, unless a
       // cut runs into it from a side, when on that side the edge follows the cut's line instead.
-      for (const [a, b, corner, cx, cy, notchY, notchX] of [
-        [N, W, NW, 0, 0, NOTCH_NW_Y, NOTCH_NW_X],
-        [N, E, NE, TILE, 0, NOTCH_NE_Y, NOTCH_NE_X],
-        [S, W, SW, 0, TILE, NOTCH_SW_Y, NOTCH_SW_X],
-        [S, E, SE, TILE, TILE, NOTCH_SE_Y, NOTCH_SE_X],
-      ] as const) {
+      for (const [a, b, corner, cx, cy, notchY, notchX] of INNER) {
         if (open(a) || open(b) || !open(corner)) continue;
         const dx = cx - px;
         const dy = cy - py;
@@ -367,19 +430,59 @@ const COBBLES: readonly (readonly (readonly [number, number, number, number])[])
 ];
 
 /**
+ * How far in from a road's edge its cobbles start to be worn smooth (1.1's A1), and how far in
+ * they're worn all over: down the middle of a road two tiles wide, a little down a narrow one, and
+ * all across where roads meet.
+ */
+const WORN_FROM = 11;
+const WORN_TO = 21;
+
+/** A cobble's key worn smooth: the stone paler, barely shaded, the joints filled with dust. */
+const WORN: Readonly<Record<string, string>> = { s: 'w', S: 'v', L: 'W', m: 'n' };
+
+/** How worn the ground is `d` in from the road's edge, from none to all. */
+function wear(d: number): number {
+  return Math.min(1, Math.max(0, (d - WORN_FROM) / (WORN_TO - WORN_FROM)));
+}
+
+/** Each pixel of a look of the cobbles as the stone it's part of, or -1 for the mortar. */
+const STONES: readonly (readonly number[])[] = COBBLES.map((set) => {
+  const s = new Sketch(TILE, TILE);
+  set.forEach(([cx, cy, rx, ry], i) => s.ellipse(cx, cy, rx, ry, String.fromCharCode(65 + i)));
+  return Array.from({ length: TILE * TILE }, (_, i) => {
+    const k = s.get(i % TILE, Math.floor(i / TILE))!;
+    return k === CLEAR ? -1 : k.charCodeAt(0) - 65;
+  });
+});
+
+/**
  * The town's cobbles set in mortar, meeting the grass softly along a gently waving edge: the
- * mortar gives way to the lawn between the last stones (V1's L2; it was a dark kerb).
+ * mortar gives way to the lawn between the last stones (V1's L2; it was a dark kerb). Down the
+ * middle, where feet go, the stones are worn lighter and smoother (1.1's A1), from the same field.
  */
 function path(mask: number, variant: number, phase: Phase = NO_PHASE): SpriteSource {
   const s = new Sketch(TILE, TILE, 'm');
-  for (const [cx, cy, rx, ry] of COBBLES[variant]!) s.ellipse(cx, cy, rx, ry, 's');
+  const cobbles = COBBLES[variant]!;
+  for (const [cx, cy, rx, ry] of cobbles) s.ellipse(cx, cy, rx, ry, 's');
   s.bevel('s', 'L', 'S');
+  const field = wavy(edges(mask, 8), phase, 1.5);
+  // A stone is worn whole or not at all, by how far in its middle is, so the worn middle thins
+  // out stone by stone rather than in a dither across them.
+  const worn = cobbles.map(([cx, cy], i) => {
+    const middle =
+      field[Math.min(TILE - 1, Math.round(cy)) * TILE + Math.min(TILE - 1, Math.round(cx))]!;
+    return wear(middle.d) > grainOf(i, variant, 13);
+  });
+  const stones = STONES[variant]!;
   // No kerb (V1's L2): toward the grass the mortar gives way to the lawn between the stones, and
   // the last stones stand loose in it.
-  paint(s, wavy(edges(mask, 8), phase, 1.5), (e, x, y) => {
+  paint(s, field, (e, x, y) => {
     const key = s.get(x, y)!;
-    if (key === 'm') return holds(e, x, y, 4) ? 'm' : CLEAR;
-    return e.d < 1.5 ? CLEAR : key;
+    if (key === 'm' && !holds(e, x, y, 4)) return CLEAR;
+    if (key !== 'm' && e.d < 1.5) return CLEAR;
+    const stone = stones[y * TILE + x]!;
+    const smooth = stone < 0 ? wear(e.d) > grainOf(x >> 1, y >> 1, 17) : worn[stone];
+    return smooth ? (WORN[key] ?? key) : key;
   });
   return s.toSource();
 }
@@ -390,6 +493,11 @@ const PATH_PALETTE: Palette = {
   s: C.stone,
   S: ramp(C.stone)[1],
   L: C.stoneLight,
+  // Worn smooth (1.1's A1): a paler, warmer stone, barely shaded, and dust in the joints.
+  w: mix(C.stoneLight, C.creamShade, 0.3),
+  v: mix(C.stone, mix(C.stoneLight, C.creamShade, 0.3), 0.55),
+  W: mix(C.stoneLight, C.creamShade, 0.6),
+  n: mix(C.stoneDark, C.stone, 0.6),
 };
 
 // ---- Water ------------------------------------------------------------------------------------
@@ -767,7 +875,7 @@ interface TerrainArt {
   palette: Palette;
   /** How many looks it comes in. */
   variants: number;
-  draw: (mask: number, variant: number, phase: Phase) => SpriteSource;
+  draw: (mask: number, variant: number, phase: Phase, own: number) => SpriteSource;
   /** Whether a diagonal staircase of it is smoothed into a slope (`CUT_NW` and the rest). */
   slopes?: true;
   /**
@@ -775,6 +883,11 @@ interface TerrainArt {
    * for where the tile sits in the wave as well as its shape.
    */
   waves?: true;
+  /**
+   * Whether it's laid on the world's grid (1.1's A1, `sprites/paving.ts`), so every piece is drawn
+   * for where its tile sits in an eight-tile repeat, and for where it stops at a kerb (`ownMask`).
+   */
+  laid?: true;
 }
 
 export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
@@ -819,6 +932,22 @@ export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
     variants: 3,
     draw: (m, v, at) => drawLongGrass(wavy(edges(m, 14), at, 4.5), v),
     waves: true,
+  },
+  flagstones: {
+    palette: PAVING_PALETTE,
+    variants: 1,
+    draw: (m, _v, at, own) => {
+      const lawn = edges(m, 4);
+      const kin = (own & 0xff) === (m & 0xff) ? lawn : edges(own & 0xff, 4);
+      return drawFlagstones(lawn, kin, own >> 8, at);
+    },
+    laid: true,
+  },
+  setts: {
+    palette: PAVING_PALETTE,
+    variants: 1,
+    draw: (m, _v, at, own) => drawSetts(edges(m, 4), edges(own, 1), at),
+    laid: true,
   },
 };
 
@@ -867,12 +996,18 @@ export function terrainPiece(
   mask: number,
   variant: number,
   at: { tx: number; ty: number } = { tx: 0, ty: 0 },
+  own: number = mask & 0xff,
 ): GroundPiece {
   const art = TERRAIN_ART[terrain];
+  if (art.laid) {
+    const phase = { px: at.tx & 7, py: at.ty & 7 };
+    const key = `ground:${terrain}:${mask}:${own}:${phase.px}${phase.py}`;
+    return piece(key, art.palette, () => art.draw(mask, variant, phase, own));
+  }
   // Only a tile with an edge waves, and only the phase along its edges matters.
   const phase = art.waves && (mask & 0xff) !== 0xff ? { px: at.tx & 3, py: at.ty & 3 } : NO_PHASE;
   const key = `ground:${terrain}:${mask}:${variant}${art.waves ? `:${phase.px}${phase.py}` : ''}`;
-  return piece(key, art.palette, () => art.draw(mask, variant, phase));
+  return piece(key, art.palette, () => art.draw(mask, variant, phase, own));
 }
 
 /**
@@ -894,7 +1029,8 @@ export function groundPieces(
     const mask = neighbourMask(tileAt, tx, ty, { slopes });
     const bank =
       id === 'water' || id === 'ice' ? bankPiece(tileAt, tx, ty, id, mask, variant) : null;
-    pieces.push(bank ?? terrainPiece(id, mask, variant, { tx, ty }));
+    const own = TERRAIN_ART[id].laid ? ownMask(tileAt, tx, ty) : mask & 0xff;
+    pieces.push(bank ?? terrainPiece(id, mask, variant, { tx, ty }, own));
   } else if (id === 'grass') {
     // Grass beside water may be wet at a corner, where the bank rounds out over it (V1's L6).
     const wet = spillOf(tileAt, tx, ty);
@@ -971,7 +1107,8 @@ const spills = new Map<string, GroundPiece | null>();
 /**
  * A patch of every kind of ground side by side, for looking at how the edges meet: a pond, a path
  * crossing the grass, a hedge, a garden bed, a cliff with steps up it, a frozen creek running into
- * open water, and a pier. Letters as in the maps.
+ * open water, a pier, and the square's flagstones round setts meeting the cobbles. Letters as in
+ * the maps, but for the flagstones (F) and setts (S).
  */
 const SAMPLE: readonly string[] = [
   '############',
@@ -990,6 +1127,9 @@ const SAMPLE: readonly string[] = [
   "#.'''.///d.#",
   '#dddd...dd.#',
   '#..dd.vvvv.#',
+  '#FFFFF=====#',
+  '#FFSFF=....#',
+  '#FFFFF.....#',
   '############',
 ];
 
@@ -1007,6 +1147,8 @@ const SAMPLE_KEY: Readonly<Record<string, TileId>> = {
   v: 'gravel',
   "'": 'meadow',
   '/': 'longGrass',
+  F: 'flagstones',
+  S: 'setts',
 };
 
 /** The sample patch of ground, drawn as the renderer lays it. */

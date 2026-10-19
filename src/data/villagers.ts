@@ -264,14 +264,15 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
         // Picking wildflowers in Whisperwood first thing, and arranging them at home after lunch.
         { from: 5, inside: 'rufusCabin' },
         { from: 7, zone: 'whisperwood', at: 'wildflowers', doing: 'flowers' },
-        { from: 11, at: 'squareNorth', doing: 'flowers' },
+        // Standing at his buckets, though a bench is beside him on the square (1.1's A1).
+        { from: 11, at: 'squareNorth', doing: 'flowers', sits: false },
         { from: 15, inside: 'rufusCabin' },
         { from: 18, at: 'farmGate' },
         { from: 21, at: 'pondEast' },
       ],
       weekend: [
         { from: 6, zone: 'whisperwood', at: 'wildflowers', doing: 'flowers' },
-        { from: 10, at: 'squareNorth', doing: 'flowers' },
+        { from: 10, at: 'squareNorth', doing: 'flowers', sits: false },
         // Sniffing the blossom in Boo Acres' orchard of a weekend (0.3's F1).
         { from: 14, zone: 'booAcres', at: 'orchard' },
         { from: 17, at: 'farmGate' },

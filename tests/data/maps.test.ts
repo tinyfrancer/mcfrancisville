@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { PATCHES } from '../../src/data/gathering';
 import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
-import { parseMap, walkable } from '../../src/systems/grid';
+import { PROP_SEATS } from '../../src/data/seats';
+import { parseMap, tileAt, walkable } from '../../src/systems/grid';
 import { PROP_ART } from '../../src/sprites/props';
 import { TILE_SIZE } from '../../src/config/world';
 import type { PropId } from '../../src/types/ids';
@@ -198,6 +199,41 @@ describe('the town', () => {
         map.props.filter((p) => p.id === id),
         id,
       ).toHaveLength(1);
+    }
+  });
+
+  it('paves the square in flagstones, the well on its setts, with benches on it (1.1 A1)', () => {
+    const well = map.props.find((p) => p.id === 'well')!;
+    // The square: the well's footprint is setts, every other tile of it flagstones or a bench's.
+    const square = { tx: 15, ty: 18, w: 10, h: 9 };
+    for (let ty = square.ty; ty < square.ty + square.h; ty++) {
+      for (let tx = square.tx; tx < square.tx + square.w; tx++) {
+        const under =
+          tx >= well.tx && tx < well.tx + well.w && ty >= well.ty && ty < well.ty + well.h;
+        expect(tileAt(map, tx, ty), `${tx},${ty}`).toBe(under ? 'setts' : 'flagstones');
+      }
+    }
+    const benches = map.props.filter(
+      (p) =>
+        p.id === 'bench' &&
+        p.tx >= square.tx &&
+        p.tx < square.tx + square.w &&
+        p.ty >= square.ty &&
+        p.ty < square.ty + square.h,
+    );
+    expect(benches.length).toBeGreaterThanOrEqual(2);
+    expect(PROP_SEATS.bench).toBeDefined();
+    // Nothing but the square is flagstones or setts.
+    for (let ty = 0; ty < map.height; ty++) {
+      for (let tx = 0; tx < map.width; tx++) {
+        const inside =
+          tx >= square.tx &&
+          tx < square.tx + square.w &&
+          ty >= square.ty &&
+          ty < square.ty + square.h;
+        if (!inside)
+          expect(['flagstones', 'setts'], `${tx},${ty}`).not.toContain(tileAt(map, tx, ty));
+      }
     }
   });
 

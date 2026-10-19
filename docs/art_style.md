@@ -125,6 +125,14 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   so a row of poles reads as one unbroken string along a path. The bulbs are four keys never
   outlined (gold, scarlet, blue, green, as the festival's), lit after dark; they're part of the
   pole's sprite, so a string of lights costs no pass over the frame.
+- **A road is worn where feet go** (1.1's A1): the cobbles are paler and barely shaded down the
+  middle of a road, a whole stone at a time, from the same distance to the edge that thins them
+  into the lawn, so a road reads as a road and a crossing as trodden.
+- **The square is the town's one built floor** (1.1's A1, `src/sprites/paving.ts`): random
+  flagstones in a calm warm grey, laid on the world's grid so slabs run over the seams between
+  tiles, inside a kerb wherever they stop, and a darker ring of setts round the well in courses
+  that run round it. A paving laid like this is drawn for where its tile sits in its repeat, and
+  takes moss in its joints in spring and summer and frost in winter.
 - **A new place has a legend of its own** (`FAIR_LEGEND`, decision 200; Boo Acres'
   `FARM_LEGEND`, 0.3's F1) for its props, rather than taking more of the town's map characters.
 - **A farm is the kit in work clothes** (Boo Acres, `src/sprites/farm.ts`): the farmhouse, the
