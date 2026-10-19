@@ -10,7 +10,7 @@ Nothing is in progress.
 
 ## After 1.0
 
-**The V1 plan is complete, and 1.0 is the release PR (#@@REL@@, `v1-dev` → `main`), opened by
+**The V1 plan is complete, and 1.0 is the release PR (#198, `v1-dev` → `main`), opened by
 V1's review ready and green and left for the user to merge: the release is theirs.** Her phone
 has 0.4 (2026-10-07, PR #175), which carried 0.5's sessions too, so it last showed her the
 mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one card,
