@@ -180,7 +180,9 @@ describe('a trick', () => {
     expect(trick).toMatchObject({ pet: 'dolly', line });
     expect(eventToast(trick!)?.text).toBe(line);
     // One done on its own is only seen.
-    expect(eventToast({ kind: 'petTrick', pet: 'dolly', at: { x: 0, y: 0 }, own: true })).toBeNull();
+    expect(
+      eventToast({ kind: 'petTrick', pet: 'dolly', at: { x: 0, y: 0 }, own: true }),
+    ).toBeNull();
   });
 });
 

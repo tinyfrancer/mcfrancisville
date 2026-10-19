@@ -50,7 +50,12 @@ function askFirst(
     'div',
     { className: 'hud-project-ask' },
     el('p', {}, askFirstLine(name, moving)),
-    el('div', { className: 'hud-actions' }, button('Not yet', notYet), button('Go ahead', go, true)),
+    el(
+      'div',
+      { className: 'hud-actions' },
+      button('Not yet', notYet),
+      button('Go ahead', go, true),
+    ),
   );
   card.setAttribute('role', 'group');
   card.setAttribute('aria-label', `Before ${name} starts`);
