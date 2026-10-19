@@ -178,7 +178,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   grass is a lawn in tones, one at each corner of the tiles (`src/sprites/lawn.ts`, which corner
   takes which from noise, trees' shade and worn doorsteps in `src/render/lawn.ts`), and the dirt,
   gravel, meadow and long grass are `src/sprites/tracks.ts`, each thinning into the lawn at its
-  edge (V1's L2, decision 293); trees,
+  edge (V1's L2, decision 293); the town's cobbles are worn smooth down the middle, a stone at a
+  time, from the same field (1.1's A1, decision 350), and the square is flagstones laid on the
+  world's grid inside a kerb, the well on setts that the flagstones ring a tile out
+  (`src/sprites/paving.ts`; cobbles, flagstones and setts run on into each other, `PAVED`); trees,
   the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
   take `forms` as well as `variants`; the tree's conifer, dead tree and birch are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
   from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
