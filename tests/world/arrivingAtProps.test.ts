@@ -3,6 +3,7 @@ import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import type { PlacedProp } from '../../src/systems/grid';
 import type { MapZoneId } from '../../src/types/ids';
 import type { WorldEvent } from '../../src/world/World';
+import { arrivalsOf } from '../../src/world/arrivals';
 import { harness, type Harness } from './harness';
 
 /**
@@ -94,5 +95,14 @@ describe('arriving at a prop (1.1 W1)', () => {
       const h = inPlace(place, new Date(2026, 9, 30, 19), { built: [...built] });
       expect(walkRound(place, h)).toMatchSnapshot(place);
     }
+  });
+
+  it('has one area say what arriving at a prop does, never two', () => {
+    const shake = () => [];
+    expect(Object.keys(arrivalsOf({ candyTree: shake }, { goose: shake }))).toEqual([
+      'candyTree',
+      'goose',
+    ]);
+    expect(() => arrivalsOf({ candyTree: shake }, { candyTree: shake })).toThrow(/candyTree/);
   });
 });

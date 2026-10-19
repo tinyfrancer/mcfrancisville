@@ -1,3 +1,4 @@
+import type { PropArrivals } from '../arrivals';
 import type { Belongings } from '../services/Belongings';
 import { CandyTree } from '../services/CandyTree';
 import { Visits } from '../services/Visits';
@@ -10,12 +11,20 @@ import type { Shared } from './shared';
 export interface Passive {
   visits: Visits;
   candyTree: CandyTree;
+  /** The pots by her door, the candy tree and its saplings, walked up to. */
+  arrivals: PropArrivals;
 }
 
 export function passive(s: Shared, belongings: Belongings): Passive {
-  const { ctx, options, bag, wallet } = s;
+  const { ctx, options, bag, wallet, porch } = s;
+  const candyTree = new CandyTree(ctx, { wallet, bag }, options.candyTree);
   return {
     visits: new Visits(ctx, { bag, wallet, belongings, name: s.town.name }, options.visits),
-    candyTree: new CandyTree(ctx, { wallet, bag }, options.candyTree),
+    candyTree,
+    arrivals: {
+      pottedPlant: () => [{ kind: 'potted', plant: porch.swap() }],
+      candyTree: () => [candyTree.shake()],
+      saplingPlot: ({ prop }) => [candyTree.tend(prop)],
+    },
   };
 }

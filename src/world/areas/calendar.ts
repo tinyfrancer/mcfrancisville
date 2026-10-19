@@ -1,4 +1,6 @@
+import { GOOSE_OUTFITS } from '../../data/geese';
 import type { MapZoneId } from '../../types/ids';
+import type { PropArrivals } from '../arrivals';
 import { Calendar } from '../services/Calendar';
 import { Finale } from '../services/Finale';
 import { Holidays } from '../services/Holidays';
@@ -19,6 +21,8 @@ export interface Festivals {
   finale: Finale;
   /** What's out of the ordinary today, and who's passing through (V1's R3). */
   rareEvents: RareEvents;
+  /** The pumpkin patch, and the porch geese saying what they have on. */
+  arrivals: PropArrivals;
 }
 
 interface FestivalParts {
@@ -32,9 +36,11 @@ interface FestivalParts {
 export function festivals(s: Shared, parts: FestivalParts): Festivals {
   const { ctx, town, bag, takings } = s;
   const { neighbourhood } = parts;
+  const holidays = new Holidays(ctx, { bag, takings }, parts.outside);
+  const pumpkinPatch = new PumpkinPatch(ctx, { bag, takings });
   return {
     calendar: new Calendar(ctx, parts.stalls),
-    holidays: new Holidays(ctx, { bag, takings }, parts.outside),
+    holidays,
     trickOrTreat: new TrickOrTreat(
       ctx,
       { bag, takings },
@@ -45,7 +51,7 @@ export function festivals(s: Shared, parts: FestivalParts): Festivals {
           neighbourhood.neighbours.some((n) => n.id === villager && n.zone === zone),
       },
     ),
-    pumpkinPatch: new PumpkinPatch(ctx, { bag, takings }),
+    pumpkinPatch,
     finale: new Finale(ctx, takings, { ...town, look: () => s.wardrobe.look }),
     rareEvents: new RareEvents(ctx, {
       bag,
@@ -58,5 +64,15 @@ export function festivals(s: Shared, parts: FestivalParts): Festivals {
       name: town.name,
       lots: { popUp: s.map.popUpLots, peddler: s.map.peddlerSpots },
     }),
+    arrivals: {
+      pumpkinPatch: () => [pumpkinPatch.visit()],
+      goose: ({ prop, arrived, place }) => {
+        if (!place) return null;
+        // The first goose in the map is hers, by her path; the other is Barty's.
+        const whose = place.map.props.find((p) => p.id === 'goose') === prop ? 0 : 1;
+        arrived.says = GOOSE_OUTFITS[holidays.goose(whose)][whose];
+        return [];
+      },
+    },
   };
 }
