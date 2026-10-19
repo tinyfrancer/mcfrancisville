@@ -26,6 +26,7 @@ import { shopping } from './areas/shopping';
 import { keepersOf, type Shared, type TownReads } from './areas/shared';
 import { going } from './areas/travel';
 import type { WorldOptions, WorldSave } from './options';
+import { arrivalsOf, type PropArrivals } from './arrivals';
 import type { Atlas } from './Atlas';
 import type { Bag } from './Bag';
 import type { Cabinet } from './Cabinet';
@@ -61,7 +62,7 @@ import type { Collecting } from './services/Collecting';
 import type { Fossils } from './services/Fossils';
 import type { Decorator } from './services/Decorator';
 import type { Deliveries } from './services/Deliveries';
-import { Digging } from './services/Digging';
+import type { Digging } from './services/Digging';
 import type { Finale } from './services/Finale';
 import type { Fishing } from './services/Fishing';
 import type { FirstDay } from './services/FirstDay';
@@ -257,6 +258,8 @@ export abstract class WorldParts {
   readonly rareEvents: RareEvents;
   /** The town's projects, funded at the noticeboard and built where they stand (V1's R4). */
   readonly projects: Projects;
+  /** What walking up to each kind of prop does, given by the areas (1.1's W1, decision 340). */
+  protected readonly propArrivals: PropArrivals;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -299,7 +302,8 @@ export abstract class WorldParts {
     const made = making(shared);
     ({ stall: this.stall, workbench: this.workbench, kitchen: this.kitchen } = made);
     this.belongings = made.belongings;
-    ({ visits: this.visits, candyTree: this.candyTree } = passive(shared, this.belongings));
+    const passed = passive(shared, this.belongings);
+    ({ visits: this.visits, candyTree: this.candyTree } = passed);
     this.firstDay = firstDay(shared, { ...made, visits: this.visits, candyTree: this.candyTree });
     // Travel is made after the places; until then (as she's first stood somewhere) every gate is
     // open.
@@ -366,16 +370,23 @@ export abstract class WorldParts {
     this.activities = fairground(shared, this.weather).activities;
     const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
     ({ collecting: this.collecting, fishing: this.fishing, fossils: this.fossils } = caught);
+    this.digging = caught.digging;
     const gone = going(shared, { zones, mailbox, visits: this.visits });
     ({ movement: this.movement, travel: this.travel, broom: this.broom } = gone);
     // Whatever she was on her way to do is left behind, wherever she went.
     ctx.signals.on('crossed', () => this.forget());
-    this.digging = new Digging(ctx, this.dug, this.bag);
     const homes = homeServices(shared, () => this.forget());
     ({ recordPlayer: this.recordPlayer, instruments: this.instruments } = homes);
     this.decorating = homes.decorating;
     this.chest = homes.chest;
     this.display = homes.display;
+    this.propArrivals = arrivalsOf(
+      made.arrivals,
+      passed.arrivals,
+      festival.arrivals,
+      caught.arrivals,
+      homes.arrivals,
+    );
     this.petCare = petServices(shared, {
       ...place,
       ...gone,

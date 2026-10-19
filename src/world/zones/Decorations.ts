@@ -7,6 +7,7 @@ import { happeningsOn, venueOf } from '../../systems/happenings';
 import { decorOn, isFrozen } from '../../systems/holidays';
 import { wanderingStallOn } from '../../systems/rareEvents';
 import { atTheFair } from '../../systems/venues';
+import type { Overlay } from './Overlay';
 import { covers } from './Zone';
 
 /**
@@ -17,7 +18,7 @@ import { covers } from './Zone';
  * winter, which is walked on then. At the fairground (0.2's M3), only what's set out for a
  * happening there.
  */
-export class Decorations {
+export class Decorations implements Overlay {
   private readonly now: () => number;
   /** Whether she has a piece of furniture, for a set's piece that's hers (her carving). */
   private readonly has: (piece: FurnitureId) => boolean;
@@ -91,5 +92,9 @@ export class Decorations {
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
     return this.props().find((p) => covers(p, tx, ty));
+  }
+
+  blocks(tx: number, ty: number): boolean {
+    return this.propAt(tx, ty) !== undefined;
   }
 }

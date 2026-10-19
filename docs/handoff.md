@@ -43,7 +43,21 @@ For T2: the vitest suite was 2,611 tests in 219 files, 346 s in the container on
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
-Not started; after H and T.
+**W1 landed (PR #206, decision 340; no save change). Next: W2.** Arriving at a prop is a
+table by prop id (`world/arrivals.ts`, `PropArrivals`): each area returns its rows as `arrivals`
+beside its services (`making`, `passive`, `festivals`, `catching`, `homeServices`), the
+constructor joins them with `arrivalsOf` (which throws on a prop claimed twice), and the door,
+way out, gathering and stray stay in `World.arriveOn`; `Digging` is made in `catching` now, with
+`Fossils`, the mound one row. `MapZone`'s overlays are one list of `Overlay`s
+(`zones/Overlay.ts`: optional `propAt`, `blocks`) in `propAt`'s order; the gates and the farm's
+rows are `zones/Gates.ts` and `zones/Plots.ts`, and `Yard` `implements Overlay` (its `blocks`),
+which W2 should keep when rooms come out of `Home`. Pets walk pulled paths (`Pet.walk`,
+`stringPull`, `Movement`'s exported `BODY_RADIUS`). Held by `tests/world/arrivingAtProps.test.ts`
+and `tests/world/overlays.test.ts`, snapshots taken from the old code (rerun them, never `-u`,
+unless a change means to alter what a prop does or where she can walk), and
+`tests/world/petPaths.test.ts`. Smoke's pictures aren't reproducible run to run (the real clock),
+so a refactor compares two runs of each side (decision 340's numbers). For her phone: the pets
+trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
