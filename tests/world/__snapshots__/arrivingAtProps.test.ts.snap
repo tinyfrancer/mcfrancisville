@@ -2,20 +2,22 @@
 
 exports[`arriving at a prop (1.1 W1) > does what it always did on a festival evening, every project built, in town > castleHill 1`] = `
 [
-  "tree@2,2 went: {"kind":"arrived","tx":1,"ty":1,"at":"tree","toward":{"tx":2,"ty":2,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
-  "tree@4,2 went: {"kind":"arrived","tx":3,"ty":1,"at":"tree","toward":{"tx":4,"ty":2,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
+  "tree@2,0 went: {"kind":"arrived","tx":1,"ty":1,"at":"tree","toward":{"tx":2,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3,"bead":"heartBead"}",
+  "tree@5,0 went: {"kind":"arrived","tx":4,"ty":1,"at":"tree","toward":{"tx":5,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
   "castle@9,4 went: {"kind":"arrived","tx":8,"ty":3,"at":"castle","toward":{"tx":9,"ty":4,"w":9,"h":5}} {"kind":"entered","scene":"castleHall"} {"kind":"mail","from":"cody"}",
   "lantern@12,10 went: {"kind":"arrived","tx":11,"ty":9,"at":"lantern","toward":{"tx":12,"ty":10,"w":1,"h":1}}",
   "lantern@15,10 went: {"kind":"arrived","tx":14,"ty":9,"at":"lantern","toward":{"tx":15,"ty":10,"w":1,"h":1}}",
   "weddingArch@20,11 went: {"kind":"arrived","tx":19,"ty":10,"at":"weddingArch","toward":{"tx":20,"ty":11,"w":2,"h":1}}",
   "roseBush@4,12 went: {"kind":"arrived","tx":3,"ty":11,"at":"roseBush","toward":{"tx":4,"ty":12,"w":1,"h":1}} {"kind":"gathered","from":"roseBush","item":"rose","count":1}",
   "roseBush@11,12 went: {"kind":"arrived","tx":10,"ty":11,"at":"roseBush","toward":{"tx":11,"ty":12,"w":1,"h":1}} {"kind":"gathered","from":"roseBush","item":"rose","count":1}",
+  "stump@0,14 went: {"kind":"arrived","tx":1,"ty":13,"at":"stump","toward":{"tx":0,"ty":14,"w":1,"h":1}}",
   "bench@8,15 went: {"kind":"arrived","tx":7,"ty":14,"at":"bench","toward":{"tx":8,"ty":15,"w":2,"h":1}}",
   "pumpkin@4,16 went: {"kind":"arrived","tx":3,"ty":15,"at":"pumpkin","toward":{"tx":4,"ty":16,"w":1,"h":1}}",
   "pumpkin@23,16 went: {"kind":"arrived","tx":22,"ty":15,"at":"pumpkin","toward":{"tx":23,"ty":16,"w":1,"h":1}}",
   "bench@17,21 went: {"kind":"arrived","tx":16,"ty":20,"at":"bench","toward":{"tx":17,"ty":21,"w":2,"h":1}}",
   "bush@6,23 went: {"kind":"arrived","tx":5,"ty":23,"at":"bush","toward":{"tx":6,"ty":23,"w":1,"h":1}}",
   "bush@21,23 went: {"kind":"arrived","tx":22,"ty":22,"at":"bush","toward":{"tx":21,"ty":23,"w":1,"h":1}}",
+  "rock@27,23 went: {"kind":"arrived","tx":26,"ty":24,"at":"rock","toward":{"tx":27,"ty":23,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"scarletFootballBead"}",
   "flowerBed@6,24 went: {"kind":"arrived","tx":5,"ty":23,"at":"flowerBed","toward":{"tx":6,"ty":24,"w":2,"h":1}}",
   "gardenSeat@8,24 went: {"kind":"arrived","tx":7,"ty":23,"at":"gardenSeat","toward":{"tx":8,"ty":24,"w":2,"h":1}}",
   "flowerBed@10,24 went: {"kind":"arrived","tx":9,"ty":23,"at":"flowerBed","toward":{"tx":10,"ty":24,"w":2,"h":1}}",
@@ -24,7 +26,6 @@ exports[`arriving at a prop (1.1 W1) > does what it always did on a festival eve
   "rock@3,32 went: {"kind":"arrived","tx":2,"ty":31,"at":"rock","toward":{"tx":3,"ty":32,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"ghostBead"}",
   "stump@10,36 went: {"kind":"arrived","tx":9,"ty":35,"at":"stump","toward":{"tx":10,"ty":36,"w":1,"h":1}}",
   "log@8,38 went: {"kind":"arrived","tx":7,"ty":37,"at":"log","toward":{"tx":8,"ty":38,"w":2,"h":1}}",
-  "rock@24,38 went: {"kind":"arrived","tx":23,"ty":37,"at":"rock","toward":{"tx":24,"ty":38,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
   "gatePost@12,40 went: {"kind":"arrived","tx":11,"ty":39,"at":"gatePost","toward":{"tx":12,"ty":40,"w":1,"h":1}}",
   "gatePost@15,40 went: {"kind":"arrived","tx":14,"ty":39,"at":"gatePost","toward":{"tx":15,"ty":40,"w":1,"h":1}}",
 ]
@@ -102,9 +103,9 @@ exports[`arriving at a prop (1.1 W1) > does what it always did on a festival eve
 
 exports[`arriving at a prop (1.1 W1) > does what it always did on a festival evening, every project built, in town > whisperwood 1`] = `
 [
+  "tree@3,1 went: {"kind":"arrived","tx":3,"ty":2,"at":"tree","toward":{"tx":3,"ty":1,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3,"bead":"batBead"}",
+  "tree@10,1 went: {"kind":"arrived","tx":9,"ty":2,"at":"tree","toward":{"tx":10,"ty":1,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3,"bead":"smileyBead"}",
   "lantern@20,1 went: {"kind":"arrived","tx":21,"ty":0,"at":"lantern","toward":{"tx":20,"ty":1,"w":1,"h":1}}",
-  "tree@1,2: nowhere to stand",
-  "tree@2,2 went: {"kind":"arrived","tx":3,"ty":2,"at":"tree","toward":{"tx":2,"ty":2,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
   "hazelHouse@5,2 went: {"kind":"arrived","tx":4,"ty":2,"at":"hazelHouse","toward":{"tx":5,"ty":2,"w":4,"h":3}} {"kind":"trickOrTreat","villager":"hazel","item":"chewyDots","home":false,"line":"Nobody's home, but there's a bowl on the step and a note: \\"Take one! Happy Halloween! —Hazel\\". You take a box of chewy dots."}",
   "oldTree@2,3 went: {"kind":"arrived","tx":3,"ty":2,"at":"oldTree","toward":{"tx":2,"ty":3,"w":2,"h":2}} {"kind":"gathered","from":"oldTree","item":"wood","count":5}",
   "rock@9,4 went: {"kind":"arrived","tx":9,"ty":3,"at":"rock","toward":{"tx":9,"ty":4,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
@@ -114,13 +115,13 @@ exports[`arriving at a prop (1.1 W1) > does what it always did on a festival eve
   "oldTree@3,11 went: {"kind":"arrived","tx":2,"ty":10,"at":"oldTree","toward":{"tx":3,"ty":11,"w":2,"h":2}} {"kind":"gathered","from":"oldTree","item":"wood","count":5}",
   "rock@19,12 went: {"kind":"arrived","tx":18,"ty":11,"at":"rock","toward":{"tx":19,"ty":12,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
   "mound@12,13 went: {"kind":"arrived","tx":11,"ty":12,"at":"mound","toward":{"tx":12,"ty":13,"w":1,"h":1}} {"kind":"unearthed","find":{"bead":"smileyBead"},"first":false}",
-  "signpost@2,16 went: {"kind":"arrived","tx":1,"ty":15,"at":"signpost","toward":{"tx":2,"ty":16,"w":1,"h":1},"sign":"town"}",
+  "stump@1,15 went: {"kind":"arrived","tx":1,"ty":14,"at":"stump","toward":{"tx":1,"ty":15,"w":1,"h":1}}",
+  "signpost@2,16 went: {"kind":"arrived","tx":2,"ty":15,"at":"signpost","toward":{"tx":2,"ty":16,"w":1,"h":1},"sign":"town"}",
   "stump@6,16 went: {"kind":"arrived","tx":5,"ty":16,"at":"stump","toward":{"tx":6,"ty":16,"w":1,"h":1}}",
   "signpost@12,16 went: {"kind":"arrived","tx":11,"ty":15,"at":"signpost","toward":{"tx":12,"ty":16,"w":1,"h":1},"sign":"hiddenClearing"}",
   "log@3,20 went: {"kind":"arrived","tx":2,"ty":19,"at":"log","toward":{"tx":3,"ty":20,"w":2,"h":1}}",
   "bush@6,22 went: {"kind":"arrived","tx":5,"ty":21,"at":"bush","toward":{"tx":6,"ty":22,"w":1,"h":1}}",
   "mound@21,28 went: {"kind":"arrived","tx":20,"ty":27,"at":"mound","toward":{"tx":21,"ty":28,"w":1,"h":1}} {"kind":"dug","buried":"hallKey","item":"hallKey"}",
-  "stump@4,31 went: {"kind":"arrived","tx":4,"ty":30,"at":"stump","toward":{"tx":4,"ty":31,"w":1,"h":1}}",
   "log@20,33 went: {"kind":"arrived","tx":19,"ty":32,"at":"log","toward":{"tx":20,"ty":33,"w":2,"h":1}}",
 ]
 `;
@@ -168,8 +169,8 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in booAcres 1`] 
 
 exports[`arriving at a prop (1.1 W1) > does what it always did, in castleHill 1`] = `
 [
-  "tree@2,2 went: {"kind":"arrived","tx":1,"ty":1,"at":"tree","toward":{"tx":2,"ty":2,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
-  "tree@4,2 went: {"kind":"arrived","tx":3,"ty":1,"at":"tree","toward":{"tx":4,"ty":2,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
+  "tree@2,0 went: {"kind":"arrived","tx":1,"ty":1,"at":"tree","toward":{"tx":2,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
+  "tree@5,0 went: {"kind":"arrived","tx":4,"ty":1,"at":"tree","toward":{"tx":5,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
   "mound@13,2 went: {"kind":"arrived","tx":12,"ty":1,"at":"mound","toward":{"tx":13,"ty":2,"w":1,"h":1}} {"kind":"unearthed","find":{"candy":40},"first":false}",
   "castle@9,4 went: {"kind":"arrived","tx":8,"ty":3,"at":"castle","toward":{"tx":9,"ty":4,"w":9,"h":5}} {"kind":"entered","scene":"castleHall"} {"kind":"mail","from":"cody"}",
   "lantern@12,10 went: {"kind":"arrived","tx":11,"ty":9,"at":"lantern","toward":{"tx":12,"ty":10,"w":1,"h":1}}",
@@ -177,17 +178,18 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in castleHill 1`
   "weddingArch@20,11 went: {"kind":"arrived","tx":19,"ty":10,"at":"weddingArch","toward":{"tx":20,"ty":11,"w":2,"h":1}}",
   "roseBush@4,12 went: {"kind":"arrived","tx":3,"ty":11,"at":"roseBush","toward":{"tx":4,"ty":12,"w":1,"h":1}} {"kind":"gathered","from":"roseBush","item":"rose","count":1}",
   "roseBush@11,12 went: {"kind":"arrived","tx":10,"ty":11,"at":"roseBush","toward":{"tx":11,"ty":12,"w":1,"h":1}} {"kind":"gathered","from":"roseBush","item":"rose","count":1}",
+  "stump@0,14 went: {"kind":"arrived","tx":1,"ty":13,"at":"stump","toward":{"tx":0,"ty":14,"w":1,"h":1}}",
   "bench@8,15 went: {"kind":"arrived","tx":7,"ty":14,"at":"bench","toward":{"tx":8,"ty":15,"w":2,"h":1}}",
   "pumpkin@4,16 went: {"kind":"arrived","tx":3,"ty":15,"at":"pumpkin","toward":{"tx":4,"ty":16,"w":1,"h":1}}",
   "pumpkin@23,16 went: {"kind":"arrived","tx":22,"ty":15,"at":"pumpkin","toward":{"tx":23,"ty":16,"w":1,"h":1}}",
   "bench@17,21 went: {"kind":"arrived","tx":16,"ty":20,"at":"bench","toward":{"tx":17,"ty":21,"w":2,"h":1}}",
   "bush@6,23 went: {"kind":"arrived","tx":5,"ty":23,"at":"bush","toward":{"tx":6,"ty":23,"w":1,"h":1}}",
   "bush@21,23 went: {"kind":"arrived","tx":22,"ty":22,"at":"bush","toward":{"tx":21,"ty":23,"w":1,"h":1}}",
+  "rock@27,23 went: {"kind":"arrived","tx":26,"ty":24,"at":"rock","toward":{"tx":27,"ty":23,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
   "signpost@15,31 went: {"kind":"arrived","tx":14,"ty":30,"at":"signpost","toward":{"tx":15,"ty":31,"w":1,"h":1},"sign":"town"}",
   "rock@3,32 went: {"kind":"arrived","tx":2,"ty":31,"at":"rock","toward":{"tx":3,"ty":32,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
   "stump@10,36 went: {"kind":"arrived","tx":9,"ty":35,"at":"stump","toward":{"tx":10,"ty":36,"w":1,"h":1}}",
   "log@8,38 went: {"kind":"arrived","tx":7,"ty":37,"at":"log","toward":{"tx":8,"ty":38,"w":2,"h":1}}",
-  "rock@24,38 went: {"kind":"arrived","tx":23,"ty":37,"at":"rock","toward":{"tx":24,"ty":38,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"batBead"}",
   "gatePost@12,40 went: {"kind":"arrived","tx":11,"ty":39,"at":"gatePost","toward":{"tx":12,"ty":40,"w":1,"h":1}}",
   "gatePost@15,40 went: {"kind":"arrived","tx":14,"ty":39,"at":"gatePost","toward":{"tx":15,"ty":40,"w":1,"h":1}}",
 ]
@@ -224,6 +226,9 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in fairground 1`
   "barrel@17,19 went: {"kind":"arrived","tx":16,"ty":18,"at":"barrel","toward":{"tx":17,"ty":19,"w":1,"h":1}}",
   "bush@2,22 went: {"kind":"arrived","tx":1,"ty":21,"at":"bush","toward":{"tx":2,"ty":22,"w":1,"h":1}}",
   "log@12,24 went: {"kind":"arrived","tx":11,"ty":23,"at":"log","toward":{"tx":12,"ty":24,"w":2,"h":1}}",
+  "rock@27,24 went: {"kind":"arrived","tx":26,"ty":23,"at":"rock","toward":{"tx":27,"ty":24,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"tigerFootballBead"}",
+  "log@17,25 went: {"kind":"arrived","tx":16,"ty":24,"at":"log","toward":{"tx":17,"ty":25,"w":2,"h":1}}",
+  "toadstools@23,25 went: {"kind":"arrived","tx":22,"ty":24,"at":"toadstools","toward":{"tx":23,"ty":25,"w":1,"h":1}} {"kind":"gathered","from":"toadstools","item":"toadstool","count":2}",
   "ferrisWheel@3,28 went: {"kind":"arrived","tx":2,"ty":27,"at":"ferrisWheel","toward":{"tx":3,"ty":28,"w":5,"h":2}}",
   "mound@5,31 went: {"kind":"arrived","tx":4,"ty":30,"at":"mound","toward":{"tx":5,"ty":31,"w":1,"h":1}} {"kind":"unearthed","find":{"bead":"ghostBead"},"first":false}",
   "stump@24,32 went: {"kind":"arrived","tx":23,"ty":31,"at":"stump","toward":{"tx":24,"ty":32,"w":1,"h":1}}",
@@ -232,8 +237,8 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in fairground 1`
 
 exports[`arriving at a prop (1.1 W1) > does what it always did, in hiddenClearing 1`] = `
 [
-  "tree@1,1: nowhere to stand",
-  "tree@2,1: nowhere to stand",
+  "tree@9,0 went: {"kind":"arrived","tx":9,"ty":1,"at":"tree","toward":{"tx":9,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
+  "tree@10,0 went: {"kind":"arrived","tx":9,"ty":1,"at":"tree","toward":{"tx":10,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3,"bead":"ghostBead"}",
   "oldTree@3,3 went: {"kind":"arrived","tx":5,"ty":4,"at":"oldTree","toward":{"tx":3,"ty":3,"w":2,"h":2}} {"kind":"gathered","from":"oldTree","item":"wood","count":5}",
   "bush@8,4 went: {"kind":"arrived","tx":7,"ty":3,"at":"bush","toward":{"tx":8,"ty":4,"w":1,"h":1}}",
   "reeds@12,4 went: {"kind":"arrived","tx":11,"ty":4,"at":"reeds","toward":{"tx":12,"ty":4,"w":1,"h":1}}",
@@ -243,7 +248,9 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in hiddenClearin
   "mound@8,11 went: {"kind":"arrived","tx":7,"ty":10,"at":"mound","toward":{"tx":8,"ty":11,"w":1,"h":1}} {"kind":"dug","buried":"castleKey","item":"castleKey"}",
   "stump@3,14 went: {"kind":"arrived","tx":2,"ty":13,"at":"stump","toward":{"tx":3,"ty":14,"w":1,"h":1}}",
   "log@6,14 went: {"kind":"arrived","tx":5,"ty":13,"at":"log","toward":{"tx":6,"ty":14,"w":2,"h":1}}",
+  "rock@15,15 went: {"kind":"arrived","tx":14,"ty":14,"at":"rock","toward":{"tx":15,"ty":15,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
   "mound@9,16 went: {"kind":"arrived","tx":8,"ty":15,"at":"mound","toward":{"tx":9,"ty":16,"w":1,"h":1}} {"kind":"unearthed","find":{"fossil":"fernInSlate"},"first":true}",
+  "log@11,16 went: {"kind":"arrived","tx":10,"ty":15,"at":"log","toward":{"tx":11,"ty":16,"w":2,"h":1}}",
   "lantern@11,21 went: {"kind":"arrived","tx":10,"ty":20,"at":"lantern","toward":{"tx":11,"ty":21,"w":1,"h":1}}",
   "signpost@8,22 went: {"kind":"arrived","tx":8,"ty":21,"at":"signpost","toward":{"tx":8,"ty":22,"w":1,"h":1},"sign":"whisperwood"}",
 ]
@@ -251,8 +258,8 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in hiddenClearin
 
 exports[`arriving at a prop (1.1 W1) > does what it always did, in lanternShore 1`] = `
 [
-  "tree@1,1 went: {"kind":"arrived","tx":2,"ty":1,"at":"tree","toward":{"tx":1,"ty":1,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
-  "tree@6,1 went: {"kind":"arrived","tx":5,"ty":1,"at":"tree","toward":{"tx":6,"ty":1,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
+  "tree@3,0 went: {"kind":"arrived","tx":2,"ty":1,"at":"tree","toward":{"tx":3,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
+  "tree@8,0 went: {"kind":"arrived","tx":8,"ty":1,"at":"tree","toward":{"tx":8,"ty":0,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
   "signpost@14,2 went: {"kind":"arrived","tx":13,"ty":1,"at":"signpost","toward":{"tx":14,"ty":2,"w":1,"h":1},"sign":"whisperwood"}",
   "rock@2,3 went: {"kind":"arrived","tx":1,"ty":2,"at":"rock","toward":{"tx":2,"ty":3,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"heartBead"}",
   "lantern@8,5 went: {"kind":"arrived","tx":7,"ty":4,"at":"lantern","toward":{"tx":8,"ty":5,"w":1,"h":1}}",
@@ -264,13 +271,14 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in lanternShore 
   "floatLantern@8,11: nowhere to stand",
   "reeds@5,12 went: {"kind":"arrived","tx":4,"ty":11,"at":"reeds","toward":{"tx":5,"ty":12,"w":1,"h":1}}",
   "rowboat@14,15 went: {"kind":"arrived","tx":13,"ty":14,"at":"rowboat","toward":{"tx":14,"ty":15,"w":2,"h":1}}",
+  "stump@25,19 went: {"kind":"arrived","tx":24,"ty":18,"at":"stump","toward":{"tx":25,"ty":19,"w":1,"h":1}}",
+  "rock@0,22 went: {"kind":"arrived","tx":1,"ty":21,"at":"rock","toward":{"tx":0,"ty":22,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
   "bench@18,23 went: {"kind":"arrived","tx":17,"ty":22,"at":"bench","toward":{"tx":18,"ty":23,"w":2,"h":1}}",
   "mound@18,25 went: {"kind":"arrived","tx":17,"ty":24,"at":"mound","toward":{"tx":18,"ty":25,"w":1,"h":1}} {"kind":"unearthed","find":{"fossil":"toadstone"},"first":true}",
   "bush@2,26 went: {"kind":"arrived","tx":1,"ty":25,"at":"bush","toward":{"tx":2,"ty":26,"w":1,"h":1}}",
+  "stump@24,26 went: {"kind":"arrived","tx":23,"ty":25,"at":"stump","toward":{"tx":24,"ty":26,"w":1,"h":1}}",
   "log@6,29 went: {"kind":"arrived","tx":5,"ty":28,"at":"log","toward":{"tx":6,"ty":29,"w":2,"h":1}}",
-  "stump@13,29 went: {"kind":"arrived","tx":12,"ty":28,"at":"stump","toward":{"tx":13,"ty":29,"w":1,"h":1}}",
   "bush@21,29 went: {"kind":"arrived","tx":20,"ty":28,"at":"bush","toward":{"tx":21,"ty":29,"w":1,"h":1}}",
-  "rock@7,32 went: {"kind":"arrived","tx":7,"ty":31,"at":"rock","toward":{"tx":7,"ty":32,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
 ]
 `;
 
@@ -343,9 +351,9 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in town 1`] = `
 
 exports[`arriving at a prop (1.1 W1) > does what it always did, in whisperwood 1`] = `
 [
+  "tree@3,1 went: {"kind":"arrived","tx":3,"ty":2,"at":"tree","toward":{"tx":3,"ty":1,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
+  "tree@10,1 went: {"kind":"arrived","tx":9,"ty":2,"at":"tree","toward":{"tx":10,"ty":1,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
   "lantern@20,1 went: {"kind":"arrived","tx":21,"ty":0,"at":"lantern","toward":{"tx":20,"ty":1,"w":1,"h":1}}",
-  "tree@1,2: nowhere to stand",
-  "tree@2,2 went: {"kind":"arrived","tx":3,"ty":2,"at":"tree","toward":{"tx":2,"ty":2,"w":1,"h":1}} {"kind":"gathered","from":"tree","item":"wood","count":3}",
   "hazelHouse@5,2 went: {"kind":"arrived","tx":4,"ty":2,"at":"hazelHouse","toward":{"tx":5,"ty":2,"w":4,"h":3}} {"kind":"entered","scene":"hazelObservatory"}",
   "oldTree@2,3 went: {"kind":"arrived","tx":3,"ty":2,"at":"oldTree","toward":{"tx":2,"ty":3,"w":2,"h":2}} {"kind":"gathered","from":"oldTree","item":"wood","count":5}",
   "rock@9,4 went: {"kind":"arrived","tx":9,"ty":3,"at":"rock","toward":{"tx":9,"ty":4,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"tigerFootballBead"}",
@@ -354,14 +362,14 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in whisperwood 1
   "bush@19,7 went: {"kind":"arrived","tx":19,"ty":6,"at":"bush","toward":{"tx":19,"ty":7,"w":1,"h":1}}",
   "oldTree@3,11 went: {"kind":"arrived","tx":2,"ty":10,"at":"oldTree","toward":{"tx":3,"ty":11,"w":2,"h":2}} {"kind":"gathered","from":"oldTree","item":"wood","count":5,"bead":"scarletFootballBead"}",
   "rock@19,12 went: {"kind":"arrived","tx":18,"ty":11,"at":"rock","toward":{"tx":19,"ty":12,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"ghostBead"}",
-  "signpost@2,16 went: {"kind":"arrived","tx":1,"ty":15,"at":"signpost","toward":{"tx":2,"ty":16,"w":1,"h":1},"sign":"town"}",
+  "stump@1,15 went: {"kind":"arrived","tx":1,"ty":14,"at":"stump","toward":{"tx":1,"ty":15,"w":1,"h":1}}",
+  "signpost@2,16 went: {"kind":"arrived","tx":2,"ty":15,"at":"signpost","toward":{"tx":2,"ty":16,"w":1,"h":1},"sign":"town"}",
   "stump@6,16 went: {"kind":"arrived","tx":5,"ty":16,"at":"stump","toward":{"tx":6,"ty":16,"w":1,"h":1}}",
   "signpost@12,16 went: {"kind":"arrived","tx":11,"ty":15,"at":"signpost","toward":{"tx":12,"ty":16,"w":1,"h":1},"sign":"hiddenClearing"}",
   "log@3,20 went: {"kind":"arrived","tx":2,"ty":19,"at":"log","toward":{"tx":3,"ty":20,"w":2,"h":1}}",
   "bush@6,22 went: {"kind":"arrived","tx":5,"ty":21,"at":"bush","toward":{"tx":6,"ty":22,"w":1,"h":1}}",
   "mound@9,26 went: {"kind":"arrived","tx":8,"ty":25,"at":"mound","toward":{"tx":9,"ty":26,"w":1,"h":1}} {"kind":"unearthed","find":{"fossil":"fernInSlate"},"first":true}",
   "mound@21,28 went: {"kind":"arrived","tx":20,"ty":27,"at":"mound","toward":{"tx":21,"ty":28,"w":1,"h":1}} {"kind":"dug","buried":"hallKey","item":"hallKey"}",
-  "stump@4,31 went: {"kind":"arrived","tx":4,"ty":30,"at":"stump","toward":{"tx":4,"ty":31,"w":1,"h":1}}",
   "log@20,33 went: {"kind":"arrived","tx":19,"ty":32,"at":"log","toward":{"tx":20,"ty":33,"w":2,"h":1}}",
 ]
 `;
