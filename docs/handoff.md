@@ -12,11 +12,14 @@ Each lane's heading says where it is; the rules are the plan's "Running it in pa
 
 ### Lane H: heard (H1 → H2; decisions from 330; never the save)
 
-**H2 (`claude/h2-crickets`, decision 331): done in its branch, in review.** The crickets are a
-chorus of two in runs and rests (`chorus(seed)` in `audio/ambience.ts`, held by
-`tests/audio/ambience.test.ts`), every noise layer ebbs on its `EBB` row, the levels trimmed,
-the `1.1` notes' fourth line in; rendered before and after (the numbers in decision 331). Next:
-the suite, smoke, its PR green and merged; then lane H is finished and ⬆ 1.1 is ready to cut.
+**Lane H is finished: H2 landed (PR #204, decision 331), and ⬆ 1.1 is ready to cut** (the
+release PR `v1.1-dev` → `main`, at the user's word). The crickets are a chorus of two in runs
+and rests (`chorus(seed)` in `audio/ambience.ts`, held by `tests/audio/ambience.test.ts`: at
+most 34 chirps a minute over 200 seeds, 12.7 on average, from 270; a silence of 22 s or more
+in every two minutes), every noise layer ebbs on its `EBB` row, the levels trimmed, the `1.1`
+notes' fourth line in (four lines and H1's P.S.); rendered before and after through the real
+`Mixer`, the numbers in decision 331. For her phone: whether the nights now sound like a place
+and not a tick, and whether any bed is still too much (the Ambience switch is hers).
 
 **H1 landed (PR #203, decision 330).** What it left for H2: Play on silent (off by
 default) and Ambience are in `audio/settings.ts`; `SilentSwitch` touches nothing while it's off,
