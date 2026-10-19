@@ -56,7 +56,27 @@ four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&pag
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
-**W1 landed (PR #206, decision 340; no save change). Next: W2.** Arriving at a prop is a
+**W2 landed (PR #208, decision 341; save v55). Next: W3.** Her rooms are a keeper of their
+own, `Rooms` (`src/world/Rooms.ts`: each room's pieces with what they show and what stands on
+what, walls, floor, size, `here`, building and growing, the decorating moves; `Decorable`, as
+`Yard` is), and `Home` is the chest's two lists and the papers and floors she owns, with its
+rooms as `home.rooms`; `Decorator` and `HomeZone` use `home.rooms`, and **`Home` still forwards
+every read of the room she's in** (27 one-liners) so `src/render/`, the sheets, `wiring/apis.ts`
+and the tests didn't move: a later session may point them at `home.rooms` and drop them
+("Where it hurts" 11). A planter's bed knows its room: `Plot.room` (saved on `SavedBed` and
+`SavedSprinkler` from v55), the farm keeping a bed at home by `bed:home:<room>:<tx>,<ty>`
+(`slotOf`); **a plot at home with no room is the room she's in** (how `HomeView` and a tap ask),
+a saved one the front room's; `bedKey`, which deals the harvest, is unchanged, so a front-room
+planter grows as it always has. The front room's refusal (`frontRoom`) is gone: a planter stands
+in any room. The `moved` signal carries the room. Step 54 writes `room: 'main'` on every bed and
+sprinkler at home; no fixture added (no lived-in save has a planter out; `livedIn.test.ts` builds
+one from 1.0's). **For W3**: `Neighbourhood`'s talk and `apis.ts` are untouched by W2;
+`wiring/apis.ts` reads `home.*` through the forwarders, which a split by area can keep or move
+to `home.rooms`. **For V1.1's 1.2 notes**: a planter in the back room is the one thing she could
+notice ("planters grow in the back room too" is a line if the review wants one). For her phone:
+a planter set down in the back room stays there and grows.
+
+**W1 landed (PR #206, decision 340; no save change).** Arriving at a prop is a
 table by prop id (`world/arrivals.ts`, `PropArrivals`): each area returns its rows as `arrivals`
 beside its services (`making`, `passive`, `festivals`, `catching`, `homeServices`), the
 constructor joins them with `arrivalsOf` (which throws on a prop claimed twice), and the door,
