@@ -7797,3 +7797,39 @@ moment, over her, as the "!" is); a feeling for every bust in the HUD (only wher
 how they feel); a poster for each event (one bright sheet says "something's on", the sheet says
 what); counting answered notes on the board (a note she's answered is taken down, as the sheet
 says).
+
+## 328. The plan for 1.1: the silent switch silences the game, the crickets tamed, then the refactors and the art redesigns, in four lanes (2026-10-19)
+
+**Context:** 1.0 and 1.0.1 are on her phone (PRs #198 and #201). The user asked, the next
+morning, for everything still logged to be reviewed and planned ("besides the leftover cloud save
+steps"): "Where it hurts" in `docs/architecture.md` and the art notes in the handoff, and two
+things from her phone folded in: a sound "like a cricket chirping" that is "almost non-stop and
+annoying" in one of the places, and that sound can't be turned off with the silent switch on the
+side of her phone.
+
+**Decision:** `docs/v1.1_plan.md`: four lanes (H heard, T tooling, W the world's shape, A the
+art), thirteen sessions and a review, two lanes at a time from `v1.1-dev`, H and T first, then W
+and A; 1.1 is the sound patch (H1, H2), 1.2 the rest. Three settled here, at the user's word:
+
+- **The silent switch silences the game** (H1), reversing decision 321's choice to play through
+  it. She turns sound off with the switch; a game that plays on regardless is the wrong default
+  for a phone she picks up in bed. `SilentSwitch` stays as the one place the audio session is
+  touched, so "play on silent" can come back as a Settings switch if ever asked; it isn't added.
+- **The crickets were the bed that became the sound** (H2): three songs looping at about four
+  chirps a second from eight at night to four in the morning, April to October, everywhere
+  outdoors, and she plays at night. They become a chorus that swells and rests (one near, one
+  far, runs of chirps then twenty to sixty seconds of none, softer), held by a test on the
+  schedule to at most a chirp a second over a minute with a rest in every two; every other
+  layer is listened to for the same fault; and an **Ambience** switch beside Sounds and Music is
+  hers if any place is still too much.
+- **Refactors change nothing she sees and are measured** (lanes T, W, A4): the fixtures and
+  smoke's screenshots the same before and after, the numbers in the PR. The body builds (A5a,
+  A5b) are the one art session pair that is a redesign of her neighbours' shapes, not of a place.
+
+**Rejected:** a "play on silent" switch now, default off (nobody asked for it; the switch is
+the phone's way and she knows it); turning the crickets off outright (a night outdoors with no
+sound at all is the flatness V1 was for; a chorus that rests is the real sound); shipping the
+refactors as their own patch (a patch she can't notice costs a deployment for nothing; they go
+with 1.2's art); the chunk split ("Where it hurts" 14: one chunk precached once a version is the
+right shape for an installed app); a new neighbour (a release with no theme gets none, decision
+270).
