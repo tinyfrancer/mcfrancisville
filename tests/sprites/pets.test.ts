@@ -80,6 +80,28 @@ describe('pet art', () => {
     }
   });
 
+  // 1.0.1's redraws: the two frames R6c left serviceable rather than lovely.
+  it("draws Gary's front with an eye up on each stalk, clear above his shell", () => {
+    const rows = petSource('gary', 'sitFront').rows;
+    const top = rows.slice(0, 5);
+    const half = rows[0]!.length / 2;
+    const eyes = top.flatMap((row, y) =>
+      [...row].flatMap((key, x) => (key === 'e' || key === 'w' ? [{ x, y }] : [])),
+    );
+    expect(eyes.some((e) => e.x < half)).toBe(true);
+    expect(eyes.some((e) => e.x >= half)).toBe(true);
+    expect(rows.slice(0, 5).some((row) => row.includes('C'))).toBe(false);
+  });
+
+  it('rolls Florence onto her back with her paws in the air, beans and all', () => {
+    const back = petSource('florence', 'trick1').rows;
+    const side = petSource('florence', 'trick0').rows;
+    expect(back).not.toEqual(side);
+    const upper = back.slice(0, 8).join('');
+    expect(upper).toContain('p');
+    expect(upper).toContain('f');
+  });
+
   it('gives the ghost pets a glow, and only them', () => {
     expect(PET_IDS.filter((id) => PET_ART[id].glow)).toEqual(['wybie', 'elvira']);
   });

@@ -71,6 +71,8 @@ import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
 import { clearedOf, suspectsOf } from '../systems/mystery';
 import { inChain } from '../systems/mysteryChain';
+import { closenessFeeling } from '../systems/moods';
+import { bandOf } from '../systems/remembering';
 import { progressOf } from '../systems/affection';
 import { inTown, MAYOR, townsfolk } from '../systems/mayor';
 import { canGoToday, goToday, TODAY_TOLD_BY } from './todayGo';
@@ -409,7 +411,14 @@ export function sheetApis({
     today: () => dayKey(world.clock.now()),
     found: (zone) => world.atlas.hasFound(zone),
     seek: (id) => world.seek(id),
-    portrait: (canvas, id) => drawBust(canvas, id, world.finale.costumeOf(id)),
+    // Warmer the closer they are (1.0.1).
+    portrait: (canvas, id) =>
+      drawBust(
+        canvas,
+        id,
+        world.finale.costumeOf(id),
+        closenessFeeling(bandOf(world.friends.hearts(id), id)) ?? 'neutral',
+      ),
     shadow: (canvas, id) => drawBust(canvas, id, null, 'neutral', PALETTE.stoneDark),
     icon: drawItemIcon,
     gift(canvas, ware) {
@@ -606,7 +615,7 @@ export function sheetApis({
       return answered !== null;
     },
     icon: drawItemIcon,
-    portrait: drawPortrait,
+    portrait: (canvas, id, feel) => drawPortrait(canvas, id, null, feel ?? 'neutral'),
     // The town's projects (V1's R4).
     projects: () => world.projects.view(),
     startProject: (id) => world.projects.start(id)?.map((piece) => FURNITURE[piece].name) ?? null,

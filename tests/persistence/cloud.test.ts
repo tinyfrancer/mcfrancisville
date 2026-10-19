@@ -88,7 +88,9 @@ describe('the cloud save on the phone', () => {
     // What the store holds is sealed: no town in it, and filed under a hash, not the key.
     const [name, value] = [...c.kept][0]!;
     expect(name).not.toContain(code);
-    expect(value).not.toMatch(/player|wardrobe|MFV/);
+    // A backup code's whole prefix: sealed text is base64url, so three letters alone ("MFV") turn
+    // up in it now and then by chance.
+    expect(value).not.toMatch(/player|wardrobe|MFV[01]-/);
 
     const second = await phone(c, code);
     expect(await second.sync.check(1000)).toEqual({ kind: 'newer', savedAt: 2000 });

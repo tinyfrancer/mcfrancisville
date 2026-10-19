@@ -8,7 +8,8 @@ import { takeOff, wear } from '../systems/wardrobe';
 import { CANDY_SAPLING, CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
-import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
+import { PUMPKIN_LIT, SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE, noticeboardLook, signpostTo } from './clutter';
 import { SIGNPOSTS } from '../data/signposts';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type {
@@ -284,6 +285,11 @@ export function catalogue(): Entry[] {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  // The jack-o'-lanterns as snow lanterns in winter (1.0.1), by day and lit.
+  SNOW_LANTERN_FORMS.forEach((form, f) => {
+    grid(`prop:pumpkin:winter${f}`, form, SNOW_LANTERN_PALETTE);
+    if (f === 0) grid('prop:pumpkin:winter:lit', form, lit(SNOW_LANTERN_PALETTE, PUMPKIN_LIT));
+  });
   grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
   grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
   grid('prop:saplingPlot:sapling', CANDY_SAPLING, SAPLING_PALETTE);
@@ -292,6 +298,15 @@ export function catalogue(): Entry[] {
     grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
   }
   grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
+  // The noticeboard with its notes all answered, and with the day's event up too (1.0.1).
+  for (const [open, poster] of [
+    [0, false],
+    [1, true],
+    [3, true],
+  ] as const) {
+    const look = noticeboardLook(open, poster);
+    grid(look.key, look.source, PROP_ART.noticeboard.palette);
+  }
   // The town's projects as the noticeboard shows them (V1's R4).
   for (const [id, picture] of Object.entries(PROJECT_PICTURES)) {
     grid(`project:${id}`, picture.source, picture.palette);

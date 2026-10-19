@@ -164,14 +164,16 @@ export function neighbourDrawables(
 
 /**
  * Draws a neighbour into a canvas of the HUD's at 1×, as the talk sheet's portrait: their head
- * and shoulders, a 32-pixel square of them, facing her.
+ * and shoulders, a 32-pixel square of them, facing her, with `mood` their face (1.0.1).
  */
 export function drawPortrait(
   canvas: HTMLCanvasElement,
   id: Figure,
   costume: Costume | null = null,
+  mood: BustMood = 'neutral',
 ): void {
-  const sprite = bakeFigure(id, 'down', 0, costume);
+  const stance: Stance = mood === 'neutral' ? {} : { feel: mood };
+  const sprite = bakeFigure(id, 'down', 0, costume, null, stance);
   const size = 32;
   canvas.width = size;
   canvas.height = size;

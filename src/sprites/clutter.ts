@@ -183,11 +183,23 @@ function barrel(pumpkins: boolean): SpriteSource {
   return finish(s);
 }
 
+/** Where each of the window's three notes is pinned on the board, and its paper and pin. */
+const NOTE_SLOTS = [
+  { x: 13, y: 17, w: 11, h: 13, paper: WALL, pin: ACCENT },
+  { x: 27, y: 19, w: 12, h: 10, paper: ACCENT_TWO, pin: ACCENT },
+  { x: 33, y: 30, w: 14, h: 10, paper: WALL, pin: ACCENT },
+] as const;
+
+/** How many notes the board can show up at once, one to a slot. */
+export const NOTE_SLOTS_UP = NOTE_SLOTS.length;
+
 /**
  * The noticeboard by the square (phase N): a wooden board under a little slate roof on two posts,
- * with neighbours' notes pinned all over it, and a pumpkin at its foot.
+ * and a pumpkin at its foot. What's pinned on it is what's up (1.0.1): Cobweb Corner's wanted
+ * list always, a note for each of the window's notes not yet answered (a pin and a scrap of paper
+ * where one was taken down), and a bright poster when the day has an event on.
  */
-function drawNoticeboard(): SpriteSource {
+function drawNoticeboard(open: number, poster: boolean): SpriteSource {
   const s = new Sketch(64, 60);
   slab(s, 7, 12, 5, 47, TRIM);
   slab(s, 52, 12, 5, 47, TRIM);
@@ -224,11 +236,32 @@ function drawNoticeboard(): SpriteSource {
     }
     s.set(x + Math.floor(w / 2), y + 1, fillOf(pin)).set(x + Math.floor(w / 2), y, lightOf(pin));
   };
-  note(13, 17, 11, 13, WALL, ACCENT);
-  note(27, 19, 12, 10, ACCENT_TWO, ACCENT);
+  // Cobweb Corner's wanted list, always up.
   note(42, 16, 9, 12, WALL, LEAVES);
-  note(17, 31, 10, 9, WALL, ACCENT_TWO);
-  note(33, 30, 14, 10, WALL, ACCENT);
+  NOTE_SLOTS.forEach(({ x, y, w, h, paper, pin }, i) => {
+    if (i < open) note(x, y, w, h, paper, pin);
+    else {
+      // Taken down: its pin left in the board, with a torn corner of paper under it.
+      const px = x + Math.floor(w / 2);
+      s.set(px, y + 1, fillOf(pin)).set(px, y, lightOf(pin));
+      s.set(px - 1, y + 2, fillOf(paper)).set(px, y + 2, shadeOf(paper));
+    }
+  });
+  if (poster) {
+    // The day's event: a poster bigger and brighter than a note, pinned at both corners, a
+    // pale star on it over two lines of big print.
+    const [x, y, w, h] = [13, 31, 16, 10];
+    s.rect(x, y, w, h, fillOf(ACCENT));
+    s.rect(x, y, w, 1, lightOf(ACCENT)).rect(x + w - 1, y + 1, 1, h - 1, shadeOf(ACCENT));
+    s.rect(x + 1, y + h - 1, w - 1, 1, shadeOf(ACCENT));
+    const cx = x + 4;
+    s.set(cx, y + 2, fillOf(WALL)).rect(cx - 1, y + 3, 3, 1, fillOf(WALL));
+    s.set(cx - 1, y + 4, fillOf(WALL)).set(cx + 1, y + 4, fillOf(WALL));
+    s.rect(x + 7, y + 3, 6, 1, darkOf(ACCENT)).rect(x + 7, y + 6, 7, 1, darkOf(ACCENT));
+    s.rect(x + 3, y + 7, 4, 1, fillOf(WALL));
+    for (const px of [x + 1, x + w - 2])
+      s.set(px, y, lightOf(LEAVES)).set(px, y + 1, fillOf(LEAVES));
+  }
   // A pumpkin at its foot, and grass round the posts.
   s.sphere(47, 55, 5, 4, 'KaAl');
   s.set(47, 50, fillOf(LEAVES)).set(48, 50, fillOf(LEAVES));
@@ -237,7 +270,25 @@ function drawNoticeboard(): SpriteSource {
 }
 
 export const BENCH: SpriteSource = drawBench();
-export const NOTICEBOARD: SpriteSource = drawNoticeboard();
+const boards = new Map<string, SpriteSource>();
+
+/**
+ * The noticeboard as it looks with `open` of the window's notes still up and, if `poster`, the
+ * day's event pinned beside them (1.0.1): its art and the key it's baked under, drawn once each.
+ */
+export function noticeboardLook(
+  open: number,
+  poster: boolean,
+): { key: string; source: SpriteSource } {
+  const up = Math.max(0, Math.min(NOTE_SLOTS_UP, Math.floor(open)));
+  const key = `prop:noticeboard:${up}${poster ? ':poster' : ''}`;
+  let source = boards.get(key);
+  if (!source) boards.set(key, (source = drawNoticeboard(up, poster)));
+  return { key, source };
+}
+
+/** The board as the catalogue and the overview show it: a full window's notes, no event. */
+export const NOTICEBOARD: SpriteSource = noticeboardLook(NOTE_SLOTS_UP, false).source;
 export const SIGNPOST: SpriteSource = signpostTo('town', 'right');
 export const BARREL_FORMS: readonly SpriteSource[] = [barrel(false), barrel(true)];
 

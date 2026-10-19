@@ -38,13 +38,28 @@ commit). Owned `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main
 - The `1.0.1` `NOTES` row has **four lines; X2 adds the fifth**. "Where it hurts" 7, 8 (X1's
   parts), 9 and 16, the art notes' rod and seeds, and `CLAUDE.md` are brought up to date.
 
-### X2: the art (`claude/x2-art`)
+### X2: the art (`claude/x2-art`) · landed, no save change
 
-Not started. Owns `sprites/`, `render/`, `data/seasons.ts`, `data/holidays.ts` and the art
-tests. Its list: jack-o'-lanterns in the snow (art notes: `seasonLook` or `DECOR`, October only);
-the tension bar small and its window dark over night water (art notes, 8); the noticeboard's and
-the neighbours sheet's busts without a feeling ("Where it hurts" 4); Florence's on-her-back
-frame and Gary's front (8); the noticeboard's art the same whatever is pinned (4).
+**Landed** (PR #200 into `v1.1-dev`, decision 327; the save stays v54). Owned `sprites/`, `render/`, `data/seasons.ts`, `data/holidays.ts` and the art tests, and (X1
+having landed) the few lines of `systems/moods.ts`, `hud/`, `wiring/apis.ts` and `main.ts` the
+busts' feelings needed. Decision 327. **Done, a commit each:**
+
+- **Snow lanterns**: in winter the jack-o'-lanterns are snow lanterns with the same faces, lit as
+  before (`RESHAPED` in `sprites/seasons.ts`, `SNOW_LANTERN_FORMS` in `sprites/townProps.ts`);
+  carved pumpkins the rest of the year.
+- **The tension bar**: 64×12, a light rim, a light window, `reelBarAt` placing it clear of her and
+  the float (`tests/render/fishing.test.ts`).
+- **Busts with a feeling**: the neighbours sheet by closeness, Cody's greeting by his line, the
+  noticeboard's faces by their notes (`closenessFeeling`, `greetingFeeling`, `noteFeeling`).
+- **Florence on her back and Gary's front**, redrawn (`sprites/pets.ts`).
+- **The noticeboard** shows what's pinned (`noticeboardLook`, read by `OutdoorView`).
+- The `1.0.1` `NOTES` row's **fifth line**; "Where it hurts" 4 and 8, the art notes and
+  `CLAUDE.md` brought up to date.
+- `tests/persistence/cloud.test.ts` looks for a backup code's whole prefix (`MFV0-`/`MFV1-`) in
+  the sealed text: "MFV" alone turned up in its base64url by chance about one run in 150.
+
+**1.0.1 is whole on `v1.1-dev`**: the `NOTES` row has its five lines. What's left logged is the
+refactors in "Where it hurts" and the art notes that are a redesign (above).
 
 Left logged, not for 1.0.1: the refactors in "Where it hurts" (2, 3, 5, 6, 10–15, 17), and the
 art notes that are a redesign (the cobble and the square, the woods' crowns, the ice, the lawns,
@@ -1688,16 +1703,15 @@ screenshots and its own four days of play at phone size, and found:
 - **The castle garden's beds are the same rectangle** four times over.
 - ~~**She holds her rod indoors**~~: done in 1.0.1 (X1, decision 325); her net, can and rod wait
   by the door while she's in (`Hands.held`).
-- **The tension bar is small** (44 world pixels, about a tile and a half at Close): it reads, but
-  only just, and its dark green window less well at night (R6a's note).
-- **Jack-o'-lanterns all year.** The town's jack-o'-lanterns are map props, so in January they
-  sit in the snow (smoke's `season-winter-sideways.png`). A `seasonLook` that turns them to snowmen
-  or lanterns outside autumn, or `DECOR` for October only, would fit L4's seasons.
+- ~~**The tension bar is small**~~: done in 1.0.1 (X2, decision 327); two tiles wide, a light rim
+  and a light window, clear of her and her float.
+- ~~**Jack-o'-lanterns all year**~~: done in 1.0.1 (X2, decision 327); in winter they're snow
+  lanterns with the same faces (`seasonLook`'s `RESHAPED`), carved pumpkins the rest of the year.
 - ~~**Sideways, the quick bar's seeds run under the bag**~~: done in 1.0.1 (X1, decision 325);
   the strip fades at an end with more beyond it, so the packet at the bag reads as "this way".
-- **Lane notes still open:** the body builds and the neutral faces on the noticeboard and the
-  neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c), the noticeboard's art
-  the same whatever is pinned (L6). Each is in "Where it hurts" too.
+- **Lane notes still open:** the body builds (L7; "Where it hurts" 3). ~~The neutral faces on the
+  noticeboard and the neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c),
+  the noticeboard's art the same whatever is pinned (L6)~~: done in 1.0.1 (X2, decision 327).
 
 ## Settled since
 

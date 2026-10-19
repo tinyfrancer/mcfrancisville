@@ -6,6 +6,7 @@ import { ZONES } from '../../src/data/zones';
 import { lawnOf } from '../../src/render/lawn';
 import { overview } from '../../src/render/overview';
 import { lookOf } from '../../src/sprites/props';
+import { PUMPKIN_LIT, SNOW_LANTERN_FORMS } from '../../src/sprites/townProps';
 import {
   seasonLook,
   seasonPieces,
@@ -106,5 +107,29 @@ describe('the seasons on what stands', () => {
     expect(seasonLook(house, 'summer').key).not.toMatch(/@/);
     expect(turnsWithSeasons('gourdonHouse')).toBe(false);
     expect(turnsWithSeasons('well')).toBe(true);
+  });
+
+  // 1.0.1 (decision 327): no jack-o'-lantern sits in the snow.
+  it('makes the jack-o-lanterns snow lanterns in winter, each its own face, lit as before', () => {
+    const lanterns = town.props.filter((p) => p.id === 'pumpkin');
+    expect(lanterns.length).toBeGreaterThan(0);
+    expect(turnsWithSeasons('pumpkin')).toBe(true);
+    const faces = new Set<number>();
+    for (const lantern of lanterns) {
+      const carved = lookOf(lantern);
+      for (const s of ['spring', 'summer', 'autumn'] as const) {
+        expect(seasonLook(lantern, s), s).toEqual(carved);
+      }
+      const winter = seasonLook(lantern, 'winter');
+      expect(winter.key).toBe(`${carved.key}@winter`);
+      expect(winter.form).toBe(carved.form);
+      expect(winter.source).toBe(SNOW_LANTERN_FORMS[carved.form]);
+      expect(winter.source).not.toBe(carved.source);
+      faces.add(winter.form);
+      // Its face is in the keys that glow after dark, as the pumpkin's is.
+      const glows = Object.keys(PUMPKIN_LIT);
+      expect(winter.source.rows.some((row) => glows.some((k) => row.includes(k)))).toBe(true);
+    }
+    expect(faces.size).toBeGreaterThan(1);
   });
 });

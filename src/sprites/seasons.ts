@@ -6,6 +6,7 @@ import { mix, PALETTE as C, ramp } from './palette';
 import { lookOf, PROP_ART, type StandingProp } from './props';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
+import { SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
 import {
   E,
   groundPieces,
@@ -385,20 +386,37 @@ const ROOF_SNOW: Palette = { [ROOF[2]!]: C.snowShade, [ROOF[3]!]: C.snow, [ROOF[
 /** What else stands under a roof besides a building with a door: the wells. */
 const ROOFED: ReadonlySet<PropId> = new Set(['well', 'farmWell']);
 
+/**
+ * What stands in another shape through a season, form for form (1.0.1, decision 327): the town's
+ * jack-o'-lanterns are snow lanterns in winter, each with its own face, so none sits in the snow.
+ */
+const RESHAPED: Partial<
+  Record<SeasonId, Partial<Record<PropId, { forms: readonly SpriteSource[]; palette: Palette }>>>
+> = {
+  winter: { pumpkin: { forms: SNOW_LANTERN_FORMS, palette: SNOW_LANTERN_PALETTE } },
+};
+
 /** Whether a season changes how this prop is drawn. */
 export function turnsWithSeasons(id: PropId): boolean {
   const art = PROP_ART[id];
   if ((art.door && !art.noEaves) || ROOFED.has(id)) return true;
+  if (Object.values(RESHAPED).some((r) => r[id] !== undefined)) return true;
   return Object.values(CROWNS).some((c) => c[id] !== undefined);
 }
 
 /**
  * How a prop looks in a season (`lookOf`, with the season's palette and a key of its own): its
- * crown in the season's colours, or snow on its roof in winter. Unchanged in autumn.
+ * crown in the season's colours, snow on its roof in winter, or another shape (`RESHAPED`).
+ * Unchanged in autumn.
  */
 export function seasonLook(prop: StandingProp, season: SeasonId): ReturnType<typeof lookOf> {
   const base = lookOf(prop);
   if (season === 'autumn' || prop.sign || prop.joins !== undefined) return base;
+  const reshaped = RESHAPED[season]?.[prop.id];
+  if (reshaped) {
+    const source = reshaped.forms[base.form] ?? reshaped.forms[0]!;
+    return { source, palette: reshaped.palette, form: base.form, key: `${base.key}@${season}` };
+  }
   const art = PROP_ART[prop.id];
   const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
   const leaves = CROWNS[season][prop.id]?.[v];

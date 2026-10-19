@@ -178,6 +178,8 @@ export const NOTES: readonly PatchNotes[] = [
         'wave.',
       "Your rod waits by the door while you're in, tricks happen where you can see them, the " +
         'reel goes gently on a calm phone, and your snack remembers what it was.',
+      "Come winter, our jack-o'-lanterns turn to snow lanterns, same grins. The reeling bar is " +
+        "bigger, and the noticeboard shows what's pinned up.",
     ],
     ps: 'P.S. Small fixes, so I typed them small. The W still sticks.',
   },

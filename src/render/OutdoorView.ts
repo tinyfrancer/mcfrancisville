@@ -15,7 +15,7 @@ import {
 } from '../sprites/nature';
 import { BED_FORMS, patchLook } from '../sprites/flowerBeds';
 import { formOf } from '../sprites/terrain';
-import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE, noticeboardLook } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
 import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { GOOSE_ART } from '../sprites/geese';
@@ -201,6 +201,9 @@ export class OutdoorView implements SceneView {
   /** The rings of earth in her yard, each waiting, a sapling or a candy tree (0.2's E1). */
   private readonly saplingPlots: { prop: PlacedProp; drawable: Drawable }[] = [];
   private readonly stalls: Drawable[] = [];
+  /** The noticeboards, and what was pinned on them when last read (1.0.1). */
+  private readonly boards: Drawable[] = [];
+  private pinned: { at: number; open: number; poster: boolean } | null = null;
   private readonly patches: Drawable[] = [];
   /** The floating lanterns, bobbing on the water. */
   private readonly bobbing: { drawable: Drawable; m: Moving | null }[] = [];
@@ -292,6 +295,8 @@ export class OutdoorView implements SceneView {
         this.candyTrees.push(drawable);
       } else if (prop.id === 'saplingPlot') {
         this.saplingPlots.push({ prop, drawable });
+      } else if (prop.id === 'noticeboard') {
+        this.boards.push(drawable);
       } else if (prop.id === 'honestyStall') {
         this.stalls.push(drawable);
       } else if (prop.id === 'pumpkinPatch') {
@@ -472,6 +477,7 @@ export class OutdoorView implements SceneView {
       ...this.popUpDrawables(nowMs),
       ...this.lotDrawables(nowMs),
       ...this.mailboxDrawables(),
+      ...this.boardDrawables(),
       ...this.potDrawables(),
       ...this.gooseDrawables(),
       ...this.candyDrawables(),
@@ -616,7 +622,7 @@ export class OutdoorView implements SceneView {
           e.giver.spent = bake(`${key}:spent`, PROP_ART[e.prop.id].spent!, palette);
         }
         if (e.entrance) Object.assign(e.entrance, { key, palette });
-        if (e.m) Object.assign(e.m, { key, palette });
+        if (e.m) Object.assign(e.m, { key, palette, source });
       }
     }
     return { season, snow: GROUND_LOOKS[look].snow === true };
@@ -861,6 +867,24 @@ export class OutdoorView implements SceneView {
       this.lotLife = { lots, life: { ...life, chimneys: [...life.chimneys, ...chimneysOf(lots)] } };
     }
     return this.lotLife.life;
+  }
+
+  /**
+   * The noticeboard wearing what's pinned on it now (1.0.1): a note for each of the window's notes
+   * she hasn't answered, and a poster while the day has an event on. Read off the world a second
+   * at a time of its clock, as the board's notes change only by the window or as she answers one.
+   */
+  private boardDrawables(): Drawable[] {
+    if (this.boards.length === 0) return [];
+    const now = this.world.clock.now();
+    if (!this.pinned || Math.abs(now - this.pinned.at) >= BOARD_READ_MS) {
+      const board = this.world.noticeboard;
+      const open = board.notices().filter((n) => !n.done).length;
+      this.pinned = { at: now, open, poster: board.posters().length > 0 };
+    }
+    const { key, source } = noticeboardLook(this.pinned.open, this.pinned.poster);
+    const sprite = bake(key, source, PROP_ART.noticeboard.palette);
+    return this.boards.map((d) => ({ ...d, sprite }));
   }
 
   /** Her mailbox, its flag up while a letter waits in it. */
@@ -1196,6 +1220,9 @@ export class OutdoorView implements SceneView {
     this.ctx.fillRect(x, y - px, px, px * 3);
   }
 }
+
+/** How often the noticeboards read what's pinned up, in the world's milliseconds. */
+const BOARD_READ_MS = 1000;
 
 /** A prop that moves on its own, as it's looked up where it stands (V1's E5). */
 function movingOf(
