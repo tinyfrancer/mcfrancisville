@@ -94,16 +94,23 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-**A2 in progress** (branch `claude/a2-woods-edges`, decision 351 to come). Done and pushed: three
-more tree forms in `sprites/treeForms.ts` (a poplar, a leaning tree, a broken one; the tree's
-forms dealt from nine, the broken one's heartwood `x` snowed in winter, `BREAK_SNOW`); the
-woods' edges (Whisperwood, Lantern Shore, the castle hill: trees in the hedge and stepping in,
-a rock or stump in a gap; held by `tests/data/maps.test.ts`'s "the places' edges"); the lawns
-(the clearing's middle, the fairground's south-east); the castle garden's milkweed beds as a
-cross, a corner, a ribbon and a horseshoe; the noticeboard's pumpkin a snowball in winter
-(`RESHAPED`, `noticeboardLook(open, poster, winter)`). W1's snapshots re-taken for exactly the
-tiles changed. Next: the season sprites and smoke's pictures looked at, `npm run perf`, the docs
-(decision 351, the art notes, `CLAUDE.md`, the plan's status line), then ready and merge.
+**A2 landed (PR #211, decision 351; no save change). Next: A3.** Three more tree forms in
+`sprites/treeForms.ts` (a poplar, a leaning tree, a broken one), so the tree's forms are dealt
+from nine by `formOf` and every tree in every place, the town's too, was dealt again; the broken
+one's heartwood (`x`, `X` in `leaves()`) is snowed in winter (`BREAK_SNOW`). The woods' edges
+(Whisperwood, Lantern Shore, the castle hill) have trees in the hedge and a tile inside it, a
+rock or stump in a gap, held by `tests/data/maps.test.ts`'s "the places' edges" (every place
+closed in; no side of the woods eight tiles without something in its edge). The clearing's
+middle and the fairground's south-east have a meadow and a few props; the castle garden's
+milkweed is a cross, a corner, a ribbon and a horseshoe; the noticeboard's pumpkin is a snowball
+in winter (`RESHAPED`, and `noticeboardLook(open, poster, winter)` for the live board). W1's
+snapshots re-taken for exactly the 106 tiles given a prop. **For A3**: the creeks' tiles are
+untouched; the edge trees at Whisperwood's right side by the creek (25,24, 25,27's rock) and the
+hall key's glade (21,28) are clear of the ice; Lantern Shore's creek mouth is as it was. Smoke's
+`interiors` "she goes into codyManor" failed run alone at 19:00 on `v1.1-dev` as on this
+branch (likely the festival evening's knock at his door, by the real clock); it passed in the
+whole run. For her
+phone: whether the woods' edges read as a wood at Close, and the broken trees aren't too many.
 
 **A1 landed (PR #209, decision 350; no save change). Next: A2.** The square is flagstones
 (`flagstones`, `_` in the map: a 10×9 rectangle, cols 15–24, rows 18–26, a tile narrower each
@@ -1812,17 +1819,20 @@ screenshots and its own four days of play at phone size, and found:
 - ~~**The lavender cobble still carries the town.**~~: done in 1.1 (A1, decision 350); the
   square is flagstones a tile narrower each side, with a ring of setts round the well and two
   benches, and the roads' cobbles are worn smooth down the middle (the fairground's too).
-- **Woods are walls of one crown.** Whisperwood, the shore and the castle hill are edged with the
-  same round teal crown over and over (the purple and orange ones and the conifers break it up, but
-  not much at a distance); the forms L2 added are few beside it. More variety in the edge crowns,
-  and an uneven edge rather than a straight hedge of trees.
+- ~~**Woods are walls of one crown.**~~: done in 1.1 (A2, decision 351); a poplar, a leaning
+  tree and a broken one join the tree's forms (nine, dealt by tile), and the woods' edges step in
+  and out, trees standing in the hedge and a tile inside it, a rock or a stump in a gap.
 - **Ice and the creeks are flat paint.** The frozen creek in Whisperwood and the one feeding the
   lake at Lantern Shore are a flat pale blue ribbon with hard edges, beside water that L6 gave banks
   and glints; and a frozen creek running into an open lake reads oddly. A texture on the ice
   (cracks, a sheen) and the banks' soft edge would bring it in line.
-- **Big empty lawns** in the hidden clearing's middle and the fairground's south-east: L2's decals
-  are there but thin. A meadow patch or a few standing props.
-- **The castle garden's beds are the same rectangle** four times over.
+- ~~**Big empty lawns**~~: done in 1.1 (A2, decision 351); a meadow, long grass, a log and a rock
+  in the clearing's middle, and a meadow, a log, a rock, toadstools and a bush in the
+  fairground's south-east.
+- ~~**The castle garden's beds are the same rectangle**~~: done in 1.1 (A2, decision 351); the
+  milkweed is a cross, a corner, a long ribbon and a horseshoe.
+- ~~**The noticeboard's little pumpkin is orange in winter**~~: done in 1.1 (A2, decision 351); a
+  snowball packed into a pumpkin's shape, with a holly sprig, whatever is pinned up.
 - ~~**She holds her rod indoors**~~: done in 1.0.1 (X1, decision 325); her net, can and rod wait
   by the door while she's in (`Hands.held`).
 - ~~**The tension bar is small**~~: done in 1.0.1 (X2, decision 327); two tiles wide, a light rim
