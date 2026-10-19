@@ -5,6 +5,7 @@ import type { SeasonId } from '../../src/data/seasons';
 import { ZONES } from '../../src/data/zones';
 import { lawnOf } from '../../src/render/lawn';
 import { overview } from '../../src/render/overview';
+import { noticeboardLook } from '../../src/sprites/clutter';
 import { lookOf } from '../../src/sprites/props';
 import { PUMPKIN_LIT, SNOW_LANTERN_FORMS } from '../../src/sprites/townProps';
 import {
@@ -98,6 +99,36 @@ describe('the seasons on what stands', () => {
     for (const tree of orchard) {
       expect(seasonLook(tree, 'spring').key).toMatch(/@spring$/);
       expect(seasonLook(tree, 'spring').palette[3]).not.toBe(seasonLook(tree, 'autumn').palette[3]);
+    }
+  });
+
+  // 1.1's A2 (decision 351): no pumpkin left orange in the snow at the noticeboard's foot either.
+  it('makes the noticeboard’s pumpkin a snowball in winter, whatever is pinned up', () => {
+    const board = town.props.find((p) => p.id === 'noticeboard')!;
+    expect(turnsWithSeasons('noticeboard')).toBe(true);
+    for (const s of ['spring', 'summer', 'autumn'] as const) {
+      expect(seasonLook(board, s), s).toEqual(lookOf(board));
+    }
+    const winter = seasonLook(board, 'winter');
+    expect(winter.key).toMatch(/@winter$/);
+    for (const [open, poster] of [
+      [0, false],
+      [2, true],
+      [3, false],
+    ] as const) {
+      const autumn = noticeboardLook(open, poster);
+      const snowy = noticeboardLook(open, poster, true);
+      const pumpkin = (rows: readonly string[]) =>
+        rows
+          .slice(48)
+          .join('')
+          .match(/[KaAl]/g) ?? [];
+      expect(pumpkin(autumn.source.rows).length).toBeGreaterThan(20);
+      expect(pumpkin(snowy.source.rows)).toEqual([]);
+      expect(snowy.key).not.toBe(autumn.key);
+      expect(snowy.palette[3]).toBe(winter.palette[3]);
+      // The board above its foot is the same board, notes and all.
+      expect(snowy.source.rows.slice(0, 48)).toEqual(autumn.source.rows.slice(0, 48));
     }
   });
 

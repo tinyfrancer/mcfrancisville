@@ -882,8 +882,9 @@ export class OutdoorView implements SceneView {
       const open = board.notices().filter((n) => !n.done).length;
       this.pinned = { at: now, open, poster: board.posters().length > 0 };
     }
-    const { key, source } = noticeboardLook(this.pinned.open, this.pinned.poster);
-    const sprite = bake(key, source, PROP_ART.noticeboard.palette);
+    const winter = this.seasonShown === 'winter';
+    const { key, source, palette } = noticeboardLook(this.pinned.open, this.pinned.poster, winter);
+    const sprite = bake(key, source, palette);
     return this.boards.map((d) => ({ ...d, sprite }));
   }
 

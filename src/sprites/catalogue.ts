@@ -322,8 +322,11 @@ export function catalogue(): Entry[] {
     [3, true],
   ] as const) {
     const look = noticeboardLook(open, poster);
-    grid(look.key, look.source, PROP_ART.noticeboard.palette);
+    grid(look.key, look.source, look.palette);
   }
+  // And in winter, its pumpkin a snowball (1.1's A2).
+  const winterBoard = noticeboardLook(1, true, true);
+  grid(winterBoard.key, winterBoard.source, winterBoard.palette);
   // The town's projects as the noticeboard shows them (V1's R4).
   for (const [id, picture] of Object.entries(PROJECT_PICTURES)) {
     grid(`project:${id}`, picture.source, picture.palette);
