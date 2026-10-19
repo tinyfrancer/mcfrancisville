@@ -36,6 +36,8 @@ import { Hearing } from './wiring/hearing';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
 import { stanceOf } from './systems/neighbourLife';
+import { greetingFeeling } from './systems/moods';
+import { bandOf } from './systems/remembering';
 import { visitLine } from './hud/messages';
 import type { Welcome } from './world/services/Visits';
 import type { DebugView } from './types/debugView';
@@ -323,6 +325,8 @@ function startGame(): void {
       ...(nudge && { nudge }),
       from: 'cody',
       line: greeting.line,
+      // His face on the card is his line's (1.0.1).
+      feel: greetingFeeling(greeting.line, bandOf(world.friends.hearts('cody'), 'cody')),
       reply: greeting.reply,
       ...(visit && { gift: visitLine(visit.count, visit.gift) }),
       ...(greeting.after && { after: greeting.after }),

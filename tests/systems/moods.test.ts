@@ -3,7 +3,18 @@ import { HEART_MOMENTS } from '../../src/data/heartMoments';
 import { REPLIES } from '../../src/data/replies';
 import { SMALL_TALK, TOPICS } from '../../src/data/smallTalk';
 import { VILLAGER_IDS } from '../../src/data/villagers';
-import { feelingIn, feelingOf, giftFeeling, herFeeling } from '../../src/systems/moods';
+import { WELCOMES } from '../../src/data/greetings';
+import { NOTICES } from '../../src/data/notices';
+import {
+  closenessFeeling,
+  feelingIn,
+  feelingOf,
+  giftFeeling,
+  greetingFeeling,
+  herFeeling,
+  noteFeeling,
+} from '../../src/systems/moods';
+import { bandOf } from '../../src/systems/remembering';
 import { FEELINGS, type Feeling } from '../../src/types/mood';
 
 describe("how a line is said (V1's L7)", () => {
@@ -71,5 +82,43 @@ describe("how a line is said (V1's L7)", () => {
     // Faces change often enough to notice, never on every line.
     expect(felt / all).toBeGreaterThan(0.25);
     expect(felt / all).toBeLessThan(0.85);
+  });
+});
+
+describe("the faces on the sheets' busts (1.0.1)", () => {
+  it('warms a neighbour on their page the closer they are, from none at a hello', () => {
+    expect(closenessFeeling(bandOf(0))).toBeNull();
+    expect(closenessFeeling(bandOf(7))).toBe('happy');
+    expect(closenessFeeling(bandOf(10))).toBe('happy');
+    expect(closenessFeeling(bandOf(0, 'cody'))).toBe('happy');
+    // Never colder for more hearts.
+    let warm = false;
+    for (let hearts = 0; hearts <= 10; hearts++) {
+      const now = closenessFeeling(bandOf(hearts)) !== null;
+      expect(now || !warm, `${hearts}`).toBe(true);
+      warm = now;
+    }
+  });
+
+  it('gladdens the face by a note she has answered, and reads one still up by its words', () => {
+    const notes = NOTICES.map((n) => n.note);
+    for (const note of notes) expect(noteFeeling(note, true)).toBe('happy');
+    expect(noteFeeling('NEED {what} FOR A BOUQUET!!! Shh!!!', false)).toBe('happy');
+    expect(noteFeeling('{what}, please. For soup. It is just soup.', false)).toBeNull();
+    // Some notes have a face of their own, but not every one.
+    const felt = notes.map((n) => noteFeeling(n, false)).filter((f) => f !== null);
+    expect(felt.length).toBeGreaterThan(0);
+    expect(felt.length).toBeLessThan(notes.length);
+  });
+
+  it("gives Cody's greeting his line's feeling, or a married man's warmth", () => {
+    expect(greetingFeeling('Oh! There you are.', 'married')).toBe('surprised');
+    expect(greetingFeeling('Morning, babe.', 'married')).toBe('happy');
+    expect(greetingFeeling('Morning.', 'hello')).toBeNull();
+    const lines = Object.values(WELCOMES).flatMap((v) =>
+      typeof v === 'string' ? [v] : Array.isArray(v) ? v : Object.values(v).flat(),
+    );
+    expect(lines.length).toBeGreaterThan(10);
+    for (const line of lines) expect(greetingFeeling(line, 'married'), line).not.toBeNull();
   });
 });

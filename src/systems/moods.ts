@@ -60,3 +60,26 @@ export function herFeeling(say: string, mood?: Feeling | null): Feeling | null {
 
 /** How long a face keeps a feeling after the line that brought it, once the talk is over. */
 export const FEEL_AFTER_MS = 2_400;
+
+/*
+ * The faces on the sheets' busts (1.0.1), the same feelings the world's faces have: a neighbour's
+ * page by how close they are, a note on the noticeboard by its words, Cody's greeting by his line.
+ */
+
+/** A neighbour's face on their page of the neighbours sheet: warmer the closer they are. */
+export function closenessFeeling(band: Band): Feeling | null {
+  return BAND_MOODS[band];
+}
+
+/**
+ * The face beside a note on the noticeboard: glad once she has answered it, and before that as
+ * its own words say ("…for a bouquet!!!"), or as usual.
+ */
+export function noteFeeling(note: string, done: boolean): Feeling | null {
+  return done ? 'happy' : feelingIn(note);
+}
+
+/** The face on a greeting: as its line says, or else as warm as how close they are. */
+export function greetingFeeling(line: string, band: Band): Feeling | null {
+  return feelingIn(line) ?? BAND_MOODS[band];
+}
