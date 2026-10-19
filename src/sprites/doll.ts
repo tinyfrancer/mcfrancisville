@@ -10,7 +10,9 @@ import type {
   Slot,
 } from '../types/ids';
 import type { Look, Worn } from '../types/look';
+import type { Feeling } from '../types/mood';
 import { BRACELET_BEADS } from './bracelets';
+import { FEELING_EYES, feelingBrows, feelingCheeks, feelingMouth, stitchMouth } from './faces';
 import {
   EYE_COLOURS,
   FABRIC_TONES,
@@ -784,9 +786,13 @@ function shadeSkin(body: Grid): string[] {
 
 /**
  * How her face looks: as usual, down at her phone, eyes shut tight, or mouth open, rocking; and
- * for a moment, blinking (V1's E2).
+ * for a moment, blinking (V1's E2); or how she feels about a line or a moment (V1's L7).
  */
-export type Mood = 'open' | 'down' | 'shut' | 'rock' | 'wink' | 'blink';
+export type Mood = 'open' | 'down' | 'shut' | 'rock' | 'wink' | 'blink' | Feeling;
+
+function isFeeling(mood: Mood): mood is Feeling {
+  return mood in FEELING_EYES;
+}
 
 /**
  * An eye four wide and round, her right one as the viewer sees it (the outer corner on the left):
@@ -807,35 +813,56 @@ export interface FaceTouches {
   lashes?: boolean;
   freckles?: boolean;
   nosePiercing?: boolean;
+  /** A stitched smile, whatever its shape (Scarah's, V1's L7). */
+  stitched?: boolean;
 }
 
 /**
  * Eyes, cheeks and a mouth, low on the face, and freckles and a nose stud for whoever has them.
- * From the side only the near eye shows.
+ * From the side only the near eye shows. `blink` shuts the eyes of a feeling for a moment and
+ * leaves its brows and mouth (V1's L7).
  */
 export function faceRows(
   view: Exclude<View, 'back'>,
   mood: Mood,
   look: FaceTouches,
+  blink = false,
 ): readonly string[] {
-  const key = [view, mood, look.lashes, look.freckles, look.nosePiercing].join(':');
-  return remember(EMPTY, `face:${key}`, () => drawFace(view, mood, look));
+  const key = [view, mood, look.lashes, look.freckles, look.nosePiercing, look.stitched, blink];
+  return remember(EMPTY, `face:${key.join(':')}`, () => drawFace(view, mood, look, blink));
 }
 
-function drawFace(view: Exclude<View, 'back'>, mood: Mood, look: FaceTouches): string[] {
+function drawFace(
+  view: Exclude<View, 'back'>,
+  mood: Mood,
+  look: FaceTouches,
+  blink = false,
+): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
-  const eye =
-    mood === 'down'
-      ? EYE_DOWN
-      : mood === 'shut'
-        ? EYE_SHUT
-        : mood === 'blink'
-          ? EYE_BLINK
-          : EYE_OPEN;
-  const open = mood === 'open' || mood === 'rock' || mood === 'wink';
+  const feeling = isFeeling(mood) ? mood : null;
+  const felt = feeling ? FEELING_EYES[feeling] : null;
+  const shutEyes = blink && feeling !== 'laugh';
+  const eye = shutEyes
+    ? EYE_BLINK
+    : felt
+      ? felt.rows
+      : mood === 'down'
+        ? EYE_DOWN
+        : mood === 'shut'
+          ? EYE_SHUT
+          : mood === 'blink'
+            ? EYE_BLINK
+            : EYE_OPEN;
+  const top = felt && !shutEyes ? felt.top : 14;
+  const open =
+    mood === 'open' ||
+    mood === 'rock' ||
+    mood === 'wink' ||
+    (!shutEyes && (feeling === 'happy' || feeling === 'surprised' || feeling === 'cross'));
   const lashes = look.lashes === true && open;
   const lips = (x: number, wide: boolean) => {
-    if (mood === 'rock' || mood === 'shut') {
+    if (feeling) feelingMouth(s, view === 'front' ? 'front' : 'side', feeling);
+    else if (mood === 'rock' || mood === 'shut') {
       s.rect(x, 20, wide ? 3 : 2, 2, 'U').rect(x, 21, wide ? 3 : 2, 1, 'u');
       if (wide) s.set(x + 1, 20, 'U');
     } else if (wide) {
@@ -844,29 +871,38 @@ function drawFace(view: Exclude<View, 'back'>, mood: Mood, look: FaceTouches): s
     } else s.set(x, 20, 'U').set(x, 21, 'u');
   };
   if (view === 'front') {
-    s.stamp({ rows: eye }, 10, 14);
-    s.stamp({ rows: mood === 'wink' ? EYE_SHUT : mirrored(eye) }, 18, 14);
+    s.stamp({ rows: eye }, 10, top);
+    s.stamp({ rows: mood === 'wink' ? EYE_SHUT : mirrored(eye) }, 18, top);
     // Brows, where her fringe lets them show; a flick of lashes at each outer corner.
-    s.rect(10, 12, 3, 1, 'b').rect(19, 12, 3, 1, 'b');
+    if (feeling) feelingBrows(s, 'front', feeling);
+    else s.rect(10, 12, 3, 1, 'b').rect(19, 12, 3, 1, 'b');
     if (mood === 'rock') s.set(12, 11, 'b').set(19, 11, 'b');
-    if (lashes) s.set(9, 14, 'E').set(9, 13, 'E');
-    if (lashes && mood !== 'wink') s.set(22, 14, 'E').set(22, 13, 'E');
+    if (lashes) s.set(9, top, 'E').set(9, top - 1, 'E');
+    if (lashes && mood !== 'wink') s.set(22, top, 'E').set(22, top - 1, 'E');
     s.rect(8, 19, 3, 1, 'c').set(9, 20, 'c').rect(21, 19, 3, 1, 'c').set(22, 20, 'c');
     s.set(9, 19, 'C').set(22, 19, 'C');
+    if (feeling) feelingCheeks(s, 'front', feeling);
     s.set(16, 18, 'n');
     lips(15, true);
-    if (look.freckles) for (const [x, y] of FRECKLES_FRONT) s.set(x, y, 'r');
+    // Under a feeling's mouth, where one reaches them.
+    if (look.freckles)
+      for (const [x, y] of FRECKLES_FRONT) if (s.get(x, y) === CLEAR) s.set(x, y, 'r');
     if (look.nosePiercing) s.set(17, 19, 'x');
   } else {
-    s.stamp({ rows: eye.map((row) => row.slice(0, 3)) }, 20, 14);
-    s.rect(20, 12, 3, 1, 'b');
-    if (lashes) s.set(23, 14, 'E').set(23, 13, 'E');
+    s.stamp({ rows: eye.map((row) => row.slice(0, 3)) }, 20, top);
+    if (feeling) feelingBrows(s, 'side', feeling);
+    else s.rect(20, 12, 3, 1, 'b');
+    if (lashes) s.set(23, top, 'E').set(23, top - 1, 'E');
     s.rect(19, 19, 3, 1, 'c').set(20, 19, 'C');
+    if (feeling) feelingCheeks(s, 'side', feeling);
     s.set(24, 18, 'n');
     lips(22, false);
-    if (look.freckles) for (const [x, y] of FRECKLES_SIDE) s.set(x, y, 'r');
+    // Under a feeling's mouth, where one reaches them.
+    if (look.freckles)
+      for (const [x, y] of FRECKLES_SIDE) if (s.get(x, y) === CLEAR) s.set(x, y, 'r');
     if (look.nosePiercing) s.set(24, 19, 'x');
   }
+  if (look.stitched) stitchMouth(s);
   return s.rows;
 }
 
@@ -1686,6 +1722,7 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   devilHorns: {},
   // A gingham patch on the crown and a scarlet band (0.3's F3).
   scarahHat: { accents: { x: C.rose, y: C.scarlet } },
+  mayorHat: { accents: { x: C.gold } },
 };
 
 function centred(grid: Grid): number {
@@ -2687,6 +2724,7 @@ export function facePalette(iris: string, skin: Tone): Palette {
     C: mix(skin.main, C.cheek, 0.45),
     u: C.berryLight,
     U: C.berry,
+    m: mix(C.berry, C.ink, 0.55),
     r: mix(skin.shade, C.barkDark, 0.35),
     x: C.silver,
   };
@@ -2889,7 +2927,11 @@ export function dollLayers(
                   ? 'blink'
                   : 'open';
     const touches = { ...look, lashes: true };
-    add(onHead(faceRows(view, mood, touches)), facePalette(EYE_COLOURS[look.eyes], skin));
+    // How she feels about a moment shows on her face as usual, but never over a pose's own face
+    // or her find held up (V1's L7).
+    const feels = rest.feel && (mood === 'open' || mood === 'blink') && pose !== 'holdUp';
+    const face = feels ? faceRows(view, rest.feel!, touches, rest.blink === true && !pose) : null;
+    add(onHead(face ?? faceRows(view, mood, touches)), facePalette(EYE_COLOURS[look.eyes], skin));
   }
   for (const w of worn) add(pieceRows(w, view, body), wornPalette(w));
   bracelets(body);
@@ -2918,10 +2960,11 @@ export function dollLayers(
   return !pose && rest.out ? folded(whole, BREATH_FROM, 1) : whole;
 }
 
-/** Standing still as usual (V1's E2): breathing out, and blinking. */
+/** Standing still as usual (V1's E2): breathing out, and blinking; and how she feels (V1's L7). */
 export interface Rest {
   out?: boolean;
   blink?: boolean;
+  feel?: Feeling;
 }
 
 /**
@@ -3017,5 +3060,6 @@ export function dollKey(
         : pose
           ? `pose:${pose}`
           : `${facing}:${frame % DOLL_FRAMES}${rest.out ? ':out' : ''}${rest.blink ? ':blink' : ''}`;
-  return `doll:${at}:${body.join(',')}:${worn}`;
+  const feel = rest.feel ? `:feel:${rest.feel}` : '';
+  return `doll:${at}${feel}:${body.join(',')}:${worn}`;
 }

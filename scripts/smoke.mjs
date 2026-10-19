@@ -10,7 +10,7 @@
  * Usage: npm run dev, then `node scripts/smoke.mjs [--headed] [--section=a,b]`. Screenshots land in
  * .smoke/.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { chromium } from 'playwright';
 
 const URL_BASE = process.env.SMOKE_URL ?? 'http://localhost:5173/';
@@ -84,7 +84,8 @@ const browser = await chromium.launch({
   headless: !headed,
   executablePath: process.env.CHROMIUM_PATH || undefined,
 });
-const context = await browser.newContext({
+/** @type {import('playwright').BrowserContextOptions} */
+const PHONE_CONTEXT = {
   viewport: PHONE,
   deviceScaleFactor: 3,
   hasTouch: true,
@@ -92,13 +93,46 @@ const context = await browser.newContext({
   // Smoke cranks the game faster than real time, so a CSS animation (the fade between places) is
   // still running when it takes a picture; reduced motion cuts it to a millisecond.
   reducedMotion: 'reduce',
-});
-const page = await context.newPage();
+};
+/**
+ * The cloud save's function (V1's S2, `api/save.ts`), faked for the dev server, which hasn't it:
+ * the same answers over a store in memory that every context given it shares, as phones share
+ * the cloud. `setUp: false` answers as the function does before its store is linked.
+ * @type {Map<string, { savedAt: number, data: string }>}
+ */
+const cloudStore = new Map();
+/** @param {import('playwright').BrowserContext} ctx @param {{ setUp?: boolean }} [options] */
+async function fakeCloud(ctx, { setUp = true } = {}) {
+  await ctx.route('**/api/save?*', async (route) => {
+    const request = route.request();
+    const id = new URL(request.url()).searchParams.get('id') ?? '';
+    /** @param {number} status @param {unknown} body */
+    const answer = (status, body) =>
+      route.fulfill({ status, contentType: 'application/json', body: JSON.stringify(body) });
+    if (!/^[0-9a-f]{64}$/.test(id)) return answer(400, { error: 'id' });
+    if (!setUp) return answer(503, { error: 'not-set-up', message: 'not linked' });
+    if (request.method() === 'GET') return answer(200, { save: cloudStore.get(id) ?? null });
+    const body = request.postDataJSON();
+    const kept = cloudStore.get(id);
+    if (kept && kept.savedAt > body.savedAt)
+      return answer(409, { kept: false, savedAt: kept.savedAt });
+    cloudStore.set(id, { savedAt: body.savedAt, data: body.data });
+    return answer(200, { kept: true, savedAt: body.savedAt });
+  });
+}
+const context = await browser.newContext(PHONE_CONTEXT);
+await fakeCloud(context);
+/** The page every helper drives; `firstDay` swaps in a new town's for a while (V1's R1). */
+let page = await context.newPage();
 
 /** @type {string[]} */
 const consoleErrors = [];
-page.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()));
-page.on('pageerror', (e) => consoleErrors.push(String(e)));
+/** @param {import('playwright').Page} p */
+function listen(p) {
+  p.on('console', (m) => m.type() === 'error' && consoleErrors.push(m.text()));
+  p.on('pageerror', (e) => consoleErrors.push(String(e)));
+}
+listen(page);
 
 /** Game time per cranked frame: a steady 25fps. */
 const FRAME_MS = 40;
@@ -354,6 +388,191 @@ async function creator() {
   check("her first visit's gift is on his greeting", /welcome gift/.test(gift), gift);
   await page.screenshot({ path: '.smoke/hello.png' });
   await answerCody();
+  await firstDayCard();
+}
+
+/** A new town's hello is followed by Cody's list for her first day (V1's R1), closed with Got it. */
+async function firstDayCard() {
+  const shown = await page
+    .waitForSelector('.hud-first-day', { timeout: 5000 })
+    .then(() => true)
+    .catch(() => false);
+  check("Cody's list for her first day follows his hello", shown);
+  if (!shown) return;
+  await framed('.hud-first-day', { picture: true });
+  const steps = await page.locator('.hud-first-day-step').count();
+  const done = await page.locator('.hud-first-day-step[data-done]').count();
+  check('it lists six things to try, none done yet', steps === 6 && done === 0, `${done}/${steps}`);
+  await tapElement('.hud-first-day .hud-done');
+  check('Got it closes it', (await page.locator('.hud-first-day').count()) === 0);
+}
+
+/**
+ * Her first day played through in a town of its own (V1's R1), so the town every other section
+ * shares is left as it was: the card after his hello, the day's chip and the tray glowing until
+ * first tapped, each step done in turn (any order) with his line and its gift, and his keepsake in
+ * her chest once the last is, the tray's button gone with it.
+ */
+async function firstDay() {
+  const main = page;
+  const town = await browser.newContext(PHONE_CONTEXT);
+  page = await town.newPage();
+  listen(page);
+  try {
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=10`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await page.waitForSelector('.hud-creator', { timeout: 10_000 });
+    await page.locator('.hud-name').fill('Smoke');
+    await tapElement('.hud-creator .hud-primary');
+    await answerCody();
+    const card = await page
+      .waitForSelector('.hud-first-day', { timeout: 5000 })
+      .then(() => true)
+      .catch(() => false);
+    check('a new town opens on his list for her first day', card);
+    if (!card) return;
+    await page.screenshot({ path: '.smoke/first-day.png' });
+    await tapElement('.hud-first-day .hud-done');
+    const glows = () =>
+      page.evaluate(() => ({
+        today: document.querySelector('.hud-today')?.hasAttribute('data-hint') ?? false,
+        more: document.querySelector('.hud-more')?.hasAttribute('data-hint') ?? false,
+      }));
+    const lit = await glows();
+    check(
+      'the day chip and the tray glow on her first day',
+      lit.today && lit.more,
+      JSON.stringify(lit),
+    );
+    await page.screenshot({ path: '.smoke/first-day-hints.png' });
+    // The tray, opened for real, has his list first in it, and stops glowing.
+    await tapElement('.hud-first-day-button');
+    check('the tray stops glowing once opened', !(await glows()).more);
+    check(
+      'his list opens again from the tray',
+      (await page.locator('.hud-first-day').count()) === 1,
+    );
+    await tapElement('.hud-first-day .hud-done');
+    await tapElement('.hud-today');
+    check(
+      'the day chip opens the calendar',
+      (await page.locator('.hud-calendar-sheet').count()) === 1,
+    );
+    check('and stops glowing', !(await glows()).today);
+    await closeSheets();
+    // On its side, the list is two columns like any sheet.
+    await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+    await page.evaluate(() => window.view.step(40));
+    await page.evaluate(() =>
+      /** @type {HTMLElement} */ (document.querySelector('.hud-first-day-button'))?.click(),
+    );
+    const side = await page.evaluate(() => {
+      const sheet = document.querySelector('.hud-first-day');
+      return !!sheet && sheet.scrollWidth <= sheet.clientWidth + 1;
+    });
+    check('his list fits a phone on its side', side);
+    await page.screenshot({ path: '.smoke/first-day-side.png' });
+    await closeSheets();
+    await page.setViewportSize(PHONE);
+    await page.evaluate(() => window.view.step(40));
+
+    /** @param {string} step @param {string} label */
+    const done = async (step, label) => {
+      const kept = await stepUntil(
+        `window.world.firstDay.done.includes(${JSON.stringify(step)})`,
+        label,
+        4000,
+      );
+      if (!kept) return;
+      await page.evaluate(() => window.view.step(40, 2));
+      const told = (await page.locator('.hud-toast').textContent()) ?? '';
+      check(`${label}, and Cody says so`, told.includes('Cody: '), told.slice(0, 60));
+    };
+    // The candy tree, walked up to.
+    await tapProp('candyTree');
+    await stepUntil(() => !window.world.player.moving, 'she reaches the candy tree');
+    await done('shake', 'shaking the candy tree is a step done');
+    // A bed dug over and sown.
+    await page.evaluate(() => {
+      const first = window.world.map.beds[0];
+      if (!first) throw new Error('the town has no garden beds');
+      const bed = { zone: /** @type {const} */ ('town'), ...first };
+      window.world.farm.till(bed);
+      window.world.garden.plant(bed, 'pumpkinSeed');
+    });
+    await done('plant', 'planting a seed is a step done');
+    // Pumpkins on the honesty stall, put out on its sheet.
+    await page.evaluate(() => window.world.bag.add('pumpkin', 2));
+    await tapProp('honestyStall');
+    await stepUntil(() => !window.world.player.moving, 'she reaches the honesty stall');
+    await page.evaluate(() => window.view.step(40));
+    await tapElement('.hud-stall-sheet .hud-ware >> nth=-1 >> button');
+    await tapElement('.hud-stall-sheet .hud-done');
+    await done('stall', 'putting something on the stall is a step done');
+    // A note on the board answered.
+    await page.evaluate(() => {
+      const n = window.world.noticeboard.notices()[0];
+      if (n) window.world.bag.add(n.item, n.count);
+    });
+    await tapProp('noticeboard');
+    await stepUntil(() => !window.world.player.moving, 'she reaches the noticeboard');
+    await page.evaluate(() => window.view.step(40));
+    await tapElement('.hud-notice >> nth=0 >> button');
+    await tapElement('.hud-notice-sheet .hud-done');
+    await done('notice', 'answering a note is a step done');
+    // Three neighbours said hello to.
+    await page.evaluate(() => {
+      const them = window.world.neighbourhood.neighbours
+        .map((n) => n.id)
+        .filter((id) => id !== 'cody' && id !== 'robBoo')
+        .slice(0, 3);
+      for (const id of them) {
+        window.world.neighbourhood.talk(id);
+        window.world.neighbourhood.endTalk();
+      }
+    });
+    await done('meet', 'meeting three neighbours is a step done');
+    // Something from her bag eaten, by its card's Eat.
+    await tapElement('.hud-bag-button');
+    await tapElement('.hud-bag .hud-slot[aria-label^="Toasted ghost mallow"]');
+    await tapElement('.hud-bag-sheet .hud-eat');
+    await tapElement('.hud-bag-sheet button:text("Done")');
+    await done('eat', 'eating something is a step done');
+    const over = await page.evaluate(() => ({
+      open: window.world.firstDay.open,
+      keepsake: window.world.home.stored.some((s) => s.id === 'welcomeSampler'),
+      button: /** @type {HTMLElement | null} */ (document.querySelector('.hud-first-day-button'))
+        ?.hidden,
+    }));
+    check(
+      'with every step done, his keepsake is in her chest and the list leaves the tray',
+      !over.open && over.keepsake && over.button === true,
+      JSON.stringify(over),
+    );
+    await page.screenshot({ path: '.smoke/first-day-done.png' });
+    // Saved (v50): back the next time, her first day stays done, and his list doesn't come back.
+    await page.evaluate(() => window.view.saveNow());
+    await page.reload({ waitUntil: 'load' });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await answerCody();
+    await page.waitForTimeout(100);
+    const kept = await page.evaluate(() => ({
+      open: window.world.firstDay.open,
+      done: window.world.firstDay.done.length,
+      card: document.querySelector('.hud-first-day') !== null,
+    }));
+    check(
+      'her first day stays done through a reload, with no list',
+      !kept.open && kept.done === 6 && !kept.card,
+      JSON.stringify(kept),
+    );
+  } finally {
+    await town.close();
+    page = main;
+  }
 }
 
 /**
@@ -454,6 +673,10 @@ async function camera() {
     await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), { tx, ty });
     await stepUntil(() => !window.world.player.moving, `she reaches ${tx},${ty}`);
   }
+  // A neighbour standing on the last tile at this hour (Ollie, of an evening) is talked to.
+  if (await page.locator('.hud-talk-sheet').count()) {
+    await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  }
   const after = await page.evaluate(() => window.view.cameraOrigin());
   check('the camera follows her down the map', after.y > before.y, `${before.y} -> ${after.y}`);
   const bottomRow = await edgeInReach(26, 'bottom');
@@ -499,13 +722,28 @@ async function smooth() {
   await stepUntil(() => !window.world.player.moving, 'she reaches the high street');
   /** @type {Record<string, { cam: {x: number, y: number}, her: {x: number, y: number} }[]>} */
   const dump = {};
+  let last = { tx: 17, ty: 27 };
   for (const [name, goal] of /** @type {const} */ ([
     ['east', { tx: 27, ty: 15 }],
     ['back', { tx: 14, ty: 15 }],
-    ['south', { tx: 19, ty: 30 }],
+    // Down to the avenue, short of where film night's screen stands on an October Saturday,
+    // which a walk to the far side of it would bend round.
+    ['south', { tx: 17, ty: 27 }],
   ])) {
-    const frames = await page.evaluate((t) => {
-      window.world.tapTile(t.tx, t.ty);
+    const walked = await page.evaluate((wanted) => {
+      // A neighbour on the tile (or just below it, the tile being their head) at this hour would be
+      // walked up to and talked to instead: the nearest open tile beside it, then.
+      const w = window.world;
+      const clear = (/** @type {{ tx: number, ty: number }} */ t) =>
+        w.canWalk(t.tx, t.ty) &&
+        !w.neighbourhood.villagerAt(t.tx, t.ty) &&
+        !w.neighbourhood.villagerAt(t.tx, t.ty + 1);
+      const ring = [0, -1, 1, -2, 2].flatMap((dy) => [0, -1, 1, -2, 2].map((dx) => ({ dx, dy })));
+      const t =
+        ring
+          .map(({ dx, dy }) => ({ tx: wanted.tx + dx, ty: wanted.ty + dy }))
+          .find((c) => clear(c)) ?? wanted;
+      w.tapTile(t.tx, t.ty);
       const out = [];
       // Walking, then a second more for the camera to settle.
       for (let i = 0, still = 0; i < 1200 && still < 60; i++) {
@@ -513,8 +751,10 @@ async function smooth() {
         out.push({ cam: window.view.cameraOrigin(), her: window.view.playerDrawnAt() });
         still = window.world.player.moving ? 0 : still + 1;
       }
-      return out;
+      return { goal: t, out };
     }, goal);
+    const frames = walked.out;
+    last = walked.goal;
     dump[name] = frames;
     const series = {
       'the camera': frames.map((f) => f.cam),
@@ -533,7 +773,12 @@ async function smooth() {
   }
   writeFileSync('.smoke/walk-frames.json', JSON.stringify(dump));
   const arrived = await playerTile();
-  check('she ends the walk where she was headed', arrived.tx === 19 && arrived.ty === 30);
+  const goal = last;
+  check(
+    'she ends the walk where she was headed',
+    arrived.tx === goal.tx && arrived.ty === goal.ty,
+    `${arrived.tx},${arrived.ty} for ${goal.tx},${goal.ty}`,
+  );
 }
 
 /**
@@ -847,10 +1092,21 @@ async function calendar() {
     !!chip && chip.bottom - chip.top >= 44 && others.every((b) => clear(chip, b)),
     JSON.stringify(chip),
   );
+  // V1's R2: a dot on the chip while Today has something she hasn't seen, gone once she looks.
+  check(
+    'the chip wears a dot while Today has something new',
+    (await page.locator('.hud-today[data-new]').count()) === 1,
+  );
   await tapElement('.hud-today');
+  check(
+    "the chip's dot goes once she has looked",
+    (await page.locator('.hud-today[data-new]').count()) === 0,
+  );
   // U4: today's mark (or a plain page) beside the title, and a tab each for today, the month and
   // what's coming up.
   await framed('.hud-calendar-sheet', { picture: true, tabs: ['Today', 'Month', 'Coming up'] });
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
+  await upNow();
   await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Month")');
   const days = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-cal-day')].map((el) => el.getBoundingClientRect()),
@@ -875,6 +1131,72 @@ async function calendar() {
   await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
   await tapElement('.hud-calendar-sheet button:text("Done")');
   check('Done closes the calendar', (await page.locator('.hud-sheet').count()) === 0);
+  // A tap on the tree's line sends her off to it and closes the calendar; she's stopped short,
+  // so the passive section still finds it full.
+  await tapElement('.hud-today');
+  await tapElement('.hud-calendar-sheet .hud-sheet-tab:text-is("Today")');
+  await tapElement('.hud-cal-line[data-today="tree"] .hud-cal-go');
+  const aim = await page.evaluate(() => {
+    const tree = window.world.map.props.find((p) => p.id === 'candyTree');
+    const aimed = window.world.aim;
+    const box = aimed && 'box' in aimed ? aimed.box : null;
+    const here = window.world.movement.tile;
+    window.world.tapTile(here.tx, here.ty);
+    return { tree, box, scene: window.world.scene };
+  });
+  check(
+    "a tap on the tree's line closes the calendar and sets her off to the tree",
+    (await page.locator('.hud-sheet').count()) === 0 &&
+      aim.scene === 'town' &&
+      !!aim.box &&
+      aim.box.tx === aim.tree?.tx &&
+      aim.box.ty === aim.tree?.ty,
+    JSON.stringify(aim),
+  );
+  await stepUntil(() => !window.world.player.moving, 'she stops');
+}
+
+/**
+ * The calendar's Today (V1's R2): a line for what's up now, the tree's among them, each true of
+ * the world and on screen upright and on its side.
+ */
+async function upNow() {
+  const tree = await page.locator('.hud-cal-line[data-today="tree"]').textContent();
+  const candy = await page.evaluate(() => window.world.candyTree.candy());
+  check(
+    "Today has the candy tree's line, saying what it holds",
+    candy > 0 && !!tree && tree.includes(`${candy} Candy`),
+    `${tree} (${candy})`,
+  );
+  /** @returns {Promise<{ kind: string, left: number, right: number, height: number }[]>} */
+  const lines = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.hud-cal-line')].map((el) => {
+        const r = el.getBoundingClientRect();
+        const kind = el instanceof HTMLElement ? (el.dataset.today ?? '') : '';
+        return { kind, left: r.left, right: r.right, height: r.height };
+      }),
+    );
+  const upright = await lines();
+  const kinds = await page.evaluate(() => window.world.upNow.lines().map((l) => l.kind));
+  check(
+    'every line of Today is one the world says, a thumb tall and on screen',
+    upright.length === kinds.length &&
+      upright.every((l, i) => l.kind === kinds[i] && l.height >= 44 && l.right <= PHONE.width),
+    JSON.stringify(upright.map((l) => l.kind)),
+  );
+  await page.screenshot({ path: '.smoke/today.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => window.view.step(40));
+  const side = await lines();
+  check(
+    'on its side, Today keeps every line on screen',
+    side.length === upright.length && side.every((l) => l.left >= 0 && l.right <= PHONE.height),
+    JSON.stringify(side.map((l) => [l.left, l.right])),
+  );
+  await page.screenshot({ path: '.smoke/today-side.png' });
+  await page.setViewportSize(PHONE);
+  await page.evaluate(() => window.view.step(40));
 }
 
 /** The noticeboard by the square: walked up to, it opens its notes, and one can be answered. */
@@ -890,7 +1212,7 @@ async function notices() {
   await page.evaluate(() => window.view.step(40));
   const cards = await page.locator('.hud-notice').count();
   check('walking up to the noticeboard opens its three notes', cards === 3, String(cards));
-  await framed('.hud-notice-sheet');
+  await framed('.hud-notice-sheet', { tabs: ['Notes', 'Projects'] });
   const candy = await page.evaluate(() => window.world.wallet.candy);
   await tapElement('.hud-notice >> nth=0 >> button');
   const after = await page.evaluate(() => window.world.wallet.candy);
@@ -898,6 +1220,106 @@ async function notices() {
   check('and the note says it is done', (await page.locator('.hud-notice-done').count()) === 1);
   await page.screenshot({ path: '.smoke/notices.png' });
   await tapElement('.hud-notice-sheet .hud-done');
+}
+
+/**
+ * The town's projects (V1's R4): the noticeboard's Projects tab, starting the bandstand, giving
+ * with − n +, its posts going up on the square, its three stages each drawn there, and the tab on
+ * its side.
+ */
+async function projects() {
+  await closeSheets();
+  const woodBefore = await page.evaluate(() => window.world.bag.count('wood') + 80);
+  await page.evaluate(() => {
+    window.world.bag.add('wood', 80);
+    window.world.bag.add('stone', 40);
+    window.world.bag.add('pumpkin', 6);
+    window.world.wallet.earn(5000);
+  });
+  await tapProp('noticeboard');
+  await stepUntil(() => !window.world.player.moving, 'she reaches the noticeboard');
+  await page.evaluate(() => window.view.step(40));
+  await framed('.hud-notice-sheet', { tabs: ['Notes', 'Projects'] });
+  await tapElement('.hud-notice-sheet .hud-sheet-tab:text-is("Projects")');
+  const cards = await page.locator('.hud-project').count();
+  check('the Projects tab offers every project to start', cards === 4, String(cards));
+  await tapElement('.hud-project >> nth=0 >> button:text-is("Start this one")');
+  const started = await page.evaluate(() => window.world.projects.current);
+  check('starting one makes it the one under way', started === 'bandstand', String(started));
+  const rows = await page.locator('.hud-project-need').count();
+  check('it asks for Candy and each of its things, a row each', rows === 4, String(rows));
+  const wood = '.hud-project-need:has-text("Wood")';
+  await tapElement(`${wood} .hud-how-many .hud-chip:last-child`);
+  await tapElement(`${wood} .hud-how-many .hud-chip:last-child`);
+  await tapElement(`${wood} .hud-primary`);
+  const given = await page.evaluate(() => ({
+    wood: window.world.bag.count('wood'),
+    post: window.world.townZone.propAt(26, 19)?.id ?? null,
+  }));
+  check(
+    'giving three wood takes three from her bag',
+    given.wood === woodBefore - 3,
+    JSON.stringify({ ...given, woodBefore }),
+  );
+  check('and the posts go up on the square', given.post === 'sitePost', JSON.stringify(given));
+  await page.screenshot({ path: '.smoke/projects.png' });
+  // On its side, the tab keeps to the screen.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => window.view.step(40));
+  const sideways = await page.evaluate(() => {
+    const sheet = document.querySelector('.hud-notice-sheet');
+    const row = document.querySelector('.hud-project-need')?.getBoundingClientRect();
+    return {
+      wide: !!sheet && sheet.scrollWidth > sheet.clientWidth + 1,
+      row: !!row && row.right <= innerWidth + 0.5,
+    };
+  });
+  check(
+    'on its side the Projects tab fits',
+    !sideways.wide && sideways.row,
+    JSON.stringify(sideways),
+  );
+  await page.screenshot({ path: '.smoke/projects-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await tapElement('.hud-notice-sheet .hud-done');
+  // Each stage drawn where it stands: the posts, the frame, the bandstand, each a different picture.
+  const shots = [];
+  for (const stage of ['posts', 'frames', 'done']) {
+    await page.evaluate((s) => {
+      window.world.projects.preview('bandstand', /** @type {'posts'} */ (s));
+      window.view.step(40);
+    }, stage);
+    const at = await page.evaluate(() => {
+      const a = window.view.tileToClient(26, 17);
+      const b = window.view.tileToClient(29, 21);
+      return { x: a.x, y: a.y, width: b.x - a.x, height: b.y - a.y };
+    });
+    const shot = await page.screenshot({ clip: at });
+    shots.push(shot.toString('base64'));
+    await page.screenshot({ path: `.smoke/project-${stage}.png` });
+  }
+  check('the posts, the frame and the bandstand each draw', new Set(shots).size === 3);
+  await page.evaluate(() => window.world.projects.preview('bandstand', undefined));
+  // What she gave is kept with her town (save v51).
+  await page.evaluate(() => window.view.saveNow());
+  await reloadGame();
+  const kept = await page.evaluate(() => ({
+    current: window.world.projects.current,
+    wood: window.world.projects.view()[0]?.items.find((i) => i.item === 'wood')?.given,
+    post: window.world.townZone.propAt(26, 19)?.id ?? null,
+  }));
+  check(
+    'the project and what she gave it survive a reload',
+    kept.current === 'bandstand' && kept.wood === 3 && kept.post === 'sitePost',
+    JSON.stringify(kept),
+  );
+  // What was put in her bag and purse for this goes again, for the sections after.
+  await page.evaluate(() => {
+    window.world.bag.remove('wood', 77);
+    window.world.bag.remove('stone', 40);
+    window.world.bag.remove('pumpkin', 6);
+    window.world.wallet.spend(5000);
+  });
 }
 
 /** The candy tree shakes down Candy, and the honesty stall takes what she grows (phase O). */
@@ -2035,6 +2457,250 @@ async function settings() {
   );
 }
 
+/**
+ * Keeping her town safe (V1's S3): Settings says when this phone last backed up, and again once a
+ * code is copied; something gone wrong is noted and mentioned on the Sound tab with a note to copy.
+ */
+async function safe() {
+  await context.grantPermissions(['clipboard-read', 'clipboard-write']);
+  await page.evaluate(() => {
+    localStorage.removeItem('mcfrancisville:backedUpAt');
+    window.dispatchEvent(
+      new ErrorEvent('error', { message: 'smoke', error: new Error('a pretend wobble') }),
+    );
+  });
+  await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Sound")');
+  const trouble =
+    (await page
+      .locator('.hud-trouble')
+      .textContent()
+      .catch(() => '')) ?? '';
+  check(
+    'a wobble is mentioned on the Sound tab, by its day',
+    /wobbly on \d+ \w+/.test(trouble),
+    trouble,
+  );
+  await tapElement('.hud-trouble-copy');
+  const note = await page.evaluate(() => navigator.clipboard.readText()).catch(() => '');
+  check('its note copies, for Cody', /a pretend wobble/.test(note), note.slice(0, 80));
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
+  await page.waitForFunction(() =>
+    /** @type {HTMLTextAreaElement | null} */ (
+      document.querySelector('.hud-code')
+    )?.value.startsWith('MFV'),
+  );
+  const before = (await page.locator('.hud-backed-up').textContent()) ?? '';
+  await tapElement('.hud-settings-sheet button:text-is("Copy")');
+  await page
+    .waitForFunction(() =>
+      /today/.test(document.querySelector('.hud-backed-up')?.textContent ?? ''),
+    )
+    .catch(() => {});
+  const after = (await page.locator('.hud-backed-up').textContent()) ?? '';
+  check(
+    'the Backup tab says when this phone last backed up, and today once a code is copied',
+    /yet/.test(before) && after === 'Last backed up today.',
+    `${before} -> ${after}`,
+  );
+  await page.evaluate(() => localStorage.removeItem('mcfrancisville:errors'));
+  await tapElement('.hud-sheet button:text("Done")');
+}
+
+/**
+ * The cloud save (V1's S2) against a faked function: this phone's town goes up as she plays, the
+ * Backup tab shows its cloud code and QR, and a second phone with a town of its own brings hers
+ * back by the code, taking the code as its own. And before the store is set up, it says so.
+ */
+async function cloudSave() {
+  await closeSheets();
+  const here = await playerTile();
+  await page.evaluate(() => {
+    localStorage.removeItem('mcfrancisville:backedUpAt');
+    window.view.saveNow();
+  });
+  // Back in front, what's waiting goes up at once rather than a few seconds on.
+  const sent = page.waitForRequest((r) => r.url().includes('/api/save?') && r.method() === 'PUT', {
+    timeout: 15_000,
+  });
+  await page.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+  const put = await sent.then(() => true).catch(() => false);
+  check('her town goes up to the cloud after a write', put);
+  await page
+    .waitForFunction(() => localStorage.getItem('mcfrancisville:backedUpAt') !== null)
+    .catch(() => {});
+  const stored = [...cloudStore.values()][0];
+  check(
+    'what the cloud keeps is sealed: no town to read in it',
+    !!stored && !/player|wardrobe|MFV/.test(stored.data),
+    stored ? stored.data.slice(0, 24) : 'nothing kept',
+  );
+  await tapElement('.hud-settings');
+  await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
+  await page
+    .waitForFunction(() =>
+      /goes up to the cloud/.test(document.querySelector('.hud-cloud-line')?.textContent ?? ''),
+    )
+    .catch(() => {});
+  const shown = await page.evaluate(() => {
+    const qr = document.querySelector('.hud-cloud-qr .hud-qr')?.getBoundingClientRect();
+    return {
+      line: document.querySelector('.hud-cloud-line')?.textContent ?? '',
+      code: document.querySelector('.hud-cloud-code')?.textContent ?? '',
+      kept: localStorage.getItem('mcfrancisville:cloudKey'),
+      qr: qr ? { width: qr.width, left: qr.left, right: qr.right } : null,
+      backed: document.querySelector('.hud-backed-up')?.textContent ?? '',
+    };
+  });
+  check(
+    'the Backup tab says the town goes up to the cloud',
+    /Last kept at/.test(shown.line),
+    shown.line,
+  );
+  check(
+    'and shows the cloud code in fours, the phone’s own key',
+    /^([0-9A-Z]{4}-){6}[0-9A-Z]{4}$/.test(shown.code) &&
+      shown.code.replace(/-/g, '') === shown.kept,
+    shown.code,
+  );
+  check(
+    'and as a QR, whole on screen',
+    !!shown.qr && shown.qr.width >= 150 && shown.qr.left >= 0 && shown.qr.right <= PHONE.width,
+    JSON.stringify(shown.qr),
+  );
+  check('a cloud upload counts as backing up', /today/.test(shown.backed), shown.backed);
+  await page.locator('.hud-cloud-qr').scrollIntoViewIfNeeded();
+  await page.screenshot({ path: '.smoke/cloud.png' });
+  await tapElement('.hud-sheet button:text("Done")');
+
+  // A second phone, with a town of its own somewhere else.
+  const main = page;
+  const other = await browser.newContext(PHONE_CONTEXT);
+  await fakeCloud(other);
+  page = await other.newPage();
+  listen(page);
+  try {
+    // Its town is hers from a minute before, two tiles off, put there from a page of the site
+    // that isn't the game, so nothing saves over it.
+    const theirs = await main.evaluate(() => localStorage.getItem('mcfrancisville:save'));
+    await page.goto(`${URL_BASE}manifest.webmanifest`);
+    await page.evaluate((s) => {
+      const save = JSON.parse(s ?? '{}');
+      save.player.tx -= 2;
+      save.updatedAt -= 60_000;
+      localStorage.setItem('mcfrancisville:save', JSON.stringify(save));
+    }, theirs);
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=10`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await answerCody();
+    await closeSheets();
+    const before = await playerTile();
+    const ownKey = await page.evaluate(() => localStorage.getItem('mcfrancisville:cloudKey'));
+    await tapElement('.hud-settings');
+    await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
+    await page.locator('.hud-cloud-field').fill(shown.code.toLowerCase().replace(/-/g, ' '));
+    page.once('dialog', (dialog) => void dialog.accept());
+    const reloaded = page.waitForEvent('load', { timeout: 60_000 });
+    await tapElement('.hud-cloud-restore');
+    await reloaded;
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await answerCody();
+    const after = await playerTile();
+    check(
+      'a new phone brings her town back by its cloud code',
+      after.tx === here.tx && after.ty === here.ty && before.tx !== here.tx,
+      `${JSON.stringify(before)} -> ${JSON.stringify(after)}, hers ${JSON.stringify(here)}`,
+    );
+    const keys = await page.evaluate(() => ({
+      now: localStorage.getItem('mcfrancisville:cloudKey'),
+      aside: Object.keys(localStorage)
+        .filter((k) => k.startsWith('mcfrancisville:cloudKey:previous:'))
+        .map((k) => localStorage.getItem(k)),
+    }));
+    check(
+      'and takes the code as its own, its old key put aside',
+      keys.now === shown.kept && keys.aside.includes(ownKey),
+      JSON.stringify(keys),
+    );
+    check(
+      'and nothing newer is offered over the town it just brought back',
+      (await page.locator('.hud-cloud-offer').count()) === 0,
+    );
+    await page.screenshot({ path: '.smoke/cloud-restored.png' });
+
+    // This phone is put away; the first plays on, and its town goes up newer. Opened again, this
+    // one is asked, never swapped: it keeps its own here.
+    await page.goto(`${URL_BASE}manifest.webmanifest`);
+    await main.evaluate(() => window.view.saveNow());
+    const newer = main.waitForRequest(
+      (r) => r.url().includes('/api/save?') && r.method() === 'PUT',
+      { timeout: 15_000 },
+    );
+    await main.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
+    await newer.then((r) => r.response()).catch(() => {});
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=10`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    const offered = await page
+      .waitForSelector('.hud-cloud-offer', { timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false);
+    check('opened behind the cloud, it asks before taking the newer town', offered);
+    await page.screenshot({ path: '.smoke/cloud-offer.png' });
+    if (offered) {
+      await tapElement('.hud-cloud-keep');
+      check(
+        "keeping this phone's town closes the card",
+        (await page.locator('.hud-cloud-offer').count()) === 0,
+      );
+    }
+  } finally {
+    await other.close();
+    page = main;
+  }
+
+  // A phone whose cloud isn't set up yet: said so, kindly. Its 503 is a console line by design,
+  // so this page isn't listened to.
+  const bare = await browser.newContext(PHONE_CONTEXT);
+  await fakeCloud(bare, { setUp: false });
+  page = await bare.newPage();
+  try {
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=10`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await page.waitForSelector('.hud-creator', { timeout: 10_000 });
+    await page.locator('.hud-name').fill('Smoke');
+    await tapElement('.hud-creator .hud-primary');
+    await answerCody();
+    // A new town's hello is followed by Cody's list for her first day (V1's R1).
+    const list = await page
+      .waitForSelector('.hud-first-day', { timeout: 5000 })
+      .then(() => true)
+      .catch(() => false);
+    if (list) await tapElement('.hud-first-day .hud-done');
+    await closeSheets();
+    await tapElement('.hud-settings');
+    await tapElement('.hud-settings-sheet .hud-sheet-tab:text-is("Backup")');
+    await page
+      .waitForFunction(() =>
+        /set up yet/.test(document.querySelector('.hud-cloud-line')?.textContent ?? ''),
+      )
+      .catch(() => {});
+    const line = (await page.locator('.hud-cloud-line').textContent()) ?? '';
+    check("before the store is set up, the cloud says it isn't yet", /set up yet/.test(line), line);
+  } finally {
+    await bare.close();
+    page = main;
+  }
+}
+
 async function neighbours() {
   const welcome = await page.evaluate(() => {
     const sheet = document.querySelector('.hud-talk-sheet');
@@ -2057,8 +2723,9 @@ async function neighbours() {
   );
   if (!talking) return;
   await framed('.hud-talk-sheet', { picture: true });
-  const hearts = (await page.locator('.hud-talk-sheet .hud-hearts').textContent()) ?? '';
-  check('the talk shows how close they are, out of ten', hearts.length === 10, hearts);
+  // Drawn hearts (V1's L5), ten of them, filled then empty.
+  const hearts = await page.locator('.hud-talk-sheet .hud-hearts .hud-heart').count();
+  check('the talk shows how close they are, out of ten', hearts === 10, String(hearts));
   const buttons = await page.evaluate(() =>
     [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].map((b) =>
       b.getBoundingClientRect(),
@@ -2070,10 +2737,26 @@ async function neighbours() {
     `${buttons.length} buttons`,
   );
   await page.screenshot({ path: '.smoke/talk.png' });
+  // On its side too (V1's P1: the talk is longer now), every answer still on screen.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const sideways = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].every((b) => {
+      const r = b.getBoundingClientRect();
+      return r.height >= 44 && r.right <= window.innerWidth && r.bottom <= window.innerHeight;
+    }),
+  );
+  check('on its side, every answer in the talk is on screen', sideways);
+  await page.screenshot({ path: '.smoke/talk-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
   await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
   await tapElement('.hud-talk-sheet .hud-slot >> nth=0');
   const points = await page.evaluate((id) => window.world.friends.of(id).points, friend);
   check(`a gift and a talk bring ${friend} closer`, points >= 20, String(points));
+  // V1's P1: they remember what she gave them, to bring it up in the days after.
+  const gave = await page.evaluate((id) => window.world.friends.of(id).gave ?? null, friend);
+  check(`${friend} remembers what she gave them`, gave !== null, String(gave));
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
     'saying bye lets them go on their way',
@@ -2122,8 +2805,11 @@ async function neighbours() {
   await reloadGame();
   const kept = await page.evaluate(() => ({
     points: window.world.friends.of('maude').points,
-    // October's story chapters come as the days do, so they're left out of the count.
-    mail: window.world.mailbox.view().filter((l) => !l.id.startsWith('story:')).length,
+    // October's story chapters come as the days do, so they're left out of the count, and so
+    // are Cody's letters, all in her mailbox from her first day (V1's P5).
+    mail: window.world.mailbox
+      .view()
+      .filter((l) => !l.id.startsWith('story:') && !l.id.startsWith('cody:')).length,
   }));
   check(
     'friendships and letters are still there after a reload',
@@ -2131,6 +2817,68 @@ async function neighbours() {
     kept.points >= 305 && kept.mail === 3,
     JSON.stringify(kept),
   );
+  const remembered = await page.evaluate((id) => window.world.friends.of(id).gave ?? null, friend);
+  check(
+    'what she gave is still remembered after a reload',
+    remembered === gave,
+    String(remembered),
+  );
+
+  // V1's P2, her voice: as if a neighbour here were three hearts along, their first story told,
+  // after their hello they ask her their question, and she answers it on a chip.
+  const asker = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighboursIn(window.world.scene)[0];
+    if (!n) return null;
+    window.world.friends.update(n.id, { points: 350, moments: [2], answered: undefined });
+    window.world.neighbourhood.talk(n.id);
+    window.world.neighbourhood.endTalk();
+    return { id: n.id, tile: n.tile };
+  });
+  if (!asker) check('someone is here to ask her something', false);
+  else {
+    await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), asker.tile);
+    const asked = await stepUntil(
+      () => document.querySelector('.hud-talk-sheet .hud-reply') !== null,
+      `${asker.id} asks her something, with answers on chips`,
+    );
+    if (asked) {
+      const chips = await page.evaluate(() =>
+        [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].map((b) => {
+          const r = b.getBoundingClientRect();
+          return { reply: b.classList.contains('hud-reply'), h: r.height, right: r.right };
+        }),
+      );
+      check(
+        'her answers are chips, each a full thumb and on screen, with Bye beside them',
+        chips.filter((c) => c.reply).length >= 2 && chips.every((c) => c.h >= 44 && c.right <= 390),
+        JSON.stringify(chips),
+      );
+      await page.screenshot({ path: '.smoke/talk-reply.png' });
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.waitForTimeout(300);
+      const sideways = await page.evaluate(() =>
+        [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].every((b) => {
+          const r = b.getBoundingClientRect();
+          return r.height >= 44 && r.right <= window.innerWidth && r.bottom <= window.innerHeight;
+        }),
+      );
+      check('on its side, every chip is on screen', sideways);
+      await page.screenshot({ path: '.smoke/talk-reply-sideways.png' });
+      await page.setViewportSize(PHONE);
+      await page.waitForTimeout(300);
+      await tapElement('.hud-talk-sheet .hud-reply >> nth=0');
+      const answered = await page.evaluate(
+        (id) => window.world.friends.of(id).answered ?? null,
+        asker.id,
+      );
+      check(`${asker.id} keeps her answer`, answered !== null, String(answered));
+      check(
+        'the chips go once she has answered',
+        (await page.locator('.hud-talk-sheet .hud-reply').count()) === 0,
+      );
+      await tapElement('.hud-talk-sheet button:text-is("Bye")');
+    }
+  }
 
   const cart = await page.evaluate(() => window.world.stalls.moonPieCart());
   if (!cart) {
@@ -2186,7 +2934,10 @@ async function relations() {
   }
   await framed('.hud-neighbours-sheet');
   const listed = await page.evaluate(() => {
-    const rows = [...document.querySelectorAll('.hud-neighbours-sheet .hud-neighbour')];
+    // The mayor is a shape of his own until she has met him (V1's P3b), below.
+    const rows = [
+      ...document.querySelectorAll('.hud-neighbours-sheet .hud-neighbour:not(.hud-unmet)'),
+    ];
     return rows.map((r) => ({
       id: /** @type {HTMLElement} */ (r).dataset.villager,
       text: r.textContent ?? '',
@@ -2202,6 +2953,14 @@ async function relations() {
       everyone.every((id) => listed.some((r) => r.id === id)) &&
       listed.every((r) => !r.text.includes('Someone new')),
     JSON.stringify(listed.map((r) => r.id)),
+  );
+  const mayor = await page.evaluate(
+    () => document.querySelector('.hud-neighbours-sheet .hud-unmet')?.textContent ?? '',
+  );
+  check(
+    "the mayor is only a shape on it till she's met him",
+    mayor.includes('The mayor') && !mayor.includes('Rob Boo'),
+    mayor,
   );
   await page.screenshot({ path: '.smoke/neighbours.png' });
 
@@ -2221,7 +2980,7 @@ async function relations() {
   });
   check(`${friend}'s page shows what they'll give at each band`, gifts === 3, String(gifts));
   await page.screenshot({ path: '.smoke/neighbour.png' });
-  await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+  await tapElement('.hud-neighbour-sheet button:has-text("Find")');
   check(
     'Find closes the sheet and sets her walking',
     (await page.locator('.hud-sheet').count()) === 0,
@@ -2241,7 +3000,7 @@ async function relations() {
     const before = await playerTile();
     await tapElement('.hud-neighbours');
     await tapElement(`.hud-neighbours-sheet .hud-neighbour[data-villager="${away}"]`);
-    await tapElement('.hud-neighbour-sheet button:has-text("👣 Find")');
+    await tapElement('.hud-neighbour-sheet button:has-text("Find")');
     const said = (await page.locator('.hud-neighbour-sheet .hud-message').textContent()) ?? '';
     const after = await playerTile();
     check(
@@ -2316,8 +3075,8 @@ async function critters() {
   check('a critter is out where she can see it', target !== undefined);
   if (!target) return;
   const before = await page.evaluate(() => window.world.cabinet.found);
-  // A wary one flutters off once, so it may take a second go.
-  for (let tries = 0; tries < 3; tries++) {
+  // A wary one flutters off once, and a shy one drifts if she rushes it (V1's R6a): a few goes.
+  for (let tries = 0; tries < 6; tries++) {
     const now = await page.evaluate(
       (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
       target.key,
@@ -2380,7 +3139,8 @@ async function critters() {
   );
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
-    book.shelves === 15 && book.sets === 16 && book.setsFit,
+    // Nine squishies (the fairground's own since V1's R6b) and eight dolls.
+    book.shelves === 15 && book.sets === 17 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
@@ -2624,8 +3384,8 @@ async function crawlies() {
   check('a creepy-crawly is out at Boo Acres', target !== null);
   if (!target) return;
   await page.evaluate(() => window.view.step(40, 30));
-  // A wary one flutters off once, so it may take a second go.
-  for (let tries = 0; tries < 3; tries++) {
+  // A wary one flutters off once, and a shy one drifts if she rushes it (V1's R6a): a few goes.
+  for (let tries = 0; tries < 6; tries++) {
     const now = await page.evaluate(
       (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
       target.key,
@@ -2693,7 +3453,12 @@ async function fishing() {
     window.world.collecting.critters().filter((c) => !window.world.canWalk(c.tx, c.ty)),
   );
   check('fish are in the water at noon', fish.length >= 2, fish.map((c) => c.critter).join(', '));
-  const [first] = fish;
+  // A common one if there is, which a single timed tap lands (V1's R6a: no reel for it).
+  const rarity = await page.evaluate(
+    (ids) => ids.map((id) => window.world.collecting.rarityOf(id)),
+    fish.map((c) => c.critter),
+  );
+  const first = fish[rarity.indexOf('common')] ?? fish[0];
   if (!first) return;
   // Over to the bank near it, so its shadow is on screen for a real tap.
   await page.evaluate((c) => {
@@ -2715,28 +3480,124 @@ async function fishing() {
     'tapping a shadow walks her to the bank and casts her rod',
     (await page.evaluate(() => window.world.hands.held)) === 'rod',
   );
-  // Her line is read off the real clock, so a bite comes in real time: wait for one, and tap.
+  // Her line is read off the real clock, so a bite comes in real time: wait for the middle of
+  // the next one (`bestTapAt`, V1's R6a) and tap, once; a rare fish's reel is a second tap in time.
   // One missed only comes round again, so she has a few goes.
   let landed = false;
+  let taps = 0;
+  const me = await playerTile();
   for (let tries = 0; tries < 4 && !landed; tries++) {
-    await page.waitForFunction(() => window.world.fishing.line?.state === 'bite', null, {
-      timeout: 20_000,
-      polling: 30,
-    });
-    await page.evaluate(() => window.view.step(16));
+    const wait = await page.evaluate(
+      () =>
+        (window.world.fishing.bestTapAt() ?? window.world.clock.now()) - window.world.clock.now(),
+    );
+    if (wait > 25) await page.waitForTimeout(wait - 25);
+    await page.waitForFunction(
+      () => ['bite', 'reel'].includes(window.world.fishing.line?.state ?? ''),
+      null,
+      { timeout: 20_000, polling: 10 },
+    );
     if (tries === 0) await page.screenshot({ path: '.smoke/fish-bite.png' });
-    const me = await playerTile();
     await tapTile(me.tx, me.ty + 2);
+    taps++;
     await page.evaluate(() => window.view.step(16, 2));
     landed = await page.evaluate((id) => window.world.bag.count(id) > 0, first.critter);
-    if (!landed) {
+    if (!landed && !(await page.evaluate(() => window.world.fishing.line))) {
       await tapTile(first.tx, first.ty);
       await stepUntil(() => window.world.fishing.line !== null, 'she casts again');
     }
   }
   check('a tap on the bite lands the fish, into her bag', landed, first.critter);
+  const common =
+    (await page.evaluate((id) => window.world.collecting.rarityOf(id), first.critter)) === 'common';
+  if (common)
+    check('a common fish lands with one tap in time', landed && taps === 1, `${taps} taps`);
+  const size = await page.evaluate((id) => window.world.cabinet.bestOf(id), first.critter);
+  check('the fish landed is measured, its best kept in the Cabinet', (size ?? 0) > 0, `${size}`);
   await page.screenshot({ path: '.smoke/fish-caught.png' });
   check('the catch is told with a fuss', (await page.locator('.hud-toast-special').count()) === 1);
+}
+
+/**
+ * V1's R6a: a shy critter rushed at drifts a tile away with a hop, drawn on the way, and is
+ * netted once she creeps up. Found by trying a few hours of a few days, by a dev build's ?day=.
+ */
+async function drifter() {
+  /** @type {null | { key: string, critter: import('../src/types/ids').CritterId, tx: number, ty: number, from: { tx: number, ty: number }, facing: import('../src/types/ids').Facing }} */
+  let shy = null;
+  for (let tries = 0; tries < 18 && !shy; tries++) {
+    const day = `2026-10-${String(3 + (tries % 6)).padStart(2, '0')}`;
+    const hour = [11, 21, 16][Math.floor(tries / 6)];
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=${hour}`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await answerCody();
+    shy = await page.evaluate(() => {
+      const w = window.world;
+      const out = w.collecting.critters();
+      const clear = (/** @type {number} */ tx, /** @type {number} */ ty) =>
+        w.canWalk(tx, ty) &&
+        !w.neighbourhood.villagerAt(tx, ty) &&
+        !out.some((o) => o.tx === tx && o.ty === ty);
+      // From the south, east or west (a flier never sees her coming from the north, its back).
+      /** @type {readonly (readonly [number, number, import('../src/types/ids').Facing])[]} */
+      const sides = [
+        [0, 1, 'up'],
+        [1, 0, 'left'],
+        [-1, 0, 'right'],
+      ];
+      for (const c of out) {
+        if (!w.collecting.isShy(c.critter) || !w.canWalk(c.tx, c.ty)) continue;
+        for (const [dx, dy, facing] of sides) {
+          // Somewhere to drift to, straight on away from her.
+          if (!clear(c.tx - dx, c.ty - dy)) continue;
+          let open = true;
+          for (let k = 1; k <= 6; k++) open &&= clear(c.tx + dx * k, c.ty + dy * k);
+          const from = { tx: c.tx + dx * 6, ty: c.ty + dy * 6 };
+          if (open) return { key: c.key, critter: c.critter, tx: c.tx, ty: c.ty, from, facing };
+        }
+      }
+      return null;
+    });
+  }
+  check('a shy critter is out somewhere to try', shy !== null);
+  if (!shy) return;
+  const target = shy;
+  // Stood six tiles off, where she'll be seen coming, and then a tap to rush it.
+  await page.evaluate((t) => window.world.movement.standAt(t.from, t.facing), target);
+  await page.evaluate(() => window.view.step(16, 4));
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), target);
+  await stepUntil(
+    () => window.world.collecting.critters().some((c) => c.hop !== undefined),
+    'the shy critter notices her',
+  );
+  const hop = await page.evaluate(
+    (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
+    target.key,
+  );
+  const step = hop ? Math.max(Math.abs(hop.tx - target.tx), Math.abs(hop.ty - target.ty)) : 0;
+  check(
+    'rushed at, a shy critter hops a tile away, drawn from where it was',
+    hop !== null && step === 1 && hop.hop?.tx === target.tx && hop.hop?.ty === target.ty,
+    JSON.stringify(hop),
+  );
+  await page.evaluate(() => window.view.step(16, 8));
+  await page.screenshot({ path: '.smoke/drift.png' });
+  await stepUntil(() => !window.world.player.moving, 'she stops');
+  // Creeping up from where she stopped, it's hers (a wary one may flutter off first).
+  for (let tries = 0; tries < 5; tries++) {
+    const now = await page.evaluate(
+      (key) => window.world.collecting.critters().find((c) => c.key === key) ?? null,
+      target.key,
+    );
+    if (!now) break;
+    await page.evaluate((t) => window.world.tapTile(t.tx, t.ty), now);
+    await stepUntil(() => !window.world.player.moving, 'she creeps up');
+  }
+  const netted = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  check('creeping up, she nets it', netted >= 1, target.critter);
 }
 
 async function pets() {
@@ -2829,6 +3690,69 @@ async function pets() {
     kept.walking === 'dolly' && kept.scene === 'town' && kept.name === 'Dolly Parton',
     JSON.stringify(kept),
   );
+  await petsThatGrow();
+}
+
+/**
+ * Pets that grow (V1's R6c): her pat counted, then Dolly made fond to bits through the dev
+ * handle, her sheet showing the level and the Trick button, the trick done in the world, and the
+ * sheet on its side.
+ */
+async function petsThatGrow() {
+  const patted = await page.evaluate(() => window.world.pets.points('dolly'));
+  check('the pat as her sheet opened made Dolly fonder', patted >= 1, String(patted));
+  await page.evaluate(() => window.world.pets.setPoints('dolly', 60));
+  const dolly = await page.evaluate(() => window.world.petCare.pet('dolly').tile);
+  await tapTile(dolly.tx, dolly.ty);
+  const opened = await stepUntil(
+    () => document.querySelector('.hud-pet-sheet') !== null,
+    'walking up to Dolly in town opens her sheet',
+  );
+  if (!opened) return;
+  const fond = await page.evaluate(() => ({
+    level: document.querySelector('.hud-pet-fond')?.getAttribute('data-level'),
+    next: document.querySelector('.hud-pet-next')?.textContent ?? '',
+    trick: [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')].some(
+      (b) => b.textContent === 'Trick',
+    ),
+  }));
+  check(
+    'her sheet shows her fondness at the top, what she knows, and a Trick button',
+    fond.level === '2' && fond.next.includes('spins') && fond.trick,
+    JSON.stringify(fond),
+  );
+  await page.screenshot({ path: '.smoke/pet-grown.png' });
+  await tapElement('.hud-pet-sheet button:text-is("Trick")');
+  const tricked = await page.evaluate(() => ({
+    pose: window.world.petCare.pet('dolly').pose,
+    said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',
+  }));
+  check(
+    'Trick makes her spin, there in the world',
+    tricked.pose === 'trick' && tricked.said.includes('spins'),
+    JSON.stringify(tricked),
+  );
+  await page.evaluate(() => window.view.step(40, 8));
+  await page.screenshot({ path: '.smoke/pet-trick.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => window.view.step(40));
+  const side = await page.evaluate(() => {
+    const buttons = [...document.querySelectorAll('.hud-pet-sheet .hud-sheet-foot button')];
+    const bar = document.querySelector('.hud-pet-bar')?.getBoundingClientRect();
+    return {
+      onScreen: buttons.every((b) => b.getBoundingClientRect().right <= window.innerWidth),
+      bar: bar ? bar.width > 0 && bar.right <= window.innerWidth : false,
+    };
+  });
+  check(
+    'on its side, her sheet keeps its buttons and bar on screen',
+    side.onScreen && side.bar,
+    JSON.stringify(side),
+  );
+  await page.screenshot({ path: '.smoke/pet-sheet-side.png' });
+  await page.setViewportSize(PHONE);
+  await page.evaluate(() => window.view.step(40));
+  await tapElement('.hud-pet-sheet button:text-is("Bye")');
 }
 
 /** The mayor's letter pins the first clue, and her corkboard at home shows the case so far. */
@@ -2877,9 +3801,12 @@ async function mystery() {
     );
     check(
       'the corkboard shows the clues found and the suspects so far',
-      pinned >= 2 && new RegExp(`${pinned} of 7 clues`).test(text) && /Wes/.test(text),
+      pinned >= 2 && new RegExp(`${pinned} of 14 clues`).test(text) && /Wes/.test(text),
       text.slice(0, 60),
     );
+    // V1's P3a: the board fills to one empty pin, the mayor's.
+    const last = (await page.locator('.hud-corkboard-sheet .hud-last-pin').textContent()) ?? '';
+    check('the corkboard keeps one pin for the mayor, marked ???', /^\?\?\?/.test(last), last);
     const wide = await page.evaluate(() =>
       [...document.querySelectorAll('.hud-clue')].every(
         (c) => c.getBoundingClientRect().right <= window.innerWidth,
@@ -2893,6 +3820,75 @@ async function mystery() {
   const mat = await page.evaluate(() => window.world.home.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  await wesChat();
+}
+
+/**
+ * Wes, after she has seen him run off three times (V1's P3a), stays behind his tree for a chat:
+ * tapping him walks her up, and he owns up on a sheet of his own, upright and on its side.
+ */
+async function wesChat() {
+  // He's put by the nearest tree, this minute, as though he'd come out there.
+  const placed = await page.evaluate(() => {
+    const m = window.world.mystery;
+    window.world.casebook.glimpses = 3;
+    window.world.casebook.chats = 0;
+    const her = {
+      tx: Math.floor(window.world.player.x / 32),
+      ty: Math.floor(window.world.player.y / 32),
+    };
+    /** @param {{ tx: number, ty: number }} l */
+    const far = (l) => Math.max(Math.abs(l.tx - her.tx), Math.abs(l.ty - her.ty));
+    /** @param {{ tx: number, ty: number }} l */
+    const free = (l) =>
+      [l.ty, l.ty - 1].every((ty) => !window.world.neighbourhood.villagerAt(l.tx, ty));
+    const near = [...m.lurks]
+      .filter((l) => far(l) >= 2 && free(l))
+      .sort((a, b) => far(a) - far(b))[0];
+    if (!near) return null;
+    m.wesSlot = Math.floor(window.world.clock.now() / 60_000);
+    m.wesHere = near;
+    return near;
+  });
+  check('Wes can be put by a tree near her', placed !== null);
+  if (!placed) return;
+  await tapTile(placed.tx, placed.ty - 1);
+  const open = await stepUntil(
+    () => document.querySelector('.hud-wes-sheet') !== null,
+    'walking up to Wes opens a chat with him',
+  );
+  if (!open) return;
+  await framed('.hud-wes-sheet', { picture: true });
+  const first = (await page.locator('.hud-wes-sheet .hud-speech').textContent()) ?? '';
+  check('Wes says hello, and stays', /Hello/.test(first), first.slice(0, 40));
+  await page.screenshot({ path: '.smoke/wes.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
+  const sideways = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-wes-sheet .hud-speech, .hud-wes-sheet button')].every(
+      (e) => {
+        const r = e.getBoundingClientRect();
+        return r.right <= window.innerWidth && r.bottom <= window.innerHeight && r.width > 0;
+      },
+    ),
+  );
+  check("on its side, Wes's chat is all on screen", sideways);
+  await page.screenshot({ path: '.smoke/wes-sideways.png' });
+  await page.setViewportSize(PHONE);
+  const goOn = '.hud-wes-sheet button:text-is("Go on…")';
+  let said = '';
+  for (let i = 0; i < 8 && (await page.locator(goOn).count()); i++) {
+    await tapElement(goOn);
+    said = (await page.locator('.hud-wes-sheet .hud-speech').textContent()) ?? '';
+    if (/assistant/.test(said)) break;
+  }
+  check("Wes owns up: he's the mayor's assistant", /assistant/.test(said), said.slice(0, 60));
+  while (await page.locator(goOn).count()) await tapElement(goOn);
+  await tapElement('.hud-wes-sheet button:text-is("Bye")');
+  check(
+    'a chat with Wes is kept: one day of chats',
+    await page.evaluate(() => window.world.casebook.chats === 1),
+  );
 }
 
 /**
@@ -3278,6 +4274,79 @@ async function seeThrough() {
   );
   await page.evaluate(() => window.world.travel.go('town'));
   await page.evaluate(() => window.view.step(40, 2));
+}
+
+/**
+ * V1's L7, faces: a loved gift (a bracelet) changes the face on the neighbour's bust in the talk
+ * sheet, read from its canvas, and the same face is on them in the world and on her, read through
+ * `view.faces()`; upright and on its side, a neighbour each.
+ */
+async function faces() {
+  await openOn('2026-09-28', 13);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  const given = new Set();
+  for (const sideways of [false, true]) {
+    const way = sideways ? 'on its side' : 'upright';
+    if (sideways) {
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.waitForTimeout(300);
+    }
+    // Someone in town she hasn't given anything to today, so the gift is taken.
+    const friend = await page.evaluate(
+      (done) => {
+        const n = window.world.neighbourhood
+          .neighboursIn('town')
+          .find(
+            (n) => !done.includes(n.id) && window.world.friends.of(n.id).gifted !== '2026-09-28',
+          );
+        if (!n) return null;
+        window.world.bag.add('loveBracelet', 1);
+        window.world.seek(n.id);
+        return n.id;
+      },
+      [...given],
+    );
+    if (!friend) {
+      check(`somebody is out in town to give a gift to, ${way}`, false);
+      break;
+    }
+    given.add(friend);
+    const talking = await stepUntil(
+      () => document.querySelector('.hud-talk-sheet') !== null,
+      `she walks up to ${friend}`,
+    );
+    if (!talking) break;
+    const bust = () =>
+      page.evaluate(() => {
+        const c = /** @type {HTMLCanvasElement | null} */ (
+          document.querySelector('.hud-talk-sheet .hud-portrait')
+        );
+        return { url: c?.toDataURL() ?? '', feel: c?.dataset['feel'] ?? 'neutral' };
+      });
+    const before = await bust();
+    await tapElement('.hud-talk-sheet button:text-is("Give a gift")');
+    await tapElement('.hud-talk-sheet .hud-slot[aria-label="Give LOVE bracelet"]');
+    await page.evaluate(() => window.view.step(40));
+    const after = await bust();
+    check(
+      `a loved gift changes ${friend}'s face on the bust, ${way}`,
+      after.feel === 'laugh' && (before.feel === 'laugh' || after.url !== before.url),
+      `${before.feel} -> ${after.feel}`,
+    );
+    const faces = await page.evaluate(() => window.view.faces());
+    check(
+      `and on ${friend} in the world, and on her, the same face, ${way}`,
+      faces.neighbours.some((f) => f.id === friend && f.feel === 'laugh') && faces.her === 'laugh',
+      JSON.stringify(faces),
+    );
+    await page.screenshot({ path: `.smoke/faces-${sideways ? 'sideways' : 'gift'}.png` });
+    await tapElement('.hud-talk-sheet button:text-is("Bye")');
+    await page.evaluate(() => window.view.step(40, 100));
+  }
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapToastAway();
 }
 
 /**
@@ -4271,6 +5340,26 @@ async function windows() {
   await page.evaluate(() => window.view.saveNow());
 }
 
+/**
+ * A real tap on a fairground game's stage, timed for the moment the world says a tap does best
+ * (V1's R6b), a little early for the touch to arrive.
+ * @param {string} selector @param {import('../src/data/activities').ActivityId} id
+ */
+async function tapInTime(selector, id) {
+  const target = page.locator(selector);
+  await target.scrollIntoViewIfNeeded();
+  const box = await target.boundingBox();
+  if (!box) throw new Error(`${selector} is not on screen`);
+  const wait = await page.evaluate(
+    (id) =>
+      (window.world.activities.bestTapAt(id) ?? window.world.clock.now()) -
+      window.world.clock.now(),
+    id,
+  );
+  if (wait > 25) await page.waitForTimeout(wait - 25);
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+}
+
 /** A tap on a prop in the fairground, through the world. @param {string} id */
 async function tapFairProp(id) {
   await page.evaluate((id) => {
@@ -4282,8 +5371,8 @@ async function tapFairProp(id) {
 
 /**
  * The fairground's activities (0.2's M2), on a Saturday afternoon when every stall is open and
- * Agatha is in her tent: a go at ring toss by real taps on the glinting bottle, fried pickles from
- * the corn dog stall, and her fortune read at the table.
+ * Agatha is in her tent: a go at ring toss by real taps timed to the swinging ring (V1's R6b),
+ * fried pickles from the corn dog stall, and her fortune read at the table.
  */
 async function fair() {
   await openOn('2026-09-26', 14);
@@ -4308,11 +5397,110 @@ async function fair() {
     (await page.locator('.hud-game-sheet').count()) === 1,
   );
   await framed('.hud-game-sheet', { picture: true, tabs: ['Play', 'Prizes'] });
+  await tapElement('.hud-game-sheet .hud-sheet-tab:text-is("Play")');
+  // V1's R6b: a go is three taps in time, each as the ring swings over the bottle that winks.
+  /** @type {import('../src/types/ids').ItemId[]} */
+  const prizes = ['chewyDots', 'smileyBead', 'loveBeads', 'ringTossRosette'];
+  const before = await page.evaluate(
+    (ids) => ids.reduce((n, id) => n + window.world.bag.count(id), 0),
+    prizes,
+  );
   await tapElement('.hud-game-sheet .hud-fair-go');
-  for (let i = 0; i < 3; i++) await tapElement('.hud-game-sheet .hud-fair-glint');
-  const rosettes = await page.evaluate(() => window.world.bag.count('ringTossRosette'));
-  check('three rings on the glinting bottles win the rosette', rosettes === 1, String(rosettes));
+  const stage = await page.evaluate(() => {
+    const canvas = document.querySelector('canvas.hud-fair-stage');
+    if (!(canvas instanceof HTMLCanvasElement)) return null;
+    const box = canvas.getBoundingClientRect();
+    return { width: box.width, height: box.height, backing: canvas.width };
+  });
+  check(
+    "the ring toss's stage is drawn at a whole scale of its pixels",
+    !!stage && stage.width > 0 && stage.width % stage.backing === 0,
+    JSON.stringify(stage),
+  );
+  await page.waitForTimeout(400);
+  await page.screenshot({ path: '.smoke/ring-toss-swing.png' });
+  for (let i = 0; i < 3; i++) await tapInTime('.hud-game-sheet .hud-fair-stage', 'ringToss');
+  await page.waitForTimeout(200);
+  const after = await page.evaluate(
+    (ids) => ids.reduce((n, id) => n + window.world.bag.count(id), 0),
+    prizes,
+  );
+  const tally = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-game-sheet .hud-fair-tally img')].map(
+      (i) => i.getAttribute('src')?.length ?? 0,
+    ),
+  );
+  check('a go of three timed taps wins a prize', after === before + 1, `${before} → ${after}`);
+  const won = await page.evaluate(
+    () => document.querySelector('.hud-game-sheet .hud-fair-prize small')?.textContent ?? '',
+  );
+  check(
+    'a go tapped in time wins better than the floor',
+    won !== '' && !won.startsWith('Every go'),
+    `${won} (${tally.length} marks)`,
+  );
   await page.screenshot({ path: '.smoke/ring-toss.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => window.view.step(40));
+  await page.waitForTimeout(100);
+  const side = await page.evaluate(() => {
+    const canvas = document.querySelector('.hud-game-sheet .hud-fair-stage');
+    const box = canvas?.getBoundingClientRect();
+    return box ? { left: box.left, right: box.right, top: box.top, bottom: box.bottom } : null;
+  });
+  check(
+    "on its side, the ring toss's stage is on screen",
+    !!side && side.left >= 0 && side.right <= PHONE.height && side.top >= 0,
+    JSON.stringify(side),
+  );
+  await page.screenshot({ path: '.smoke/ring-toss-side.png' });
+  await page.setViewportSize(PHONE);
+  await page.evaluate(() => window.view.step(40));
+  await tapElement('.hud-game-sheet .hud-done');
+
+  // The duck pond (V1's R6b): a duck picked by a tap on it, and every duck wins.
+  await page.evaluate(() => window.world.wallet.earn(100));
+  await tapFairProp('duckPondStall');
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the duck pond');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the duck pond opens it',
+    (await page.locator('.hud-game-sheet').count()) === 1,
+  );
+  const bagCount = () =>
+    page.evaluate(() =>
+      ['chewyDots', 'loveBeads', 'luckyDuckSquish', 'sourGhouls', 'popcorn'].reduce(
+        (n, id) =>
+          n + window.world.bag.count(/** @type {import('../src/types/ids').ItemId} */ (id)),
+        0,
+      ),
+    );
+  const before2 = await bagCount();
+  await tapElement('.hud-game-sheet .hud-fair-go');
+  await page.waitForTimeout(300);
+  await tapElement('.hud-game-sheet .hud-fair-stage');
+  await page.waitForTimeout(200);
+  check('a duck picked at the duck pond wins a prize', (await bagCount()) === before2 + 1);
+  await page.screenshot({ path: '.smoke/duck-pond.png' });
+  await tapElement('.hud-game-sheet .hud-done');
+
+  // The strength bell: held to wind up, and let go near the top of the puck's climb.
+  await tapFairProp('strengthBellStall');
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the strength bell');
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'walking up to the strength bell opens it',
+    (await page.locator('.hud-game-sheet').count()) === 1,
+  );
+  const before3 = await bagCount();
+  await tapElement('.hud-game-sheet .hud-fair-go');
+  const climb = await page.evaluate(
+    () => (window.world.activities.round('strengthBell')?.next?.pattern.period ?? 2000) / 2,
+  );
+  await holdElement('.hud-game-sheet .hud-fair-throw', climb - 30);
+  await page.waitForTimeout(200);
+  check('a swing at the strength bell wins a prize', (await bagCount()) === before3 + 1);
+  await page.screenshot({ path: '.smoke/strength-bell.png' });
   await tapElement('.hud-game-sheet .hud-done');
 
   // The corn dog stall: fried pickles (her answer 80).
@@ -5012,7 +6200,8 @@ async function interiors() {
     await stepUntil(() => !window.world.player.moving, 'she reaches the settee');
     await page.evaluate(() => window.view.step(40, 20));
     const said = (await page.locator('.hud-toast').textContent()) ?? '';
-    check('a keepsake not hers yet says he is saving one for her', /saving one/.test(said), said);
+    // Married to him from the first day (V1's P5), his keepsakes are hers to have at once.
+    check("a keepsake of her husband's is hers to have at once", /you can have/.test(said), said);
     // It's a seat too (0.2's G1): she sits on it, drawn on it, and a tap stands her up again.
     const sat = await page.evaluate(() => ({
       seat: window.world.sitting.seat,
@@ -5170,6 +6359,338 @@ async function scarah() {
 }
 
 /**
+ * Rob Boo (V1's P3b, decision 303): on a plain Tuesday evening, the mayor's chain done by the dev
+ * handles (`world.mystery.pin`), the town is gathered in the castle's great hall; walking in by real
+ * taps, the dust sheet comes off, Rob Boo says hello and the corkboard's last pin is his. The next
+ * morning, after a reload by `?day=`, he's on the town hall's steps, and a tap on him talks to him.
+ */
+/**
+ * Jobs seen, and happenings that do something (V1's P4): Rufus's flower buckets open as a shop,
+ * and at book club Maude's talk has its verb, picking next week's book from three, through the
+ * talk's list of actions, upright and on its side.
+ */
+async function jobs() {
+  await page.evaluate(() => window.view.saveNow());
+  // A Wednesday evening in November, out of the festival: book club is on at Maude's.
+  await openOn('2026-11-11', 20);
+  await goOut();
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  if (!(await goInto('rufusHouse', 'rufusCabin'))) return;
+  await page.evaluate(() => window.world.wallet.earn(1000));
+  await tapFixture('flowerBuckets');
+  const shop = (await page.locator('.hud-shop-sheet').count()) === 1;
+  const title = shop ? ((await page.locator('.hud-shop-sheet h2').textContent()) ?? '') : '';
+  check(
+    "walking up to Rufus's flower buckets opens them as a shop",
+    shop && /flower buckets/.test(title),
+    title,
+  );
+  if (!shop) return goOut();
+  await framed('.hud-shop-sheet');
+  const wares = await page.locator('.hud-shop-sheet .hud-ware').count();
+  check('his buckets have something in them today', wares > 3, String(wares));
+  await page.screenshot({ path: '.smoke/flower-buckets.png' });
+  await tapElement('.hud-shop-sheet .hud-done');
+  await goOut();
+
+  if (!(await goInto('maudeHouse', 'library'))) return;
+  const settled = await stepUntil(() => {
+    const m = window.world.neighbourhood.neighbour('maude');
+    return m.zone === 'library' && !m.moving;
+  }, 'Maude in her library for book club');
+  if (!settled) return goOut();
+  const maude = await page.evaluate(() => window.world.neighbourhood.neighbour('maude').tile);
+  await tapTile(maude.tx, maude.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Maude opens a talk',
+  );
+  if (!talking) return goOut();
+  const verb = `.hud-talk-sheet button:text-is("Pick next week's book")`;
+  check("at book club, Maude's talk has its verb", (await page.locator(verb).count()) === 1);
+  await page.screenshot({ path: '.smoke/talk-actions.png' });
+  const fits = () =>
+    page.evaluate(() =>
+      [...document.querySelectorAll('.hud-talk-sheet .hud-sheet-foot button')].every((b) => {
+        const r = b.getBoundingClientRect();
+        return r.height >= 44 && r.right <= window.innerWidth && r.bottom <= window.innerHeight;
+      }),
+    );
+  check("upright, every one of the talk's actions is on screen", await fits());
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  check("on its side, every one of the talk's actions is on screen", await fits());
+  await page.screenshot({ path: '.smoke/talk-actions-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  if ((await page.locator(verb).count()) !== 1) return;
+  await tapElement(verb);
+  const picks = await page.locator('.hud-talk-sheet .hud-reply').count();
+  check("picking next week's book offers three", picks === 3, String(picks));
+  await page.screenshot({ path: '.smoke/talk-picks.png' });
+  if (picks === 0) return;
+  await tapElement('.hud-talk-sheet .hud-reply >> nth=0');
+  const joined = await page.evaluate(() => window.world.joining.lastJoined('bookClub'));
+  const said = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
+  check(
+    'her pick is kept for next week, and Maude answers it',
+    joined?.on === '2026-11-11' && typeof joined.choice === 'string' && said.length > 0,
+    `${JSON.stringify(joined)} ${said}`,
+  );
+  check('the verb is done for tonight', (await page.locator(verb).count()) === 0);
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  await goOut();
+}
+
+async function robBoo() {
+  const evening = '2026-11-17';
+  const morning = '2026-11-18';
+  await openOn(evening, 19);
+  const ready = await page.evaluate(() => {
+    const m = window.world.mystery;
+    const chain = /** @type {const} */ ([
+      'welcome',
+      'typewriter',
+      'wobblyLetter',
+      'sash',
+      'goodEnvelopes',
+      'stamp',
+      'assistant',
+      'typing',
+      'promise',
+    ]);
+    for (const id of chain) m.pin(id);
+    return {
+      ready: m.ready(),
+      met: m.met(),
+      about: window.world.neighbourhood.neighbours.some((n) => n.id === 'robBoo'),
+    };
+  });
+  check(
+    'the mayor has promised, and is nowhere about yet',
+    ready.ready === evening && ready.met === null && !ready.about,
+    JSON.stringify(ready),
+  );
+  await closeSheets();
+  await page.evaluate(() => window.world.atlas.find('castleHill'));
+  await page.evaluate(() => window.view.step(40));
+  await closeSheets();
+  await page.evaluate(
+    () => window.world.scene === 'castleHill' || window.world.travel.go('castleHill'),
+  );
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  const castle = await page.evaluate(() => {
+    const p = window.world.zones.map('castleHill').map.props.find((p) => p.id === 'castle');
+    return p ? { tx: p.tx + 4, ty: p.ty + p.h } : null;
+  });
+  if (!castle) return check('the castle hill has its castle', false);
+  if (!(await tapAlong(castle, "up to the castle's doors"))) return;
+  await tapTile(castle.tx, castle.ty - 1);
+  const inside = await stepUntil(
+    () => window.world.scene === 'castleHall',
+    "she goes into the castle's great hall",
+  );
+  if (!inside) return;
+  const revealed = await stepUntil(
+    () => document.querySelector('.hud-reveal-sheet') !== null,
+    'the dust sheet is waiting for her in the hall',
+  );
+  if (!revealed) return;
+  await page.evaluate(() => window.view.step(40, 10));
+  await framed('.hud-reveal-sheet', { picture: true });
+  const before = (await page.locator('.hud-reveal-sheet h2').textContent()) ?? '';
+  const goOn = '.hud-reveal-sheet button:text-is("Go on…")';
+  let titles = [before];
+  for (let i = 0; i < 10 && (await page.locator(goOn).count()) > 0; i++) {
+    await tapElement(goOn);
+    titles.push((await page.locator('.hud-reveal-sheet h2').textContent()) ?? '');
+    if (titles.at(-1) !== titles.at(-2)) {
+      await page.screenshot({ path: '.smoke/reveal.png' });
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.waitForTimeout(300);
+      await page.screenshot({ path: '.smoke/reveal-sideways.png' });
+      await page.setViewportSize(PHONE);
+      await page.waitForTimeout(300);
+    }
+  }
+  titles = [...new Set(titles)];
+  check(
+    'the dust sheet comes off the mayor, and it is Rob Boo',
+    titles.length === 2 && titles[0] === 'The mayor' && titles[1] === 'Rob Boo, the mayor',
+    JSON.stringify(titles),
+  );
+  await tapElement('.hud-reveal-sheet button:text-is("Hello, Rob!")');
+  const met = await page.evaluate(() => ({
+    met: window.world.mystery.met(),
+    here: window.world.neighbourhood.neighboursIn('castleHall').some((n) => n.id === 'robBoo'),
+    pinned: window.world.casebook.foundOn('unmasked'),
+  }));
+  check(
+    'she has met the mayor, his clue is pinned, and he is there in the hall',
+    met.met === evening && met.pinned === evening && met.here,
+    JSON.stringify(met),
+  );
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/reveal-hall.png' });
+  await page.evaluate(() => window.view.saveNow());
+
+  // The next morning, a Wednesday: out on the town hall's steps, waving the town good morning.
+  await openOn(morning, 9);
+  await goOut();
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+  await page.evaluate(() => window.view.step(40, 10));
+  await closeSheets();
+  const where = await page.evaluate(() => {
+    const n = window.world.neighbourhood.neighbour('robBoo');
+    return { zone: n.zone, tx: n.tile.tx, ty: n.tile.ty, met: window.world.mystery.met() };
+  });
+  check(
+    "the next morning Rob Boo is out on the town hall's steps",
+    where.zone === 'town' && where.met === evening,
+    JSON.stringify(where),
+  );
+  if (where.zone !== 'town') return;
+  const near = await page.evaluate((s) => {
+    const town = window.world.zones.map('town');
+    return [
+      { tx: s.tx, ty: s.ty + 2 },
+      { tx: s.tx + 2, ty: s.ty },
+      { tx: s.tx - 2, ty: s.ty },
+      { tx: s.tx, ty: s.ty + 3 },
+    ].find((t) => town.canWalk(t.tx, t.ty));
+  }, where);
+  if (!near) return check('there is open ground near Rob Boo', false);
+  if (!(await tapAlong(near, 'near Rob Boo'))) return;
+  const at = await page.evaluate(() => window.world.neighbourhood.neighbour('robBoo').tile);
+  await tapTile(at.tx, at.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Rob Boo opens a talk',
+  );
+  if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
+  const head = (await page.locator('.hud-talk-sheet h2').textContent()) ?? '';
+  const said = (await page.locator('.hud-talk-sheet .hud-speech').textContent()) ?? '';
+  check(
+    'a tap on Rob Boo talks to him',
+    /Rob Boo/.test(head) && said.length > 0,
+    `${head}: ${said}`,
+  );
+  await page.screenshot({ path: '.smoke/rob-boo.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: '.smoke/rob-boo-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+}
+
+/**
+ * Cody, married (V1's P5): at eight on an evening he spends at hers, she goes home and finds him
+ * there; walked up to by a real tap, he asks how her day was with her three answers, and answers
+ * the one she taps; what they can do together is beside Chat; and his page calls him married.
+ * Upright and on its side.
+ */
+async function married() {
+  /** @type {string | null} */
+  let evening = null;
+  for (const day of ['2026-10-05', '2026-10-06', '2026-10-07', '2026-10-08', '2026-10-09']) {
+    await openOn(day, 20);
+    if (await page.evaluate(() => window.world.marriage.atHers)) {
+      evening = day;
+      break;
+    }
+  }
+  if (!evening) return check('one of five evenings, Cody is at hers', false);
+  await page.evaluate(() => window.world.scene === 'home' || window.world.travel.home());
+  await stepUntil(
+    () => window.world.scene === 'home' && window.view.transition() === null,
+    'she flies home',
+  );
+  await closeSheets();
+  const there = await stepUntil(() => {
+    const cody = window.world.neighbourhood.neighbour('cody');
+    return cody.zone === 'home' && !cody.moving;
+  }, 'Cody is at hers of an evening');
+  if (!there) return;
+  await page.evaluate(() => window.view.step(40, 10));
+  await page.screenshot({ path: '.smoke/married-home.png' });
+  const where = await page.evaluate(() => window.world.neighbourhood.whereIs('cody'));
+  check(
+    "the neighbours sheet's Cody is visiting her",
+    where?.zone === 'home' && JSON.stringify(where.doing) === '{"visiting":"her"}',
+    JSON.stringify(where),
+  );
+  const at = await page.evaluate(() => window.world.neighbourhood.neighbour('cody').tile);
+  await tapTile(at.tx, at.ty);
+  const talking = await stepUntil(
+    () => document.querySelector('.hud-talk-sheet') !== null,
+    'walking up to Cody at hers opens a talk',
+  );
+  if (!talking) return;
+  await framed('.hud-talk-sheet', { picture: true });
+  const asked = await page.evaluate(() => ({
+    said: document.querySelector('.hud-talk-sheet .hud-speech')?.textContent ?? '',
+    chips: [...document.querySelectorAll('.hud-talk-sheet .hud-reply')].map(
+      (b) => b.textContent ?? '',
+    ),
+    hearts: document.querySelectorAll('.hud-talk-sheet .hud-hearts .hud-heart-full').length,
+  }));
+  check(
+    'Cody asks how her day was, with her three answers, his hearts full',
+    /day|today/i.test(asked.said) &&
+      JSON.stringify(asked.chips) === '["It was good!","Long day…","Tell you later"]' &&
+      asked.hearts === 10,
+    JSON.stringify(asked),
+  );
+  await page.screenshot({ path: '.smoke/married-ask.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  await page.screenshot({ path: '.smoke/married-ask-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  await tapElement('.hud-talk-sheet .hud-reply:text-is("Long day…")');
+  const answered = await page.evaluate(() => ({
+    said: document.querySelector('.hud-talk-sheet .hud-speech')?.textContent ?? '',
+    kept: window.world.lately.last.herDay,
+    buttons: [...document.querySelectorAll('.hud-talk-sheet button')].map(
+      (b) => b.textContent?.trim() ?? '',
+    ),
+  }));
+  check(
+    'tapping "Long day…", he answers it, and what she said is kept for tomorrow',
+    answered.said !== asked.said &&
+      answered.said.length > 0 &&
+      answered.kept?.day === evening &&
+      answered.kept.answer === 'long',
+    JSON.stringify(answered),
+  );
+  check(
+    'what they can do together at hers is beside Chat',
+    answered.buttons.includes('Our song') && answered.buttons.includes('Chat'),
+    JSON.stringify(answered.buttons),
+  );
+  await page.screenshot({ path: '.smoke/married-answered.png' });
+  await tapElement('.hud-talk-sheet button:text-is("Bye")');
+  await tapElement('.hud-neighbours');
+  await tapElement('.hud-neighbours-sheet .hud-neighbour[data-villager="cody"]');
+  const band = await page.evaluate(() =>
+    [...document.querySelectorAll('.hud-neighbour-sheet .hud-fact')].map((f) => f.textContent),
+  );
+  check(
+    'his page calls him married, never "getting to know you"',
+    band.some((f) => /Married/.test(f ?? '')) && !band.some((f) => /Getting to know/.test(f ?? '')),
+    JSON.stringify(band),
+  );
+  await closeSheets();
+}
+
+/**
  * Opens the game on another day and hour (a dev build's `?day=`), cranked by hand.
  * @param {string} day @param {number} hour
  */
@@ -5181,6 +6702,131 @@ async function openOn(day, hour) {
   await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
   await closeSheets();
   await page.evaluate(() => window.view.step(40, 5));
+}
+
+/**
+ * The seasons (V1's L4): the town on a day in each, its lawn baked in the season's colours (snow
+ * in January, all four different), the drifts and snow in their looks, and the winter town on its
+ * side too. Clear weather, at noon, so each screenshot shows the season and not a rainy day.
+ */
+async function seasons() {
+  /** @type {Record<string, number[]>} */
+  const lawns = {};
+  /** @type {readonly (readonly [string, string])[]} */
+  const days = [
+    ['2027-01-15', 'winter'],
+    ['2027-04-15', 'spring'],
+    ['2027-07-15', 'summer'],
+    ['2026-10-15', 'autumn'],
+  ];
+  for (const [day, season] of days) {
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=12&weather=clear`, {
+      waitUntil: 'load',
+      timeout: 60_000,
+    });
+    await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+    await closeSheets();
+    await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+    await stepUntil(() => window.world.scene === 'town', `she is in town on ${day}`);
+    // The flight's moment plays on the next step, so its transition only shows up after one.
+    await page.evaluate(() => window.view.step(40, 3));
+    await stepUntil(() => window.view.transition() === null, 'the way into town has drawn');
+    await page.evaluate(() => window.view.step(40, 20));
+    const shown = await page.evaluate(() => window.view.season());
+    check(`${day} draws the town in ${season}`, shown?.season === season, JSON.stringify(shown));
+    lawns[season] = shown?.lawn ?? [];
+    await page.screenshot({ path: `.smoke/season-${season}.png` });
+    if (season === 'winter') {
+      await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+      await page.evaluate(() => window.view.step(40, 3));
+      await page.screenshot({ path: '.smoke/season-winter-sideways.png' });
+      await page.setViewportSize(PHONE);
+      await page.evaluate(() => window.view.step(40, 3));
+    }
+  }
+  const [r = 0, g = 0, b = 0] = lawns.winter ?? [];
+  check('the lawn lies under snow in winter', r > 180 && g > 180 && b > 190, JSON.stringify(lawns));
+  const greens = ['spring', 'summer', 'autumn'].map((s) => lawns[s] ?? []);
+  check(
+    'the lawn is green in spring, summer and autumn',
+    greens.every(([lr = 0, lg = 0, lb = 0]) => lg > lr && lg > lb),
+    JSON.stringify(lawns),
+  );
+  const keys = Object.values(lawns).map((c) => c.join(','));
+  check(
+    'the lawn is a different colour in every season',
+    new Set(keys).size === 4,
+    keys.join(' | '),
+  );
+}
+
+/**
+ * Rare events (V1's R3): a meteor shower's night by `?day=`, told by a toast and in Today, shooting
+ * stars in the sky; and the wandering stall's week, the stall stood in town and opened as a shop.
+ */
+async function rare() {
+  const shower = '2026-11-29';
+  await openOn(shower, 22);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', `she is in town on ${shower}`);
+  await page.evaluate(() => window.view.step(40, 30));
+  const shown = await page.evaluate(() => ({
+    today: window.world.rareEvents.today(),
+    sky: window.world.rareEvents.sky(),
+    line: window.world.upNow.lines().some((l) => l.kind === 'rare'),
+  }));
+  check(
+    `${shower} is a meteor shower's night, shooting stars in the sky and a line in Today`,
+    shown.today === 'meteorShower' && shown.sky === 'meteors' && shown.line,
+    JSON.stringify(shown),
+  );
+  // The day's letters are told first, each waiting its turn: a tap sends each on.
+  /** @type {string[]} */
+  const told = [];
+  for (let i = 0; i < 8; i++) {
+    const text =
+      (await page
+        .locator('.hud-toast-shown')
+        .textContent()
+        .catch(() => '')) ?? '';
+    told.push(text);
+    if (text.includes('meteor shower')) break;
+    await page.evaluate(() =>
+      document.querySelector('.hud-toast-shown')?.dispatchEvent(new Event('pointerdown')),
+    );
+    await page.waitForTimeout(100);
+  }
+  check(
+    'the meteor shower is told by a toast',
+    told.some((t) => t.includes('meteor shower')),
+    told.join(' | '),
+  );
+  await page.screenshot({ path: '.smoke/rare-meteors.png' });
+
+  const stallDay = '2026-11-18';
+  await openOn(stallDay, 12);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', `she is in town on ${stallDay}`);
+  await page.evaluate(() => window.view.step(40, 10));
+  await closeSheets();
+  const stood = await page.evaluate(() => ({
+    today: window.world.rareEvents.today(),
+    open: window.world.shops.isOpen('wandering'),
+  }));
+  check(
+    `the wandering stall is in town on ${stallDay}`,
+    stood.today === 'wanderingStall' && stood.open,
+    JSON.stringify(stood),
+  );
+  await page.evaluate(() => window.world.tapTile(31, 35));
+  await stepUntil(
+    () => document.querySelector('.hud-shop-sheet') !== null,
+    'the wandering stall opens as a shop',
+  );
+  const title = (await page.locator('.hud-shop-sheet').textContent()) ?? '';
+  check('the wandering stall sells its curios', title.includes('Curios from far away'), title);
+  await page.screenshot({ path: '.smoke/rare-stall.png' });
+  await closeSheets();
 }
 
 /** The Halloween Festival (0.2's J1): the banner, the chip's countdown, the calendar, the title. */
@@ -5423,6 +7069,19 @@ async function finale() {
       JSON.stringify(photo),
     );
     await page.screenshot({ path: '.smoke/photo.png' });
+    // Kept as a print (V1's S3): the share sheet on her iPhone, a download here, with none.
+    const download = page.waitForEvent('download', { timeout: 10_000 }).catch(() => null);
+    await tapElement('.hud-photo-keep');
+    const file = await download;
+    const path = file && (await file.path().catch(() => null));
+    const png = path ? readFileSync(path) : null;
+    check(
+      'the photo can be kept, as a print big enough for the camera roll',
+      !!png &&
+        png.readUInt32BE(16) >= 900 &&
+        /^mcfrancisville-.*\.png$/.test(file?.suggestedFilename() ?? ''),
+      `${file?.suggestedFilename()} ${png ? png.readUInt32BE(16) : 0}`,
+    );
   }
   await closeSheets();
   await page.screenshot({ path: '.smoke/fair-party.png' });
@@ -5667,12 +7326,17 @@ async function gallery() {
   check('the gallery shows every sprite', count > 20, `${count} sprites`);
   // The gallery is a very long page; a full-page picture of it takes a while, and is taken at one
   // pixel a CSS pixel, since at the phone's three it's more than Chromium will capture.
-  await page.screenshot({
-    path: '.smoke/gallery.png',
-    fullPage: true,
-    scale: 'css',
-    timeout: 120_000,
-  });
+  /** @type {import('playwright').PageScreenshotOptions} */
+  const shot = { path: '.smoke/gallery.png', fullPage: true, scale: 'css', timeout: 120_000 };
+  try {
+    await page.screenshot(shot);
+  } catch (error) {
+    // Grown past what Chromium will capture in one (CI's runner gives up before a container
+    // does): the top of it, which is what a look at it starts with anyway.
+    console.log(`note  the gallery is too long to picture whole, so its top is: ${error}`);
+    const width = await page.evaluate(() => document.documentElement.scrollWidth);
+    await page.screenshot({ ...shot, clip: { x: 0, y: 0, width, height: 16_000 } });
+  }
 }
 
 /**
@@ -6026,6 +7690,7 @@ async function heard() {
 /** @type {[string, () => Promise<void>][]} */
 const SECTIONS = [
   ['boot', boot],
+  ['firstDay', firstDay],
   ['pwa', pwa],
   ['walk', walk],
   ['camera', camera],
@@ -6039,6 +7704,7 @@ const SECTIONS = [
   ['bag', bag],
   ['calendar', calendar],
   ['notices', notices],
+  ['projects', projects],
   ['passive', passive],
   ['farm', farm],
   ['shop', shop],
@@ -6056,12 +7722,15 @@ const SECTIONS = [
   ['mystery', mystery],
   ['sound', sound],
   ['settings', settings],
+  ['safe', safe],
+  ['cloud', cloudSave],
   ['weather', weather],
   ['night', night],
   ['fountain', fountain],
   ['heard', heard],
   ['critters', critters],
   ['fishing', fishing],
+  ['drifter', drifter],
   ['fossils', fossils],
   ['crawlies', crawlies],
   ['pets', pets],
@@ -6069,6 +7738,7 @@ const SECTIONS = [
   ['places', places],
   ['seeThrough', seeThrough],
   ['effects', effects],
+  ['faces', faces],
   ['verbs', verbs],
   ['alive', alive],
   ['moves', moves],
@@ -6089,10 +7759,15 @@ const SECTIONS = [
   ['everyone', everyone],
   ['scarah', scarah],
   ['holidays', holidays],
+  ['seasons', seasons],
+  ['rare', rare],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],
   ['october', october],
   ['finale', finale],
+  ['jobs', jobs],
+  ['robBoo', robBoo],
+  ['married', married],
   ['broom', broom],
   ['closer', closer],
   ['sideways', sideways],

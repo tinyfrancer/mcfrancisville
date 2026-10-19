@@ -20,6 +20,7 @@ import {
   wantedLine,
   wontBuy,
 } from './messages';
+import { price as priceTag } from './glyph';
 import { drawWare, faceOf, type WareArt } from './wares';
 
 /** What the shop sheet may ask of the game. Like the others, it never reaches the world directly. */
@@ -117,7 +118,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
   const tab = (): CounterTab => (tabs ? (sheet.tab() as CounterTab) : 'buy');
 
   const render = () => {
-    purse.textContent = `${candy(api.candy())} Candy`;
+    purse.textContent = candy(api.candy());
     const at = tab();
     finder.hidden = at !== 'sell';
     bookFinder.hidden = at !== 'book';
@@ -168,9 +169,10 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
     };
     const { name, about, owned } = faceOf(w, has);
     const buy = el('button', { type: 'button', className: 'hud-price' });
-    buy.textContent = owned ? 'Yours' : candy(offer.price);
+    if (owned) buy.textContent = 'Yours';
+    else buy.append(priceTag(offer.price));
     if (offer.was !== undefined && !owned) {
-      buy.prepend(el('s', { className: 'hud-was' }, candy(offer.was)), ' ');
+      buy.prepend(el('s', { className: 'hud-was' }, String(offer.was)), ' ');
     }
     buy.disabled = owned || offer.price > api.candy();
     buy.setAttribute('aria-label', owned ? `${name}, yours` : `Buy ${name} for ${offer.price}`);
@@ -228,11 +230,11 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
       render();
     };
     const some = el('button', { type: 'button', className: 'hud-price hud-sell-one' });
-    const price = (n: number) => {
-      some.textContent = `Sell ${n} for ${candy(each * n)}`;
+    const offer = (n: number) => {
+      some.replaceChildren(`Sell ${n} for `, priceTag(each * n));
     };
-    price(1);
-    const count = howMany(stack.count, price);
+    offer(1);
+    const count = howMany(stack.count, offer);
     some.addEventListener('click', () => sell(count.value()));
     const controls: HTMLElement[] = [some];
     if (stack.count > 1) {
@@ -271,7 +273,7 @@ export function openShop(hud: HTMLElement, api: ShopApi, shop: ShopId): () => vo
   function orderButton(e: BookEntry): HTMLElement {
     const { piece, price } = e.page;
     const b = el('button', { type: 'button', className: 'hud-price' });
-    b.textContent = candy(price);
+    b.append(priceTag(price));
     b.disabled = price > api.candy();
     b.setAttribute('aria-label', `Order ${e.name} for ${price}`);
     b.addEventListener('click', () => {

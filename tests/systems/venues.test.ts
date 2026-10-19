@@ -81,8 +81,13 @@ describe('where the calendar’s events are (0.2 M3)', () => {
     expect(wordsOf('marketDay').morning).toMatch(/fairground/);
     expect(postersOn(MARKET_DAY, 9)[0]!.line).toMatch(/market stall/);
     const halloween = postersOn('2026-10-31', 12);
-    expect(halloween.map((p) => p.name)).toEqual(['The costume contest', 'The Halloween party']);
-    expect(halloween[0]!.line).toBe("6pm to 8pm, at the fairground's stage");
+    // Halloween is a Saturday in 2026: Gourdon's open day is that afternoon (V1's P4).
+    expect(halloween.map((p) => p.name)).toEqual([
+      'Workshop open day',
+      'The costume contest',
+      'The Halloween party',
+    ]);
+    expect(halloween[1]!.line).toBe("6pm to 8pm, at the fairground's stage");
     expect(postersOn('2026-10-31', 21).map((p) => p.name)).toEqual(['The Halloween party']);
   });
 });

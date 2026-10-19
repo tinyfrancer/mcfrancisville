@@ -17,6 +17,8 @@ import { SET_TWO_ART } from './setsTwo';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { BOOTHOVEN_PIECES_ART } from './boothoven';
 import { SCARAH_PIECES_ART } from './scarah';
+import { ROB_BOO_PIECES_ART } from './robBoo';
+import { FIRST_DAY_ART } from './firstDay';
 import { FOSSIL_PIECES_ART } from './fossilPieces';
 import { CRAWLY_PIECES_ART } from './crawlyPieces';
 import { FIGURINE_ART } from './figurines';
@@ -62,6 +64,8 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...NEWCOMER_PIECES_ART,
   ...BOOTHOVEN_PIECES_ART,
   ...SCARAH_PIECES_ART,
+  ...ROB_BOO_PIECES_ART,
+  ...FIRST_DAY_ART,
   ...FOSSIL_PIECES_ART,
   ...CRAWLY_PIECES_ART,
   ...FIGURINE_ART,

@@ -3,8 +3,10 @@ import { openBroom, type BroomApi } from './BroomSheet';
 import { openRod, type RodApi } from './RodSheet';
 import { bedCard, type BedApi, type BedSpot } from './BedCard';
 import { openCabinet, openMuseum, type CabinetApi } from './CabinetSheet';
-import { openCalendar, shortDate, WINDOW_ICON, type CalendarApi } from './CalendarSheet';
-import { el, sheetOpen } from './dom';
+import { openCalendar, shortDate, WINDOW_GLYPH, type CalendarApi } from './CalendarSheet';
+import { el, moving, sheetOpen } from './dom';
+import { glyph } from './glyph';
+import { countUp } from './countUp';
 import { openStove, openWorkbench, type CraftApi } from './CraftSheet';
 import { decorBar, openStorage, type HomeApi } from './HomeSheets';
 import { openDisplay, type DisplayApi } from './DisplaySheet';
@@ -14,7 +16,7 @@ import { openTitle, type TitleApi } from './TitleScreen';
 import type { LookApi } from './pickers';
 import type { Toast } from './messages';
 import { toastLine } from './ToastLine';
-import { candy, countdown } from './messages';
+import { countdown } from './messages';
 import { openSeeds, type FarmApi } from './SeedSheet';
 import { openSettings, type SaveApi, type SoundApi, type ViewApi } from './SettingsSheet';
 import { openMail, type MailApi } from './MailSheet';
@@ -27,6 +29,8 @@ import { openCatalogue, type CatalogueApi } from './CatalogueSheet';
 import { openPet, type PetApi } from './PetSheet';
 import { quickBar, type QuickApi } from './QuickBar';
 import { openCorkboard, type MysteryApi } from './CorkboardSheet';
+import { openWes } from './WesSheet';
+import { openReveal } from './RevealSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
 import { openBarn, type BarnApi } from './BarnSheet';
@@ -34,7 +38,12 @@ import { openFair, type FairApi } from './FairSheet';
 import type { ActivityId } from '../data/activities';
 import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
+import { openFirstDay, type FirstDayApi } from './FirstDayCard';
+import { hintOnce } from './hints';
+import { markTodaySeen, todaySeen } from './todaySeen';
+import { hasFresh } from '../systems/today';
 import { CALENDAR } from '../data/calendar';
+import type { Glyph } from '../data/glyphs';
 import { trimOn } from '../data/trims';
 import type { PetId, ShelfId, ShopId, VillagerId } from '../types/ids';
 import { injectHudStyles } from './styles';
@@ -77,6 +86,8 @@ export interface HudOptions {
   bed: BedApi;
   title: TitleApi;
   notes: NotesApi;
+  /** Cody's list for her first day (V1's R1). */
+  firstDay: FirstDayApi;
   standalone: boolean;
 }
 
@@ -115,6 +126,10 @@ export interface Hud {
   openMuseum(): void;
   /** Opens her mystery corkboard, unless a sheet is already up. */
   openCorkboard(): void;
+  /** A chat with Wes behind his tree, unless a sheet is already up (V1's P3a). */
+  openWes(lines: readonly string[]): void;
+  /** Meeting the mayor at the castle (V1's P3b): over whatever was up, as it happens once. */
+  openReveal(lines: readonly string[]): void;
   /** Opens the noticeboard by the square, unless a sheet is already up. */
   openNotices(): void;
   /** Opens the honesty stall at the farm gate, unless a sheet is already up. */
@@ -129,8 +144,10 @@ export interface Hud {
   greet(card: GreetingCard): void;
   /** A line across the top for a moment: what she just found. */
   toast(toast: Toast): void;
+  /** Cody's list for her first day (V1's R1), unless a sheet is up; its button and glows woken. */
+  openFirstDay(): void;
   /** Their photo at the Halloween party, flash and all, over whatever's up (0.2's J4). */
-  photo(picture: HTMLCanvasElement, caption: string): void;
+  photo(picture: HTMLCanvasElement, caption: string, print?: () => Promise<Blob | null>): void;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
   /** The bag or her Candy gives a little bump, as what she got lands (V1's E1). */
@@ -141,12 +158,12 @@ export interface Hud {
   playerAt(clientY: number): void;
 }
 
-function cornerButton(className: string, label: string, text: string, onClick: () => void) {
+function cornerButton(className: string, label: string, icon: Glyph, onClick: () => void) {
   const button = document.createElement('button');
   button.type = 'button';
   button.className = `hud-round ${className}`;
   button.setAttribute('aria-label', label);
-  button.textContent = text;
+  button.append(glyph(icon, 32));
   button.addEventListener('click', onClick);
   return button;
 }
@@ -170,12 +187,13 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const fader = el('div', { className: 'hud-fade' });
   viewport.append(fader);
 
-  // Her Candy, first along the top. It's only to read.
+  // Her Candy, first along the top. It's only to read, and it counts up to what she has (V1's L5).
   const purse = el('div', { className: 'hud-candy' });
   purse.setAttribute('aria-label', 'Candy');
-  const showCandy = (amount: number) => (purse.textContent = candy(amount));
-  showCandy(options.shop.candy());
-  options.shop.onCandy(showCandy);
+  const amount = el('span', { className: 'hud-candy-n' });
+  purse.append(glyph('candy', 32), amount);
+  const counter = countUp(amount, options.shop.candy(), moving);
+  options.shop.onCandy((now) => counter.to(now));
 
   // The day beside it: its window and date, and what's on, a tap away from the calendar.
   const day = el('button', { type: 'button', className: 'hud-today' });
@@ -186,15 +204,17 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     const today = options.calendar.today();
     const on = today.happening[0];
     const { festival } = today;
-    day.textContent = `${WINDOW_ICON[today.window]} ${shortDate(today.day)}`;
-    if (on) day.append(' ', el('span', { className: 'hud-today-on' }, CALENDAR[on].icon));
+    // The window's icon is its own, so it can wait while a meal's chip needs the room.
+    day.replaceChildren(
+      el('span', { className: 'hud-today-window' }, glyph(WINDOW_GLYPH[today.window])),
+      el('span', { className: 'hud-today-date' }, shortDate(today.day)),
+    );
+    if (on) day.append(el('span', { className: 'hud-today-on' }, glyph({ mark: on })));
     // A festival counts down on the chip till its big day, which is marked like any other.
     if (festival && festival.left > 0) {
       const days = festival.left === 1 ? '1 day' : `${festival.left} days`;
       day.append(
-        ' ',
-        el('span', { className: 'hud-today-on' }, CALENDAR[festival.id].icon),
-        ' ',
+        el('span', { className: 'hud-today-on' }, glyph({ mark: festival.id })),
         el('span', { className: 'hud-today-left' }, days),
       );
     }
@@ -202,13 +222,24 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     if (festival) what.push(CALENDAR[festival.id].name, countdown(festival));
     day.setAttribute('aria-label', ['Calendar', today.window, ...what].join(', '));
     const season = trimOn(today.day);
-    trim.textContent = season.icon;
+    trim.replaceChildren(glyph(season.icon));
     trim.title = season.name;
   };
   day.addEventListener('click', () => openCalendar(hud, options.calendar));
+  // On her first day, the chip glows until she first taps it (V1's R1).
+  const todayHint = hintOnce(day, 'today', options.firstDay.open);
+  // A dot on the chip while Today has something she hasn't seen since she last looked (V1's R2).
+  const showTodayDot = () =>
+    day.toggleAttribute('data-new', hasFresh(options.calendar.upNow(), todaySeen()));
+  day.addEventListener('click', () => {
+    markTodaySeen(options.calendar.upNow().map((line) => line.key));
+    showTodayDot();
+  });
+  showTodayDot();
+  options.calendar.onUpNow(showTodayDot);
   showDay();
   options.calendar.onChange(showDay);
-  const settings = cornerButton('hud-settings', 'Settings', '⚙︎', () =>
+  const settings = cornerButton('hud-settings', 'Settings', 'settings', () =>
     openSettings(
       hud,
       options.save,
@@ -218,7 +249,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     ),
   );
   // Her neighbours (0.2's U3): how close each is and where they are just now.
-  const neighbours = cornerButton('hud-neighbours', 'Neighbours', '👥', () =>
+  const neighbours = cornerButton('hud-neighbours', 'Neighbours', 'neighbours', () =>
     openNeighbours(hud, options.neighbours),
   );
   // What a meal is doing, a tap from what it does (0.3's A4); the toast line comes later.
@@ -237,29 +268,47 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const menu = el('div', { className: 'hud-menu' });
   menu.setAttribute('role', 'toolbar');
   menu.setAttribute('aria-label', 'Your things');
-  const decorate = cornerButton('hud-decorate', 'Decorate', '🛋️', () => home.startDecorating());
-  const bag = cornerButton('hud-bag-button', 'Bag', '🎒', () => openBag(hud, options.bag));
-  const closet = cornerButton('hud-closet', 'Closet', '👗', () => openWardrobe(hud, options.looks));
-  const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', '📖', () =>
+  const decorate = cornerButton('hud-decorate', 'Decorate', 'decorate', () =>
+    home.startDecorating(),
+  );
+  const bag = cornerButton('hud-bag-button', 'Bag', 'bag', () => openBag(hud, options.bag));
+  const closet = cornerButton('hud-closet', 'Closet', 'closet', () =>
+    openWardrobe(hud, options.looks),
+  );
+  const cabinet = cornerButton('hud-cabinet', 'Curiosity Cabinet', 'book', () =>
     openCabinet(hud, options.cabinet),
   );
   // Outdoors on a phone held upright, the quick bar and the menu share one row: the bag stays,
   // and the rest wait in a little tray behind "more" (0.2.1), so the bar is one thumb high.
   const extras = el('div', { className: 'hud-menu-more' });
   // Her yard's (0.3's H5), in the tray while she stands in it.
-  const decorateYard = cornerButton('hud-decorate-yard', 'Decorate your yard', '🪴', () =>
+  const decorateYard = cornerButton('hud-decorate-yard', 'Decorate your yard', 'plant', () =>
     home.startDecorating(),
   );
   extras.append(
     decorateYard,
     closet,
-    cornerButton('hud-map-button', 'Map', '🗺️', () => openMap(hud, options.map)),
+    cornerButton('hud-map-button', 'Map', 'map', () => openMap(hud, options.map)),
     cabinet,
   );
-  const more = cornerButton('hud-more', 'More', '☰', () =>
+  const more = cornerButton('hud-more', 'More', 'more', () =>
     bottom.toggleAttribute('data-open', !bottom.hasAttribute('data-open')),
   );
   extras.addEventListener('click', () => bottom.removeAttribute('data-open'));
+  // Cody's list, first in the tray while a step of her first day is still to do (V1's R1), and
+  // the tray glowing until she first opens it.
+  const firstDay = cornerButton('hud-first-day-button', 'Your first day', 'scroll', () =>
+    openFirstDay(hud, options.firstDay),
+  );
+  extras.prepend(firstDay);
+  const moreHint = hintOnce(more, 'more', options.firstDay.open);
+  const showFirstDay = () => {
+    firstDay.hidden = !options.firstDay.open();
+    todayHint.refresh();
+    moreHint.refresh();
+  };
+  showFirstDay();
+  options.firstDay.onChange(showFirstDay);
   document.addEventListener('pointerdown', (e) => {
     const target = e.target as Node | null;
     if (target && !extras.contains(target) && !more.contains(target)) {
@@ -341,7 +390,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     viewport,
     openTitle: (onStart) => openTitle(hud, options.title, onStart),
     whatsNew: (onDone) => whatsNew(hud, options.notes, onDone),
-    photo: (picture, caption) => openPhoto(hud, picture, caption),
+    photo: (picture, caption, print) => openPhoto(hud, picture, caption, print),
     openCreator: (onDone) => openCreator(hud, options.looks, onDone),
     openSalon() {
       if (!sheetOpen(hud)) openSalon(hud, options.looks);
@@ -384,6 +433,12 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     openCorkboard() {
       if (!sheetOpen(hud)) openCorkboard(hud, options.mystery);
     },
+    openWes(lines) {
+      if (!sheetOpen(hud)) openWes(hud, options.mystery, lines);
+    },
+    openReveal(lines) {
+      openReveal(hud, options.mystery, lines);
+    },
     openNotices() {
       if (!sheetOpen(hud)) openNotices(hud, options.notices);
     },
@@ -402,9 +457,13 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       return true;
     },
     greet(card) {
-      openGreeting(hud, options.talk, card, (after) => api.toast({ text: after, icon: '👊' }));
+      openGreeting(hud, options.talk, card, (after) => api.toast({ text: after, icon: 'heart' }));
     },
     toast: toasts.show,
+    openFirstDay() {
+      showFirstDay();
+      if (!sheetOpen(hud) && options.firstDay.open()) openFirstDay(hud, options.firstDay);
+    },
     placeBed: bed.place,
     playerAt: toasts.playerAt,
     bump(what) {

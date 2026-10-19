@@ -1,3 +1,4 @@
+import { PROJECT_ART } from './projects';
 import { HOLIDAY_PROP_ART } from './holidays';
 import type { MapZoneId, PropId } from '../types/ids';
 import { formOf, variantOf } from './terrain';
@@ -128,6 +129,7 @@ import {
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
+import { MORE_TREE_FORMS } from './treeForms';
 import { flicker, type Frames } from './frames';
 import { candlelit, flame } from './motion';
 import { CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE, SAPLING_PLOT } from './nature';
@@ -142,6 +144,7 @@ import {
 } from './finale';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from './clutter';
 import { BOOTHOVEN_HOUSE, BOOTHOVEN_HOUSE_PALETTE } from './boothoven';
+import { TOWN_HALL, TOWN_HALL_PALETTE } from './robBoo';
 import {
   CORN_DOG_PALETTE,
   CORN_DOG_STALL,
@@ -155,6 +158,10 @@ import {
   FORTUNE_TENT_PALETTE,
   HOOK_A_GHOST_PALETTE,
   HOOK_A_GHOST_STALL,
+  DUCK_POND_PALETTE,
+  DUCK_POND_STALL,
+  STRENGTH_BELL_PALETTE,
+  STRENGTH_BELL_STALL,
   LIGHT_POLE,
   LIGHT_POLE_LIT,
   LIGHT_POLE_PALETTE,
@@ -166,6 +173,8 @@ import {
   MARKET_PALETTE,
   MARKET_STALL,
   STALL_BILLOWS,
+  WANDERING_PALETTE,
+  WANDERING_STALL,
 } from './fairground';
 import {
   GOURDON_GLOW,
@@ -243,11 +252,14 @@ const STORAGE_CHEST = (() => {
 export const PROP_ART: Record<PropId, PropArt> = {
   ...HOLIDAY_PROP_ART,
   ...FARM_PROP_ART,
+  // The town's projects going up (V1's R4).
+  ...PROJECT_ART,
   tree: {
     source: TREE,
     palette: TREE_LEAVES[0]!,
     variants: TREE_LEAVES,
-    forms: TREE_FORMS,
+    // The conifer, the dead tree and the birch after the three round ones (V1's L2).
+    forms: [...TREE_FORMS, ...MORE_TREE_FORMS],
     shadow: { w: 44, h: 12 },
   },
   willow: { source: WILLOW, palette: WILLOW_PALETTE, shadow: { w: 104, h: 16 } },
@@ -481,7 +493,7 @@ export const PROP_ART: Record<PropId, PropArt> = {
     source: OLD_TREE,
     palette: OLD_TREE_LEAVES[0]!,
     variants: OLD_TREE_LEAVES,
-    shadow: { w: 110, h: 18 },
+    shadow: { w: 140, h: 20 },
   },
   floatLantern: {
     source: FLOAT_LANTERN,
@@ -625,6 +637,19 @@ export const PROP_ART: Record<PropId, PropArt> = {
     smoke: [{ x: 106, y: 26 }],
     shadow: { w: 128, h: 16 },
   },
+  // Rob Boo's town hall by the square (V1's P3b), its windows and lamps lit after dark.
+  townHall: {
+    ...TOWN_HALL,
+    palette: TOWN_HALL_PALETTE,
+    glow: WINDOWS_LIT,
+    frames: candlelit(WINDOWS_LIT),
+    lights: [
+      { x: 36, y: 124, radius: 30 },
+      { x: 76, y: 124, radius: 30 },
+      { x: 56, y: 150, radius: 26 },
+    ],
+    shadow: { w: 108, h: 16 },
+  },
   // The Hollow Fairground's (0.2's M1), its bulbs lit after dark.
   fairStage: {
     source: FAIR_STAGE,
@@ -641,7 +666,11 @@ export const PROP_ART: Record<PropId, PropArt> = {
   cornDogStall: stall(CORN_DOG_STALL, CORN_DOG_PALETTE, STALL_BILLOWS.cornDog),
   hookAGhostStall: stall(HOOK_A_GHOST_STALL, HOOK_A_GHOST_PALETTE, STALL_BILLOWS.hookAGhost),
   toffeeAppleStall: stall(TOFFEE_APPLE_STALL, TOFFEE_APPLE_PALETTE, STALL_BILLOWS.toffeeApple),
+  // The duck pond and the strength bell (V1's R6b).
+  duckPondStall: stall(DUCK_POND_STALL, DUCK_POND_PALETTE, STALL_BILLOWS.duckPond),
+  strengthBellStall: stall(STRENGTH_BELL_STALL, STRENGTH_BELL_PALETTE, STALL_BILLOWS.strengthBell),
   marketStall: stall(MARKET_STALL, MARKET_PALETTE, STALL_BILLOWS.market),
+  wanderingStall: stall(WANDERING_STALL, WANDERING_PALETTE, STALL_BILLOWS.wandering),
   fortuneTent: {
     ...FORTUNE_TENT,
     palette: FORTUNE_TENT_PALETTE,

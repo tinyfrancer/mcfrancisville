@@ -39,8 +39,35 @@ export function onceADay(key: string): boolean {
       'lesson:',
       'fortune:',
       'mound:',
+      // A rare event's doings (V1's R3): told of, met, found and carried home, once a day.
+      'rare:',
+      // What she and Cody did together tonight (V1's P5).
+      'together:',
     ].some((prefix) => key.startsWith(prefix))
   );
+}
+
+/**
+ * The most trees, rocks and flowers a place gives in a window (V1's R4, decision 314): about what
+ * the town has, so a round of the woods or the castle hill pays about what a round of the town
+ * does, and a project is a goal rather than nine minutes of tapping. The town, Boo Acres and the
+ * clearing never reach it.
+ */
+export const GATHERS_PER_WINDOW = 48;
+
+/** Whether a key is a tree, rock or flower patch's in a place (not the snack, a mound or a bone). */
+export function isGatherIn(key: string, zone: ZoneId): boolean {
+  const own = zone === 'town' ? key : key.startsWith(`${zone}:`) ? key.slice(zone.length + 1) : '';
+  return own.startsWith('prop:') || own.startsWith('patch:');
+}
+
+/** How many trees, rocks and flowers she has gathered in a place this window. */
+export function gatheredIn(taken: Taken, zone: ZoneId, now: number): number {
+  const window = windowKey(now);
+  let n = 0;
+  for (const [key, when] of Object.entries(taken))
+    if (when === window && isGatherIn(key, zone)) n++;
+  return n;
 }
 
 /** The day part of a window key, or a bare day key as it is. */

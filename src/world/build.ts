@@ -1,18 +1,22 @@
+import type { Joining } from './services/Joining';
+import type { PostRound } from './services/PostRound';
 import { TOWN } from '../data/maps';
 import { ZONE_IDS, ZONES } from '../data/zones';
 import type { SavedPlayer } from '../persistence/SaveState';
 import { systemClock, type Clock } from '../systems/clock';
 import { parseMap, type TileMap } from '../systems/grid';
-import type { TalkScene } from '../systems/dialogue';
+import type { Around } from '../systems/dialogue';
 import type { Had } from '../systems/milestones';
 import type { MapZoneId, ZoneId } from '../types/ids';
 import { festivals } from './areas/calendar';
 import { catching } from './areas/collecting';
 import { fairground } from './areas/fairground';
+import { firstDay } from './areas/firstDay';
+import { upNow } from './areas/upNow';
 import { her } from './areas/her';
 import { homeServices } from './areas/home';
 import { making } from './areas/making';
-import { mystery } from './areas/mystery';
+import { mystery, tellTheMayor } from './areas/mystery';
 import { neighbours } from './areas/neighbours';
 import { outdoors } from './areas/outdoors';
 import { passive } from './areas/passive';
@@ -30,10 +34,13 @@ import { worldContext, type WorldContext } from './context';
 import type { Dug } from './Dug';
 import type { WorldState } from './events';
 import type { EventBus } from './eventBus';
-import type { Farm } from './Farm';
+import { placeOf, type Farm, type Plot } from './Farm';
 import type { Friends } from './Friends';
 import type { Home } from './Home';
 import type { Keepsakes } from './Keepsakes';
+import type { Lately } from './Lately';
+import type { Marriage } from './services/Marriage';
+import { PET_IDS } from '../data/pets';
 import type { Letters } from './Letters';
 import { tileOf, type Movement } from './Movement';
 import type { Pets } from './Pets';
@@ -57,6 +64,10 @@ import type { Deliveries } from './services/Deliveries';
 import { Digging } from './services/Digging';
 import type { Finale } from './services/Finale';
 import type { Fishing } from './services/Fishing';
+import type { FirstDay } from './services/FirstDay';
+import type { UpNow } from './services/UpNow';
+import type { RareEvents } from './services/RareEvents';
+import { Projects } from './services/Projects';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import { Garden } from './services/Garden';
@@ -151,6 +162,10 @@ export abstract class WorldParts {
   /** The Halloween Festival's finale: the contest she judges, Cody's half, their photo (J4). */
   readonly finale: Finale;
   readonly baking: Baking;
+  /** Joining in at her neighbours' happenings, and what they remember of it (V1's P4). */
+  readonly joining: Joining;
+  /** Ollie walking her post to her mailbox while she's in town (V1's P4). */
+  readonly postRound: PostRound;
   /** The Hollow Fairground's games, fortune and snack stalls (0.2's M2). */
   readonly activities: Activities;
   /** Her neighbours: their walks, talking, gifts, favours and friendships. */
@@ -230,6 +245,18 @@ export abstract class WorldParts {
   readonly stall: HonestyStall;
   /** The barn's wall at Boo Acres: her sprinklers, and the fields to sprinkle (0.3's F2). */
   readonly barn: Barn;
+  /** What she has done lately, which her neighbours remember (V1's P1). */
+  readonly lately: Lately;
+  /** Cody, married to her: his evening question, their story, and nights in (V1's P5). */
+  readonly marriage: Marriage;
+  /** Cody's thread over her first day in a new town (V1's R1). */
+  readonly firstDay: FirstDay;
+  /** What's up now, for the calendar's Today tab (V1's R2). */
+  readonly upNow: UpNow;
+  /** What's out of the ordinary today, and who's passing through (V1's R3). */
+  readonly rareEvents: RareEvents;
+  /** The town's projects, funded at the noticeboard and built where they stand (V1's R4). */
+  readonly projects: Projects;
 
   constructor(options: WorldOptions = {}) {
     // What the services that talk with her neighbours read of the town, each when it's asked, so
@@ -253,8 +280,10 @@ export abstract class WorldParts {
     ({ bag: this.bag, wardrobe: this.wardrobe, takings: this.takings, home: this.home } = keepers);
     ({ farm: this.farm, friends: this.friends, letters: this.letters } = keepers);
     ({ cabinet: this.cabinet, pets: this.pets, casebook: this.casebook } = keepers);
+    tellTheMayor(this.casebook);
     ({ wallet: this.wallet, atlas: this.atlas, porch: this.porch } = keepers);
     ({ keepsakes: this.keepsakes, dug: this.dug, yard: this.yard } = keepers);
+    this.lately = keepers.lately;
     const shared: Shared = {
       ...keepers,
       ctx,
@@ -271,6 +300,7 @@ export abstract class WorldParts {
     ({ stall: this.stall, workbench: this.workbench, kitchen: this.kitchen } = made);
     this.belongings = made.belongings;
     ({ visits: this.visits, candyTree: this.candyTree } = passive(shared, this.belongings));
+    this.firstDay = firstDay(shared, { ...made, visits: this.visits, candyTree: this.candyTree });
     // Travel is made after the places; until then (as she's first stood somewhere) every gate is
     // open.
     const place = places(shared, (zone) => (this.travel ? this.travel.isOpen(zone) : true));
@@ -278,17 +308,44 @@ export abstract class WorldParts {
     this.zones = place.zones;
     const { zones } = this;
     const outside = () => zones.outdoor(this.scene)?.id ?? null;
-    this.garden = new Garden(ctx, this.bag, this.farm);
+    // Her greenhouse's planters, once it's built, are under glass (V1's R4).
+    const glass = (bed: Plot) =>
+      placeOf(bed) !== 'home' &&
+      this.zones.outdoor(placeOf(bed))?.sites?.isBed(bed.tx, bed.ty) === true;
+    this.garden = new Garden(ctx, this.bag, this.farm, glass);
     this.barn = new Barn(this.bag, this.garden);
     this.gathering = new Gathering(ctx, this.bag, this.takings, this.map);
     this.shops = new Shops(ctx, this.wallet, this.bag, this.belongings, this.stalls);
     this.mailbox = new Mailbox(ctx, this.letters, this.belongings, this.wardrobe);
     const { mailbox, belongings } = this;
+    this.projects = new Projects(ctx, {
+      works: keepers.works,
+      bag: this.bag,
+      wallet: this.wallet,
+      mailbox,
+      yard: keepers.yard,
+    });
     const hasHad = (id: Had) => this.milestones.hasHad(id);
     const shop = shopping(shared, { mailbox, belongings, hasHad });
     ({ deliveries: this.deliveries, catalogue: this.catalogue, workshop: this.workshop } = shop);
     this.figurines = shop.figurines;
-    const near = neighbours(shared, { mailbox, belongings, zones, talk: () => this.talkScene() });
+    const near = neighbours(shared, {
+      mailbox,
+      belongings,
+      zones,
+      talk: () => this.talkScene(),
+      learnt: () => this.instruments.learnt,
+      dance: () => {
+        const her = this.movement.player;
+        const zone = this.zones.get(this.scene);
+        this.recordPlayer.ourSong(tileOf(her.x, her.y), (tx, ty) => zone.canWalk(tx, ty));
+      },
+      pets: () => this.petCare.here().map((p) => p.tile),
+      visits: () => this.visits.count,
+    });
+    this.joining = near.joining;
+    this.marriage = near.marriage;
+    this.postRound = near.postRound;
     ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
     ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
     this.mystery = mystery(shared, mailbox, this.townZone);
@@ -296,6 +353,7 @@ export abstract class WorldParts {
       stalls: this.stalls,
       neighbourhood: this.neighbourhood,
       outside,
+      mailbox,
     });
     ({
       calendar: this.calendar,
@@ -303,6 +361,7 @@ export abstract class WorldParts {
       trickOrTreat: this.trickOrTreat,
     } = festival);
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
+    this.rareEvents = festival.rareEvents;
     ({ weather: this.weather, fountain: this.fountain } = outdoors(shared, zones, outside));
     this.activities = fairground(shared, this.weather).activities;
     const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
@@ -317,7 +376,13 @@ export abstract class WorldParts {
     this.decorating = homes.decorating;
     this.chest = homes.chest;
     this.display = homes.display;
-    this.petCare = petServices(shared, { ...place, ...gone, collecting: this.collecting }).petCare;
+    this.petCare = petServices(shared, {
+      ...place,
+      ...gone,
+      collecting: this.collecting,
+      fossils: this.fossils,
+      smallEvents: this.smallEvents,
+    }).petCare;
     const { workbench, neighbourhood, petCare, decorating, recordPlayer, fishing } = this;
     const hers = her(shared, {
       workbench,
@@ -331,10 +396,24 @@ export abstract class WorldParts {
     });
     ({ hands: this.hands, novelty: this.novelty, milestones: this.milestones } = hers);
     ({ sitting: this.sitting, poses: this.poses } = hers);
+    const { candyTree, stall, garden, noticeboard, fossils, shops, calendar } = this;
+    const today = { candyTree, stall, garden, noticeboard, fossils, shops, calendar };
+    this.upNow = upNow(shared, {
+      ...today,
+      neighbourhood,
+      firstDay: this.firstDay,
+      hasHad,
+      rareEvents: this.rareEvents,
+      stalls: this.stalls,
+      projects: this.projects,
+    });
   }
 
-  /** What's going on round her, for what a neighbour brings up (0.2's D2). */
-  private talkScene(): TalkScene {
+  /**
+   * What's going on round her, for what a neighbour brings up (0.2's D2), and what she has done
+   * and worn lately, which they remember (V1's P1).
+   */
+  private talkScene(): Around {
     const walker = this.pets.walking;
     const beside = walker !== null && this.petCare.here().some((p) => p.id === walker);
     return {
@@ -343,6 +422,15 @@ export abstract class WorldParts {
       holding: this.hands.held,
       caught: this.collecting.caughtToday(),
       pet: beside ? this.pets.nameOf(walker) : null,
+      wearing: Object.values(this.wardrobe.look.outfit).map((worn) => worn.id),
+      ...this.lately.last,
+      visits: this.visits.count,
+      clue: this.casebook.newest,
+      met: this.mystery.met(),
+      // For what only her husband brings up (V1's P5).
+      here: this.scene,
+      pets: PET_IDS.map((id) => this.pets.nameOf(id)),
+      yard: this.yard.placed.map((p) => p.id),
     };
   }
 
@@ -384,6 +472,10 @@ export abstract class WorldParts {
       yard: this.yard.snapshot(),
       ...this.belongings.snapshot(),
       ...this.deliveries.snapshot(),
+      ...this.lately.snapshot(),
+      ...this.joining.snapshot(),
+      ...this.firstDay.snapshot(),
+      ...this.projects.snapshot(),
     };
   }
 

@@ -34,4 +34,24 @@ describe('the web app manifest', () => {
     expect(href).toBeDefined();
     expect(existsSync(join(publicDir, href!))).toBe(true);
   });
+
+  it("has a launch screen for every phone it names, each that phone's size (V1's L5)", () => {
+    const html = readFileSync(join(process.cwd(), 'index.html'), 'utf8');
+    const links = [
+      ...html.matchAll(
+        /device-width: (\d+)px\) and \(device-height: (\d+)px\) and \(-webkit-device-pixel-ratio: (\d)\)[^"]*"\s+href="([^"]+)"/g,
+      ),
+    ];
+    expect(links.length).toBeGreaterThanOrEqual(8);
+    for (const [, w, h, ratio, href] of links) {
+      const file = join(publicDir, href!);
+      expect(existsSync(file), href).toBe(true);
+      // A PNG's width and height are the first two words of its IHDR, sixteen bytes in.
+      const png = readFileSync(file);
+      expect([png.readUInt32BE(16), png.readUInt32BE(20)], href).toEqual([
+        Number(w) * Number(ratio),
+        Number(h) * Number(ratio),
+      ]);
+    }
+  });
 });

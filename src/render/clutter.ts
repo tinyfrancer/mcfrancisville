@@ -46,6 +46,8 @@ export function decalsOf(
       const key = `${tx},${ty}`;
       if (skip.has(key)) continue;
       const tile = tileAt(map, tx, ty);
+      // Something afloat keeps off the bank, which rounds in over the water's edge (V1's L6).
+      if (tile === 'water' && !onOpenWater(map, tx, ty)) continue;
       for (const [i, rule] of rules.entries()) {
         if (rule.on !== tile) continue;
         if (rule.near && !besides(rule.near).has(key)) continue;
@@ -57,4 +59,17 @@ export function decalsOf(
     }
   }
   return decals;
+}
+
+/** Whether a tile of water has water on all four sides, and so no bank across it. */
+function onOpenWater(map: TileMap, tx: number, ty: number): boolean {
+  return [
+    [0, -1],
+    [1, 0],
+    [0, 1],
+    [-1, 0],
+  ].every(([dx, dy]) => {
+    const id = tileAt(map, tx + dx!, ty + dy!);
+    return id === 'water' || id === 'ice' || id === 'boards' || id === undefined;
+  });
 }

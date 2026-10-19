@@ -1,4 +1,4 @@
-import { PALETTE as C, ramp } from './palette';
+import { PALETTE as C } from './palette';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -33,6 +33,9 @@ function tuft(lean: -1 | 0 | 1): SpriteSource {
       s.set(x + bend, y, tone);
     }
   }
+  // A shaded root along the ground under the blades (V1's L2), so the tuft stands on the lawn.
+  for (let x = 1; x < TUFT_W - 1; x++)
+    if (s.get(x, TUFT_H - 1) === CLEAR) s.set(x, TUFT_H - 1, 'k');
   return s.toSource();
 }
 
@@ -40,8 +43,8 @@ export const TUFT_FRAMES: readonly SpriteSource[] = [tuft(-1), tuft(0), tuft(1)]
 
 export const TUFT_PALETTE: Palette = {
   [CLEAR]: null,
-  G: C.mossLight,
-  L: ramp(C.mossLight)[3],
-  d: C.moss,
-  k: ramp(C.moss)[1],
+  G: C.leaf,
+  L: C.leafLight,
+  d: C.grassCool,
+  k: C.grassShade,
 };

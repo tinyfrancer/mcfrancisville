@@ -29,7 +29,12 @@ export type Place =
  * The fountain's own tune, and Christmas's in town (0.2's H2); and their song day's, in town on
  * 21 September (0.2's D2).
  */
-export type ThemeId = Place | FestivalId | 'fountain' | 'christmas' | 'septemberSong';
+export type ThemeId = Place | TunedFestival | 'fountain' | 'christmas' | 'septemberSong';
+
+/** The festivals with a tune of their own; the weeks a season (V1's R3) play the town's. */
+export type TunedFestival = Extract<FestivalId, 'halloweenFestival'>;
+
+const tuned = (id: FestivalId): id is TunedFestival => id === 'halloweenFestival';
 
 /**
  * The time of day the music answers to: the day's three windows, and the night from ten till five
@@ -853,7 +858,7 @@ export function musicFor(zone: ZoneId, window: DayWindow, occasion: Occasion): M
   const place = placeOf(zone);
   const song = occasion.special === 'septemberSong' ? 'septemberSong' : undefined;
   const holiday = song ?? (decor === 'christmas' ? 'christmas' : undefined);
-  const festival = place === 'town' ? (festivals[0] ?? holiday) : undefined;
+  const festival = place === 'town' ? (festivals.find(tuned) ?? holiday) : undefined;
   const time: Time = occasion.night && window === 'evening' ? 'night' : window;
   return `${festival ?? place}@${time}`;
 }

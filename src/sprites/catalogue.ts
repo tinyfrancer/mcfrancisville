@@ -28,6 +28,7 @@ import type {
   WindowPaperId,
 } from '../types/ids';
 import type { Look } from '../types/look';
+import { FEELINGS } from '../types/mood';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
 import {
@@ -65,10 +66,11 @@ import {
 } from './garden';
 import { FIXTURE_ART } from './interiors';
 import { CALENDAR_MARKS, CALENDAR_PAGE, NEIGHBOUR_CAKE } from './calendarMarks';
+import { GLYPHS } from './ui';
 import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { TIPPED_CAN } from './actions';
-import { accessoryIcon, BUBBLE_ART, petPalette, petSource, type PetFrame } from './pets';
+import { accessoryIcon, BUBBLE_ART, PET_ART, petPalette, petSource, type PetFrame } from './pets';
 import { POT_ART } from './houses';
 import {
   DOOR_DRESSINGS,
@@ -85,10 +87,12 @@ import {
 } from './holidays';
 import { CALENDAR, CALENDAR_IDS } from '../data/calendar';
 import { MAILBOX_FULL, PROP_ART } from './props';
+import { PROJECT_PICTURES } from './projects';
 import { PATCH_ART, SHOOTS, SHOOTS_PALETTE } from './nature';
 import { TUFT_FRAMES, TUFT_PALETTE } from './life';
 import { GOOSE_ART } from './geese';
 import { DECAL_ART, DECAL_PALETTE } from './clutter';
+import { SKATING } from '../data/skating';
 import { SCALE_SHEET } from './scaleSheet';
 import {
   rasterize,
@@ -103,6 +107,7 @@ import { frameCount, sourcesOf, type Frames } from './frames';
 import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
 import { Sketch } from './sketch';
 import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
+import { GAME_BACKDROPS, GAME_PALETTES, GAME_PIECES, type GamePiece } from './fairGames';
 import { LEAF_FRAMES, LEAF_PALETTES } from './leaves';
 import {
   GRASS_VARIANTS,
@@ -287,6 +292,22 @@ export function catalogue(): Entry[] {
     grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
   }
   grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
+  // The town's projects as the noticeboard shows them (V1's R4).
+  for (const [id, picture] of Object.entries(PROJECT_PICTURES)) {
+    grid(`project:${id}`, picture.source, picture.palette);
+  }
+  // The fair games' stages and what moves on them (V1's R6b), each in its stall's colours.
+  for (const [id, motion] of [
+    ['ringToss', 'swing'],
+    ['hookAGhost', 'bob'],
+    ['duckPond', 'ducks'],
+    ['strengthBell', 'bell'],
+  ] as const) {
+    grid(`fair:${id}`, GAME_BACKDROPS[motion], GAME_PALETTES[id]!);
+  }
+  for (const piece of Object.keys(GAME_PIECES) as GamePiece[]) {
+    grid(`fair:piece:${piece}`, GAME_PIECES[piece], GAME_PALETTES.duckPond!);
+  }
   grid('greeting:redOne', RED_ONE, RED_ONE_PALETTE);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
@@ -337,8 +358,8 @@ export function catalogue(): Entry[] {
     const lines = CALENDAR[id].banner;
     if (lines) grid(`festival:banner:${id}`, festivalBanner(lines), FESTIVAL_BANNER_PALETTE);
   }
-  // Her neighbours, the Moon Pie Man and Wes, turning and walking.
-  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
+  // Her neighbours, the Moon Pie Man, Wes and those passing through (V1's R3), turning and walking.
+  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes', 'wayfarer', 'moira'] as const) {
     for (const facing of FACINGS) {
       for (let frame = 0; frame < DOLL_FRAMES; frame++) {
         entries.push({
@@ -393,6 +414,8 @@ export function catalogue(): Entry[] {
     });
     const { weekday, weekend } = VILLAGERS[id].schedule;
     const works = new Set([...weekday, ...weekend].flatMap((s) => (s.doing ? [s.doing] : [])));
+    // Skating on the frozen pond, slipped into their day in winter (V1's L4).
+    if (SKATING.some((row) => row.villager === id)) works.add('skating');
     for (const work of works) {
       const facing = WORKS[work].faces;
       for (const frame of [0, 1]) {
@@ -406,16 +429,37 @@ export function catalogue(): Entry[] {
       }
     }
   }
+  // How each feels about a line (V1's L7): every feeling in a strip, facing her, side on, in
+  // costume and blinking through it, so the gallery stays short enough to picture whole.
+  for (const id of [...VILLAGER_IDS, 'moonPieMan', 'wes'] as const) {
+    for (const feel of FEELINGS) {
+      entries.push({
+        name: `figure:${id}:mood:${feel}`,
+        draw: () =>
+          beside([
+            rasterizeLayers(figureLayers(id, 'down', 0, null, null, { feel })),
+            rasterizeLayers(figureLayers(id, 'right', 0, null, null, { feel })),
+            ...(id === 'moonPieMan' || id === 'wes'
+              ? []
+              : [rasterizeLayers(figureLayers(id, 'down', 0, 'own', null, { feel }))]),
+            rasterizeLayers(figureLayers(id, 'down', 0, null, null, { feel, blink: true })),
+          ]),
+      });
+    }
+  }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
     grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
   for (const id of PET_IDS) {
-    for (const frame of ['side0', 'side1', 'sit', 'rest'] as const) pet(id, id, null, frame);
+    const tricks = (['trick0', 'trick1', 'trick2'] as const).slice(0, PET_ART[id].trick.length);
+    for (const frame of ['side0', 'side1', 'sitFront', 'sitBack', 'rest', ...tricks] as const) {
+      pet(id, id, null, frame);
+    }
   }
   for (const accessory of ACCESSORY_IDS) {
-    pet(`fibi:${accessory}`, 'fibi', accessory, 'sit');
+    pet(`fibi:${accessory}`, 'fibi', accessory, 'sitFront');
     pet(`dolly:${accessory}`, 'dolly', accessory, 'side0');
-    pet(`florence:${accessory}`, 'florence', accessory, 'sit');
+    pet(`florence:${accessory}`, 'florence', accessory, 'sitFront');
     const icon = accessoryIcon(accessory);
     grid(`accessory:${accessory}`, icon.source, icon.palette);
   }
@@ -425,6 +469,8 @@ export function catalogue(): Entry[] {
   // What her neighbours have to tell her: news, or something lost (phase S2).
   grid('bubble:news', NEIGHBOUR_BUBBLES['!'].source, NEIGHBOUR_BUBBLES['!'].palette);
   grid('bubble:lost', NEIGHBOUR_BUBBLES['?'].source, NEIGHBOUR_BUBBLES['?'].palette);
+  // And a favour they're asking today (V1's R2).
+  grid('bubble:favour', NEIGHBOUR_BUBBLES['+'].source, NEIGHBOUR_BUBBLES['+'].palette);
   // The effects layer (V1's E1): the emotes, each kind of particle in each colour, and a pop's
   // pictures for Candy, a parcel and its count.
   for (const [emote, art] of Object.entries(EMOTE_BUBBLES)) {
@@ -456,6 +502,8 @@ export function catalogue(): Entry[] {
     grid(`mark:${id}`, art.source, art.palette);
   grid('mark:neighbourBirthday', NEIGHBOUR_CAKE.source, NEIGHBOUR_CAKE.palette);
   grid('mark:page', CALENDAR_PAGE.source, CALENDAR_PAGE.palette);
+  // The HUD's own pictures (V1's L5).
+  for (const [id, art] of Object.entries(GLYPHS)) grid(`ui:${id}`, art.source, art.palette);
   for (const [id, art] of Object.entries(TOOL_ART)) grid(`tool:${id}`, art.source, art.palette);
   // What she holds, at the world's size (phase V).
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
@@ -571,6 +619,20 @@ export function catalogue(): Entry[] {
           {
             flipX: facing === 'left',
           },
+        ),
+    });
+  }
+  // How she feels for a moment (V1's L7): facing us, side on and blinking through it, a strip.
+  for (const feel of FEELINGS) {
+    entries.push({
+      name: `doll:feel:${feel}`,
+      draw: () =>
+        beside(
+          [{ feel }, { feel, blink: true }].flatMap((rest) =>
+            (['down', 'right'] as const).map((facing) =>
+              rasterizeLayers(dollLayers(DEFAULT_LOOK, facing, 0, undefined, rest)),
+            ),
+          ),
         ),
     });
   }
@@ -761,5 +823,22 @@ function tile(rows: readonly (readonly Raster[])[]): Raster {
       }
     }),
   );
+  return { width, height, data };
+}
+
+/** Pictures side by side, their feet on one row, a pixel apart (V1's L7's strips). */
+function beside(pictures: readonly Raster[]): Raster {
+  const width = pictures.reduce((w, p) => w + p.width + 1, -1);
+  const height = Math.max(...pictures.map((p) => p.height));
+  const data = new Uint8ClampedArray(width * height * 4);
+  let left = 0;
+  for (const p of pictures) {
+    const top = height - p.height;
+    for (let y = 0; y < p.height; y++) {
+      const from = y * p.width * 4;
+      data.set(p.data.subarray(from, from + p.width * 4), ((top + y) * width + left) * 4);
+    }
+    left += p.width + 1;
+  }
   return { width, height, data };
 }

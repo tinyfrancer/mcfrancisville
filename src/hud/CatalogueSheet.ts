@@ -6,6 +6,7 @@ import type { CatalogueEntry } from '../world/services/Catalogue';
 import { collection, fitIcon, ROW_ICON, type Entry } from './collection';
 import { el, openSheet } from './dom';
 import { candy, orderedLine, wareName } from './messages';
+import { price as priceTag } from './glyph';
 import { drawWare, faceOf, type WareArt } from './wares';
 
 /** What Ollie's catalogue may ask of the game (0.3's S1). It never reaches the world directly. */
@@ -74,7 +75,8 @@ export function openCatalogue(hud: HTMLElement, api: CatalogueApi): () => void {
   function orderButton(page: Page): HTMLElement {
     const { ware, price, yours } = page.entry;
     const b = el('button', { type: 'button', className: 'hud-price' });
-    b.textContent = yours ? 'Yours' : candy(price);
+    if (yours) b.textContent = 'Yours';
+    else b.append(priceTag(price));
     b.disabled = yours || price > api.candy();
     b.setAttribute('aria-label', yours ? `${page.name}, yours` : `Order ${page.name} for ${price}`);
     b.addEventListener('click', () => {
@@ -114,7 +116,7 @@ export function openCatalogue(hud: HTMLElement, api: CatalogueApi): () => void {
   }
 
   function render(): void {
-    purse.textContent = `${candy(api.candy())} Candy`;
+    purse.textContent = candy(api.candy());
     const browsing = sheet.tab() === 'pages';
     finder.hidden = !browsing;
     if (browsing) pages.refresh();

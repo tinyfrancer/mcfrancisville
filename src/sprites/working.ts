@@ -302,6 +302,46 @@ function coffee(steam: 0 | 1): Held {
   return outlined(s, { m: C.maroon, M: C.maroonShade, c: C.bark, s: C.ghost });
 }
 
+// ---- Wrapunzel: a mixing bowl on her hip, the spoon going round (V1's P4) -------------------
+
+function mixingBowl(round: 0 | 1): Held {
+  const s = sketch();
+  // The spoon first, so the bowl's rim comes over its foot.
+  const [x, y] = round ? [13, 25] : [19, 26];
+  s.line(x, y, 16, 32, 'h').set(x, y, 'H');
+  // The bowl, a wide one, and the batter in it.
+  s.ellipse(16, 34, 7, 4, 'b').rect(9, 33, 14, 1, 'B').rect(10, 32, 12, 1, 'c');
+  s.rect(10 + round, 32, 2, 1, 'C').rect(18 - round, 32, 2, 1, 'C');
+  s.bevel('b', 'L', 'M');
+  return outlined(s, {
+    h: C.wood,
+    H: C.bark,
+    b: C.cream,
+    B: C.creamShade,
+    L: C.white,
+    M: C.creamShade,
+    c: C.gold,
+    C: C.pumpkin,
+  });
+}
+
+// ---- Rob Boo: his rubber stamp, up and down onto a paper (V1's P4) -------------------------
+
+function stampAndPaper(down: 0 | 1): Held {
+  const s = sketch();
+  // The paper in his near hand, with the last APPROVED on it in red.
+  s.rect(6, 29, 9, 7, 'w').rect(6, 35, 9, 1, 'W');
+  s.rect(8, 31, 5, 1, 'r').rect(8, 33, 4, 1, 'r');
+  // The stamp in his other hand: a knob, a handle and the block, coming down onto the paper.
+  const y = down ? 27 : 22;
+  s.rect(19, y, 3, 2, 'k')
+    .rect(20, y + 2, 1, 2, 'h')
+    .rect(18, y + 4, 5, 2, 'h');
+  s.rect(18, y + 6, 5, 1, 'r');
+  if (down) s.set(16, 30, 'r').set(24, 31, 'r');
+  return outlined(s, { w: C.white, W: C.creamShade, r: C.scarlet, k: C.plum, h: C.wood }, true);
+}
+
 // ---- The jobs, two frames each ----------------------------------------------------------
 
 function two(make: (frame: 0 | 1) => WorkFrame): readonly [WorkFrame, WorkFrame] {
@@ -314,6 +354,36 @@ const TRAY_HANDS = (lift: 0 | 1) =>
     [10, 31 - lift],
     [11, 31 - lift],
   ]);
+
+// ---- On the frozen pond in winter (V1's L4): white skates, arms out for balance ------------
+
+/** A pair of white skates on silver blades, over their feet, one foot a pixel ahead as they glide. */
+function skates(glide: 0 | 1): Held {
+  const s = sketch();
+  for (const [x, lift] of [
+    [10, glide],
+    [17, 1 - glide],
+  ] as const) {
+    s.rect(x + 1, 43 - lift, 4, 3, 'w').rect(x + 1, 43 - lift, 4, 1, 'W');
+    s.rect(x, 46 - lift, 6, 1, 'b');
+    s.set(x + 5, 45 - lift, 'b');
+  }
+  return { ...outlined(s, { w: C.white, W: C.cream, b: C.silver }), front: true };
+}
+
+/** An arm held out to the side for balance, from the shoulder, its hand up or down a little. */
+const balancing = (up: 0 | 1) =>
+  arm([
+    [8, 27],
+    [5, 28 - up * 2],
+    [2, 29 - up * 3],
+    [1, 29 - up * 3],
+  ]);
+
+const SKATING: readonly [WorkFrame, WorkFrame] = two((f) => ({
+  arms: { left: balancing(f), right: mirror(balancing(f === 1 ? 0 : 1)) },
+  held: [skates(f)],
+}));
 
 const FRAMES: Record<Exclude<WorkId, 'reading'>, readonly [WorkFrame, WorkFrame]> = {
   flowers: [
@@ -465,6 +535,37 @@ const FRAMES: Record<Exclude<WorkId, 'reading'>, readonly [WorkFrame, WorkFrame]
       ]),
     },
     held: [{ ...coffee(steam), front: true as const }],
+  })),
+  skating: SKATING,
+  baking: two((round) => ({
+    arms: {
+      left: forearm([
+        [8, 29],
+        [10, 32],
+        [11, 33],
+      ]),
+      right: forearm([
+        [23, 29],
+        [round ? 20 : 22, 28],
+        [round ? 17 : 19, 27],
+      ]),
+    },
+    held: [{ ...mixingBowl(round), front: true as const }],
+  })),
+  stamping: two((down) => ({
+    arms: {
+      left: forearm([
+        [8, 29],
+        [9, 31],
+        [10, 32],
+      ]),
+      right: forearm([
+        [23, 29],
+        [22, down ? 29 : 25],
+        [21, down ? 28 : 23],
+      ]),
+    },
+    held: [stampAndPaper(down)],
   })),
 };
 

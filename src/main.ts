@@ -5,6 +5,7 @@ import {
   dayRequested,
   hourRequested,
   manualLoopRequested,
+  perfRequested,
   titleSkipped,
   weatherRequested,
 } from './config/flags';
@@ -30,6 +31,7 @@ import { Effects, resolverFor } from './render/effects';
 import { Transitions } from './render/transition';
 import { feelTap } from './wiring/taps';
 import { Chatter } from './wiring/chatter';
+import { Pats } from './wiring/codyHome';
 import { Hearing } from './wiring/hearing';
 import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
 import { specialDayOf } from './systems/friendship';
@@ -42,6 +44,19 @@ import { fromSave, tileOf, World, type WorldEvent } from './world/World';
 import { sheetApis, type Waiting } from './wiring/apis';
 import { playMoments } from './wiring/moments';
 import { FixedStep } from './loop';
+import { catchErrors, readErrorNotes, troubleOf } from './errorNotes';
+import { NOTES } from './data/patchNotes';
+import { SAFE_KEEPING } from './data/greetings';
+import { backedUpLine, nudgeFor } from './systems/backupNudge';
+import { markBackedUp, markNudged, readBackedUpAt, readNudgedAt } from './safekeeping';
+import { showPerf } from './wiring/perf';
+import { CloudSave, fetchKept, townFrom } from './persistence/cloud';
+import { cloudKey, fromCode, keepCloudKey, readable, toCode } from './persistence/cloudKey';
+import { sealerFor } from './persistence/cloudSeal';
+import { offerCloud } from './hud/CloudCard';
+
+/** How long the title waits for the cloud to say whether it has a newer town (V1's S2). */
+const CLOUD_WAIT_MS = 2500;
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
@@ -57,6 +72,9 @@ const TAP_SLOP_PX = 8;
 
 const root = document.getElementById('app') as HTMLElement;
 const canvas = document.getElementById('game') as HTMLCanvasElement;
+
+// Whatever goes wrong uncaught is noted for Settings to mention, and the game carries on (V1's S3).
+catchErrors(window);
 
 if (galleryRequested(location.search)) {
   showGallery(root);
@@ -85,6 +103,8 @@ function startGame(): void {
   });
   // Two neighbours standing together chatter, a bubble at a time (V1's E3).
   const chatter = new Chatter();
+  // Cody pats her pets at hers of an evening (V1's P5).
+  const pats = new Pats();
   // Between places, an iris on her and her broom seen flying; a wash as the day turns (V1's E4).
   const transitions = new Transitions(canvas, {
     reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -163,13 +183,39 @@ function startGame(): void {
     };
     return save;
   };
-  const autosave = new AutoSaver(() => saveService.save(currentSave()));
+  // Her town kept in the cloud too (V1's S2, decision 323), under a key this phone makes once.
+  const key = cloudKey();
+  const sealer = key ? sealerFor(key.code) : Promise.resolve(null);
+  // A newer town in the cloud is offered once she's past the title, never swapped in silently.
+  let pastTitle = false;
+  let newerAt: number | null = null;
+  const cloud = new CloudSave({
+    sealer: () => sealer,
+    fetch: (url, init) => fetch(url, init),
+    now: () => Date.now(),
+    online: () => navigator.onLine !== false,
+    backedUp: (at) => markBackedUp(at),
+    onNewer: (at) => (pastTitle ? offerCloudTown(at) : (newerAt = at)),
+  });
+  const checking = cloud.check(loaded?.updatedAt ?? 0);
+  const autosave = new AutoSaver(() => {
+    const written = currentSave();
+    saveService.save(written);
+    cloud.saved(written);
+  });
   // `pagehide` is the one iOS reliably fires as a Home Screen app is swiped away; a tab being
   // hidden is the last moment anything is guaranteed to run at all.
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') autosave.flush();
   });
   window.addEventListener('pagehide', () => autosave.flush());
+  // After the save above: what's waiting for the cloud goes as the page hides, the game comes
+  // back to the front, or the signal comes back.
+  document.addEventListener('visibilitychange', () => {
+    void cloud.flush(document.visibilityState === 'hidden');
+  });
+  window.addEventListener('pagehide', () => void cloud.flush(true));
+  window.addEventListener('online', () => void cloud.flush());
   const persisted = requestPersistence();
   let closeness = readCloseness();
 
@@ -179,12 +225,64 @@ function startGame(): void {
       const decoded = await decodeBackup(code);
       if (!decoded.ok) return decoded;
       autosave.stop();
-      saveService.save(decoded.save);
+      cloud.stop();
+      // Stamped now, so the town she chose is the newest and the cloud's isn't offered over it.
+      saveService.save({ ...decoded.save, updatedAt: Date.now() });
       location.reload();
       return { ok: true };
     },
+    cloud: {
+      code: () => (key ? readable(key.code) : null),
+      status: async () => {
+        await cloud.recheck();
+        return cloud.status();
+      },
+      async restore(text) {
+        const bytes = fromCode(text);
+        const theirs = bytes && (await sealerFor(toCode(bytes)));
+        if (!bytes || !theirs) {
+          return { ok: false, reason: "That doesn't look like a cloud code. Check each letter?" };
+        }
+        const got = await fetchKept(
+          theirs,
+          (url, init) => fetch(url, init),
+          () => navigator.onLine,
+        );
+        if (!got.ok) {
+          const why =
+            got.state === 'notSetUp'
+              ? "The cloud isn't set up yet."
+              : "The cloud can't be reached.";
+          return { ok: false, reason: `${why} Try again in a little while?` };
+        }
+        if (!got.kept) return { ok: false, reason: 'The cloud has no town under that code yet.' };
+        const town = await townFrom(got.kept, theirs);
+        if (!town.ok) return town;
+        autosave.stop();
+        cloud.stop();
+        // This phone takes that code as its own, so both keep the one town from now on.
+        keepCloudKey(toCode(bytes));
+        saveService.save(town.save);
+        location.reload();
+        return { ok: true };
+      },
+    },
     status: async () => ({ persisted: await persisted, standalone: runningStandalone() }),
+    backedUpLine: () => backedUpLine(Date.now(), readBackedUpAt()),
+    backedUp: () => markBackedUp(Date.now()),
   };
+  // A word under Cody's hello about keeping the town safe, about once a week, never on the first
+  // (V1's S3); when it's said is the phone's, never the save's.
+  const nudgeNow = (kind: string): string | null => {
+    const now = Date.now();
+    const standalone = runningStandalone();
+    const keeping = { now, standalone, backedUpAt: readBackedUpAt(), nudgedAt: readNudgedAt() };
+    const nudge = kind === 'first' ? null : nudgeFor({ ...keeping, since: save.createdAt });
+    if (nudge) markNudged(now);
+    return nudge && SAFE_KEEPING[nudge];
+  };
+  // The ?perf corner (V1's S3): her phone's frame times, from her first tap.
+  const perf = perfRequested(location.search) ? showPerf(root) : null;
   // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
   world.events.on('home', () => autosave.markDirty());
   world.events.on('yard', () => autosave.markDirty());
@@ -201,6 +299,11 @@ function startGame(): void {
       setEffects: (on) => sound.setEffectsOn(on),
       setMusic: (on) => sound.setMusicOn(on),
       silentHint: () => sound.silentHint(),
+      trouble: () =>
+        troubleOf(readErrorNotes(), Date.now(), {
+          version: NOTES[NOTES.length - 1]!.version,
+          userAgent: navigator.userAgent,
+        }),
     },
     view: {
       closeness: () => closeness,
@@ -217,13 +320,17 @@ function startGame(): void {
   tickOnPress(root, () => sound.uiTick());
   // Cody's greeting, with what today's visit brought (decisions.md 24, 114, 115).
   const greet = ({ greeting, visit }: Welcome) => {
+    const nudge = nudgeNow(greeting.kind);
     hud.greet({
+      ...(nudge && { nudge }),
       from: 'cody',
       line: greeting.line,
       reply: greeting.reply,
       ...(visit && { gift: visitLine(visit.count, visit.gift) }),
       ...(greeting.after && { after: greeting.after }),
       ...(greeting.kind === 'redOne' && { redOne: true }),
+      // A new town's first hello is followed by his list for her first day (V1's R1).
+      ...(greeting.kind === 'first' && { then: () => hud.openFirstDay() }),
     });
     changed();
   };
@@ -241,10 +348,43 @@ function startGame(): void {
       greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
     }
   };
+  // The cloud's newer town, offered (V1's S2); `then` once it's settled, if she keeps hers.
+  const offerCloudTown = (at: number, then?: () => void) =>
+    offerCloud(
+      hud.element,
+      at,
+      {
+        async take() {
+          const town = await cloud.newer();
+          if (!town?.ok)
+            return town?.reason ?? "The cloud's town couldn't be brought down just now.";
+          autosave.stop();
+          cloud.stop();
+          saveService.save(town.save);
+          location.reload();
+          return null;
+        },
+        keep: () => cloud.keepMine(),
+      },
+      then,
+    );
+  // In from the title once the cloud has said (or a moment has passed), asked first if it's newer.
+  const afterCloud = (go: () => void) => {
+    const waited = new Promise((done) => setTimeout(done, CLOUD_WAIT_MS));
+    void Promise.race([checking, waited]).then(() => {
+      pastTitle = true;
+      const at = newerAt;
+      newerAt = null;
+      if (at === null) go();
+      else offerCloudTown(at, go);
+    });
+  };
   // The title screen first, every time (phase V), then the mayor's notes on a new version
   // (decision 142); a dev build's `?skiptitle` goes straight in.
-  if (import.meta.env.DEV && titleSkipped(location.search)) enter();
-  else hud.openTitle(() => hud.whatsNew(enter));
+  if (import.meta.env.DEV && titleSkipped(location.search)) {
+    pastTitle = true;
+    enter();
+  } else hud.openTitle(() => hud.whatsNew(() => afterCloud(enter)));
 
   // The world is drawn in the room between the bars (0.2's U1), from a whole device pixel, as
   // close as she chose (decision 290); a room indoors is fitted to show it whole.
@@ -306,6 +446,7 @@ function startGame(): void {
     const tap = press.travel <= TAP_SLOP_PX;
     press = null;
     if (tap) feelTap(view().tap(e.clientX, e.clientY), { world, effects, sound });
+    perf?.start();
   });
   canvas.addEventListener('pointercancel', () => (press = null));
 
@@ -329,18 +470,21 @@ function startGame(): void {
     view().follow(stepMs);
     effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
     chatter.show(world, effects);
+    pats.show(world, effects);
     hearing.step(world, sound, clock.now());
     effects.step(stepMs, resolverFor(world));
     transitions.step(stepMs);
   };
   let last = performance.now();
   const frame = (now: number) => {
+    const started = performance.now();
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
     if (!manual) steps.advance(delta, tick);
     if (fitFor() !== fitted) resize();
     drawFrame(now);
     placeBed();
+    perf?.frame(now, performance.now() - started);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);
@@ -375,6 +519,7 @@ function startGame(): void {
       effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
       transition: () => transitions.state(),
       motion: () => view().motion?.() ?? { props: [], flyers: 0, leaves: 0 },
+      season: () => view().seasonNow?.() ?? null,
       figures: () =>
         world.neighbourhood.neighboursIn(world.scene).map((n) => ({
           id: n.id,
@@ -383,6 +528,12 @@ function startGame(): void {
             stanceOf({ ...n, seated: n.seat !== null }, performance.now()) ?? 'walking',
           ),
         })),
+      faces: () => ({
+        her: world.poses.face(),
+        neighbours: world.neighbourhood
+          .neighboursIn(world.scene)
+          .map((n) => ({ id: n.id, feel: world.neighbourhood.feelingOf(n.id) })),
+      }),
     };
     Object.assign(window, { world, view: debug, sound });
   }

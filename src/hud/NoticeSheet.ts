@@ -1,12 +1,16 @@
 import { CALENDAR } from '../data/calendar';
+import type { ProjectId } from '../types/ids';
+import type { Gift, ProjectView } from '../world/services/Projects';
+import { projectsPanel } from './ProjectsPanel';
 import { VILLAGERS } from '../data/villagers';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import type { Poster } from '../systems/notices';
+import { glyph, glyphed, price } from './glyph';
 import type { Notice } from '../world/services/Noticeboard';
 import { fitIcon, ROW_ICON } from './collection';
 import { el, openSheet } from './dom';
-import { asked, candy, wantedLine } from './messages';
+import { asked, wantedLine } from './messages';
 
 /** What the noticeboard may ask of the game. Like the other sheets, it never reaches the world. */
 export interface NoticeApi {
@@ -21,18 +25,36 @@ export interface NoticeApi {
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws a neighbour's head and shoulders at 1×. */
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
+  /** The town's projects, as the Projects tab shows them (V1's R4). */
+  projects(): readonly ProjectView[];
+  /**
+   * Starts funding a project: null if one is under way, or the names of what of hers went in the
+   * storage chest to make room for it.
+   */
+  startProject(id: ProjectId): readonly string[] | null;
+  /** Gives the project under way lots of Candy or so many of a thing; false if nothing went. */
+  giveProject(gift: Gift): boolean;
+  /** Draws a project as it'll look built, at 1×. */
+  projectPicture(canvas: HTMLCanvasElement, id: ProjectId): void;
 }
 
 /**
  * The noticeboard by the square (phase N): three notes from her neighbours, new each window, each
- * saying what they'd like, what it brings, and how many she has; a tap hands it over.
+ * saying what they'd like, what it brings, and how many she has; a tap hands it over. And on its
+ * second tab, the town's projects (V1's R4).
  */
-export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
+export function openNotices(hud: HTMLElement, api: NoticeApi, tab = 'notes'): () => void {
   const sheet = openSheet(hud, {
     title: 'Noticeboard',
     line: 'New notes every morning, afternoon and evening.',
     className: 'hud-notice-sheet',
+    tabs: [
+      { id: 'notes', label: 'Notes' },
+      { id: 'projects', label: 'Projects' },
+    ],
+    tab,
   });
+  const projects = projectsPanel(sheet.panel('projects'), api);
   const message = el('p', { className: 'hud-message' });
 
   const render = () => {
@@ -43,7 +65,7 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
       el(
         'p',
         {},
-        el('small', { className: 'hud-notice-for' }, '📌 Pinned up by Cobweb Corner'),
+        el('small', { className: 'hud-notice-for' }, glyphed('pin', 'Pinned up by Cobweb Corner')),
         wantedLine(api.wanted()),
       ),
     );
@@ -53,19 +75,29 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
           el(
             'section',
             { className: 'hud-notice-wanted' },
-            el('small', { className: 'hud-notice-for' }, '📌 Today'),
+            el('small', { className: 'hud-notice-for' }, glyphed('pin', 'Today')),
             ...posters.map((p) =>
-              el('p', {}, `${p.icon} `, el('strong', {}, p.name), el('small', {}, ` ${p.line}.`)),
+              el(
+                'p',
+                {},
+                glyph(p.icon),
+                ' ',
+                el('strong', {}, p.name),
+                el('small', {}, ` ${p.line}.`),
+              ),
             ),
           ),
         ]
       : [];
-    sheet.body.replaceChildren(
-      ...today,
-      ...api.notices().map((notice) => card(notice, bag)),
-      wanted,
-      message,
-    );
+    sheet
+      .panel('notes')
+      .replaceChildren(
+        ...today,
+        ...api.notices().map((notice) => card(notice, bag)),
+        wanted,
+        message,
+      );
+    projects.render();
   };
 
   function card(notice: Notice, bag: readonly Stack[]): HTMLElement {
@@ -82,7 +114,7 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
       give.textContent = 'Done ✓';
       give.disabled = true;
     } else {
-      give.textContent = `Hand over · ${candy(notice.candy)}`;
+      give.replaceChildren('Hand over ', price(notice.candy));
       give.disabled = have < notice.count;
       give.addEventListener('click', () => {
         if (!api.answer(notice.slot)) return;
@@ -105,7 +137,7 @@ export function openNotices(hud: HTMLElement, api: NoticeApi): () => void {
                 el(
                   'small',
                   { className: 'hud-notice-for' },
-                  `${CALENDAR[notice.during].icon} ${CALENDAR[notice.during].name}`,
+                  glyphed({ mark: notice.during }, CALENDAR[notice.during].name),
                 ),
               ]
             : []),

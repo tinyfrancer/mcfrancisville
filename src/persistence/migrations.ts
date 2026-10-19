@@ -206,6 +206,57 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 0.3's C1: fossils, which the museum's seventh case shows from `cabinet.donated` and which count
   // as had in `collected`. Nobody had dug one up before, so both lists stay as they were.
   42: (state) => state,
+  // V1's P1: what her neighbours remember of her. Nothing was remembered before, so nothing she
+  // did then is brought up as though they'd been listening: no piece placed, crop picked or thing
+  // given the museum lately. Each friendship stays as it was; what it gave, spoke and opened with
+  // is kept from the first talk after.
+  43: (state) => ({ ...state, lately: { placed: null, harvested: null, donated: null } }),
+  // V1's P2: their questions and heart moments, kept on each friendship once asked or told.
+  // Nobody had asked her anything or told her a story before, so every friendship stays as it
+  // was: each question is still to ask, and each moment she has the hearts for is still to come.
+  44: (state) => state,
+  // V1's P3a: the mystery's chain and Wes. The day this build first sees her town is set on its
+  // first look, so the chain starts the next morning; Wes ran off once if his button is on her
+  // board (that was a glimpse), and nobody had chatted with him.
+  45: (state) => {
+    const mystery = (state.mystery ?? {}) as Record<string, unknown>;
+    const clues = (mystery.clues ?? {}) as Record<string, unknown>;
+    const glimpses = typeof clues.button === 'string' ? 1 : 0;
+    return {
+      ...state,
+      mystery: { ...mystery, began: null, wes: { glimpses, chats: 0, talked: null } },
+    };
+  },
+  // V1's P3b: Rob Boo, the mayor, met at the castle; the day she met him is the `unmasked` clue's
+  // in `mystery.clues`, and his friendship goes in `friends` as anyone's. Nobody had met him
+  // before, so nothing changes: the mystery and every friendship stay as they were.
+  46: (state) => state,
+  // V1's P4: what she did at her neighbours' happenings, which the host remembers next time.
+  // Nobody had a verb to join in with before, so there's nothing to remember: an empty record.
+  47: (state) => ({ ...state, happenings: {} }),
+  // V1's P5: Cody, married. Nobody had asked her how her day was or told her their story before,
+  // so there's no answer to bring up and no scene told: each is still to come.
+  48: (state) => {
+    const lately = (state.lately ?? {}) as Record<string, unknown>;
+    return { ...state, lately: { ...lately, herDay: null, told: [] } };
+  },
+  // V1's R1: Cody's list for her first day. A town saved before it isn't new, and she knows her
+  // way round it already, so its first day is over, with no step counted and no gift given.
+  49: (state) => ({ ...state, firstDay: { done: [], over: true } }),
+  // V1's R4: the town's projects. A town saved before them has none begun and none built.
+  50: (state) => ({ ...state, projects: { current: null, given: {}, built: [] } }),
+  // V1's R6a: the biggest of each fish she lands. No fish was ever measured before, so none has a
+  // best yet; the next of each she lands is its first, and the Cabinet asks her to land another.
+  51: (state) => {
+    const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
+    return { ...state, cabinet: { ...cabinet, best: {} } };
+  },
+  // V1's R6c: how fond each pet has grown of her. Nothing counted before, so each starts at none,
+  // and every pat from here on counts.
+  52: (state) => {
+    const pets = (state.pets ?? {}) as Record<string, unknown>;
+    return { ...state, pets: { ...pets, affection: {} } };
+  },
 };
 
 /**

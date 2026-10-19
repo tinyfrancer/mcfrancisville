@@ -1,4 +1,5 @@
-import type { HolidayId, TownEventId } from './calendar';
+import type { FestivalId, HolidayId, TownEventId } from './calendar';
+import type { RareEventId } from './rareEvents';
 import type { DayWindow } from './windows';
 import { CODY_NICKNAME } from './villagers';
 
@@ -83,6 +84,32 @@ export const HOLIDAY_GREETINGS: Record<HolidayId | TownEventId, string> = {
     'Friday the 13th! Luckiest day there is. Beads everywhere. I found three in my shoe.',
 };
 
+/** A festival week a season (V1's R3): every festival but October's, which is a month. */
+export type SeasonFestivalId = Exclude<FestivalId, 'halloweenFestival'>;
+
+/**
+ * Cody's hello on a day out of the ordinary (V1's R3): the first day of a festival week, or a rare
+ * event's (the wandering stall's Monday).
+ */
+export const RHYTHM_GREETINGS: Record<SeasonFestivalId | RareEventId, string> = {
+  blossomWeek:
+    "Honey bunny, it's blossom week! Every tree's gone pink. I've got petals in my hair. I'm keeping them.",
+  fireworksWeek:
+    'Fireworks week, booby! A whole week of it. The bats have filed a complaint. I signed it. Sorry, bats.',
+  lightsWeek:
+    "Winter lights week, mi amor. Every window's lit. Ours is the best one. I may have used too many.",
+  meteorShower:
+    "Hazel says there's a meteor shower tonight, babe. Let's look up after eight. I'll wish for you. Again.",
+  wanderingStall:
+    'A wandering stall rolled in by the bakery, mi amor! Curios from far away. I bought nothing. Yet.',
+  stranger:
+    'Ooh, someone new in town, booby, just passing through. Big pack, little lantern. Go say hi!',
+  snowDay:
+    "SNOW DAY! Babe! Mittens! Everyone's out! I've already made a snow bat. It's not great. It's great.",
+  lostCritter:
+    "Someone's little critter has wandered off, mi amor. You're the best at finding things. You found me.",
+};
+
 /**
  * The red Tesla (personal_touches.md, "Version 0.1"): whoever spots a red one first taps the
  * other's arm. It drives across his greeting, and she always gets him first.
@@ -135,4 +162,17 @@ export const DEDICATION = {
   line: 'To my beautiful perfect angel baby wife, who is my whole world.',
   signed: 'Love, Cody',
   reply: '♥',
+};
+
+/**
+ * A line under his greeting about once a week (V1's S3), while the game is in a browser tab, or
+ * once it's installed when her last backup code is a fortnight old: what keeps her town safe.
+ */
+export const SAFE_KEEPING: Record<'install' | 'backup', string> = {
+  install:
+    "P.S. Pop the game on your Home Screen (Share, then Add to Home Screen) and the town's kept " +
+    'safe for good. I worry about it. A normal amount.',
+  backup:
+    "P.S. It's been a little while since your last backup code. Settings, Backup, Copy, and tuck " +
+    "it in Notes? Then the town's safe whatever happens to your phone.",
 };

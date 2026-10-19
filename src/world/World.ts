@@ -1,6 +1,7 @@
 import { FURNITURE } from '../data/furniture';
 import { FIXTURES } from '../data/interiors';
 import type { Placed } from '../data/home';
+import type { PasserId } from '../data/rareEvents';
 import { isFish } from '../data/critters';
 import { dayKey } from '../systems/clock';
 import { BONE_KEY } from '../systems/pets';
@@ -14,7 +15,7 @@ import type { PetId, VillagerId } from '../types/ids';
 import { bedKey, placeOf, type Plot } from './Farm';
 import type { Pet } from './Pet';
 import { facingFor, type Neighbour } from './Neighbour';
-import { reach, tileCentre, type Player } from './Movement';
+import { reach, tileCentre, walkedTiles, type Player } from './Movement';
 import { worthVisiting, type RoomThing } from './zones/RoomZone';
 import { WorldParts } from './build';
 import type { Arrived, Critter, TileBox, WorldEvent } from './events';
@@ -56,7 +57,10 @@ type Visit =
   | { kind: 'fish'; fish: string }
   | { kind: 'pet'; pet: PetId }
   | { kind: 'thing'; thing: RoomThing }
-  | { kind: 'ice'; toward: Tile };
+  | { kind: 'ice'; toward: Tile }
+  | { kind: 'wes'; at: Tile }
+  /** Someone passing through (V1's R3): the wayfarer, or a visitor staying the week. */
+  | { kind: 'passer'; who: PasserId; at: Tile };
 
 /**
  * What a tap has set her off toward, for the view to outline for a beat (V1's E4, decision 283):
@@ -197,6 +201,9 @@ export class World extends WorldParts {
       }
       case 'ice':
         return null;
+      case 'wes':
+      case 'passer':
+        return tile(visit.at);
     }
   }
 
@@ -218,9 +225,16 @@ export class World extends WorldParts {
     this.petCare.endPet();
     const neighbour = this.neighbourhood.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
-    // She sets off after Wes; he'll be gone by the time she's near.
+    // She sets off after Wes; he'll be gone by the time she's near, unless he stays to chat.
     const wes = this.mystery.wesAt(tx, ty);
+    const staying = wes ? this.mystery.approach() : null;
+    if (staying) return this.walkTo(this.around(staying), { kind: 'wes', at: staying });
     if (wes) return this.walkTo([wes], undefined);
+    const passer = this.rareEvents.passerAt(this.scene, tx, ty);
+    if (passer) {
+      const at = { tx: passer.tx, ty: passer.ty };
+      return this.walkTo(this.around(at), { kind: 'passer', who: passer.id, at });
+    }
     const critter = this.collecting.critterAt(tx, ty);
     if (critter) return this.stalk(critter);
     const pet = this.petCare.petAt(tx, ty);
@@ -324,6 +338,8 @@ export class World extends WorldParts {
     this.travel.check();
     this.mystery.check();
     this.mailbox.checkSpecialDay();
+    this.neighbourhood.check();
+    this.marriage.check();
     this.deliveries.check();
     this.weather.check();
     this.holidays.check();
@@ -333,12 +349,15 @@ export class World extends WorldParts {
     this.milestones.check();
     this.stall.check();
     this.decorating.check();
+    // Last, and only on a step with nothing else to say, so a letter's toast doesn't take its line.
+    this.rareEvents.check();
     this.mystery.step(
       this.movement.tile,
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),
     );
     const heading = this.visiting?.kind === 'villager' ? this.visiting.villager : null;
     this.neighbourhood.step(deltaMs, this.player, heading);
+    this.postRound.step(deltaMs);
     this.petCare.step(
       deltaMs,
       this.visiting?.kind === 'pet' ? this.visiting.pet : null,
@@ -346,18 +365,30 @@ export class World extends WorldParts {
     );
     const events = this.ctx.moments.drain();
     events.push(...this.fishing.step());
+    const walked = this.player.moving ? walkedTiles(this.player) : null;
+    events.push(...this.collecting.notice(this.movement.tile, walked));
     if (this.arrivedInPlace) {
       events.push(...this.arrival(this.arrivedInPlace));
       this.arrivedInPlace = null;
     }
     const arrivedAt = this.movement.step(deltaMs, this.kitchen.pace());
     if (arrivedAt) events.push(...this.arrival(arrivedAt));
+    // A step of her first day done, by whatever just happened (V1's R1).
+    events.push(...this.firstDay.saw(events));
     this.poses.saw(events);
     this.poses.step(deltaMs);
     for (const e of events) {
       // Walking in on one of their happenings is said as she comes in.
       const happening = e.kind === 'entered' ? this.neighbourhood.happeningIn(e.scene) : null;
       if (e.kind === 'entered' && happening) e.happening = happening;
+    }
+    // In the great hall with the town gathered for the mayor's hello (V1's P3b), the sheet comes off.
+    if (this.scene === 'castleHall' && this.neighbourhood.happeningIn(this.scene) === 'unmasking') {
+      const unmasked = this.mystery.unmask();
+      if (unmasked) {
+        this.neighbourhood.settle('robBoo');
+        events.push(unmasked);
+      }
     }
     return events;
   }
@@ -368,6 +399,9 @@ export class World extends WorldParts {
    */
   private arrival(here: Tile): WorldEvent[] {
     const events = this.arriveAt(here);
+    // The mystery's next clue, if it waits where she walked up to (V1's P3a).
+    const at = events.find((e): e is Arrived => e.kind === 'arrived')?.at;
+    if (at && this.scene === 'town') this.mystery.visit(at);
     const bone = this.petCare.lostBone();
     if (
       events.length > 0 &&
@@ -427,6 +461,8 @@ export class World extends WorldParts {
       // Gone by the time she got there, if the hour turned on the way.
       const critter = this.collecting.find(visit.critter);
       if (!critter || reach(here, critter) > 1) return [arrived];
+      // A shy one drifted off as she rushed up (V1's R6a): she stops, to creep up on it after.
+      if (this.collecting.shiedFrom(critter.key)) return [arrived];
       arrived.toward = { tx: critter.tx, ty: critter.ty, w: 1, h: 1 };
       const at = tileCentre(critter);
       if (reach(here, critter) > 0) {
@@ -458,6 +494,17 @@ export class World extends WorldParts {
       // They'd moved on by the time she got there: after them, a few times, then let them go.
       if (visit.tries + 1 < FOLLOW_TRIES && this.follow(n, visit.tries + 1)) return [];
       return [arrived];
+    },
+    wes: ({ at }, here, arrived) => {
+      arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
+      this.face(here, arrived.toward);
+      const chat = this.mystery.chat(here);
+      return chat ? [arrived, chat] : [arrived];
+    },
+    passer: ({ who, at }, here, arrived) => {
+      arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
+      this.face(here, arrived.toward);
+      return [arrived, this.rareEvents.meet(who)];
     },
     ice: ({ toward }, here, arrived) => {
       const ice = iceBeside(here, toward, this.slipsOn);
@@ -496,6 +543,8 @@ export class World extends WorldParts {
     if (prop?.id === 'candyTree') return [arrived, this.candyTree.shake()];
     if (prop?.id === 'saplingPlot') return [arrived, this.candyTree.tend(prop)];
     if (prop?.id === 'pumpkinPatch') return [arrived, this.pumpkinPatch.visit()];
+    // A built bandstand plays a tune as she walks up, Boothoven's she has learnt too (V1's R4).
+    if (prop?.id === 'bandstand') return [arrived, this.instruments.play('piano')];
     if (prop?.id === 'honestyStall') {
       const sold = this.stall.collect();
       return sold ? [arrived, sold] : [arrived];
@@ -521,6 +570,8 @@ export class World extends WorldParts {
       outdoors.id === 'town' && !prop
         ? [...this.smallEvents.pickUp(here), ...this.holidays.pickUp(here)]
         : [];
+    // A critter gone astray, wherever it has wandered to (V1's R3).
+    if (!prop) found.push(...this.rareEvents.pickUp(outdoors.id, here));
     return [arrived, ...found, ...this.gathering.arriveAt(outdoors, here, prop)];
   }
 }

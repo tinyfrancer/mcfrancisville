@@ -91,6 +91,9 @@ export const CUES = {
     { wave: 'sine', notes: line('A1:3.5'), gain: 0.16, attack: 0.5, release: 1.4 },
   ),
   munch: cue(pluck('E4:.15 -:.1 D4:.15 -:.15 C5:.2 E5:.5', 0.16, 'sine')),
+  // A pet's trick (V1's R6c): a twirl up and a little landing; and Dolly's two brave woofs.
+  trick: cue(chime('C5:.1 E5:.1 G5:.1 C6:.1 E6:.15 C6:.1 G6:.6', 0.16)),
+  woof: cue(pluck('A3:.12 -:.08 A3:.2', 0.14, 'square')),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -144,6 +147,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'carved':
       return event.first ? 'firstCatch' : 'made';
     case 'tossed':
+      if (event.grade === 2) return 'found';
       return event.landed ? 'pick' : 'tap';
     case 'won':
       return event.top ? 'firstCatch' : 'treat';
@@ -153,6 +157,13 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'coin';
     case 'ate':
       return 'munch';
+    // V1's P4: a beat of baking, and joining in at a happening.
+    case 'bakeStep':
+      return 'pick';
+    case 'joined':
+    case 'together':
+    case 'firstDay':
+      return 'treat';
     case 'keepsake':
     case 'dug':
     case 'foundLost':
@@ -161,13 +172,28 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'decorated':
     case 'frozen':
     case 'dressedUp':
+    // V1's R3: something out of the ordinary told, a passer-by's hello, a stray found.
+    case 'heralded':
+    case 'metPasser':
+    case 'foundStray':
+      return 'treat';
+    // V1's R4: Candy or things given to a project, and one built.
+    case 'pitchedIn':
+      return 'coin';
+    case 'built':
       return 'treat';
     case 'caught':
       return event.first ? 'firstCatch' : 'caught';
     case 'unearthed':
       return event.first ? 'firstCatch' : 'treat';
     case 'fled':
+    case 'drifted':
       return 'fled';
+    // A rare fish hooked rings like a bite; a slack line like one let go (V1's R6a).
+    case 'hooked':
+      return 'bite';
+    case 'slack':
+      return 'reeled';
     case 'cast':
     case 'nibble':
     case 'bite':
@@ -181,6 +207,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'clue':
       return 'clue';
     case 'wesGone':
+    case 'wesStays':
       return 'wes';
     case 'wesDropped':
       return 'mail';
@@ -203,6 +230,15 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'rumble';
     case 'refused':
       return 'refused';
+    // V1's R6c: the pat's own heart is played by the sheet; a treat munches.
+    case 'petted':
+      return event.treat ? 'munch' : null;
+    case 'petGrew':
+      return 'firstCatch';
+    case 'petTrick':
+      return 'trick';
+    case 'petHelped':
+      return event.job === 'bark' ? 'woof' : event.job === 'fetch' ? null : 'found';
     default:
       return null;
   }
@@ -222,8 +258,12 @@ const VOICES: Record<Figure, { base: number; wave: Part['wave'] }> = {
   hazel: { base: 71, wave: 'triangle' },
   boothoven: { base: 55, wave: 'sine' },
   scarah: { base: 63, wave: 'square' },
+  robBoo: { base: 67, wave: 'sine' },
   moonPieMan: { base: 50, wave: 'triangle' },
   wes: { base: 48, wave: 'sine' },
+  // Passing through (V1's R3).
+  wayfarer: { base: 58, wave: 'triangle' },
+  moira: { base: 65, wave: 'sine' },
 };
 
 const STEPS = [0, 2, 4, 5, 7, 9];

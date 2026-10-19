@@ -219,6 +219,7 @@ export class Decorator {
       this.ctx.moments.push({ kind: 'refused', why: place.refusesHere(id) ?? 'noRoom' });
       return false;
     }
+    this.ctx.signals.emit('placed', { piece: id });
     this.changed();
     if (this.outside) this.ctx.events.emit('home', this.home);
     if (this.decor) this.select(piece);

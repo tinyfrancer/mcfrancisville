@@ -3,13 +3,14 @@ import { isRecord, RECORD_TUNES } from '../audio/records';
 import { PIANO_TUNES } from '../audio/pianos';
 import type { SoundBoard } from '../audio/SoundBoard';
 import type { Hud } from '../hud/Hud';
-import { eventToast, MARKET_SHUT, NO_SEEDS } from '../hud/messages';
+import { eventToast, FIRST_DAY_FINISHED, MARKET_SHUT, NO_SEEDS } from '../hud/messages';
 import { isDisplayPiece } from '../data/display';
 import type { World, WorldEvent } from '../world/World';
 import type { Tile } from '../systems/pathfinding';
 import { seedsIn, type Waiting } from './apis';
 import type { Effects } from '../render/effects';
 import type { Transitions } from '../render/transition';
+import { pngOf, printOf } from '../render/photo';
 import { tileCentre } from '../world/World';
 import { bumpsOf, effectsOf, type Placing } from './effectsOf';
 
@@ -64,7 +65,13 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'photo') {
       const them = world.neighbourhood.neighbour(event.with).tile;
       const picture = snapshot([world.movement.tile, them]);
-      if (picture) hud.photo(picture, event.caption);
+      // Kept as a print through the share sheet, made only if she asks (V1's S3).
+      const caption = event.caption;
+      const print = () => {
+        const made = picture && printOf(picture, caption);
+        return made ? pngOf(made) : Promise.resolve(null);
+      };
+      if (picture) hud.photo(picture, caption, print);
     }
     if (event.kind === 'entered' && event.scene !== 'home') sound.stopRecord();
     if (event.kind === 'arrived' && event.opens) {
@@ -81,6 +88,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'noticeboard') hud.openNotices();
     if (event.kind === 'arrived' && event.at === 'honestyStall') hud.openStall();
     if (event.kind === 'arrived' && event.at === 'moonPieCart') hud.openShop('moonPie');
+    if (event.kind === 'arrived' && event.at === 'wanderingStall') hud.openShop('wandering');
     if (event.kind === 'arrived' && event.at === 'seedCart') hud.openShop('seeds');
     if (event.kind === 'arrived' && event.at === 'barn') hud.openBarn();
     // Market day's stall by the fairground's stage (0.2's M3): its table, or when it's out.
@@ -103,6 +111,8 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.piece === 'stove') hud.openStove();
     if (event.kind === 'arrived' && event.piece === 'broomStand') hud.openBroom();
     if (event.kind === 'arrived' && event.piece === 'mysteryCorkboard') hud.openCorkboard();
+    if (event.kind === 'wesChat') hud.openWes(event.lines);
+    if (event.kind === 'unmasked') hud.openReveal(event.lines);
     if (event.kind === 'tilled' || event.kind === 'bare') {
       waiting.bed = { zone: world.scene, tx: event.tx, ty: event.ty };
       // The sheet says it all; a toast behind it would only be half seen.
@@ -117,5 +127,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     }
     const toast = eventToast(event);
     if (toast) hud.toast(toast);
+    // The last step of her first day, and his keepsake after it (V1's R1).
+    if (event.kind === 'firstDay' && event.keepsake) hud.toast(FIRST_DAY_FINISHED);
   }
 }

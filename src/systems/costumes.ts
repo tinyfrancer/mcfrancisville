@@ -1,6 +1,7 @@
 import { NEIGHBOUR_COSTUMES } from '../data/costumes';
 import { TRICK_OR_TREAT_FESTIVAL } from '../data/trickOrTreat';
 import { VILLAGER_IDS } from '../data/villagers';
+import { inTown } from './mayor';
 import type { VillagerId } from '../types/ids';
 import { festivalOn, shiftDay } from './calendar';
 
@@ -24,5 +25,8 @@ export function inCostume(villager: VillagerId, day: string): boolean {
 
 /** Those who put their costumes on this morning. */
 export function dressingUp(day: string): VillagerId[] {
-  return VILLAGER_IDS.filter((id) => inCostume(id, day) && !inCostume(id, shiftDay(day, -1)));
+  // The mayor too, once she has met him (V1's P3b).
+  return VILLAGER_IDS.filter(
+    (id) => inTown(id) && inCostume(id, day) && !inCostume(id, shiftDay(day, -1)),
+  );
 }

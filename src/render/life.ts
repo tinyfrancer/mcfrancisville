@@ -1,10 +1,13 @@
 import { TILE_SIZE } from '../config/world';
 import { bake } from '../sprites/bake';
 import { TUFT_FRAMES, TUFT_H, TUFT_PALETTE, TUFT_W } from '../sprites/life';
+import { tuftColours } from '../sprites/seasons';
+import type { SeasonId } from '../data/seasons';
 import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { tileHash } from '../sprites/terrain';
 import { tileAt, walkable, type PlacedProp, type TileMap } from '../systems/grid';
+import type { TileId } from '../types/ids';
 import type { Point } from './camera';
 import { fillPixelEllipse } from './ground';
 
@@ -24,9 +27,10 @@ export interface Life {
 
 /**
  * How often a tile of grass has a tuft of long grass on it: one in this many, picked by where it
- * is, and never where she picks flowers or on a way through.
+ * is, and never where she picks flowers or on a way through. A meadow has more, and long grass
+ * one on every tile (V1's L2).
  */
-const TUFT_ONE_IN = 4;
+const TUFT_ONE_IN: Partial<Record<TileId, number>> = { grass: 4, meadow: 2, longGrass: 1 };
 
 export function lifeOf(map: TileMap): Life {
   const standing = new Set<string>();
@@ -45,17 +49,25 @@ export function lifeOf(map: TileMap): Life {
         water.push({ tx, ty, ice: id === 'ice' });
       }
       const h = tileHash(tx, ty);
+      const oneIn = id === undefined ? undefined : TUFT_ONE_IN[id];
       if (
-        id === 'grass' &&
+        oneIn !== undefined &&
         walkable(map, tx, ty) &&
         !standing.has(key) &&
         !patches.has(key) &&
-        h % TUFT_ONE_IN === 0
+        h % oneIn === 0
       ) {
         tufts.push({
           x: tx * TILE_SIZE + 3 + ((h >>> 4) % (TILE_SIZE - TUFT_W - 6)),
           y: ty * TILE_SIZE + TUFT_H + 4 + ((h >>> 9) % (TILE_SIZE - TUFT_H - 6)),
         });
+        // Long grass is thick with them: a second on about half its tiles.
+        if (id === 'longGrass' && (h >>> 20) % 2 === 0) {
+          tufts.push({
+            x: tx * TILE_SIZE + 3 + ((h >>> 13) % (TILE_SIZE - TUFT_W - 6)),
+            y: ty * TILE_SIZE + TUFT_H + 4 + ((h >>> 23) % (TILE_SIZE - TUFT_H - 6)),
+          });
+        }
       }
     }
   }
@@ -132,9 +144,12 @@ export function drawTufts(
   cam: Point,
   nowMs: number,
   gusty: boolean,
+  season: SeasonId = 'autumn',
 ): void {
   const canvas = ctx.canvas;
-  const frames = TUFT_FRAMES.map((f, i) => bake(`tuft:${i}`, f, TUFT_PALETTE));
+  // In the season's colours (V1's L4): straw standing out of the snow in winter.
+  const palette = tuftColours(season, TUFT_PALETTE);
+  const frames = TUFT_FRAMES.map((f, i) => bake(`tuft:${i}@${season}`, f, palette));
   const speed = gusty ? 380 : 700;
   const reach = gusty ? 0.2 : 0.55;
   for (const t of life.tufts) {

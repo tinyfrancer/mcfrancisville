@@ -17,6 +17,11 @@ export interface Player {
   walkMs: number;
 }
 
+/** How many tiles she has walked since she last stood still. */
+export function walkedTiles(player: Player): number {
+  return (player.walkMs * WALK_SPEED) / 1000 / TILE_SIZE;
+}
+
 export function tileCentre(t: Tile): { x: number; y: number } {
   return { x: t.tx * TILE_SIZE + TILE_SIZE / 2, y: t.ty * TILE_SIZE + TILE_SIZE / 2 };
 }

@@ -474,8 +474,9 @@ describe('the step where everyone lives in town (33 to 34, decision 211)', () =>
     v33.newcomers = { since: '2026-10-01', wrote: { ollie: '2026-10-01' }, heard: {} };
     const migrated = migrateSave(v33);
     expect(migrated).not.toHaveProperty('newcomers');
-    // What she has had is seeded on the way up (S1); a new save leaves it to the world.
-    expect({ ...migrated, ever: [] }).toEqual(SAVE);
+    // What she has had is seeded on the way up (S1); a new save leaves it to the world. An old
+    // town's first day is over (V1's R1).
+    expect({ ...migrated, ever: [] }).toEqual({ ...SAVE, firstDay: { done: [], over: true } });
   });
 });
 
@@ -525,6 +526,230 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("V1's R6c step (52 to 53)", () => {
+  it('gives every pet no fondness yet, keeping its names, clothes and bones', () => {
+    const old = { ...structuredClone(SAVE), version: 52 } as Record<string, unknown>;
+    const pets = { ...STARTER_PETS, names: { gary: 'Sir Gary' }, bones: 4 } as Record<
+      string,
+      unknown
+    >;
+    delete pets.affection;
+    old.pets = pets;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.pets).toEqual({ ...pets, affection: {} });
+    const fond = { points: 21, day: '2026-10-18', pat: 3, walk: 1, treat: 0 };
+    const kept = { ...STARTER_PETS, affection: { fibi: fond, someDayPet: fond } };
+    expect(migrateSave({ ...SAVE, pets: kept })?.pets).toEqual(kept);
+    expect(migrateSave({ ...SAVE, pets: { ...STARTER_PETS, affection: [] } })).toBeNull();
+    const bad = { ...STARTER_PETS, affection: { fibi: { ...fond, points: -1 } } };
+    expect(migrateSave({ ...SAVE, pets: bad })).toBeNull();
+    expect(migrateSave({ ...SAVE, pets: { ...STARTER_PETS, affection: undefined } })).toBeNull();
+  });
+});
+
+describe("V1's R6a step (51 to 52)", () => {
+  it('gives an old Cabinet no fish measured yet, keeping what was caught and shown', () => {
+    const old = { ...structuredClone(SAVE), version: 51 } as Record<string, unknown>;
+    const cabinet = { caught: { moonCarp: '2026-10-02' }, donated: ['moonCarp'] };
+    old.cabinet = cabinet;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.cabinet).toEqual({ ...cabinet, best: {} });
+    const measured = { ...cabinet, best: { moonCarp: 9 } };
+    expect(migrateSave({ ...SAVE, cabinet: measured })?.cabinet).toEqual(measured);
+    expect(migrateSave({ ...SAVE, cabinet: { ...cabinet, best: { moonCarp: '9' } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, cabinet })).toBeNull();
+  });
+});
+
+describe("V1's R4 step (50 to 51)", () => {
+  it('gives an old town no project begun or built, keeping the rest', () => {
+    const old = { ...structuredClone(SAVE), version: 50 } as Record<string, unknown>;
+    delete old.projects;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.projects).toEqual({ current: null, given: {}, built: [] });
+    expect(up).toEqual(SAVE);
+    const funding = {
+      current: 'bandstand',
+      given: { bandstand: { candy: 300, items: { wood: 12 } } },
+      built: ['footbridge'],
+    };
+    expect(migrateSave({ ...SAVE, projects: funding })?.projects).toEqual(funding);
+    expect(migrateSave({ ...SAVE, projects: { ...funding, built: 'footbridge' } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, projects: { ...funding, given: { bandstand: { candy: '3' } } } }),
+    ).toBeNull();
+  });
+});
+
+describe("V1's R1 step (49 to 50)", () => {
+  it("ends an old town's first day before it starts, with nothing counted", () => {
+    const old = { ...structuredClone(SAVE), version: 49 } as Record<string, unknown>;
+    delete old.firstDay;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.firstDay).toEqual({ done: [], over: true });
+    expect(SAVE.firstDay).toEqual({ done: [], over: false });
+    const partway = { done: ['shake', 'eat'], over: false };
+    expect(migrateSave({ ...SAVE, firstDay: partway })?.firstDay).toEqual(partway);
+    expect(migrateSave({ ...SAVE, firstDay: { done: 'shake', over: false } })).toBeNull();
+    expect(migrateSave({ ...SAVE, firstDay: { done: [] } })).toBeNull();
+  });
+});
+
+describe("V1's P5 step (48 to 49)", () => {
+  it('gives an old save no answer to his evening question and no scene told, keeping the rest', () => {
+    const old = { ...structuredClone(SAVE), version: 48 } as Record<string, unknown>;
+    const placed = { piece: 'batLamp', day: '2026-10-16' };
+    old.lately = { placed, harvested: null, donated: null };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.lately).toEqual({ placed, harvested: null, donated: null, herDay: null, told: [] });
+    const lately = { ...SAVE.lately, herDay: { day: '2026-10-17', answer: 'long' }, told: ['ice'] };
+    expect(migrateSave({ ...SAVE, lately })?.lately).toEqual(lately);
+    expect(migrateSave({ ...SAVE, lately: { ...SAVE.lately, told: [3] } })).toBeNull();
+  });
+});
+
+describe("V1's P4 step (47 to 48)", () => {
+  it('gives an old save an empty record of joining in, and reads one with picks after', () => {
+    const old = { ...structuredClone(SAVE), version: 47 } as Record<string, unknown>;
+    delete old.happenings;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.happenings).toEqual({});
+    const happenings = { bookClub: { on: '2026-11-11', choice: 'wutheringFrights' } };
+    expect(migrateSave({ ...SAVE, happenings })?.happenings).toEqual(happenings);
+    expect(migrateSave({ ...SAVE, happenings: { bookClub: { on: 3 } } })).toBeNull();
+  });
+});
+
+describe("V1's P3b step (46 to 47)", () => {
+  it('keeps the mystery and every friendship as they were, with the mayor not met yet', () => {
+    const old = { ...structuredClone(SAVE), version: 46 } as Record<string, unknown>;
+    const mystery = {
+      clues: { welcome: '2026-09-26', promise: '2026-11-17' },
+      began: '2026-09-27',
+      wes: { glimpses: 3, chats: 4, talked: '2026-11-16' },
+    };
+    const friend = { points: 300, talked: '2026-11-16', gifted: null, favour: null };
+    old.mystery = mystery;
+    old.friends = { scarah: friend };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.mystery).toEqual(mystery);
+    expect(up?.friends).toEqual({ scarah: friend });
+    expect(up?.friends.robBoo).toBeUndefined();
+    expect(up?.mystery.clues.unmasked).toBeUndefined();
+  });
+
+  it("reads the day she met the mayor, and Rob Boo's friendship once he has one", () => {
+    const friend = { points: 40, talked: '2026-11-18', gifted: null, favour: null };
+    const mystery = { ...SAVE.mystery, clues: { promise: '2026-11-17', unmasked: '2026-11-17' } };
+    const up = migrateSave({ ...SAVE, mystery, friends: { robBoo: friend } });
+    expect(up?.mystery.clues.unmasked).toBe('2026-11-17');
+    expect(up?.friends.robBoo).toEqual(friend);
+    expect(migrateSave({ ...SAVE, friends: { robBoo: { ...friend, points: -3 } } })).toBeNull();
+  });
+});
+
+describe("V1's P3a step (45 to 46)", () => {
+  it('starts the chain on its first look, and counts his button as one glimpse of Wes', () => {
+    const old = { ...structuredClone(SAVE), version: 45 } as Record<string, unknown>;
+    old.mystery = { clues: { welcome: '2026-09-26', button: '2026-09-28' } };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.mystery).toEqual({
+      clues: { welcome: '2026-09-26', button: '2026-09-28' },
+      began: null,
+      wes: { glimpses: 1, chats: 0, talked: null },
+    });
+    const none = migrateSave({ ...old, mystery: { clues: {} } });
+    expect(none?.mystery.wes.glimpses).toBe(0);
+  });
+
+  it('reads the chain and Wes, and refuses them in the wrong shape', () => {
+    const wes = { glimpses: 3, chats: 2, talked: '2026-10-10' };
+    const mystery = { clues: {}, began: '2026-10-09', wes };
+    expect(migrateSave({ ...SAVE, mystery })?.mystery).toEqual(mystery);
+    expect(migrateSave({ ...SAVE, mystery: { ...mystery, began: 4 } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, mystery: { ...mystery, wes: { ...wes, chats: -1 } } }),
+    ).toBeNull();
+    expect(migrateSave({ ...SAVE, mystery: { clues: {} } })).toBeNull();
+  });
+});
+
+describe("V1's P2 step (44 to 45)", () => {
+  it('keeps every friendship as it was, with nothing asked or told yet', () => {
+    const old = { ...structuredClone(SAVE), version: 44 } as Record<string, unknown>;
+    const friend = { points: 1000, talked: '2026-10-06', gifted: null, favour: null, spoke: 10 };
+    old.friends = { nessa: friend };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.friends).toEqual({ nessa: friend });
+  });
+
+  it('reads her answers and the moments told, and refuses them in the wrong shape', () => {
+    const hazel = { points: 500, talked: null, gifted: null, favour: null };
+    const told = { ...hazel, answered: 'red', moments: [2, 4, 5] };
+    const up = migrateSave({ ...SAVE, friends: { hazel: told } });
+    expect(up?.friends.hazel).toEqual(told);
+    expect(migrateSave({ ...SAVE, friends: { hazel: { ...hazel, answered: 3 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, friends: { hazel: { ...hazel, moments: 'all' } } })).toBeNull();
+  });
+});
+
+describe("V1's P1 step (43 to 44)", () => {
+  it('remembers nothing done lately, and keeps every friendship as it was', () => {
+    const old = { ...structuredClone(SAVE), version: 43 } as Record<string, unknown>;
+    delete old.lately;
+    const friend = { points: 420, talked: '2026-10-05', gifted: '2026-10-04', favour: null };
+    old.friends = { maude: friend };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    // And, on the way up, nothing told Cody or by him yet (V1's P5).
+    expect(up?.lately).toEqual({
+      placed: null,
+      harvested: null,
+      donated: null,
+      herDay: null,
+      told: [],
+    });
+    expect(up?.friends).toEqual({ maude: friend });
+  });
+
+  it('reads what they remember once there is some, and refuses it in the wrong shape', () => {
+    const lately = {
+      placed: { piece: 'batLamp', day: '2026-10-07' },
+      harvested: { crop: 'pumpkin', day: '2026-10-07' },
+      donated: null,
+      herDay: null,
+      told: [],
+    };
+    const friends = {
+      hazel: {
+        points: 300,
+        talked: null,
+        gifted: null,
+        favour: null,
+        gave: 'rose',
+        spoke: 3,
+        opened: [7],
+      },
+    };
+    const up = migrateSave({ ...SAVE, lately, friends });
+    expect(up?.lately).toEqual(lately);
+    expect(up?.friends.hazel?.opened).toEqual([7]);
+    expect(migrateSave({ ...SAVE, lately: { ...lately, donated: { day: 3 } } })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, friends: { hazel: { ...friends.hazel, spoke: 'x' } } }),
+    ).toBeNull();
+  });
+});
+
 describe("0.3's C1 step (42 to 43)", () => {
   it('keeps what is on show and what she has had as it was, with no fossils yet', () => {
     const old = { ...structuredClone(SAVE), version: 42 } as Record<string, unknown>;
@@ -532,12 +757,13 @@ describe("0.3's C1 step (42 to 43)", () => {
     old.collected = ['vampDoll'];
     const up = migrateSave(old);
     expect(up?.version).toBe(SAVE_VERSION);
-    expect(up?.cabinet).toEqual(old.cabinet);
+    // V1's R6a's step gives it no fish measured yet.
+    expect(up?.cabinet).toEqual({ ...(old.cabinet as object), best: {} });
     expect(up?.collected).toEqual(['vampDoll']);
   });
 
   it('reads fossils on show and had once she has some, and refuses a list of the wrong shape', () => {
-    const cabinet = { caught: {}, donated: ['lunaMoth', 'trilobite', 'dragonEgg'] };
+    const cabinet = { caught: {}, donated: ['lunaMoth', 'trilobite', 'dragonEgg'], best: {} };
     const up = migrateSave({ ...SAVE, cabinet, collected: ['trilobite'] });
     expect(up?.cabinet.donated).toEqual(cabinet.donated);
     expect(up?.collected).toEqual(['trilobite']);
@@ -828,7 +1054,7 @@ describe('the shape check', () => {
     expect(migrateSave({ ...SAVE, cabinet: { caught: [], donated: [] } })).toBeNull();
     expect(migrateSave({ ...SAVE, cabinet: { caught: { lunaMoth: 3 }, donated: [] } })).toBeNull();
     expect(migrateSave({ ...SAVE, cabinet: { caught: {}, donated: 'all' } })).toBeNull();
-    const later = { caught: { someDayMoth: '2026-09-27' }, donated: ['someDayMoth'] };
+    const later = { caught: { someDayMoth: '2026-09-27' }, donated: ['someDayMoth'], best: {} };
     expect(migrateSave({ ...SAVE, cabinet: later })?.cabinet).toEqual(later);
   });
 
@@ -847,7 +1073,7 @@ describe('the shape check', () => {
     expect(migrateSave({ ...SAVE, mystery: [] })).toBeNull();
     expect(migrateSave({ ...SAVE, mystery: { clues: { rumour: 3 } } })).toBeNull();
     expect(migrateSave({ ...SAVE, mystery: { clues: [] } })).toBeNull();
-    const later = { clues: { someDayClue: '2026-09-27' } };
+    const later = { ...SAVE.mystery, clues: { someDayClue: '2026-09-27' } };
     expect(migrateSave({ ...SAVE, mystery: later })?.mystery).toEqual(later);
   });
 });

@@ -15,6 +15,7 @@ import {
   type Stance,
 } from '../../src/sprites/villagers';
 import type { Facing } from '../../src/types/ids';
+import { FEELINGS } from '../../src/types/mood';
 
 const FACINGS: Facing[] = ['down', 'up', 'left', 'right'];
 const FIGURES: Figure[] = [...VILLAGER_IDS, 'moonPieMan'];
@@ -32,8 +33,9 @@ describe('the villagers', () => {
       for (const facing of FACINGS) {
         for (let frame = 0; frame < DOLL_FRAMES; frame++) {
           const layers = figureLayers(id, facing, frame);
-          // Her scale, and room over her head only for a tall hat (Agatha's witch hat).
-          const tall = id === 'agatha' ? 48 + HAT_ROOM : 48;
+          // Her scale, and room over her head only for a tall hat (Agatha's witch hat, the mayor's
+          // top hat).
+          const tall = id === 'agatha' || id === 'robBoo' ? 48 + HAT_ROOM : 48;
           for (const layer of layers) {
             expect(spriteSize(layer.source), `${id} ${facing} ${frame}`).toEqual({
               width: 32,
@@ -99,7 +101,7 @@ describe("the villagers alive (V1's E3)", () => {
       const seen = new Set([still]);
       for (const stance of stances) {
         const layers = figureLayers(id, 'down', 0, null, null, stance);
-        const tall = id === 'agatha' ? 48 + HAT_ROOM : 48;
+        const tall = id === 'agatha' || id === 'robBoo' ? 48 + HAT_ROOM : 48;
         for (const l of layers) expect(spriteSize(l.source)).toEqual({ width: 32, height: tall });
         const picture = flat(id, 'down', stance);
         expect(seen.has(picture), `${id} ${JSON.stringify(stance)}`).toBe(false);
@@ -121,7 +123,8 @@ describe("the villagers alive (V1's E3)", () => {
         jobs += 1;
       }
     }
-    expect(jobs).toBe(12);
+    // V1's P4: Wrapunzel's mixing bowl beside her tray, and the mayor's stamp.
+    expect(jobs).toBe(14);
   });
 
   it("hold what they're working with inside their picture, and light Nessa's lantern", () => {
@@ -148,6 +151,55 @@ describe("the villagers alive (V1's E3)", () => {
     const frames = [0, 1, 2].map((frame) => flat('maude', 'down', {}, frame));
     expect(new Set(frames).size).toBe(3);
     expect(maudeRows('down', { hem: 1 })).not.toEqual(maudeRows('down'));
+  });
+
+  it('feel every feeling facing her and side on, in costume too, each a face of its own', () => {
+    for (const id of [...FIGURES, 'wes'] as const) {
+      const costumes = id === 'moonPieMan' || id === 'wes' ? [null] : [null, 'own' as const];
+      for (const costume of costumes) {
+        for (const facing of ['down', 'right', 'left'] as const) {
+          const face = (stance: Stance) =>
+            Array.from(
+              rasterizeLayers(figureLayers(id, facing, 0, costume, null, stance), {
+                flipX: facing === 'left',
+              }).data,
+            ).join();
+          const faces = new Set([face({})]);
+          for (const feel of FEELINGS) {
+            const layers = figureLayers(id, facing, 0, costume, null, { feel });
+            const tall = layers[0]!.source.rows.length;
+            for (const l of layers) expect(spriteSize(l.source).height).toBe(tall);
+            faces.add(face({ feel }));
+          }
+          expect(faces.size, `${id} ${facing} ${costume}`).toBe(FEELINGS.length + 1);
+        }
+        // From behind, nobody's face shows.
+        const back = (stance: Stance) => flat(id, 'up', stance);
+        for (const feel of FEELINGS) expect(back({ feel }), `${id} ${feel}`).toBe(back({}));
+      }
+    }
+  });
+
+  it('blink through a feeling, its mouth kept, all but a pumpkin and a skull', () => {
+    for (const id of FIGURES) {
+      if (id === 'gourdon' || id === 'barty' || id === 'moonPieMan') continue;
+      for (const feel of FEELINGS) {
+        if (feel === 'laugh') continue;
+        const blinking = flat(id, 'down', { feel, blink: true });
+        expect(blinking, `${id} ${feel}`).not.toBe(flat(id, 'down', { feel }));
+        expect(blinking, `${id} ${feel}`).not.toBe(flat(id, 'down', { blink: true }));
+      }
+    }
+  });
+
+  it("carve Gourdon's glow to how he feels, so his lit face is the face he's making", () => {
+    const lit = Object.keys(PUMPKIN_HEAD_GLOW).join('');
+    const litAt = (rows: readonly string[]) =>
+      rows.map((r) => [...r].map((k) => (lit.includes(k) ? 1 : 0)).join('')).join('/');
+    const plain = litAt(pumpkinHead('down', 0).rows);
+    for (const feel of FEELINGS) {
+      expect(litAt(pumpkinHead('down', 0, feel).rows), feel).not.toBe(plain);
+    }
   });
 
   it("fold Gourdon's glow with him, so his face stays lit where it is", () => {

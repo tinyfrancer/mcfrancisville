@@ -189,6 +189,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   gourdonHouse: { w: 5, h: 3, door: 2 },
   hazelHouse: { w: 4, h: 3, door: 1 },
   boothovenHouse: { w: 4, h: 3, door: 1 },
+  // Rob Boo's town hall by the square (V1's P3b), on its lot from her first day.
+  townHall: { w: 3, h: 3, door: 1 },
   lotSign: { w: 1, h: 1 },
   soldSign: { w: 1, h: 1 },
   movingBoxes: { w: 1, h: 1 },
@@ -215,8 +217,13 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   cornDogStall: { w: 3, h: 1 },
   hookAGhostStall: { w: 3, h: 1 },
   toffeeAppleStall: { w: 3, h: 1 },
+  // The duck pond and the strength bell (V1's R6b).
+  duckPondStall: { w: 3, h: 1 },
+  strengthBellStall: { w: 3, h: 1 },
   // Market day's table, by the stage (0.2's M3).
   marketStall: { w: 3, h: 1 },
+  // Never written in a map: it stands at `WANDERING_STALL_AT` the weeks it's in town (V1's R3).
+  wanderingStall: { w: 3, h: 1 },
   fortuneTent: { w: 3, h: 2, door: 1 },
   ferrisWheel: { w: 5, h: 2 },
   lightPole: { w: 1, h: 1 },
@@ -230,6 +237,19 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   pearTree: { w: 1, h: 1 },
   plumTree: { w: 1, h: 1 },
   persimmonTree: { w: 1, h: 1 },
+  // The town's projects going up (V1's R4): a post at each corner of a site, each one's frame, and
+  // what's built. The footbridge's rails stand over its deck, walked on.
+  sitePost: { w: 1, h: 1 },
+  bandstandFrame: { w: 3, h: 2 },
+  bandstand: { w: 3, h: 2 },
+  bedFrame: { w: 2, h: 1 },
+  planks: { w: 2, h: 1 },
+  flowerBed: { w: 2, h: 1 },
+  gardenSeat: { w: 2, h: 1 },
+  bridgeFrame: { w: 2, h: 2 },
+  footbridge: { w: 2, h: 2 },
+  greenhouseFrame: { w: 3, h: 2 },
+  herGreenhouse: { w: 3, h: 1 },
 };
 
 export const LEGEND: Record<string, LegendEntry> = {
@@ -303,6 +323,24 @@ export const LEGEND: Record<string, LegendEntry> = {
   E: { tile: 'grass', prop: 'honestyStall' },
   i: { tile: 'grass', prop: 'pumpkinPatch' },
   z: { tile: 'grass', prop: 'goose' },
+  // The ground's open lawns (V1's L2): a meadow of little flowers, and long grass.
+  "'": { tile: 'meadow' },
+  '/': { tile: 'longGrass' },
+};
+
+/**
+ * The wilds' legend (V1's L2): Whisperwood's, the clearing's and Lantern Shore's ways are dirt
+ * tracks, not the town's cobbles.
+ */
+export const WILD_LEGEND: Record<string, LegendEntry> = {
+  ...LEGEND,
+  '=': { tile: 'dirt' },
+};
+
+/** The castle hill's (V1's L2): its ways up to the castle are gravel. */
+export const CASTLE_LEGEND: Record<string, LegendEntry> = {
+  ...LEGEND,
+  '=': { tile: 'gravel' },
 };
 
 /**
@@ -382,6 +420,14 @@ export const TOWN_SPOTS = {
   wellFrontRight: { tx: 20, ty: 23 },
   wellEastUp: { tx: 22, ty: 21 },
   wellWestUp: { tx: 17, ty: 21 },
+  // Out on the pond, west of the fountain, walked on only while it's frozen over (V1's L4).
+  pondIce: { tx: 23, ty: 43 },
+  // Rob Boo's (V1's P3b): the town hall's steps and the square's south-east corner, where he
+  // waves the town good morning and shakes hands; his place round the well, and his film seat.
+  townHallSteps: { tx: 28, ty: 27 },
+  squareSouthEast: { tx: 24, ty: 25 },
+  wellFrontMiddle: { tx: 20, ty: 24 },
+  filmBehindLeft: { tx: 20, ty: 31 },
 } as const satisfies Record<string, Tile>;
 
 /**
@@ -414,7 +460,7 @@ export const TOWN: MapSource = {
     { tx: 6, ty: 16 },
     { tx: 32, ty: 16 },
     { tx: 3, ty: 23 },
-    { tx: 27, ty: 19 },
+    { tx: 21, ty: 16 },
     { tx: 14, ty: 35 },
     { tx: 28, ty: 35 },
     { tx: 35, ty: 45 },
@@ -449,6 +495,8 @@ export const TOWN: MapSource = {
     { prop: 'ollieHouse', to: 'ollieCottage' },
     { prop: 'gourdonHouse', to: 'gourdonPumpkin' },
     { prop: 'boothovenHouse', to: 'boothovenParlour' },
+    // Rob Boo's town hall (V1's P3b).
+    { prop: 'townHall', to: 'mayorsOffice' },
   ],
   // Ollie's, below Agatha's in the west meadow, Gourdon's pumpkin past the bakery, and
   // Boothoven's east of the square, beside the salon.
@@ -456,6 +504,8 @@ export const TOWN: MapSource = {
     { prop: 'ollieHouse', tx: 13, ty: 30 },
     { prop: 'gourdonHouse', tx: 31, ty: 30 },
     { prop: 'boothovenHouse', tx: 35, ty: 21 },
+    // Rob Boo's town hall (V1's P3b), at the square's south-east corner, beside the bakery.
+    { prop: 'townHall', tx: 26, ty: 24 },
   ],
   // Beside her door, at the top of the square, below the well, and by the willow.
   snackSpots: [
@@ -483,8 +533,8 @@ export const TOWN: MapSource = {
   ],
   rows: [
     '############################==##########',
-    '###...................%####P==P.....%###',
-    '##.T.......22222222..T%QQQQ.==s,....%###',
+    "###...................%####P==P.''''%###",
+    "##.T.......22222222..T%QQQQ.==s,''''%###",
     '#........ffffffffffff.%QQQQ.==...T..%T.#',
     '#........|hhhhhhhhhB|.%QQQQ.==..R...%..#',
     '#.HHHHH..|==========|.%..=====......%..#',
@@ -506,12 +556,12 @@ export const TOWN: MapSource = {
     '#.:..SSSSS....====WWWW====....MMMMM....#',
     '#......===========WWWW===========......#',
     '#.............============.............#',
-    '#............T============.R...........#',
+    '#............T============.............#',
     '#.UUUUU....,..============....bbbbbb.d.#',
     '#.UUUUU...;...l==========l....bbbbbb...#',
     '#.UUUUU..AAAAp.....==.....=..dbbbbbb.,.#',
-    '#...=....AAAA......==.....=...bbbbbb,..#',
-    '#.R.=....AAAA......==...T.=======....T.#',
+    "#...=''''AAAA......==.....=...bbbbbb,..#",
+    "#.R.=''''AAAA......==...T.=======....T.#",
     '#...=.....=........==..................#',
     '#T..=.....=......L.==.L...............v#',
     '#...=.....=........==..................#',
@@ -520,16 +570,16 @@ export const TOWN: MapSource = {
     '#......==.v.v......==..................#',
     '#......==........==================....#',
     '#.fffff==fffff...=.........,.....L=....#',
-    '#.|..........|...=YY..~~~~~~~.....=.T..#',
-    '#.|.g.g...g..|.q.=...~~~~~~~~~~...=....#',
-    '#.|.........p|.T.=..~~~~~~~~~~~~..=....#',
+    '#.|///.......|...=YY..~~~~~.......=.T..#',
+    '#.|/g.g...g..|.q.=...~~~~~~~~.....=....#',
+    '#.|.........p|.T.=..~~~~~~~~~~~...=....#',
     '#.|...::::...|...=..~~~~~OO~~~~~..=R.v.#',
-    '#.|.g.::::.g.|...=..~~~~~OO~~~~~..=....#',
-    '#.|.....:....|...=..~~~~~~~~~~~~..=....#',
-    '#.|p..g...g.p|.T.=...~~~~~~~~~~~;.=....#',
-    '#.|..........|...=....~~~~~~~~~...=....#',
+    '#.|.g.::::.g.|...=...~~~~OO~~~~~..=....#',
+    '#.|.....:....|...=...~~~~~~~~~~~..=....#',
+    '#.|p..g...g/p|.T.=....~~~~~~~~~~;.=....#',
+    '#.|.......///|...=....~~~~~~~~~...=....#',
     '#.ffffffffffff...=..jj..~~~~~jj...=..T.#',
-    '##....v.......T..=L...,..........L==.s##',
+    "##....v.......T..=L...,.''''''''.L==.s##",
     '###..............================P==P###',
     '##################################==####',
   ],
@@ -553,7 +603,7 @@ export const WHISPERWOOD_SPOTS = {
 } as const satisfies Record<string, Tile>;
 
 export const WHISPERWOOD: MapSource = {
-  legend: LEGEND,
+  legend: WILD_LEGEND,
   spots: WHISPERWOOD_SPOTS,
   spawn: { tx: 1, ty: 17 },
   // Where the day's mound may be (0.3's C1).
@@ -601,19 +651,19 @@ export const WHISPERWOOD: MapSource = {
     '============....TT.......#',
     '#.........==sTTTT.TTT.T..#',
     '#..oo.....==......T.TT.T.#',
-    '#..;;.....==..T...t.TT...#',
-    '#.....v,..==.............#',
+    '#..;;////.==..T...t.TT...#',
+    '#/////v,..==.............#',
     '#....GG...==.T...TT.TTT..#',
     '#....GG...==.T.........v.#',
-    '#T.t......==...T.--------#',
-    '#.T...T...==.TTT.--------#',
-    '#.T..TT...==.T...--......#',
+    '#T.t......==...T....-----#',
+    '#.T...T//.==.TTT..-------#',
+    '#.T..TT///==.T...---.....#',
     '#.TTT.TT..==xxxx.--..X...#',
     '#..TT..T..=======--......#',
     '#..T..TT..=======--.....T#',
-    '#T..q............--.....T#',
-    '#T.;.....TTT..T..--...T..#',
-    '#...........GG...--.ooT.T#',
+    '#T..q...........--......T#',
+    '#T.;.....TTT..T.--....T..#',
+    '#...........GG..--..ooT.T#',
     '#T..R...t.TTGG...--.TTT.T#',
     '#........T...T.T.--.TTT..#',
     '#T.TTTTTTTT......--..TT.T#',
@@ -639,7 +689,7 @@ export const LANTERN_SHORE_SPOTS = {
 } as const satisfies Record<string, Tile>;
 
 export const LANTERN_SHORE: MapSource = {
-  legend: LEGEND,
+  legend: WILD_LEGEND,
   spots: LANTERN_SHORE_SPOTS,
   spawn: { tx: 14, ty: 6 },
   // Where the day's mound may be (0.3's C1).
@@ -684,8 +734,8 @@ export const LANTERN_SHORE: MapSource = {
     '#...........""....jj.....#',
     '#....================....#',
     '#...........==...........#',
-    '#.v.........==...........#',
-    '#...........==.........TT#',
+    "#.v''''''''.==.///////...#",
+    "#..''''''''.==.///////.TT#",
     '#.TT.================...T#',
     '#T.T..oo.....q.......v...#',
     '#..,.......TT...T..T..T..#',
@@ -705,7 +755,7 @@ export const LANTERN_SHORE: MapSource = {
  * worn path down to the way back.
  */
 export const HIDDEN_CLEARING: MapSource = {
-  legend: LEGEND,
+  legend: WILD_LEGEND,
   spawn: { tx: 9, ty: 21 },
   // Where the day's mound may be (0.3's C1).
   digSpots: [
@@ -721,11 +771,11 @@ export const HIDDEN_CLEARING: MapSource = {
     '#TTTTTTTT..TTTTTT#',
     '#TTTTTTTT.TTTTTTT#',
     '#TTGGTT....TTTTTT#',
-    '#.TGG...v...~~~TT#',
-    '#.T..,.....~~~~.T#',
-    '#.T.,.......~~...#',
-    '#.T............TT#',
-    '#..........,...TT#',
+    '#.TGG...v...r~~TT#',
+    '#.T..,....~~~~~.T#',
+    '#.T.,......~~r...#',
+    "#.T.'''''......TT#",
+    "#....'''''.,...TT#",
     '#TT....t.t......T#',
     '#.....t...t......#',
     '#T......X......TT#',
@@ -751,7 +801,7 @@ export const HIDDEN_CLEARING: MapSource = {
  * whose doors go into its hall (phase U).
  */
 export const CASTLE_HILL: MapSource = {
-  legend: LEGEND,
+  legend: CASTLE_LEGEND,
   spawn: { tx: 13, ty: 9 },
   // Where the day's mound may be (0.3's C1).
   digSpots: [
@@ -770,8 +820,8 @@ export const CASTLE_HILL: MapSource = {
   butterflies: 14,
   rows: [
     '############################',
-    '#..........................#',
-    '#.T.T..................T.T.#',
+    "#.....''''''....''''''.....#",
+    "#.T.T.''''''....''''''.T.T.#",
     '#.T.T.................TT.TT#',
     '#..T.....KKKKKKKKK.....T...#',
     '#.T.TT...KKKKKKKKK....TT.T.#',
@@ -793,10 +843,10 @@ export const CASTLE_HILL: MapSource = {
     '#............==..jj........#',
     '#.T..######..==.######...TT#',
     '#.....v......==......v.....#',
-    '#...........L==L...........#',
-    '#............==..........T.#',
-    '#.......p....==....p.....T.#',
-    '#............==..........T.#',
+    "#...........L==L.'''''''...#",
+    "#............==..'''''''.T.#",
+    '#//////.p....==....p.....T.#',
+    '#//////......==..........T.#',
     '#T.....T.....==........T...#',
     '#%%%%%%%%%%%%++%%%%%%%%%%%%#',
     '#%%%%%%%%%%%%++%%%%%%%%%%%%#',
@@ -831,6 +881,9 @@ export const FAIR_LEGEND: Record<string, LegendEntry> = {
   '4': { tile: 'grass', prop: 'cornDogStall' },
   '5': { tile: 'grass', prop: 'hookAGhostStall' },
   '6': { tile: 'grass', prop: 'toffeeAppleStall' },
+  // V1's R6b.
+  '9': { tile: 'grass', prop: 'duckPondStall' },
+  '0': { tile: 'grass', prop: 'strengthBellStall' },
   '7': { tile: 'grass', prop: 'ferrisWheel' },
   '8': { tile: 'grass', prop: 'marketStall' },
   '!': { tile: 'grass', prop: 'lightPole' },
@@ -848,6 +901,9 @@ export const FAIRGROUND_SPOTS = {
   cornDogs: { tx: 22, ty: 12 },
   hookAGhost: { tx: 7, ty: 17 },
   toffeeApples: { tx: 22, ty: 17 },
+  // The duck pond and the strength bell (V1's R6b), between them.
+  duckPond: { tx: 11, ty: 17 },
+  strengthBell: { tx: 18, ty: 17 },
   tentFlap: { tx: 25, ty: 7 },
   bigWheel: { tx: 5, ty: 27 },
   midway: { tx: 15, ty: 15 },
@@ -878,6 +934,8 @@ export const FAIRGROUND_SPOTS = {
   crowdBackRight: { tx: 19, ty: 9 },
   crowdBack: { tx: 14, ty: 9 },
   crowdBackMiddle: { tx: 16, ty: 9 },
+  // Rob Boo's (V1's P3b).
+  crowdMiddleNear: { tx: 13, ty: 8 },
 } as const satisfies Record<string, Tile>;
 
 export const FAIRGROUND: MapSource = {
@@ -888,8 +946,9 @@ export const FAIRGROUND: MapSource = {
   digSpots: [
     { tx: 24, ty: 2 },
     { tx: 2, ty: 8 },
-    { tx: 11, ty: 15 },
-    { tx: 18, ty: 16 },
+    // Moved off the duck pond and the strength bell (V1's R6b).
+    { tx: 13, ty: 13 },
+    { tx: 19, ty: 19 },
     { tx: 6, ty: 19 },
     { tx: 5, ty: 31 },
     { tx: 26, ty: 26 },
@@ -914,10 +973,10 @@ export const FAIRGROUND: MapSource = {
     '#..==.....jj..==..jj.....==..#',
     '#..==..,,.....==....d....==..#',
     '#,.==.........==.........==.T#',
-    '#..==.555.....==.....666.==..#',
+    '#..==.555.999.==.000.666.==..#',
     '#..==.........==.........==..#',
-    '#T.==......y..==..d......==v.#',
-    '#..==....y....==.....,,..==..#',
+    '#T.==.........==.........==v.#',
+    '#..==....y.y..==.d...,,..==..#',
     '#..==.........==.........==.T#',
     '#..==!..!..!..==..!..!..!==..#',
     '#.v========================..#',
@@ -958,6 +1017,8 @@ export const FARM_LEGEND: Record<string, LegendEntry> = {
   // The farm's extension rows go on from the town's two (0.2's N1): the third and fourth.
   '3': { tile: 'grass', plot: 3 },
   '4': { tile: 'grass', plot: 4 },
+  // Its ways are dirt tracks (V1's L2), between the fields too.
+  '=': { tile: 'dirt' },
 };
 
 /** Where her neighbours are to be found at Boo Acres, Scarah most of all (F3). */
@@ -996,8 +1057,8 @@ export const BOO_ACRES: MapSource = {
   ],
   rows: [
     '##################################',
-    '#T.....T...........v..,..........#',
-    '#...............................T#',
+    "#T.....T.'''''''''.v..,..........#",
+    "#........'''''''''..............T#",
     '#..IIIII...DDDDDD....@..$..&..*..#',
     '#..IIIII...DDDDDD...........,....#',
     '#T.IIIII..dDDDDDDy...............#',
@@ -1024,8 +1085,8 @@ export const BOO_ACRES: MapSource = {
     '#.......f.444444.d.f...q......p..#',
     '#.......f==========f........jj..T#',
     '#..;.;..ffffffffffff....p........#',
-    '#.T..................T...T....,..#',
-    '#.....Tv..jj,..,.;...............#',
+    '#.T...............///T///T....,..#',
+    '#.....Tv..jj,..,.;///////........#',
     '##################################',
   ],
 };

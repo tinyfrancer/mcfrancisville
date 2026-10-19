@@ -23,8 +23,8 @@ export type HolidayId =
 /** The town's own days, which change something while they last. */
 export type TownEventId = 'marketDay' | 'fullMoon' | 'luckyFriday';
 
-/** The town's festivals, which span days (decision 143). */
-export type FestivalId = 'halloweenFestival';
+/** The town's festivals, which span days (decision 143); a week a season beyond October (V1's R3). */
+export type FestivalId = 'halloweenFestival' | 'blossomWeek' | 'fireworksWeek' | 'lightsWeek';
 
 export type CalendarId = SpecialDayId | HolidayId | TownEventId | FestivalId;
 
@@ -49,7 +49,6 @@ export type CalendarKind = 'special' | 'holiday' | 'event' | 'festival';
 
 export interface CalendarRow {
   name: string;
-  icon: string;
   kind: CalendarKind;
   when: When;
   /** What the calendar says of it: what happens, warm and a little silly. */
@@ -70,7 +69,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   // Her days, first on any day they share.
   earlyBirthday: {
     name: "Cody's birthday for you",
-    icon: '🎂',
     kind: 'special',
     when: special('earlyBirthday'),
     about: "Cody is sure it's today. Everyone else has checked. Let him have it.",
@@ -78,7 +76,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   birthday: {
     name: 'Your birthday',
-    icon: '🎉',
     kind: 'special',
     when: special('birthday'),
     about: 'The whole town gathers round the well, and there is always cake.',
@@ -86,7 +83,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   anniversary: {
     name: 'Your anniversary',
-    icon: '💍',
     kind: 'special',
     when: special('anniversary'),
     about: 'Another year of you and Cody. He has something for you in the mailbox.',
@@ -94,7 +90,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   septemberSong: {
     name: 'Your song day',
-    icon: '🎶',
     kind: 'special',
     when: special('septemberSong'),
     about:
@@ -103,7 +98,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   dollyDay: {
     name: 'Dolly Parton day',
-    icon: '🦋',
     kind: 'special',
     when: special('dollyDay'),
     about: 'Butterflies everywhere, big hair all round, and everyone a little bit rhinestone.',
@@ -112,7 +106,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
 
   newYear: {
     name: "New Year's Day",
-    icon: '🎆',
     kind: 'holiday',
     when: { on: '01-01' },
     about: 'A fresh year in McFrancisVille. Same ghosts, new resolutions.',
@@ -120,7 +113,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   valentines: {
     name: "Valentine's Day",
-    icon: '💘',
     kind: 'holiday',
     when: { on: '02-14' },
     about: 'Hearts on every door, and a few that still beat.',
@@ -128,7 +120,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   stPatricks: {
     name: "St Patrick's Day",
-    icon: '☘️',
     kind: 'holiday',
     when: { on: '03-17' },
     about: 'Everything green, even the ghosts. Especially the ghosts.',
@@ -136,7 +127,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   easter: {
     name: 'Easter',
-    icon: '🥚',
     kind: 'holiday',
     when: { easter: 0 },
     about: 'Eggs hidden all over town. Some of them are hatching into something.',
@@ -144,7 +134,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   fourthOfJuly: {
     name: 'Fourth of July',
-    icon: '🎇',
     kind: 'holiday',
     when: { on: '07-04' },
     about: 'Fireworks over the pond, and the bats are not impressed.',
@@ -152,7 +141,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   halloween: {
     name: 'Halloween',
-    icon: '🎃',
     kind: 'holiday',
     when: { on: '10-31' },
     about: "It's Halloween every day here, but today it's official. Party!",
@@ -160,7 +148,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   thanksgiving: {
     name: 'Thanksgiving',
-    icon: '🦃',
     kind: 'holiday',
     when: { nth: 4, weekday: 4, month: 11 },
     about: 'A long table, a lot of pie, and everyone saying what they are thankful for.',
@@ -168,7 +155,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   christmasEve: {
     name: 'Christmas Eve',
-    icon: '🕯️',
     kind: 'holiday',
     when: { on: '12-24' },
     about: 'Stockings up, and something on the roof that is probably just the wind.',
@@ -176,7 +162,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   christmas: {
     name: 'Christmas',
-    icon: '🎄',
     kind: 'holiday',
     when: { on: '12-25' },
     about: 'Snow on the gravestones, lights on everything, and presents for everyone.',
@@ -184,7 +169,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   newYearsEve: {
     name: "New Year's Eve",
-    icon: '🥂',
     kind: 'holiday',
     when: { on: '12-31' },
     about: 'Staying up till midnight, which in this town is nothing special.',
@@ -193,7 +177,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
 
   marketDay: {
     name: 'Market day',
-    icon: '🧺',
     kind: 'event',
     when: { nth: 1, weekday: 6 },
     about: 'The first Saturday of the month. Cobweb Corner puts out a market table of extras.',
@@ -206,7 +189,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   fullMoon: {
     name: 'Full moon',
-    icon: '🌕',
     kind: 'event',
     when: { fullMoon: true },
     about: 'The night is bright, and the moths and orbs come out in their droves.',
@@ -214,7 +196,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   },
   luckyFriday: {
     name: 'Lucky Friday',
-    icon: '🍀',
     kind: 'event',
     when: { weekday: 5, date: 13 },
     about:
@@ -225,7 +206,6 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
   // Last, so a day's own rows come before the festival it falls in.
   halloweenFestival: {
     name: 'The Halloween Festival',
-    icon: '🦇',
     kind: 'festival',
     when: { from: '10-01', until: '10-31' },
     about:
@@ -233,6 +213,36 @@ export const CALENDAR: Record<CalendarId, CalendarRow> = {
     morning: 'The Halloween Festival is on!',
     finale: 'halloween',
     banner: ['HALLOWEEN', 'FESTIVAL'],
+  },
+  // A week a season beyond October (V1's R3), each with a shelf of its own and a beat a week.
+  blossomWeek: {
+    name: 'Blossom week',
+    kind: 'festival',
+    when: { from: '04-18', until: '04-24' },
+    about:
+      'A week in spring when every tree in town is pink, and a picnic under the willow on the Saturday.',
+    morning: "It's blossom week! Every tree in town has gone pink.",
+    banner: ['BLOSSOM', 'WEEK'],
+  },
+  fireworksWeek: {
+    name: 'Fireworks week',
+    kind: 'festival',
+    when: { from: '06-28', until: '07-04' },
+    about:
+      'The week before the Fourth, with sparklers at the shore on the Saturday and fireworks to finish.',
+    morning: "It's fireworks week! The bats have been warned.",
+    finale: 'fourthOfJuly',
+    banner: ['FIREWORKS', 'WEEK'],
+  },
+  lightsWeek: {
+    name: 'Winter lights week',
+    kind: 'festival',
+    when: { from: '12-18', until: '12-24' },
+    about:
+      'The week before Christmas Eve, every window lit, and a walk round the lights on the Saturday.',
+    morning: "It's winter lights week! Every window in town is lit.",
+    finale: 'christmasEve',
+    banner: ['WINTER', 'LIGHTS'],
   },
 };
 

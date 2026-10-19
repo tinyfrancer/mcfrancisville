@@ -13,8 +13,11 @@ import {
   type Stance,
 } from '../sprites/villagers';
 import { workPose } from '../sprites/working';
+import { MAYOR_LIFT, MAYOR_PORTRAIT_DROP } from '../sprites/robBoo';
 import { stanceOf } from '../systems/neighbourLife';
+import { bubblesOver } from '../systems/today';
 import type { BraceletId, Facing, VillagerId, ZoneId } from '../types/ids';
+import type { Feeling } from '../types/mood';
 import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
 import { TILE_SIZE } from '../config/world';
@@ -22,6 +25,7 @@ import type { Point } from './camera';
 import { fillPixelEllipse } from './ground';
 import { bakeIcon } from './items';
 import { glowOf, type Drawable } from './scene';
+import { scale2x } from './scale2x';
 
 /** How long each of a neighbour's walk frames shows: a slower step than hers. */
 const AMBLE_FRAME_MS = 180;
@@ -48,7 +52,8 @@ export function bakeFigure(
 /** Names a stance for the bake cache; standing plainly is no name at all. */
 function stanceKey(stance: Stance): string {
   const act = stance.act ? `:${stance.act}${stance.frame ?? 0}` : '';
-  return `${act}${stance.sit ? ':sit' : ''}${stance.out ? ':out' : ''}${stance.blink ? ':blink' : ''}`;
+  const feel = stance.feel ? `:${stance.feel}` : '';
+  return `${act}${stance.sit ? ':sit' : ''}${stance.out ? ':out' : ''}${stance.blink ? ':blink' : ''}${feel}`;
 }
 
 /** Maude's soft glow after dark: all of her sheet, in its own pale colour, as she stands. */
@@ -66,7 +71,7 @@ export function maudeGlow(facing: Facing, frame = 0, stance: Stance = {}): HTMLC
 /** Gourdon's carved face after dark, candlelit from inside his pumpkin, as he stands. */
 function gourdonGlow(facing: Facing, frame: number, stance: Stance): HTMLCanvasElement {
   const f = stance.act ? 0 : frame % DOLL_FRAMES;
-  const head = pumpkinHead(facing, f);
+  const head = pumpkinHead(facing, f, stance.feel ?? null);
   const [layer] = stanceFolded([{ source: { rows: head.rows }, palette: head.palette }], stance);
   return glowOf(
     `glow:gourdon:${facing}:${f}${stanceKey(stance)}`,
@@ -114,7 +119,10 @@ export function neighbourDrawables(
       const frame = n.moving ? 1 + (Math.floor(n.walkMs / AMBLE_FRAME_MS) % 2) : 0;
       const wears = world.friends.of(n.id).wears ?? null;
       // Standing, they breathe, blink, wave, sit and work (V1's E3).
-      const stance = stanceOf({ ...n, seated: n.seat !== null }, nowMs) ?? {};
+      const life = stanceOf({ ...n, seated: n.seat !== null }, nowMs) ?? {};
+      // And how they feel about what they're telling her, the face on their bust (V1's L7).
+      const feel = world.neighbourhood.feelingOf(n.id);
+      const stance: Stance = feel ? { ...life, feel } : life;
       const costume = world.finale.costumeOf(n.id);
       const sprite = bakeFigure(n.id, n.facing, frame, costume, wears, stance);
       const ghost = n.id === 'maude';
@@ -138,13 +146,16 @@ export function neighbourDrawables(
       }
       const footY = Math.round(n.y) + 14;
       const x = Math.round(n.x);
-      const lift = ghost ? 5 + Math.round(Math.sin(nowMs / 450) * 2) : 0;
+      // The mayor floats a little too, a ghost in a top hat (V1's P3b).
+      const floats = ghost || n.id === 'robBoo';
+      const bob = Math.round(Math.sin(nowMs / 450) * 2);
+      const lift = ghost ? 5 + bob : floats ? MAYOR_LIFT + bob : 0;
       const d: Drawable = {
         footY,
         sprite,
         x: x - sprite.width / 2,
         y: footY - sprite.height - lift,
-        shadow: { cx: x, cy: footY - 2, w: ghost ? 16 : 24, h: ghost ? 6 : 8 },
+        shadow: { cx: x, cy: footY - 2, w: floats ? 16 : 24, h: floats ? 6 : 8 },
       };
       if (glow) d.glow = glow;
       return d;
@@ -171,8 +182,95 @@ export function drawPortrait(
   // Maude's sheet starts a little lower in her sprite than the others' heads.
   // A costume's tall hat is left above the frame, so the face sits where it always does.
   const hat = sprite.height - bakeFigure(id, 'down', 0).height;
-  const top = (id === 'maude' ? 6 : 0) + hat;
+  // The mayor's top hat is cropped to its brim, so his face is all there (V1's P3b).
+  const top = (id === 'maude' ? 6 : id === 'robBoo' ? MAYOR_PORTRAIT_DROP : 0) + hat;
   ctx.drawImage(sprite, 0, top, size, size, 0, 0, size, size);
+}
+
+/** How a face looks on the bust (V1's L5): as it always does, or a feeling (V1's L7). */
+export type BustMood = 'neutral' | Feeling;
+
+/**
+ * A bust's frame (V1's L5): head and shoulders in a square of 32 of the figure's pixels, drawn at 64
+ * by `scale2x`, the shoulders running off its foot: `above` rows over the shoulders' line (the
+ * head's 24, and a little hair or hat), `below` under it.
+ */
+const BUST = { size: 32, above: 25, below: 7 };
+
+const firstRows = new WeakMap<HTMLCanvasElement, number>();
+
+/** The first row of a baked sprite with anything in it: where the top of their head is. */
+function firstRow(sprite: HTMLCanvasElement): number {
+  let row = firstRows.get(sprite);
+  if (row !== undefined) return row;
+  row = 0;
+  const data = sprite.getContext('2d')?.getImageData(0, 0, sprite.width, sprite.height).data;
+  if (data) {
+    const at = data.findIndex((v, i) => i % 4 === 3 && v > 0);
+    if (at >= 0) row = Math.floor(at / 4 / sprite.width);
+  }
+  firstRows.set(sprite, row);
+  return row;
+}
+
+/**
+ * Draws a neighbour into a canvas of the HUD's as a bust (V1's L5): their head and shoulders
+ * framed whole wherever their head starts in the sprite (a mummy's sheet, a tall hat), drawn at
+ * 64 from their own pixels (`scale2x`: diagonals half-stepped, edges kept), in an oval of evening
+ * like a cameo's. `mood` is the face, the one they have in the world as they say it (V1's L7,
+ * baked through `bakeFigure` with it, so the world and the bust share one face); `shadow` fills
+ * the figure with one colour, for someone she hasn't met.
+ */
+export function drawBust(
+  canvas: HTMLCanvasElement,
+  id: Figure,
+  costume: Costume | null = null,
+  mood: BustMood = 'neutral',
+  shadow: string | null = null,
+): void {
+  const stance: Stance = mood === 'neutral' ? {} : { feel: mood };
+  const sprite = bakeFigure(id, 'down', 0, costume, null, stance);
+  const shoulders = sprite.height - DOLL_HEIGHT + 24;
+  const top = Math.max(firstRow(sprite) - 1, shoulders - BUST.above, 0);
+  const rows = Math.min(sprite.height, shoulders + BUST.below) - top;
+  const art = document.createElement('canvas');
+  art.width = BUST.size;
+  art.height = BUST.size;
+  const a = art.getContext('2d');
+  if (!a) return;
+  a.drawImage(
+    sprite,
+    0,
+    top,
+    sprite.width,
+    rows,
+    (BUST.size - sprite.width) >> 1,
+    BUST.size - rows,
+    sprite.width,
+    rows,
+  );
+  if (shadow) {
+    a.globalCompositeOperation = 'source-in';
+    a.fillStyle = shadow;
+    a.fillRect(0, 0, BUST.size, BUST.size);
+  }
+  const size = BUST.size * 2;
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
+  ctx.clearRect(0, 0, size, size);
+  // The oval of evening behind them, a shade lighter toward the top, as if lit from above.
+  ctx.fillStyle = PALETTE.dusk;
+  fillPixelEllipse(ctx, size / 2, size / 2 + 6, 58, 64);
+  ctx.fillStyle = PALETTE.plum;
+  fillPixelEllipse(ctx, size / 2, size / 2 - 2, 40, 38);
+  const big = scale2x(a.getImageData(0, 0, BUST.size, BUST.size).data, BUST.size, BUST.size);
+  const figure = document.createElement('canvas');
+  figure.width = size;
+  figure.height = size;
+  figure.getContext('2d')?.putImageData(new ImageData(big, size, size), 0, 0);
+  ctx.drawImage(figure, 0, 0);
 }
 
 /** Where each twinkle of a spell sits round a neighbour's head, and its turn to shine. */
@@ -218,7 +316,7 @@ export function drawSpellSparkles(
 
 /**
  * A "!" over a neighbour with news for her, and a "?" over one who has lost something, bobbing a
- * little. Drawn after the light, so she can see them across the town at night.
+ * little, and beside either a parcel over one asking a favour today (V1's R2). Drawn after the light, so she can see them across the town at night.
  */
 export function drawNeighbourBubbles(
   ctx: CanvasRenderingContext2D,
@@ -228,13 +326,21 @@ export function drawNeighbourBubbles(
   nowMs: number,
 ): void {
   for (const n of world.neighbourhood.neighboursIn(zone)) {
-    const bubble = world.smallEvents.bubble(n.id);
-    if (!bubble) continue;
-    const art = NEIGHBOUR_BUBBLES[bubble];
-    const sprite = bakeIcon(`bubble:${bubble === '!' ? 'news' : 'lost'}`, art.source, art.palette);
+    const bubbles = bubblesOver(
+      world.smallEvents.bubble(n.id),
+      world.neighbourhood.favour(n.id) !== null,
+    );
+    if (bubbles.length === 0) continue;
     const bob = 2 * (Math.floor(nowMs / 500) % 2);
     const head = overHead(world, n);
-    ctx.drawImage(sprite, head.x + 4 - cam.x, head.y - sprite.height - bob - cam.y);
+    let x = head.x + 4;
+    for (const bubble of bubbles) {
+      const art = NEIGHBOUR_BUBBLES[bubble];
+      const key = { '!': 'news', '?': 'lost', '+': 'favour' }[bubble];
+      const sprite = bakeIcon(`bubble:${key}`, art.source, art.palette);
+      ctx.drawImage(sprite, x - cam.x, head.y - sprite.height - bob - cam.y);
+      x += sprite.width + 2;
+    }
   }
 }
 

@@ -350,6 +350,242 @@ function elviraCurled(): SpriteSource {
   return finishPet(s);
 }
 
+/**
+ * A cat sitting with its back to her (V1's R6c): watching the fire, or looking up at her when
+ * she's further up the room. Its ears from behind, its tail round its paws on the ground.
+ */
+function catBack(kind: Cat): SpriteSource {
+  const s = new Sketch(20, 24);
+  s.ellipse(10, 17, 7, kind === 'bambino' ? 5 : 6, 'f');
+  s.ellipse(10, 8.5, 6.5, 5.5, 'f');
+  ear(s, 5, 0, 5, false);
+  ear(s, 14, 0, 5, false);
+  // The tail curls out from under her, along the floor to the right.
+  s.rect(14, 21, 5, 2, 'f').rect(17, 19, 2, 2, 'f');
+  if (kind === 'sphynx') s.set(8, 5, 's').set(10, 4, 's').set(12, 5, 's').set(10, 6, 's');
+  if (kind === 'fluffy') {
+    // All tuxedo from behind, but for the tip of her plume and two white socks.
+    for (let y = 0; y < s.height; y++) {
+      for (let x = 0; x < s.width; x++) if (s.get(x, y) === 'f' && y < 21) s.set(x, y, 'm');
+    }
+    s.rect(17, 19, 2, 2, 'f');
+  }
+  neckwear(s, (_x, y) => y === 13 || y === 14, []);
+  return finishPet(s);
+}
+
+/** Fibi from behind: her big ears up, her bushy tail down along the floor. */
+function shepherdBack(): SpriteSource {
+  const s = new Sketch(24, 28);
+  s.ellipse(12, 19, 8, 8, 'f');
+  s.ellipse(12, 9, 6.5, 6, 'f');
+  ear(s, 7, 0, 6, false);
+  ear(s, 17, 0, 6, false);
+  s.ellipse(17.5, 24.5, 3.5, 2.5, 'f');
+  s.rect(11, 8, 2, 8, 'm');
+  neckwear(s, (_x, y) => y === 15 || y === 16, []);
+  return finishPet(s);
+}
+
+/** Dolly from behind: her topknot, her ears down, and the pom-pom of her tail. */
+function poodleBack(): SpriteSource {
+  const s = new Sketch(24, 30);
+  s.ellipse(12, 21, 8, 8, 'f');
+  s.ellipse(12, 9, 6, 6, 'f');
+  s.ellipse(12, 3.5, 5, 3.5, 'f');
+  s.ellipse(12, 24, 3, 3, 'f');
+  curls(s);
+  s.ellipse(5, 11, 2.5, 5, 'm').ellipse(19, 11, 2.5, 5, 'm');
+  s.rect(6, 27, 4, 2, 'f').rect(14, 27, 4, 2, 'f');
+  neckwear(s, (_x, y) => y === 16 || y === 17, []);
+  return finishPet(s);
+}
+
+/** The spiral of Gary's shell, keyed `C` over its `CCcc` sphere, round a centre. */
+function spiral(s: Sketch, cx: number, cy: number): void {
+  for (const [x, y] of [
+    [0, 0],
+    [1, 0],
+    [1, 1],
+    [0, 2],
+    [-1, 2],
+    [-2, 1],
+    [-2, 0],
+    [-2, -1],
+    [-1, -2],
+    [1, -2],
+    [2, -1],
+    [3, 0],
+    [3, 2],
+    [2, 3],
+  ] as const) {
+    s.set(cx + x, cy + y, 'C');
+  }
+}
+
+/** Gary facing her: his shell up behind him, his face and both eye stalks. */
+function snailFront(): SpriteSource {
+  const s = new Sketch(22, 20);
+  s.ellipse(11, 17, 9, 2.5, 'f');
+  const shell = new Sketch(22, 20).sphere(11, 8.5, 7, 7, 'CCcc');
+  s.stamp(shell, 0, 0);
+  spiral(s, 11, 8);
+  s.ellipse(11, 13.5, 4, 3.5, 'f');
+  s.rect(8, 4, 1, 7, 'f').rect(14, 4, 1, 7, 'f');
+  s.set(8, 3, 'e').set(14, 3, 'e');
+  s.set(10, 14, 'e').set(12, 14, 'e');
+  neckwear(s, (x, y) => y === 16 && x >= 8 && x <= 14, [[11, 17]]);
+  return finishPet(s);
+}
+
+/** Gary from behind: all shell, with the tips of his stalks peeping over it. */
+function snailBack(): SpriteSource {
+  const s = new Sketch(22, 20);
+  s.ellipse(11, 17, 9, 2.5, 'f');
+  s.rect(8, 1, 1, 5, 'f').rect(14, 1, 1, 5, 'f');
+  s.set(8, 0, 'e').set(14, 0, 'e');
+  const shell = new Sketch(22, 20).sphere(11, 10, 7.5, 7, 'CCcc');
+  s.stamp(shell, 0, 0);
+  spiral(s, 11, 10);
+  neckwear(s, () => false, [[11, 18]]);
+  return finishPet(s);
+}
+
+/** Gary tucked into his shell for a nap: his job (V1's R6c). */
+function snailTucked(): SpriteSource {
+  const s = new Sketch(28, 18);
+  s.ellipse(12, 15.5, 7, 1.5, 'f');
+  const shell = new Sketch(28, 18).sphere(10, 9.5, 7.5, 7, 'CCcc');
+  s.stamp(shell, 0, 0);
+  spiral(s, 10, 9);
+  neckwear(s, () => false, [[17, 16]]);
+  return finishPet(s);
+}
+
+/** Gary's trick, at last: stretched up tall, both stalks as high as they'll go. Ta-da. */
+function snailTaDa(): SpriteSource {
+  const s = new Sketch(28, 24);
+  s.ellipse(13, 20.5, 12, 2.5, 'f');
+  s.ellipse(22, 15, 3.5, 6, 'f');
+  s.rect(20, 2, 1, 10, 'f').rect(24, 1, 1, 11, 'f');
+  s.set(20, 1, 'e').set(24, 0, 'e');
+  neckwear(s, (x, y) => (x === 19 || x === 20) && y >= 13 && y <= 22, [[21, 21]]);
+  const shell = new Sketch(28, 24).sphere(10, 14.5, 7.5, 7, 'CCcc');
+  s.stamp(shell, 0, 0);
+  spiral(s, 10, 14);
+  return finishPet(s);
+}
+
+/** Florence on her side, belly to her, paws out, her blanket over her back end: rolling over. */
+function florenceRolling(onBack: boolean): SpriteSource {
+  const s = new Sketch(32, 20);
+  if (onBack) {
+    // Belly up, all four paws in the air, her head upside down at the end.
+    s.ellipse(15, 13, 10, 4.5, 'f');
+    for (const x of [8, 12, 18, 22]) s.rect(x, 4, 3, 6, 'f');
+    s.ellipse(26.5, 12, 5, 4.5, 'f');
+    // Her ears point down, her head being upside down.
+    for (const tip of [24, 29]) {
+      for (let i = 0; i < 4; i++) {
+        const half = Math.floor(i / 2);
+        s.rect(tip - half, 19 - i, half * 2 + 1, 1, 'f');
+      }
+    }
+    s.rect(24, 12, 2, 1, 's').rect(28, 12, 1, 1, 's').set(26, 10, 'p');
+    s.ellipse(15, 14.5, 6, 2, 'l');
+  } else {
+    s.ellipse(15, 13, 10, 4.5, 'f');
+    s.rect(9, 16, 4, 2, 'f').rect(19, 16, 4, 2, 'f');
+    s.ellipse(26.5, 10, 5, 4.5, 'f');
+    ear(s, 24, 3, 5);
+    ear(s, 29, 4, 4);
+    eye(s, 26, 9);
+    s.set(30, 11, 'p');
+  }
+  // Her blanket, still over her back half, as it always is.
+  s.ellipse(8, 13, 7.5, 5, 'b').rect(1, 13, 13, 5, 'b');
+  for (const x of [4, 9]) for (let y = 7; y < 18; y++) if (s.get(x, y) === 'b') s.set(x, y, 'c');
+  s.bevel('bc', null, 'B');
+  neckwear(s, (x, y) => (x === 20 || x === 21) && y >= 9 && y <= 16, [[22, 17]]);
+  return finishPet(s);
+}
+
+/** Fibi sitting up tall, front paws up, begging: `high` as she bobs. */
+function shepherdBeg(high: boolean): SpriteSource {
+  const s = new Sketch(24, 30);
+  const up = high ? 1 : 0;
+  s.ellipse(12, 21, 6.5, 8, 'f');
+  s.ellipse(12, 9 - up, 6.5, 6, 'f');
+  s.ellipse(12, 13 - up, 3.5, 2.5, 'f');
+  ear(s, 7, 0 - up + 1, 6);
+  ear(s, 17, 0 - up + 1, 6);
+  eye(s, 8, 8 - up);
+  eye(s, 14, 8 - up);
+  s.rect(11, 12 - up, 2, 1, 'm');
+  s.rect(11, 14 - up, 2, 2, 'p');
+  // Paws up at her chest, tucked in.
+  s.rect(7, 16 - up * 2, 3, 3, 'f').rect(14, 16 - up * 2, 3, 3, 'f');
+  s.rect(7, 27, 4, 2, 'f').rect(13, 27, 4, 2, 'f');
+  neckwear(s, (_x, y) => y === 15 - up || y === 16 - up, [
+    [11, 17 - up],
+    [12, 17 - up],
+    [11, 18 - up],
+    [12, 18 - up],
+  ]);
+  return finishPet(s);
+}
+
+/** Dolly mid-spin, facing her, her ears flung out either side. */
+function poodleSpin(): SpriteSource {
+  const s = new Sketch(28, 30);
+  s.ellipse(14, 21, 8, 8, 'f');
+  s.ellipse(14, 9, 6, 6, 'f');
+  s.ellipse(14, 3.5, 5, 3.5, 'f');
+  s.ellipse(14, 13, 3, 2.5, 'f');
+  curls(s);
+  s.ellipse(5, 8, 4, 2.5, 'm').ellipse(23, 8, 4, 2.5, 'm');
+  eye(s, 10, 8);
+  eye(s, 16, 8);
+  s.rect(13, 12, 2, 1, 'm');
+  s.rect(9, 27, 4, 2, 'f').rect(15, 27, 4, 2, 'f');
+  neckwear(s, (_x, y) => y === 16 || y === 17, [
+    [13, 18],
+    [14, 18],
+    [13, 19],
+    [14, 19],
+  ]);
+  return finishPet(s);
+}
+
+/** A grid turned a quarter at a time clockwise: Wybie upside down in his loop. */
+function turned(source: SpriteSource, quarters: 1 | 2 | 3): SpriteSource {
+  let rows = [...source.rows];
+  for (let q = 0; q < quarters; q++) {
+    const h = rows.length;
+    const w = rows[0]!.length;
+    const next: string[] = [];
+    for (let x = 0; x < w; x++) {
+      let row = '';
+      for (let y = h - 1; y >= 0; y--) row += rows[y]![x];
+      next.push(row);
+    }
+    rows = next;
+  }
+  return { rows };
+}
+
+/** Elvira, all but gone: a curl of green mist where she was. */
+function elviraWisp(): SpriteSource {
+  const s = new Sketch(16, 14);
+  s.ellipse(8, 10, 5, 2.5, 'f');
+  s.ellipse(6, 6.5, 2.5, 2.5, 'f');
+  s.ellipse(10, 4, 2, 2, 'f');
+  s.set(12, 1, 'f').set(13, 2, 'f');
+  s.set(7, 9, 'h').set(9, 9, 'h');
+  neckwear(s, () => false, []);
+  return finishPet(s);
+}
+
 const CAT_SIDE_0 = catSide('sphynx', 0);
 const CAT_SIDE_1 = catSide('sphynx', 1);
 const CAT_SIT = catSit('sphynx');
@@ -371,16 +607,92 @@ const FLUFFY_SIT = catSit('fluffy');
 const ELVIRA_CURLED = elviraCurled();
 
 /** How a pet is drawn: which grid, for what it's doing. */
-export type PetFrame = 'side0' | 'side1' | 'sit' | 'rest';
+export type PetFrame =
+  'side0' | 'side1' | 'sitFront' | 'sitBack' | 'rest' | 'trick0' | 'trick1' | 'trick2';
 
 export interface PetArt {
   side: readonly [SpriteSource, SpriteSource];
-  sit: SpriteSource;
-  /** Florence asleep under her blanket, or Elvira curled up. */
+  /** Sitting facing her, into the room. */
+  sitFront: SpriteSource;
+  /** Sitting with its back to her (V1's R6c): watching the fire, or looking up the room at her. */
+  sitBack: SpriteSource;
+  /** Florence asleep under her blanket, Elvira curled up, or Gary tucked into his shell. */
   rest?: SpriteSource;
+  /** The frames of its trick (V1's R6c) that it has none of already, one to three. */
+  trick: readonly SpriteSource[];
   palette: Palette;
   /** A ghost pet's soft glow after dark: every key in one pale colour (decisions.md 17). */
   glow?: Palette;
+}
+
+/**
+ * A moment of a trick: from `at` (0 to 1 through it), which frame, turned round (`flip`, against
+ * the way it faces), lifted and moved along (in pixels), and how solid it is.
+ */
+export interface TrickStep {
+  at: number;
+  frame: PetFrame;
+  flip?: boolean;
+  lift?: number;
+  dx?: number;
+  alpha?: number;
+}
+
+/**
+ * Each trick, beat by beat (V1's R6c): Florence rolls over, Fibi sits up and begs, Dolly spins,
+ * Gary… eventually, Wybie loops the loop, Elvira fades away and back.
+ */
+export const TRICK_STEPS: Record<PetId, readonly TrickStep[]> = {
+  florence: [
+    { at: 0, frame: 'trick0' },
+    { at: 0.3, frame: 'trick1' },
+    { at: 0.65, frame: 'trick0', flip: true },
+    { at: 0.9, frame: 'rest' },
+  ],
+  fibi: [
+    { at: 0, frame: 'trick0' },
+    { at: 0.25, frame: 'trick1' },
+    { at: 0.5, frame: 'trick0' },
+    { at: 0.75, frame: 'trick1' },
+  ],
+  dolly: [
+    { at: 0, frame: 'side0' },
+    { at: 0.125, frame: 'trick0' },
+    { at: 0.25, frame: 'side0', flip: true },
+    { at: 0.375, frame: 'sitBack' },
+    { at: 0.5, frame: 'side0' },
+    { at: 0.625, frame: 'trick0' },
+    { at: 0.75, frame: 'side0', flip: true },
+    { at: 0.875, frame: 'sitFront' },
+  ],
+  gary: [
+    { at: 0, frame: 'rest' },
+    { at: 0.55, frame: 'side0' },
+    { at: 0.7, frame: 'trick0' },
+  ],
+  wybie: [
+    { at: 0, frame: 'side0', lift: 2, dx: -6 },
+    { at: 0.18, frame: 'trick0', lift: 12, dx: 6 },
+    { at: 0.4, frame: 'trick1', lift: 22, dx: 0 },
+    { at: 0.62, frame: 'trick2', lift: 12, dx: -8 },
+    { at: 0.84, frame: 'side0', lift: 2, dx: 0 },
+  ],
+  elvira: [
+    { at: 0, frame: 'sitFront', alpha: 0.7 },
+    { at: 0.15, frame: 'sitFront', alpha: 0.35 },
+    { at: 0.3, frame: 'trick0', alpha: 0.5 },
+    { at: 0.55, frame: 'trick0', alpha: 0.25 },
+    { at: 0.7, frame: 'sitFront', alpha: 0.35 },
+    { at: 0.85, frame: 'sitFront', alpha: 0.7 },
+  ],
+};
+
+/** The beat of its trick a pet is at, `done` of the way through it. */
+export function trickStep(id: PetId, done: number): TrickStep {
+  const steps = TRICK_STEPS[id];
+  let step = steps[0]!;
+  for (const s of steps) if (done >= s.at) step = s;
+  return step;
 }
 
 /**
@@ -434,8 +746,10 @@ const ELVIRA = coat({
 export const PET_ART: Record<PetId, PetArt> = {
   florence: {
     side: [CAT_SIDE_0, CAT_SIDE_1],
-    sit: CAT_SIT,
+    sitFront: CAT_SIT,
+    sitBack: catBack('sphynx'),
     rest: FLORENCE_ASLEEP,
+    trick: [florenceRolling(false), florenceRolling(true)],
     // Her blanket is blue, with cream stripes.
     palette: coat({
       f: C.skin,
@@ -449,7 +763,9 @@ export const PET_ART: Record<PetId, PetArt> = {
   },
   fibi: {
     side: [SHEPHERD_SIDE_0, SHEPHERD_SIDE_1],
-    sit: SHEPHERD_SIT,
+    sitFront: SHEPHERD_SIT,
+    sitBack: shepherdBack(),
+    trick: [shepherdBeg(false), shepherdBeg(true)],
     palette: coat({
       f: C.furBlack,
       s: C.furBlackShade,
@@ -460,36 +776,54 @@ export const PET_ART: Record<PetId, PetArt> = {
   },
   dolly: {
     side: [POODLE_SIDE_0, POODLE_SIDE_1],
-    sit: POODLE_SIT,
+    sitFront: POODLE_SIT,
+    sitBack: poodleBack(),
+    trick: [poodleSpin()],
     palette: coat({ f: C.furBlack, s: C.furBlackShade, l: C.dusk, e: C.gold, p: C.roseLight }),
   },
   gary: {
     side: [SNAIL_0, SNAIL_1],
-    sit: SNAIL_0,
+    sitFront: snailFront(),
+    sitBack: snailBack(),
+    rest: snailTucked(),
+    trick: [snailTaDa()],
     palette: coat({ f: C.skinMintyShade, s: C.skinMinty, c: C.rope, C: C.wood, e: C.ink }),
   },
   wybie: {
     side: [BAMBINO_SIDE_0, BAMBINO_SIDE_1],
-    sit: BAMBINO_SIT,
+    sitFront: BAMBINO_SIT,
+    sitBack: catBack('bambino'),
+    // Up, over and down again: nose up, upside down, nose down.
+    trick: [turned(BAMBINO_SIDE_0, 3), turned(BAMBINO_SIDE_0, 2), turned(BAMBINO_SIDE_0, 1)],
     palette: WYBIE,
     glow: glowing(WYBIE, C.orbBlueLight),
   },
   elvira: {
     side: [FLUFFY_SIDE_0, FLUFFY_SIDE_1],
-    sit: FLUFFY_SIT,
+    sitFront: FLUFFY_SIT,
+    sitBack: catBack('fluffy'),
     rest: ELVIRA_CURLED,
+    trick: [elviraWisp()],
     palette: ELVIRA,
     glow: glowing(ELVIRA, C.orbGreenLight),
   },
 };
 
-/** The grid a pet is drawn from for a frame; one without a rest pose sits instead. */
+/**
+ * The grid a pet is drawn from for a frame; one without a rest pose sits instead, and a trick's
+ * frame it hasn't is its first.
+ */
 export function petSource(id: PetId, frame: PetFrame): SpriteSource {
   const art = PET_ART[id];
   if (frame === 'side0') return art.side[0];
   if (frame === 'side1') return art.side[1];
-  if (frame === 'rest') return art.rest ?? art.sit;
-  return art.sit;
+  if (frame === 'sitBack') return art.sitBack;
+  if (frame === 'rest') return art.rest ?? art.sitFront;
+  if (frame === 'trick0' || frame === 'trick1' || frame === 'trick2') {
+    const i = Number(frame.slice(-1));
+    return art.trick[i] ?? art.trick[0] ?? art.sitFront;
+  }
+  return art.sitFront;
 }
 
 /** Each accessory's colour, and its spikes' or bell's. */
@@ -653,6 +987,38 @@ export const BUBBLE_ART: Record<Bubble, BubbleArt> = {
       ],
     },
     palette: { ...BUBBLE_EDGE, x: C.ink },
+  },
+  // A nose on the trail (V1's R6c): three little sniffs, in a bubble.
+  sniff: {
+    source: {
+      rows: [
+        '.ooooooo.',
+        'owwwwwwwo',
+        'owxwwwwwo',
+        'owwwxwwwo',
+        'owwwwwxwo',
+        'owwwwwwwo',
+        '.oowoooo.',
+        '..oo.....',
+      ],
+    },
+    palette: { ...BUBBLE_EDGE, x: C.wood },
+  },
+  // Found it! A gold "!".
+  found: {
+    source: {
+      rows: [
+        '.ooooooo.',
+        'owwwxwwwo',
+        'owwwxwwwo',
+        'owwwxwwwo',
+        'owwwwwwwo',
+        'owwwxwwwo',
+        '.oowoooo.',
+        '..oo.....',
+      ],
+    },
+    palette: { ...BUBBLE_EDGE, x: C.gold },
   },
   // Florence's Zs, rising from under her blanket: no bubble, just the Zs.
   zzz: {

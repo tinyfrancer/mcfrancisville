@@ -228,7 +228,7 @@ export function openCreator(hud: HTMLElement, api: LookApi, onDone: () => void):
       el(
         'p',
         {},
-        'Your closet is behind the 👗 up top, and the Muse Hair Salon in town can change your hair any time.',
+        'Your closet is behind the dress on the bar along the bottom, and the Muse Hair Salon in town can change your hair any time.',
       ),
     );
   actions(message, finish);

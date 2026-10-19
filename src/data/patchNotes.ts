@@ -3,6 +3,9 @@
  * 142): nobody has met the mayor, so the notes come off their typewriter, warm and a little too
  * busy, like their letters in `mystery.ts`. Oldest first, and only ever added to: the last row is
  * the version on her phone, and a release to `main` adds its row (or finishes the newest one).
+ * A row her phone never saw may be folded into the next one (1.0 holds 0.6 to 0.9, decision 324),
+ * so she reads one card; a row she has seen is never changed (but for L5's emoji, put in words,
+ * decision 295).
  */
 export interface PatchNotes {
   /** How the version is named on the card: "0.2". Unique, and never reused. */
@@ -34,7 +37,7 @@ export const NOTES: readonly PatchNotes[] = [
     version: '0.2.1',
     lines: [
       'The buttons along the bottom have budged up into one tidy row. The closet, the map and ' +
-        'the Cabinet wait behind the ☰ while you are out and about.',
+        'the Cabinet wait in the tray while you are out and about.',
       'Turn your phone on its side and the town turns with you now, buttons down either side. ' +
         'We had the whole town practise.',
       'Some trees by the frozen creek were standing on a certain little key. They have been ' +
@@ -49,7 +52,7 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'With your phone on its side, the buttons have tucked themselves into one slim strip ' +
         'along the bottom, so you can see right across town again.',
-      'They held a vote about it. The ☰ abstained.',
+      'They held a vote about it. The three little lines abstained.',
       'Everything else is just where you left it. Cody would like it noted that he did not ' +
         'touch anything.',
     ],
@@ -76,7 +79,7 @@ export const NOTES: readonly PatchNotes[] = [
     lines: [
       'Every window is redone: bigger writing and pictures, tabs where it gets busy, the ways ' +
         'out around you on the map, and birthdays on the calendar.',
-      'A 👥 by the calendar shows all your neighbours: hearts, birthdays, favourite things, ' +
+      'The two friends up top show all your neighbours: hearts, birthdays, favourite things, ' +
         'gifts to come and where they are now. Tap Find to go and say hello!',
       'Boothoven the ghost composer moves in east of the square, welcome party at the well! ' +
         'Pianos, his and yours (a card at Cobweb Corner), play a new tune each go.',
@@ -147,6 +150,22 @@ export const NOTES: readonly PatchNotes[] = [
         'flicker, doors open for you, crows and bats fly over and leaves fall in autumn.',
     ],
     ps: 'P.S. If your phone asks for less motion, everything here keeps very still. Mostly.',
+  },
+  {
+    version: '1.0',
+    lines: [
+      'The ground is all new, and the town turns with the seasons: blossom in spring, green ' +
+        'summers, leaves piling up in autumn and snow all winter. Somebody skates!',
+      'Your neighbours remember what you gave, wore and grew, ask you things, keep your ' +
+        'answers, and their faces show how they feel. And I have said hello, in person!',
+      "Cody is married to you (he asked me to type it in bold; I can't) and round most " +
+        'evenings to ask how your day was. Birthdays are parties now!',
+      "Today says what's waiting, the weeks bring surprises (a meteor shower, if you're " +
+        'lucky), and the noticeboard has things for the whole town to build!',
+      'Fish come in sizes, the fair wants a well-timed tap, and pets grow fond enough to help ' +
+        'on walks and learn a trick. Every button has a little drawing now.',
+    ],
+    ps: 'P.S. A big one, so I typed it on my best paper. The W still sticks. It always will.',
   },
 ];
 

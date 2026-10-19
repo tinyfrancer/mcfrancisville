@@ -33,7 +33,8 @@ export const SCARAH: VillagerRow = {
       { from: 20, inside: 'scarahFarmhouse' },
     ],
     weekend: [
-      { from: 5, zone: 'booAcres', at: 'byTheWell' },
+      // Filling her little can at the well and watering round it (V1's P4).
+      { from: 5, zone: 'booAcres', at: 'byTheWell', doing: 'watering' },
       // Into town of a weekend, with a basket of whatever's ripe for Cobweb Corner.
       { from: 10, at: 'shopSide' },
       { from: 15, zone: 'booAcres', at: 'seedCart' },

@@ -1,47 +1,118 @@
-# Handoff: picking up version 0 cold
+# Handoff: picking up the game cold
 
-Written 2026-09-26, updated at the end of phase 12 for a fresh session. Version 0 is built; keep
-this current until it's in her hands, then trim it to what version 1 needs.
+Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
+V1's review (decision 324) for after 1.0. Read "In progress" and "After 1.0" first; "Where
+things stand" further down is the long history.
 
 ## In progress
 
-**V1 is under way (settled 2026-10-06, decisions 266–275; the plan is `docs/v1_plan.md`, the
-analysis behind it `docs/v1_analysis.md`).** Five lanes of sessions on `v1-dev`, **two lanes at a
-time**: lanes 1 (feel) and 2 (look) first, lane 5 (sound, platform, her fixes) when lane 2's L1
-and L3 are in, lanes 3 (people) and 4 (rhythm) as seats free, V1 (review and 1.0) alone after all
-five. Patches go to her phone at the user's word when a patch's sessions have merged (the table
-in the plan: 0.4 is L1, E4, S4, S1, R5). Each lane's heading below is kept by its running session;
-a session that starts cold and finds a heading mid-way resumes that work on its branch. **A session
-starting cold with no lane named reads the plan's status line and these headings and asks the
-user which lane to take.** `v1-dev` was made from `main` (0.3) on 2026-10-06 and is in
-`vercel.json`'s no-preview list; nothing merges into `v0.3-dev` now.
+Nothing is in progress.
 
-### The coordinating session (read this first if you are it)
+## After 1.0
 
-Run V1 as 0.3 was run ("How 0.3 was run", below): one `Agent` call per plan session (`model:
-"opus"`, `isolation: "worktree"`), two at a time, with the prompt built from the plan's "Rules
-every lane session follows" and the paragraph below on GitHub; check in every half hour
-(`send_later`); when an agent returns, confirm on GitHub that its PR merged and its heading and
-the status line were written, then start the lane's next session; a cut-off agent is resumed by
-a fresh one on the same branch from its heading; save-bumping PRs merge one at a time; tell the
-user when a patch's sessions have all merged; never merge to `main`.
+**The V1 plan is complete, and 1.0 is the release PR (#198, `v1-dev` → `main`), opened by
+V1's review ready and green and left for the user to merge: the release is theirs.** Her phone
+has 0.4 (2026-10-07, PR #175), which carried 0.5's sessions too, so it last showed her the
+mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one card,
+`1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed nothing
+in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures, the 0.3
+town's and a 1.0 town played by taps (`lived-in-v53.json`). **Her notes leave the cloud save
+out** (decision 324): it does nothing until the store is linked, so nothing promises her it.
 
-What every agent needs in its prompt: the setup (`npm ci` in the worktree, never delete the
-lockfile; `git fetch origin v1-dev && git checkout -b claude/<session> origin/v1-dev`, checking
-the head matches GitHub's `v1-dev`); the suite line (`npm run lint && npm run format:check &&
-npm run typecheck && npm run test && npm run build`, then `npm run dev` on a port of its own and
-`CHROMIUM_PATH=/opt/pw-browsers/chromium npm run smoke`, the dev server killed after; never
-`playwright install`); the commit trailer; **and GitHub through the REST API, since GraphQL is
-blocked**: open a draft PR with a JSON body file and `gh api repos/tinyfrancer/mcfrancisville/pulls
---method POST --input body.json`; mark ready with `gh api …/pulls/<n>/ccr/ready_for_review
---method POST`; CI with `gh api …/commits/<sha>/check-runs --jq '.check_runs[] | "\(.name):
-\(.status) \(.conclusion)"'` polled until both runs are `completed success`; merge with `gh api
-…/pulls/<n>/merge --method PUT -f merge_method=merge -f commit_title="Merge pull request #<n>
-from tinyfrancer/claude/<branch>"`.
+**The user's steps, after merging the release PR:**
 
-### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
+1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
+   Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
+   **Redeploy** the production deployment, since a deployment only sees the variables it was built
+   with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
+   set up yet". Check the deployment's Functions tab lists `api/save` (nobody has run it on Vercel
+   yet; if the build trips on TypeScript, the fallback is `api/save.js` with JSDoc types, decision
+   323), then README's `curl`, then Settings on her phone.
+2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
+   town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
+   readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
+   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 are the table just above it
+   (town at Close 32.6–32.8 ms mean at 21:30 and 22.3 at noon, 4× throttled Chromium).
+3. **Listen**: whether the game is heard with the silent switch on (S1, decision 321).
 
-E5 landed (PR #172). Lane 1 is finished.
+**`v1-dev` ends with 1.0.** A later plan's integration branch is made from `main` after the
+release merges (as `v1-dev` was from 0.3's `main`), and added to `vercel.json`'s no-preview list
+the day it's made (decision 265). A session starting cold with nothing asked of it does nothing to
+the game and asks the user what they'd like next. **The 1.1 notes are collected already**: "Where
+it hurts" in `docs/architecture.md` (1.0.x's first candidates are 1 and 7–9: Vercel and her
+phone's first readings, a card before a project moves her things, the reel under reduced motion,
+rare events in October), the "Art notes for the final pass" below, and each lane's "For" notes
+under "Notes for 1.1".
+
+### V1 (after the lanes)
+
+**V1's review landed** (PR #197, decision 324; no save change). It played a new town by real taps
+over four days (14–17 September 2026, a scratch Playwright driver under `?loop=manual&day=`) and
+kept it as `tests/persistence/fixtures/lived-in-v53.json`; opened the 0.3 lived-in town as her
+phone will, at Close, Far and sideways (one 1.0 card, Cody's hello, no errors); looked at smoke's
+reel, trick, reveal, winter, Far and sideways screenshots; fixed three small things (a toast half
+the room wide, the quick bar's line off the left edge, the hooked "!" over the tension bar); put
+the 0.5 notes row back as it shipped (L6, L2 and L4 had written into it after it was on her phone,
+so the ground and seasons now open 1.0's card); timed 1.0 at Close and Far by day and night
+(`docs/architecture.md`, "V1's review"); and brought `docs/architecture.md`, its "Where it hurts",
+the art notes, `CLAUDE.md`, the README and this file up to 1.0.
+
+### How V1 was run, for whoever plans 1.1
+
+`docs/v1_analysis.md` found the game wide but not deep (five findings: nothing reacts, the
+neighbours don't know her, no direction or rhythm, the presentation sells it short, sound and
+platform), an interview with the user settled ten questions (decisions 266–275), and
+`docs/v1_plan.md` cut the answer into 29 sessions of one context window each, in five lanes by the
+files they own (feel, look, people, rhythm, sound/platform/her fixes), two lanes at a time, with
+this review alone after. One coordinating session ran each plan session as an Opus sub-agent in a
+worktree of its own, as 0.3 was run (below): `npm ci`, a branch from `v1-dev`, the whole suite and
+smoke on a dev-server port of its own before every push, a draft PR through the REST API (`gh
+api`; GraphQL is blocked in the container), merged by the session with a merge commit once CI was
+green, and its heading here and line on the plan's status line written as it went. What was new:
+**patches to her phone at the user's word** (0.4 went out with 0.5's first five sessions in it,
+since a patch is whatever has merged; the rest waited for 1.0, so four `NOTES` rows she never saw
+were folded into one); **ten save bumps** (v44–v53), each in a session's last commit
+after merging `v1-dev`, one at a time, with no collision; **cross-lane "For X" notes** that told the
+next session in another lane exactly which seam to use (E1's effects for everyone, L4's palette
+swaps for anything drawn outdoors, P3b's `inTown` for anything looping over neighbours, R2's
+`TodayFacts` for R3, R4 and R6), the best habit of the plan; and **smoke sections in second browser
+contexts** for anything that wanted a new town (R1's `firstDay`, S2's `cloud`). What cost the most:
+the suite and smoke grew to half an hour a push ("Where it hurts" 2), and lanes that both wanted
+the 0.x `NOTES` row spent lines folding each other's. Worth keeping for 1.1: the analysis before
+the plan, lanes by files owned, two at a time, the "For X" notes, saves bumped last, and a review
+that plays a real town by taps and keeps it as a fixture. Worth changing: smoke split by area, and
+the patch notes written once per release by the review rather than a line per session.
+
+### What V1 built (a line a session; the decisions hold the detail)
+
+- **Lane 1, feel:** E1 (PR #165, 280) the effects layer; E2 (PR #166, 281) her verbs have a body;
+  E3 (PR #168, 282) neighbours alive at their stops; E4 (PR #171, 283) taps felt and an iris through
+  doors; E5 (PR #172, 284) props and furniture animate, crows, bats and leaves.
+- **Lane 2, look:** L1 (PR #164, 290) Close and Far, rooms in a house; L3 (PR #167, 291) light; L6
+  (PR #177, 292) the art pass; L2 (PR #179, 293) the ground; L4 (PR #182, 294) the seasons; L5 (PR
+  #185, 295) the UI polished, glyphs for emoji; L7 (PR #188, 296) faces.
+- **Lane 3, people:** P1 (PR #178, 300, v44) talks with memory; P2 (PR #180, 301, v45) her voice and
+  heart moments; P3a (PR #181, 302, v46) the mystery chapter by chapter; P3b (PR #183, 303, v47) Rob
+  Boo; P4 (PR #184, 304, v48) jobs seen and happenings with a verb; P5 (PR #186, 305, v49) Cody,
+  married.
+- **Lane 4, rhythm:** R5 (PR #173, 310) critters for all; R1 (PR #187, 311, v50) the first day; R2
+  (PR #190, 312) Today; R3 (PR #192, 313) weeks that differ; R4 (PR #194, 314, v51) town projects;
+  R6b (PR #193, 315) the fair games; R6a (PR #196, 316, v52) fishing with a floor; R6c (PR #195, 317,
+  v53) pets that grow.
+- **Lane 5, sound, platform and her fixes:** S4 (PR #169, 320) her fixes; S1 (PR #170, 321) heard;
+  S3 (PR #189, 322) safe; S2 (PR #191, 323) the cloud save.
+- **V1** (PR #197, decision 324): the review and 1.0, under "After 1.0" above.
+
+### Notes for 1.1 (the lanes' "For" notes, kept as they left them)
+
+Each lane's running session left notes for the sessions after it: how to add a moment, a topic, a
+happening, a rare event, a project, a fish, a trick, a working pose; which seam to use; and what
+was left. They're kept here as written, the newest first in each lane, because they're the best
+how-to the code has; what they say about `NOTES` rows and patches is history now (the rows are
+folded into 1.0), and every "Left for the review" item is in "Where it hurts" in
+`docs/architecture.md`.
+
+#### Lane 1: feel (E1 → E2 → E3 → E4 → E5; decisions from 280; never the save)
 
 **For L6, L2 and L4 (from E5, decision 284):** what moves on its own is `frames` on a prop's,
 piece's or fixture's art (`sprites/frames.ts`): whole-size `sources` (each frame the art's size,
@@ -106,11 +177,93 @@ E2's, L3's, E3's and E5's); a later 0.5 session folds two to make room.
 visits her home, and E1 found two sections that tripped on her (the bell jar came out where she
 stood; she was on the front mat after following through from the back room). `clearMat` now
 waits for visitors too and `display` moves the jar off anyone. Run smoke with `TZ=UTC` as well
-when CI fails and a local run doesn't.
+when CI fails and a local run doesn't. L2 found two more (decision 293): on 11 October before 05:00
+UTC the first walk south (at Close) fails "her, on the screen never shimmers" at frame 241 on
+`v1-dev` too, someone near her path bending it into a corner just before she stops; it passes from
+the morning window, so re-run the CI job then (`gh api …/actions/jobs/<id>/rerun --method POST`)
+rather than loosening the check. And the date chip's ellipsis with a meal's chip up, fixed.
 
-### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
+#### Lane 2: look (L1 → L3 → L6 → L2 → L4 → L5 → L7; decisions from 290; never the save)
 
-L3 landed (PR #167). Next in this lane: L6.
+**For V1's review (from L7, decision 296):** a face's feeling is a `Feeling` (`types/mood.ts`).
+**To give a line a feeling**: a heart moment's `moods` (parallel to its `lines`), a reply's `mood`
+(theirs) or `feels` (hers, on her chip; a `TopicReplies` row's `feels` by chip), a topic's
+`TOPIC_MOODS` row (`data/moods.ts`); everything else is worked out by `feelingOf`
+(`systems/moods.ts`: row, topic, the words' `FEELING_CUES`, `KIND_MOODS`, `BAND_MOODS`), and a
+gift by `GIFT_MOODS`. `Neighbourhood` puts it on `Chat.feels`/`moreFeels`, `GiftResult.feels` and a
+favour's thanks; the talk sheet shows it on the bust and calls `TalkApi.feel`, and
+`Neighbourhood.feelingOf` puts it in the world sprite's `Stance.feel` while she talks and 2.4 s
+after. **To draw a new face of its own** (a neighbour without the doll's eyes): its touch reads the
+`feel` passed as a `Touch`'s fourth argument (`sprites/moodFaces.ts` has the four), and
+`tests/sprites/villagers.test.ts` wants every feeling different from the face as usual. **Her**
+face: `feelOf` beside `verbOf` (`world/services/Poses.ts`) and the `felt` signal; `poses.face()`
+goes into `bakeDoll` as `Rest.feel`. `view.faces()` in a dev build says hers and the neighbours'.
+**Left for the review:** the plan's two or three body builds (every clothing cut, action and work
+pose is painted on the one body, so it's a pass of its own); the noticeboard's 48-pixel
+`drawPortrait` faces and the greeting/neighbours-sheet busts are still neutral (`drawBust`'s
+`mood` takes a feeling if a caller wants one).
+
+**For L7 (from L5, decision 295):** the portrait is `drawBust(canvas, id, costume, mood, shadow)`
+in `render/villagers.ts`: the figure facing her (`bakeFigure(id, 'down', 0, costume)`), framed from
+the first row with anything in it (25 rows over the shoulders' line at most, 7 under), drawn at 64
+by `scale2x` (`render/scale2x.ts`) over an oval of evening. `mood` is a `BustMood`, only
+`'neutral'` so far, read nowhere yet (`void mood`): widen the type with L7's moods, and draw the
+face before the frame is cut, either by passing the mood into `bakeFigure`/`figureLayers` (so the
+world sprite and the bust share one face, as the plan wants) or by stamping the face's rows over
+the 32-pixel crop before `scale2x` (eyes sit at rows 14–18, the mouth under; a stamp after the
+scale would be at the wrong density). The talk sheet, the greeting, the neighbours sheet, the
+corkboard and the fortune table call it through their Apis in `wiring/apis.ts`; the noticeboard's
+48-pixel faces are still `drawPortrait`. A mood that wants a mark in the chrome (a sweat drop, a
+note) is a glyph: a `GlyphId` in `data/glyphs.ts` and a drawing in `GLYPHS` (`sprites/ui.ts`),
+shown by `glyph()`; never an emoji (`tests/hud/noEmoji.test.ts` reads `src/hud/` and `src/data/`,
+all but Cody's lines in `greetings.ts`). Hearts are `heartsRow(now, was)` (`hud/hearts.ts`): pass
+the hearts shown before and the new ones pop.
+
+**For L5/L7 (from L4, decision 294):** the season is `seasonOf(dayKey)` (`systems/seasons.ts`,
+by `SEASON_MONTHS`); the ground's look by month is `groundLookIdOf` (`data/seasons.ts`, six looks:
+autumn's three build the drifts). Everything seasonal is a palette swap in `sprites/seasons.ts`
+baked under `<key>@<season>`: `seasonPiece` for the ground, `seasonLook` for a prop (use it, not
+`lookOf`, for anything drawn outdoors, so a new leafy prop or building turns: a crown is a `CROWNS`
+row by colouring, a building with a door gets snow on its `ROOF` keys unless `noEaves`), and
+`tuftColours`. Autumn is always the town as it was. A view bakes its season when made and
+`OutdoorView.turn()` re-bakes props and lets the ground's chunks go when the day's season changes.
+The light takes `SEASON_LIGHT` into `gradeOf` (a `season` argument after `outdoors`). **L5:** the
+title's night-sky picture and the app icon are season-free, as they should be; if the title wants
+snow in winter it can read `seasonOf` too. A calendar mark per season isn't there. **L7:** Nessa's
+skating (`skating` work, `data/skating.ts`) has her face as any working pose. `view.season()` in a
+dev build says the season, the look and the lawn's baked colour; smoke's `seasons` reads it.
+
+**For L4 (from L2, decision 293):** a season's palette swap touches, on the ground: the lawn's
+five tones (`GRASS_TONES` in `sprites/lawn.ts`, a fill and a tuft's blade, tip and under each,
+from `PALETTE.grassShade`/`grassCool`/`moss`/`grassWarm`/`grassWorn`), the meadow's and long
+grass's palettes (`MEADOW_PALETTE`, `LONG_GRASS_PALETTE` in `sprites/tracks.ts`: `meadow`,
+`meadowLight`, `longGrass`, `longGrassLight`, the flowers' colours), the swaying tufts
+(`TUFT_PALETTE`, `sprites/life.ts`) and the decals (`DECAL_PALETTE`, `sprites/clutter.ts`: the
+daisies, dandelions, clover and leaf drifts are the seasonal ones); dirt and gravel can stay. On
+the trees: `TREE_LEAVES` colours all six forms of the town tree (the conifer, dead tree and birch in
+`sprites/treeForms.ts` are in the same keys, so they swap with it; the birch's bark `i`–`J` and a
+hollow `k` come from `leaves()` and needn't change), and `OLD_TREE_LEAVES` the old trees. **How the
+ground re-bakes:** each tile is a piece keyed by its kind, look and (for grass) its four lawn
+corners (`groundPieces(at, tx, ty, lawn)` in `sprites/terrain.ts`), baked through `bake` into the
+chunks; `Ground` works out the lawn once (`lawnOf` in `render/lawn.ts`) and its chunks are let go
+with `chunks.release()` as `Ground.wet` does. A season swap should put the season in the pieces'
+keys (or their palettes' names), so the cache doesn't hand back last season's canvas, and release
+the chunks; it costs one bake per chunk on the change, never a frame (the town has 696 distinct
+pieces). Leaf drifts building through autumn can be a `CLUTTER` rule per season (a `oneIn` that
+falls as the weeks go), or a lawn tone; snow on the ground is a palette of `GRASS_TONES` and
+wants no puddles. `tests/render/lawn.test.ts` holds every place's commonest colour under a quarter
+from its overview: a winter all one white would break it, so give snow tones too.
+
+**For L2/L4 (from L6, decision 292):** a tile of water or ice by a bank, and grass beside one, is
+drawn from the water round it (`bankField`, `wetAround` in `sprites/banks.ts`, wired in
+`groundPieces`): L2's reeds and any new water tile should go through `WET` in `terrain.ts`, and a
+new ground kind beside water just isn't wet. Flower patches side by side draw as a bed
+(`patchLook`); L2's meadow tiles can sit beside them. Handed on from the art notes: **L2** the
+grass tufts (subtle) and the old trees' crowns (barely bigger than the town's); **L4** nobody
+else skates on the frozen pond; **lane 4 (R2/R4)** the noticeboard's art is the same whatever is
+pinned. The 0.5 `NOTES` row is full again (E1's and E2's folded into one, L6's added): L2 and L4
+fold two more each to make room. `docs/review/l6/` has the before-and-after PNGs, made by
+rendering `origin/main` and the branch with `npm run sprite` and pairing crops.
 
 **For L6/L2/L4:** the light reads no sprite's keys. The grade (`src/render/grade.ts`, `GRADE` a
 row per sky, its colours the palette's `light*`) is the light map's multiply and one `screen` or
@@ -134,13 +287,283 @@ perf -- --view=far`. The scale is never read directly: everything reads it throu
 backing size, which is 390×724 at Close and 585×1086 at Far on smoke's phone, so a pass sized in
 tiles is in world pixels. Smoke's `tapTile` taps through the world when the tile is off the view.
 
-### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
+#### Lane 3: people (P1 → P2 → P3a → P3b → P4 → P5; decisions from 300)
 
-Not started; starts when a seat frees. Next: P1.
+**For R1 (from P5, decision 305):** on a new town, Cody's three reward letters are posted quietly
+(no toast) the first time a day is stepped once her first visit is counted (`Marriage.check`), so
+her mailbox has his record, tee and portrait from her first day; R1's thread can point at them.
+He's `married` from the first day (`Friends.hearts('cody')` is always ten; `bandOf`/`tierOf` take
+the villager), at hers most evenings from seven (`atHers` in `systems/cody.ts`), and of an evening
+asks "how was your day?" (`Marriage.tell`) until she answers, which stands alone with Bye like a
+question: a first-day card that wants him to say something else of an evening should come before
+it or after her answer. His story's scenes start on her third day (`OUR_STORY`).
 
-### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
+**For P5 (from P4, decision 304):** **To add a talk action** (a button beside Chat and Give), add
+a block to `wiring/talkActions.ts` reading the service's own `canX`/`X`: a `TalkAction` is a
+`label`, `lit` and `run()`, whose `TalkOutcome` is `lines` said one after another ("Go on…"
+between), an `aside`, a `beat(k)` as each line shows (the bake's steps; return a string to say it
+under that line), `choices` (more `TalkAction`s, drawn as `.hud-reply` chips with "Never mind")
+or `close`. Never a field on `TalkApi`. Cody's "how was your day" can be one, or P2's question
+shape. **To add a happening**, a row in a const of its own spread into `HAPPENINGS` (the weekly
+ones are `WEEKLY_HAPPENINGS`, the parties `BIRTHDAY_PARTIES`), a `HappeningId` (add to `WeeklyId`
+or a union of its own), a `HAPPENING_CALLED` name in `data/smallTalk.ts`, and **its verb** in
+`VERBS` (`data/happeningVerbs.ts`: a `label`, `ask` and `choices` dealt by the week with `deal`,
+or `done` for one press; `remembers` with `{choice}` for what the host says next time, and the
+choice ids are saved in `happenings`, so never change one once out); `tests/data/happeningVerbs.test.ts`
+reads them all. A row may stand beyond the town (`where: { zone, at }`), want a clear day
+(`clear`) and give the host a working pose there (`doing`). Cody's evenings at hers aren't a
+happening (her home isn't an interior): P2's calls (`CALLING` in `Neighbourhood`) are the way in. **To add a working pose**, as E3 said: a `WorkId`, a row (`P4_WORKS` in
+`data/work.ts` shows a const of its own), two frames in `FRAMES` (`sprites/working.ts`) and
+`doing` on a stop; `tests/world/jobsSeen.test.ts` wants every stop job someone's (skating is L4's,
+by rule) and every neighbour at a job some stop weekday and weekend, and
+`tests/sprites/villagers.test.ts` counts the jobs (14). **Errands:** `Neighbourhood`'s keeps
+take an `errand(id)` (a place and a job, ahead of the plan; Ollie's post round is the one), and a
+`recall(happening, id)` for a host's remembering line. Cody's birthday is "always tomorrow", so
+he has no birthday line, party or double gift; P5 may give him one. The 0.7 `NOTES` row has three
+lines, all P4's: P5, L5 and L7 add or fold, five at most.
 
-R5 landed (PR #173). Next in this lane: R1.
+**For P4/P5 (from P3b, decision 303):** Rob Boo is `robBoo`, a `VillagerId` like the rest
+(`data/robBoo.ts`, art `sprites/robBoo.ts`), but **he isn't about until she has met him**:
+`systems/mayor.ts` (`knowMayor`, told by `tellTheMayor` in `areas/mystery.ts` before the town is
+made and by `Mystery.pin`/`unmask` after) answers `inTown(id)` and `townsfolk()`, and
+`Neighbourhood.neighbours` (walking, drawn, talked to), `visitsOn`'s callers, `dressingUp`, the
+calendar's birthdays, trick or treat's doors, keepsake hints and the neighbours sheet (a shape,
+`.hud-unmet`) all read it. **Anything new that loops over every neighbour** (P4's jobs seen,
+birthdays as a day with a party, weekly happenings, a participation verb) should skip him while
+`!inTown('robBoo')`, or name him only after; `VILLAGER_IDS` still has him, so tables keyed by
+`VillagerId` need his row. He has no `doing` at his stops (the doll's `reading` frames read as
+nothing on him; P4 can give him a job of his own, a stamp say, as a `WORKS` row). His stops are
+`mayorsOffice` (stands 0–2), `townHallSteps` and `squareSouthEast` (new `TOWN_SPOTS`); his town
+hall is the `townHall` lot at the square's south-east corner, door step (27, 27). The unmasking is
+the `unmasking` happening (`on: { unmasking: true }`, `unmaskingOn`), first of everything on its
+evenings, ten more `stands` in `castleHall` for the crowd; once met it never comes again. A
+happening with the whole town now lists `robBoo` last in `who` (and film night has a thirteenth
+seat, `filmBehindLeft`); the costume contest still has eleven, him and Boothoven out of it. The
+met day is the `unmasked` clue (`UNMASKED`, `Mystery.met()`, `Around.met`); the talk topic
+`mayorMet` fits for three days after. **P5:** his five heart moments end with ringing the town hall
+bell at New Year with her; if Cody's married evenings want the whole town anywhere, Rob is in
+`PARTY_SPOTS` (`wellFrontMiddle`) and `STAGE_SPOTS` (`crowdMiddleNear`). The 0.6 `NOTES` row is
+full at five lines (P3b's added): P4 and P5 fold two to make room.
+
+**For P3b (from P3a, decision 302):** **the flag** is `world.mystery.ready()`: the day the chain's
+last clue, the mayor's promise (`CHAIN_LAST`, `promise`), was pinned, or null (`readyOn` in
+`systems/mysteryChain.ts`); the unmasking can be a happening at the castle hall from then, by the
+day key. **The empty pin** is `LAST_PIN` (`data/mysteryChain.ts`), drawn last on the corkboard
+(`.hud-last-pin`, `hud/CorkboardSheet.ts`, saying `ready` once the promise is in): replace it with
+the reveal's clue (a `ClueId` row, pinned by the happening) and drop the `???` row when it is
+pinned. **To add a clue to the chain**, add its id to `ChainClueId`, a `CHAIN_CLUES` row and a
+`CHAIN` step: `{ clue, letter }` (a mayor's letter, `mayor:n` numbered after the last, pinning
+the clue as she reads it) or `{ clue, at }` (pinned as she walks up to that prop in town, from
+`World.arrival` through `Mystery.visit`); it comes `CHAIN_DAYS` after the one before is read or
+found. A clue may `clears` a suspect (`SUSPECTS[id].cleared` says so on the board); Wes and the
+Moon Pie Man are both cleared by the end. **Wes** isn't a villager: his lines are `data/wes.ts`
+(`WES_FIRST`, `WES_TALK` by `wesBand`, `WES_READY` leading the day's first chat once the promise
+is in: rewrite those for after the reveal), his chat is `Mystery.chat` (a `wesChat` moment opening
+`hud/WesSheet.ts`), and what's kept is `mystery.wes` (`glimpses`, `chats`, `talked`, on the
+`Casebook`); he stays from `WES_GLIMPSES` (three) times run. The neighbours' theorising is the
+`mystery` topic (`data/mysteryTalk.ts`), fitting three days after any clue is pinned
+(`Around.clue`, `stillNews`): after the reveal P3b may want it to fit no more, or a new topic.
+The mayor's letters already sign "The Mayor", type with a sticky W, own up to being shy and
+see-through and to the initials R.B. (the stamp), and promise to say hello at the castle; the
+0.6 `NOTES` row has four lines (P3a's in the mayor's voice), so P3b adds one or folds two.
+
+**For P3a/P3b/P5 (from P2, decision 301):** a talk is now the hello, then on the next talk (any
+with `talks > 0`) a **heart moment** or a **question** if one is due (`Neighbourhood.tell`, rules
+in `systems/voice.ts`), before puffs, happenings and drop-bys. **To add a moment**, add a
+`HeartMoment` row to that neighbour in `HEART_MOMENTS` (`data/heartMoments.ts`: `hearts` from
+`MOMENT_HEARTS`, three to six `lines`, optional `replies` on the last and a `gift` item); one is
+told a day, lowest unseen first, and kept in `Friendship.moments`. **To add a question**, it's
+one per neighbour in `QUESTIONS` (`data/questions.ts`, answers with an `id` never changed once out
+and a `called` for `{answer}` in `ANSWER_TALK`); kept in `Friendship.answered`. **To add replies
+to a topic**, add a `REPLIES` row (`data/replies.ts`: her `say` chips, and a `back` per neighbour
+per chip); any line on that topic offers them. A question's or moment's chips stand alone with
+Bye (`Chat.asked`); a topic's sit beside Chat and Give. `Neighbourhood.reply(id, k)` answers;
+smoke taps `.hud-talk-sheet .hud-reply`. Best friends (ten hearts, `BEST_HEARTS`) get `missed`
+for `away`, `invite` for `happening` (both read `Between.band`), a call by choice
+(`systems/calls.ts`, placed in `Neighbourhood.plan` as `CALLING`) and a letter (`dear:` ids,
+`Neighbourhood.check`). **P5:** Cody has a question (a perfect night in) and `missed`/`invite`
+lines, but no moments, calls or letters: give him a `HEART_MOMENTS.cody` row (the type is
+`Partial`, so a row is all it takes, and `tests/data/heartMoments.test.ts` expects it undefined,
+so change that line), and his married band can be a `Band` above `best` that `bandOf` returns for
+him alone, with `BEST_CALLS.cody`/`BEST_LETTERS.cody` turning on his calls and letters (both
+skip him only because his rows are missing). His "how was your day" fits the question shape: a
+daily `Told` with replies, from a rule beside `questionDue`. **P3a:** Wes after the third glimpse
+can take a `QUESTIONS`-style row of his own if he's a villager; theorising lines are a new topic.
+The 0.6 `NOTES` row has three lines (P1's two folded into one, P2's, P1's promises): P3a and P3b
+fold or add, five at most, each line 160 characters at most.
+
+**For P2/P5 (from P1, decision 300):** what a neighbour brings up is a **topic**: a `Topic` in
+`data/smallTalk.ts` (in `TOPICS`, which orders them; `band` and `away` are `URGENT` in
+`systems/dialogue.ts` and lead a day's first talk), three lines a neighbour in `SMALL_TALK` (a
+memory topic's in `MEMORY_TALK`, `data/memoryTalk.ts`), and the rule for when it fits with what
+it fills in `memoryTopics` (`systems/remembering.ts`) or `aroundNow` (`systems/dialogue.ts`).
+`tests/data/dialogue.test.ts` reads every line with every way its placeholder can be said
+(`SAID_AS`: add a key for a new placeholder) and needs the topic to fit in one of `scenesOn`'s
+scenes. A new **scene fact** is a field on `Around` (filled in `build.ts`'s `talkScene`) or on
+`Between` (filled in `Neighbourhood.between` from the friendship as it was before the talk; give
+`STRANGERS` its empty value). A new **saved history field** on a friendship is an optional field
+on `Friendship` (`world/Friends.ts`: repaired in the constructor, checked in `isFriendsShape`),
+set in `Neighbourhood.talk`/`remember` or `give`; one about her rather than a neighbour goes on
+`Lately` (`world/Lately.ts`, the `lately` save field) through a signal wired in
+`areas/neighbours.ts`. The day's first line is `talkLine` with `talks: 0` (`openerOf`); P5's
+"how was your day" can be a topic of Cody's alone (a row with lines only for him would need the
+`SMALL_TALK` shape loosened, or an urgent topic that fits only for `cody`). P2's answers and
+moments seen want a save field of their own, the next number being v45. The 0.6 `NOTES` row has
+three lines, all P1's: P2, P3a and P3b fold two into one each to make room, five at most.
+
+#### Lane 4: rhythm (R5 → R1 → R2 → R3 → R4 → R6a → R6b → R6c; decisions from 310)
+
+**For R6/V1 (from R4, decision 314):** the save is v51 (`projects: { current, given, built }`).
+**To add a project**: a `ProjectId` in `types/ids.ts` and a `PROJECTS` row in `data/projects.ts`
+(its `zone`, `where`, `candy`, `needs` of things she gathers or grows, never sold, its pieces at
+each of `posts`, `frames` and `done` by top-left tile, `picture`, and `deck` or `beds` if it's
+walked on or grown in), a `PropId`, `PROP_FOOTPRINT` row and art in `sprites/projects.ts` for its
+frame and what's built (the posts are `sitePost` at the corners, `corners()`), a picture in
+`PROJECT_PICTURES`, and what it does once built (a case in `World.arriveOn`, a `PROP_SEATS` row, a
+happening's `bandstand`-style move). `tests/data/projectSites.test.ts` holds its tiles clear and
+nothing cut off; `economy.test.ts` its worth between three and fourteen thorough days. A site in her
+yard is kept from the day she starts it (`keptFor` in `areas/shared.ts`, `Yard.makeRoom`). What's
+drawn is `Sites` per place, read off `Works`; `world.projects.preview(id, stage)` shows a stage in a
+dev build, and `npm run sprite -- 'stage:*'` draws each. **Gathering is capped** at
+`GATHERS_PER_WINDOW` (48) a place a window (`gatheredIn` from `Takings`): a new place with more than
+48 things is capped too, and the economy test holds every place's best capped round within 1.6 of
+the town's. The 0.8 `NOTES` row is full at five lines (R1's two folded into one, R2's, R3's, R4's):
+a later 0.8 session folds two.
+
+##### R6c (beside R6a)
+
+**For V1 (from R6c, decision 317):** the save is v53 (`pets.affection`, a `Fondness` per pet:
+`points`, and the day's `pat`/`walk`/`treat` counts). Fondness rows are `data/affection.ts`
+(`FONDNESS` per kind and day, `WALK_TILES`, `LEVEL_AT` 20 and 60), rules `systems/affection.ts`
+(`fonder`, `levelOf`, `progressOf`, `patLineAt`, `isFondness`), kept on `Pets` (`fonder`, `level`,
+`points`; `setPoints` is the dev handle smoke uses). **To give a pet more to say at a level**,
+`GROWN_PATS` (three a level, `tests/systems/affection.test.ts` counts nine distinct). **A job** is
+a `JOBS` row and its rule in `systems/pets.ts`, decided in `Pet.follow` from
+`PetSurroundings.finds` (read off `Fossils`, `Collecting`, `SmallEvents` in `areas/pets.ts`) as a
+`PetDeed`, and made so in `PetCare.deed`; the critters' side is `Collecting.settle(key)` (a barked
+critter neither drifts nor flutters for its hour) and `Collecting.draw(key, to)` (a hop, as a
+drift). **A trick** is a `TRICKS` row (`ms`), its frames in `PET_ART[id].trick` and its beats in
+`TRICK_STEPS` (`sprites/pets.ts`: frame, flip against her facing, lift, dx, alpha), read by
+`lookOf` in `render/pets.ts`; the gallery's `pet:<id>:trick<n>` rows show them. **Rest spots**
+are `PET_RESTS` (a hearth, beds, sofas, rugs; a new piece a pet should use is a row) and
+`REST_LIKES`, worked out by `systems/petRest.ts` per room and layout; a perched pet is
+`Pet.perch` (drawn lifted, in front of the piece). Every pet has `sitFront` and `sitBack`; a sit
+beside her shows its back when she's further up. **Left for the review:** Florence's on-her-back
+frame and Gary's front are serviceable rather than lovely (an art pass could redraw them; frame
+sizes are free); a trick asked for on the sheet can happen behind it when the pet is low on the
+screen (a trick on its own is seen in full); Cody's evening pats (`wiring/codyHome.ts`) don't count
+towards fondness, which felt right (they're his pats). The 0.9 `NOTES` row is full at five lines
+(S3's offline and backup in one, S3's photo folded into S2's cloud, R6b's, R6a's, R6c's). Smoke on
+a container: a stale vite from another worktree held 5176, so R6c ran its dev server on 5186
+(`SMOKE_URL`) and the preview on 5187 (`PREVIEW_URL`).
+
+##### R6a (beside R6c)
+
+**For V1 (from R6a, decision 316):** the save is v52: the `Cabinet` keeps the biggest of each fish
+(`best`, by `CritterId`, in quarters of a hand; `measure`, `bestOf`). **A fish's bite** is
+`BITE_MS[rarity]`; a tier in `REELS` (`systems/fishing.ts`, rare and legendary now) is hooked on its
+bite and reeled on the tension bar (`reelOf`, `needleAt`, `reelGrade`; drawn by `drawReel` in
+`render/fishing.ts` from `world.fishing.line.reeling`); `world.fishing.bestTapAt()` says when a tap
+does best, bite or bar, for tests and smoke. **A new fish** wants a `FISH_SIZES` row
+(`data/fishSizes.ts`) inside its shadow's band (`catchSize.test.ts` holds it); its size is said by
+`handsOf`. **Shy critters** are `drifts(id)` in `systems/drift.ts` (rare, legendary and the finer
+moths; never a fish or a creepy-crawly): `Collecting.notice(her, walked)` from `World.update` hops one
+a tile away (`Critter.hop`, drawn by `hopOf` in `render/critters.ts`) when she comes within
+`NOTICE_TILES` having walked more than `CREEP_TILES` since she last stood still, unless she's behind a
+flier (north of it, more than to its side); `shiedFrom` stops the net on that walk. **Left for the
+review:** the bar doesn't slow under reduced motion (the world doesn't know the phone's setting;
+a tap out of time costs nothing), and the bar's window is a dark green that reads less well over
+the night's water than over the day's. Smoke's `drifter` finds a shy critter by trying a few
+`?day=`s and hours; the 0.9 `NOTES` row is full at five (S3's first two folded into one, S3's other,
+S2's, R6b's, R6a's): R6c folds two. The rarity test is unchanged by this (9.1–10.2 months, the
+longest wait 30 days).
+
+##### R6b (beside R4)
+
+**For R6a/R6c/V1 (from R6b, decision 315):** a fair game's throw is `patternOf(game, seed, n,
+slow)` scored by `score(pattern, tapAt, startedAt, at)` on the world's clock
+(`systems/activities.ts`); the sheet's stage (`render/fairGames.ts`) draws from the same reads, so
+**a new game is a `Motion`, its position read and its `offBy`, a backdrop and pieces in
+`sprites/fairGames.ts`, and a case in `drawFairGame`**; a new stall is `drawStall` with wares, a
+`PropId`, a footprint, a legend character (`FAIR_LEGEND` has used `9` and `0`) and an `ACTIVITIES`
+row. R6a's reel can borrow the shape (a pattern dealt from the cast, graded 0–2, the floor always
+something). `world.activities.bestTapAt(id)` says when a tap does best, which smoke's `tapInTime`
+waits for. The free go is `fortune:freeGo` in `Takings` (the `fortune:` prefix makes it once a
+day); a **Today line for it** ("your first go at the duck pond is free") was left for later, as R4
+was growing Today beside this session: a `TodayFacts` field read from `activities.freeGo()` and
+`freeToday`. The 0.9 `NOTES` row is full at five lines (S3's three, S2's, R6b's): R6a and R6c fold
+two. A new squishy moves `figurines.test.ts`'s count and smoke's Cabinet "sets" count (now 17).
+
+**For R4/R6 (from R3, decision 313):** no save change; the 0.8 `NOTES` row is full at five lines
+(R1's three, R2's, R3's): **R4 folds two to make room**.
+
+- **To add a rare event**: a `RareEventId` and a `RARE_EVENTS` row in `data/rareEvents.ts` (its
+  `name`, `glyph`, the `heralds` toast, Today's `small`, a `keepsake` (a `RareKeepsakeId` with an
+  item row in `RARE_KEEPSAKES`, a 0 in `RARE_KEEPSAKE_VALUES`, art in `sprites/rareEvents.ts`, and
+  the selling test's kept list) and its `letter`; `months`, `clear` or `week` if it wants them),
+  a line in `RHYTHM_GREETINGS` (`data/greetings.ts`), and what it does: dealt by `rareEventOn`
+  (`systems/rareEvents.ts`, cached per day; a one-day event is any that `fits`), told and its
+  keepsake posted by `RareEvents.check` (`world.rareEvents`; quietly, the toast says "And there's
+  a letter", since a letter's toast takes the line), seen in the sky by `rareSkyAt` (the view's
+  `rareEvents.sky()`), stood in town through `Decorations` as the stall is, or someone passing
+  through (`PASSERS`, a `Figure` row in `sprites/villagers.ts` and a voice in `audio/cues.ts`).
+  Everything she has done of one is a `rare:` key in `Takings` (once a day). Rerun
+  `tests/systems/rareEvents.test.ts` (about one day in nine, never two at once).
+- **To add a festival**: a `FestivalId` and a `CALENDAR` row with a `from`/`until` span (never
+  overlapping another: `festivalOn` reads the first), a `banner`, a `CALENDAR_MARKS` row, a shelf
+  `on` it in `SHOPS`, a beat `on: { festival, weekdays }` in `RHYTHM_HAPPENINGS` (never on its
+  finale), a `RHYTHM_GREETINGS` line and `FESTIVAL_LINES` (said on its first day and Saturday). Only
+  `TunedFestival`s have a tune (`audio/music.ts`); add a `THEMES` row and widen it to give one.
+- **To add a daytime happening**: a `RhythmId`, a `RHYTHM_HAPPENINGS` row, a `HAPPENING_CALLED`
+  name and a `RHYTHM_VERBS` row. Mind the neighbours' stops that tests lean on (Rufus's Monday
+  wildflowers in `tests/world/travel.test.ts`), and that a happening beats a visit to hers:
+  `callersOn` now leaves out a caller at a happening.
+- **R4's projects**: a Today line is a `TodayFacts` field and a `TodayLine` member as R2 said;
+  `outOfTheOrdinary` in `systems/today.ts` shows where R3's went. A project in the world could
+  stand through `Decorations` as the wandering stall does (a prop row, `PROP_FOOTPRINT`, a tile kept
+  clear in `tests/data/digSpots.test.ts`'s `keptClear`). **R6b**: the wayfarer and Moira are taps
+  (`Visit` `passer`); a fair game could borrow `metPasser`'s toast. `tests/world/weeksDiffer.test.ts`
+  holds no two days alike in any month for two years: rerun it if a happening or event goes.
+
+**For R3/R4 (from R2, decision 312):** the calendar's Today is `todayLines(facts)` in
+`systems/today.ts`, worked out each time from `TodayFacts`, which `areas/upNow.ts` reads off the
+services (`world.upNow.lines()`); nothing is kept. **To add a Today line** (R3's rare event, a
+travelling stall, a visitor for the week; R4's project to fund): add a field to `TodayFacts` and
+its read in `areas/upNow.ts` (a plain read of a service, made before `upNow` in `build.ts`), a
+member of the `TodayLine` union with a `key` (it changes when the line is news again: put the day,
+window or week in it, so the date chip's dot comes back) and a `go` if a tap should take her
+somewhere (`{ zone, prop }` walks up to a prop, `{ zone, tile, bed }` to a bed, `{ villager }` to
+a neighbour; `wiring/todayGo.ts` flies her there first by `Travel.fly` when she's elsewhere), its
+push in `todayLines` where it belongs in the order, its words in `hud/todayWords.ts` (a case:
+`text`, `small`, a `Glyph`, never an emoji), and a case in `holds()` in `tests/world/today.test.ts`
+asking the world itself whether it's true. If what it reads changes without one of
+`TODAY_TOLD_BY`'s events (`wiring/todayGo.ts`), add the event there so the dot is asked again.
+R3's rare events can be Today's lines first and toasts second; R4's projects a line while one's
+being funded (what it still wants) with a `go` to the noticeboard. The favour parcel is `+` in
+`NEIGHBOUR_BUBBLES`, picked by `bubblesOver`; a new bubble over a head goes beside it there. The
+0.8 `NOTES` row has four lines (R1's three, R2's one): R3 and R4 fold to stay at five.
+
+**For R2/R3 (from R1, decision 311):** her first day is `world.firstDay` (`FirstDay`, made by
+`areas/firstDay.ts`): six steps (`FIRST_DAY_STEPS`, `data/firstDay.ts`) worked out by
+`systems/firstDay.ts` from `FirstDayFacts` the area reads off the town (the candy tree's
+`shakenAt`, any bed growing or crop picked, the stall's stock, sales or tin, a `notice:n` key in
+the takings, friendships' `talked` but Cody's, any meal's time). It's `open` once her look is made
+and her first visit counted, until every step is done; `saw(events)` in `World.update` re-reads the
+facts only when a moment came or the bag, Candy, friends or stall changed, and returns a `firstDay`
+moment per step done (with `keepsake` on the last). Saved as `firstDay: { done, over }`; an old
+town's is over. **R2's Today** can read the same facts (they're plain reads of the world) or
+`world.firstDay.steps()` to show "Cody's list: 4 of 6" while it's open. **The card** is
+`hud/FirstDayCard.ts` through `FirstDayApi` (`open`, `steps`, `portrait`, `onChange` on the
+`firstDay` state event), opened by `hud.openFirstDay()` (only with no sheet up), from the greeting's
+`then` on his `first` hello only, and from `.hud-first-day-button`, first in the "more" tray, hidden
+when the thread is over. **The one-time glow** is `hud/hints.ts`: `hintOnce(button, id, wanted)` sets
+`data-hint` (an outline pulse in `hud/firstDayStyles.ts`) while `wanted()` and the phone hasn't
+pressed it (`mcfrancisville:hintsSeen`, a list of `HintId`s), put out by the first click; add a
+`HintId` to glow something else once (R2's dot on the date chip is its own thing, but can sit beside
+`todayHint` in `Hud.ts`). The starter bag has four seed kinds. Smoke's `firstDay` runs in a second
+browser context (`PHONE_CONTEXT`, `page` swapped and restored), so a section that wants a new town
+of its own can do the same. The 0.8 `NOTES` row has three lines (R1's): R2, R3 and R4 add or fold,
+five at most.
 
 **For R1/R2/R6a (from R5, decision 310):** whether a critter comes out on a day is `comesOut`
 (in its season and weather, or `isVisiting`: the day after a full moon, `isVisitDay`), read by
@@ -156,9 +579,51 @@ case (`RoomView.onShow`), so a family past 12 needs another `museumCase` row wit
 like the rest; the holiday critters and spiders are ordinary rows (`holiday` on a row only moves
 its season), so `wary` and a bite window by rarity apply to them as to any.
 
-### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
+#### Lane 5: sound, platform and her fixes (S4 → S1 → S3 → S2; decisions from 320)
 
-S1 landed (PR #170). Next in this lane: S3.
+**For V1 (from S2, decision 323):**
+
+- **Nobody has run the function on Vercel yet.** It's Web `GET`/`PUT` handlers in `api/save.ts`
+  with its own `api/tsconfig.json` (Vercel compiles a function with the nearest tsconfig; the
+  app's never emits). The first deploy to `main` that carries it is the first real test: check
+  the deployment's Functions tab lists `api/save`, then the README's `curl`. If the build trips
+  on TypeScript, the fallback is the same file as `api/save.js` with JSDoc types.
+- **Cut 0.9 after the store is linked**, or its note ("floats up to the cloud") runs ahead of
+  the game; until then Settings says "The cloud isn't set up yet" and nothing else changes.
+- The QR holds the code as text (the camera shows it to copy); restoring is typed or pasted on
+  the new phone. The backup code stays and is still the way for a phone with no signal.
+- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke.mjs`) on the
+  main context and the `cloud` section's own; other contexts reach the dev server, which serves
+  `api/save.ts` as JavaScript, read as out of reach, so nothing is ever PUT there.
+
+**For S2 (from S3, decision 322):**
+
+- **The service worker** is `public/sw.js`; `vite build` writes its `PRECACHE` list and `VERSION`
+  in (the plugin in `vite.config.ts`, `precacheList`/`withPrecache` in `src/precache.ts`, marks
+  `/* precache */ []` and `/* version */ 'dev'` that must stay). The version hashes every file
+  and the worker's code, so any deploy makes a new cache and the old ones go on activate.
+  Navigation is network first, kept under `/`; `/assets/` cache first; anything else network
+  first with the cache behind it. **It never answers or keeps `/api/`** (an early `return` before
+  `respondWith`, held by `tests/pwa/precache.test.ts`), so `api/save` always reaches the network
+  and fails honestly offline: the client's debounced, offline-tolerant PUT has to queue and retry
+  itself, as the worker won't. Don't make an `api/` file under `public/` (it would be precached);
+  a Vercel function lives in the root `api/`, outside `dist/`. `npm run smoke:offline` (and its CI
+  step) runs the built game offline: if S2 adds a sync on boot, it must not throw or log a console
+  error with no signal, or that run fails its "no errors" check.
+- **What's the phone's** is a key beside the save in `localStorage`, read and written in
+  try/catch with a `Storage` parameter for tests, as `src/settings.ts`, `src/safekeeping.ts`
+  (`mcfrancisville:backedUpAt`, `:nudgedAt`) and `src/errorNotes.ts` (`:errors`) do. S2's secret
+  belongs there too (a new module of its own). A cloud save is a backup: S2 can call
+  `markBackedUp(now)` after a successful PUT, so the Backup tab's "last backed up" and Cody's
+  nudge (`nudgeFor` in `src/systems/backupNudge.ts`) count it.
+- **The error notes**: `catchErrors(window)` runs first in `main.ts` and notes every uncaught error
+  and unhandled rejection (the last five, repeats counted); Settings' Sound tab mentions the
+  newest for a month with Copy note. A sync's failures that are expected (offline, a 5xx) should be
+  caught where they happen, not left as unhandled rejections, or every walk through a tunnel
+  becomes a note.
+- **The 0.9 `NOTES` row** has three lines, all S3's (a row needs three to five): S2 and lane 4's
+  R6 sessions fold S3's into one or two to make room. `?perf` (production too) is for her phone's
+  number, which `docs/architecture.md` has a table waiting for.
 
 **For S3/S2 (from S1):** the sound is `src/audio/` (decision 321): `graph.ts`'s `Mixer` is the
 node graph, `SoundBoard` what plays when, `session.ts` the silent switch (`audioSession` or a
@@ -174,10 +639,6 @@ session folds two to make room.
 **For S1/S3/S2:** any − n + or other button that should repeat while held takes `held(button,
 step)` from `hud/dom.ts` (timing in `HELD`/`heldGap`); smoke holds a button with a real touch
 through `holdElement`. The 0.4 `NOTES` row has four lines now (L1's three and S4's); one more fits.
-
-### V1 (after the lanes)
-
-Not started.
 
 ### How 0.3 was run, for whoever plans 0.4
 
@@ -1161,32 +1622,39 @@ plan's as decisions 78–83.
 
 ## Art notes for the final pass
 
-What still looks off after phase V's art pass (the user reviews the art all together: "Before
-phase G" in `docs/personal_touches.md`, and phase V's review page). Fixed in phase V, and so gone
-from here: the fireworks in screen space, the lot signs, Skelly's lights, the arch's posts, the
-toadstools, the sprinkler's ears, the noticeboard's roof, Nessa's oar, the moonfish's crescent, the
-stove's any-fish, the music box, the cake topper, and Gourdon's pumpkin and teeth. The rooms that
-looked dim in smoke's screenshots (the hall among them) aren't: smoke took them while the fade
-between places was still running, and now runs with reduced motion so it doesn't.
-Phase J's furniture, keepsakes, paper and floors at 32 answered phase H's notes.
+What still looks off, kept as sessions notice it (the user reviews the art all together: "Before
+phase G" in `docs/personal_touches.md`). L6 emptied the list (decision 292); **V1's review**
+(decision 324) looked again after L6, L2, L4 and L7, at `npm run sprite -- 'place:*'`, the smoke
+screenshots and its own four days of play at phone size, and found:
 
-- F1's seven new critters (the Hercules beetle, the axolotl, the glowing jellyfish, the tombstone
-  toad, the mourning cloak, the reed frog, the ladybug) are first drawings; the last four are palettes on their
-  family's shapes. The museum's cases show them at 24 since K2, four to a shelf.
-- Town: the well is small for the middle of the square, and the square has no clutter; the
-  grass tufts are subtle; the fog's clumps are big and even; signposts have no words (a word per
-  place in the capitals); the noticeboard's notes are the same whatever is pinned; the garlands'
-  bulbs are faint by day; the little spooky tree's bat is lost in its boughs; the pond's ice has
-  no skating marks and nobody else skates.
-- The wilds: the old trees' crowns are barely bigger than the town's; the clearing's pool is a
-  diamond; the rowboat reads small beside the pier; the castle garden is sparse by day; the frozen
-  creek meets the lake without an edge; Nessa's boathouse is up the bank from the water.
-- Small things: a seed or sprout is faint on watered soil at night. (K2 did the rest: the fish
-  shadows, the "!", whiskers, steam, the pie, the kettle, the bed card and the stool's face, and
-  the calendar's marks, decision 171.)
-- The smaller homes (9 tiles across) fill only about half a phone's width.
-- The festival's banner (J1) is in the signs' lettering, so it reads small hung between lamps
-  eleven tiles apart; bigger lettering, or bats on its string, would make more of it.
+- **The lavender cobble still carries the town.** L2 gave the woods and farm dirt and the castle
+  gravel, but the town's roads, its square and the fairground's paths are all one cobble, and the
+  square is a big empty plaza with a small well in the middle; it draws the eye more than the
+  buildings round it. A worn middle, a second paving for the square (flagstones, a ring round the
+  well), benches or planters on it, or the square made smaller, would each help.
+- **Woods are walls of one crown.** Whisperwood, the shore and the castle hill are edged with the
+  same round teal crown over and over (the purple and orange ones and the conifers break it up, but
+  not much at a distance); the forms L2 added are few beside it. More variety in the edge crowns,
+  and an uneven edge rather than a straight hedge of trees.
+- **Ice and the creeks are flat paint.** The frozen creek in Whisperwood and the one feeding the
+  lake at Lantern Shore are a flat pale blue ribbon with hard edges, beside water that L6 gave banks
+  and glints; and a frozen creek running into an open lake reads oddly. A texture on the ice
+  (cracks, a sheen) and the banks' soft edge would bring it in line.
+- **Big empty lawns** in the hidden clearing's middle and the fairground's south-east: L2's decals
+  are there but thin. A meadow patch or a few standing props.
+- **The castle garden's beds are the same rectangle** four times over.
+- **She holds her rod indoors**: the quick bar hides at home, but what she held outside stays in
+  her hand in the house (seen with Cody on the sofa at 19:30). Harmless, a little odd.
+- **The tension bar is small** (44 world pixels, about a tile and a half at Close): it reads, but
+  only just, and its dark green window less well at night (R6a's note).
+- **Jack-o'-lanterns all year.** The town's jack-o'-lanterns are map props, so in January they
+  sit in the snow (smoke's `season-winter-sideways.png`). A `seasonLook` that turns them to snowmen
+  or lanterns outside autumn, or `DECOR` for October only, would fit L4's seasons.
+- **Sideways, the quick bar's seeds run under the bag**: with four kinds of seed the last packet is
+  cut off at the bag button (it scrolls, so nothing is lost, but it reads as clipped).
+- **Lane notes still open:** the body builds and the neutral faces on the noticeboard and the
+  neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c), the noticeboard's art
+  the same whatever is pinned (L6). Each is in "Where it hurts" too.
 
 ## Settled since
 

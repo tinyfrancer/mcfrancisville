@@ -1,3 +1,4 @@
+import type { JoinedSnapshot } from '../systems/joining';
 import type { BroomLook } from '../data/broom';
 import type { HomeInput } from '../data/home';
 import type { MapSource } from '../data/maps';
@@ -17,9 +18,12 @@ import type { SavedBed, SavedSprinkler } from './Farm';
 import type { FriendsSnapshot } from './Friends';
 import type { MailEntry } from './Letters';
 import type { PorchSnapshot } from './Porch';
+import type { WorksSnapshot } from './Works';
 import type { CandyTreeSnapshot } from './services/CandyTree';
+import type { LatelySnapshot } from './Lately';
 import type { FreshSnapshot } from './services/Novelty';
 import type { VisitsSnapshot } from './services/Visits';
+import type { FirstDaySnapshot } from './services/FirstDay';
 import type { ClosetSnapshot } from './Wardrobe';
 
 /** What of her finds is saved: the bag, and what she has taken today. */
@@ -72,6 +76,8 @@ export interface WorldOptions {
   visits?: Partial<VisitsSnapshot>;
   /** When she last shook the candy tree. */
   candyTree?: Partial<CandyTreeSnapshot>;
+  /** Her first day's steps done (V1's R1); a new town's are all still to do. */
+  firstDay?: Partial<FirstDaySnapshot>;
   /** What's on the honesty stall, and in its tin. */
   stall?: Partial<StallSnapshot>;
   /** When she last ate for each of a meal's effects. */
@@ -92,6 +98,12 @@ export interface WorldOptions {
   ever?: readonly string[];
   /** What's on its way on Ollie's round (0.3's S1). */
   orders?: readonly Order[];
+  /** What she has done lately, which her neighbours remember (V1's P1). */
+  lately?: Partial<LatelySnapshot>;
+  /** What she did at each of their happenings last time, which the host remembers (V1's P4). */
+  happenings?: JoinedSnapshot;
+  /** The town's projects: the one she's funding, what's in each, those built (V1's R4). */
+  projects?: Partial<WorksSnapshot>;
   clock?: Clock;
 }
 
@@ -134,5 +146,9 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     yard: save.yard,
     ever: save.ever,
     orders: save.orders,
+    lately: save.lately,
+    happenings: save.happenings,
+    firstDay: save.firstDay,
+    projects: save.projects,
   };
 }

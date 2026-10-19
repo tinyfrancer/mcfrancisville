@@ -10,6 +10,8 @@ import { YARD_FURNITURE } from './yard';
 import { SET_FURNITURE } from './sets';
 import { SET_FLOORINGS, WINDOW_WALLPAPERS } from './wallsAndFloors';
 import { SCARAH_FURNITURE } from './scarah';
+import { ROB_BOO_FURNITURE } from './robBoo';
+import { FIRST_DAY_FURNITURE } from './firstDay';
 
 type Gifted =
   | 'ghostStories'
@@ -574,6 +576,8 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...YARD_FURNITURE,
   ...SET_FURNITURE,
   ...SCARAH_FURNITURE,
+  ...ROB_BOO_FURNITURE,
+  ...FIRST_DAY_FURNITURE,
   ...FOSSIL_FURNITURE,
   ...CRAWLY_FURNITURE,
   ...FIGURINE_FURNITURE,

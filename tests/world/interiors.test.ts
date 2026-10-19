@@ -119,10 +119,15 @@ describe('the insides of buildings', () => {
     expect(back.keepsakes.has('floatingCandles')).toBe(true);
   });
 
-  it('says Cody is saving his for her', () => {
+  it("gives her Cody's at once: she's married to him from the first day (V1's P5)", () => {
     const h = harness();
     goIn(h, 'codyHouse');
-    expect(arrivals(usePiece(h, 'velvetSettee')).at(-1)?.says).toMatch(/saving one/);
+    expect(usePiece(h, 'velvetSettee')).toContainEqual({
+      kind: 'keepsake',
+      piece: 'velvetSettee',
+      from: 'cody',
+    });
+    expect(h.world.keepsakes.has('velvetSettee')).toBe(true);
   });
 
   it('has nobody to talk to inside, and nothing to gather', () => {

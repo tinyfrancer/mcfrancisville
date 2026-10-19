@@ -55,6 +55,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "Your birthday's tomorrow, isn't it, {name}? I've been practising the song. Cody says it's today. Agatha says it isn't.",
     scarah:
       "{name}, Cody's been all round the farm telling everyone it's your birthday. My calendar says tomorrow. Cornelius sides with the calendar.",
+    robBoo:
+      "Ahem. {name}, Cody came to the town hall to have your birthday declared a public holiday. Today. I checked the records. It's tomorrow. I've pencilled it in.",
   },
   birthday: {
     cody: "Happy birthday, mi amor. For real this time. Told you I was only a day early. Everyone's here for you.",
@@ -76,6 +78,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "Happy birthday, {name}! I've written you a birthday song. It's the usual one, but much more dramatic.",
     scarah:
       "Happy birthday, {name}! I've planted a whole row of sunflowers in the shape of your name. Give them a week.",
+    robBoo:
+      "Happy birthday, {name}! By order of the mayor, today is the best day of the year. I've stamped it. It's official.",
   },
   anniversary: {
     cody: '{years} years today, honey bunny. Still my orb. Still the best thing that ever happened to this vampire.',
@@ -97,6 +101,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "Happy anniversary! {years} years, {name}. That's a long, lovely duet. I'm playing it a little encore.",
     scarah:
       "Happy anniversary, {name}! {years} years. That's {years} harvests, and every one of them a good one.",
+    robBoo:
+      "Happy anniversary, {name}! {years} years. I've had it written into the town records in my very best typing. Only one W smudged.",
   },
   // Their song is theirs to sing: the lines only know what day it is, and the town hums along.
   septemberSong: {
@@ -123,6 +129,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "The twenty-first of September! {name}, there's a song for today. The whole town's humming it. So am I.",
     scarah:
       "It's the twenty-first of September! {name}, I don't know the words, but I've been dancing in the field all morning. The crows joined in.",
+    robBoo:
+      "It's the twenty-first of September! {name}, the whole square's been humming it since breakfast. I've been humming along. A bit flat. Ghosts often are.",
   },
   // Dolly Parton day (her favourite): butterflies in every place, and a nod or two, never a likeness.
   dollyDay: {
@@ -149,6 +157,8 @@ export const SPECIAL_LINES: Record<SpecialDayId, Record<VillagerId, string>> = {
       "Happy Dolly Parton day, {name}! I've learned three chords and the truth. The butterflies approve.",
     scarah:
       "Happy Dolly Parton day, {name}! A country girl through and through, like me. I've sung to the sweetcorn since sunrise. It's grown an inch.",
+    robBoo:
+      "Happy Dolly Parton day, {name}! There are butterflies on the town hall steps. I've declared them honoured guests.",
   },
 };
 
@@ -162,10 +172,17 @@ export interface SpecialLetter {
 export const SPECIAL_LETTERS: Partial<Record<SpecialDayId, SpecialLetter>> = {
   birthday: {
     from: 'everyone',
+    // Signed by everyone (V1's P2), each in their own way.
     letter:
-      'Happy birthday, {name}!\n\nFrom all of us in McFrancisVille: Maude, Rufus, Wrapunzel, ' +
-      'Agatha, Barty and Cody (who says he wished you happy birthday first, and technically he ' +
-      "did).\n\nThere's cake. There's always cake.",
+      'Happy birthday, {name}!\n\nFrom all of us in McFrancisVille:\n\n' +
+      'Maude (in pencil, very neatly)\nRufus!!! (and a pawprint)\n' +
+      'Wrapunzel (with love and flour)\nAgatha (just the A)\nBarty (and Terry the worm)\n' +
+      'Ollie (first class)\nNessa (a little damp)\nGourdon (carved, not written)\n' +
+      'Hazel (with a star by it)\nBoothoven (fortissimo)\nScarah (and Cornelius, who wrote "Pumpkin")\n' +
+      // The mayor signs as the mayor (V1's P3b), typed, whether she has met him or not.
+      'The Mayor (typed, every W a little darker)\n' +
+      'and Cody, who says he wished you happy birthday first, and technically he did.' +
+      "\n\nThere's cake. There's always cake.",
     gift: { furniture: 'birthdayCake' },
   },
   // Just the one line, in Cody's words (personal_touches.md, "The finishing touches"); the orb that
@@ -191,4 +208,5 @@ export const PARTY_SPOTS: Record<VillagerId, SpotName<'town'>> = {
   hazel: 'wellFrontRight',
   boothoven: 'wellEastUp',
   scarah: 'wellWestUp',
+  robBoo: 'wellFrontMiddle',
 };

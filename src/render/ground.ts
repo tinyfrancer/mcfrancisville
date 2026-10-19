@@ -4,9 +4,13 @@ import { PALETTE, SHADOW_ALPHA } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
 import { DECAL_ART, DECAL_PALETTE } from '../sprites/clutter';
 import type { ClutterRule } from '../data/clutter';
+import { GROUND_LOOKS, type GroundLookId } from '../data/seasons';
+import { seasonPieces } from '../sprites/seasons';
 import { decalsOf, type Decal } from './clutter';
+import { lawnOf } from './lawn';
 import { puddlesOf, type Puddle } from './puddles';
 import { PUDDLE_ART, PUDDLE_PALETTE } from '../sprites/puddles';
+import type { LawnField } from '../sprites/lawn';
 import { groundPieces } from '../sprites/terrain';
 import { tileAt, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
@@ -81,14 +85,22 @@ export class Ground {
   private readonly clutter: readonly ClutterRule[];
   private decals: Decal[];
   private readonly chunks: Chunks<HTMLCanvasElement>;
+  /** The tone at each corner of the lawn (V1's L2), from where the trees, doors and gates stand. */
+  private readonly lawn: LawnField;
   /** Whether it's baked as it looks in the rain, dark and with puddles (V1's L3). */
   private isWet = false;
   private puddles: Puddle[] | null = null;
+  /**
+   * The season it's baked in (V1's L4): its colours, what lies on the lawn, and snow. October's
+   * (`autumn`) is the ground as it always was.
+   */
+  private shown: GroundLookId = 'autumn';
 
   constructor(map: TileMap, clutter: readonly ClutterRule[] = [], chunkTiles?: number) {
     this.map = map;
     this.clutter = clutter;
-    this.decals = decalsOf(map, clutter, (id) => DECAL_ART[id].length);
+    this.decals = this.decalsNow();
+    this.lawn = lawnOf(map);
     this.chunks = new Chunks(chunkGrid(map, chunkTiles), (i) => this.bakeChunk(i));
   }
 
@@ -113,7 +125,7 @@ export class Ground {
     const changed = changedTiles(this.map.tiles, tiles, this.map.width);
     if (changed.length === 0) return;
     this.map = { ...this.map, tiles: [...tiles] };
-    this.decals = decalsOf(this.map, this.clutter, (id) => DECAL_ART[id].length);
+    this.decals = this.decalsNow();
     this.puddles = null;
     this.chunks.invalidate(chunksTouching(this.chunks.grid, changed, BAKE_MARGIN));
   }
@@ -126,6 +138,45 @@ export class Ground {
     if (wet === this.isWet) return;
     this.isWet = wet;
     this.chunks.release();
+  }
+
+  /**
+   * Bakes the ground as it is in a season (V1's L4): its colours, its decals and its snow. Every
+   * chunk is let go when the season (or autumn's drifts) turn, and baked afresh as it's drawn, so
+   * it costs one bake a chunk a season, never a frame.
+   */
+  look(look: GroundLookId): void {
+    if (look === this.shown) return;
+    this.shown = look;
+    this.decals = this.decalsNow();
+    this.chunks.release();
+  }
+
+  /** A tile's colour as baked, the average of its pixels, 0 to 255 a channel (the smoke check). */
+  colourAt(tx: number, ty: number): number[] {
+    const { grid } = this.chunks;
+    const T = TILE_SIZE;
+    const per = grid.size / T;
+    const index = Math.floor(ty / per) * grid.cols + Math.floor(tx / per);
+    const rect = chunkRect(grid, index);
+    const g = context(this.chunks.get(index));
+    const data = g.getImageData(tx * T - rect.x, ty * T - rect.y, T, T).data;
+    const sum = [0, 0, 0];
+    for (let i = 0; i < data.length; i += 4) for (let c = 0; c < 3; c++) sum[c]! += data[i + c]!;
+    return sum.map((c) => Math.round(c / (T * T)));
+  }
+
+  /** The season it's baked in now. */
+  get looks(): GroundLookId {
+    return this.shown;
+  }
+
+  /** The decals on the ground in its season: the place's own, less what's hidden, and the added. */
+  private decalsNow(): Decal[] {
+    const look = GROUND_LOOKS[this.shown];
+    const rules = look.adds.length ? [...this.clutter, ...look.adds] : this.clutter;
+    const decals = decalsOf(this.map, rules, (id) => DECAL_ART[id].length);
+    return look.hides.length ? decals.filter((d) => !look.hides.includes(d.decal)) : decals;
   }
 
   /** Lets go of every baked chunk, for a place she has left. */
@@ -161,13 +212,14 @@ export class Ground {
     const { map } = this;
     const at = (tx: number, ty: number) => tileAt(map, tx, ty);
     const T = TILE_SIZE;
+    const { season, snow = false } = GROUND_LOOKS[this.shown];
     const tx0 = Math.max(0, Math.floor(rect.x / T) - BAKE_MARGIN);
     const ty0 = Math.max(0, Math.floor(rect.y / T) - BAKE_MARGIN);
     const tx1 = Math.min(map.width, Math.ceil((rect.x + rect.width) / T) + BAKE_MARGIN);
     const ty1 = Math.min(map.height, Math.ceil((rect.y + rect.height) / T) + BAKE_MARGIN);
     for (let ty = ty0; ty < ty1; ty++) {
       for (let tx = tx0; tx < tx1; tx++) {
-        for (const p of groundPieces(at, tx, ty)) {
+        for (const p of seasonPieces(at, tx, ty, this.lawn, season, snow)) {
           g.drawImage(bake(p.key, p.source, p.palette), tx * T, ty * T);
         }
       }
@@ -177,7 +229,8 @@ export class Ground {
       const art = DECAL_ART[d.decal][d.look]!;
       g.drawImage(bake(`decal:${d.decal}:${d.look}`, art, DECAL_PALETTE), d.tx * T, d.ty * T);
     }
-    if (this.isWet) this.drawWet(g, rect, { tx0, ty0, tx1, ty1 });
+    // No puddles stand on snow; the snow's own shade does for wet (V1's L4).
+    if (this.isWet && !snow) this.drawWet(g, rect, { tx0, ty0, tx1, ty1 });
     drawShadows(g, map, rect, { tx0, ty0, tx1, ty1 });
     return canvas;
   }

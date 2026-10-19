@@ -1,20 +1,39 @@
 import { CRITTERS } from '../data/critters';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
+import type { ClueId } from '../data/mystery';
 import { HAPPENING_CALLED, SMALL_TALK, TOPICS, type Topic } from '../data/smallTalk';
 import { SPECIAL_DAYS } from '../data/specialDays';
 import { isTool, type Held } from '../data/tools';
 import type { Weather } from '../data/weather';
-import type { CritterId, HappeningId, VillagerId } from '../types/ids';
+import type {
+  BraceletId,
+  CritterId,
+  CropId,
+  FossilId,
+  FurnitureId,
+  HappeningId,
+  ItemId,
+  OutfitId,
+  VillagerId,
+  ZoneId,
+} from '../types/ids';
+import type { HerDayAnswer } from '../data/cody';
+import { husbandTopics } from './cody';
+import { daysBetween } from './calendar';
 import { windowAtHour } from './clock';
 import { happeningsOn, hourOfNight, venueOf } from './happenings';
+import { stillNews } from './mysteryChain';
+import { hashString } from './random';
+import { aThing, isBest, memoryTopics, type Band, type Brought, type Keyed } from './remembering';
 
 /**
- * What's going on round her as she talks to someone (0.2's D2), for what they bring up. The
- * world fills it in at the talk; a test can make one up. Nothing in it is saved: what she caught
- * today is forgotten by a reload, and only means a line or two fewer.
+ * What's going on round her as she talks to someone (0.2's D2), and what she has done and worn
+ * lately (V1's P1), for what they bring up. The world fills it in at the talk; a test can make one
+ * up. What she caught today isn't saved, and only means a line or two fewer after a reload; what
+ * she picked, gave the museum and put out is kept by `Lately`.
  */
-export interface TalkScene {
+export interface Around {
   weather: Weather;
   storm: boolean;
   /** What's in her hand, from the quick bar. */
@@ -23,13 +42,61 @@ export interface TalkScene {
   caught: CritterId | null;
   /** The pet out walking with her, by the name she has given it. */
   pet: string | null;
+  /** The pieces she has on. */
+  wearing: readonly OutfitId[];
+  /** The last piece she put out at home or in her yard, and the day. */
+  placed: { piece: FurnitureId; day: string } | null;
+  /** The last crop she picked, and the day. */
+  harvested: { crop: CropId; day: string } | null;
+  /** The last thing she gave the museum, and the day. */
+  donated: { thing: CritterId | FossilId; day: string } | null;
+  /** How many days she has come to town (`Visits`): how long she has lived here. */
+  visits: number;
+  /** The clue pinned to her corkboard most lately, and the day (V1's P3a). */
+  clue: { id: ClueId; day: string } | null;
+  /** The day she met the mayor at the castle (V1's P3b), or null while he's still a mystery. */
+  met: string | null;
+  /** What she told Cody when he asked about her day, and the day (V1's P5), from `Lately`. */
+  herDay?: { day: string; answer: HerDayAnswer } | null;
+  /** Where she is as they talk (V1's P5: her husband says more at hers). */
+  here?: ZoneId;
+  /** Her pets, by the names she has given them, wherever they are. */
+  pets?: readonly string[];
+  /** The pieces out in her yard. */
+  yard?: readonly FurnitureId[];
 }
+
+/** What's between her and the neighbour she's talking to (V1's P1), from their friendship. */
+export interface Between {
+  /** The last thing she gave them, and the day. */
+  gave: { item: ItemId; day: string } | null;
+  /** The day she last talked to them before today, if ever. */
+  talked: string | null;
+  /** A band of friendship reached since they last spoke to her. */
+  reached: Band | null;
+  /** The bracelet of hers they wear. */
+  wears: BraceletId | null;
+  /** How close they are now (V1's P2): best friends miss her, and ask her along. */
+  band: Band;
+  /** What she answered when they asked her something, as they'd say it (V1's P2). */
+  answer: string | null;
+}
+
+export type TalkScene = Around & Between;
+
+/** Nothing between her and a neighbour: a first meeting, as far as their memory goes. */
+export const STRANGERS: Between = {
+  gave: null,
+  talked: null,
+  reached: null,
+  wears: null,
+  band: 'hello',
+  answer: null,
+};
 
 /** A critter as it's spoken of, with its "a": "a candle moth", "an axolotl", "a Hercules beetle". */
 export function aCritter(id: CritterId): string {
-  const name = CRITTERS[id].name;
-  const word = /^Hercules\b/.test(name) ? name : name.charAt(0).toLowerCase() + name.slice(1);
-  return `${/^[aeiou]/i.test(word) ? 'an' : 'a'} ${word}`;
+  return aThing(CRITTERS[id].name);
 }
 
 /**
@@ -42,58 +109,94 @@ export function comingUp(villager: VillagerId, day: string, hour: number): Happe
   return (
     happeningsOn(day).find((id) => {
       const row = HAPPENINGS[id];
-      return row.who.includes(villager) && h < row.from;
+      // Something on every day (Nessa's lanterns at dusk, V1's P4) is their day, not news.
+      const daily = 'weekdays' in row.on && row.on.weekdays.length === 7;
+      return !daily && row.who.includes(villager) && h < row.from;
     }) ?? null
   );
 }
 
-/** Which topics fit now, the first first, with what each line leaves to fill. */
-function topicsNow(
+/** The topics of what's round her that fit now, with what each line leaves to fill. */
+function aroundNow(
   villager: VillagerId,
   scene: TalkScene,
   day: string,
   hour: number,
 ): { topic: Topic; fill: Record<string, string> }[] {
   const fits: { topic: Topic; fill: Record<string, string> }[] = [];
-  const coming = comingUp(villager, day, hour);
   const held = scene.holding;
-  for (const topic of TOPICS) {
-    if (topic === 'storm' && scene.weather === 'rain' && scene.storm)
-      fits.push({ topic, fill: {} });
-    if (topic === 'rain' && scene.weather === 'rain' && !scene.storm)
-      fits.push({ topic, fill: {} });
-    if (topic === 'fog' && scene.weather === 'fog') fits.push({ topic, fill: {} });
-    if (topic === 'happening' && coming) {
-      const fill = { happening: HAPPENING_CALLED[coming], place: venueOf(coming).place };
-      fits.push({ topic, fill });
-    }
-    if (topic === 'caught' && scene.caught) {
-      fits.push({ topic, fill: { catch: aCritter(scene.caught) } });
-    }
-    if (topic === 'pet' && scene.pet) fits.push({ topic, fill: { pet: scene.pet } });
-    if (topic === held) fits.push({ topic, fill: {} });
-    if (topic === 'seed' && !isTool(held) && ITEMS[held].kind === 'seed')
-      fits.push({ topic, fill: {} });
-    if (topic === windowAtHour(hour)) fits.push({ topic, fill: {} });
+  if (scene.weather === 'rain') fits.push({ topic: scene.storm ? 'storm' : 'rain', fill: {} });
+  if (scene.weather === 'fog') fits.push({ topic: 'fog', fill: {} });
+  const coming = comingUp(villager, day, hour);
+  if (coming) {
+    const fill = { happening: HAPPENING_CALLED[coming], place: venueOf(coming).place };
+    // A best friend asks her along (V1's P2).
+    fits.push({ topic: isBest(scene.band) ? 'invite' : 'happening', fill });
   }
+  if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
+  if (scene.pet) fits.push({ topic: 'pet', fill: { pet: scene.pet } });
+  // A clue pinned lately, which they theorise about (V1's P3a), until she has met the mayor, and
+  // then for a few days the meeting, which is all anyone talks about (V1's P3b).
+  if (scene.met) {
+    if (stillNews(scene.met, day)) fits.push({ topic: 'mayorMet', fill: {} });
+  } else if (scene.clue && stillNews(scene.clue.day, day)) {
+    fits.push({ topic: 'mystery', fill: {} });
+  }
+  if (held === 'net' || held === 'can' || held === 'rod') fits.push({ topic: held, fill: {} });
+  if (!isTool(held) && ITEMS[held].kind === 'seed') fits.push({ topic: 'seed', fill: {} });
+  fits.push({ topic: windowAtHour(hour), fill: {} });
   return fits;
 }
 
+const URGENT: ReadonlySet<Topic> = new Set<Topic>(['band', 'away', 'missed']);
+
+/** Days since 1 January 2000, so a topic's lines come round one a day. */
+function dayNumber(day: string): number {
+  return daysBetween('2000-01-01', day);
+}
+
+/** A line with what it leaves filled in, and its key: its words as written. */
+function filled(template: string, fill: Record<string, string>): Keyed {
+  const text = Object.entries(fill).reduce(
+    (line, [key, value]) => line.replaceAll(`{${key}}`, value),
+    template,
+  );
+  return { text, key: hashString(template) };
+}
+
 /**
- * What a neighbour could bring up now, in the order they would: the sky first, then what's on,
- * then what she's doing, and her day last. Each is that topic's line in their words, with all but
- * her name filled in.
+ * What a neighbour could bring up now, in the order they would (`TOPICS`): a band just reached
+ * and a long time away first, then the sky, what's on, what she has done and wears and is doing,
+ * and her time here and her day last. Each topic's lines are in its words with all but her name
+ * filled in, today's first: they come round one a day, so a topic isn't said the same way two
+ * days running.
  */
+export function topicsNow(
+  villager: VillagerId,
+  scene: TalkScene,
+  day: string,
+  hour: number,
+): Brought[] {
+  const fits = [...aroundNow(villager, scene, day, hour), ...memoryTopics(villager, scene, day)];
+  // What only her husband brings up jumps the queue (V1's P5).
+  const husband = husbandTopics(villager, scene, day);
+  const everyone = TOPICS.flatMap((topic) => {
+    const fit = fits.find((f) => f.topic === topic);
+    if (!fit) return [];
+    const lines = SMALL_TALK[topic][villager];
+    const start = (dayNumber(day) + hashString(`${villager}:${topic}`)) % lines.length;
+    const turned = [...lines.slice(start), ...lines.slice(0, start)];
+    return [{ topic, urgent: URGENT.has(topic), lines: turned.map((l) => filled(l, fit.fill)) }];
+  });
+  return [...husband, ...everyone];
+}
+
+/** What a neighbour could bring up now, a line a topic (today's), in the order they would. */
 export function smallTalk(
   villager: VillagerId,
   scene: TalkScene,
   day: string,
   hour: number,
 ): string[] {
-  return topicsNow(villager, scene, day, hour).map(({ topic, fill }) =>
-    Object.entries(fill).reduce(
-      (line, [key, value]) => line.replaceAll(`{${key}}`, value),
-      SMALL_TALK[topic][villager],
-    ),
-  );
+  return topicsNow(villager, scene, day, hour).map((b) => b.lines[0]!.text);
 }

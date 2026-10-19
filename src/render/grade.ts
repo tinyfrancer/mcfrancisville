@@ -1,6 +1,7 @@
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
 import { daylight, type Daylight, type Sky } from '../systems/clock';
+import type { SeasonId } from '../data/seasons';
 
 /**
  * The grade by hour (V1's L3, decision 291): how the light of each sky colours the finished frame,
@@ -49,6 +50,18 @@ export const GRADE: Record<Sky, GradeRow> = {
   },
 };
 
+/**
+ * A season's touch on the light (V1's L4, decision 294), multiplied into the grade's as rain's
+ * grey is, so it costs no pass: a cool winter, a soft pink spring, a warm summer. Autumn is the
+ * light as it always was.
+ */
+export const SEASON_LIGHT: Record<SeasonId, string | null> = {
+  autumn: null,
+  winter: PALETTE.lightWinter,
+  spring: PALETTE.lightSpring,
+  summer: PALETTE.lightSummer,
+};
+
 /** A grade worked out for a moment: the light as whole channels, 0 to 255. */
 export interface Grade {
   light: Rgb;
@@ -68,20 +81,23 @@ const each = (f: (i: 0 | 1 | 2) => number): Rgb => [f(0), f(1), f(2)];
 /**
  * The grade for this light. `tint` greys it for rain or fog (multiplied into the light, and no
  * clouds' shadows under an overcast sky); `soften` (0 to 1) lifts it that far toward plain, as a
- * room indoors is only gently dim at night; `outdoors` false has no clouds.
+ * room indoors is only gently dim at night; `outdoors` false has no clouds; `season` is the
+ * season's touch on the light (`SEASON_LIGHT`), which leaves the clouds be.
  */
 export function gradeOf(
   light: Daylight,
   tint: string | null = null,
   soften = 0,
   outdoors = true,
+  season: string | null = null,
 ): Grade {
   const a = GRADE[light.from];
   const b = GRADE[light.to];
   const la = channels(a.light);
   const lb = channels(b.light);
   const t = tint ? channels(tint) : ([255, 255, 255] as Rgb);
-  const lit = each((i) => (lerp(la[i], lb[i], light.t) * t[i]) / 255);
+  const st = season ? channels(season) : ([255, 255, 255] as Rgb);
+  const lit = each((i) => (((lerp(la[i], lb[i], light.t) * t[i]) / 255) * st[i]) / 255);
   return {
     light: each((i) => Math.round(lit[i] + (255 - lit[i]) * soften)),
     shadows: each((i) => lerp(a.shadows[i], b.shadows[i], light.t) * (1 - soften)),

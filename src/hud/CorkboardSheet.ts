@@ -1,5 +1,7 @@
 import { CLUE_IDS, CLUES, SUSPECTS, type ClueId, type SuspectId } from '../data/mystery';
+import { LAST_PIN, UNMASKED } from '../data/mysteryChain';
 import { el, openSheet } from './dom';
+import { glyph } from './glyph';
 import { dated } from './MailSheet';
 
 /** What her corkboard may ask of the game. Like the other sheets, it never reaches the world. */
@@ -10,6 +12,32 @@ export interface MysteryApi {
   suspects(): SuspectId[];
   /** Draws a suspect's head and shoulders at 1×, for the sheet to scale up. */
   portrait(canvas: HTMLCanvasElement, id: SuspectId): void;
+  /** Whether a clue has cleared a suspect (V1's P3a). */
+  cleared(id: SuspectId): boolean;
+  /**
+   * For a clue of the chain still to come (V1's P3a): how many days until it does, 0 once it's
+   * due; null for any other clue, or one further off.
+   */
+  daysUntil(id: ClueId): number | null;
+  /** Whether a clue is one of the chain's, which come a week apart. */
+  inChain(id: ClueId): boolean;
+  /** Whether the mayor has promised to say hello: the last pin is theirs. */
+  ready(): boolean;
+  /**
+   * Draws the mayor's head and shoulders at 1× (V1's P3b): Rob Boo once `seen`, and until then
+   * his shape only, under the dust sheet.
+   */
+  mayor(canvas: HTMLCanvasElement, seen: boolean): void;
+}
+
+/** What a clue still to find says: where to look, or, for the chain's, when it'll come. */
+function hintOf(api: MysteryApi, id: ClueId): string {
+  if (!api.inChain(id)) return CLUES[id].hint;
+  const days = api.daysUntil(id);
+  if (days === 0) return CLUES[id].hint;
+  if (days === 1) return 'Coming tomorrow, or thereabouts.';
+  if (days !== null) return `Coming in about ${days} days.`;
+  return 'After the clue before it, a week or so on.';
 }
 
 /**
@@ -17,18 +45,21 @@ export interface MysteryApi {
  * it, a question mark and a hint for each still to find, and a photo of everyone they point at.
  */
 export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
-  const clues = CLUE_IDS.map((id) => {
+  // The unmasking's clue isn't shown still to find: the last pin stands for it till it's pinned.
+  const met = api.foundOn(UNMASKED) !== null;
+  const shown = CLUE_IDS.filter((id) => id !== UNMASKED || met);
+  const clues = shown.map((id) => {
     const row = CLUES[id];
     const on = api.foundOn(id);
     return el(
       'div',
       { className: 'hud-seed hud-clue' },
-      el('span', { textContent: on ? '📌' : '❔' }),
+      glyph(on ? 'pin' : 'question', 32),
       el(
         'span',
         { className: 'hud-seed-text' },
         el('strong', {}, on ? row.title : 'Still to find'),
-        el('small', {}, on ? `${row.note} (${dated(on)})` : row.hint),
+        el('small', {}, on ? `${row.note} (${dated(on)})` : hintOf(api, id)),
       ),
     );
   });
@@ -44,24 +75,40 @@ export function openCorkboard(hud: HTMLElement, api: MysteryApi): () => void {
         'span',
         { className: 'hud-seed-text' },
         el('strong', {}, SUSPECTS[id].name),
-        el('small', {}, SUSPECTS[id].note),
+        el('small', {}, api.cleared(id) ? SUSPECTS[id].cleared : SUSPECTS[id].note),
       ),
     );
   });
 
-  const found = CLUE_IDS.filter((id) => api.foundOn(id) !== null).length;
-  const status =
-    found === CLUE_IDS.length
-      ? 'Every clue so far is pinned up. The mayor is still a mystery… for now.'
-      : `${found} of ${CLUE_IDS.length} clues pinned up. Red string at the ready.`;
+  // The one pin left for the unmasking (V1's P3a), until she meets the mayor (V1's P3b).
+  const lastPin = el(
+    'div',
+    { className: 'hud-seed hud-clue hud-last-pin' },
+    glyph('question', 32),
+    el(
+      'span',
+      { className: 'hud-seed-text' },
+      el('strong', {}, LAST_PIN.title),
+      el('small', {}, api.ready() ? LAST_PIN.ready : LAST_PIN.waiting),
+    ),
+  );
+
+  const found = shown.filter((id) => api.foundOn(id) !== null).length;
+  const status = met
+    ? found === shown.length
+      ? 'Every clue is pinned up, and the mayor is Rob Boo! Case closed. The red string can rest.'
+      : `The mayor is Rob Boo! ${found} of ${shown.length} clues pinned up, all the same.`
+    : found === shown.length
+      ? 'Every clue is pinned up, and one pin is left. The mayor is still a mystery… for now.'
+      : `${found} of ${shown.length} clues pinned up. Red string at the ready.`;
 
   const { body, close } = openSheet(hud, {
-    title: 'Who is the mayor?',
+    title: met ? 'The mayor, found' : 'Who is the mayor?',
     line: status,
     className: 'hud-corkboard-sheet',
   });
   body.append(
-    el('div', { className: 'hud-seeds' }, ...clues),
+    el('div', { className: 'hud-seeds' }, ...clues, ...(met ? [] : [lastPin])),
     ...(suspects.length > 0
       ? [el('h3', {}, 'Suspects'), el('div', { className: 'hud-seeds' }, ...suspects)]
       : []),

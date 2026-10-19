@@ -5,13 +5,16 @@ import { ITEMS, type ItemKind } from '../data/items';
 import type { Ware } from '../data/shop';
 import { VILLAGERS } from '../data/villagers';
 import { ZONES } from '../data/zones';
-import { MAX_HEARTS, tierOf } from '../systems/friendship';
+import { HUSBAND, MARRIED_BAND } from '../data/cody';
+import { MAX_HEARTS, tierOf, yearsMarried } from '../systems/friendship';
 import type { ItemId, VillagerId, ZoneId } from '../types/ids';
 import type { Whereabout } from '../world/services/Neighbourhood';
 import { fitIcon, ROW_ICON, SLOT_ICON } from './collection';
 import { button, el, openSheet } from './dom';
 import { wareName } from './messages';
-import { heartsRow } from './TalkSheet';
+import { heartsRow } from './hearts';
+import { glyph, glyphed } from './glyph';
+import type { Glyph } from '../data/glyphs';
 
 /** One neighbour, as the sheet lists them. */
 export interface NeighbourView {
@@ -19,6 +22,8 @@ export interface NeighbourView {
   hearts: number;
   /** Where they are now; null in a town without them. */
   where: Whereabout | null;
+  /** Whether she has met them: everyone, and the mayor once she has (V1's P3b). */
+  met: boolean;
 }
 
 /** What the neighbours sheet may ask of the game (0.2's U3). It never reaches the world directly. */
@@ -33,6 +38,8 @@ export interface NeighboursApi {
   seek(id: VillagerId): boolean;
   /** Draws a neighbour's head and shoulders at 1×. */
   portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
+  /** Draws someone she hasn't met, as their shape only, at 1× (V1's P3b: the mayor). */
+  shadow(canvas: HTMLCanvasElement, id: VillagerId): void;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
   /** Draws what a neighbour gives her at a band of hearts, at 1×. */
   gift(canvas: HTMLCanvasElement, ware: Ware): void;
@@ -66,12 +73,22 @@ export function likesLine(kinds: readonly ItemKind[]): string {
   return `${said.slice(0, -1).join(', ')} and ${said.at(-1)}`;
 }
 
-/** How close they are, in a word or two. */
-export function bandOf(hearts: number): string {
+/**
+ * How close they are, in a word or two; her husband is married to her, and how long, never
+ * "getting to know you" (V1's P5, decision 269).
+ */
+export function bandOf(hearts: number, id?: VillagerId, day?: string): string {
+  if (id === HUSBAND) {
+    const years = day ? yearsMarried(day) : 0;
+    return years > 0 ? `${MARRIED_BAND}, ${years} year${years === 1 ? '' : 's'}` : MARRIED_BAND;
+  }
   if (hearts >= MAX_HEARTS) return 'Best friends';
-  return { hello: 'Getting to know you', friend: 'Friends', close: 'Close friends' }[
-    tierOf(hearts)
-  ];
+  return {
+    hello: 'Getting to know you',
+    friend: 'Friends',
+    close: 'Close friends',
+    married: MARRIED_BAND,
+  }[tierOf(hearts)];
 }
 
 const IN: Partial<Record<ZoneId, string>> = {
@@ -122,9 +139,13 @@ function giftKind(ware: Ware): string {
 
 function portraitOf(api: NeighboursApi, view: NeighbourView): HTMLCanvasElement {
   const picture = el('canvas', { className: 'hud-portrait' });
-  api.portrait(picture, view.id);
+  if (view.met) api.portrait(picture, view.id);
+  else api.shadow(picture, view.id);
   return picture;
 }
+
+/** The mayor, before she has met him (V1's P3b): a shape on the sheet, and a line. */
+const UNMET = { name: 'The mayor', about: "Nobody's met the mayor yet. Someday, perhaps." };
 
 /** Sets off to them if they're here; otherwise says where they are. Never a hop there. */
 function find(api: NeighboursApi, view: NeighbourView, said: HTMLElement, close: () => void) {
@@ -145,21 +166,37 @@ function find(api: NeighboursApi, view: NeighbourView, said: HTMLElement, close:
  */
 export function openNeighbours(hud: HTMLElement, api: NeighboursApi): () => void {
   const views = api.neighbours();
+  const known = views.filter((v) => v.met).length;
   const sheet = openSheet(hud, {
     title: 'Your neighbours',
-    line: `${views.length} ${views.length === 1 ? 'neighbour' : 'neighbours'} in McFrancisVille`,
+    line: `${known} ${known === 1 ? 'neighbour' : 'neighbours'} in McFrancisVille`,
     className: 'hud-neighbours-sheet',
   });
   const rows = views.map((view) => {
+    if (!view.met) {
+      const row = el(
+        'div',
+        { className: 'hud-seed hud-neighbour hud-unmet' },
+        portraitOf(api, view),
+        el(
+          'span',
+          { className: 'hud-seed-text' },
+          el('strong', {}, UNMET.name),
+          el('small', {}, UNMET.about),
+        ),
+      );
+      row.dataset.villager = view.id;
+      return row;
+    }
     const name = VILLAGERS[view.id].name;
     const where = view.where;
     const about = where ? whereLine(view.id, where, api.found(where.zone)) : '';
-    const cake = isBirthday(view.id, api.today()) ? ' 🎂' : '';
+    const cake = isBirthday(view.id, api.today()) ? [' ', glyph('neighbourCake')] : [];
     const text = el(
       'span',
       { className: 'hud-seed-text' },
       el('strong', {}, name),
-      el('span', { className: 'hud-hearts' }, heartsRow(view.hearts), cake),
+      el('span', { className: 'hud-hearts' }, ...heartsRow(view.hearts), ...cake),
       el('small', {}, about),
     );
     const row = el(
@@ -199,16 +236,16 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
   });
 
   const about = sheet.panel('about');
-  const hearts = el('p', { className: 'hud-hearts' }, heartsRow(view.hearts));
+  const hearts = el('p', { className: 'hud-hearts' }, ...heartsRow(view.hearts));
   hearts.setAttribute('aria-label', `${view.hearts} hearts of ${MAX_HEARTS}`);
-  const fact = (label: string, text: string) =>
-    el('p', { className: 'hud-fact' }, el('strong', {}, label), ' ', text);
-  const today = isBirthday(id, api.today()) ? " It's today! 🎉" : '';
-  about.append(hearts, fact('💞', bandOf(view.hearts)));
+  const fact = (mark: Glyph, text: string) =>
+    el('p', { className: 'hud-fact' }, glyphed(mark, text));
+  const today = isBirthday(id, api.today()) ? " It's today!" : '';
+  about.append(hearts, fact('heart', bandOf(view.hearts, id, api.today())));
   if (view.where) {
-    about.append(fact('📍', whereLine(id, view.where, api.found(view.where.zone))));
+    about.append(fact('here', whereLine(id, view.where, api.found(view.where.zone))));
   }
-  about.append(fact('🎂', `${birthdayOf(id)}${today}`));
+  about.append(fact('neighbourCake', `${birthdayOf(id)}${today}`));
   about.append(el('h3', {}, 'Loves'));
   about.append(
     el(
@@ -227,7 +264,9 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
   about.append(el('p', {}, `${likes.charAt(0).toUpperCase()}${likes.slice(1)}.`));
 
   const gifts = sheet.panel('gifts');
-  gifts.append(el('p', { className: 'hud-fact' }, `As you grow close, ${row.name} will send you:`));
+  const sends =
+    id === HUSBAND ? `${row.name} has sent you:` : `As you grow close, ${row.name} will send you:`;
+  gifts.append(el('p', { className: 'hud-fact' }, sends));
   gifts.append(
     el(
       'div',
@@ -237,7 +276,11 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
         api.gift(icon, reward.gift);
         fitIcon(icon, ROW_ICON);
         const sent = view.hearts >= reward.hearts;
-        const when = el('span', { className: 'hud-band' }, sent ? '✓ Sent' : `♥ ${reward.hearts}`);
+        const when = el(
+          'span',
+          { className: 'hud-band' },
+          ...(sent ? ['✓ Sent'] : [glyph('heart'), ` ${reward.hearts}`]),
+        );
         const gift = el(
           'div',
           { className: 'hud-ware' },
@@ -264,7 +307,14 @@ export function openNeighbour(hud: HTMLElement, api: NeighboursApi, id: Villager
   sheet.foot.prepend(said);
   sheet.actions(
     button('Everyone', () => openNeighbours(hud, api)),
-    button(`👣 Find ${row.name}`, () => find(api, view, said, sheet.close), true),
+    findButton(row.name, () => find(api, view, said, sheet.close)),
   );
   return sheet.close;
+}
+
+/** Find, with its footprints (V1's L5). */
+function findButton(name: string, onClick: () => void): HTMLButtonElement {
+  const b = button(`Find ${name}`, onClick, true);
+  b.prepend(glyph('footprints'), ' ');
+  return b;
 }

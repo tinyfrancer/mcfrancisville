@@ -36,8 +36,11 @@ export function lostBone(
   return { scene: indoors ? 'home' : 'town', tx: spot.tx, ty: spot.ty };
 }
 
-/** A little something a pet does now and then: a whine, a "…", a heart, or the Zs of a nap. */
-export type Bubble = 'woof' | 'whine' | 'dots' | 'heart' | 'zzz';
+/**
+ * A little something a pet does now and then: a whine, a "…", a heart, or the Zs of a nap; and on
+ * a walk (V1's R6c), a sniff on the trail and a "!" at what it found.
+ */
+export type Bubble = 'woof' | 'whine' | 'dots' | 'heart' | 'zzz' | 'sniff' | 'found';
 
 /** Whether something happens in this stretch of `periodMs`, one time in `oneIn`, for its first `forMs`. */
 function nowAndThen(what: string, now: number, periodMs: number, oneIn: number, forMs: number) {
@@ -99,4 +102,137 @@ export function boneLine(name: string, bones: number): string {
       ? "{name}'s bone! She whines, wags her whole back end, and carries it off to lose it again. You made her day."
       : "{name}'s bone! She wags so hard she nearly falls over. That's {bones} bones you've brought back.";
   return line.replaceAll('{name}', name).replaceAll('{bones}', String(bones));
+}
+
+/** What a walk turns up round her, for a pet's job (V1's R6c): read off the world's own services. */
+export interface PetFinds {
+  /** Today's mound in this place, while it's still to dig. */
+  mound: Tile | null;
+  /** The critters out where she is: the shy ones Dolly barks out, the orbs Elvira draws. */
+  critters: readonly FoundCritter[];
+  /** Something a neighbour lost, lying in this place. */
+  lost: Tile | null;
+}
+
+export interface FoundCritter extends Tile {
+  key: string;
+  /** Wary, or rare enough to drift off as she nears. */
+  shy: boolean;
+  orb: boolean;
+}
+
+export const NO_FINDS: PetFinds = { mound: null, critters: [], lost: null };
+
+/** Within this many tiles of her, Fibi goes and sits by the mound; within the far, she leads. */
+export const SNIFF_NEAR = 5;
+export const SNIFF_FAR = 14;
+/** How near her a shy critter has to be for Dolly to bark it out. */
+export const BARK_REACH = 4;
+/** How near her an orb has to be for Elvira to draw it nearer. */
+export const DRAW_REACH = 6;
+/** How far off Wybie will fetch a dropped thing from. */
+export const FETCH_REACH = 10;
+
+function reachOf(a: Tile, b: Tile): number {
+  return Math.max(Math.abs(a.tx - b.tx), Math.abs(a.ty - b.ty));
+}
+
+/** One step from `from` towards `to`, on open ground: straight, or along either axis. */
+function stepTowards(
+  from: Tile,
+  to: Tile,
+  canWalk: (tx: number, ty: number) => boolean,
+): Tile | null {
+  const dx = Math.sign(to.tx - from.tx);
+  const dy = Math.sign(to.ty - from.ty);
+  const options = [
+    { tx: from.tx + dx, ty: from.ty + dy },
+    { tx: from.tx + dx, ty: from.ty },
+    { tx: from.tx, ty: from.ty + dy },
+  ];
+  const moved = (t: Tile) => t.tx !== from.tx || t.ty !== from.ty;
+  return options.find((t) => moved(t) && canWalk(t.tx, t.ty)) ?? null;
+}
+
+/**
+ * Where Fibi goes about today's mound: near enough, to the open tile beside it nearest her, to
+ * sit (`by`); further off, a couple of steps ahead of her on its trail, nose down.
+ */
+export function sniffGoal(
+  her: Tile,
+  mound: Tile,
+  canWalk: (tx: number, ty: number) => boolean,
+): { goal: Tile; by: boolean } | null {
+  const far = reachOf(her, mound);
+  if (far > SNIFF_FAR) return null;
+  if (far <= SNIFF_NEAR) {
+    let best: Tile | null = null;
+    for (let y = mound.ty - 1; y <= mound.ty + 1; y++) {
+      for (let x = mound.tx - 1; x <= mound.tx + 1; x++) {
+        const t = { tx: x, ty: y };
+        if ((x === mound.tx && y === mound.ty) || (x === her.tx && y === her.ty)) continue;
+        if (!canWalk(x, y)) continue;
+        if (!best || reachOf(t, her) < reachOf(best, her)) best = t;
+      }
+    }
+    return best && { goal: best, by: true };
+  }
+  const one = stepTowards(her, mound, canWalk);
+  const two = one && stepTowards(one, mound, canWalk);
+  const goal = two ?? one;
+  return goal && { goal, by: false };
+}
+
+/** The shy critter Dolly barks out: the nearest within reach of her she hasn't barked at yet. */
+export function barkTarget(
+  her: Tile,
+  critters: readonly FoundCritter[],
+  barked: (key: string) => boolean,
+): FoundCritter | null {
+  const near = critters.filter((c) => c.shy && !barked(c.key) && reachOf(c, her) <= BARK_REACH);
+  return near.sort((a, b) => reachOf(a, her) - reachOf(b, her))[0] ?? null;
+}
+
+/**
+ * The orb Elvira draws a tile nearer, and where to: the nearest in reach not drawn yet, that isn't
+ * already beside her.
+ */
+export function drawTarget(
+  her: Tile,
+  critters: readonly FoundCritter[],
+  drawn: (key: string) => boolean,
+  canWalk: (tx: number, ty: number) => boolean,
+): { key: string; to: Tile } | null {
+  const orbs = critters
+    .filter((c) => c.orb && !drawn(c.key) && reachOf(c, her) > 1 && reachOf(c, her) <= DRAW_REACH)
+    .sort((a, b) => reachOf(a, her) - reachOf(b, her));
+  const open = (tx: number, ty: number) => canWalk(tx, ty) && (tx !== her.tx || ty !== her.ty);
+  for (const orb of orbs) {
+    const to = stepTowards(orb, her, open);
+    if (to) return { key: orb.key, to };
+  }
+  return null;
+}
+
+/** Whether Wybie can fetch a dropped thing: lying near enough to her. */
+export function fetchable(her: Tile, lost: Tile | null): lost is Tile {
+  return lost !== null && reachOf(her, lost) <= FETCH_REACH;
+}
+
+/**
+ * Whether a pet at home goes to its resting spot in this stretch, rather than pottering about:
+ * about half the time, and for Gary a third.
+ */
+export function restsNow(id: PetId, now: number): boolean {
+  return nowAndThen(`${id}:rest`, now, 20_000, id === 'gary' ? 3 : 2, 20_000);
+}
+
+/** Whether a pet that knows its trick shows it off on its own in this stretch of time. */
+export function trickNow(id: PetId, now: number, ms: number): boolean {
+  return nowAndThen(`${id}:trick`, now, 40_000, 3, ms);
+}
+
+/** Whether Florence, asleep and fond of her, purrs a heart through her Zs just now. */
+export function dreamsOfHer(now: number): boolean {
+  return nowAndThen('florence:dream', now, 5000, 3, 1400);
 }

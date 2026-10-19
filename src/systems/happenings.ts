@@ -2,6 +2,7 @@ import {
   HAPPENING_IDS,
   HAPPENINGS,
   STAGE_SPOTS,
+  type Away,
   type HappeningRow,
   type Outdoors,
   type SetPiece,
@@ -13,15 +14,36 @@ import type { HappeningId, InteriorId, MapZoneId, VillagerId, ZoneId } from '../
 import { CALENDAR } from '../data/calendar';
 import { fallsOn, festivalsOn, isFullMoon, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
+import { inTown, unmaskingOn } from './mayor';
+import { isBirthday } from '../data/birthdays';
+import { weatherOn } from './weather';
 import { hashString } from './random';
 import type { Place } from './schedules';
-import { atTheFair } from './venues';
+import { atTheBandstand, atTheFair } from './venues';
 
 /* When her neighbours' own events are on (phase S2), from the day key and the hour alone. */
 
-/** Whether a happening is on at all on a day. */
+/** What's been worked out for the day, of the happenings on by the day key alone. */
+let byDay: { day: string; on: Map<HappeningId, boolean> } | null = null;
+
+/**
+ * Whether a happening is on at all on a day. Asked of every row many times a step, so what the
+ * day key alone decides is kept for the day; the mayor's hello and his birthday read whether
+ * she has met him, which can change while she plays, so they're worked out each time.
+ */
 export function happensOn(id: HappeningId, day: string): boolean {
   const { on } = HAPPENINGS[id];
+  if ('unmasking' in on || ('birthday' in on && on.birthday === 'robBoo')) return decide(id, day);
+  if (byDay?.day !== day) byDay = { day, on: new Map() };
+  let is = byDay.on.get(id);
+  if (is === undefined) byDay.on.set(id, (is = decide(id, day)));
+  return is;
+}
+
+function decide(id: HappeningId, day: string): boolean {
+  const { on, clear } = HAPPENINGS[id];
+  // Stargazing wants a clear sky (V1's P4), worked out from the day key as the weather is.
+  if (clear && weatherOn(day) !== 'clear') return false;
   if ('festival' in on) {
     if (!on.weekdays.includes(partsOf(day).weekday)) return false;
     const { finale } = CALENDAR[on.festival];
@@ -32,6 +54,9 @@ export function happensOn(id: HappeningId, day: string): boolean {
   if ('fullMoon' in on) return isFullMoon(day);
   if ('holiday' in on) return fallsOn(CALENDAR[on.holiday].when, day);
   if ('special' in on) return day.slice(5) === SPECIAL_DAYS[on.special];
+  if ('unmasking' in on) return unmaskingOn(day);
+  // A neighbour's birthday party (V1's P4); the mayor's only once she has met him.
+  if ('birthday' in on) return isBirthday(on.birthday, day) && inTown(on.birthday);
   return hashString(`happening:${id}:${day}`) % on.oneIn === 0;
 }
 
@@ -53,7 +78,9 @@ export function hourOfNight(hour: number): number {
  */
 export function isHolidays(id: HappeningId): boolean {
   const { on } = HAPPENINGS[id];
-  return 'holiday' in on || 'festival' in on || 'special' in on;
+  return (
+    'holiday' in on || 'festival' in on || 'special' in on || 'unmasking' in on || 'birthday' in on
+  );
 }
 
 /** The happenings going on at an hour of a day, a holiday's first. */
@@ -63,7 +90,10 @@ export function happeningsAt(hour: number, day: string): HappeningId[] {
     const row = HAPPENINGS[id];
     return row.from <= h && h < row.until && happensOn(id, day);
   });
-  return [...on.filter(isHolidays), ...on.filter((id) => !isHolidays(id))];
+  // The mayor's hello (V1's P3b) comes before anything else: it happens once.
+  const once = on.filter((id) => 'unmasking' in HAPPENINGS[id].on);
+  const rest = on.filter((id) => !once.includes(id));
+  return [...once, ...rest.filter(isHolidays), ...rest.filter((id) => !isHolidays(id))];
 }
 
 /**
@@ -77,7 +107,7 @@ export function happeningOf(villager: VillagerId, hour: number, day: string): Ha
 /** Where a happening is today: the place, how they gather, as the calendar says it, and its set. */
 export interface Venue {
   zone: ZoneId;
-  where: { inside: InteriorId } | Outdoors<'town'> | Outdoors<'fairground'>;
+  where: { inside: InteriorId } | Outdoors<'town'> | Outdoors<'fairground'> | Away;
   /** "round the well", "at the fairground's stage". */
   place: string;
   set: readonly SetPiece[];
@@ -97,7 +127,11 @@ export function venueOf(id: HappeningId): Venue {
       set: row.fair.set ?? [],
     };
   }
-  const zone = 'inside' in row.where ? row.where.inside : 'town';
+  if (row.bandstand && atTheBandstand()) {
+    return { zone: 'town', where: row.bandstand.where, place: row.bandstand.place, set: [] };
+  }
+  const zone =
+    'inside' in row.where ? row.where.inside : 'zone' in row.where ? row.where.zone : 'town';
   return { zone, where: row.where, place: row.place, set: row.set ?? [] };
 }
 

@@ -4,12 +4,16 @@ import {
   EASTER_EGG_ODDS,
   HELLO_REPLY,
   HOLIDAY_GREETINGS,
+  RHYTHM_GREETINGS,
+  type SeasonFestivalId,
   POKEMON,
   RED_ONE,
   WELCOMES,
 } from '../data/greetings';
 import { SPECIAL_LINES } from '../data/specialDays';
-import { happeningOn } from './calendar';
+import { festivalDay, festivalsOn, happeningOn } from './calendar';
+import { rareEventBegan, rareEventOn } from './rareEvents';
+import type { RareEventId } from '../data/rareEvents';
 import { dayKey, windowKey, windowOf } from './clock';
 import { fill, specialDayOf, yearsMarried } from './friendship';
 import { hashString } from './random';
@@ -51,6 +55,19 @@ function celebrated(day: string): Celebrated | null {
 }
 
 /**
+ * The day out of the ordinary that has a greeting (V1's R3): a festival week's first day, or the
+ * first day of a rare event.
+ */
+export function rhythmOn(day: string): SeasonFestivalId | RareEventId | null {
+  const festival = festivalsOn(day).find(
+    (id): id is SeasonFestivalId => id !== 'halloweenFestival' && festivalDay(id, day).nth === 1,
+  );
+  if (festival) return festival;
+  const rare = rareEventOn(day);
+  return rare && rareEventBegan(day) === day ? rare : null;
+}
+
+/**
  * What Cody says as she opens the game (decisions.md 24, 114), from the clock, when she last had
  * it open, and her name. `lastPlayedAt` is null for a brand-new game. On one of her special days
  * it's that day's line every time; on the first visit of any other day it may be the day's
@@ -69,6 +86,8 @@ export function greetingFor(now: number, lastPlayedAt: number | null, name: stri
   if (dayKey(lastPlayedAt) !== day) {
     const holiday = celebrated(day);
     if (holiday) return { kind: 'holiday', line: HOLIDAY_GREETINGS[holiday], reply: HELLO_REPLY };
+    const rhythm = rhythmOn(day);
+    if (rhythm) return { kind: 'holiday', line: RHYTHM_GREETINGS[rhythm], reply: HELLO_REPLY };
     const roll = hashString(`${day}:greeting`) % 100;
     if (roll < EASTER_EGG_ODDS.redOne) {
       const line = pick(RED_ONE.lines, now, 'redOne');

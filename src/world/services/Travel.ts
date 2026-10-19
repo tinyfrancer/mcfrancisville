@@ -1,4 +1,5 @@
 import { ZONE_IDS, ZONES } from '../../data/zones';
+import type { Glyph } from '../../data/glyphs';
 import { dayKey } from '../../systems/clock';
 import {
   holds,
@@ -25,7 +26,7 @@ export interface Place {
   id: ZoneId;
   name: string;
   blurb: string;
-  icon: string;
+  icon: Glyph;
   /** Where it sits on the map, in percent. */
   at: { x: number; y: number };
   /** Whether she has been; one she hasn't is a question mark on the path from one she has. */
@@ -43,7 +44,7 @@ export interface WayOut {
   /** Which edge of the place it's off. */
   side: 'north' | 'south' | 'east' | 'west';
   name: string;
-  icon: string;
+  icon: Glyph;
   /** Whether she has been there; the map doesn't name a place she hasn't. */
   found: boolean;
   /** A place the world map keeps quiet about until she finds it. */
@@ -135,6 +136,29 @@ export class Travel {
       return false;
     }
     const entry = this.reads.zones.get(to).entry(null);
+    this.ctx.moments.push({ kind: 'flew', to });
+    this.ctx.moments.push(this.arrive(to, entry.tile, entry.facing));
+    return true;
+  }
+
+  /**
+   * Whether she can fly to a place on the map (V1's R2): as `go` would, or out of a building (or
+   * her home) into the place it stands in.
+   */
+  canFly(to: ZoneId): boolean {
+    if (to === this.where || !this.isOpen(to)) return false;
+    if (outsideOf(this.where) === to) return this.reads.zones.outdoor(to) !== undefined;
+    return this.reads.atlas.hasFound(to) && ZONES[to].onMap !== undefined;
+  }
+
+  /**
+   * Flies her to a place, as the map does, for a line of the calendar's Today (V1's R2): from a
+   * building in that place, out onto its doorstep. False where she can't.
+   */
+  fly(to: ZoneId): boolean {
+    if (!this.canFly(to)) return false;
+    if (outsideOf(this.where) !== to) return this.go(to);
+    const entry = this.reads.zones.get(to).entry(this.where);
     this.ctx.moments.push({ kind: 'flew', to });
     this.ctx.moments.push(this.arrive(to, entry.tile, entry.facing));
     return true;

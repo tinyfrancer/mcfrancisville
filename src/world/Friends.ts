@@ -1,7 +1,12 @@
+import { HUSBAND } from '../data/cody';
+import { MOMENT_HEARTS } from '../data/heartMoments';
+import { ITEMS } from '../data/items';
 import { VILLAGERS } from '../data/villagers';
 import { heartsOf, MAX_HEARTS, POINTS_PER_HEART } from '../systems/friendship';
+import { OPENERS_KEPT, type LineKey } from '../systems/remembering';
+import { answerOf } from '../systems/voice';
 import { isBracelet } from '../systems/wardrobe';
-import type { BraceletId, VillagerId } from '../types/ids';
+import type { BraceletId, ItemId, VillagerId } from '../types/ids';
 
 /** Where a friendship stands, and the day key of the last talk, gift and favour, if any. */
 export interface Friendship {
@@ -11,6 +16,16 @@ export interface Friendship {
   favour: string | null;
   /** The bracelet she gave them last, which they wear (0.2's W1). */
   wears?: BraceletId;
+  /** What she gave them last, on the day `gifted` (V1's P1), for them to remember it by. */
+  gave?: ItemId;
+  /** The hearts they had when they last spoke to her (V1's P1), to notice a band reached. */
+  spoke?: number;
+  /** What they opened their last few days with (V1's P1), so a week never opens the same. */
+  opened?: LineKey[];
+  /** What she answered when they asked her their question (V1's P2), by the answer's id. */
+  answered?: string;
+  /** The heart moments they've told her (V1's P2), by the hearts each comes at. */
+  moments?: number[];
 }
 
 export interface FriendsSnapshot {
@@ -38,6 +53,18 @@ export class Friends {
         gifted: dayOrNull(f.gifted),
         favour: dayOrNull(f.favour),
         ...(isBracelet(f.wears) ? { wears: f.wears } : {}),
+        // What they remember of her (V1's P1): a thing this build doesn't know is forgotten.
+        ...(typeof f.gave === 'string' && f.gave in ITEMS ? { gave: f.gave } : {}),
+        ...(Number.isFinite(f.spoke) ? { spoke: f.spoke } : {}),
+        ...(Array.isArray(f.opened)
+          ? { opened: f.opened.filter(Number.isInteger).slice(-OPENERS_KEPT) }
+          : {}),
+        // What they've told her and asked her (V1's P2): an answer or a moment this build doesn't
+        // know is forgotten, and asked or told again.
+        ...(answerOf(id as VillagerId, f.answered) ? { answered: f.answered } : {}),
+        ...(Array.isArray(f.moments)
+          ? { moments: f.moments.filter((h) => (MOMENT_HEARTS as readonly unknown[]).includes(h)) }
+          : {}),
       });
     }
   }
@@ -46,8 +73,9 @@ export class Friends {
     return this.all.get(id) ?? FRESH;
   }
 
+  /** How close they are; her husband is as close as can be from the first day (V1's P5). */
   hearts(id: VillagerId): number {
-    return heartsOf(this.of(id).points);
+    return id === HUSBAND ? MAX_HEARTS : heartsOf(this.of(id).points);
   }
 
   /** Changes a friendship; points are only ever added, and stop at ten hearts. */

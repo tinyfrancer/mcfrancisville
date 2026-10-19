@@ -6207,3 +6207,1481 @@ still picture. No save change. Personal touches parked (decision 177): nothing w
   the town by day, leaves fall in October and not in July, upright and on its side.
 - **Perf**: no pass added; a frame is another baked sprite, and the flyers and leaves a few
   small drawables. Measured beside `v1-dev` in `docs/architecture.md`.
+
+## 292. The art pass: banks that meander, beds that are beds, frogs that read, and the art notes cleared (2026-10-07, V1's L6)
+
+_Session L6 of the V1 plan, lane 2, for decision 267 ("some creatures and scenery look funny")
+and `docs/v1_analysis.md`'s finding 4. No save change. Personal touches parked (decision 177):
+the user named nothing, so what reads wrong is this session's judgement, shown before and after
+in `docs/review/l6/` and the PR._
+
+Every critter was rendered at 16 and 24, every place whole (`npm run sprite -- 'place:*'`), the
+scale sheet, and the town, the wilds and the farm at Close by day and at night; what read wrong
+at phone size was fixed, and the handoff's art notes were each fixed, found already fixed, or
+judged and handed on, so the list is empty.
+
+- **Water has organic banks** (`src/sprites/banks.ts`). The pond was an octagon and the creek a
+  right-angled L because a bank was drawn from its own tile's shape: rounded corners and 45° cuts
+  (`slopes`). Now a tile of water or ice by a bank is drawn from the water round it: the share of
+  a tent two tiles wide round each pixel that is wet (`REACH` 36 pixels, from the 5×5 tiles round
+  it, `wetAround`), inverted to how far in from a straight bank that would be (`depthOf`), and
+  moved in and out up to 4 pixels by a slow wobble on the world's pixels (`wobble`, knots 56
+  apart), so a staircase of tiles is one curve and a straight run meanders. The bank's painting
+  (`water`, `ice` in `terrain.ts`) is unchanged; they take the field instead of the tile's. Grass
+  beside water takes the bit of it that rounds out over its corner (`spillOf`), so an inside
+  corner curves too; the middle of a pond is the plain cached piece. The hedge round a place's
+  edge counts as beyond it, so the creek runs on under it rather than stopping short. Pieces by a
+  bank are keyed by their tile and the wet tiles round it (a few hundred small canvases across
+  every place, baked once with the chunks), so the pond freezing over at Christmas bakes afresh.
+  Where she can walk is still the tiles; the bank only moves a few pixels either side of them.
+  Lily pads and lanterns afloat keep to water with water on all four sides (`onOpenWater` in
+  `render/clutter.ts`), off the bank. The tile shapes changed where an octagon or an L was in the
+  tiles themselves: the park pond lost its symmetry (a lobe at the top left, a notch on the west),
+  the creek bends round in a curve from the east and wiggles west a tile on its way south, and the
+  clearing's pool is wider in the middle than at either end; every spot, dig spot and way round
+  held (`tests/data`).
+- **Flower patches side by side are beds** (`src/sprites/flowerBeds.ts`). The castle garden's
+  milkweed and the graveyard's ghost daisies were the same scatter of blooms on bare lawn in every
+  tile, a dot grid. A patch with more of its kind beside it is now a bed: low leaves lit as one
+  mass in a 32-pixel repeat, cut back with a bobbing edge and rounded corners where the bed ends,
+  its front in shade, and heads of blooms in one of three layouts by the tile (`formOf`), the
+  picked look its leaves with buds. A patch alone keeps its scatter. `patchLook` is read by
+  `OutdoorView` and the overview alike; a moonpetal bed glows as a patch does.
+- **The critters that read wrong** (`src/sprites/critterLooks.ts`): the frog was a box with dots
+  for eyes, and is now a squat frog with folded back legs, little hands, a smile and shiny eyes (a
+  glint `E` on every frog's palette), which every frog and toad shares; the mist newt was a frog
+  in lavender, and is a newt, side on and low, its spots aglow; the firefly was a grey bar over a
+  bulb, and is a beetle from above with feelers, a rosy shield, dark wing cases and its tail lit,
+  its wings open on its second frame; the Hercules beetle's horn stood like a bottle's neck, and
+  is now a pincer, the long horn hooked right over the short one; the fog eel was a grey stick,
+  and is a swaying ribbon with a fin and a face; the ghost pike's flicked tail hung down as a
+  spike, and fans now; the catfish's whiskers drooped below it like legs, and sweep out from its
+  lip. Of F1's palettes on their family's shapes, the mourning cloak has its cream border and blue
+  dots (`cloaked`), the tombstone toad a pale cross on its brow and warts (`tombstoned`), the reed
+  frog its pale flank stripes (`striped`); the ladybug, a beetle with spots, was judged right as
+  it is, as were the axolotl and the glowing jellyfish.
+- **The scale sheet's tree is the town's tree** (`TREE`, `TREE_LEAVES[0]`): the first draft's
+  three dithered puffs read as a lollipop, as `docs/art_style.md` warns.
+- **The rest of the art notes.** The rowboat is a good two tiles long and near a tile deep, big
+  enough for two, reaching off its footprint to the right and never over the pier it's tied to.
+  The festival banner's lettering is the signs' doubled (2×2 pixels a pixel), so it reads hung
+  eleven tiles across. A garland's bulb has a socket and a glint, so it reads as glass by day.
+  A seed is a 2×2 pale grain shaded under, and a sprout's leaves bigger, so both show on watered
+  soil after dark. Found already fixed: the signposts' words (0.2's C1), the fog's uneven clumps,
+  the little tree's plum bat and the creek's lip at the lake (0.2's K1), Nessa's boathouse by the
+  water and its jetty (0.2's K1), the small homes filling the width (decision 290). Judged fine:
+  the well, a third of the view across at Close, and the square's leaves round it, with the
+  gatherings, the film night and the pop-up's corner needing the rest of it clear. Handed on: the
+  grass tufts and the old trees' crowns to L2 (its own list says so), the noticeboard showing the
+  window's notes to lane 4 (R2's Today or R4's sheet at the board), and others skating on the
+  frozen pond to L4's winter.
+- **Held by** `tests/sprites/banks.test.ts` (the wobble smooth and the same every time, a
+  straight bank within a few pixels of the tiles, a corner rounded, the middle plain, a staircase
+  reaching over the grass in its inner corner, a creek a tile wide still running and running on
+  off the map, the field meeting itself across a seam), the terrain test (grass beside water may
+  carry a bank piece; away from it, not), the maps' and dig spots' tests as before, and the
+  catalogue drawing every critter. Framed art untouched, so `tests/sprites/frames.test.ts` holds
+  as it was.
+
+**Rejected:** a bank from the tile's own shape with more cuts (still a polygon, and the octagon is
+in the tiles); a box blur for the field (its corners come out as hyperbolas, still faceted; the
+tent's are round); a reach of a tile or less (a staircase stays a staircase); drawing water past
+the grass's own tile only where the tile is water (an inside corner would stay a point); new tile
+kinds for banks (L2's ground; the water needed none); redrawing every critter (most read; only
+those that didn't were redrawn); a new noticeboard art per window (it wants to know what's pinned,
+which is lane 4's); standing clutter in the square (it's where everyone gathers).
+
+## 300. Talks with memory: what she wore, gave, grew and put out, three lines a topic, and a day's first line that varies (2026-10-07, V1's P1)
+
+_Session P1 of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("The neighbours
+don't know her"). Bumps the save to v44. Personal touches parked (decision 177): every line is
+the warmest default in each neighbour's voice as their rows show it; nothing was asked._
+
+**Decided:**
+
+- **The scene carries what she has done and worn** (`TalkScene` in `systems/dialogue.ts`, now
+  `Around & Between`). `Around`, from the world (`build.ts`'s `talkScene`): the weather, what she
+  holds, today's catch and her pet as before, and now the pieces she has on, the last piece she
+  put out at home or in her yard, the last crop she picked, the last thing she gave the museum
+  (each with its day), and how many days she has come to town (`Visits.count`, which is how long
+  she has lived here). `Between`, from the friendship as it was before this talk
+  (`Neighbourhood.between`): the last gift she gave _this_ neighbour and its day, the day she
+  last talked to them before today, a band reached since they last spoke to her (`bandOf`:
+  `friend` from 3 hearts, `close` from 7, `best` at 10), and the bracelet of hers they wear.
+- **What's saved, only what can't be worked out.** On each `Friendship` (optional, so an old
+  save reads as "they don't remember yet"): `gave` (the item; `gifted` was already its day),
+  `spoke` (their hearts when they last spoke to her, so a band reached is said once, on the next
+  talk through `lineFor`, and only marked said when it is), and `opened` (the keys of the last
+  seven lines they opened a day with). Beside `Friends`, a `Lately` keeper (`world/Lately.ts`,
+  save field `lately`): the last piece placed, crop picked and thing donated, each with its day,
+  told by three new signals (`placed` from `Decorator.takeOut`, `harvested` from `Garden.tend`,
+  `donated` from both museums' `donate`), wired in `areas/neighbours.ts`. What's caught today
+  stays unsaved, as before. An id a later build drops is forgotten, never a save refused. The
+  migration 43 → 44 gives an old save `lately` with nothing in it: nothing was remembered then,
+  so nothing is brought up that didn't happen while they were listening.
+- **Ten new topics** (`data/memoryTalk.ts`, `MEMORY_TALK`, merged into `SMALL_TALK`): `band`,
+  `away` (three days or more since they talked: "three days", "a whole week", "weeks", "ages"),
+  `gift` (one to fourteen days after: "yesterday", "the other day"…), `harvest` and `donated`
+  (today's), `placed` (within three days), `costume` (a piece from the pop-up's costume shelves,
+  `COSTUME_PIECES`) or else `outfit` (one piece she has on, another each day), `bracelet`, and
+  `here` (from her third day: "a few days", "a month", "two months", "a year"). How each thing is
+  said mid-sentence is `systems/remembering.ts` (`spokenName`, `aThing`, `agoOf`, `awayOf`,
+  `hereOf`); no placeholder starts a sentence or comes straight before her name, and none has a
+  verb or count leaning on it, since "your rain boots" and "your new fairy lights" are plural.
+- **Three lines a topic a neighbour**, the old topics too (`SMALL_TALK`: 23 topics, twelve
+  neighbours, 828 lines), one a day in turn (`topicsNow` rotates each topic's lines by the day),
+  and a topic is brought up once a day, whichever of its lines.
+- **How a day's first line is chosen** (`openerOf` in `systems/remembering.ts`, through
+  `talkLine` in `systems/friendship.ts`): a special day's or holiday's line first, as before;
+  then anything that can't wait (a band reached, a long time away); otherwise the topics that fit
+  and the neighbour's own lines (counted twice) in an order the day deals, so the window's line
+  leads only about one morning in four or five. Whichever it is, it's the first of its lines not
+  among the seven they last opened with. After the first talk, nothing changed: something
+  topical every other talk at most, their own lines between.
+- **Lines that promised what nothing gives** (the analysis's list): Barty's "plant something
+  with me" now asks her to the Sunday seed swap at the farm gate (a happening of his); Nessa's
+  "do you want to watch?" now sends her down to the pier, where she lights a lantern at dusk
+  (E3's working pose); Maude's saved bookmark, Gourdon's little box and Ollie's "write to
+  someone, I'll take it" are rewritten so they promise nothing, and so are the small-talk lines
+  that did (Ollie's letter for her pet, his carrying her can, his sign on her door, Gourdon's
+  board "next week", Hazel checking the moon for her).
+- **Cody** is on the same machinery, three lines a topic like everyone (P5 gives him his band);
+  "babe" stays about one line in four.
+- **Held by tests.** `tests/data/dialogue.test.ts` reads every line of every topic from every
+  neighbour with each thing it leaves to fill said every way the rows can say it (every outfit,
+  piece, crop, critter, fossil, item and bracelet, every "ago", "away" and "here") and three
+  sample names; reads every topic from every neighbour in six scenes at three hours; and plays
+  28 days of daily first talks for every neighbour at four heart levels in a plain, a busy and a
+  changing scene, holding that no seven days running open the same way, and that the window's
+  line leads some mornings and not most. `tests/world/remembering.test.ts` gives a gift and
+  hears it the next day, stays away five days, crosses a band, picks, donates and places, and
+  keeps it all through a save; `tests/persistence/migrations.test.ts` the step to 44.
+
+**Rejected:** saving the day's first lines as text (a reworded line would never match again;
+the key is a hash of the line as written, and a rewritten line simply counts as new); a rotation
+by the day number alone with no memory (any change in what fits from one day to the next, rain
+or a gift, can bring a line round again inside the week); a fourth line per topic (three already
+outlast a week with the openers remembered, and the rest of the lane needs the words for heart
+moments).
+
+## 301. Her voice: chips she answers with, questions they keep, five heart moments each, and best friends (2026-10-07, V1's P2)
+
+_Session P2 of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("A talk is one
+line and three buttons"; "after 10 hearts, nothing"). Bumps the save to v45. Personal touches
+parked (decision 177): every story, question and answer is the warmest default in each
+neighbour's voice as their rows already tell it (Maude's "after", Nessa's name, Wrapunzel's
+pharaoh father, Boothoven's ninth, Barty's Mabel, Hazel's Pip are inventions); nothing was asked._
+
+**Decided:**
+
+- **A reply is a `Reply`** (`data/replies.ts`): `say`, her words on a chip, and `back`, theirs.
+  Her chips on a topic are hers, the same whoever she talks to (`TopicReplies.say`), and each
+  neighbour answers each in their own words (`back`), on four topics to start: `outfit`, `gift`,
+  `away` and `rain`. `Neighbourhood.talk` puts them on the `Chat` (`replies`) when the line said is
+  on such a topic and keeps them pending; `Neighbourhood.reply(id, k)` answers the `k`th, once.
+  The sheet shows them as `.hud-reply` chips beside Chat, Give and Bye; a question's or a
+  moment's (`Chat.asked`) stand alone with Bye until she answers. A reply gives no points: talking
+  already does once a day, and answering is for its own sake.
+- **Questions** (`data/questions.ts`, `QUESTIONS`): one per neighbour, Cody's a husband's
+  ("perfect night in?"), each with three `Answer`s (a `Reply` with an `id` kept in the save and a
+  `called`, how it's said later mid-sentence). Asked from three hearts on a talk after their
+  hello, once a day until she answers; walking away just means another day. The answer comes up
+  again about one day in three as the `answer` topic (`ANSWER_TALK`, three lines each, `{answer}`
+  filled from `called`, through `Between.answer` and `memoryTopics`).
+- **Heart moments** (`data/heartMoments.ts`, `HEART_MOMENTS`): five for every neighbour but Cody,
+  at 2, 4, 5, 8 and 10 hearts (`MOMENT_HEARTS`), three to six lines told one after another (the
+  sheet's "Go on…"), the five telling one story; the ten-heart ones end on her replies, and two
+  hand her something (Barty a hosta division of Mabel's, Gourdon a pumpkin seed). The next one due
+  is told on a talk after their hello (`momentDue` in `systems/voice.ts`: lowest unseen first),
+  **one a day per neighbour**, so an old save at ten hearts hears all five over five days rather
+  than at once, and before a puff, a happening's line or a drop-by. The hello says "{Name} has
+  something to tell you." and Chat is lit when one waits (`Chat.waiting`).
+- **Best friends** (ten hearts; `data/bestFriends.ts`): `missed` replaces `away` (urgent, so it
+  leads the day) and `invite` replaces `happening` for a best friend (`Between.band`); about one
+  day in six each calls at her house by choice for a window's visiting hours when nothing of
+  theirs is on then (`callOn` in `systems/calls.ts`, read only by `Neighbourhood` once it knows
+  they're best friends, so the town's schedules stay worked out from the day key alone), says
+  `BEST_CALLS` on arrival and shows as visiting her on the neighbours sheet; and about one day in
+  twelve each writes (`writesOn`, `dear:<villager>:<day>`, one of three letters dealt by the id,
+  posted by `Neighbourhood.check` once a day). Cody has `missed` and `invite` lines but no
+  moments, calls or letters here: P5 gives him his own as her husband.
+- **The birthday letter is signed by all twelve**, each their own way, Cody last.
+- **What's saved, on each `Friendship`** (optional, so an old save reads as "nothing told or
+  asked yet"): `answered` (the answer's id) and `moments` (the hearts of those told). An id or
+  number this build doesn't know is forgotten and asked or told again, never a save refused. The
+  migration 44 → 45 changes nothing: no one had asked or told anything before, and every moment
+  she has passed the hearts for is still to come. What she says back to a topic isn't saved.
+
+**Rejected:** a moment the moment a band is reached, even mid-gift (the hello first reads better,
+and kept P1's band line as the day's opener); every moment due played back to back (a lived-in
+save would sit through twenty-five scenes); chips that replace Chat and Give on every topical line
+(a casual "Thank you!" shouldn't hold the talk up); a call by choice decided in `schedules.ts`
+(which would need her friendships, and every reader of it would have to be handed them);
+replies that move hearts (it would make the right answer a thing to learn).
+
+## 293. The ground: a lawn in tones, dirt and gravel tracks, meadow and long grass, ten decals, three more trees and bigger old ones (2026-10-10, V1's L2)
+
+_Session L2 of the V1 plan, lane 2, for decision 273 and `docs/v1_analysis.md`'s finding that the
+ground was one flat green. No save change. Personal touches parked (decision 177). Before and
+after in `docs/review/l2/` (before is `v1-dev` at `5e31920`) and the PR._
+
+The plan's test was the town's single commonest colour under a quarter of its pixels. It was the
+lawn's moss at **42.0%**; it is now **15.4%**, and every place outdoors is under a quarter too
+(Whisperwood 26.0 → 10.4%, Lantern Shore 33.1 → 17.5%, the castle hill 36.8 → 14.5%, the clearing
+36.3 → 11.9%, the fairground 49.5 → 23.5%, Boo Acres 53.1 → 18.1%), held for each by
+`tests/render/lawn.test.ts` over the place's overview.
+
+- **The lawn is in tones** (`src/sprites/lawn.ts`, `src/render/lawn.ts`). Every corner of the
+  tiles carries one of five greens (shade, dark, mid, light, worn: `GRASS_TONES`, a fill and a
+  tuft's colours each), and a tile of grass is drawn from its four corners, blended across it and
+  stepped to the nearest tone with a dithered seam, so tones lie in soft blobs and no tile edge
+  shows. Which tone a corner takes is worked out once from the map when its ground is made
+  (`lawnOf`): two octaves of value noise over the world's tiles (knots 6 and 2.5 tiles apart) for
+  dark, mid and light, about a third each; the shade of each tree's crown round its foot, by tree
+  (`SHADE`: the old trees and the willow widest); and grass worn thin before every door's step, at
+  a gate and round a well. A tile's piece is keyed by its corners and its look, so pieces are
+  shared across the map and baked once each. Off the map a corner is the plain mid green.
+- **Four new ground kinds** (`TileId`s `dirt`, `gravel`, `meadow`, `longGrass`, drawn in
+  `src/sprites/tracks.ts`, wired in `TERRAIN_ART`). The cobbles stay the town's; Whisperwood's,
+  the clearing's and Lantern Shore's ways are dirt (`WILD_LEGEND`, `'='`), the castle hill's
+  gravel (`CASTLE_LEGEND`), Boo Acres' dirt (`FARM_LEGEND`'s `'='`), so the maps' rows for ways
+  didn't change, only their legend. Meadow (`'`, a lighter green with clover and tiny flowers) and
+  long grass (`/`, deep green thick with blades) are patches laid on open lawn in every place but
+  the fairground, the only rows of the maps that changed. Steps carry on a dirt or gravel track as
+  they do the cobbles (`continues`). Each kind is drawn from how far each pixel is in from its
+  edge, the edge waving along the world four tiles to a wave (`wavy`), and each thins into the
+  lawn in an ordered dither rather than stopping at a kerb (`holds`): dirt over 3 pixels, gravel
+  3, long grass 6, meadow 9, so a patch fades rather than reading as a rug. **The cobbles lost
+  their dark kerb** the same way: the mortar gives way to the lawn between the last stones.
+  Puddles lie on dirt as on cobbles (gravel drains, `HOLDS_WATER` in `render/puddles.ts`); her
+  footsteps sound as on a path on dirt and gravel (`groundOf` in `audio/ambience.ts`); the swaying
+  tufts are one tile in two on meadow and every tile on long grass, a second on half of those
+  (`TUFT_ONE_IN` in `render/life.ts`).
+- **Ten more decals** (`DecalId`, art in `src/sprites/clutter.ts`, rules in `src/data/clutter.ts`):
+  clover, a mushroom ring, a leaf drift, a puddle, acorns, pinecones, daisies, a molehill,
+  dandelions and a fairy ring, each place its own mix (acorns and pinecones near trees, a fairy
+  ring in long grass, puddles on dirt), after the rules before them so those keep their tiles.
+- **Water, banks and reeds:** L6's banks (decision 292) were already organic; the reeds are the
+  existing `reeds` prop, now also at the edge of the hidden clearing's pond. No new water tile.
+- **Three more trees** (`src/sprites/treeForms.ts`): a conifer in tiers of drooping boughs, a dead
+  spooky tree of curling bare branches with a few last leaves, and a birch, slim and pale with
+  dark marks under an airy crown, after the town tree's three round forms in
+  `PROP_ART.tree.forms`, picked by where a tree stands, so a wood isn't a wall of one tree. Each is
+  the tree's size and in its keys, so it takes `TREE_LEAVES` by tile; a birch's bark is `i`–`J`
+  and a hollow `k`, coloured by `leaves()` for every tree. **Whisperwood's old trees are a third
+  bigger** (192×214, the crown 180 across, against 144×176 and 136), their crowns over 1.8 times
+  the town tree's width, footprint unchanged. **The lawn's tufts read**: three blades over a
+  shaded root, the swaying ones brighter with a root of their own (the art notes' "subtle").
+- **Measured** (`docs/architecture.md`, "L2's ground"): drawing costs what it did. The ground is
+  still baked into chunks; what costs more is the bake, a place having more distinct pieces (the
+  town 195 → 696), paid once as a chunk comes into view, and perf's yard, which comes back to town
+  after Boo Acres and bakes its ground afresh, is a millisecond or two dearer for it. A route
+  walked twice, the second pass over baked ground, drew the same on both builds. The heap is 1–2
+  MB higher.
+- **Held by** `tests/render/lawn.test.ts` (every place's commonest colour under a quarter; the
+  noise's tones about a third each and low in frequency; shade under every town tree and wear at
+  every door; a tile blending into the next with no seam), `tests/sprites/terrain.test.ts` (steps
+  up from dirt and gravel, a track's edge waving and meeting at a seam, no kerb but a thinning), `tests/sprites/treeForms.test.ts` (six forms the
+  tree's size, every one its own in every leaf colour; the old tree over 1.8 times as wide), and
+  the maps', zones' and dig spots' tests as they were.
+- **Two things outside the ground, found by CI.** With a meal's chip up, the day chip's date was
+  cut to an ellipsis in CI's fonts on a two-digit day (it fit on the 8th): the window's icon now
+  hides with what's on (`hud-today-window`), since the meal's chip says till when. And the
+  catalogue's draw-everything test, about 4 s on a 2-core container on `v1-dev` as here, has a
+  20 s timeout. Smoke's walk south fails "her, on the screen never shimmers" at frame 241 at some
+  times of day on `v1-dev` too: her path turns a corner about 20 frames before she stops, so the
+  lagging camera turns her screen x round twice inside its 30-frame window; it depends on who
+  stands near the path, and passed from the morning window on.
+
+**Rejected:** a tone per tile (its edges show as a grid; corners blend); per-pixel noise baked
+into one canvas per place (no sharing, and a season's swap would have nothing to key on); drawing
+the tones over the ground each frame (a pass, and the grade multiplies over it anyway); new
+characters in every map for dirt and gravel (the ways are the same tiles in another material, so
+the legend says it); dirt for the town's ways (the cobbles are the town's); a bank or reed tile
+kind (L6's banks needed none, and the reeds prop already stands in water); bigger old trees on a
+bigger footprint (the woods' layout and the dig spots would all move); a meadow fading over 4
+pixels (it read as a rug laid on the lawn).
+
+## 302. The mystery, chapter by chapter: a step a week from the reading, the town theorising, Wes who stays, and one pin left (2026-10-10, V1's P3a)
+
+_Session P3a of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("The story
+stops in week one") under decisions 270 and 271. Bumps the save to v46. Personal touches parked
+(decision 177): the clues, the mayor's letters, the neighbours' theories and Wes's story are the
+warmest default (a shy ghost mayor whose initials are R.B., a sash, a rubber stamp in Skelly's
+hand, typing by the well; Wes the mayor's nervous assistant); nothing was asked._
+
+**Decided:**
+
+- **The chain** (`data/mysteryChain.ts`, `CHAIN`): seven steps after the mayor's second letter
+  (`CHAIN_AFTER`, the `typewriter` clue), alternating letters and clues to find: the mayor's
+  wobbly letter (shy, not mysterious), a sash on the noticeboard, a letter clearing the Moon Pie
+  Man, a rubber stamp in Skelly's hand (APPROVED, R.B., MAYOR), a letter clearing Wes as the
+  mayor's assistant, typing by the well with nobody there, and the mayor's promise to say hello
+  in person. A letter step is a `mayor:n` letter (`MAYOR_LETTERS` grows from the chain, `mayor:2`
+  to `mayor:5`) pinning its clue as she reads it; a clue step pins as she walks up to its prop
+  in town (`Mystery.visit`, from `World.arrival`). Its rows are `CHAIN_CLUES`, spread into `CLUES`.
+- **The cadence** (`systems/mysteryChain.ts`, `nextStep`/`dueStep`): each step comes
+  `CHAIN_DAYS` (seven) days after the day she read or found the one before, by the day key, so
+  nothing is locked and a week away just means it's waiting when she's back. An old town that
+  already has its second letter starts the chain the morning after this build first sees it
+  (`began`, set on the first `check`), never the moment the patch opens. A fresh town reaches the
+  last clue about 56 days in. The corkboard says when the next one comes ("Coming in about n
+  days"), and the chain's later steps "after the clue before it".
+- **Suspects cleared:** a clue may `clears` a suspect (`clearedOf`); the board shows them with
+  their `cleared` line. Both end cleared; Wes and the Moon Pie Man stay red herrings.
+- **The neighbours theorise** (`data/mysteryTalk.ts`, the `mystery` topic, three lines each):
+  it fits for `THEORY_DAYS` (three) after any clue is pinned (`Around.clue`, the casebook's
+  newest, filled in `talkScene`), ordered after `placed`. Agatha moves strings on her corkboard,
+  Hazel is sure it's a ghost nobody's met, Barty and Rufus deny being R.B., Cody couldn't be less
+  bothered.
+- **Wes stays after the third glimpse** (`data/wes.ts`): each time she gets near and he runs
+  counts (`glimpses`); the third says he'll stay next time (`wesStays`), and from then on he
+  lurks as before but a tap walks her up beside him (a `wes` visit; he holds his spot until she
+  gets there, `approach`) and opens his own sheet (`hud/WesSheet.ts`, `wesChat`): the first time
+  a five-line confession (the mayor's assistant, checking the town is ready), after that a line a
+  talk in turn by band, `hello`, `friend` from three days of chats, `close` from eight, with
+  `WES_READY` leading once the mayor has promised. No schedule, no house, no hearts. In the
+  festival's last week he hands over the story's last chapter in the chat rather than dropping it.
+- **One pin left:** the board ends with a `???` pin (`LAST_PIN`), waiting until the promise and
+  then saying the mayor will say hello soon. `Mystery.ready()` is the day the promise was pinned
+  (`readyOn`, `CHAIN_LAST`): **P3b's flag**, from which the unmasking can come.
+- **What's saved** (`mystery`, save v46): beside the clues' days (which are the days each letter
+  was read and each clue found), `began` and `wes` (`glimpses`, `chats`, `talked`). The migration
+  45 → 46 gives `began: null` (set on the first look, so the chain starts the next morning) and
+  `wes` with one glimpse if his button is on the board (that was a glimpse) and no chats.
+
+**Rejected:** starting the chain from every clue so far (the visitor book, the Moon Pie Man and
+October's last chapter would lock it behind catching, a peddler's day or a month); counting
+glimpses once a day (he's out a minute in four, so three are soon had anyway); making Wes a
+`VillagerId` (every neighbour table in the game would need his row, and he'd get hearts,
+birthdays and a schedule, which he hasn't); the chain's clues hidden at night or far afield (she
+plays when she can, and a clue she can't reach at her hours would be a lock); a separate saved
+`ready` flag (it's the promise's day, already kept).
+
+## 303. The mayor says hello: Rob Boo under a dust sheet at the castle, and a neighbour like the rest after (2026-10-11, V1's P3b)
+
+_Session P3b of the V1 plan, lane 3, finishing decision 270's mystery and giving 0.6 its new
+neighbour (decision 211). Bumps the save to v47. Personal touches parked (decision 177): Rob Boo,
+his town hall, his lines and the scene are the warmest default (a shy ghost mayor who goes pink,
+says "Ahem" and stamps APPROVED on what he likes); nothing was asked._
+
+**Decided:**
+
+- **Who he is** (`data/robBoo.ts`, art `sprites/robBoo.ts`): Rob Boo, the town clerk who caught
+  a chill one winter, went see-through and kept working; put his own name in the ballot box as a
+  joke when the old mayor retired, and won unopposed because nobody dared vote in a haunted town
+  hall; mayor for a hundred and twelve years, running the town by letter because his knees went
+  wobbly at every door. Wes found him thirty years ago and stayed. He is the doll in pale ghost
+  tones (art style: a ghost is pale, not see-through), floating a few pixels like Maude, in a plum
+  frock coat with a gold MAYOR sash across it, the top hat a size too big and the pink of his
+  cheeks; in October he goes as a magician. His five heart moments tell how he became mayor and
+  end with ringing the town hall bell together at New Year. His question is what the town should
+  have more of; his gifts are the sticky typewriter's recipe, the mayor's top hat and the key to
+  the town.
+- **His town hall** stands on a lot of its own at the square's south-east corner, beside the
+  bakery (`lots` in `TOWN`, 3×3, the rock there taken up): cream stone under a slate pediment
+  with a clock, a bell tower and a plum flag, columns by an arched door, TOWN HALL over it. Inside
+  is the mayor's office (`mayorsOffice`): his desk fixture and two keepsakes, the ballot box with
+  his one vote in it and his top-hat stand. His day runs between the office, the town hall steps
+  and the square's south-east corner (new `TOWN_SPOTS`); he has a place in every party and film
+  night, the fireworks picnic, his birthday on Groundhog Day, lines on every holiday and special
+  day, every topic, memory topic, reply and best-friend row.
+- **Before he's met he isn't about** (`systems/mayor.ts`: `knowMayor`, told from the corkboard by
+  `tellTheMayor` before the town is made and by `Mystery.pin`/`unmask` after; `inTown`,
+  `townsfolk`): his row exists, but he isn't among `Neighbourhood.neighbours`, calls on nobody
+  (`visitsOn`), dresses up for nobody, has no cake on the calendar, his door gives no sweets and
+  his keepsakes give no hint, and the neighbours sheet shows the mayor as a shape only
+  (`drawShadowPortrait`, back from 0.2's U3). The town hall stands from the first day: the mayor
+  always had an office. The birthday letter is signed "The Mayor".
+- **The reveal** is the `unmasking` happening (`on: { unmasking: true }`), in the castle's great
+  hall every evening from six till two from the day the mayor promised (`Mystery.ready`) until the
+  evening she's there, and on for the rest of that evening, ahead of anything else on. The whole
+  town stands in rows before the cake (ten more `stands` in `castleHall`). Walking in while it's on,
+  `Mystery.unmask` pins the `unmasked` clue quietly (no clue toast to spoil it) and the reveal
+  sheet (`hud/RevealSheet.ts`) plays seven lines: the dust sheet trembling, Wes's announcement,
+  the sheet sliding off on `REVEAL_AT` (the picture goes from his shape to him, the title to "Rob
+  Boo, the mayor"), his hello, the hall erupting; "Hello, Rob!" closes it. He's settled straight
+  at the front (`Neighbourhood.settle`), and talking to him there is his hello. The corkboard's
+  `???` gives way to his clue and says the case is closed; the `mystery` topic stops, and for three
+  days the town talks of nothing but meeting him (`mayorMet`, `MAYOR_MET_TALK`); Wes's day's first
+  chat is `WES_MET` for those days.
+- **What's saved** (v47): only the `unmasked` clue's day in `mystery.clues`, which is the day she
+  met him; his friendship goes in `friends` as anyone's. A save from before has neither, so the
+  migration 46 → 47 changes nothing, and an older build would drop the clue it doesn't know.
+
+**Rejected:** a separate `met` flag beside the clue (the clue's day is the meeting); the reveal at a
+fixed hour on the promise's day only (she plays at night, at her hours, so it waits every evening
+until she comes); a toast for his clue (it would name him before the sheet comes off); see-through
+art (the art style keeps that for the ghost pets); the town hall appearing only once he's met (an
+office was always there; only its keepsakes and its door's sweets wait); a lot west of the square
+(the Moon Pie Man's spot and Cobweb Corner's side) or south of it (film night's screen).
+
+## 294. The seasons: palettes by the month, snow that settles all winter, blossom, drifts that build, and Nessa on the ice (2026-10-11, V1's L4)
+
+_Session L4 of the V1 plan, lane 2, for decision 273. No save change. Personal touches parked
+(decision 177): who skates was Claude's pick (Nessa, as L6 suggested). Overviews in
+`docs/review/l4/` and the PR._
+
+- **The season is the month of the day key** (`seasonOf` in `src/systems/seasons.ts`), by the
+  months the Cabinet's shelves and the crops already go by (`SEASON_MONTHS`): winter December to
+  February, spring March to May, summer June to August, autumn September to November. **October
+  is still the heart of it: autumn is the town exactly as it was**, its palettes, decals and light
+  untouched, so every test and overview of October held without a change. Nothing is saved.
+- **What lies on the ground goes by month** (`GROUND_LOOKS`, `MONTH_LOOKS` in `src/data/seasons.ts`):
+  a look per stretch of the year, the decals it hides and the rules it adds after each place's own
+  (so the place's own keep their tiles). Spring hides last autumn's leaves and adds daisies and
+  dandelions; summer adds clover; snow hides everything on the lawn but pinecones and twigs, and
+  the lily pads. **The drifts build through autumn**: September has the leaves under the trees but
+  no drifts out on the lawn, October is the town as it was, November adds drifts on one tile in
+  eight and leaves on one in eleven. Falling leaves (E5) take their months from `seasonOf`
+  (`FALLING_LEAVES.season`).
+- **Every change is a palette swap** of art already drawn (`src/sprites/seasons.ts`), baked under
+  a key with `@<season>` on it so the cache never hands back last season's canvas. On the ground:
+  the lawn's five tones (`SEASON_TONES`, through a new `lawnPalette` in `sprites/lawn.ts`: spring
+  fresher, summer deeper, winter in snow), meadow, long grass and hedges, and in winter the grass
+  lip of a cliff and the top of a bank (`seasonPiece`, which reads the piece's kind from its key
+  and shifts its own palette). On what stands (`seasonLook`, `lookOf` with the season's palette):
+  every leafy crown by the colouring it wears (`CROWNS`): **in spring the teal trees in pink
+  blossom flecked white, the plum ones in white blossom, the orange ones in fresh leaf, apples and
+  plums pink and pears and persimmons white**; in summer the teal and orange trees green, the plum
+  ones plum; in winter snow along the top of every crown over its own dark leaves, the orchard bare
+  twigs. A conifer keeps its needles in spring and summer. **Snow on the roofs** is the kit's roof
+  keys (`ROOF`'s shade, fill and light) in snow on every building with a door and the wells, but
+  not Gourdon's pumpkin (`noEaves`), whose roof keys are its body. The swaying tufts go greener,
+  or straw out of the snow (`tuftColours`).
+- **Snow settles all winter, not on two days.** The lawn's tones in snow (a lavender shade under
+  the crowns, slush where it's trodden), each kind in a snow of its own so no one white passes a
+  quarter of a place (`tests/sprites/seasons.test.ts`, as `tests/render/lawn.test.ts` holds
+  October); a track gets snow drifted in along the edges that open onto the lawn, thinning in a
+  dither, and a few flecks on it (`snowDust`, a piece per shape over the cobbles, dirt, gravel and
+  the pier), baked into the chunks with everything else. **No puddles stand on snow**
+  (`Ground.bakeChunk`), and **in winter a rainy day's rain falls as snow** (`drawSnow` instead of
+  the streaks and splashes, view only: the world's weather is still rain, so the beds are watered).
+  The pond freezes as it did (`FROZEN`, round the new year).
+- **The ground re-bakes on a change and never a frame.** `Ground.look(id)` keeps the look its
+  chunks were baked in and lets them all go when it changes (as `wet` does), recomputing the
+  decals; `OutdoorView.turn()` asks it each frame (a comparison of two strings) and, when the
+  season turns while she plays, bakes the trees, bushes and roofs again in place (their drawables,
+  givers, doors and frames), so the change shows the next frame. A view made on a day bakes that
+  day's look from the start. Held by `tests/render/ground.test.ts` (a stand-in canvas: the same
+  look keeps the chunks, a new one lets them go, drawing again bakes each once).
+- **A season's light is a tint into the grade** (`SEASON_LIGHT` in `render/grade.ts`, a `season`
+  argument to `gradeOf`, `Lighting.apply` and `drawLight`): a cool white in winter, a touch of pink
+  in spring, a warm one in summer, none in autumn. It's multiplied into the light the light map
+  already lays, so it costs no pass, and unlike rain's tint it leaves the clouds' shadows be.
+- **Nessa skates on the frozen pond** (`SKATING` in `src/data/skating.ts`, `withSkating` in
+  `src/systems/skating.ts`, slipped in by `scheduleOn` on a frozen day): at the weekend from 11
+  to 3 instead of watching the fountain, and on weekdays from 1 to 3, at `pondIce` (a town spot out
+  on the water west of the fountain), her day going on as it was after. Her stop's `doing` is the
+  new `skating` work (`WORKS`, two frames in `sprites/working.ts`: arms out for balance, white
+  skates on silver blades), so E3's life gives her the glide round the stop and the wave. The
+  gallery shows it (`figure:nessa:work:skating:*`); `tests/systems/skating.test.ts` holds the
+  spot on the water, her stop, the day around it and her out on the ice in a world.
+- **Smoke's `seasons`** opens the town on 15 January, April, July and October at noon in clear
+  weather (`view.season()`: the season, the look, the lawn's baked colour): snow in January, green
+  the rest, all four different; screenshots `.smoke/season-*.png`, and winter on its side.
+  `npm run sprite -- 'season:*:<place>'` draws each place in winter, spring, summer and November.
+- **Measured**: no pass added. `npm run perf` on the same machine, comparing a clear day in autumn (16 September, as the town always was) with a clear one in winter (24 February) and a rainy day in each (15 September; 16 February, its rain falling as snow); draw means in ms (p50), town at 21:30 and at noon: clear autumn 25.9–26.2 (16.7–17) and 10.4–11.1 (5.3–5.8), clear winter 25.2–26.3 (18.2–18.6) and 8.9–12.4 (4.2–5.9); rainy autumn 29.5–30.4 (20.5–20.8) and 25.6–26.5 (17.3–18.2), snowy winter 29.1 (18.7) and 27.2 (17.2); every other place within the runs' spread, the heap the same (24.5–26 MB in town). A season's swap costs one bake a chunk when it turns (the pieces it touches baked again under their season's keys), never a frame. (October itself measures dearer, 30–39 ms, for the Halloween Festival's decorations, as before L4.)
+
+**Rejected:** a season per week or a blend across the months (a re-bake each week, and a lawn
+between green and snow reads as dirty); snow drawn over the ground each frame (a pass, and it would
+fight the lamps' pools); a separate snow canvas per chunk (twice the memory for a quarter of the
+year); a glow-like overlay for the roofs' snow (a second sprite per building where its own keys
+already say which pixels are roof); freezing the pond all winter (when it's walked on and not fished is the world's
+rule, and its weeks round the new year were chosen for their first date); bare trees with no leaves at all in winter (a palette
+can't take pixels away, and snow on a crown reads warmer than twigs against snow); a skater drawn by
+the view alone (who is where is the world's, decision 9); a new `on: { frozen }` happening for the
+skater (a happening stops E3's life, so she'd stand still on the ice).
+
+## 304. Jobs seen, a verb at every happening that the host remembers, birthdays as days, and the talk's actions a list (2026-10-17, V1's P4)
+
+_Session P4 of the V1 plan, lane 3, answering `docs/v1_analysis.md`'s finding 2 ("Jobs are words";
+"Happenings are watched"; "Birthdays are a cake icon"). Bumps the save to v48. Personal touches
+parked (decision 177): the books, films, stars, wishes, carols, pieces, who comes to whose party and
+every line are the warmest default each neighbour's rows suggest; nothing was asked._
+
+**Decided:**
+
+- **The talk sheet's actions are a list** ("where it hurts" 11). `TalkApi` loses its four
+  `canX`/`X` pairs for `actions(id): TalkAction[]` (`hud/TalkSheet.ts`): a label, whether it's lit,
+  and `run()`, whose `TalkOutcome` is lines said one after another ("Go on…" between them), an
+  aside, a `beat(k)` called as each line shows (a scene's step, which may say something under it),
+  picks offered after the last line as chips with "Never mind", or `close` (their photo). The list
+  is built in `wiring/talkActions.ts` from the services' own `canX`/`X`, asked afresh each time the
+  buttons are drawn; the crown, the bake, the lesson, the photo and every happening's verb are
+  rows of it. A new action is a block there, never a field on `TalkApi`.
+- **Jobs seen.** Every neighbour has a job (`doing`) at a stop on a weekday and at the weekend,
+  and every `WorkId` is someone's (held by `tests/world/jobsSeen.test.ts`): Wrapunzel's mixing bowl
+  by the oven (`baking`, new stops at 8 and 15 on weekdays, 8 and 21 at weekends), the mayor's
+  APPROVED stamp at his desk (`stamping`), Agatha home to stir at 23 of a weekend, and Scarah's can
+  at Boo Acres' well of a weekend morning; art in `sprites/working.ts` as E3's are.
+- **Rufus's flower buckets are a shop** (`SHOPS.flowers`, `data/flowerShop.ts`): `flowerBuckets`
+  `opens: { shop: 'flowers' }`, in his cabin and the greenhouse alike, an honesty jar's greeting
+  that reads in either. **It sells flowers to grow, never cut**: a rose to grow every day, four
+  bulbs or packets of the rest, two of his morning's wildflowers, and a vase for a bouquet. What she
+  grows is on Cobweb Corner's wanted list at double (decision 168), so selling a crop would be a
+  loop; the economy test holds it. "I sold every rose by nine! Then I bought one back! It's for
+  you!" is made true by his Valentine's line handing her a rose (`HOLIDAY_GIFTS`, beside
+  `HOLIDAY_TREATS` in `Neighbourhood.treat`).
+- **Baking together is a scene**: the 🧁 tells the day's bake in three steps and its line
+  (`Bake.steps`, each `pour` or `crouch`), a `bakeStep` moment a step starting E2's pour or crouch
+  on her (`verbOf`) with a puff of sparkle, and the Candy and the bakes come on the last line
+  (`Baking.scene`, `step`, then `bake` as before). Closing the sheet halfway bakes nothing, and
+  she can start again.
+- **Ollie walks her post over** (`world.postRound`, `PostRound`, rules `systems/postRound.ts`): a
+  letter posted to her (`Mailbox.post`'s new `posted` signal, and Deliveries' morning round) while
+  she's in town and not talking to him sends him to her path before her mailbox (an `Errand` the
+  neighbourhood plans him to, ahead of his stop), where he stands sorting it in (`post`) for 1.6 s
+  of stepped time, and her mailbox's flag stays down until he leaves (`OutdoorView` reads
+  `carrying`). If she leaves town, or 90 s pass, it's simply there. The toast and the badge come
+  at once as before, so every test and the mail sheet are unchanged. Nothing is saved.
+- **A happening a week for those without one** (`WEEKLY_HAPPENINGS`, `data/weeklyHappenings.ts`):
+  Nessa lighting the lanterns on the pier every dusk (18–19, a daily row, kept out of the
+  `happening` small-talk topic since it isn't news) and lantern night at the pier's end on Mondays;
+  Boothoven's recital in his parlour on Tuesdays; parcel day at Ollie's on Thursday mornings;
+  stargazing at the lookout on Thursday nights, only when the day is clear (`clear` on a row, by
+  `weatherOn`); Gourdon's open day on Saturday afternoons. A row may now be outdoors beyond the town
+  (`where: { zone, at }`, `Away`) and name the host's job there (`doing`), which the neighbourhood
+  draws once they're standing at their place (`jobAt`).
+- **Birthdays are days** (`data/birthdayParties.ts`): each neighbour's own line first that day
+  (`BIRTHDAY_LINES`, through `dayLine`, after her special days and before a holiday's); a gift that
+  day counts double (`BIRTHDAY_GIFT_TIMES`, and the sheet says so); and a party at theirs from five
+  till eight, two friends round, a slice of moonpetal cake from the host (`BIRTHDAY_PARTIES`, a
+  `PartyId` each, `on: { birthday }`, before any everyday happening). The mayor's only once she
+  has met him (`inTown`). Cody's birthday is always tomorrow, so he has none.
+- **Every happening has a verb** (`data/happeningVerbs.ts`, `VERBS`): a button in the host's talk
+  while it's on and she's there, once a day (`world.joining`, `Joining`; rules `systems/joining.ts`).
+  Some pick from three (next week's book, the icing, next week's film, film night's reel, a seed
+  at the swap, what she's thankful for, the next carol, a resolution, a wish on a lantern, the
+  parcel's pile, a star's name, Gourdon's next piece), dealt a week at a time from up to six
+  (`deal`, by `weekOf`); the recital takes requests from the piano tunes she knows, the latest
+  learnt first, and plays it (a `tune` moment); the rest are one press (howl, sing along with the
+  well, the dip, a heart cake, the jig, a firework wish, a dance with Cody, a lantern at dusk,
+  Happy Birthday at every party). The seed swap hands her the packet and takes the plainest seed she
+  has to spare, or none. Four kept the verb they had (`own`): the crown, the eggs, the duet and
+  the mayor's hello. Joining in is a little friendship (`JOIN_POINTS`, 5) and a `joined` moment (a
+  sparkle and a ♥ over the host).
+- **The outcome is remembered** (save v48, `happenings`: by happening, the day and the pick's id).
+  The next time it's on, on a later day, the host's first word there is `remembers` with her pick
+  as it's `called` ("Everyone read "Wuthering Frights", the one you picked"), through the
+  neighbourhood's new `recall` read, in place of their welcome. A happening or a pick this build
+  doesn't know is forgotten, never a save refused. The migration 47 → 48 gives an empty record:
+  nothing was joined in before.
+
+**Rejected:** a `canX`/`X` pair per verb on `TalkApi` (twenty-five more); the 🧁 paying on the first
+press with the scene after (the scene would be decoration); Ollie's walk holding back the mail
+toast until the letter is in (every mail test and the badge would wait on a neighbour's path, and a
+letter she's been told of can still be in the box a moment later); cut flowers in Rufus's buckets
+(a loop with the wanted list); a lantern lit for her along a walk between spots (a happening stands
+at a place, and her stop's lantern pose already moved, so the row at the pier is the watchable one);
+a birthday party at the square for everyone (twelve parties a year would empty the town; two friends
+at theirs is a party she can find); the next week's line in every guest's mouth (only the host
+remembers, which keeps the lines few and the memory honest); a verb at every happening for every
+neighbour there (one each, the host's, so the talk's buttons stay few).
+
+## 305. Cody, married: a band of his own, his evenings at hers, "how was your day?", what only he notices, their story, and nights in (2026-10-17, V1's P5)
+
+_Session P5 of the V1 plan, lane 3's last, for decision 269 and `docs/v1_analysis.md`'s finding 2
+("Cody is a greeter"). Bumps the save to v49. Personal touches parked (decision 177): every line is
+the warmest default in his voice as his rows have it, sarcastic but loving, "babe" about one line in
+four among mi amor, booby and honey bunny; their story uses only what `personal_touches.md` already
+holds (the first date on the ice, the monarchs at the castle, "to the moon and back", forever orbs,
+her catchphrase); the Big Ladle and the star called Orb are inventions; nothing was asked._
+
+**Decided:**
+
+- **Married from the first day** (`data/cody.ts`, `HUSBAND`). `Friends.hearts('cody')` is always
+  ten, so everything that reads hearts sees him as close as can be (his manor's keepsakes are hers
+  to take, the talk sheet's and his page's hearts are full, his question is asked); his points are
+  kept as they were and still only grow, so nothing is lost. His band is `married`, above `best`
+  (`bandOf(hearts, villager)` in `systems/remembering.ts`), so no band is ever "reached" with him,
+  and `isBest` gives him the best friends' `missed` and `invite` lines. His line pool is `married`
+  (`tierOf(hearts, villager)`): his `friend` and `close` lines and eight a husband says
+  (`MARRIED_LINES`), never his `hello` ones again. The neighbours sheet calls him "Married, 6 years"
+  (from `yearsMarried`), never "getting to know you", and his gifts "has sent you".
+- **His letters** (the record, the maroon tee, the portrait) are all posted, quietly, the first time
+  a day is stepped once her first visit is counted (`Marriage.check`): a new town's first day, an old
+  save's first day of this version. One already sent is never sent again (`Letters.send`), and the
+  heart rewards that would post them later find them there. None in a town without neighbours.
+- **The manor kept, his evenings at hers** (`systems/cody.ts`: `eveningAtHers`, `atHers`): six
+  nights in seven by the day key, from seven until ten on a weeknight and eleven at the weekend
+  (his schedule's walk on her path after), never on her birthday or while a happening of his is on.
+  His schedule is unchanged; `Neighbourhood` reads the rule as it reads a best friend's call: he
+  settles in front of a seat in the room she's in (the widest facing out first; her first day's
+  pumpkin chair), sits on it, potters round it as at a stop of his own, and every third stroll goes
+  to one of her pets (`besidePet`), where a heart rises over it (`patting`, shown by
+  `wiring/codyHome.ts`). With nowhere to sit he stands by the mat like a guest. The neighbours
+  sheet says he's visiting her. Her home is not made a `Stop` place: its rooms change shape as she
+  decorates, so his place there is worked out each step from what stands in it, as the guests' are.
+- **"How was your day?"** (`Marriage.tell`, through `Neighbourhood.talk` before anything else of
+  his): of an evening (from six), on any talk until she answers, unless a happening of his is on or
+  it's her birthday, and after a special day's line. He asks about the first thing she did today
+  that he knows of (a catch, a pick, a museum gift, a piece put out: `askOf`, two ways each) or else
+  the day's way of asking (seven, one a day). Her three chips stand alone with Bye: "It was good!",
+  "Long day…", "Tell you later", and his answer to each is one of seven, a day's in turn, so none
+  comes round inside a week. Her answer and its day are kept (`Lately.herDay`), and **the next day
+  the first thing he says** is about it (`yesterdayOf`, three an answer), before a small event or a
+  puff.
+- **What only he notices** (`husbandTopics`, three lines each, jumping the queue of `topicsNow`):
+  two pieces of her look together, her newest piece (put out within a fortnight) and her pets by
+  name when they're at hers, and a piece in her yard. They're Cody's alone, so `SMALL_TALK`'s shape
+  wasn't loosened; `tests/data/dialogue.test.ts` leaves them to `tests/systems/cody.test.ts`.
+- **Their story instead of heart moments** (`OUR_STORY`): three scenes, the first date on the ice
+  from her third day here, the castle from her seventh and "to the moon and back" from her
+  fourteenth (by `Visits.count`), told one a day on a talk after his hello, Chat lit when one waits;
+  the last ends on her chips, one of them her catchphrase. `HEART_MOMENTS.cody` stays empty. Kept
+  in `Lately.told`.
+- **Nights in** (talk actions, `TOGETHER`, each once a night through `Takings`' `together:` keys):
+  at hers of an evening, 🍫 a snack run after dark while tonight's snack is still out (he fetches it
+  for her, and it's gone from town), 🔭 stargazing on a clear night, and 💃 their song any evening
+  (`RecordPlayer.ourSong`: he brought his copy, so she needn't own it, and they dance). Each is a
+  short scene, a `together` moment as the last line shows (her `show` or `greet`, a heart over him).
+- **What's saved** (v49, on `lately`): `herDay` (the day and the answer's id, never changed once
+  out) and `told` (the scenes' ids). The migration 48 → 49 adds nothing told and no answer; an id
+  this build doesn't know is forgotten, never a save refused. Where he is, what they did tonight
+  (already in `Takings`) and the pats aren't saved.
+- **Held by** `tests/systems/cody.test.ts` (the band and pool, six nights in seven, the ask about
+  what she did, a week without a repeat, the day after, the topics, the story, every line whole and
+  "babe" between one in ten and three), `tests/world/married.test.ts` (his letters once, quietly;
+  the ask, the answer kept through a save, the next day; walking round and sitting on her chair; the
+  manor by day; the story a day at a time; nights in once a night), the migration's test, and
+  smoke's `married` (at eight at hers, a real tap, his three chips, "Long day…" answered and kept,
+  the nights in beside Chat, his page married; upright and on its side).
+
+**Rejected:** a saved `married` flag or a points top-up (hearts read full needs no save and loses
+nothing); his letters as toasts on her first day (three in a row over the creator; they're quietly
+there, the flag up); an evening stop `inside: home` in his schedule (her home isn't an interior
+with fixed stands; the call's way in already walks a neighbour there); asking only once a day
+(a tap on Bye would lose the day's exchange; the chips stand alone until she answers, as a
+question's do); the day-after line as an urgent topic (a small event or a puff came first); his
+moments by hearts (he has none to earn); a fourth night in (three keep the talk's buttons few).
+
+## 295. The UI polished: the game's own pictures where every emoji sat, hearts that pop, Candy that counts, busts, a night-sky title, an icon and a splash (2026-10-17, V1's L5)
+
+_Session L5 of the V1 plan, lane 2, answering `docs/v1_analysis.md`'s finding 4 ("The HUD is a
+generic iOS web app": 120 emoji, sheets that pop, nothing moving, a gradient title). Decision 273
+kept the rounded style, so it's polished, not replaced: no pixel frames, no pixel font. No save
+change. Personal touches parked (decision 177): nothing was asked._
+
+- **Drawn glyphs, no emoji** (`src/sprites/ui.ts`, `GLYPHS`): 62 glyphs at 16 pixels, 59 drawn as
+  the calendar's marks are (decision 181), a few palette keys outlined in ink and lit from the top
+  left: the bars' buttons (two friends, the gear, the wing chair, her satchel, the frock on its
+  hanger, the Cabinet's book with its moth, the folded map, the potted plant, three lines), the
+  hearts full and empty, the sunrise, sun and moon of the day's windows, and for toasts, sheets
+  and places Skelly, the castle, a signpost, her house, the town, a door, a sparkle, a happy face,
+  drops, the piano, letters, a pin, a looking glass, a scroll, storm, rain and fog, a question
+  mark, four arrows, a map pin, footprints, a camera, a crown, the sort arrows, a tree, a paper
+  lantern, the big wheel, waves, a top hat, a telescope, a hammer, a bottle, a star, the ring-toss
+  tally, and the months' trims (snowflake, blossom, watermelon, shell, leaf). A **`Glyph`**
+  (`src/data/glyphs.ts`) is one of those or **anything that already has a picture**: `{ item }`
+  (a toast about a catch shows that critter, a fossil that fossil, a record that record, a sweet
+  that sweet), `{ mark }` (the calendar's own marks: the day chip, a decorated holiday, the
+  calendar's rows) or `{ tool }`. So a toast says what it's about in the thing's own pixels, and
+  only 59 things needed drawing for the ~120 emoji (the sweet, the parcel and the lavender cake were
+  there already). Data rows name theirs (`ZONES`, `HAPPENINGS`,
+  `BAR_TRIMS`, a verb's `glyph`); `CALENDAR` rows lost their `icon`, their mark being their picture.
+- **Shown as an SVG of whole squares** (`svgOf` in `src/sprites/svg.ts`: a path per colour, a
+  rectangle per run, `crispEdges`), an `<img>` from `glyph()` (`src/hud/glyph.ts`) at 16 CSS
+  pixels in a line or 32 on a button, so each pixel is a whole block at any pixel ratio, needs no
+  canvas (the HUD's tests run in jsdom) and is made once per glyph. A price on a button is
+  `price()`, the drawn sweet and the number; `candy()` now says "12 Candy" in a sentence.
+- **Held by `tests/hud/noEmoji.test.ts`**: no `\p{Extended_Pictographic}` in `src/hud/`, `src/data/`
+  (but `greetings.ts`, Cody's lines) or the wiring the chrome reads; every place, happening, verb
+  and month marked with a drawing; every glyph within 16 pixels in its palette's keys. The
+  world's emote bubbles stay keyed by the symbols they draw (♥ ♪ …), never shown as text.
+- **What moves** (reduced motion cuts all of it): a heart won while they talk **pops** in after the
+  last (`heartsRow(now, was)` in `hud/hearts.ts`, scaled up past full and settling, 110 ms apart);
+  **Candy counts** to what she has in 640 ms, easing out, its figures one width
+  (`hud/countUp.ts`); a **"new" mark drops in and settles**, and the dot on a button with new
+  things behind it; **sheets** rise in 260 ms on a long ease-out over a backdrop easing in a beat
+  behind (E4's `hud-sheet-up`/`-down` and backdrop names kept, `SHEET_LEAVE_MS` still 160); the
+  **title fades up** out of the dark, and **bats cross its sky** flapping (`BAT_FLYING`, E5's bats).
+- **The day chip reads as a button**: every button is now lit from the top left as the art is, a
+  lit edge over a lip, and sinks as it's pressed; her purse, which is only to read, sits in a
+  well, so the chip beside it is the raised one.
+- **Busts** (`drawBust` in `render/villagers.ts`): head and shoulders framed from wherever the
+  head starts in the sprite (the first row with anything in it, so a mummy's sheet or a hat sits
+  right), 25 rows over the shoulders' line and 7 under, **drawn at 64 by Scale2x**
+  (`render/scale2x.ts`: a diagonal step becomes a half-step, a straight edge stays crisp) in an
+  oval of evening like a cameo; `mood` defaults to `'neutral'` (`BustMood`) for L7's faces, and
+  `shadow` fills the figure for someone she hasn't met (the mayor). The talk sheet, the greeting,
+  the neighbours sheet, the corkboard's suspects and the fortune teller use it; the noticeboard's
+  48-pixel faces keep `drawPortrait`. `drawShadowPortrait` went.
+- **The title** (`render/title.ts`): a night sky 56 pixels deep over the town crop (bands of ink,
+  night, dusk and plum dithered into each other, stars, the woods dark along the horizon) with
+  **the moon at tonight's phase** (`moonAge` in `systems/calendar.ts`, from the full moons' own
+  count), the town under the dusk's multiply with its windows, lamps and pumpkins lit over it; the
+  crop is a row shorter so the whole fits a phone on its side at 1×. Season-free.
+- **The app icon** (`src/sprites/appIcon.ts`, `npm run icons` through Vite's module runner as
+  `npm run sprite` is): her plum house at night on its lawn, windows and attic lit, a lit
+  jack-o'-lantern, the moon, drawn at 64 so it's 8 to a pixel at 512, 3 at 192 and the middle 60
+  at 3 for the 180 apple-touch icon, what matters inside a maskable icon's circle. **Launch
+  screens** (`apple-touch-startup-image`, ten, every iPhone since the X and the SE, in
+  `index.html` by media query) are the night, the icon at the biggest whole scale that fits and
+  "MCFRANCISVILLE" in the signs' lettering; `tests/pwa/manifest.test.ts` holds each linked one
+  there at its phone's size.
+- **Perf unchanged**: nothing in a frame's drawing changed (the HUD is DOM; the title is one
+  picture drawn once, its bats a few DOM sprites while it's up).
+
+**Rejected:** emoji fonts or an icon font (a phone's look again, not the town's); a canvas per
+glyph (jsdom has none, and a stylesheet can't take one); drawing a picture for every emoji (a
+thing with art of its own is its own best picture); 24-pixel glyphs in text (one and a half to a
+pixel, uneven on a phone at 3×); a bust at 1× in a 64 square (a face too small to read), or the
+figure's pixels just doubled (the same as before); hand-drawn 64-pixel portraits for thirteen
+neighbours (a session of its own, and L7's moods would double it); a taller sky (the title must
+fit a phone on its side at a whole scale); a pixel font for the HUD (decision 273).
+
+## 311. The first day: Cody's little list, four seeds to start, and the chip and the tray shown once (2026-10-18, V1's R1)
+
+_Session R1 of the V1 plan, lane 4, for `docs/v1_analysis.md`'s finding 3 ("No first day": title,
+dedication, creator, Cody's card, three letter toasts, then nothing; 22 seeds on the quick bar).
+Bumps the save to v50. Personal touches parked (decision 177): his lines are the warmest default
+in his voice, married to her from the start ("babe" in two of the thirteen, mi amor, booby and
+honey bunny for the rest); the sampler is an invention; nothing was asked._
+
+**Decided:**
+
+- **A thread, not a tutorial** (`data/firstDay.ts`, `FIRST_DAY_STEPS`): six steps, shake the candy
+  tree, plant a seed, put something on the honesty stall, answer a note on the board, meet three
+  neighbours (Cody aside, already hers), eat something from the bag. Each has a title, a glyph,
+  his line before (how) and after (well done), and a small gift (a moon pie, two sunflower seeds,
+  50 and 40 Candy, a heart bead, two ghost mallows). With the last, whichever it is, **his
+  keepsake**: a welcome-home sampler he stitched (a wall piece, `welcomeSampler`, art in
+  `sprites/firstDay.ts`), in her storage chest, and his closing line.
+- **Worked out from what the town already keeps** (`systems/firstDay.ts`, `FirstDayFacts`): the
+  tree's `shakenAt`, any bed growing or a crop ever picked, the stall's stock, sales or tin, a
+  `notice:n` key in the day's takings, friendships' `talked` (her husband aside), any meal's time.
+  So no step is a lock, any order works, and something done before she looked counts as soon as
+  the thread begins. `world.firstDay` (`FirstDay`, made by `areas/firstDay.ts`) re-reads them only
+  when something happened (a moment, or the bag, Candy, friends or stall changing), keeps each step
+  done, gives its gift and returns a `firstDay` moment from `World.update`; E1's effects (the gift
+  popping from her a beat after what she did, sparkles, a heart), the purse or bag bumping, a
+  `treat` cue, and a toast with his line after and the gift; the last adds his closing toast.
+- **Begun by his hello**: the thread is open once her look is made and her first visit counted
+  (`begun`), until every step is done. Nothing expires: a step can wait for another day (the
+  stall usually does, wanting a crop or something made) and still counts.
+- **The card** (`hud/FirstDayCard.ts` through `FirstDayApi`): his bust, "Your first day", his
+  intro, a row a step (a full heart when done, his after-line and "Done! You got…"; an empty one
+  with his how-line and "For you:…", meeting counting "1 of 3"), Got it. It opens after his very
+  first hello (`GreetingCard.then`, the greeting's `first` kind only, so a reload never brings it
+  back) and from the tray behind "more", first in it, while a step is open (`hud-first-day-button`).
+  It never blocks: it's a sheet like any other, closed with a tap.
+- **The date chip and the tray shown once** (`hud/hints.ts`): each glows (`data-hint`, an outline
+  pulse, still with reduced motion) until first pressed, only while the thread is open, so an old
+  town never sees it. Kept per phone beside the dedication (`mcfrancisville:hintsSeen`), never in
+  the save.
+- **Four starter seed kinds, not 22** (`STARTER_BAG`: pumpkin, rose, moonflower, candy corn); the
+  rest are on Scarah's cart every day, which `tests/data/crops.test.ts` now holds. An old bag keeps
+  whatever seeds it has.
+- **What's saved** (v50, `firstDay`): the steps done and `over`. The migration 49 → 50 makes every
+  old town's thread over with nothing done: she knows her way round, so nothing new appears, no
+  gifts come and no glow lights. A step this build doesn't know is forgotten.
+- **Held by** `tests/world/firstDay.test.ts` (waits for the hello; kept, gifted and told once, in any
+  order; three neighbours, not Cody; counted when done before it began; the keepsake and over; a
+  step left for days later; kept through a save; nothing for an old town), the migration's test,
+  and smoke's `firstDay`, played in a town of its own (a second browser context) so the shared
+  town's sections are left as they were: the card after his hello, both glows and their going,
+  the card from the tray, on its side, each step done by a tap or the world's own calls with his
+  line in the toast, and the keepsake in the chest with the tray's button gone.
+
+**Rejected:** a step-by-step tutorial that waits on each step (a lock, and decision 11); counting
+the steps' own events in the save (the town already keeps what they read); the card after every
+hello on day one (smoke and she would see it on every reload); a skip button (Got it closes it,
+and it asks nothing of her); the hints in the save (a phone's, like the dedication); fewer seeds in
+an old bag (nothing is lost).
+
+## 296. Faces: a feeling for every line, one face on the bust and in the world, and hers for a moment (2026-10-18, V1's L7)
+
+_Session L7 of the V1 plan, lane 2, the lane's last, answering `docs/v1_analysis.md`'s finding 4
+("One body, one face": five moods used only by idle poses, a talk never changing a face). No save
+change. Personal touches parked (decision 177): nothing was asked, and every feeling is the
+warmest default the lines suggested._
+
+- **Six feelings** (`Feeling`, `types/mood.ts`): happy, surprised, sad, a laugh, shy and cross (the
+  fond kind); no feeling is the face as it always was. A doll `Mood` is now any of the old five,
+  the blink or a feeling, so a feeling goes through `faceRows` like the rest.
+- **Drawn into the doll's face** (`sprites/faces.ts`, lines added to `drawFace`): an eye grid per
+  feeling (a smile's lower lid, a laugh's two arcs, a surprise a row taller, a sad droop at the
+  outer corner, shy looking down, cross low at the inner corner), brows by pixel, a deeper blush
+  for happy, laugh and shy, and a mouth per feeling in lip keys with `m` for inside an open one
+  (`facePalette`), from the front and side on. **A blink over a feeling** shuts its eyes and keeps
+  its brows and mouth (`faceRows`' `blink`), so a laughing neighbour still blinks; a laugh's eyes
+  are shut already. Freckles go under a feeling's mouth. **The faces of their own** are
+  `sprites/moodFaces.ts`: Gourdon's carving cut to each feeling (and his candlelit glow with it,
+  `pumpkinHead(…, feel)`), Barty's sockets and grin, the Moon Pie Man's mouth under his shades,
+  Maude's eyes behind her glasses and her mouth over her chain; Wes's moustache keeps his mouth
+  and his eyes say it. **Scarah's smile is stitched** (`FaceTouches.stitched`, `stitchMouth`): a
+  stitch at each end of her mouth in whatever shape it's in, her seams' thread. A `Touch` takes the
+  feeling as a fourth argument, which the faces of their own read and the rest ignore.
+- **One face, the world's and the bust's.** The feeling is `Stance.feel`, so `figureLayers` and
+  `bakeFigure` (keyed by it) draw it, and `drawBust`'s `mood` (`BustMood`, now `'neutral' |
+Feeling`) bakes the figure with that stance before the frame is cut and scaled, as L5 preferred:
+  no stamp after Scale2x, no second drawing.
+- **Chosen by the line** (`systems/moods.ts`, rows in `data/moods.ts`): a row's own feeling first
+  (a heart moment's `moods`, a reply's `mood`, null meaning "as usual"), then its topic's
+  (`TOPIC_MOODS`: a storm surprises, a costume makes them laugh, a bracelet makes them shy…), then
+  the line's own words (`FEELING_CUES`: "Ha!", "Hmph", "sorry", "Um", "Oh!", a line ending glad),
+  then the kind of line (`KIND_MOODS`: a puff is bashful, a happening and a drop-by glad), then
+  how close they are (`BAND_MOODS`: close and best friends and her husband smile). A gift is
+  `GIFT_MOODS`: **a loved one makes them laugh for joy**, a liked one smile, a second in a day is
+  turned down shyly. `Neighbourhood` puts it on every `Chat` (`feels`, and `moreFeels` for a
+  moment's other lines), `GiftResult`, a reply and a favour's thanks; topic lines with their topic
+  give a feeling about half the time, so faces change often but not on every line (held by
+  `tests/systems/moods.test.ts`). Four heart moments carry moods of their own (Maude's eight and
+  ten, Rufus's eight) and the four topics' chips a feeling each (`feels`); the rest are worked out.
+- **The sheet says which line is showing.** The talk sheet draws the bust with each line's
+  feeling as it shows it ("Go on…" included, a talk action's lines worked out from their words)
+  and tells the world (`TalkApi.feel` → `Neighbourhood.feel`), so the face on them in the world is
+  the one on their bust; it holds while she talks and `FEEL_AFTER_MS` (2.4 s) after Bye
+  (`Neighbourhood.feelingOf`, read by `neighbourDrawables` into the stance). The bust's canvas
+  carries `data-feel`.
+- **Her face for a moment, as E2's verbs are** (`feelOf` beside `verbOf` in
+  `world/services/Poses.ts`, `FEEL_MS` in `systems/poses.ts`): glad at a catch and surprised at a
+  first one, laughing at a gift they loved and glad at one they liked, surprised by Wes darting
+  off or dropping his clue (the fright, gentle) and by a clue pinned, laughing at a shelf finished,
+  glad at a first harvest, a fair prize or an egg. It shows once what she's doing is done (the
+  find held up, the rock-out) and for `FEEL_MS` (2.4 s) after, walking or still, crouching or
+  waving, but never over a pose's own face (her phone, the rock-out, the find held up). **A chip
+  that's a feeling** ("Thank you!", "I love the rain!", a row's `feels`; "I picked it just for
+  today." isn't) shows on her face as she says it (`herFeeling`, the `felt` signal). It's `Rest`'s
+  `feel` to `bakeDoll`, keyed.
+- **Blinks**: E3 had already made the neighbours' blink the `blink` mood, so it shares the
+  machinery; what's new is blinking through a feeling. A pumpkin, a skull and dark glasses still
+  don't blink.
+- **Held by** `tests/sprites/doll.test.ts` (every feeling facing us and side on a face of its own,
+  nothing below her chin changed, the blink over each, her crouch feeling and her find held up
+  not, every piece and hairstyle in every feeling) and `tests/sprites/villagers.test.ts` (every
+  neighbour, the Moon Pie Man and Wes in every feeling, facing her, side on and in costume, each a
+  face of its own and nothing from behind; blinking through each; Gourdon's glow carved with
+  him), `tests/world/faces.test.ts`, `tests/hud/talkFaces.test.ts`, and smoke's `faces` section (a
+  loved gift changes the bust's canvas and the same face is on the neighbour and on her through
+  `view.faces()`, upright and on its side). The gallery's `figure:<id>:mood:<feeling>` and
+  `doll:feel:<feeling>` rows show them all, each a strip (facing her, side on, in costume,
+  blinking) so the gallery grows by 96 pictures, not 400: it had grown past what CI's Chromium will
+  capture in one full-page screenshot, which smoke's `gallery` now falls back from to its top.
+- **No new bodies.** The plan's "two or three body builds" (`docs/v1_analysis.md`: "below the neck
+  every neighbour is the same silhouette") is out of scope for one session: every piece of
+  clothing, every action pose and every work pose is painted onto the one body's regions
+  (decision 27), so a second build is a pass over all of them. It's left for V1's review to weigh.
+- Two purses said "Candy Candy" since L5's `candy()` started saying the word itself (the shop's
+  and the catalogue's); fixed in passing.
+
+**Rejected:** a feeling stamped over the bust after the crop (a second face to keep in step with
+the world's, at the wrong density after Scale2x); a mood field on every small-talk line (thousands
+of lines to tag by hand, where the topic and the line's own words say it); a feeling on every line
+(a face that never rests reads as noise); her face reacting to every line she reads (only a chip
+she picks is hers to feel); a sad face when a critter flees or a fish gets away (nothing
+punishes, decision 11); a new face drawn per neighbour per feeling (thirteen times six faces to
+keep, where the doll's face and a few faces of their own cover everyone).
+
+## 322. Safe: the shell kept for the first launch with no signal, a backup nudge, the photo kept, notes of what went wrong, and a way to time her phone (2026-10-18, V1's S3)
+
+_Session S3 of the V1 plan, lane 5, answering finding 5 of `docs/v1_analysis.md` (no splash, a
+service worker with no precache so the first offline launch can fail and old bundles never
+pruned, no backup nudge, the party photo can't be saved, no error reporting, 60 fps on a real
+iPhone never measured). No save change: everything new is the phone's, beside the save, as the
+sound switches are. Personal touches parked (decision 177): Cody's two nudge lines are the warmest
+sensible default, nothing was asked._
+
+- **The splash was already done** by L5 (decision 295: ten launch screens, the night, the icon and
+  the name, drawn by `npm run icons`, held by `tests/pwa/manifest.test.ts`), so S3 drew none; the
+  worker now precaches them with the rest.
+- **The worker precaches the shell** (`public/sw.js`). `vite build` runs a plugin in the new
+  `vite.config.ts` that, once everything (public files too) is written, lists `dist/` into the
+  worker (`precacheList` in `src/precache.ts`: the page as `/`, the hashed chunk, the manifest,
+  the icons and the launch screens; never `sw.js`, a map or anything hidden) and names its cache
+  by a hash of every file and the worker's own code, so the same build makes the same worker and
+  any change makes a new one. Installing adds each file on its own (one that fails can't stop the
+  rest, or the worker); activating deletes every `mcfrancisville-*` cache but its own, so last
+  month's bundles go (the old worker's single runtime cache, `mcfrancisville-v1`, held every
+  bundle ever fetched). **Navigation stays network first** (decision 13's reason: a new deploy is
+  seen at once), kept under `/` and served from there with no signal; `/assets/` is cache first
+  (a hashed name never changes); anything else network first with the cache behind it. Lookups
+  ignore `Vary` (Vite's preview says `Vary: Origin`, which a module script's request carries and
+  the precache's didn't, and the first offline reload failed on it). **`/api/` is never touched**,
+  for S2's function. `npm run smoke:offline` (`scripts/smoke-offline.mjs`, a CI step against `npm
+run preview` on the build just made) visits once with signal, checks every listed file kept and
+  an older version's cache gone, then with the context offline reloads and opens a new page: both
+  reach the title, and the new one goes on through the dedication to the creator. The old worker
+  failed this: the first visit's page isn't controlled, so nothing was cached until a second.
+- **"Last backed up"**: the Backup tab says "No backup code saved from this phone yet", "today",
+  "yesterday" or "N days ago" (`backedUpLine` in `src/systems/backupNudge.ts`, by 5am days), from
+  `mcfrancisville:backedUpAt` (`src/safekeeping.ts`), stamped when a code is copied to the
+  clipboard or the share sheet takes it (not when the copy falls back to selecting the text: we
+  can't know she copied it). A restored code doesn't stamp it: that phone hasn't backed up.
+- **The nudge** is a line under Cody's hello (`GreetingCard.nudge`, `SAFE_KEEPING` in
+  `src/data/greetings.ts`), at most once a week (`nudgeFor`, `mcfrancisville:nudgedAt`): while the
+  game is in a browser tab, to put it on the Home Screen (installed is what keeps the save from
+  Safari's wipe, decision 5); once installed, a fresh code when the last is a fortnight old, or
+  there never was one and the town (`createdAt`) is. Never on his first hello. A line under the
+  greeting rather than a greeting of its own, so it never takes the place of his welcome, a
+  holiday's or the red Tesla's.
+- **The photo is kept as a print** (`printOf` in `src/render/photo.ts`): her pixels at the whole
+  scale nearest 1080 wide, on the polaroid's white with the caption under it, as a PNG. The photo
+  card's "Keep it" (`src/hud/PhotoCard.ts`, `keepPhoto` in `src/hud/keepPhoto.ts`) hands it to
+  `navigator.share` with a file where `canShare` says it can (an iPhone's sheet has Save Image),
+  else downloads it; closing the sheet is her choice and downloads nothing. Named for its day.
+- **Notes of what went wrong** (`src/errorNotes.ts`): `catchErrors(window)` first thing in
+  `main.ts` notes every uncaught error and unhandled rejection (message, file and line, stack cut
+  to 1,200 characters), the last five kept in `mcfrancisville:errors`, the same error again
+  counted rather than added (an error every frame stays one note). It never prevents the console
+  seeing it and nothing in it can throw. Settings' **Sound tab**, beside the silent switch's hint,
+  says "Something went a bit wobbly on 18 October" for a month after the last one, with **Copy
+  note** (every note, the version and the phone's user agent) for Cody.
+- **`?perf`** (`src/wiring/perf.ts`, `perfRequested` in `config/flags.ts`): from her first tap on
+  the town it times 30 s of frames, the gap between frames and the step and draw inside each, and
+  shows each's p50 and p95 and the fps in a corner that takes no taps, then stops with the result
+  up. **In production too**, against the prompt's "dev build": the build on her phone is the one
+  worth measuring (a dev build is unbundled modules, no minifying, Vite's client), opening a
+  dev server to her phone means a LAN and a laptop, and `?gallery` is production's already
+  (decision 21). Without the query nothing is measured or shown. The method and a place for her
+  number are in `docs/architecture.md`'s performance baseline: **nobody has read it yet**.
+
+**Rejected:** `vite-plugin-pwa`/Workbox (a dependency, a generated worker nobody here reads, for a
+list of sixteen files); precaching from `index.html`'s references at runtime (the worker would
+parse HTML, and the icons and launch screens aren't referenced from the page the same way);
+cache-first navigation (stale until a second launch, decision 13); the nudge as its own card or a
+toast (one more thing in her way as she opens the game); stamping a backup on opening the Backup
+tab (seeing a code isn't keeping it); the nudge or the stamps in the save (a restore would carry
+another phone's); an error reporter that sends anything anywhere (no backend, and her phone's
+notes are hers to pass on); catching and swallowing errors in the loop (a hidden fault is worse
+than a noted one, and changing the loop's shape wasn't asked); `?perf` sampling `world.update`
+and the draw apart (perf.mjs does that on the container; on her phone what matters is the frame);
+splitting the 1.66 MB chunk (precached once a version, it costs her a download per deploy, not a
+launch; worth it only if a launch is ever slow on her phone).
+
+## 312. Today: what's waiting, each line read off the world, a tap away; a parcel over a favour; a dot on the chip (2026-10-18, V1's R2)
+
+_Session R2 of the V1 plan, lane 4, for `docs/v1_analysis.md`'s finding 3 ("No today": goals live
+only inside sheets, favours are invisible until she talks, nothing says "three notes are up,
+Barty's asking for a rose, the tree is full, two beds are ripe"). No save change. Personal touches
+parked (decision 177): nothing was asked; the words are the warmest default._
+
+- **A line each for what's up now, at the top of the calendar's Today tab** (above the day's own
+  rows, which stay): Cody's list while it's open ("2 of 6 done"), the candy tree's Candy, the
+  honesty stall's tin and what sold, ripe beds by place, the notes still up on the board and who
+  pinned them, each neighbour asking a favour today (what, and where they are now), the day's
+  mounds not yet dug, who's coming round to hers today and when (the visit dealt to hers, a best
+  friend's call, Cody's evening), tonight's happening (or whichever is on or next, with where and
+  who), the critters visiting out of their time on R5's visit day (and the ones new to her by
+  name), or "critters come visiting in two days" when one is near, and Cobweb Corner's wanted list.
+- **Worked out each time it's asked, never kept** (`systems/today.ts`, `todayLines` from
+  `TodayFacts`): `world.upNow` (`UpNow`, made by `areas/upNow.ts`) reads the facts off the services
+  as they are (`candyTree.candy()`, `stall.view()`, `garden.ripe()`, `noticeboard.notices()`,
+  `neighbourhood.favour`/`whereIs`, `fossils.mound`/`isDug`, `shops.wanted()`, the calendar's
+  gatherings, `callersOn`, `isVisiting`, `firstDay`), so a line is there only while it's true. The
+  words are the HUD's (`hud/todayWords.ts`); the system's lines are data, so the test can ask the
+  world about each.
+- **A tap takes her there** where that makes sense (`wiring/todayGo.ts`): up to a neighbour where
+  she is (`world.seek`), into a building by walking to its door when it's in the place she's in
+  (`MapZone.buildingOf`), and otherwise by broom (`Travel.fly`: as the map's `go`, or out of a
+  building or her house onto its doorstep into the place it stands in, `canFly`), then up to the
+  tree, stall, board, mound or ripe bed (`tendBed`), so arriving does the thing. A line that can't
+  take her anywhere as things are (a place not yet found, a neighbour indoors elsewhere) isn't a
+  button. The calendar closes as she sets off.
+- **A favour bubble**: a little parcel (`+`, `NEIGHBOUR_BUBBLES`, pumpkin with a plum ribbon)
+  over a neighbour asking a favour today, beside the `!` or `?` if there is one (`bubblesOver`),
+  until it's done. The gallery has it as `bubble:favour`.
+- **A dot on the date chip** while Today has a line she hasn't seen since she last opened the
+  calendar: each line has a `key` that changes when it's news again (the tree and the notes each
+  window, a favour or mound each day, the wanted list each week, a ripe count when it changes), and
+  the keys seen are kept per phone (`mcfrancisville:todaySeen`, `hud/todaySeen.ts`), never in the
+  save. Asked again as the world says the day, bag, Candy, friends, stall, first day or scene
+  changed (`TODAY_TOLD_BY`).
+- **Held by** `tests/world/today.test.ts` (every line true of the world it was built from, asked of
+  the services and rules themselves, through a new town and a week of windows; lines going once
+  done; ripe beds, mounds and the stall counted; news only for a key unseen; the tree reached from
+  town and from her house; a favour's neighbour reached), `tests/systems/today.test.ts`, and
+  smoke's `calendar` (the dot and its going, the tree's line with what it holds, every line the
+  world's and on screen upright and on its side, a tap on the tree's line setting her off to it).
+
+**Rejected:** a pip on the HUD with its own sheet (the calendar's Today was already the place, and
+the chip already opens it); lines kept in the save (they'd go stale; everything is a read); the
+dot in the save (a phone's, like R1's hints); a favour bubble showing the thing they want (a
+16-pixel icon in an 18-pixel bubble doesn't read; the line in Today says what); hopping her to a
+neighbour indoors in another building (the neighbours sheet's Find never hops either; she's flown
+to the place, or walked to the door).
+
+## 323. The cloud save: a tiny function, a key the phone makes once, the town sealed with it, and the newest kept (2026-10-18, V1's S2)
+
+_Session S2 of the V1 plan, lane 5, the lane's last, carrying out decision 275's "cloud save".
+No save change: the key and everything the cloud keeps track of are the phone's, beside the save,
+as the backup stamps are (decision 322). Personal touches parked (decision 177): every line she
+reads is the warmest sensible default, nothing was asked._
+
+- **The function** is `api/save.ts`, the first thing in the game that isn't a static site: Web
+  `GET` and `PUT` handlers on Vercel's Node runtime, no framework and no package, over an Upstash
+  Redis store (what Vercel's KV now is) through its REST API with plain `fetch`
+  (`KV_REST_API_URL`/`KV_REST_API_TOKEN`, or Upstash's own `UPSTASH_REDIS_REST_*`). `GET
+/api/save?id=` answers `{ save: { savedAt, data } | null }`; `PUT` with `{ savedAt, data }`
+  keeps it unless what's kept is newer (409, `{ kept: false, savedAt }`). It refuses anything but
+  an id of 64 lowercase hex digits (400, before the store is asked), a body that isn't a sealed
+  save, and 256 KB or more by its `Content-Length` or its size (413); it never logs, and a store
+  failure is a 502 that doesn't repeat what was sent. With the env vars missing it answers 503
+  `{ error: 'not-set-up' }` with a line pointing at the README. It has its own
+  `api/tsconfig.json`, since Vercel compiles a function with the nearest one and the app's never
+  emits; `npm run typecheck` checks it under both. `vercel.json` is unchanged: no `functions`
+  block was needed.
+- **The key** (`src/persistence/cloudKey.ts`, `mcfrancisville:cloudKey`): 128 random bits made the
+  first time the game opens on a phone, shown as 28 symbols of Crockford's base 32 (no I, L, O or
+  U; an O typed is a zero and an I or L a one) in fours, `AH67-6CM8-…`: 26 for the bits and two
+  check symbols, a weighted sum mod 1021, so any one symbol mistyped or two side by side swapped
+  is caught before the cloud is asked. A key replaced by restoring another is put aside under
+  `mcfrancisville:cloudKey:previous:<time>`, never thrown away.
+- **Nothing of hers is readable without the key**: the function never sees it. It's told an id,
+  SHA-256 of the key with a salt, and keeps what's sealed with AES-GCM under SHA-256 of the key
+  with another salt (`cloudSeal.ts`, WebCrypto; no stretching, the key being 128 random bits).
+  What's sealed is her backup code (`encodeBackup`), so a town brought down goes through the same
+  migrations as a pasted code, and an old one still opens.
+- **The client** (`src/persistence/cloud.ts`, `CloudSave`): each local write is handed to it by
+  the `AutoSaver`'s write; five seconds after the last, the newest goes up, stamped with the
+  save's `updatedAt` (her save's "savedAt"). With no signal (`navigator.onLine`), a failed send
+  or a 5xx it waits, and goes on the next write, the game coming back to the front, or the
+  `online` event; as the page hides it goes at once with `keepalive` (a town is a few KB sealed).
+  Every expected failure is caught where it happens, so none reaches S3's error notes (held by a
+  test that fails on any unhandled rejection). A 503 marks it not set up, and anything that isn't
+  JSON (Vite's preview, a dev server, which serves the function's source) out of reach: either
+  stops the uploads for the session until Settings asks again. After a PUT is kept,
+  `markBackedUp(now)`, so the Backup tab's "last backed up" and Cody's nudge count it. A request
+  that fails with no signal still gets the browser's own "Failed to load resource" line in the
+  console (CI's run showed two, from the pages opened offline, which the `navigator.onLine`
+  guard didn't stop there though it did in the container), which `smoke:offline` excuses for
+  `/api/save` alone; any other error still fails it.
+- **Last write wins, but she's asked first.** On opening, the cloud is asked once what it has
+  for this key, and **nothing goes up until it has answered**, even for a key just made (that
+  GET is also how a server without the function is found out before it's sent a town). If its
+  town is newer than the one the phone opened with, the uploads hold and a card asks, after the
+  title and the notes and before Cody's hello (the title waits up to 2.5 s for the answer; a
+  later answer is offered when it comes): **Take the cloud's** (brought down, stored, reloaded)
+  or **Keep this phone's** (which then goes up as the newest). Never swapped silently. A phone
+  that opened offline asks before its first upload once there's signal. The function keeps
+  whichever is newest by the stamp, so a phone that's behind and writing anyway can't put an
+  older town over a newer one. Restoring a backup code stamps the restored town now, so the
+  town she chose is the newest and the cloud's isn't offered over it.
+- **Restore on a new phone**: Settings → Backup gains **Kept in the cloud**, under the backup
+  code (which stays): how it's going ("goes up as you play, last kept at…", "isn't set up yet",
+  "can't be reached just now"), the phone's cloud code in fours and as a **QR** (`src/hud/qr.ts`,
+  our own encoder, about 300 lines: ISO 18004 level M, versions 1–6, alphanumeric or bytes, the
+  mask of least penalty; held against `segno` and python-qrcode's codes in
+  `tests/hud/fixtures/qr-reference.json`, drawn as whole squares in an SVG, dark on white), Copy,
+  and a field to type a code into. **Bring it back** reads the code, asks the cloud, opens the
+  town and, once she's confirmed, stores it, takes that code as this phone's own (so both phones
+  keep the one town from then on) and reloads. The QR holds the code as text: the iPhone's camera
+  shows it to copy, since an installed web app can't scan and a link would open Safari, whose
+  storage isn't the app's.
+- **The user provisions the store** (the only step a session can't do): README's "Cloud save"
+  has the steps (Vercel → Storage → Create Database → Upstash for Redis, free plan, connect to
+  the project with the `KV` prefix, check the two env vars, redeploy). Until then the game is as
+  it was, and Settings says the cloud isn't set up yet. **Nobody has run it against a real store
+  yet**: the function's handler is tested with a faked store, a save round-trips through it from
+  `CloudSave` in a test, and smoke's `cloud` section restores a town by key on a second phone
+  against a Playwright route that answers as the function does.
+
+**Rejected:** Vercel Blob (a file per save, public by URL unless signed, and its SDK);
+`@vercel/kv` (deprecated for Upstash's own SDK, and a dependency for two REST calls); the key in
+the URL path as the store's name (the store, its dashboard and any log would hold the key to the
+town); keeping the save readable in the store (the user, or anyone with the dashboard, could
+read her town); a QR library (a dependency for a few hundred lines that are tested); a QR holding
+a link (Safari isn't the installed app); a passphrase or an account (one more thing to forget;
+the code is the account); silently taking a newer cloud town, or merging two (a town isn't
+mergeable, and decision 11 says nothing is lost: she chooses); last write wins without the check
+on opening (Cody's greeting writes within a second of opening, which would put a stale phone's
+town over the newer one before she'd done anything); the cloud as the save rather than beside it
+(she plays offline; `localStorage` stays the save, decision 5); a dev-server middleware faking
+the function (smoke's route covers it, and a dev build showing "can't be reached" is honest).
+
+## 313. Weeks that differ: daytime beats, a festival week a season, rare events, passers-by, and arrivals told (2026-10-18, V1's R3)
+
+_Session R3 of the V1 plan, lane 4, for `docs/v1_analysis.md` finding 3 ("Every weekday is the
+same", "Decision 211 removed the pacing", "Surprises are thin"). No save change. Personal touches
+parked (decision 177): who hosts, the critters' names, Moira, the wayfarer and every line are the
+warmest default the rows suggest; nothing was asked._
+
+- **Something on in the daytime on Monday, Tuesday and Thursday** (`RHYTHM_HAPPENINGS`,
+  `data/rhythmHappenings.ts`, spread into `HAPPENINGS`; `RhythmId`): Scarah's market round at her
+  seed cart at Boo Acres (Monday 8–11, with Rufus; pick the week's star crop for the sign), Hazel's
+  cloud watching at the lookout (Tuesday 14–17, with Nessa; name a cloud) and Agatha's herb walk in
+  Whisperwood (Thursday 13–16, with Barty; choose the herb for the week's brew). Each has a verb as
+  P4's do (`RHYTHM_VERBS`, `data/rhythmVerbs.ts`), dealt three at a time by the week and remembered
+  by the host. Gourdon keeps his open day's pick (the plan's example for Thursday was his bench day,
+  but "pick the week's piece" is already his Saturday's verb; two of one verb a week would blur).
+- **A festival week a season beyond October** (`FestivalId`: `blossomWeek` 18–24 April,
+  `fireworksWeek` 28 June–4 July counting down to the Fourth, `lightsWeek` 18–24 December counting
+  down to Christmas Eve), rows within `calendar.ts`'s span rules, so `festivalsOn`, the calendar's
+  band, the banner across the square (`BLOSSOM WEEK`, `FIREWORKS WEEK`, `WINTER LIGHTS`) and the
+  countdown work as October's do. Each has a shelf `on` it at Cobweb Corner (`Blossom week`,
+  `Fireworks week`, `Winter lights`, from wares already priced), one beat on its Saturday (the
+  blossom picnic under the willow, sparklers at the shore, the lights walk from the well; none when
+  the Saturday is the finale, whose holiday has its own), a calendar mark, Cody's hello on its first
+  day (`RHYTHM_GREETINGS`) and a first line from six neighbours each on its first day and its
+  Saturday (`FESTIVAL_LINES`, through `dayLine` after a holiday's). **They play the town's tune**
+  (`TunedFestival` in `audio/music.ts`: only October's has a theme of its own); a theme each was
+  more than this session.
+- **Rare events** (`data/rareEvents.ts`, `systems/rareEvents.ts`): a meteor shower (a clear night,
+  shooting stars after eight anywhere outdoors, `render/meteors.ts`), the wandering stall (a whole
+  week, Monday to Sunday, never two running and never in a festival's week, at `WANDERING_STALL_AT`
+  by the bakery: market day's stall redrawn in plum and gold, `CURIOS`, through `Decorations`, a
+  shop of its own, `wandering`, whose week's curios are dealt `everyWeek`), a wayfarer passing
+  through town for the day, a snow day in December to February (snow falling all day by the
+  world's `rareEvents.sky()`, over whatever the weather is) and a critter gone astray (a
+  neighbour's own, bobbing on a dig spot of its place clear of the day's mound until she walks onto
+  it, then carried home by a talk action, "Give back Sir Hops", for 40 Candy and a little
+  friendship). **Dealt from the day key alone**: one week in 15 the stall, and one day in 11 of the
+  rest a day's event that fits (its months, a clear sky), a snow day first half the time in
+  winter; never on a holiday, one of her days or a festival's; never two at once. About one day in
+  8.7 in all (`tests/systems/rareEvents.test.ts` holds 1/11 to 1/7.5 over six years, each in two
+  years, a snow day every winter).
+- **Told, and a keepsake the first time**: the first time she's out on the day (in town for the
+  Moon Pie Man and the pop-up), a `heralded` toast (`Herald`: a rare event, a visitor's first day,
+  or a peddler arrived), and a line in Today; the first time each rare event comes, a letter with a
+  keepsake (`rare:<id>`: Hazel's star shard, Ollie with the stall's pennant and the wayfarer's
+  postcard after the hello, Cody's snowflake charm, Maude's finder's rosette once the stray is
+  home; five `RareKeepsakeId` items, unsellable). **No save bump**: what she was told, met, found
+  and carried is `Takings` for the day (`rare:` is once a day in `onceADay`), and "the first time"
+  is the mailbox's, which never sends a letter twice.
+- **Passers-by** (`PASSERS`, figures from the doll's parts in `sprites/villagers.ts`, a voice each):
+  the wayfarer on a stranger's day, and **Moira**, Nessa's aunt, who keeps a lighthouse and stays at
+  Lantern Shore every 12–18 July, an arrival on a schedule as decision 271 allows, a span of the
+  year (`when`), not a villager row. Tapping one walks her up (`Visit` `passer`); the first hello
+  of the day is a line and a little treat (`metPasser`), after that a line.
+- **The Moon Pie Man and the pop-up told when they arrive**: a toast the first time she's in town
+  on a day they're there and weren't the day before, and a Today line with a tap to the cart or the
+  pop-up while they're in town (the calendar's plain "is in town today" row gives way to it).
+- **Today** grows `rare`, `passer`, `stray` and `peddler` lines (`TodayFacts.rare`, `passers`,
+  `stray`, `peddlers`, read in `areas/upNow.ts`), each held by `tests/world/today.test.ts`'s `holds`.
+- **Done**: `tests/world/weeksDiffer.test.ts` holds every month for two years with no two days
+  alike (the calendar's rows and festivals, the happenings, the rare event, who's passing through
+  and visiting, the peddlers and the weather together), and every Monday, Tuesday and Thursday with
+  a daytime beat; smoke's `rare` opens 29 November 2026 at ten at night (`?day=`) and sees the
+  shower, its toast and its line, and 18 November's stall opened as a shop.
+
+**Rejected:** a rare event per day by a weighted table with "none" in it (a week's stall can't be
+dealt a day at a time without being a week's state); keeping what she has seen in the save (a
+letter already is the record, and `Takings` holds the day); a snow day that changes the weather
+(the world's rain waters the beds; snow over a clear or foggy day reads as a snow day all the
+same); the visitor as a villager row (decision 271: arrivals that aren't locks, and a thirteenth
+neighbour with hearts and favours for one week a year would be a neighbour she can't keep up
+with); a theme of music per festival week (three tunes is a session of its own); new ware art for
+the festival shelves (what's already drawn and priced fits each week).
+
+## 315. The fair games reworked: taps in time with a floor, prizes by how well, a duck pond and a bell, and a free go a day (2026-10-18, V1's R6b)
+
+_Session R6b of the V1 plan, lane 4, beside R4, for decision 272 ("the fair games definitely need
+a rework") and `docs/v1_analysis.md` finding 3's "Almost no activity is fun in itself" (the glint
+showed before the throw and always landed: a win button). No save change: the free go is a
+`Takings` key. Personal touches parked (decision 177): the games, the prize, the words and the
+stalls' look are the warmest default; nothing was asked._
+
+- **A throw is a tap in time.** Each throw is a moving thing on a little stage in the game's sheet
+  (`src/hud/FairSheet.ts`, drawn every frame by `render/fairGames.ts` from `sprites/fairGames.ts`,
+  the stall's own inside in its own palette at whole pixels): at **ring toss** a ring swings along
+  a rail over five bottles and she taps to drop it as it passes over the one that winks; at
+  **hook-a-ghost** four ghosts bob along the tub and she taps as one is under the hook. Where it is
+  is worked out, never ticked: `patternOf(game, seed, throw, slow)` deals a sweep's length, where it
+  starts and the bottle to aim for from the day and the go (`${day}:${id}:${n}`), and
+  `score(pattern, tapAt, startedAt, at)` (`systems/activities.ts`) grades the tap by how far the
+  thing was from the mark: **2 near perfect, 1 good, 0 wide**, and wide still counts. The stage
+  draws with the very same reads (`ringAt`, `ghostsAt`, `ducksAt`, `puckAt`), so what she sees is
+  what's scored. Windows, tuned to a phone: the ring's perfect is within 6% of the track and good
+  16% (about ±80 ms and ±210 ms), the hook's 2.5% and 7% of a quarter-tub gap, the bell's top 7%
+  and 30% of its height on an eased sweep; the test holds at least 120 ms perfect and 300 ms good
+  for every timed game.
+- **Prizes by how well the go went**, never a loss: a go's points (two a perfect throw, one a good
+  one) pick a prize along the row, `prizeRank` rounding points × prizes ÷ most, so the floor is
+  every go's, three good rings are the third prize, and the rosette wants five of six points. A go
+  is still paid as it ends (decision 201); a go left half thrown costs nothing.
+- **Reduced motion is slower, never still** (`SLOW_SWEEP`, 1.6×): the sheet starts a go with
+  `slow` when the phone asks for less motion, and the same go is dealt, only gentler; the windows
+  along the track stay, so they're wider in time.
+- **Two stalls, from the one stall drawing** (`drawStall` with wares of their own, `9` and `0` in
+  `FAIR_LEGEND` on the ring's south row either side of the aisle, counters `duckPond` and
+  `strengthBell` in `FAIRGROUND_SPOTS`; two dig spots and a hay bale and barrel moved aside): the
+  **duck pond** (morning to night, every day), where ducks drift round and she taps one to pick it,
+  every duck a prize and what's under it dealt with the go (plain half the time, a star three in
+  ten, a crown two in ten): the one game of luck, as the plan asked; and the **strength bell**
+  (afternoons and evenings, all day in the festival), where she holds to wind up and lets go as
+  the puck reaches the top (`hold`, then `toss`; the puck eases up and down from her hold).
+- **A reason to go:** the **first go of the day is free at one stall** (`freeGoOn(day)`, dealt
+  among the games open of an evening, when she plays; `fortune:freeGo` in `Takings`, once a day by
+  its prefix), said on its Have a go ("Free go!") and at every other game ("Your first go at the
+  duck pond is free today"); **a prize only won there**, the **lucky duck squish** (`FAIR_PRIZES`
+  in `data/fairPrizes.ts`, a ghost duckling in a gold paper crown, art `sprites/fairPrizes.ts`), the
+  best at the duck pond and the bell: a squishy, so it joins her squishy shelf, the "every squishy"
+  shelf and Gourdon's figurines, worth 12 (less than a go), on no shelf, and never in Ollie's
+  catalogue (`orderPrice` turns it away); and **Agatha's fortune points there** one day in three
+  while the free go is still to be had (`fairTipOn`, `FAIR_TIPS`, `Reading.fair`).
+- **What she sees and hears:** each throw says how it went (`THROWN_LINES`), its mark in the tally
+  (a star for perfect), a burst where it landed on the stage, and in the world a `tossed` moment
+  with its `grade`: a perfect one sparkles more and she hums (`effectsOf`), and chimes `found`.
+- **Held by** `tests/systems/activities.test.ts` (the same go dealt the same; a tap at the best
+  moment perfect and some tap wide for 60 goes of each timed game; the windows' widths in ms;
+  reduced motion slower and aimed the same; every duck a prize and all three marks dealt; the free
+  go always at a game open of an evening, several over two months; the fortune's word by name, now
+  and then), `tests/world/activities.test.ts` (three perfect rings win the rosette and pay as it
+  ends; three late throws at each win the floor and are paid; the bell rung from a hold and the
+  floor for letting go at once; the duck picked is the prize; the free go free with an empty purse
+  and paid after; the fortune's word only while the go is to be had), `tests/data/economy.test.ts`
+  (the fair's prize worth less than a go, won at a game, on no shelf and never ordered) and smoke's
+  `fair` (a go of three real taps timed to the swinging ring, a prize better than the floor, the
+  stage at a whole scale and on screen upright and on its side).
+
+**Rejected:** keeping the glint and the 40-in-100 chance (a win button, decision 272); a miss
+that wins nothing or costs the go (decision 11: always something); Candy back as a prize (a loop to
+guard, decision 201); scoring on the HUD's clock (`performance.now()`) rather than the world's
+injected one (untestable with the fake clock, and the stage and the score would drift apart); a
+skill duck pond with the marks shown (the plan's "pick a duck, every duck wins" is a lucky dip,
+and one game of luck among three of timing is a change of pace); a tall strength tower as a prop
+of its own (a new footprint and art for one game; the stall's pole reads); a Today line for the
+free go (Today's lines are R4's to grow beside this session; the fortune and the sheets say it,
+and a later session can add it as a `TodayLine`); a fairground-only small piece of furniture
+instead of a squishy (she loves collecting, and a squishy joins three collections at once).
+
+## 314. Something to build: four town projects funded at the noticeboard, going up in three stages, and the woods capped per window (2026-10-18, V1's R4)
+
+_Session R4 of the V1 plan, lane 4, carrying out decision 274 for `docs/v1_analysis.md` finding 3
+("Nothing to save for"). A save bump (`projects`). Personal touches parked (decision 177): which
+four projects, where each stands, the prices and every line are the warmest default the plan's
+paragraph suggests; nothing was asked, and no real-life project is nodded to (decision 274)._
+
+- **Four projects** (`src/data/projects.ts`, `PROJECTS`, `ProjectId`), one funded at a time:
+  **the bandstand** on the square beside the noticeboard (3×2 at 26,19; 5,000 Candy, 80 wood, 40
+  stone, 6 pumpkins), **the castle garden** restored on the castle hill's west lawn (two raised
+  flower beds and a stone-and-wood bench, 6,24 for six tiles; 3,600 Candy, 60 stone, 30 wood, 6
+  roses, 6 marigolds), **the footbridge** over Whisperwood's creek from the woods to the far bank
+  (2×2 on the ice at 21,25; 4,200 Candy, 120 wood, 30 stone) and **her greenhouse** at the top of
+  her yard behind the house (a glasshouse 3×1 at 5,1 with three planters before it; 6,000 Candy, 60
+  wood, 40 stone, 4 sunflowers). Each asks only what she gathers or grows, never what a shop sells.
+- **Funded at the noticeboard**: its sheet has two tabs now, Notes (as it was) and **Projects**
+  (`hud/ProjectsPanel.ts` through `NoticeApi`): with none under way, every project not built with
+  its picture, what it asks and Start; with one, its picture, a bar, how it stands, and a row for
+  Candy and each thing with S4's held − n + and a Give. Candy goes in lots of 100 (`CANDY_LOT`),
+  never more than it still wants or she has. Starting the greenhouse puts anything of hers standing
+  on its site in the storage chest, and says so (`Yard.makeRoom`, the doorway's precedent); from
+  then the site is kept off her lawn (`Kept` in `systems/yard.ts`). Before she starts it her yard
+  is all hers, so 0.3's lived-in yard (a lantern at 5,1) is untouched.
+- **Seen in the world in three stages** (`systems/projects.ts`: `stageOf`, `piecesAt`): nothing
+  before anything's given, **a post at each corner** of the site from the first thing given
+  (`sitePost`, a stake with a pumpkin ribbon), **its frame** from half its worth (Candy at face
+  value, things at what the shops pay: `progressOf`, `FRAMES_FROM`), and **the thing** the moment
+  the last of it is in. They stand as `Decorations` stands a holiday's pieces: `Sites`
+  (`world/zones/`) per place, read off `Works` (the keeper, `world/Works.ts`), solid, walked up to,
+  drawn by `OutdoorView` among the lots' and the square's pieces; art at 32 in
+  `src/sprites/projects.ts`, the bandstand's bunting blowing (`frames`), its lantern and the
+  greenhouse's glass lit after dark. `npm run sprite -- 'stage:*'` draws each place with its
+  projects at each stage, `'project:*'` the noticeboard's pictures; in a dev build
+  `world.projects.preview(id, stage)` shows a stage without funding it (smoke's `projects` reads
+  all three).
+- **Built, each is used**: the bandstand plays a tune as she walks up (the piano's, Boothoven's
+  lessons among them), plays the fountain's music box within three tiles after dark (`byBandstand`,
+  read by `Fountain`), and **Boothoven's Tuesday recital moves out under its roof**
+  (`bandstand` on a `HappeningRow`, `knowBandstand` in `systems/venues.ts` as the fairground's
+  gate moves the calendar's events); the castle garden's bench seats her (`PROP_SEATS.gardenSeat`);
+  the footbridge's deck is walked without skates (`MapZone.slippery` false on it, the bridge drawn
+  from its top edge under anyone on it, the creek's ice and banks unbroken beneath); and the
+  greenhouse's three planters are **beds** through the farm (`FarmLand.projects`, as the extension
+  rows are kept grass until built), tended as any bed and **under glass**: anything sown there grows
+  as if in season (`growsQuick`'s `glass`). Not a `planter` piece: the yard's pieces aren't beds
+  (decision 234), and a fixed site was the way to show it going up.
+- **The mayor writes** when one's built (`project:<id>`, `letterOf`), signed as the Mayor until
+  she has met Rob Boo and as him after, and a `built` moment toasts it with confetti; a gift that
+  raises the posts or the frame toasts where (`pitchedIn`'s `raised`).
+- **Today** has a line while one's under way ("The bandstand is 40% of the way there", a tap to
+  the noticeboard; `TodayFacts.project`, keyed by its stage and the week).
+- **The economy**: a project is the one thing dearer than a day (decision 128's test still holds
+  every shop price within a day); `economy.test.ts` holds each project's worth above three of a
+  thorough day's income (three windows' rounds of the town and the candy tree, about 1,340) and at
+  most fourteen (so 3.2 to 4.9 thorough days each, two to three weeks at her pace). **Gathering is
+  capped per place per window** (`GATHERS_PER_WINDOW` = 48 in `systems/gathering.ts`, counted from
+  `Takings` by `gatheredIn`): past it, everything there rests till the next window (a `resting`
+  moment with `plenty`, "Whisperwood has shared plenty for now"). The town (46 things), Boo Acres and
+  the clearing never reach it; a window's best round of Whisperwood falls from about 1,405 Candy to
+  412 (the town's is 426), the castle hill's from 1,728 to 660, Lantern Shore's from 714 to 373,
+  held by the test at most 1.6 of the town's.
+- **Saved** as `projects: { current, given, built }` (save v51, migration gives an old town none
+  begun). The sites are kept clear of every spot, door, lot, stall, set piece, egg and dig spot and
+  cut nothing off at any stage (`tests/data/projectSites.test.ts`); the town's dig spot at 27,19
+  moved to 21,16 for the bandstand, and `tests/data/digSpots.test.ts` keeps every site and its ring
+  clear.
+
+**Rejected:** a project that grows over time once funded (decision 271 allows it, but a thing that
+finishes the moment she gives the last of it is the reward); funding several at once (one at a time
+keeps the goal in view, as the plan says); the deck as `boards` ground (it cut the creek's ice in
+two, banks and all); her greenhouse anywhere in the yard she likes (a site she watches go up has to
+be somewhere); a daily cap on gathering (a window's is the same rhythm the trees already keep);
+capping by Candy rather than things (a count she can feel, "the woods have shared plenty", reads
+better than a sum).
+
+## 316. Fishing and catching with a floor: bites by rarity, a reel for the rare ones, a size and a best per fish, and shy critters that drift (2026-10-18, V1's R6a)
+
+_Session R6a of the V1 plan, lane 4, beside R6c, for decision 272 ("a shorter bite window for a
+rarer fish, a rare critter that drifts off as she nears… nothing ever lost") and
+`docs/v1_analysis.md` finding 3's "Almost no activity is fun in itself" (a 1.5 s bite that can't be
+failed; netting a statue; `wary` only ever 1). Save v52 (`cabinet.best`). Personal touches parked
+(decision 177): the sizes, words and the bar's look are the warmest plain defaults; nothing was
+asked._
+
+- **A bite by rarity.** `BITE_MS` is a row by `Rarity` (`systems/fishing.ts`): 1.5 s common, 1.1 s
+  uncommon, 0.9 s rare, 0.7 s legendary. A bite let go still comes round again, forever, as
+  decision 121 had it.
+- **A reel for the rare and legendary fish** (`REELS`, `reelOf`, `needleAt`, `reelGrade`, R6b's
+  shape): a tap on the bite hooks it (`hooked`), and a tension bar over her head sweeps a needle
+  there and back across a glowing window dealt from the cast (its middle 0.3 to 0.7 along). A tap in
+  the window lands it (grade 1, or 2 near the middle, which sparkles more); a tap out of it, or
+  three sweeps untapped (`REEL_SWEEPS`), lets the line go `slack`: the fish comes round to bite
+  again from then, as if newly cast to, told once a cast. Nothing is lost. Windows: rare a 1.8 s
+  sweep, ±0.15 of the bar (270 ms a pass, twice a sweep), legendary 1.5 s, ±0.12 (180 ms); the test
+  holds at least 150 ms a pass. Common and uncommon fish land on the bite as before, with one tap.
+  The bar is drawn by `render/fishing.ts` from `world.fishing.line.reeling`, read off the world's
+  clock as the score is. `world.fishing.bestTapAt()` says when a tap does best, bite or bar, for the
+  tests and smoke.
+- **A size per catch** (`sizeOf` in `systems/catchSize.ts`): each fish has a range in quarters of
+  a hand (`FISH_SIZES` in `data/fishSizes.ts`, inside its shadow's band, `SHADOW_SIZES`), and a
+  catch is two rolls of the cast's hash averaged into it, so middling sizes are likeliest; the top
+  fifth of a range is a **whopper** (about one catch in twelve). Said in her hands ("half a hand",
+  "a hand and a half", "two and a half hands", `handsOf`) on the catch's toast. The `caught` moment
+  carries `size`, `best`, `whopper`, `grade` and the `water` it came from: the splash there is as
+  big as the fish (`effectsOf`), a whopper gets confetti and a "!", a new best a sparkle and a "♪",
+  and a whopper thrills her as a rare catch does.
+- **A personal best per fish** on the `Cabinet` by `CritterId` (`measure`, `bestOf`; `best` in the
+  snapshot, save v52, whose step gives an old town none measured: a fish caught before was never
+  sized, so the Cabinet's card says "Land another to see how big it is"). A new best says "your
+  biggest yet!" on its toast; the Cabinet's card says "Your biggest: two hands long."
+- **Shy critters drift** (`systems/drift.ts`): the rare and legendary ones and the moths finer than
+  common (never a fish, a creepy-crawly, which keeps to its spot, or a common one). As she comes
+  within two tiles (`NOTICE_TILES`) having walked more than three since she last stood still
+  (`CREEP_TILES`, read off `walkMs` by `walkedTiles`), it hops a tile directly away from her
+  (`driftTo`, onto open ground no other critter is on) and settles there; her walk ends beside where
+  it was without a swing (`Collecting.shiedFrom`), so a second tap from where she stopped creeps up
+  and nets it. Once a walk, at most twice in its hour (`DRIFTS_AN_HOUR`), then it's used to her;
+  `notice` in `Collecting`, called by `World.update`. **From behind:** every flier is drawn face on,
+  looking out of the screen, so its back is to the north; coming at a flier from any tile north of
+  it, it never notices her. The hop is drawn by `render/critters.ts` from `Critter.hop` (where from,
+  how far through `HOP_MS`, 320 ms): an eased slide with an 8-pixel arc and its shadow sliding
+  under it, never a jump cut. The first drift since the game opened is told ("It's shy: stop a few
+  steps away, then creep up on it slowly"); the Cabinet's hint says "It's shy: creep up on it
+  slowly, or from behind" for every drifting one, found or not.
+- **Legendaries `wary` 2–3** on the net (the orbs, the Hercules beetle, the axolotl and the golden
+  snail 2, the wishing moth and the ghost bat 3); the legendary fish stay at 1, since on a rod
+  wariness is more nibbles, and their bite and reel are their test. Commons stay 0 and never drift.
+- **The rarity test is untouched by it** (it catches everything dealt): from the first of every
+  month the Cabinet still fills in 9.1 to 10.2 months, and no critter waits more than 30 days.
+- **Held by** `tests/systems/fishing.test.ts` (each tier's bite length; the reel only for rare and
+  legendary, the same for the same cast, a tap on the middle perfect and the bar's ends slack,
+  each pass's window in ms, the next best moment from any time), `tests/systems/catchSize.test.ts`
+  (every fish a range in its shadow's, sizes the same per cast and different across, whoppers now
+  and then, the words), `tests/systems/drift.test.ts` (who is shy, legendaries wary 2–3, rushing
+  noticed and creeping or behind a flier not, a tile away or none), `tests/world/reel.test.ts` (a
+  common landed with one timed tap; a rare hooked and a perfect reel landed; a late tap slack,
+  nothing kept, the bite again and landed; untapped, slack by itself; bites shorter by tier),
+  `tests/world/fishing.test.ts` (a session of 24 catches over three days in more than three sizes,
+  a best said and every best kept in the save), `tests/world/drift.test.ts` (rushed, a hop of one
+  tile and no catch, then crept up and netted; drawn hopping then settled; stopped four off and
+  netted unnoticed; twice at most) and smoke's `fishing` (a common landed with one tap timed by
+  `bestTapAt`, measured) and `drifter` (rushed from six tiles, a one-tile hop drawn from where it
+  was, then netted).
+
+**Rejected:** a bar for every fish (commons stay a tap, as the plan says, and the reel is the rare
+ones' moment); a miss on the bar losing the fish, or the bait (decision 11 and 272); a tug of war
+(holding is hard on a phone, and decision 121 turned it down); sizes in inches or centimetres (her
+hands are the unit she'd smile at); a size for the net's critters (a moth isn't held up to be
+measured, and the plan asked it of fish); a critter that drifts more than a tile or for ever (that
+is a chase, and frustrating); fliers that turn to face left and right (they're drawn face on, so a
+back view per flier would be new art, and "facing away" couldn't be seen); a slower bar under
+reduced motion (the world doesn't know the phone's setting, unlike the fair's sheet; a tap out of
+time costs nothing, so it's left for V1's review); a hint that names the creep distance in tiles
+(the toast says "stop a few steps away", which is the whole of it).
+
+## 317. Pets that grow: fondness from pats, walks and treats, a job on walks and a trick, rest spots at home, and a sit from behind (2026-10-18, V1's R6c)
+
+_Session R6c of the V1 plan, lane 4, beside R6a, for `docs/v1_analysis.md`'s depth audit ("lovingly
+written decoration": three pat lines round and round, no affection, no job). Personal touches
+parked (decision 177): the lines, tricks, jobs and favourite spots are the warmest default from
+each pet's character as `data/pets.ts` has it; nothing was asked. A save bump (`pets.affection`)._
+
+- **Fondness, per pet, never lost.** A pat is a point (three a day count), a walk a point every
+  `WALK_TILES` (24) tiles she walks outdoors with it beside her (four a day), a treat three (one a
+  day: the plainest snack or sweet in her bag, never a kept thing, from a Treat button that shows
+  only while one would count). Each kind counts per pet per day by the day key (`fonder` in
+  `systems/affection.ts`); points only go up and a day away is just a day (decision 11). The pat as
+  the sheet opens counts, so walking up to a pet is the whole of the habit.
+- **Two levels**, at 20 and 60 points (`LEVEL_AT`): two days of everything for the first, six for
+  the second; a pat a day alone gets there in about three weeks. Each brings three more pat lines
+  in the pet's own voice (`GROWN_PATS`), said newest first so the level is heard at once, and a
+  toast in candlelight (`GREW_LINES`). The sheet shows two drawn hearts, a bar to the next level
+  and what it learns next.
+- **A job on walks at one**, decided by the pet (`Pet.update` returns a `PetDeed`) from what
+  `PetSurroundings.finds` reads off the world's own services (`areas/pets.ts`: `Fossils.mound`,
+  `Collecting.critters`, `SmallEvents.lying`), rules in `systems/pets.ts`, made so by
+  `PetCare.deed`: **Fibi** leads on the trail of today's undug mound and sits by it within five
+  tiles ("What a good nose!", once a day a place); **Dolly** barks a shy critter (wary, or one of
+  R6a's that drift, decision 316) out within four tiles and it settles for the hour
+  (`Collecting.settle`): it never drifts or flutters off, and her net has it first time; **Elvira**
+  draws an orb within six tiles one tile nearer (`Collecting.draw`, a hop like a drift's);
+  `PetCare.calmed` and `drawnTo` say which; **Wybie**
+  zooms to something a neighbour dropped within ten tiles and brings it back, picked up as though
+  she'd walked onto it; **Florence and Gary nap**, which is their job (Gary in his shell, Florence
+  dreaming hearts through her Zs).
+- **A trick at two** (`TRICKS`; `TRICK_STEPS` beat by beat in `sprites/pets.ts`, one to three
+  frames of its own each): Florence rolls over, blanket and all; Fibi sits up and begs; Dolly spins
+  through her four views; Gary does a trick… eventually (a long wait in his shell, then ta-da);
+  Wybie loops the loop (his side frame turned a quarter at a time, lifted round a circle); Elvira
+  fades to a wisp and back. On the sheet's Trick button, and once in a while on its own (one 40 s
+  stretch in three) when she has stood still two seconds.
+- **Rest spots at home** (`systems/petRest.ts`): each pet's favourite kind in the room she's in by
+  `REST_LIKES` (Florence the fire, the ghosts the bed, Fibi a rug, Dolly the sofa), a spot each, one
+  pet to a tile, from `PET_RESTS` rows (the hearth, both beds, both sofas, the rugs); half its
+  stretches (Gary a third, Florence whenever she's asleep) it goes there, hops up onto a bed or a
+  sofa (`Pet.perch`, drawn lifted and in front of the piece) or sits with its back to her facing the
+  fire.
+- **A front and a back sit** (`sitFront`, `sitBack` per pet; Gary has a real front at last): a pet
+  sitting by her faces her, its back to us when she's further up the screen.
+- **Effects** (E1's layer): hearts over a patted pet (more for a treat), hearts and sparkles at a
+  level, sparkles for a trick, a "!" over a barked-out critter, sparkles where Fibi sits and an orb
+  lands; cues `trick` and `woof`.
+
+**Rejected:** fondness that fades (decision 11); a needs bar or hunger (decision 68); a level per
+pet shown as a number (two hearts and a bar read better); several pets walking at once (decision
+67); jobs that hand her Candy or things outright (the economy test, and a job that helps her do
+what she was doing is gentler); a bark that catches the critter for her (the net is still hers to
+swing).
+
+## 324. 1.0: the review after the lanes, one card for her, the 0.5 card kept as shipped, and the cloud left out of her notes (2026-10-18, V1's review)
+
+_Session V1 of the V1 plan, the last: the architecture review, perf against L1's Close baseline,
+the art notes, a lived-in fixture, `CLAUDE.md` and the handoff for after 1.0, and the release PR
+from `v1-dev` to `main`, left for the user to merge. No save change (still v53). Personal touches
+parked (decision 177): the notes card's words are the warmest default; nothing was asked._
+
+- **One card for her, `1.0`.** Her phone has 0.4 (PR #175), which carried 0.5's notes too, so it
+  last showed the mayor's 0.5 card. The four rows after it (0.6–0.9), which no phone saw, are
+  folded into one 1.0 row of five lines, so `notesToShow('0.5', …)` gives exactly one card
+  (`tests/systems/patchNotes.test.ts` holds it).
+- **The 0.5 row is put back as it shipped.** L6, L2 and L4 had written their news into the 0.5
+  row after 0.5 was on her phone, so the ground and the seasons would never have reached her: the
+  row is main's again, word for word, and the ground and the seasons are 1.0's first line. A row
+  she has seen is never changed, but for L5's emoji put in words (decision 295), which the Settings
+  copy shows.
+- **The cloud save is left out of her notes.** It does nothing until the user links an Upstash
+  Redis store in Vercel (README's "Cloud save"); a line promising her town is in the cloud could
+  be untrue the day she reads it. Settings → Backup says what it is once it's on, and the handoff
+  and the release PR tell the user the steps.
+- **The shakedown** played a new town by real taps over four days and kept it as
+  `tests/persistence/fixtures/lived-in-v53.json` (held by `livedIn.test.ts`, which now opens each
+  save at its own `lastPlayedAt`), and opened the 0.3 lived-in town as her phone will (notes last
+  seen 0.5) at Close, Far and sideways: one 1.0 card, Cody's hello, the first day already over,
+  no errors. It fixed three small things: a toast took half the room's width, so a three-line
+  toast ran to ten; the quick bar's line ran off the left edge; and the hooked moment's "!" sat
+  over the tension bar's right end. The rest (the reel, a trick, Rob Boo's reveal, winter, Far,
+  sideways) is smoke's, whose screenshots were looked at; what's left is "Where it hurts" in
+  `docs/architecture.md` and the art notes in the handoff.
+- **Perf** at Close is 2–4 ms of a night's mean dearer than L1's baseline after all 29 sessions,
+  Far a little more, no frame doubled, updates a few tenths up, the heap 28.5–32 MB; the table is
+  in `docs/architecture.md`, beside the empty one for her iPhone's `?perf`.
+- **`v1-dev` ends with 1.0.** A later plan makes its integration branch from `main` once the
+  release has merged, and adds it to `vercel.json`'s no-preview list that day (decision 265).
+
+**Rejected:** a card for each of 0.6–0.9 (four cards at one opening, of a release she gets at
+once); leaving the 0.5 row as the lanes left it (the ground and the seasons never told); a cloud
+line worded as something Cody can switch on (it asks her to ask, and the switch is the user's
+job, not hers); fixing the larger rough edges the shakedown confirmed (body builds, the reel
+under reduced motion, rare events in October) in the review rather than in 1.1.

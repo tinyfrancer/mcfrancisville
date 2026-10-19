@@ -71,6 +71,14 @@ export function suspectsOf(found: readonly ClueId[]): SuspectId[] {
   return suspects;
 }
 
+/** Who her clues have cleared so far (V1's P3a). */
+export function clearedOf(found: readonly ClueId[]): SuspectId[] {
+  return found.flatMap((id) => {
+    const who = CLUES[id].clears;
+    return who ? [who] : [];
+  });
+}
+
 /** A chapter of the mayor's October story, as its letter's id. */
 export const chapterId = (n: number) => `story:${n}`;
 

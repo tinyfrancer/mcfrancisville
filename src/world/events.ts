@@ -1,8 +1,12 @@
+import type { Feeling } from '../types/mood';
 import type { PatchStage } from '../data/pumpkinPatch';
 import type { CalendarId } from '../data/calendar';
 import type { BroomLook } from '../data/broom';
+import type { TogetherId } from '../data/cody';
 import type { Placed } from '../data/home';
 import type { DecorId } from '../data/holidays';
+import type { PasserId, RareEventId } from '../data/rareEvents';
+import type { ProjectStage } from '../data/projects';
 import type { ClueId } from '../data/mystery';
 import type { Effect } from '../data/dishes';
 import type { Made } from '../data/recipes';
@@ -21,7 +25,9 @@ import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
 import type { ActivityId } from '../data/activities';
+import type { Grade } from '../systems/activities';
 import type { TuneId } from '../data/instruments';
+import type { PetJob, PetLevel } from '../data/affection';
 import type {
   BuriedId,
   Carvable,
@@ -29,7 +35,9 @@ import type {
   DishId,
   FigurineId,
   FixtureId,
+  FossilId,
   CropId,
+  FirstDayStepId,
   FurnitureId,
   HappeningId,
   ItemId,
@@ -39,6 +47,7 @@ import type {
   OutfitId,
   PetId,
   PotPlantId,
+  ProjectId,
   PropId,
   RecipeId,
   ShelfId,
@@ -82,7 +91,10 @@ export type GatherSource = PropId | 'flowers' | 'snack' | 'bone';
  * `fled` one that fluttered off before she could, not far. With her rod (phase Q), `cast` is her
  * float going in (with a `hint` of what to wait for, until she has caught a fish), `nibble` and
  * `bite` what the fish does, `letGo` a bite she let pass (`first` since she cast), `reeled` a tap
- * too soon, and `caught` a fish landed.
+ * too soon, and `caught` a fish landed. Since V1's R6a a rare fish is `hooked` on the bite and
+ * reeled in on a tension bar, a tap out of its window going `slack` (the fish bites again); a
+ * fish landed has its `size` (in quarters of a hand), `best` if it's her biggest yet of its kind,
+ * `whopper` and how well the reel went (`grade`); and a shy critter rushed at has `drifted`.
  *
  * With her pets, `pet` is the one she walked up to. At her door, `potted` is a new plant in her pots.
  *
@@ -121,6 +133,12 @@ export type WorldEvent =
   | { kind: 'clue'; clue: ClueId }
   | { kind: 'wesGone'; line: number }
   | { kind: 'wesDropped' }
+  /** Wes ran off the third time, and will stay for a chat from now on (V1's P3a). */
+  | { kind: 'wesStays' }
+  /** She stopped to chat with Wes, and what he said, one line after another (V1's P3a). */
+  | { kind: 'wesChat'; lines: string[] }
+  /** She met the mayor at the castle (V1's P3b): the scene, one line after another. */
+  | { kind: 'unmasked'; lines: string[] }
   | { kind: 'crowned'; villager: VillagerId }
   | { kind: 'photo'; with: VillagerId; caption: string }
   /** A new window of the day began while she played (phase N), and what's on today. */
@@ -151,7 +169,8 @@ export type WorldEvent =
   | { kind: 'tune'; tune: TuneId; line?: string }
   | { kind: 'refused'; why: Refusal }
   | { kind: 'gathered'; from: GatherSource; item: ItemId; count: number; bead?: ItemId }
-  | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow }
+  /** Already taken this window; or, with `plenty`, the place has given its most (V1's R4). */
+  | { kind: 'resting'; from: GatherSource; item: ItemId; back: DayWindow; plenty?: MapZoneId }
   | { kind: 'tilled'; tx: number; ty: number }
   | { kind: 'bare'; tx: number; ty: number }
   /** `quick` where it grows best, a day sooner (0.2's N1). */
@@ -180,8 +199,21 @@ export type WorldEvent =
   | { kind: 'cooked'; recipe: RecipeId; item: DishId; used: Taken[]; night: boolean }
   /** She ate something from her bag, and it does its small thing till the window turns. */
   | { kind: 'ate'; item: ItemId; effect: Effect; until: DayWindow }
-  | { kind: 'caught'; critter: CritterId; first: boolean }
+  | {
+      kind: 'caught';
+      critter: CritterId;
+      first: boolean;
+      size?: number;
+      best?: 'first' | 'best';
+      whopper?: true;
+      grade?: Grade;
+      /** The water a fish came up out of. */
+      water?: Tile;
+    }
   | { kind: 'fled'; critter: CritterId }
+  | { kind: 'drifted'; critter: CritterId; first?: true }
+  | { kind: 'hooked' }
+  | { kind: 'slack'; first?: true }
   | { kind: 'cast'; hint?: true }
   | { kind: 'nibble' }
   | { kind: 'bite' }
@@ -207,8 +239,22 @@ export type WorldEvent =
   | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
   /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
   | { kind: 'baked'; item: ItemId; candy: number }
-  /** A throw at a fairground game (0.2's M2), and whether it landed. */
-  | { kind: 'tossed'; activity: ActivityId; landed: boolean }
+  /** She joined in at a neighbour's happening (V1's P4): howled, picked the book, named a star. */
+  | { kind: 'joined'; happening: HappeningId; villager: VillagerId }
+  /** A beat of baking with Wrapunzel (V1's P4): pouring the mix, or down at the oven door. */
+  | { kind: 'bakeStep'; does: 'pour' | 'crouch' }
+  /** Something she and Cody did together at hers (V1's P5): she holds it up, or waves at the sky. */
+  | { kind: 'together'; what: TogetherId; does: 'show' | 'greet' }
+  /**
+   * A step of her first day done (V1's R1), what it brought, and with the last, Cody's keepsake
+   * for her home.
+   */
+  | { kind: 'firstDay'; step: FirstDayStepId; reward: VisitGift; keepsake?: FurnitureId }
+  /**
+   * A throw at a fairground game (0.2's M2), and whether it landed; since V1's R6b, how well:
+   * 0 wide (still the floor), 1 good, 2 near perfect.
+   */
+  | { kind: 'tossed'; activity: ActivityId; landed: boolean; grade: 0 | 1 | 2 }
   /** A go at a fairground game done, and what it won; `top` for the prize to win. */
   | { kind: 'won'; activity: ActivityId; item: ItemId; landed: number; top: boolean }
   /** Her fortune read in the tent, once a day. */
@@ -236,7 +282,34 @@ export type WorldEvent =
   /** A shelf finished (0.2's F2), its letter posted with it: cheered where she is (V1's E1). */
   | { kind: 'shelved'; shelf: MilestoneId }
   /** She gave a neighbour a gift, and how they took it (V1's E1: a heart over them if loved). */
-  | { kind: 'gave'; villager: VillagerId; item: ItemId; reaction: Reaction };
+  | { kind: 'gave'; villager: VillagerId; item: ItemId; reaction: Reaction }
+  /**
+   * Something out of the ordinary today (V1's R3), told the first time she's out that day: a
+   * rare event, a visitor come to stay, or the Moon Pie Man or the pop-up arrived in town.
+   */
+  | { kind: 'heralded'; what: Herald; posted?: true }
+  /**
+   * She said hello to someone passing through (V1's R3): their line, and what they gave her;
+   * `posted` when a keepsake came in the mail with it, quietly, for the toast to say.
+   */
+  | { kind: 'metPasser'; who: PasserId; line: string; gift: ItemId | null; posted?: true }
+  /** She found a neighbour's critter gone astray, to carry home to them (V1's R3). */
+  | { kind: 'foundStray'; critter: CritterId; line: string }
+  /** She gave to a town project (V1's R4), and `raised` if its posts or frame went up with it. */
+  | { kind: 'pitchedIn'; project: ProjectId; raised?: ProjectStage }
+  /** A town project is built, the last of it given (V1's R4): its letter is in the mail. */
+  | { kind: 'built'; project: ProjectId }
+  /** She patted a pet, or gave it a treat (V1's R6c): a heart over it, `at` in world pixels. */
+  | { kind: 'petted'; pet: PetId; at: { x: number; y: number }; treat?: ItemId }
+  /** A pet grew fond enough of her for a new level (V1's R6c): its job at one, its trick at two. */
+  | { kind: 'petGrew'; pet: PetId; name: string; level: PetLevel; at: { x: number; y: number } }
+  /** A pet did its trick (V1's R6c), asked on its sheet, or `own` of its own accord. */
+  | { kind: 'petTrick'; pet: PetId; at: { x: number; y: number }; own?: true }
+  /** A pet did its job on a walk (V1's R6c), `at` what it found, barked out or drew in. */
+  | { kind: 'petHelped'; pet: PetId; name: string; job: PetJob; at: { x: number; y: number } };
+
+/** What's told as out of the ordinary today (V1's R3). */
+export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };
 
 /** A run of tiles, `w` by `h` from its top-left: what she walked up to (V1's E1). */
 export interface TileBox {
@@ -290,6 +363,10 @@ export interface WorldState extends Record<string, unknown> {
   bed: Tile | null;
   /** Her broom's colours changed (0.2's P1). */
   broom: BroomLook;
+  /** A step of her first day was done (V1's R1): the steps done so far. */
+  firstDay: readonly FirstDayStepId[];
+  /** Something was given to a town project, or one was started or built (V1's R4). */
+  projects: number;
 }
 
 /**
@@ -306,15 +383,27 @@ export interface Signals extends Record<string, unknown> {
   opened: { letter: string };
   /** One of the big moments that gets her rocking out (personal_touches.md, "Her, drawn bigger"). */
   thrilled: { by: Thrill };
+  /** She said something on a chip that's a feeling (V1's L7), which shows on her face. */
+  felt: { feeling: Feeling };
   /** She went from one place to another, and is standing in the new one. */
   crossed: { from: ZoneId; to: ZoneId };
   /** A piece of furniture was moved across her room (`to`), or put away in the chest (null). */
   moved: { piece: FurnitureId; from: Tile; to: Tile | null };
+  /** She picked a crop (V1's P1), for her neighbours to remember. */
+  harvested: { crop: CropId };
+  /** She gave the museum a critter or a fossil (V1's P1). */
+  donated: { thing: CritterId | FossilId };
+  /** She took a piece out of her chest and set it down at home or in her yard (V1's P1). */
+  placed: { piece: FurnitureId };
+  /** A letter came to her mailbox by the post (V1's P4), for Ollie to walk over. */
+  posted: { letter: string };
 }
 
 /** A critter out in town now, where it is, and what its catch is remembered by. */
 export interface Critter extends OutCritter {
   key: string;
+  /** Hopping a tile away from her (V1's R6a): from where, and how far through the hop, 0 to 1. */
+  hop?: { tx: number; ty: number; t: number };
 }
 
 /** A rare catch, a loved gift, the first of a crop, or a letter from Cody. */
@@ -330,11 +419,24 @@ export interface Chat {
   gift?: ItemId;
   /** The Candy they gave her for handing back something they'd lost. */
   candy?: number;
+  /** A heart moment's lines after this one, said one after another (V1's P2). */
+  more?: string[];
+  /** What she can say back to the last line, on chips (V1's P2): `Neighbourhood.reply`. */
+  replies?: string[];
+  /** They've asked her something (V1's P2): her chips are all there is until she answers. */
+  asked?: boolean;
+  /** They've a story to tell or a question to ask on her next talk (V1's P2). */
+  waiting?: boolean;
+  /** How they feel saying `line` (V1's L7), on their face; null or missing, as usual. */
+  feels?: Feeling | null;
+  /** How they feel saying each of `more`. */
+  moreFeels?: (Feeling | null)[];
 }
 
 /** How a villager took a gift, or that they'd rather she kept it for another day. */
 export type GiftResult =
-  { declined: false; reaction: Reaction; line: string } | { declined: true; line: string };
+  | { declined: false; reaction: Reaction; line: string; birthday?: true; feels?: Feeling | null }
+  | { declined: true; line: string; feels?: Feeling | null };
 
 /** A letter in her mailbox, as she reads it. */
 export interface MailView extends Letter {

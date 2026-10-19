@@ -2,9 +2,17 @@ import { FURNITURE, turnCount } from '../data/furniture';
 import type { Placed } from '../data/home';
 import { isSmall } from '../data/tabletop';
 import { isOutdoor, type YardSnapshot } from '../data/yard';
-import { anchorsFor, covers, riderAt, ridersOf, surfaceAt, type Refusal } from '../systems/decor';
+import {
+  anchorsFor,
+  covers,
+  footprint,
+  riderAt,
+  ridersOf,
+  surfaceAt,
+  type Refusal,
+} from '../systems/decor';
 import type { Tile } from '../systems/pathfinding';
-import { inBox, standsOn, yardFit, yardRefusal, type YardGround } from '../systems/yard';
+import { inBox, standsOn, yardFit, yardRefusal, type Kept, type YardGround } from '../systems/yard';
 import type { FurnitureId, ItemId } from '../types/ids';
 import type { Home } from './Home';
 
@@ -19,10 +27,18 @@ export class Yard {
   private readonly home: Home;
   private readonly pieces: Placed[] = [];
   private changes = 0;
+  /** Lawn kept for a project going up there (V1's R4), where nothing of hers may stand. */
+  private readonly kept: Kept;
 
-  constructor(ground: YardGround | null, home: Home, saved?: Partial<YardSnapshot>) {
+  constructor(
+    ground: YardGround | null,
+    home: Home,
+    saved?: Partial<YardSnapshot>,
+    kept: Kept = () => false,
+  ) {
     this.ground = ground;
     this.home = home;
+    this.kept = kept;
     const placed = Array.isArray(saved?.placed) ? saved.placed : [];
     // The surfaces first, so what stands on them has them to stand on (0.3's H3).
     for (const p of [...placed.filter((p) => !p.on), ...placed.filter((p) => p.on)]) {
@@ -30,8 +46,9 @@ export class Yard {
       const turn = Number.isInteger(p.turn) ? Math.abs(p.turn) % turnCount(p.id) : 0;
       const piece: Placed = { id: p.id, tx: p.tx, ty: p.ty, turn };
       if (p.on === true) piece.on = true;
-      if (ground && yardRefusal(ground, this.pieces, piece, null) === null) this.pieces.push(piece);
-      else home.store(p.id);
+      if (ground && yardRefusal(ground, this.pieces, piece, null, kept) === null) {
+        this.pieces.push(piece);
+      } else home.store(p.id);
     }
   }
 
@@ -49,7 +66,9 @@ export class Yard {
   lawn(): Tile[] {
     const g = this.ground;
     if (!g) return [];
-    return [...g.lawn].map((i) => ({ tx: i % g.map.width, ty: Math.floor(i / g.map.width) }));
+    return [...g.lawn]
+      .map((i) => ({ tx: i % g.map.width, ty: Math.floor(i / g.map.width) }))
+      .filter((t) => !this.kept(t.tx, t.ty));
   }
 
   /** What stands out in her yard. */
@@ -95,7 +114,7 @@ export class Yard {
     if (!this.ground || this.refusesHere(id) || !this.home.stored.some((s) => s.id === id)) {
       return null;
     }
-    const piece = yardFit(this.ground, this.pieces, id, near, standing);
+    const piece = yardFit(this.ground, this.pieces, id, near, standing, this.kept);
     if (!piece || !this.home.unstore(id)) return null;
     this.pieces.push(piece);
     this.changes++;
@@ -116,7 +135,7 @@ export class Yard {
       : anchorsFor(piece.id, piece.turn, tx, ty);
     let why: Refusal | null = null;
     for (const at of places) {
-      const no = yardRefusal(this.ground, others, at, standing);
+      const no = yardRefusal(this.ground, others, at, standing, this.kept);
       if (no === null) {
         for (const r of riders) {
           r.tx += at.tx - piece.tx;
@@ -140,7 +159,7 @@ export class Yard {
     if (count === 1 || !this.ground) return null;
     const turned = { ...piece, turn: (piece.turn + 1) % count };
     const others = this.pieces.filter((p) => p !== piece);
-    const why = yardRefusal(this.ground, others, turned, standing);
+    const why = yardRefusal(this.ground, others, turned, standing, this.kept);
     if (why === null) {
       piece.turn = turned.turn;
       this.changes++;
@@ -157,6 +176,26 @@ export class Yard {
     }
     this.changes++;
     return [];
+  }
+
+  /**
+   * Puts away whatever of hers stands on lawn now kept for a project (V1's R4), in the storage
+   * chest as when she puts it away herself, with what stands on it. The pieces put away.
+   */
+  makeRoom(): FurnitureId[] {
+    const moved: FurnitureId[] = [];
+    for (const piece of [...this.pieces]) {
+      if (piece.on || !this.pieces.includes(piece)) continue;
+      const { w, h } = footprint(piece.id, piece.turn);
+      let inTheWay = false;
+      for (let ty = piece.ty; ty < piece.ty + h; ty++) {
+        for (let tx = piece.tx; tx < piece.tx + w; tx++) inTheWay ||= this.kept(tx, ty);
+      }
+      if (!inTheWay) continue;
+      moved.push(piece.id, ...this.ridersOf(piece).map((p) => p.id));
+      this.putAway(piece);
+    }
+    return moved;
   }
 
   snapshot(): YardSnapshot {

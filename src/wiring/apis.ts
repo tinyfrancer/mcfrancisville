@@ -4,11 +4,13 @@ import type { NotesApi } from '../hud/NotesCard';
 import { drawTitleScene } from '../render/title';
 import { DEDICATION } from '../data/greetings';
 import type { StallApi } from '../hud/StallSheet';
+import type { FirstDayApi } from '../hud/FirstDayCard';
 import type { BarnApi } from '../hud/BarnSheet';
 import type { FairApi } from '../hud/FairSheet';
 import { stallTakes } from '../systems/passive';
 import { drawRedOne } from '../render/greetings';
 import { drawBedPicture } from '../render/garden';
+import { drawFairGame } from '../render/fairGames';
 import type { BagApi, FreshApi } from '../hud/BagSheet';
 import type { CabinetApi } from '../hud/CabinetSheet';
 import type { CalendarApi } from '../hud/CalendarSheet';
@@ -32,12 +34,15 @@ import type { FarmApi } from '../hud/SeedSheet';
 import type { ShopApi } from '../hud/ShopSheet';
 import type { CatalogueApi } from '../hud/CatalogueSheet';
 import type { TalkApi } from '../hud/TalkSheet';
+import { talkActions } from './talkActions';
 import type { NeighboursApi } from '../hud/NeighboursSheet';
 import { CUES, voiceOf } from '../audio/cues';
 import type { SoundBoard } from '../audio/SoundBoard';
 import { ITEMS } from '../data/items';
 import { OUTFITS } from '../data/outfits';
 import { drawSilhouette } from '../render/critters';
+import { drawProjectPicture } from '../render/projects';
+import { FURNITURE } from '../data/furniture';
 import { drawDollPreview, drawWornDetail } from '../render/doll';
 import {
   drawFixtureIcon,
@@ -60,11 +65,16 @@ import type { BroomApi } from '../hud/BroomSheet';
 import { ZONES } from '../data/zones';
 import { drawAccessoryIcon, drawPetPortrait } from '../render/pets';
 import { drawRecipeIcon } from '../render/recipes';
-import { drawPortrait } from '../render/villagers';
+import { drawBust, drawPortrait } from '../render/villagers';
 import { VILLAGER_IDS } from '../data/villagers';
 import { dayKey, hourOf } from '../systems/clock';
 import { isAbout } from '../systems/critters';
-import { suspectsOf } from '../systems/mystery';
+import { clearedOf, suspectsOf } from '../systems/mystery';
+import { inChain } from '../systems/mysteryChain';
+import { progressOf } from '../systems/affection';
+import { inTown, MAYOR, townsfolk } from '../systems/mayor';
+import { canGoToday, goToday, TODAY_TOLD_BY } from './todayGo';
+import { PALETTE } from '../sprites/palette';
 import type { Plot } from '../world/Farm';
 import { sellValue } from '../systems/shop';
 import { isBracelet, wear, WRIST_MAX } from '../systems/wardrobe';
@@ -359,6 +369,12 @@ export function sheetApis({
       sound.cue(voiceOf(id, chat.line));
       return chat;
     },
+    reply(id, k) {
+      changed();
+      const chat = world.neighbourhood.reply(id, k);
+      if (chat) sound.cue(voiceOf(id, chat.line));
+      return chat;
+    },
     bag: () => world.bag.spares,
     give(id, item) {
       changed();
@@ -374,39 +390,27 @@ export function sheetApis({
     },
     endTalk: () => world.neighbourhood.endTalk(),
     icon: drawItemIcon,
-    portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
+    // One face for the line (V1's L7): on their bust here, and in the world through `feel`.
+    portrait: (canvas, id, feel) =>
+      drawBust(canvas, id, world.finale.costumeOf(id), feel ?? 'neutral'),
+    feel: (id, feel) => world.neighbourhood.feel(id, feel),
     redOne: drawRedOne,
-    canCrown: (id) => world.finale.canCrown(id),
-    crown(id) {
-      changed();
-      return world.finale.crown(id);
-    },
-    canBake: (id) => world.baking.canBake(id),
-    bake(id) {
-      changed();
-      return world.baking.bake(id);
-    },
-    canLearn: (id) => world.instruments.canLearn(id),
-    learn(id) {
-      changed();
-      return world.instruments.learn(id);
-    },
-    canPhoto: (id) => world.finale.canPhoto(id),
-    photo: () => {
-      world.finale.photo();
-    },
+    actions: (id) => talkActions(world, id, changed),
   };
   const neighbours: NeighboursApi = {
     neighbours: () =>
       VILLAGER_IDS.map((id) => ({
         id,
         hearts: world.friends.hearts(id),
-        where: world.neighbourhood.whereIs(id),
+        // The mayor is only a shape until she has met him (V1's P3b), and nowhere to be found.
+        met: inTown(id),
+        where: inTown(id) ? world.neighbourhood.whereIs(id) : null,
       })),
     today: () => dayKey(world.clock.now()),
     found: (zone) => world.atlas.hasFound(zone),
     seek: (id) => world.seek(id),
-    portrait: (canvas, id) => drawPortrait(canvas, id, world.finale.costumeOf(id)),
+    portrait: (canvas, id) => drawBust(canvas, id, world.finale.costumeOf(id)),
+    shadow: (canvas, id) => drawBust(canvas, id, null, 'neutral', PALETTE.stoneDark),
     icon: drawItemIcon,
     gift(canvas, ware) {
       if ('item' in ware) drawItemIcon(canvas, ware.item);
@@ -431,6 +435,7 @@ export function sheetApis({
     critter: (id) => ({
       caughtOn: world.cabinet.caughtOn(id),
       donated: world.cabinet.isDonated(id),
+      best: world.cabinet.bestOf(id),
       outNow: isAbout(
         id,
         dayKey(world.clock.now()),
@@ -466,11 +471,20 @@ export function sheetApis({
       name: world.pets.nameOf(id),
       wearing: world.pets.wearing(id),
       walking: world.pets.walking === id,
+      level: world.pets.level(id),
+      progress: progressOf(world.pets.points(id)),
+      canTreat: world.petCare.canTreat(id),
     }),
     pat(id) {
       sound.cue(CUES.heart);
+      changed();
       return world.petCare.patPet(id);
     },
+    treat(id) {
+      changed();
+      return world.petCare.treat(id);
+    },
+    trick: (id) => world.petCare.trick(id),
     rename(id, name) {
       changed();
       return world.petCare.rename(id, name);
@@ -497,7 +511,12 @@ export function sheetApis({
   const mystery: MysteryApi = {
     foundOn: (id) => world.casebook.foundOn(id),
     suspects: () => suspectsOf(world.casebook.found),
-    portrait: drawPortrait,
+    portrait: (canvas, id) => drawBust(canvas, id),
+    cleared: (id) => clearedOf(world.casebook.found).includes(id),
+    daysUntil: (id) => world.mystery.daysUntil(id),
+    inChain,
+    ready: () => world.mystery.ready() !== null,
+    mayor: (canvas, seen) => drawBust(canvas, MAYOR, null, 'neutral', seen ? null : PALETTE.ghost),
   };
   const quick: QuickApi = {
     held: () => world.hands.held,
@@ -588,6 +607,15 @@ export function sheetApis({
     },
     icon: drawItemIcon,
     portrait: drawPortrait,
+    // The town's projects (V1's R4).
+    projects: () => world.projects.view(),
+    startProject: (id) => world.projects.start(id)?.map((piece) => FURNITURE[piece].name) ?? null,
+    giveProject(gift) {
+      const given = world.projects.give(gift);
+      if (given) play([given]);
+      return given !== null;
+    },
+    projectPicture: drawProjectPicture,
   };
   const stall: StallApi = {
     stall: () => world.stall.view(),
@@ -618,11 +646,25 @@ export function sheetApis({
   const fair: FairApi = {
     candy: () => world.wallet.candy,
     round: (id) => world.activities.round(id),
-    start: (id) => world.activities.start(id),
-    toss(id, target) {
+    start: (id, slow) => world.activities.start(id, slow),
+    // The games in time (V1's R6b).
+    hold: (id) => world.activities.hold(id),
+    toss(id, at) {
       changed();
-      return world.activities.toss(id, target);
+      return world.activities.toss(id, at);
     },
+    freeToday: (id) => world.activities.freeToday(id),
+    freeGo: () => {
+      const id = world.activities.freeGo();
+      return world.activities.freeToday(id) ? id : null;
+    },
+    stage: (canvas, id, last) =>
+      drawFairGame(canvas, {
+        activity: id,
+        round: world.activities.round(id),
+        last,
+        now: world.clock.now(),
+      }),
     readToday: () => world.activities.readToday,
     readFortune() {
       changed();
@@ -637,7 +679,7 @@ export function sheetApis({
     icon: drawItemIcon,
     reader(canvas) {
       if (world.neighbourhood.neighbour('agatha').zone === 'fortuneTent') {
-        drawPortrait(canvas, 'agatha');
+        drawBust(canvas, 'agatha');
       } else drawFixtureIcon(canvas, 'fortuneTable');
     },
   };
@@ -647,26 +689,42 @@ export function sheetApis({
     comingUp: () => world.calendar.comingUp(),
     mark: drawCalendarMark,
     plain: drawPlainMark,
-    birthdays: () => [...VILLAGER_IDS],
+    birthdays: () => townsfolk(),
     onChange: (listener) => world.events.on('today', listener),
+    // What's up now (V1's R2), and where a line of it takes her.
+    upNow: () => world.upNow.lines(),
+    canGo: (to) => canGoToday(world, to),
+    go: (to) => goToday(world, to),
+    onUpNow: (listener) => {
+      const offs = TODAY_TOLD_BY.map((key) => world.events.on(key, listener));
+      return () => offs.forEach((off) => off());
+    },
   };
   const title: TitleApi = {
-    art: (canvas) => drawTitleScene(canvas, world.wardrobe.look),
+    art: (canvas) => drawTitleScene(canvas, world.wardrobe.look, dayKey(world.clock.now())),
     dedication: DEDICATION,
     festival: () => {
       const { festival } = world.calendar.today();
       if (!festival) return null;
       const row = CALENDAR[festival.id];
-      return { name: `${row.icon} ${row.name}`, countdown: `${countdown(festival)}!` };
+      return { mark: festival.id, name: row.name, countdown: `${countdown(festival)}!` };
     },
   };
   const notes: NotesApi = {
     name: () => world.wardrobe.look.name,
     hasTown: () => world.wardrobe.created,
   };
+  // Cody's list for her first day (V1's R1).
+  const firstDay: FirstDayApi = {
+    open: () => world.firstDay.open,
+    steps: () => world.firstDay.steps(),
+    portrait: (canvas) => drawBust(canvas, 'cody', world.finale.costumeOf('cody')),
+    onChange: (listener) => world.events.on('firstDay', listener),
+  };
   return {
     title,
     notes,
+    firstDay,
     stall,
     barn,
     fair,

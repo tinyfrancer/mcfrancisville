@@ -16,8 +16,12 @@ import {
 import { venueOf } from '../systems/happenings';
 import type { Today } from '../world/services/Calendar';
 import { el, openSheet, PICTURE } from './dom';
+import { glyph, glyphed } from './glyph';
+import type { Glyph } from '../data/glyphs';
 import { fitIcon } from './collection';
 import { countdown } from './messages';
+import type { TodayGo, TodayLine } from '../systems/today';
+import { todayWords } from './todayWords';
 
 /** What the calendar may ask of the game. Like the other sheets, it never reaches the world. */
 export interface CalendarApi {
@@ -33,6 +37,13 @@ export interface CalendarApi {
   plain(canvas: HTMLCanvasElement, mark: 'neighbourBirthday' | 'page'): void;
   /** The neighbours whose birthdays she knows (0.2's U4): everyone in town. */
   birthdays(): VillagerId[];
+  /** What's up now (V1's R2): a line each, read off the world. */
+  upNow(): TodayLine[];
+  /** Whether a line can take her there as things are, and taking her. */
+  canGo(to: TodayGo): boolean;
+  go(to: TodayGo): boolean;
+  /** Called when what's up now may have changed; returns a way to stop. */
+  onUpNow(listener: () => void): () => void;
 }
 
 export const MONTHS = [
@@ -51,10 +62,11 @@ export const MONTHS = [
 ];
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-export const WINDOW_ICON: Record<DayWindow, string> = {
-  morning: '🌅',
-  afternoon: '☀️',
-  evening: '🌙',
+/** Each window of the day's mark (V1's L5): the sun coming up, the sun, the moon. */
+export const WINDOW_GLYPH: Record<DayWindow, Glyph> = {
+  morning: 'morning',
+  afternoon: 'afternoon',
+  evening: 'evening',
 };
 
 const WEATHER_WORDS = { clear: 'clear', rain: 'rainy', fog: 'foggy' } as const;
@@ -89,7 +101,7 @@ function happeningRow(id: CalendarId): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event' },
-    el('span', { className: 'hud-cal-icon' }, row.icon),
+    el('span', { className: 'hud-cal-icon' }, glyph({ mark: id }, 32)),
     el('span', {}, el('strong', {}, row.name), el('small', {}, wordsOf(id).about)),
   );
 }
@@ -100,7 +112,7 @@ function festivalRow(festival: FestivalDay): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event hud-cal-festival' },
-    el('span', { className: 'hud-cal-icon' }, row.icon),
+    el('span', { className: 'hud-cal-icon' }, glyph({ mark: festival.id }, 32)),
     el(
       'span',
       {},
@@ -126,7 +138,7 @@ function gatheringRow(id: HappeningId): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event' },
-    el('span', { className: 'hud-cal-icon' }, row.icon),
+    el('span', { className: 'hud-cal-icon' }, glyph(row.icon, 32)),
     el(
       'span',
       {},
@@ -142,7 +154,7 @@ function birthdayRow(id: VillagerId, today: boolean): HTMLElement {
   return el(
     'div',
     { className: 'hud-cal-event hud-cal-birthday' },
-    el('span', { className: 'hud-cal-icon' }, '🎂'),
+    el('span', { className: 'hud-cal-icon' }, glyph('neighbourCake', 32)),
     el(
       'span',
       {},
@@ -150,6 +162,32 @@ function birthdayRow(id: VillagerId, today: boolean): HTMLElement {
       el('small', {}, today ? 'A gift today would make it.' : 'Something they love would suit.'),
     ),
   );
+}
+
+/**
+ * A line of what's up now (V1's R2): its picture and words, and where it can take her, a button
+ * that sends her off and closes the calendar so she sees herself go.
+ */
+function upNowLine(line: TodayLine, api: CalendarApi, close: () => void): HTMLElement {
+  const words = todayWords(line);
+  const body = [
+    el('span', { className: 'hud-cal-icon' }, glyph(words.glyph, 32)),
+    el('span', {}, el('strong', {}, words.text), el('small', {}, words.small)),
+  ];
+  const item = el('li', { className: 'hud-cal-line' });
+  item.dataset.today = line.kind;
+  const go = line.go && api.canGo(line.go) ? line.go : null;
+  if (!go) {
+    item.append(el('div', { className: 'hud-cal-event' }, ...body));
+    return item;
+  }
+  const button = el('button', { type: 'button', className: 'hud-cal-event hud-cal-go' }, ...body);
+  button.append(el('span', { className: 'hud-cal-go-mark' }, glyph('east')));
+  button.addEventListener('click', () => {
+    if (api.go(go)) close();
+  });
+  item.append(button);
+  return item;
 }
 
 /** The first and last day of a festival, around one of its days. */
@@ -173,7 +211,7 @@ function spanKey(id: FestivalId, day: string): HTMLElement {
     'p',
     { className: 'hud-cal-key' },
     el('span', { className: 'hud-cal-swatch' }),
-    `${row.icon} ${row.name}, ${spanWords(id, day)}`,
+    glyphed({ mark: id }, `${row.name}, ${spanWords(id, day)}`),
   );
 }
 
@@ -194,7 +232,7 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   fitIcon(picture, PICTURE);
   const sheet = openSheet(hud, {
     title: 'Calendar',
-    line: `${longDate(today.day)} · ${WINDOW_ICON[today.window]} ${today.window} · ${WEATHER_WORDS[today.weather]}`,
+    line: `${longDate(today.day)}, the ${today.window}, ${WEATHER_WORDS[today.weather]}`,
     picture,
     tabs: [
       { id: 'today', label: 'Today' },
@@ -207,11 +245,20 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
 
   const todayBox = el('section', { className: 'hud-cal-today' });
   todayBox.append(el('p', {}, windowLine(today.window)));
+  const lines = api.upNow();
+  if (lines.length > 0) {
+    const upNow = el('ul', { className: 'hud-cal-upnow' });
+    upNow.setAttribute('aria-label', 'Up now');
+    for (const line of lines) upNow.append(upNowLine(line, api, () => sheet.close()));
+    todayBox.append(upNow);
+  }
   if (today.festival) todayBox.append(festivalRow(today.festival));
   for (const id of today.happening) todayBox.append(happeningRow(id));
   for (const id of birthdaysOn(today.day, known)) todayBox.append(birthdayRow(id, true));
   for (const id of today.gatherings) todayBox.append(gatheringRow(id));
   for (const shop of today.visitors) {
+    // Up now says so already, with a tap to go (V1's R3).
+    if (lines.some((l) => l.kind === 'peddler' && l.shop === shop)) continue;
     todayBox.append(el('p', {}, `${SHOPS[shop].name} is in town today.`));
   }
   const busy =
@@ -219,7 +266,7 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
     today.visitors.length +
     today.gatherings.length +
     birthdaysOn(today.day, known).length;
-  if (busy === 0 && !today.festival) {
+  if (busy === 0 && !today.festival && lines.length === 0) {
     todayBox.append(el('p', { className: 'hud-cal-quiet' }, 'A quiet day in McFrancisVille.'));
   }
 
@@ -312,26 +359,31 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
   showDetail(api.month(year, month).find((d) => d.day === today.day)!);
 
   // What's on soon, and the birthdays she knows in the month ahead, in the order they come.
-  const soon: { day: string; text: string }[] = api.comingUp().map((day) => ({
-    day: day.day,
-    text: day.happening
-      .map((id) => {
-        const row = CALENDAR[id];
+  const soon: { day: string; what: { mark: Glyph; text: string }[] }[] = api
+    .comingUp()
+    .map((day) => ({
+      day: day.day,
+      what: day.happening.map((id) => {
         const span = day.festivals.find((f) => f === id);
-        return `${row.icon} ${row.name}${span ? `, ${spanWords(span, day.day)}` : ''}`;
-      })
-      .join(', '),
-  }));
+        const text = `${CALENDAR[id].name}${span ? `, ${spanWords(span, day.day)}` : ''}`;
+        return { mark: { mark: id }, text };
+      }),
+    }));
   for (let ahead = 1; ahead <= 31; ahead++) {
     const day = shiftDay(today.day, ahead);
     for (const id of birthdaysOn(day, known)) {
-      soon.push({ day, text: `🎂 ${VILLAGERS[id].name}'s birthday` });
+      soon.push({
+        day,
+        what: [{ mark: 'neighbourCake', text: `${VILLAGERS[id].name}'s birthday` }],
+      });
     }
   }
   soon.sort((a, b) => (a.day < b.day ? -1 : a.day > b.day ? 1 : 0));
   const soonBox = el('section', { className: 'hud-cal-soon' });
-  for (const { day, text } of soon) {
-    soonBox.append(el('p', {}, el('strong', {}, `${shortDate(day)} `), text));
+  for (const { day, what } of soon) {
+    const line = el('p', { className: 'hud-cal-soon-day' }, el('strong', {}, shortDate(day)));
+    what.forEach(({ mark, text }, k) => line.append(k > 0 ? ', ' : ' ', glyphed(mark, text)));
+    soonBox.append(line);
   }
   if (soon.length === 0) {
     soonBox.append(el('p', { className: 'hud-cal-quiet' }, 'Nothing on for a while.'));

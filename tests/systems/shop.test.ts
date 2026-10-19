@@ -1,3 +1,4 @@
+import { FIRST_DAY } from '../../src/data/firstDay';
 import { FIGURINE_IDS } from '../../src/data/figurines';
 import { FINALE_LETTER } from '../../src/data/finale';
 import { HOLIDAY_LETTERS } from '../../src/data/holidays';
@@ -232,6 +233,8 @@ describe('the day’s stock', () => {
         ...MUSEUM_LETTERS.map((l) => l.gift),
         ...Object.values(MILESTONES).map((m) => m.gift),
         ...(FINALE_LETTER.gift ? [FINALE_LETTER.gift] : []),
+        // Cody's keepsake for her first day (V1's R1).
+        { furniture: FIRST_DAY.keepsake },
       ].flatMap((w) => ('furniture' in w ? [w.furniture] : [])),
     );
     for (const id of Object.keys(FURNITURE) as FurnitureId[]) {
@@ -289,6 +292,12 @@ describe('selling', () => {
       'hallKey',
       'ringTossRosette',
       'plushGhost',
+      // The rare events' keepsakes (V1's R3).
+      'starShard',
+      'stallPennant',
+      'wayfarerPostcard',
+      'snowflakeCharm',
+      'finderRosette',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));

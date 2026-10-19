@@ -15,13 +15,17 @@ import { fromSave, World } from '../../src/world/World';
  * what her phone holds as 0.3 lands); 0.3's was played over three days in a dev build (Boo Acres
  * and the greenhouse planted, both rooms and the yard decorated, things on tables and on show, the
  * chest holding things, friends at every band with Scarah, fossils and crawlies given to the
- * museum, a figurine carved, the week's set bought, an order on its way).
+ * museum, a figurine carved, the week's set bought, an order on its way). 1.0's was played over
+ * four days by real taps in a dev build, a new town from its title (Cody's first-day list done,
+ * the bandstand started, a ghost minnow measured, Fibi fond to her first level, Wrapunzel's first
+ * story told, Cody's question and his "how was your day?" answered, the wandering stall seen).
  */
 const LIVED_IN = {
   '0.2.2': 'lived-in-v27.json',
   '0.2.3': 'lived-in-v31.json',
   '0.2.5': 'lived-in-v34.json',
   '0.3': 'lived-in-v43.json',
+  '1.0': 'lived-in-v53.json',
 };
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
@@ -42,6 +46,12 @@ const ADDED: Record<string, readonly string[]> = {
   candyTree: ['saplings'],
   stall: ['shelves'],
   home: ['items'],
+  // V1's P3a: the day the chain began, and Wes.
+  mystery: ['began', 'wes'],
+  // V1's R6a: the biggest of each fish she has landed.
+  cabinet: ['best'],
+  // V1's R6c: how fond each pet has grown of her.
+  pets: ['affection'],
 };
 
 /**
@@ -88,8 +98,9 @@ describe('a lived-in save from her phone', () => {
       const old = JSON.parse(readFileSync(join(FIXTURES, file), 'utf8'));
       const migrated = migrateSave(structuredClone(old));
       expect(migrated?.version).toBe(SAVE_VERSION);
-      // Opened again no sooner than she put it down, so what she took that window is still taken.
-      const clock = new FakeClock(new Date(Math.max(+new Date(2026, 9, 1, 15), old.lastPlayedAt)));
+      // Opened again just as she put it down, so what she took that window is still taken (1.0's
+      // was played in September, before the 1 October the older ones were once opened on).
+      const clock = new FakeClock(new Date(old.lastPlayedAt));
       const saved = new World({ clock, ...fromSave(migrated) }).save() as Record<string, unknown>;
 
       for (const key of Object.keys(old)) {

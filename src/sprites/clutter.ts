@@ -434,11 +434,217 @@ function twigs(s: Sketch, rand: () => number): void {
     .set(x + 1, y - 2, 't');
 }
 
+// ---- More on the ground (V1's L2) ----------------------------------------------------------------
+
+/** A place in a tile for a little thing, kept clear of its edge by `margin`. */
+function spot(rand: () => number, margin = 5): [number, number] {
+  return [
+    margin + Math.floor(rand() * (32 - margin * 2)),
+    margin + Math.floor(rand() * (32 - margin * 2)),
+  ];
+}
+
+/** Clover: a few three-leafed sprigs low in the grass, and now and then its little white head. */
+function clover(s: Sketch, rand: () => number): void {
+  for (let i = 0; i < 9; i++) {
+    const [x, y] = spot(rand);
+    s.rect(x - 1, y - 1, 2, 2, 'v')
+      .rect(x + 1, y - 1, 2, 2, 'v')
+      .rect(x, y + 1, 2, 2, 'v');
+    s.set(x - 1, y - 1, 'V')
+      .set(x + 1, y - 1, 'V')
+      .set(x, y + 1, 'V');
+    s.set(x + 1, y + 3, 'q');
+  }
+  if (rand() < 0.6) {
+    const [x, y] = spot(rand, 7);
+    s.rect(x, y, 3, 2, 'F')
+      .set(x + 1, y - 1, 'F')
+      .set(x + 2, y + 1, 'l')
+      .set(x + 1, y + 2, 'q');
+  }
+}
+
+/** A toadstool a few pixels high: a cap lit on its left over a pale stem. */
+function tinyToadstool(s: Sketch, x: number, y: number, cap: 'h' | 'r'): void {
+  s.rect(x, y, 1, 2, 'm');
+  s.rect(x - 1, y - 1, 3, 1, cap).set(x - 1, y - 1, cap === 'h' ? 'H' : 'R');
+  s.set(x, y - 2, cap);
+}
+
+/** A ring of little toadstools come up overnight, half round, their caps a warm tan. */
+function mushroomRing(s: Sketch, rand: () => number): void {
+  const cx = 14 + Math.floor(rand() * 4);
+  const cy = 15 + Math.floor(rand() * 3);
+  const from = rand() * Math.PI;
+  for (let i = 0; i < 6; i++) {
+    const a = from + (i / 6) * Math.PI * 1.3;
+    tinyToadstool(s, Math.round(cx + Math.cos(a) * 9), Math.round(cy + Math.sin(a) * 7), 'h');
+  }
+  tinyToadstool(s, cx, cy, 'r');
+}
+
+/**
+ * Leaves blown into a drift on the open lawn: a heap of them deeper in the middle, in the trees'
+ * autumn colours, with a shadow tucked under its front.
+ */
+function leafDrift(s: Sketch, rand: () => number): void {
+  const keys = ['a', 'b', 'c', 'd'];
+  const cx = 14 + Math.floor(rand() * 4);
+  const cy = 16 + Math.floor(rand() * 3);
+  s.ellipse(cx, cy + 3, 10, 2, 'Q');
+  for (let i = 0; i < 22; i++) {
+    const t = rand() * 2 - 1;
+    const x = Math.round(cx + t * 10);
+    const y = Math.round(cy + (rand() * 2 - 1) * (4 - Math.abs(t) * 3));
+    const key = keys[Math.floor(rand() * keys.length)]!;
+    s.rect(x, y, 3, 2, key).set(x + 1, y - 1, key);
+    if (rand() < 0.4) s.set(x + 2, y + 1, 'e');
+  }
+}
+
+/** A muddy puddle left on a track: a brown rim round water holding the sky, a glint on it. */
+function puddle(s: Sketch, rand: () => number): void {
+  const [x, y] = spot(rand, 10);
+  const rx = 6 + Math.floor(rand() * 3);
+  s.ellipse(x, y, rx + 1, 3.5, 'x');
+  s.ellipse(x, y, rx, 2.5, 'w');
+  s.rect(x - rx + 2, y - 1, 3, 1, 'W').set(x + 2, y + 1, 'W');
+  s.rect(x - rx, y + 3, rx * 2, 1, 'k');
+}
+
+/** Acorns fallen under the oaks: brown nuts in their knobbly caps, one still on its twig. */
+function acorns(s: Sketch, rand: () => number): void {
+  for (let i = 0; i < 4; i++) {
+    const [x, y] = spot(rand);
+    s.rect(x, y, 3, 3, 'n')
+      .set(x + 1, y + 3, 'n')
+      .set(x, y, 'N');
+    s.rect(x - 1, y - 1, 5, 1, 'j')
+      .rect(x, y - 2, 3, 1, 'j')
+      .set(x + 1, y - 3, 't');
+  }
+}
+
+/** Pinecones under the conifers: each a stack of scales, lit on its left. */
+function pinecones(s: Sketch, rand: () => number): void {
+  for (let i = 0; i < 3; i++) {
+    const [x, y] = spot(rand, 6);
+    for (let j = 0; j < 5; j++) {
+      const w = j === 0 || j === 4 ? 2 : 3;
+      s.rect(x + (j === 4 ? 1 : 0), y + j, w, 1, j % 2 === 0 ? 't' : 'n');
+    }
+    s.set(x, y + 1, 'N')
+      .set(x, y + 3, 'N')
+      .set(x + 1, y + 5, 'q')
+      .set(x + 2, y + 5, 'q');
+  }
+}
+
+/** A daisy: white petals round a yellow eye, four pixels across. */
+function daisy(s: Sketch, x: number, y: number): void {
+  s.set(x, y - 1, 'F')
+    .set(x - 1, y, 'F')
+    .set(x + 1, y, 'F')
+    .set(x, y + 1, 'l');
+  s.set(x - 1, y - 1, 'F').set(x + 1, y + 1, 'l');
+  s.set(x, y, 'y');
+}
+
+/** Daisies in the grass, a few together. */
+function daisies(s: Sketch, rand: () => number): void {
+  for (let i = 0; i < 7; i++) {
+    const [x, y] = spot(rand, 4);
+    s.set(x, y + 2, 'v').set(x - 1, y + 3, 'v');
+    daisy(s, x, y);
+  }
+}
+
+/** A molehill: a little mound of fresh crumbly earth, lit on top, its crumbs about it. */
+function molehill(s: Sketch, rand: () => number): void {
+  const x = 13 + Math.floor(rand() * 6);
+  const y = 16 + Math.floor(rand() * 4);
+  s.ellipse(x, y + 2, 8, 3.5, 'k');
+  s.ellipse(x, y, 7, 4, 'x');
+  s.ellipse(x - 1, y - 2, 4, 2, 'X');
+  for (let i = 0; i < 6; i++) {
+    const a = rand() * Math.PI * 2;
+    s.set(Math.round(x + Math.cos(a) * 10), Math.round(y + 2 + Math.sin(a) * 5), 'x');
+  }
+}
+
+/** Dandelion clocks gone to seed: round white puffs on thin stems, and one still yellow. */
+function dandelions(s: Sketch, rand: () => number): void {
+  for (let i = 0; i < 3; i++) {
+    const [x, y] = spot(rand, 6);
+    s.rect(x, y + 2, 1, 4, 'v');
+    s.ellipse(x, y, 2.5, 2.5, 'l');
+    s.set(x - 1, y - 1, 'F')
+      .set(x, y - 2, 'F')
+      .set(x - 2, y, 'F')
+      .set(x, y, 'F');
+    s.set(x + 1, y + 1, 'q').set(x + 1, y - 1, 'F');
+  }
+  const [x, y] = spot(rand, 6);
+  s.rect(x, y + 1, 1, 3, 'v');
+  s.rect(x - 1, y - 1, 3, 2, 'y')
+    .set(x, y - 2, 'y')
+    .set(x - 1, y - 1, 'o');
+}
+
+/**
+ * A fairy ring: a whole circle of tiny pale toadstools on a ring of darker grass, as if someone
+ * danced there in the night.
+ */
+function fairyRing(s: Sketch, rand: () => number): void {
+  const cx = 16;
+  const cy = 16;
+  for (let a = 0; a < Math.PI * 2; a += 0.05) {
+    s.set(Math.round(cx + Math.cos(a) * 11), Math.round(cy + Math.sin(a) * 9), 'Q');
+  }
+  const from = rand();
+  for (let i = 0; i < 9; i++) {
+    const a = ((i + from) / 9) * Math.PI * 2;
+    const x = Math.round(cx + Math.cos(a) * 11);
+    const y = Math.round(cy + Math.sin(a) * 9);
+    s.rect(x, y - 1, 1, 2, 'm')
+      .rect(x - 1, y - 2, 3, 1, 'l')
+      .set(x - 1, y - 2, 'F');
+  }
+}
+
+/** The ground's ten more (V1's L2), each in two or three looks. */
+const MORE_DECAL_ART: Record<
+  | 'clover'
+  | 'mushroomRing'
+  | 'leafDrift'
+  | 'puddle'
+  | 'acorns'
+  | 'pinecones'
+  | 'daisies'
+  | 'molehill'
+  | 'dandelions'
+  | 'fairyRing',
+  readonly SpriteSource[]
+> = {
+  clover: [11, 12, 13].map((seed) => decal(clover, seed)),
+  mushroomRing: [14, 15].map((seed) => decal(mushroomRing, seed)),
+  leafDrift: [16, 17].map((seed) => decal(leafDrift, seed)),
+  puddle: [18, 19].map((seed) => decal(puddle, seed)),
+  acorns: [20, 21].map((seed) => decal(acorns, seed)),
+  pinecones: [22, 23].map((seed) => decal(pinecones, seed)),
+  daisies: [24, 25, 26].map((seed) => decal(daisies, seed)),
+  molehill: [27, 28].map((seed) => decal(molehill, seed)),
+  dandelions: [29, 30].map((seed) => decal(dandelions, seed)),
+  fairyRing: [31, 32].map((seed) => decal(fairyRing, seed)),
+};
+
 export const DECAL_ART: Record<DecalId, readonly SpriteSource[]> = {
   leaves: [1, 2, 3].map((seed) => decal(fallenLeaves, seed)),
   pebbles: [4, 5].map((seed) => decal(pebbles, seed)),
   lilyPad: [decal((s, r) => lilyPad(s, r, false), 6), decal((s, r) => lilyPad(s, r, true), 7)],
   twigs: [8, 9].map((seed) => decal(twigs, seed)),
+  ...MORE_DECAL_ART,
 };
 
 /** The colours every decal is painted from; each uses a few. */
@@ -461,4 +667,22 @@ export const DECAL_PALETTE: Palette = {
   t: C.bark,
   n: C.wood,
   N: ramp(C.wood)[3]!,
+  // V1's L2: clover's greens, a toadstool's tan cap and pale stem, a red one, mud and a puddle's
+  // water and glint, earth, an acorn's cap, a dandelion's fluff and its gold.
+  v: mix(C.leafDark, C.moss, 0.3),
+  V: C.leaf,
+  h: mix(C.rope, C.wood, 0.4),
+  H: C.rope,
+  m: C.cream,
+  r: C.toadstool,
+  R: mix(C.toadstool, C.white, 0.35),
+  x: C.soil,
+  X: C.soilLight,
+  k: C.soilDark,
+  w: C.puddle,
+  W: C.puddleShine,
+  j: ramp(C.wood)[1]!,
+  l: C.creamShade,
+  o: C.goldShade,
+  Q: C.grassShade,
 };

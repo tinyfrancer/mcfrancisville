@@ -30,15 +30,20 @@ import type { VisitsSnapshot } from '../world/services/Visits';
 import type { CandyTreeSnapshot } from '../world/services/CandyTree';
 import type { StallSnapshot } from '../systems/passive';
 import type { Meals } from '../systems/cooking';
+import { isFondness } from '../systems/affection';
 import { FIRST_BROOM } from '../data/broom';
 import type { TuneId } from '../data/instruments';
 import type { Order } from '../systems/catalogue';
+import type { LatelySnapshot } from '../world/Lately';
+import type { JoinedSnapshot } from '../systems/joining';
+import type { FirstDaySnapshot } from '../world/services/FirstDay';
+import type { WorksSnapshot } from '../world/Works';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 43;
+export const SAVE_VERSION = 53;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -117,7 +122,8 @@ export interface SaveState {
   /**
    * Her friendship with each neighbour she has met: its points, and the day of the last talk, gift
    * and favour. A villager id is only checked to be a string; the town leaves out any it
-   * doesn't know.
+   * doesn't know. What they remember of her (save v44) and what they've asked and told her
+   * (`answered`, `moments`, save v45, V1's P2) are optional.
    */
   friends: Partial<Record<VillagerId, Friendship>>;
   /** The letters in her mailbox, by id, the day each came, and whether she has opened it. */
@@ -136,7 +142,9 @@ export interface SaveState {
   pets: PetsSnapshot;
   /**
    * The mayor's mystery: the day each clue was pinned to her corkboard. Ids are only checked
-   * to be strings; the casebook leaves out any it doesn't know.
+   * to be strings; the casebook leaves out any it doesn't know. Since V1's P3a (save v46), the
+   * day this build first saw her town (`began`, null until then) and Wes: how many times he ran,
+   * the days she has chatted with him and the last.
    */
   mystery: MysterySnapshot;
   /**
@@ -225,6 +233,28 @@ export interface SaveState {
   ever: string[];
   /** What she has ordered from the catalogue, by its key and the day she ordered it (save v41). */
   orders: Order[];
+  /**
+   * What she has done lately that her neighbours remember (save v44, V1's P1): the last piece
+   * placed, crop picked and thing given the museum, each with its day. One this build doesn't
+   * know is forgotten.
+   */
+  lately: LatelySnapshot;
+  /**
+   * What she did at each of her neighbours' happenings last time (save v48, V1's P4): the day,
+   * and her pick's id, by happening, which the host remembers. One this build doesn't know is
+   * forgotten.
+   */
+  happenings: JoinedSnapshot;
+  /**
+   * Her first day's steps done, and whether it's over (save v50, V1's R1). An old town's is over
+   * from the start. A step this build doesn't know is forgotten.
+   */
+  firstDay: FirstDaySnapshot;
+  /**
+   * The town's projects (save v51, V1's R4): the one she's funding, what she has given each by
+   * Candy and by thing, and those built. One this build doesn't know is let go.
+   */
+  projects: WorksSnapshot;
 }
 
 export function newSave(
@@ -253,9 +283,9 @@ export function newSave(
     recipes: [],
     friends: {},
     mail: [],
-    cabinet: { caught: {}, donated: [] },
+    cabinet: { caught: {}, donated: [], best: {} },
     pets: structuredClone(STARTER_PETS),
-    mystery: { clues: {} },
+    mystery: { clues: {}, began: null, wes: { glimpses: 0, chats: 0, talked: null } },
     atlas: { found: ['town', 'home'], opened: [] },
     porch: { plant: 'mums' },
     keepsakes: [],
@@ -274,6 +304,10 @@ export function newSave(
     yard: { placed: [] },
     ever: [],
     orders: [],
+    lately: { placed: null, harvested: null, donated: null, herDay: null, told: [] },
+    happenings: {},
+    firstDay: { done: [], over: false },
+    projects: { current: null, given: {}, built: [] },
   };
 }
 
@@ -448,7 +482,14 @@ function isFriendsShape(value: unknown): boolean {
       dayOrNull(f.talked) &&
       dayOrNull(f.gifted) &&
       dayOrNull(f.favour) &&
-      (f.wears === undefined || typeof f.wears === 'string')
+      (f.wears === undefined || typeof f.wears === 'string') &&
+      // What they remember of her (save v44): checked for shape, repaired by `Friends`.
+      (f.gave === undefined || typeof f.gave === 'string') &&
+      (f.spoke === undefined || typeof f.spoke === 'number') &&
+      (f.opened === undefined || Array.isArray(f.opened)) &&
+      // What they've asked and told her (save v45): checked for shape, repaired by `Friends`.
+      (f.answered === undefined || typeof f.answered === 'string') &&
+      (f.moments === undefined || Array.isArray(f.moments))
     );
   });
 }
@@ -472,7 +513,11 @@ function isCabinetShape(value: unknown): boolean {
     c.caught !== null &&
     !Array.isArray(c.caught) &&
     Object.values(c.caught).every((day) => typeof day === 'string') &&
-    isStringList(c.donated)
+    isStringList(c.donated) &&
+    typeof c.best === 'object' &&
+    c.best !== null &&
+    !Array.isArray(c.best) &&
+    Object.values(c.best).every((size) => typeof size === 'number')
   );
 }
 
@@ -495,7 +540,12 @@ function isPetsShape(value: unknown): boolean {
     isStringList(p.accessories) &&
     Number.isInteger(p.bones) &&
     (p.bones as number) >= 0 &&
-    dayOrNull(p.happy)
+    dayOrNull(p.happy) &&
+    // V1's R6c: each pet's fondness, a pet this build doesn't know kept as it is.
+    typeof p.affection === 'object' &&
+    p.affection !== null &&
+    !Array.isArray(p.affection) &&
+    Object.values(p.affection).every(isFondness)
   );
 }
 
@@ -557,6 +607,20 @@ function isVisitsShape(value: unknown): boolean {
   return Number.isInteger(v.count) && (v.count as number) >= 0 && typeof v.last === 'string';
 }
 
+/** The mystery's chain and Wes (V1's P3a, save v46): a day or null, and Wes's counts. */
+function isMysteryMore(m: Record<string, unknown>): boolean {
+  const wes = m.wes as Record<string, unknown> | null;
+  const count = (n: unknown) => Number.isInteger(n) && (n as number) >= 0;
+  return (
+    (m.began === null || typeof m.began === 'string') &&
+    typeof wes === 'object' &&
+    wes !== null &&
+    count(wes.glimpses) &&
+    count(wes.chats) &&
+    (wes.talked === null || typeof wes.talked === 'string')
+  );
+}
+
 /** The shape check a save must pass after migrating, before the game will stand her in it. */
 export function isSaveState(value: unknown): value is SaveState {
   if (typeof value !== 'object' || value === null) return false;
@@ -595,6 +659,7 @@ export function isSaveState(value: unknown): value is SaveState {
     typeof s.mystery === 'object' &&
     s.mystery !== null &&
     isStringRecord((s.mystery as Record<string, unknown>).clues) &&
+    isMysteryMore(s.mystery as Record<string, unknown>) &&
     typeof s.atlas === 'object' &&
     s.atlas !== null &&
     isStringList((s.atlas as Record<string, unknown>).found) &&
@@ -617,8 +682,80 @@ export function isSaveState(value: unknown): value is SaveState {
     isStringList(s.tunes) &&
     isYardShape(s.yard) &&
     isStringList(s.ever) &&
-    isOrdersShape(s.orders)
+    isOrdersShape(s.orders) &&
+    isLatelyShape(s.lately) &&
+    isJoinedShape(s.happenings) &&
+    isFirstDayShape(s.firstDay) &&
+    isProjectsShape(s.projects)
   );
+}
+
+/**
+ * The town's projects (save v51): the current one null or a string, what's given to each as Candy
+ * and counts, and those built. Ids are checked by `Works`, which lets go of one it doesn't know.
+ */
+function isProjectsShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const given = v.given;
+  return (
+    (v.current === null || typeof v.current === 'string') &&
+    isStringList(v.built) &&
+    typeof given === 'object' &&
+    given !== null &&
+    !Array.isArray(given) &&
+    Object.values(given).every((g) => {
+      if (typeof g !== 'object' || g === null) return false;
+      const { candy, items } = g as Record<string, unknown>;
+      return (
+        typeof candy === 'number' &&
+        typeof items === 'object' &&
+        items !== null &&
+        !Array.isArray(items) &&
+        Object.values(items).every((n) => typeof n === 'number')
+      );
+    })
+  );
+}
+
+/** What she has done lately (save v44): each last thing null, or an id and its day. */
+function isLatelyShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  const last = (key: string, id: string) => {
+    const done = v[key];
+    if (done === null) return true;
+    if (typeof done !== 'object' || done === undefined) return false;
+    const d = done as Record<string, unknown>;
+    return typeof d[id] === 'string' && typeof d.day === 'string';
+  };
+  // What she told Cody, and the scenes he has told (save v49, V1's P5).
+  const told = isStringList(v.told);
+  const herDay = last('herDay', 'answer');
+  return (
+    last('placed', 'piece') &&
+    last('harvested', 'crop') &&
+    last('donated', 'thing') &&
+    herDay &&
+    told
+  );
+}
+
+/** Her first day (save v50): the steps done, and whether it's over. */
+function isFirstDayShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const v = value as Record<string, unknown>;
+  return isStringList(v.done) && typeof v.over === 'boolean';
+}
+
+/** What she did at their happenings (save v48): by happening, a day and maybe a pick. */
+function isJoinedShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
+  return Object.values(value).every((j) => {
+    if (typeof j !== 'object' || j === null) return false;
+    const r = j as Record<string, unknown>;
+    return typeof r.on === 'string' && (r.choice === undefined || typeof r.choice === 'string');
+  });
 }
 
 /** Ollie's round (0.3's S1): each order's ware key and the day it was ordered. */

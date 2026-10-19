@@ -61,6 +61,16 @@ const SCARAH_FIXTURES: Record<Extract<FixtureId, 'seedDrawers'>, FixtureRow> = {
   },
 };
 
+/** Rob Boo's own (V1's P3b), in his office at the town hall. */
+const ROB_BOO_FIXTURES: Record<Extract<FixtureId, 'mayorsDesk'>, FixtureRow> = {
+  mayorsDesk: {
+    name: "The mayor's desk",
+    layer: 'floor',
+    size: { w: 3, h: 1 },
+    says: 'A great desk piled with letters, a typewriter with a sticky W, and a rubber stamp worn smooth with use. Everything on it says APPROVED.',
+  },
+};
+
 /**
  * What stands in the town's buildings for good (phase H): the counters, shelves and chairs the
  * shops and the salon are run from, the museum's cases, and a piece in each neighbour's house that
@@ -139,6 +149,8 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     layer: 'floor',
     size: { w: 2, h: 1 },
     says: 'Roses, moonflowers and forget-me-boos, sorted by colour with enormous, careful paws.',
+    // His job, seen (V1's P4): his buckets are a shop, an honesty jar beside them.
+    opens: { shop: 'flowers' },
   },
   bigCauldron: {
     name: 'Great cauldron',
@@ -252,6 +264,7 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
   },
   ...GREENHOUSE_FIXTURES,
   ...SCARAH_FIXTURES,
+  ...ROB_BOO_FIXTURES,
 };
 
 /**
@@ -371,6 +384,37 @@ const SCARAH_FARMHOUSE: InteriorRow = {
     { id: 'pumpkinPile', tx: 0, ty: 8, turn: 0 },
     { id: 'flowerPots', tx: 8, ty: 7, turn: 0 },
     { id: 'wallShelf', tx: 6, ty: 1, turn: 0 },
+  ],
+};
+
+/**
+ * The mayor's office in the town hall (V1's P3b): his desk against the back wall, a portrait and
+ * candles over it, a rug, and his keepsakes, the hat stand by the door and the ballot box.
+ */
+const MAYORS_OFFICE: InteriorRow = {
+  building: 'townHall',
+  owner: 'robBoo',
+  width: 9,
+  floorRows: 5,
+  wallpaper: 'goldDamask',
+  flooring: 'oakBoards',
+  stands: [
+    { tx: 5, ty: 3 },
+    { tx: 6, ty: 5 },
+    { tx: 2, ty: 6 },
+  ],
+  welcome:
+    "The mayor's office at the town hall. A great desk, a hat stand with three top hats on it, and a chair that's ever so slightly see-through.",
+  fixtures: [{ id: 'mayorsDesk', tx: 2, ty: 3 }],
+  furniture: [
+    { id: 'topHatStand', tx: 0, ty: 3, turn: 0, keepsake: FIRST },
+    { id: 'ballotBox', tx: 8, ty: 3, turn: 0, keepsake: SECOND },
+    { id: 'floatingCandles', tx: 1, ty: 1, turn: 0 },
+    { id: 'catPortrait', tx: 6, ty: 1, turn: 0 },
+    { id: 'floatingCandles', tx: 7, ty: 1, turn: 0 },
+    { id: 'moonRug', tx: 3, ty: 5, turn: 0 },
+    { id: 'candelabra', tx: 8, ty: 6, turn: 0 },
+    { id: 'monstera', tx: 0, ty: 7, turn: 0 },
   ],
 };
 
@@ -773,6 +817,17 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { tx: 3, ty: 5 },
       { tx: 6, ty: 6 },
       { tx: 9, ty: 7 },
+      // The rest of the town, in rows before the mayor, for his hello (V1's P3b).
+      { tx: 4, ty: 7 },
+      { tx: 8, ty: 7 },
+      { tx: 12, ty: 7 },
+      { tx: 10, ty: 7 },
+      { tx: 3, ty: 8 },
+      { tx: 5, ty: 8 },
+      { tx: 7, ty: 8 },
+      { tx: 9, ty: 8 },
+      { tx: 11, ty: 8 },
+      { tx: 1, ty: 8 },
     ],
     welcome:
       "Castle Mac-A-Boo's great hall, all candlelight and roses, set just so for an anniversary. Yours.",
@@ -797,6 +852,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
   },
   greenhouse: GREENHOUSE,
   scarahFarmhouse: SCARAH_FARMHOUSE,
+  mayorsOffice: MAYORS_OFFICE,
 };
 
 export const INTERIOR_IDS = Object.keys(INTERIORS) as InteriorId[];

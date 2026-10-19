@@ -6,6 +6,7 @@ import type { MapZoneId, TileId, ZoneId } from '../../types/ids';
 import type { Decorations } from './Decorations';
 import type { Lots } from './Lots';
 import type { Mounds } from './Mounds';
+import type { Sites } from './Sites';
 import type { Stalls } from './Stalls';
 import type { Yard } from '../Yard';
 import { footprint } from '../../systems/decor';
@@ -35,6 +36,8 @@ export class MapZone implements Zone {
   readonly yard: Yard | null;
   /** The day's mound (0.3's C1), solid like any. */
   readonly mounds: Mounds | null;
+  /** The town's projects going up here (V1's R4). */
+  readonly sites: Sites | null;
 
   constructor(
     id: MapZoneId,
@@ -46,8 +49,10 @@ export class MapZone implements Zone {
     rowsBuilt: () => number = () => 0,
     yard: Yard | null = null,
     mounds: Mounds | null = null,
+    sites: Sites | null = null,
   ) {
     this.id = id;
+    this.sites = sites?.any ? sites : null;
     this.mounds = mounds;
     this.yard = yard?.exists ? yard : null;
     this.rowsBuilt = rowsBuilt;
@@ -111,7 +116,9 @@ export class MapZone implements Zone {
     this.decorations?.propAt(tx, ty) === undefined &&
     !this.isBuiltPlot(tx, ty) &&
     !this.yard?.blocks(tx, ty) &&
-    !covers(this.mounds?.today(), tx, ty);
+    !covers(this.mounds?.today(), tx, ty) &&
+    this.sites?.propAt(tx, ty) === undefined &&
+    !this.sites?.isBed(tx, ty);
 
   /** Whether a tile kept for the farm is a bed now, its row built (0.2's N1). */
   isBuiltPlot(tx: number, ty: number): boolean {
@@ -127,6 +134,8 @@ export class MapZone implements Zone {
       const tx = i % map.width;
       const ty = Math.floor(i / map.width);
       if (this.isBuiltPlot(tx, ty)) return 'bed';
+      // A built project's planters are beds (V1's R4); the footbridge is drawn over the ice.
+      if (this.sites?.isBed(tx, ty)) return 'bed';
       return this.isIce(tx, ty) ? 'ice' : t;
     });
   }
@@ -142,13 +151,15 @@ export class MapZone implements Zone {
    * skates (phase B1), so the way on to Lantern Shore reads the same as the way it opens.
    */
   slippery = (tx: number, ty: number): boolean =>
-    tileAt(this.map, tx, ty) === 'ice' || this.isIce(tx, ty);
+    (tileAt(this.map, tx, ty) === 'ice' || this.isIce(tx, ty)) && !this.sites?.isDeck(tx, ty);
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
     const onLot = this.lots?.propAt(tx, ty);
     if (onLot) return onLot;
     const decoration = this.decorations?.propAt(tx, ty);
     if (decoration) return decoration;
+    const site = this.sites?.propAt(tx, ty);
+    if (site) return site;
     const popUp = this.stalls?.popUp();
     if (covers(popUp, tx, ty)) return popUp!;
     const cart = this.stalls?.moonPieCart();
@@ -178,6 +189,12 @@ export class MapZone implements Zone {
       door && (this.map.props.find((p) => p.id === door.prop) ?? this.lots?.house(door.prop));
     if (building) return { tile: doorStep(building), facing: 'down' };
     return { tile: this.map.spawn, facing: 'down' };
+  }
+
+  /** The building here whose door goes into `inside`, if one does (V1's R2). */
+  buildingOf(inside: ZoneId): PlacedProp | undefined {
+    const door = this.map.doors.find((d) => d.to === inside);
+    return door && (this.map.props.find((p) => p.id === door.prop) ?? this.lots?.house(door.prop));
   }
 
   doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null {

@@ -3,9 +3,24 @@
  * everywhere it has to be answered.
  */
 export type TileId =
-  'grass' | 'path' | 'water' | 'hedge' | 'bed' | 'cliff' | 'steps' | 'ice' | 'boards';
+  | 'grass'
+  | 'path'
+  | 'water'
+  | 'hedge'
+  | 'bed'
+  | 'cliff'
+  | 'steps'
+  | 'ice'
+  | 'boards'
+  // V1's L2: a dirt track, gravel, a meadow and long grass.
+  | 'dirt'
+  | 'gravel'
+  | 'meadow'
+  | 'longGrass';
 
 export type PropId =
+  // The wandering stall, in town for a week now and then (V1's R3).
+  | 'wanderingStall'
   | 'tree'
   | 'rock'
   | 'pumpkin'
@@ -93,6 +108,9 @@ export type PropId =
   | 'ringTossStall'
   | 'cornDogStall'
   | 'hookAGhostStall'
+  // The duck pond and the strength bell (V1's R6b).
+  | 'duckPondStall'
+  | 'strengthBellStall'
   | 'toffeeAppleStall'
   // Market day's table at the fairground (0.2's M3).
   | 'marketStall'
@@ -109,7 +127,21 @@ export type PropId =
   | 'appleTree'
   | 'pearTree'
   | 'plumTree'
-  | 'persimmonTree';
+  | 'persimmonTree'
+  // The town hall by the square (V1's P3b), Rob Boo's, on a lot of its own.
+  | 'townHall'
+  // The town's projects going up (V1's R4): the posts, each one's frame, and what's built.
+  | 'sitePost'
+  | 'bandstandFrame'
+  | 'bandstand'
+  | 'bedFrame'
+  | 'planks'
+  | 'flowerBed'
+  | 'gardenSeat'
+  | 'bridgeFrame'
+  | 'footbridge'
+  | 'greenhouseFrame'
+  | 'herGreenhouse';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -220,6 +252,7 @@ export type ItemId =
   | 'booBao'
   | 'xiaoLongBoo'
   | 'batGyoza'
+  | FairPrizeId
   | DollId
   | 'recordGhoulyParton'
   | 'recordLadyGhoulga'
@@ -279,6 +312,8 @@ export type ItemId =
   | 'toffeeApple'
   | 'ringTossRosette'
   | 'plushGhost'
+  // A keepsake the first time each rare event comes (V1's R3).
+  | RareKeepsakeId
   | DishId
   | FruitId
   | CritterId
@@ -446,7 +481,12 @@ export type WorkId =
   | 'conducting'
   | 'reading'
   | 'stirring'
-  | 'coffee';
+  | 'coffee'
+  // V1's L4: on the frozen pond in winter (`data/skating.ts`).
+  | 'skating'
+  // V1's P4: Wrapunzel at her mixing bowl, the mayor at his stamp.
+  | 'baking'
+  | 'stamping';
 
 /** Her look (phase 3). A body choice is made in the creator; hair changes at the Muse Salon. */
 export type SkinId = 'porcelain' | 'peach' | 'honey' | 'bronze' | 'umber' | 'ghostly' | 'minty';
@@ -641,7 +681,9 @@ export type OutfitId =
   | 'mummyWraps'
   | 'devilHorns'
   // Scarah's straw hat, the twin of hers (0.3's F3).
-  | 'scarahHat';
+  | 'scarahHat'
+  // Rob Boo's top hat, the twin of his (V1's P3b).
+  | 'mayorHat';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
@@ -672,7 +714,11 @@ export type ShopId =
   // Boo Acres' seed cart (0.3's F2): every seed, every day.
   | 'seeds'
   // Gourdon's workshop (0.3's S2), at his carpenter's bench.
-  | 'workshop';
+  | 'workshop'
+  // Rufus's flower buckets (V1's P4).
+  | 'flowers'
+  // The wandering stall's (V1's R3), in town for a week now and then.
+  | 'wandering';
 
 /**
  * Furniture for her home (phase 7): pieces that stand on the floor, rugs that lie on it, and
@@ -836,6 +882,8 @@ export type FurnitureId =
   | YardPiece
   // Scarah's (0.3's F3): her keepsakes, and the straw friend she teaches her to make.
   | ScarahPiece
+  // Rob Boo's (V1's P3b): his keepsakes, and what he sends her.
+  | RobBooPiece
   // Furniture sets (0.3's S3): a room's worth of pieces that go together.
   | SuitePiece
   // What the fossils send her (0.3's C1).
@@ -844,7 +892,9 @@ export type FurnitureId =
   | CrawlyPiece
   // Gourdon's figurines (0.3's C3), carved from three of a kind, and the one he carved of himself.
   | FigurineId
-  | 'carvedGourdon';
+  | 'carvedGourdon'
+  // Cody's keepsake for her first day (V1's R1).
+  | 'welcomeSampler';
 
 /** The squishies she collects (0.2's F2), kept apart for the figurines (0.3's C3). */
 export type SquishyId =
@@ -855,7 +905,11 @@ export type SquishyId =
   | 'eyeballSquish'
   | 'booBao'
   | 'xiaoLongBoo'
-  | 'batGyoza';
+  | 'batGyoza'
+  | FairPrizeId;
+
+/** What's only ever won at the Hollow Fairground (V1's R6b): a squishy of its own. */
+export type FairPrizeId = 'luckyDuckSquish';
 
 /** What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil. */
 export type Carvable = CritterId | SquishyId | DollId | FossilId;
@@ -871,6 +925,12 @@ export type FossilPiece = 'fossilShelf' | 'amberDome';
 
 /** Scarah's pieces (0.3's F3): two keepsakes in her farmhouse, and her straw friend. */
 export type ScarahPiece = 'crowPerch' | 'harvestQuilt' | 'strawFriend';
+
+/**
+ * Rob Boo's pieces (V1's P3b): two keepsakes in his office, his old typewriter with the sticky W,
+ * and the key to the town.
+ */
+export type RobBooPiece = 'ballotBox' | 'topHatStand' | 'stickyTypewriter' | 'keyToTown';
 
 /** A piece that shows the set of something she owns, filling as hers does (0.3's H2). */
 export type SetPiece =
@@ -1054,6 +1114,8 @@ export type RecipeId =
   | 'starChart'
   // Scarah's (0.3's F3): a scarecrow for her yard, made as Scarah was.
   | 'strawFriend'
+  // Rob Boo's (V1's P3b): a typewriter like his, its W sticking.
+  | 'stickyTypewriter'
   | DishId;
 
 /**
@@ -1099,7 +1161,9 @@ export type InteriorId =
   // The greenhouse at Boo Acres (0.3's F2), a room of raised beds under glass.
   | 'greenhouse'
   // Scarah's farmhouse at Boo Acres (0.3's F3).
-  | 'scarahFarmhouse';
+  | 'scarahFarmhouse'
+  // The mayor's office in the town hall (V1's P3b), Rob Boo's.
+  | 'mayorsOffice';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -1126,7 +1190,33 @@ export type HappeningId =
   | 'halloweenParty'
   | 'thanksgivingDinner'
   | 'carols'
-  | 'countdown';
+  | 'countdown'
+  // The mayor says hello at the castle (V1's P3b), once, from the day of the promise.
+  | 'unmasking'
+  | WeeklyId
+  | PartyId
+  | RhythmId;
+
+/** A happening of every neighbour's week (V1's P4), and Nessa's lanterns at dusk every day. */
+export type WeeklyId =
+  'stargazing' | 'recital' | 'lanternNight' | 'parcelDay' | 'openDay' | 'lanternLighting';
+
+/**
+ * The weeks' new beats (V1's R3): a daytime happening on Monday, Tuesday and Thursday, and the
+ * weekly beat of each season's festival.
+ */
+export type RhythmId =
+  'marketRound' | 'cloudWatching' | 'herbWalk' | 'blossomPicnic' | 'sparklerNight' | 'lightsWalk';
+
+/** The keepsake each rare event leaves her the first time it comes (V1's R3). */
+export type RareKeepsakeId =
+  'starShard' | 'stallPennant' | 'wayfarerPostcard' | 'snowflakeCharm' | 'finderRosette';
+
+/** Whose birthday it is, of those with a day: Cody's is always tomorrow. */
+export type Celebrant = Exclude<VillagerId, 'cody'>;
+
+/** A neighbour's birthday party (V1's P4), at theirs on the day. */
+export type PartyId = `${Celebrant}Birthday`;
 
 /** Something one of her neighbours has lost in town, for her to find and hand back (phase S2). */
 export type LostId =
@@ -1191,7 +1281,9 @@ export type FixtureId =
   | 'raisedBed'
   | 'glassPanes'
   // Scarah's (0.3's F3): a wall of seed drawers in her farmhouse.
-  | 'seedDrawers';
+  | 'seedDrawers'
+  // Rob Boo's desk in the town hall (V1's P3b).
+  | 'mayorsDesk';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -1212,7 +1304,9 @@ export type VillagerId =
   | 'hazel'
   | 'boothoven'
   // Scarah, a scarecrow come to life one harvest moon, who comes with 0.3 (decision 214).
-  | 'scarah';
+  | 'scarah'
+  // Rob Boo, the shy ghost mayor, met at the castle at the mystery's end (V1's P3b, decision 270).
+  | 'robBoo';
 
 /**
  * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie
@@ -1240,3 +1334,9 @@ export type ToolId = 'hands' | 'net' | 'can' | 'rod';
 
 /** The collections that mark what's new in them until she has looked (phase M). */
 export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';
+
+/** The steps of Cody's first-day thread (V1's R1), in any order. */
+export type FirstDayStepId = 'shake' | 'plant' | 'stall' | 'notice' | 'meet' | 'eat';
+
+/** The town's projects (V1's R4), funded over weeks at the noticeboard. */
+export type ProjectId = 'bandstand' | 'castleGarden' | 'footbridge' | 'greenhouse';

@@ -1,4 +1,4 @@
-import { CRITTERS, flies, isCritter } from '../../data/critters';
+import { CRITTERS, flies, isCritter, type Rarity } from '../../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../../data/museum';
 import { dayKey, hourOf } from '../../systems/clock';
 import { lureKey, luredCritter } from '../../systems/cooking';
@@ -12,6 +12,8 @@ import {
   type OutCritter,
 } from '../../systems/critters';
 import { hashString } from '../../systems/random';
+import { isWhopper } from '../../systems/catchSize';
+import { DRIFTS_AN_HOUR, drifts, driftTo, HOP_MS, startles } from '../../systems/drift';
 import { walkable } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import { reach } from '../Movement';
@@ -59,8 +61,22 @@ export class Collecting {
   private readonly habitats = new Map<MapZoneId, Habitats>();
   /** Each place's critters, dealt once an hour, before today's catches are taken out. */
   private readonly dealt = new Map<MapZoneId, { hour: string; out: OutCritter[] }>();
-  /** Critters that have fluttered off this hour, by key: where to, and how often. */
-  private fluttered = new Map<string, { tile: Tile; times: number }>();
+  /**
+   * Critters that have fluttered off this hour, by key: where to, and how often; and how often a
+   * shy one has drifted off as she rushed up, and its last hop (V1's R6a).
+   */
+  private fluttered = new Map<
+    string,
+    { tile: Tile; times: number; drifts: number; hop?: { from: Tile; at: number } }
+  >();
+  /** How far she had walked at the last step, so a new walk is seen starting (V1's R6a). */
+  private walked = 0;
+  /** The shy critters that drifted off since she set off, which she can't net on this walk. */
+  private readonly shied = new Set<string>();
+  /** The critters a pet barked out this hour, settled for her net (V1's R6c). */
+  private readonly settled = new Set<string>();
+  /** She has been told how to creep up on a shy one, since the game opened. */
+  private toldOfDrift = false;
   private flutteredHour = '';
   /** When her net's swing ends. */
   private netUntil = 0;
@@ -126,6 +142,7 @@ export class Collecting {
     const which = `${day}@${hour}`;
     if (this.flutteredHour !== which) {
       this.fluttered.clear();
+      this.settled.clear();
       this.flutteredHour = which;
     }
     let dealt = this.dealt.get(place);
@@ -138,16 +155,103 @@ export class Collecting {
     for (const c of dealt.out) {
       const key = critterKey(hour, c.slot, place);
       if (!this.keeps.takings.isReady(key)) continue;
-      const moved = this.fluttered.get(key);
-      out.push(moved ? { ...c, ...moved.tile, key } : { ...c, key });
+      out.push(this.where(c, key, now));
     }
     const lured = this.luredIn(place, out);
-    if (lured) {
-      const key = lureKey(this.lurer!.lure()!.at);
-      const moved = this.fluttered.get(key);
-      out.push(moved ? { ...lured, ...moved.tile, key } : { ...lured, key });
-    }
+    if (lured) out.push(this.where(lured, lureKey(this.lurer!.lure()!.at), now));
     return out;
+  }
+
+  /** A critter where it is now: wherever it fluttered or drifted to, and mid-hop if it is. */
+  private where(c: OutCritter, key: string, now: number): Critter {
+    const moved = this.fluttered.get(key);
+    const critter: Critter = moved ? { ...c, ...moved.tile, key } : { ...c, key };
+    const hop = moved?.hop;
+    if (hop && now - hop.at < HOP_MS) {
+      critter.hop = { tx: hop.from.tx, ty: hop.from.ty, t: Math.max(0, now - hop.at) / HOP_MS };
+    }
+    return critter;
+  }
+
+  /**
+   * What the shy critters near her make of her this step (V1's R6a): one she's rushing up to
+   * drifts a tile away and settles, unless she's creeping up or behind a flier. Each drifts at
+   * most `DRIFTS_AN_HOUR` times, then lets her near. `walked` is how many tiles she has walked
+   * since she last stood still, or null while she stands.
+   */
+  notice(her: Tile, walked: number | null): WorldEvent[] {
+    const setOff = walked === null || walked < this.walked;
+    this.walked = walked ?? 0;
+    if (setOff) this.shied.clear();
+    if (walked === null) return [];
+    const place = this.outside();
+    if (place === null) return [];
+    const now = this.ctx.clock.now();
+    const out = this.critters(place);
+    const events: WorldEvent[] = [];
+    for (const c of out) {
+      const moved = this.fluttered.get(c.key);
+      // Once a walk: it has hopped off, and watches her come on.
+      if (this.shied.has(c.key) || (moved?.drifts ?? 0) >= DRIFTS_AN_HOUR) continue;
+      // One a pet barked out has settled, and lets her come on (V1's R6c).
+      if (this.settled.has(c.key)) continue;
+      if (!startles(c.critter, c, { her, walked })) continue;
+      const taken = new Set(out.map((o) => `${o.tx},${o.ty}`));
+      const zone = this.zone(place);
+      const free = (t: Tile) =>
+        this.canBe(place, t) && zone.canWalk(t.tx, t.ty) && !taken.has(`${t.tx},${t.ty}`);
+      const to = driftTo(c, her, free);
+      if (!to) continue;
+      this.fluttered.set(c.key, {
+        tile: to,
+        times: moved?.times ?? 0,
+        drifts: (moved?.drifts ?? 0) + 1,
+        hop: { from: { tx: c.tx, ty: c.ty }, at: now },
+      });
+      this.shied.add(c.key);
+      const first = !this.toldOfDrift;
+      this.toldOfDrift = true;
+      const drifted: WorldEvent = { kind: 'drifted', critter: c.critter };
+      events.push(first ? { ...drifted, first } : drifted);
+    }
+    return events;
+  }
+
+  /** Whether a kind is shy and drifts off if she rushes at it (V1's R6a). */
+  isShy(id: CritterId): boolean {
+    return drifts(id);
+  }
+
+  /** How rare a kind is, which sets how long a fish bites and whether it's reeled in. */
+  rarityOf(id: CritterId): Rarity {
+    return CRITTERS[id].rarity;
+  }
+
+  /** Whether a critter drifted off as she came up on this walk, so her net can't reach it yet. */
+  shiedFrom(key: string): boolean {
+    return this.shied.has(key);
+  }
+
+  /**
+   * Dolly barked it out (V1's R6c): it settles where it is for the rest of its hour, never
+   * drifting or fluttering off, and her net has it first time.
+   */
+  settle(key: string): void {
+    this.settled.add(key);
+    this.shied.delete(key);
+  }
+
+  /** Elvira drew it a tile nearer (V1's R6c): it hops there, and stays till anything else moves it. */
+  draw(key: string, to: Tile): void {
+    const out = this.critters().find((c) => c.key === key);
+    if (!out) return;
+    const moved = this.fluttered.get(key);
+    this.fluttered.set(key, {
+      tile: to,
+      times: moved?.times ?? 0,
+      drifts: moved?.drifts ?? 0,
+      hop: { from: { tx: out.tx, ty: out.ty }, at: this.ctx.clock.now() },
+    });
   }
 
   /**
@@ -237,7 +341,7 @@ export class Collecting {
     const row = CRITTERS[id];
     const times = this.fluttered.get(critter.key)?.times ?? 0;
     const place = this.outside();
-    if (times < row.wary && place !== null) {
+    if (times < row.wary && place !== null && !this.settled.has(critter.key)) {
       const others = new Set(this.critters(place).map((c) => `${c.tx},${c.ty}`));
       const to = flutterTo(
         critter,
@@ -245,7 +349,8 @@ export class Collecting {
         (t) => this.canBe(place, t) && !others.has(`${t.tx},${t.ty}`),
       );
       if (to) {
-        this.fluttered.set(critter.key, { tile: to, times: times + 1 });
+        const drifted = this.fluttered.get(critter.key)?.drifts ?? 0;
+        this.fluttered.set(critter.key, { tile: to, times: times + 1, drifts: drifted });
         return { kind: 'fled', critter: id };
       }
     }
@@ -254,23 +359,32 @@ export class Collecting {
 
   /**
    * A critter caught, in her net or on her rod: gone for the rest of its hour, into her bag and
-   * her Curiosity Cabinet.
+   * her Curiosity Cabinet. A fish comes with its `size`, measured against her best (V1's R6a).
    */
-  keep(critter: Critter): WorldEvent {
+  keep(critter: Critter, size: number | null = null): WorldEvent {
     const id = critter.critter;
     const { bag, takings, cabinet } = this.keeps;
     takings.take(critter.key);
     bag.add(id, 1);
     const day = dayKey(this.ctx.clock.now());
     const first = cabinet.record(id, day);
+    const best = size === null ? null : cabinet.measure(id, size);
     this.lastCatch = { id, day };
     this.ctx.events.emit('bag', bag.contents);
-    if (first) this.ctx.events.emit('cabinet', cabinet);
+    if (first || best) this.ctx.events.emit('cabinet', cabinet);
     const rarity = CRITTERS[id].rarity;
-    if (rarity === 'rare' || rarity === 'legendary') {
+    const whopper = size !== null && isWhopper(id, size);
+    if (rarity === 'rare' || rarity === 'legendary' || whopper) {
       this.ctx.signals.emit('thrilled', { by: 'catch' });
     }
-    return { kind: 'caught', critter: id, first };
+    return {
+      kind: 'caught',
+      critter: id,
+      first,
+      ...(size === null ? {} : { size }),
+      ...(best ? { best } : {}),
+      ...(whopper ? { whopper } : {}),
+    };
   }
 
   /**
@@ -281,6 +395,7 @@ export class Collecting {
     const { bag, cabinet, mailbox } = this.keeps;
     if (!isCritter(id) || cabinet.isDonated(id) || !bag.remove(id)) return null;
     cabinet.donate(id);
+    this.ctx.signals.emit('donated', { thing: id });
     this.ctx.events.emit('bag', bag.contents);
     this.ctx.events.emit('cabinet', cabinet);
     const day = dayKey(this.ctx.clock.now());

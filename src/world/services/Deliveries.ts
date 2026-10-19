@@ -57,12 +57,16 @@ export class Deliveries {
     const due = this.orders.filter((o) => isDue(o, today));
     if (due.length === 0) return;
     let n = this.mailbox.letters.all.filter((m) => isDeliveryLetter(m.id)).length;
+    let last = '';
     for (const order of due) {
       const ware = wareOf(order.ware)!;
-      this.mailbox.post(deliveryLetterId(ware, n++), today, true);
+      last = deliveryLetterId(ware, n++);
+      this.mailbox.post(last, today, true);
       this.orders.splice(this.orders.indexOf(order), 1);
     }
     this.ctx.moments.push({ kind: 'delivered', wares: due.map((o) => wareOf(o.ware)!) });
+    // His round, the morning's parcels in his satchel (V1's P4).
+    this.ctx.signals.emit('posted', { letter: last });
     this.ctx.events.emit('orders', this.onTheWay());
   }
 

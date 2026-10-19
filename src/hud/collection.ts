@@ -1,4 +1,5 @@
 import { el } from './dom';
+import { glyph } from './glyph';
 
 /** One thing in a collection, as the collection sorts, filters and finds it. */
 export interface Entry {
@@ -167,7 +168,7 @@ export function collection<E extends Entry>(options: CollectionOptions<E>): Coll
 
   const sort = el('button', { type: 'button', className: 'hud-chip hud-sort' });
   const showSort = () => {
-    sort.textContent = `↕ ${SORT_NAMES[view.sort]}`;
+    sort.replaceChildren(glyph('sort'), ` ${SORT_NAMES[view.sort]}`);
     sort.setAttribute('aria-label', `Order: ${SORT_NAMES[view.sort]}. Tap to change.`);
   };
   sort.addEventListener('click', () => {

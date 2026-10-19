@@ -9,15 +9,19 @@ user's wife. It is Animal Crossing and Stardew Valley by way of The Nightmare Be
 up, decorate a house, farm, befriend monster neighbours, and collect critters, pets, furniture and
 clothes. **Cozy and relaxing is the brief**: nothing punishes, expires or is lost (decision 11).
 
-It is a static site (TypeScript + Vite, Canvas 2D, no backend), deployed by Vercel from `main` and
-installed on her iPhone as a home-screen app. Saves live in `localStorage`.
+It is a static site (TypeScript + Vite, Canvas 2D, and a backend, a tiny one: `api/save`, decision
+323), deployed by Vercel from `main` and installed on her iPhone as a home-screen app. Saves live
+in `localStorage`, and go up sealed to the cloud save beside it (`src/persistence/cloud.ts`; the
+store is the user's to link, README's "Cloud save").
 
 **The current plan is `docs/v1_plan.md`** (settled 2026-10-06, decisions 266–275, after
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
-word, 1.0 when it is all in; its status line says which have landed. **0.3 is on her phone**
-(`docs/v0.3_plan.md` complete, released 2026-10-05, PR #156, save v43); `docs/v0.2_plan.md` and
-the plans before it are complete.
+word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
+(V1's review, decision 324): all 29 sessions are on `v1-dev`, and **1.0 goes to her phone at the
+user's word** as the release PR from `v1-dev` to `main`. **0.4 is on her phone** (2026-10-07, PR
+#175, with 0.5's first sessions; save v43); 1.0 brings the save to v53. `docs/v0.3_plan.md`,
+`docs/v0.2_plan.md` and the plans before them are complete; there is no plan after V1 yet.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
@@ -39,6 +43,7 @@ npm run format:check # what CI runs
 npm run icons        # regenerate public/icons/ from the pixel grid in scripts/make-icons.mjs
 npm run sprite       # render sprites to PNGs in .sprites/ (`-- 'prop:*' --zoom=6`, `--list`, `--sheet`)
 npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs `npm run dev` running
+npm run smoke:offline # the first launch with no signal; needs `npm run build` and `npm run preview`
 ```
 
 In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
@@ -56,11 +61,14 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1-dev` is the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
-212).** Each session branches from it, its PR targets it, and it is merged with a merge commit as
+**`v1-dev` was the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
+212), and it ends with 1.0:** a later plan's integration branch is made from `main` once 1.0 has
+merged, and added to `vercel.json`'s no-preview list the day it's made (decision 265). While a
+plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
-`v1-dev`, because Vercel deployments are limited. Each release adds its own `NOTES` row in
-`src/data/patchNotes.ts`. A session that changes the save bumps `SAVE_VERSION` only in its last
+the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
+row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
+0.6–0.9, decision 324). A session that changes the save bumps `SAVE_VERSION` only in its last
 commit, after merging the latest `v1-dev`, and says so in its handoff heading; save-bumping PRs
 merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
@@ -148,7 +156,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   sheet is built by `openSheet` (`src/hud/dom.ts`: a head with a `picture` beside the title and
   its `tabs`, a scrolling body with a `panel` per tab, a foot with Done last; 0.2's U2, decision
   179), and every list of her things by `collection()` (`src/hud/collection.ts`: filters, order,
-  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109). A thing tapped in her bag is told
+  search, "new" marks), with icons sized by `fitIcon` to a whole scale (decision 109). Every
+  mark in the chrome is one of the game's own 16-pixel glyphs (`src/sprites/ui.ts`, a `Glyph` in
+  `src/data/glyphs.ts`, shown by `glyph()` in `src/hud/glyph.ts` as an SVG of whole squares),
+  never an emoji (V1's L5, decision 295; `tests/hud/noEmoji.test.ts`). A thing tapped in her bag is told
   by `itemCard` (`src/hud/itemCard.ts`) in the sheet's foot, in the bag and at the shop's Sell tab
   alike (decision 146).
 
@@ -156,9 +167,13 @@ what each owns, and where it hurts. Update it when a seam moves.
 
 - **Art:** `src/sprites/`, drawn to `docs/art_style.md` (read it before drawing anything). Props
   are grids keyed by `PropId`. The ground is `src/sprites/terrain.ts`: grass under everything, and
-  each other `TileId` a piece drawn from which of its neighbours carry it on (decision 93); trees,
+  each other `TileId` a piece drawn from which of its neighbours carry it on (decision 93). The
+  grass is a lawn in tones, one at each corner of the tiles (`src/sprites/lawn.ts`, which corner
+  takes which from noise, trees' shade and worn doorsteps in `src/render/lawn.ts`), and the dirt,
+  gravel, meadow and long grass are `src/sprites/tracks.ts`, each thinning into the lawn at its
+  edge (V1's L2, decision 293); trees,
   the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
-  take `forms` as well as `variants`), the fountain `src/sprites/park.ts`. Buildings are built
+  take `forms` as well as `variants`; the tree's conifer, dead tree and birch are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
   from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
   shared keys, decision 95): her house, Skelly and her pots in `houses.ts`, the shops, the pop-up
   and the cart in `shops.ts`, the neighbours' houses in `neighbourHouses.ts`. Water smooths a
@@ -209,6 +224,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   out in `src/systems/activities.ts` and done by `world.activities`; arriving at one opens
   `src/hud/FairSheet.ts` (`FairApi`, `hud.openFair`), or toasts when it opens. A go is paid as it
   ends; the fortune is once a day in `Takings`; a new stall is a row.
+  The games are taps in time (V1's R6b, decision 315): `patternOf` deals each throw's moving thing
+  from the day and the go, `score` grades a tap 0–2 by where it was (`systems/activities.ts`), the
+  prize is by the go's points (`prizeRank`), never nothing; the sheet's stage is
+  `render/fairGames.ts` from `sprites/fairGames.ts`, drawn with the same reads. The duck pond and the
+  strength bell are stalls `9` and `0`; the day's first go at one stall is free (`freeGoOn`,
+  `fortune:freeGo` in `Takings`), and the lucky duck squish is only won there (`data/fairPrizes.ts`).
   The calendar comes there with the gate open, as it is from the start (0.2's M3, decision 202): a happening row's `fair`
   (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
   `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,
@@ -298,7 +319,23 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
   another hour's light (decision 34). A tree whose crown hides her, or something near her she
-  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222).
+  might want, is drawn see-through (`src/render/occlusion.ts`, 0.3's A3, decision 222). Since
+  V1's L3 (decision 291) the light is graded by the sky (`GRADE` in `src/render/grade.ts`), with
+  dithered lamp pools (`dither.ts`), bloom, a night vignette, moonlight, cloud shadows and puddles
+  (`bloom.ts`, `moonlight.ts`, `clouds.ts`, `puddles.ts`).
+- **What reacts** (V1's E1 and E4, decisions 280 and 283): one effects queue, `Effects`
+  (`src/render/effects.ts`, art `src/sprites/effects.ts`), shared by every view and stepped with
+  the world: pops of what she got, particles and emotes, pushed from the moments by
+  `src/wiring/effectsOf.ts` (the world never names an effect). A tap shows a ring and brackets
+  round what she set off toward (`feelTap` in `src/wiring/taps.ts`, `World.aim`), a shrug where
+  she can't go, and places pass through an iris (`src/render/transition.ts`).
+- **The seasons** (V1's L4, decision 294): `seasonOf(day)` (`src/systems/seasons.ts`) by the
+  month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
+  (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
+  (`seasonPiece` for the ground, `seasonLook` for a prop, baked under `<key>@<season>`), the ground
+  re-baked by `Ground.look`, the props by `OutdoorView.turn`; in winter snow lies on the lawn, the
+  tracks and the roofs and the rain falls as snow, and Nessa skates on the frozen pond
+  (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are
@@ -460,7 +497,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   it. **A new neighbour comes with a release**: a villager row, a home (a lot or a building), art,
   and their place in the happenings, there from the moment it lands. 0.3's is Scarah (decision
   243): her row and pieces in `src/data/scarah.ts`, their art in `src/sprites/scarah.ts`, and
-  Cornelius a touch on her shoulder in `src/sprites/villagers.ts`.
+  Cornelius a touch on her shoulder in `src/sprites/villagers.ts`. V1's is Rob Boo, the mayor
+  (decision 303): row and pieces `src/data/robBoo.ts`, art and the town hall `src/sprites/robBoo.ts`;
+  he isn't about until she meets him at the castle (`inTown` in `src/systems/mayor.ts`).
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
   `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
@@ -478,20 +517,45 @@ what each owns, and where it hurts. Update it when a seam moves.
   by `Neighbour.roam`/`notice`, a seat beside the stop sits them (`seated`), and a `doing` on a
   `Stop` names their job (`WORKS` in `src/data/work.ts`, two frames of arms and what they hold
   in `src/sprites/working.ts`); `figureLayers` takes a `Stance`, and chatter's bubbles go to the
-  effects layer from `src/wiring/chatter.ts`.
+  effects layer from `src/wiring/chatter.ts`. How a face feels (V1's L7, decision 296) is a
+  `Feeling` on the stance (`feel`) and on her `Rest`, drawn by `src/sprites/faces.ts` and
+  `moodFaces.ts`, chosen by the line in `src/systems/moods.ts` (rows `src/data/moods.ts`): the
+  talk sheet's bust and the world sprite are one face, and hers feels a moment through `poses`.
+  **They know her** (V1's lane 3): what a neighbour brings up is a `Topic` (`TOPICS` in
+  `src/data/smallTalk.ts`, three lines each, memory topics in `src/data/memoryTalk.ts`, the rules
+  in `src/systems/remembering.ts` and `dialogue.ts`), from what she wore, gave, grew, put out and
+  how long it's been (`Friendship`'s history, `src/world/Lately.ts`; P1, decision 300). A talk is
+  the hello, then a **heart moment** or a **question** when one is due (`src/systems/voice.ts`:
+  `HEART_MOMENTS` at 2, 4, 5, 8 and 10 hearts in `src/data/heartMoments.ts`, one `QUESTIONS` row
+  each in `src/data/questions.ts`, kept in `Friendship.moments`/`answered`), and her answers are
+  reply chips (`.hud-reply`; `REPLIES` in `src/data/replies.ts`); best friends miss her, ask her
+  along, call and write (`src/systems/calls.ts`; P2, decision 301). Their jobs are seen and each
+  has a happening with something to do (`VERBS` in `src/data/happeningVerbs.ts`, `world.joining`,
+  kept in `happenings`; birthdays a day with a party, `src/data/birthdayParties.ts`); a talk's
+  buttons are `TalkAction`s from `src/wiring/talkActions.ts` (P4, decision 304). **Cody is
+  married to her** from the first day (P5, decision 305): `world.marriage`, `src/systems/cody.ts`
+  and `src/data/cody.ts` (his evenings at hers, "how was your day?" with three answers he brings
+  up the next day, `OUR_STORY` from her third day, nights in), his hearts always ten.
 - **Critters:** rows in `src/data/critters.ts` (hours, habitat, the places it lives in `where`,
   rarity, `wary`, a `season` in months, `moon`), each also an item in her bag. Which are out, and
   where, is `src/systems/critters.ts`: habitats found from each place's map, and each place's
   critters dealt from the day key (decision 102). Rarity is four tiers, 12:5:2:1, with a
   legendary one waiting for its hours, weather or full moon, and `isAbout` is the one test of
-  whether a critter could be out (0.2's F1, decision 150). `tests/systems/rarity.test.ts` holds
+  whether a critter could be out (0.2's F1, decision 150); since V1's R5 (decision 310) every
+  critter comes out the day after each full moon when out of its season or weather (`comesOut`,
+  `isVisiting`), never more than 29 days away, and the Cabinet says when (`nextChance`); seven
+  holiday critters and three jumping spiders stay all year. `tests/systems/rarity.test.ts` holds
   a simulated year filling the Cabinet in about ten months: rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
   too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
   tapping one walks her to the bank and casts her rod (`world.fishing`,
   `src/world/services/Fishing.ts`), the line's nibbles and bite are worked out from the cast in
   `src/systems/fishing.ts`, any tap reels in, and `src/render/fishing.ts` draws the line, float
-  and "!". `src/world/Cabinet.ts` is the
+  and "!". Since V1's R6a (decision 316) a bite is shorter the rarer the fish (`BITE_MS`), a rare
+  or legendary one is reeled in on a tension bar (`REELS`; a tap out of time only slackens the
+  line), each catch has a size (`src/data/fishSizes.ts`, `src/systems/catchSize.ts`) and the
+  Cabinet keeps each fish's best (save v52); shy critters drift a tile from her as she rushes up
+  (`src/systems/drift.ts`, `Collecting.notice`). `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters; the museum's
   cases, three tiles wide, show each donated critter's 24-pixel art in a `nooks` box. Art is
@@ -523,11 +587,24 @@ what each owns, and where it hurts. Update it when a seam moves.
   where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `world.petCare` has `walkWith`,
   `patPet`, `rename`, `dress` and `returnBone`; tapping a pet walks up to it and arrives with `pet`,
   which opens `src/hud/PetSheet.ts` (through `PetApi`). Ghost pets are see-through and glow.
+  **They grow fond of her** (V1's R6c, decision 317, save v53): pats, walks and a treat a day
+  (`FONDNESS` in `src/data/affection.ts`, rules `src/systems/affection.ts`, kept as `Pets`'
+  `affection`), never less; at the first level a job on walks (`JOBS`, decided in `Pet.follow`,
+  done by `PetCare.deed`) and three new pat lines (`GROWN_PATS`), at the second a trick (`TRICKS`,
+  frames in `PET_ART[id].trick`, beats `TRICK_STEPS`, a Trick button); they rest by the fire, on
+  the bed or sofa or a rug at home (`PET_RESTS`, `src/systems/petRest.ts`).
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
   moment); walking up to her corkboard opens `src/hud/CorkboardSheet.ts` (through `MysteryApi`).
   Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
+  Since V1's P3a (decision 302) the mystery comes a step a week, a letter or a clue at a prop
+  (`CHAIN` in `src/data/mysteryChain.ts`, `src/systems/mysteryChain.ts`), to the mayor's promise
+  (`world.mystery.ready()`); Wes stays for a chat after the third glimpse (`src/data/wes.ts`,
+  `src/hud/WesSheet.ts`), and the town theorises (`src/data/mysteryTalk.ts`). Then the unmasking
+  (P3b, decision 303): a happening at the castle's great hall any evening from the promise until
+  she comes, the dust sheet off on `src/hud/RevealSheet.ts`, and Rob Boo a neighbour from then
+  (`inTown` in `src/systems/mayor.ts`).
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
   `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch, the
@@ -611,7 +688,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`birthdaysOn`, `CalendarApi.birthdays`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
-  `src/hud/NoticeSheet.ts` (`NoticeApi`).
+  `src/hud/NoticeSheet.ts` (`NoticeApi`). **Today** (V1's R2, decision 312) is the calendar's
+  first tab: `todayLines` in `src/systems/today.ts` worked out each time from `TodayFacts`, which
+  `src/world/areas/upNow.ts` reads off the services (`world.upNow`), its words in
+  `src/hud/todayWords.ts`, a tap on a line walking or flying her there (`src/wiring/todayGo.ts`),
+  and a dot on the date chip while something's new (`src/hud/todaySeen.ts`, kept per phone); a
+  neighbour asking a favour wears a parcel. **Weeks that differ** (V1's R3, decision 313): a
+  daytime happening on Monday, Tuesday and Thursday and a festival week each spring, summer and
+  winter (`RHYTHM_HAPPENINGS`, festivals as `CALENDAR` rows with a span), and rare events about one
+  day in nine, never during a festival (`RARE_EVENTS` in `src/data/rareEvents.ts`, dealt by
+  `rareEventOn`, told by `world.rareEvents` with a keepsake the first time; the wandering stall for
+  a week, a meteor shower, a wayfarer, a snow day, a stray critter), Moira at the shore every July,
+  and the Moon Pie Man and the pop-up told when they arrive.
 - **Holidays in town** (phase U, decisions 126–127): each big holiday's decorations are a row in
   `DECOR` (`src/data/holidays.ts`), up for days either side of it by `decorOn`
   (`src/systems/holidays.ts`, from the day key); `world.holidays` (`Holidays`) says whose are up,
@@ -626,6 +714,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   Halloween (`HOLIDAY_TREATS`); the day's letters are `HOLIDAY_LETTERS`. Castle Mac-A-Boo's great
   hall (`castleHall`, art in `src/sprites/hall.ts`) is open from the start; its heart key is still
   buried in Whisperwood, a keepsake.
+- **Her first day** (V1's R1, decision 311, save v50): Cody's little list of six steps in any
+  order (shake the tree, plant, the stall, a note, three hellos, a snack; `FIRST_DAY_STEPS` in
+  `src/data/firstDay.ts`), worked out by `src/systems/firstDay.ts` from what the town keeps and
+  kept by `world.firstDay`, his line and a small gift for each and his stitched sampler with the
+  last; the card is `src/hud/FirstDayCard.ts` (`FirstDayApi`), after his first hello and first in
+  the tray while it's open; the date chip and the tray glow once per phone (`src/hud/hints.ts`). A
+  new town starts with four seed kinds; an old town's first day is over before it starts.
 - **The title screen** (decision 130): `src/hud/TitleScreen.ts` (`TitleApi`), every time she opens
   the game, its picture `src/render/title.ts`; the first time, his dedication to her follows it
   (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. The first
@@ -651,10 +746,29 @@ what each owns, and where it hurts. Update it when a seam moves.
   `wantedOn` and `paysOn` in `src/systems/shop.ts`); and once a day she bakes with Wrapunzel at
   Crumbs & Curios (`world.baking`, rows in `src/data/baking.ts`, a 🧁 in her talk). Everything a
   recipe makes is worth a quarter more than its inputs, held by the economy test.
+- **Town projects** (V1's R4, decision 314): rows in `src/data/projects.ts` (a bandstand on the
+  square, the castle garden, a footbridge over Whisperwood's creek, her greenhouse behind her
+  house), funded one at a time on the noticeboard's Projects tab (`src/hud/ProjectsPanel.ts`
+  through `NoticeApi`) by `world.projects` (`Projects`, kept by `Works`, save v51); rules in
+  `src/systems/projects.ts`. Each stands where it'll be in three stages (posts, frame, built) through
+  `Sites` (`src/world/zones/`), art `src/sprites/projects.ts`; `world.projects.preview(id, stage)`
+  in a dev build, `npm run sprite -- 'stage:*'`. Gathering is capped per place per window
+  (`GATHERS_PER_WINDOW` in `src/systems/gathering.ts`).
 - **Dev handles:** under `npm run dev`, `window.world` (the `World`), `window.view` (a
   `DebugView`) and `window.sound` (the `SoundBoard`). `?loop=manual` stops the loop so smoke can crank `view.step(ms, frames)`, which
   runs through the same fixed 120Hz step (`src/loop.ts`) as the loop. `?day=2026-12-24` opens a dev build on
   another day (at `?hour=`, or noon), to see a holiday.
+- **Kept safe** (V1's S3, decision 322): `public/sw.js` precaches the shell, its list and version
+  written in by the plugin in `vite.config.ts` (`src/precache.ts`), and never touches `/api/`;
+  what's the phone's and not the save's (when it last backed up, Cody's weekly nudge, the notes of
+  what went wrong) is `src/safekeeping.ts` and `src/errorNotes.ts`, the nudge's rule
+  `src/systems/backupNudge.ts`; the party photo is kept through the share sheet
+  (`src/hud/keepPhoto.ts`); `?perf`, in production too, times her phone's frames
+  (`src/wiring/perf.ts`). **The cloud save** (V1's S2, decision 323) is `api/save.ts`, a Vercel
+  function over an Upstash Redis store, which does nothing until the user links one (README's
+  "Cloud save"; it answers 503 till then): a key each phone makes once (`cloudKey.ts`), the town
+  sealed with it (`cloudSeal.ts`), sent and fetched by `src/persistence/cloud.ts`, its card in
+  Settings `src/hud/CloudCard.ts`.
 
 ## Verifying a change
 

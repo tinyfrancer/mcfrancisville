@@ -31,6 +31,9 @@ export interface Placing {
 /** Which button in the HUD bumps as something comes to it. */
 export type Bump = 'bag' | 'purse';
 
+/** How long a first day's gift waits for what she did to show first (V1's R1). */
+const FIRST_DAY_BEAT_MS = 600;
+
 /** Her feet, a little under her tile's centre, where dust is kicked up. */
 const FEET = 13;
 
@@ -184,14 +187,35 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       ];
     case 'ate':
       return [emote('♥')];
+    // A puff of flour at the bowl, a twinkle at the oven door (V1's P4).
+    case 'bakeStep':
+      return [burst('sparkle', event.does === 'pour' ? head : feet, 3, 10)];
+    // Something done together at hers (V1's P5): a heart over him.
+    case 'together':
+      return [burst('sparkle', head, 4, 12), emote('♥', { villager: 'cody' })];
     case 'caught': {
-      const from = box ? there : (at.float ?? source);
+      const water = event.water ? middle({ ...event.water, w: 1, h: 1 }) : null;
+      const from = water ?? (box ? there : (at.float ?? source));
       const shown: Effect[] = [pop({ item: event.critter }, 1, from)];
-      if (event.first) shown.push(burst('sparkle', head, 6, 16), emote('!'));
+      // A fish comes up with a splash as big as it is, a whopper or a best with a fuss (V1's R6a).
+      if (event.size !== undefined && water) {
+        shown.push(burst('splash', water, 3 + Math.min(9, Math.floor(event.size / 2)), 4));
+      }
+      if (event.whopper) shown.push(burst('confetti', head));
+      if (event.grade === 2) shown.push(burst('sparkle', from, 6, 10));
+      if (event.first || event.whopper) shown.push(burst('sparkle', head, 6, 16), emote('!'));
+      else if (event.best === 'best') shown.push(burst('sparkle', head, 5, 14), emote('♪'));
       return shown;
     }
     case 'fled':
       return [burst('dust', there, 4, 8), emote('…')];
+    case 'drifted':
+      return [emote('…')];
+    case 'hooked':
+      // No "!" over her: the tension bar takes that place, and a bubble would hide its end.
+      return at.float ? [burst('splash', at.float, 7, 4)] : [];
+    case 'slack':
+      return [emote('…')];
     case 'cast':
       return at.float ? [{ ...burst('splash', at.float, 6, 3), delayMs: CAST_MS }] : [];
     case 'nibble':
@@ -221,6 +245,17 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       const { icon, count } = giftIcon(event.gift);
       return [pop(icon, count, over), emote('♥')];
     }
+    // A step of her first day (V1's R1): after what she did shows, his gift, sparkles and a heart.
+    case 'firstDay': {
+      const { icon, count } = giftIcon(event.reward);
+      const shown: Effect[] = [
+        pop(icon, count, over, FIRST_DAY_BEAT_MS),
+        { ...burst('sparkle', head, 6, 14), delayMs: FIRST_DAY_BEAT_MS },
+        emote('♥'),
+      ];
+      if (event.keepsake) shown.push(pop({ parcel: true }, 1, over, FIRST_DAY_BEAT_MS * 2));
+      return shown;
+    }
     case 'shook': {
       const crown = shape?.crown ?? head;
       if (event.back) return [burst('leaf', crown, 3, 12), emote('…')];
@@ -235,6 +270,8 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       if (event.did === 'growing') return [burst('sparkle', there, 3, 10)];
       return [emote('?')];
     case 'tossed':
+      // A near-perfect throw at the fair (V1's R6b) sparkles more, and she hums.
+      if (event.grade === 2) return [burst('sparkle', head, 7, 16), emote('♪')];
       return event.landed ? [burst('sparkle', head, 3, 12)] : [emote('…')];
     case 'won':
       return event.top
@@ -250,6 +287,29 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [burst('sparkle', feet, 5, 10), emote('!')];
     case 'decorated':
       return [burst('confetti', head), emote('♪')];
+    // V1's R3: something out of the ordinary told, a passer-by's hello, a stray found.
+    case 'heralded':
+      return [burst('sparkle', head, 4, 14), emote('!')];
+    case 'metPasser':
+      return event.gift ? [pop({ item: event.gift }, 1, head), emote('♥')] : [emote('♪')];
+    case 'foundStray':
+      return [burst('sparkle', feet, 5, 10), pop({ item: event.critter }, 1, feet), emote('!')];
+    // V1's R4: something given to a town project, and one built.
+    case 'pitchedIn':
+      return event.raised ? [burst('sparkle', head, 5, 14), emote('!')] : [];
+    case 'built':
+      return [burst('confetti', head), burst('sparkle', head, 6, 18), emote('♪')];
+    // V1's R6c: a pat or a treat, a level reached, a trick and a job, each over the pet.
+    case 'petted':
+      return [burst('heart', event.at, event.treat ? 5 : 3, 8)];
+    case 'petGrew':
+      return [burst('heart', event.at, 6, 12), burst('sparkle', event.at, 6, 16), emote('♥')];
+    case 'petTrick':
+      return [burst('sparkle', event.at, event.own ? 4 : 7, 14)];
+    case 'petHelped':
+      return event.job === 'bark'
+        ? [emote('!', event.at)]
+        : [burst('sparkle', event.at, 5, 10), ...(event.job === 'sniff' ? [emote('!')] : [])];
     case 'frozen':
       return [burst('sparkle', head, 6, 20), emote('♪')];
     case 'dressedUp':
@@ -269,6 +329,20 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [burst('sparkle', head, 4, 14), emote('?')];
     case 'wesGone':
       return [emote('?')];
+    // V1's P3a: he'll stay next time; and his chat is the sheet's.
+    case 'wesStays':
+      return [emote('!')];
+    case 'wesChat':
+      return [];
+    // V1's P3b: meeting the mayor is the sheet's.
+    case 'unmasked':
+      return [];
+    // Joining in at a happening (V1's P4): the host is delighted.
+    case 'joined':
+      return [
+        burst('sparkle', { villager: event.villager }, 4, 12),
+        emote('♥', { villager: event.villager }),
+      ];
     case 'crowned':
       return [
         burst('confetti', { villager: event.villager }),
@@ -338,6 +412,8 @@ export function bumpsOf(event: WorldEvent): Bump[] {
       ];
     case 'visit':
       return 'candy' in event.gift ? ['purse'] : 'item' in event.gift ? ['bag'] : [];
+    case 'firstDay':
+      return 'candy' in event.reward ? ['purse'] : 'item' in event.reward ? ['bag'] : [];
     default:
       return [];
   }

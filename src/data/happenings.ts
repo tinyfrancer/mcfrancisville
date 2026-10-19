@@ -4,13 +4,21 @@ import type {
   HappeningId,
   InteriorId,
   ItemId,
+  PartyId,
   PropId,
+  RhythmId,
   VillagerId,
+  WeeklyId,
+  WorkId,
 } from '../types/ids';
 import type { FestivalId, HolidayId } from './calendar';
+import type { Glyph } from './glyphs';
 import type { SpecialDayId } from './specialDays';
 import type { SpotName } from './maps';
 import type { MapZoneId } from '../types/ids';
+import { WEEKLY_HAPPENINGS } from './weeklyHappenings';
+import { BIRTHDAY_PARTIES } from './birthdayParties';
+import { RHYTHM_HAPPENINGS } from './rhythmHappenings';
 
 /**
  * Which days a happening is on: some weekdays (0 is Sunday) by the day key, the night of a full
@@ -24,7 +32,11 @@ export type HappeningDays =
   | { oneIn: number }
   | { holiday: HolidayId }
   | { festival: FestivalId; weekdays: readonly number[] }
-  | { special: SpecialDayId };
+  | { special: SpecialDayId }
+  /** The mayor's hello (V1's P3b): from the day of the promise until the evening she's there. */
+  | { unmasking: true }
+  /** A neighbour's birthday (V1's P4), by `BIRTHDAYS`. */
+  | { birthday: VillagerId };
 
 /**
  * Gathered outdoors in a place: round the host at a spot, everyone at their own place for a party
@@ -33,6 +45,11 @@ export type HappeningDays =
  */
 export type Outdoors<Z extends MapZoneId> =
   { at: SpotName<Z> } | { party: true } | { seats: readonly SpotName<Z>[] };
+
+type Beyond = Exclude<MapZoneId, 'town' | 'fairground'>;
+
+/** Gathered round the host at a spot in a place beyond the town (V1's P4: the pier). */
+export type Away = { [Z in Beyond]: { zone: Z; at: SpotName<Z> } }[Beyond];
 
 /** A piece set out for a happening, standing all its day, by its top left. */
 export interface SetPiece {
@@ -46,7 +63,7 @@ export interface SetPiece {
 export interface HappeningRow {
   name: string;
   /** Beside its name on the calendar. */
-  icon: string;
+  icon: Glyph;
   /** Where, as the calendar says it: "in Maude's library". */
   place: string;
   on: HappeningDays;
@@ -61,7 +78,7 @@ export interface HappeningRow {
    * their place at her birthday party (`PARTY_SPOTS`), for a party the whole town comes to, or
    * each in a seat of their own, in the order of `who` (0.2's J3's film night).
    */
-  where: { inside: InteriorId } | Outdoors<'town'>;
+  where: { inside: InteriorId } | Outdoors<'town'> | Away;
   /** Who's there, the host first, standing at the place; the rest gather round them. */
   who: readonly VillagerId[];
   /** What each says to her the first time she talks to them there. `{name}` is her name. */
@@ -85,6 +102,15 @@ export interface HappeningRow {
    * it's in town, as `where` says, so she can always get to it (decisions.md 11).
    */
   fair?: { where: Outdoors<'fairground'>; place: string; set?: readonly SetPiece[] };
+  /**
+   * Where it moves once the bandstand on the square is built (V1's R4): Boothoven's recital, out
+   * of his parlour and under its roof.
+   */
+  bandstand?: { where: Outdoors<'town'>; place: string };
+  /** What the host does there, a working pose (V1's P4): Nessa lighting the lanterns. */
+  doing?: WorkId;
+  /** Only on a clear day (V1's P4's stargazing): on a rainy or foggy one it isn't on. */
+  clear?: true;
 }
 
 /** Where each stands at a gathering before the fairground's stage (0.2's M3). */
@@ -101,6 +127,7 @@ export const STAGE_SPOTS: Record<VillagerId, SpotName<'fairground'>> = {
   gourdon: 'crowdBackRight',
   hazel: 'crowdBack',
   scarah: 'crowdBackMiddle',
+  robBoo: 'crowdMiddleNear',
 };
 
 /** The costume contest's line-up along the front of the fairground's stage. */
@@ -126,10 +153,10 @@ const AT_THE_STAGE = "at the fairground's stage";
  * they say. They come before visits and schedules, and after her birthday party, which nobody
  * misses. Nothing is missed by not going: they come round again (decisions.md 11).
  */
-export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
+const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId | RhythmId>, HappeningRow> = {
   bookClub: {
     name: 'Book club',
-    icon: '📚',
+    icon: 'book',
     place: "in Maude's library",
     on: { weekdays: [3] },
     from: 19,
@@ -146,7 +173,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   midnightBake: {
     name: 'The midnight bake',
-    icon: '🍪',
+    icon: { item: 'batWingCookie' },
     place: 'at Crumbs & Curios',
     on: { weekdays: [5] },
     from: 22,
@@ -163,7 +190,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   spellGoneWrong: {
     name: 'A spell gone mildly wrong',
-    icon: '✨',
+    icon: 'sparkle',
     place: 'by the well',
     on: { oneIn: 5 },
     from: 14,
@@ -179,7 +206,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   moonHowl: {
     name: 'Howling at the full moon',
-    icon: '🐺',
+    icon: { item: 'wolfDoll' },
     place: 'up at the lookout',
     on: { fullMoon: true },
     from: 21,
@@ -193,7 +220,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   seedSwap: {
     name: 'The Sunday seed swap',
-    icon: '🌱',
+    icon: { item: 'pumpkinSeed' },
     place: 'at the farm gate',
     on: { weekdays: [0] },
     from: 8,
@@ -210,7 +237,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   movieNight: {
     name: 'Movie night',
-    icon: '🎬',
+    icon: { item: 'popcorn' },
     place: "at Cody's manor",
     on: { weekdays: [6] },
     from: 20,
@@ -230,7 +257,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   // festival's, it comes before any everyday happening, so Cody's own movie night gives way.
   filmNight: {
     name: 'Film night',
-    icon: '👻',
+    icon: { item: 'plushGhost' },
     place: 'on the avenue below the square',
     on: { festival: 'halloweenFestival', weekdays: [6] },
     from: 19,
@@ -249,6 +276,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         'filmBackEnd',
         'filmBackCorner',
         'filmBehind',
+        'filmBehindLeft',
       ],
     },
     who: [
@@ -264,6 +292,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     faces: 'up',
     set: [
@@ -286,6 +315,8 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "A silent film, {name}! I'm playing along on a little upright. Do hum if it helps.",
       scarah:
         'A film under the stars! Cornelius had the popcorn. Cornelius has eaten the popcorn. Sit with us, {name}.',
+      robBoo:
+        "Ahem. {name}, a film about a friendly ghost! I've seen it a hundred times. I cry at the bit where everyone waves. Every time.",
     },
     gift: 'popcorn',
   },
@@ -293,7 +324,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   // The holidays' own (phase U): where one meets an everyday one, the holiday's wins.
   newYearDip: {
     name: "The New Year's dip",
-    icon: '🌊',
+    icon: 'wave',
     place: 'at the pond',
     on: { holiday: 'newYear' },
     from: 10,
@@ -309,7 +340,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   valentineTea: {
     name: "Valentine's tea",
-    icon: '💝',
+    icon: { mark: 'valentines' },
     place: 'at Crumbs & Curios',
     on: { holiday: 'valentines' },
     from: 14,
@@ -328,7 +359,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   stPatricksJig: {
     name: "A St Patrick's jig",
-    icon: '☘️',
+    icon: { mark: 'stPatricks' },
     place: 'by the well',
     on: { holiday: 'stPatricks' },
     from: 15,
@@ -345,7 +376,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   eggHunt: {
     name: 'The Easter egg hunt',
-    icon: '🥚',
+    icon: { item: 'chocolateEgg' },
     place: 'by the willow',
     on: { holiday: 'easter' },
     from: 9,
@@ -360,19 +391,21 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   fireworksPicnic: {
     name: 'The fireworks picnic',
-    icon: '🎆',
+    icon: { mark: 'newYear' },
     place: 'by the pond',
     on: { holiday: 'fourthOfJuly' },
     from: 19,
     until: 24,
     where: { at: 'pondNorth' },
-    who: ['cody', 'rufus', 'barty', 'ollie'],
+    who: ['cody', 'rufus', 'barty', 'ollie', 'robBoo'],
     says: {
       cody: 'Picnic by the pond, babe. Best seats in town for the fireworks. Have an ice pop. They melt fast.',
       rufus: 'Are they starting?! Are they starting NOW?! …How about NOW?!',
       barty: '{name}! Brought the long blanket. Sit anywhere. Mind the bats, they get twitchy.',
       ollie:
         "I've been told the fireworks come at nine. I've been told this by Rufus, forty times.",
+      robBoo:
+        "Ahem. The mayor's fireworks, {name}! I light the first one myself. Well. I float near it, looking official, and Gourdon lights it.",
     },
     gift: 'icePop',
   },
@@ -384,7 +417,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   // round the well, where the town's Christmas tree stands.
   costumeContest: {
     name: 'The costume contest',
-    icon: '👑',
+    icon: 'crown',
     place: 'at the stage on the avenue',
     on: { holiday: 'halloween' },
     from: 18,
@@ -439,7 +472,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
   },
   halloweenParty: {
     name: 'The Halloween party',
-    icon: '🎃',
+    icon: { mark: 'halloween' },
     place: 'round the well',
     on: { holiday: 'halloween' },
     from: 18,
@@ -458,6 +491,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     set: [
       { prop: 'chiliTable', tx: 22, ty: 19 },
@@ -501,12 +535,14 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "A rock star, {name}! I've traded the piano for an air guitar tonight. Requests welcome!",
       scarah:
         "Happy Halloween, {name}! I'm a crow tonight, and Cornelius is a scarecrow. The chili's lovely. Straw soaks it right up.",
+      robBoo:
+        "Happy Halloween, {name}! I've come as a magician. For my next trick, I shall go pink. …Ta-da.",
     },
     gift: 'whiteChickenChili',
   },
   thanksgivingDinner: {
     name: 'Thanksgiving dinner',
-    icon: '🦃',
+    icon: { mark: 'thanksgiving' },
     place: 'round the well',
     on: { holiday: 'thanksgiving' },
     from: 15,
@@ -526,6 +562,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     says: {
       wrapunzel:
@@ -546,12 +583,14 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "{name}, I've written a little grace. It's mostly humming. Pass the gravy, would you?",
       scarah:
         "{name}, I've brought the sweetcorn! Every cob from the far field. Pass the butter, would you?",
+      robBoo:
+        "Ahem. A few words, {name}, from the mayor. I'm thankful for every single one of you. That's it. That's the speech. Pass the rolls?",
     },
     gift: 'pumpkinPie',
   },
   carols: {
     name: 'Carols by the well',
-    icon: '🎶',
+    icon: { mark: 'septemberSong' },
     place: 'round the well',
     on: { holiday: 'christmasEve' },
     from: 18,
@@ -570,6 +609,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     says: {
       maude:
@@ -586,12 +626,14 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       boothoven: "{name}, I'll take the low notes. Ghosts have marvellous low notes. Ooooooh.",
       scarah:
         '{name}, I can only sing the one note, but I sing it with all my stuffing. Cornelius has a word for the rest.',
+      robBoo:
+        "{name}, I've sung carols by this well every Christmas Eve for a hundred years. This is the first time anyone could hear me.",
     },
     gift: 'gingerbreadBat',
   },
   countdown: {
     name: 'The countdown',
-    icon: '🥂',
+    icon: { mark: 'newYearsEve' },
     place: 'round the well',
     on: { holiday: 'newYearsEve' },
     from: 21,
@@ -611,6 +653,7 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
       'hazel',
       'boothoven',
       'scarah',
+      'robBoo',
     ],
     says: {
       cody: "Counting down with you, babe. Ten, nine… I'll lose count. Doesn't matter. You're here.",
@@ -628,13 +671,15 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
         "{name}, at midnight I play the last chord of the year. Fortissimo. Cover your ears. Or don't!",
       scarah:
         'Ten, nine… Cornelius is counting too! He\'s on "Pumpkin." He\'s been on "Pumpkin" for a while. Happy New Year, {name}!',
+      robBoo:
+        "Ahem. As mayor, I hereby declare the new year… nearly here. Ten, nine… I've gone pink already, {name}.",
     },
   },
   // Their anniversary at the castle hall (0.2's L2): Boothoven at its piano, and Cody to listen.
   // Once she and Boothoven are close, walking up to the piano plays their duet.
   anniversaryDuet: {
     name: 'A duet at the castle',
-    icon: '🎹',
+    icon: 'piano',
     place: "in Castle Mac-A-Boo's great hall",
     on: { special: 'anniversary' },
     from: 18,
@@ -649,6 +694,69 @@ export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
     welcome:
       "Candlelight, roses, and Boothoven at the hall's grand piano. Cody's here too, grinning.",
   },
+  // The mayor says hello (V1's P3b, decision 303): from the day of the mayor's promise, every
+  // evening at the castle's great hall until the one she's there, the whole town gathered round a
+  // dust sheet at the front. The sheet comes off as she comes in (`Mystery.unmask`), and the town
+  // stays the rest of that evening to say hello to Rob Boo. Cody is by the piano, the mayor before
+  // the cake, and the rest of the town in rows before him (`castleHall`'s `stands`, in this order).
+  unmasking: {
+    name: 'The mayor says hello',
+    icon: 'topHat',
+    place: "in Castle Mac-A-Boo's great hall",
+    on: { unmasking: true },
+    from: 18,
+    until: 26,
+    where: { inside: 'castleHall' },
+    who: [
+      'cody',
+      'robBoo',
+      'agatha',
+      'maude',
+      'rufus',
+      'wrapunzel',
+      'barty',
+      'ollie',
+      'nessa',
+      'gourdon',
+      'hazel',
+      'boothoven',
+      'scarah',
+    ],
+    says: {
+      cody: "The mayor's a ghost, babe! A little shy one in a big hat. I said it'd be someone nice. I said that, right? Let's say I said that.",
+      robBoo:
+        "Ahem. Hello, {name}. It's really me. I'm so glad you came. I'm so glad I didn't hide under the cake. I nearly did.",
+      agatha:
+        "A shy ghost who types, with the initials R.B. My corkboard had it, {name}. I'll be taking the string down now. Reluctantly.",
+      maude:
+        "Another ghost! Oh, {name}, I'm delighted. We'll start a club. A very quiet one, with tea.",
+      rufus:
+        "IT WAS A GHOST! A NICE ONE! I KNEW IT WAS NICE! I didn't know it was a ghost! I'M SO HAPPY!",
+      wrapunzel:
+        "Oh, the poor dear's gone ever so pink. I'll bake him something, {name}. Ghosts like meringue. Everyone likes meringue.",
+      barty:
+        "R.B.! Rob Boo! Not Rufus, not me. I'm so relieved I've lost a finger. Hang on. Found it.",
+      ollie:
+        "I've been delivering the mayor's letters for years, {name}, and I never once saw who posted them. Now I know why!",
+      nessa: "He's shy, like me. I think we're going to get on, {name}. Quietly.",
+      gourdon: 'Mayor. Ghost. Good. Built the town hall door. Wondered why he never used it.',
+      hazel:
+        'A ghost nobody had met. I said so! I did, {name}. I wrote it down. With a star by it.',
+      boothoven:
+        '{name}, a fanfare for the mayor! Ta-da-daaa! A ghost who was shy of being seen. I know that song by heart.',
+      scarah:
+        "Cornelius said it was a ghost! He says everything's a ghost, but this time he was right. Three times now, {name}!",
+    },
+    welcome: 'The great hall is full to the doors, and everyone is whispering.',
+  },
+};
+
+/** Every happening: the everyday, and every neighbour's week and birthday (V1's P4). */
+export const HAPPENINGS: Record<HappeningId, HappeningRow> = {
+  ...EVERYDAY,
+  ...WEEKLY_HAPPENINGS,
+  ...BIRTHDAY_PARTIES,
+  ...RHYTHM_HAPPENINGS,
 };
 
 export const HAPPENING_IDS = Object.keys(HAPPENINGS) as HappeningId[];

@@ -1,0 +1,16 @@
+{
+  // Vercel compiles each function with the tsconfig nearest it (V1's S2, decision 323). The
+  // app's is for Vite and never emits (`allowImportingTsExtensions` needs `noEmit`), so the
+  // function has a plain one of its own; the app's `npm run typecheck` checks it too, through
+  // `tests/api/`.
+  "compilerOptions": {
+    "target": "es2022",
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2023", "DOM"],
+    "types": [],
+    "strict": true,
+    "skipLibCheck": true
+  },
+  "include": ["*.ts"]
+}

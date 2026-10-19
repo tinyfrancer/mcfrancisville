@@ -12,12 +12,12 @@ import {
   CANDY_TREE_PALETTE,
   SAPLING_PALETTE,
   PATCH_ART,
-  SHOOTS,
-  SHOOTS_PALETTE,
 } from '../sprites/nature';
+import { BED_FORMS, patchLook } from '../sprites/flowerBeds';
+import { formOf } from '../sprites/terrain';
 import { HONESTY_STALL, HONESTY_STALL_PALETTE } from '../sprites/clutter';
 import { POT_ART } from '../sprites/houses';
-import { lookOf, MAILBOX_FULL, PROP_ART } from '../sprites/props';
+import { MAILBOX_FULL, PROP_ART } from '../sprites/props';
 import { GOOSE_ART } from '../sprites/geese';
 import { dayKey, daylight, hourOf, underFullMoon, type Daylight } from '../systems/clock';
 import { happeningsAt } from '../systems/happenings';
@@ -53,6 +53,7 @@ import { drawGlints } from './bloom';
 import { coveredCrowns, maskOf, nearHer, SeeThrough, type Placed } from './occlusion';
 import { bakeIcon } from './items';
 import { drawFlash, drawSnow, drawWeatherAir, drawWeatherGround, WEATHER_LOOK } from './weather';
+import { drawMeteors } from './meteors';
 import {
   doorDrawables,
   eaveDrawables,
@@ -79,6 +80,10 @@ import { wheelCars } from './wheel';
 import { openDoorDrawable, type Entrance } from './doors';
 import { perchDrawables, skyDrawables } from './sky';
 import { leafDrawables, leavesFall, shedsLeaves } from './leaves';
+import { groundLookIdOf, seasonOf } from '../systems/seasons';
+import { seasonLook, turnsWithSeasons } from '../sprites/seasons';
+import { GROUND_LOOKS, type SeasonId } from '../data/seasons';
+import { SEASON_LIGHT } from './grade';
 import {
   drawDrawables,
   drawLight,
@@ -161,7 +166,7 @@ export class OutdoorView implements SceneView {
    */
   private reshaped: { tiles: TileId[]; life: Life } | null = null;
   /** What the ground was last baked as: whether the pond was frozen, and how many rows built. */
-  private groundShown = 'false:0';
+  private groundShown = 'false:0:0';
   private readonly props: Drawable[] = [];
   /** What moves on its own where it stands: the fountain, the wheel, a lamp (V1's E5). */
   private readonly moving: { id: PropId; drawable: Drawable; m: Moving }[] = [];
@@ -216,6 +221,15 @@ export class OutdoorView implements SceneView {
   private aloft = { flyers: 0, leaves: 0 };
   /** Skelly, drawn in a holiday's get-up while its decorations are up. */
   private readonly skellies: Drawable[] = [];
+  /** The season the props are baked in (V1's L4), and those it changes, to bake again as it turns. */
+  private seasonShown: SeasonId;
+  private readonly seasonal: {
+    prop: PlacedProp;
+    drawable: Drawable;
+    giver?: Giver;
+    entrance?: Entrance;
+    m?: Moving;
+  }[] = [];
 
   constructor(
     world: World,
@@ -237,15 +251,23 @@ export class OutdoorView implements SceneView {
     const monarchs = monarchsOn(dayKey(world.clock.now()), zone.map.butterflies);
     this.flutters = fluttersOf(zone.map, monarchs);
     this.ground = new Ground(zone.map, CLUTTER[zone.id]);
+    const day = dayKey(world.clock.now());
+    this.ground.look(groundLookIdOf(day));
+    this.seasonShown = seasonOf(day);
     this.life = lifeOf(zone.map);
     for (const prop of zone.map.props) {
       const art = PROP_ART[prop.id];
-      const { source, palette, form: f, key } = lookOf(prop);
+      const { source, palette, form: f, key } = seasonLook(prop, this.seasonShown);
+      const turns = turnsWithSeasons(prop.id) ? { prop, drawable: {} as Drawable } : null;
       const sprite = bake(key, source, palette);
       const footY = (prop.ty + prop.h) * TILE_SIZE;
       const x = prop.tx * TILE_SIZE + (prop.w * TILE_SIZE - sprite.width) / 2;
       const y = footY - sprite.height;
       const drawable: Drawable = { footY, sprite, x, y };
+      if (turns) {
+        turns.drawable = drawable;
+        this.seasonal.push(turns);
+      }
       if (CROWNS.has(prop.id)) drawable.crown = crownOf(prop).crown;
       if (art.glow) {
         drawable.glow = glowOf(`glow:${prop.id}:${f}`, source, art.palette, art.glow);
@@ -254,7 +276,9 @@ export class OutdoorView implements SceneView {
         const building = art.noEaves ? {} : { building: { key: `${prop.id}:${f}`, source } };
         this.doors.push({ x, y, footY, door: art.door, ...building });
         const box = { tx: prop.tx, ty: prop.ty, w: prop.w, h: prop.h };
-        this.entrances.push({ box, x, y, footY, door: art.door, key, source, palette });
+        const entrance = { box, x, y, footY, door: art.door, key, source, palette };
+        this.entrances.push(entrance);
+        if (turns) Object.assign(turns, { entrance });
       }
       if (prop.id === 'scarecrow') this.scarecrows.push(drawable);
       if (shedsLeaves(prop.id)) this.shedding.push(drawable);
@@ -285,9 +309,13 @@ export class OutdoorView implements SceneView {
         this.mounds.push({ prop, drawable, dug });
       } else if (art.spent) {
         const spent = bake(`${key}:spent`, art.spent, palette);
-        this.givers.push({ key: propKey(prop, zone.id), drawable, ready: sprite, spent });
+        const giver = { key: propKey(prop, zone.id), drawable, ready: sprite, spent };
+        this.givers.push(giver);
+        if (turns) Object.assign(turns, { giver });
       } else if (art.frames) {
-        this.moving.push({ id: prop.id, drawable, m: movingOf(prop, source, palette, key) });
+        const m = movingOf(prop, source, palette, key);
+        this.moving.push({ id: prop.id, drawable, m });
+        if (turns) Object.assign(turns, { m });
       } else {
         this.props.push(drawable);
       }
@@ -301,17 +329,21 @@ export class OutdoorView implements SceneView {
     if (popUp.glow) {
       this.popUpGlow = glowOf('glow:popUpShop', popUp.source, popUp.palette, popUp.glow);
     }
-    const shoots = bake('patch:shoots', SHOOTS, SHOOTS_PALETTE);
     for (const patch of zone.map.patches) {
       const art = PATCH_ART[patch.id];
-      const ready = bake(`patch:${patch.id}`, art.source, art.palette);
+      // A patch among more of its kind is a flower bed (V1's L6), each tile in a layout of its own.
+      const form = formOf(patch.tx, patch.ty, BED_FORMS);
+      const look = patchLook(zone.map.patches, patch, true, form);
+      const bare = patchLook(zone.map.patches, patch, false, form);
+      const ready = bake(look.key, look.source, look.palette);
+      const shoots = bake(bare.key, bare.source, bare.palette);
       const x = patch.tx * TILE_SIZE;
       const y = patch.ty * TILE_SIZE;
       // Flat on the ground: anything standing on or below the tile covers it.
       const drawable: Drawable = { footY: y + 1, sprite: ready, x, y };
       const giver: Giver = { key: patchKey(patch, zone.id), drawable, ready, spent: shoots };
       if (art.glows) {
-        giver.readyGlow = glowOf(`glow:patch:${patch.id}`, art.source, art.palette, {
+        giver.readyGlow = glowOf(`glow:${look.key}`, look.source, look.palette, {
           f: art.palette.f ?? null,
           F: art.palette.F ?? null,
         });
@@ -405,13 +437,16 @@ export class OutdoorView implements SceneView {
     ctx.fillStyle = PALETTE.hedgeDark;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     const life = this.season();
+    const turned = this.turn();
     this.ground.wet(this.weather() === 'rain');
     this.ground.draw(ctx, cam, canvas);
 
     const weather = this.weather();
+    // In winter the rain falls as snow, onto snow (V1's L4).
+    const snowing = turned.snow && weather === 'rain';
     drawShimmer(ctx, life, cam, nowMs, weather === 'rain');
-    drawTufts(ctx, life, cam, nowMs, weather === 'rain');
-    drawWeatherGround(ctx, weather, cam, nowMs);
+    drawTufts(ctx, life, cam, nowMs, weather === 'rain', turned.season);
+    if (!snowing) drawWeatherGround(ctx, weather, cam, nowMs);
     if (this.town) drawLawn(ctx, this.world, cam);
     drawTarget(ctx, this.world, cam, nowMs);
 
@@ -449,6 +484,8 @@ export class OutdoorView implements SceneView {
       ...this.skyDrawables(me, nowMs),
       ...this.leafDrawables(nowMs),
       ...this.cartDrawables(),
+      ...this.passerDrawables(),
+      ...this.strayDrawables(nowMs),
       ...neighbours,
       ...this.wesDrawables(),
       ...critters,
@@ -490,9 +527,11 @@ export class OutdoorView implements SceneView {
       nowMs,
     );
     drawLine(ctx, this.world, me, cam, nowMs);
-    drawWeatherAir(ctx, weather, cam, nowMs);
+    if (!snowing) drawWeatherAir(ctx, weather, cam, nowMs);
     const sky = this.world.holidays.sky();
-    if (sky === 'snow') drawSnow(ctx, cam, nowMs);
+    // A rare event's sky (V1's R3): a snow day's snow, or a meteor shower after dark.
+    const rareSky = this.world.rareEvents.sky();
+    if (sky === 'snow' || snowing || rareSky === 'snow') drawSnow(ctx, cam, nowMs);
 
     const beat = this.fountainBeat();
     const lights = [
@@ -515,12 +554,14 @@ export class OutdoorView implements SceneView {
       lights,
       0,
       tint,
+      SEASON_LIGHT[turned.season],
     );
     if (this.town && decor) drawGarlandLights(ctx, decor, cam, nowMs, light.lamps);
     if (beat !== null && !REDUCED()) {
       for (const f of this.fountains) drawFountainNotes(ctx, f.top, beat, cam);
     }
     if (sky === 'fireworks') drawFireworks(ctx, cam, nowMs);
+    if (rareSky === 'meteors') drawMeteors(ctx, cam, nowMs);
     if (this.weatherShown === null) drawFlash(ctx, this.world.weather.sinceFlash(), REDUCED());
     this.drawSnackTwinkle(nowMs);
     drawRipeSparkles(ctx, this.world, this.zone.id, cam, nowMs);
@@ -541,15 +582,61 @@ export class OutdoorView implements SceneView {
   private season(): Life {
     const frozen = this.zone.decorations?.frozen ?? false;
     const rows = this.town ? this.world.farm.rows : 0;
-    const shown = `${frozen}:${rows}`;
+    // A built project's deck and beds are ground too (V1's R4).
+    const built = this.zone.sites?.shown ?? '0';
+    const shown = `${frozen}:${rows}:${built}`;
     if (shown !== this.groundShown) {
       this.groundShown = shown;
       const { map } = this.zone;
       const tiles = this.zone.groundTiles();
-      this.reshaped = shown === 'false:0' ? null : { tiles, life: lifeOf({ ...map, tiles }) };
+      this.reshaped = shown === 'false:0:0' ? null : { tiles, life: lifeOf({ ...map, tiles }) };
       this.ground.retile(tiles);
     }
     return this.reshaped?.life ?? this.life;
+  }
+
+  /**
+   * The season today (V1's L4), from the day key: the ground baked in its look (let go and baked
+   * again when it turns), and the trees, bushes and roofs baked in its colours the first frame
+   * after it does. Most days it's a comparison of two strings.
+   */
+  private turn(): { season: SeasonId; snow: boolean } {
+    const day = dayKey(this.world.clock.now());
+    const look = groundLookIdOf(day);
+    this.ground.look(look);
+    const season = seasonOf(day);
+    if (season !== this.seasonShown) {
+      this.seasonShown = season;
+      for (const e of this.seasonal) {
+        const { source, palette, key } = seasonLook(e.prop, season);
+        const sprite = bake(key, source, palette);
+        e.drawable.sprite = sprite;
+        if (e.giver) {
+          e.giver.ready = sprite;
+          e.giver.spent = bake(`${key}:spent`, PROP_ART[e.prop.id].spent!, palette);
+        }
+        if (e.entrance) Object.assign(e.entrance, { key, palette });
+        if (e.m) Object.assign(e.m, { key, palette });
+      }
+    }
+    return { season, snow: GROUND_LOOKS[look].snow === true };
+  }
+
+  /**
+   * The season the place is drawn in now (V1's L4), and its lawn's colour as baked: the average of
+   * its first few tiles of grass. For the smoke check.
+   */
+  seasonNow(): { season: SeasonId; look: string; lawn: number[] } {
+    const { map } = this.zone;
+    const grass: { tx: number; ty: number }[] = [];
+    for (let i = 0; i < map.tiles.length && grass.length < 12; i++) {
+      if (map.tiles[i] === 'grass')
+        grass.push({ tx: i % map.width, ty: Math.floor(i / map.width) });
+    }
+    const sum = [0, 0, 0];
+    for (const t of grass) this.ground.colourAt(t.tx, t.ty).forEach((c, i) => (sum[i]! += c));
+    const lawn = sum.map((c) => Math.round(c / Math.max(1, grass.length)));
+    return { season: this.seasonShown, look: this.ground.looks, lawn };
   }
 
   /** She has left: the ground's chunks are let go, and baked again as she comes back. */
@@ -586,6 +673,7 @@ export class OutdoorView implements SceneView {
     const { map } = this.zone;
     const whole = new Ground(map, CLUTTER[this.zone.id], Math.max(map.width, map.height));
     if (this.reshaped) whole.retile(this.reshaped.tiles);
+    whole.look(this.ground.looks);
     whole.wet(this.weather() === 'rain');
     const a = this.ground.whole();
     const b = whole.whole();
@@ -631,7 +719,7 @@ export class OutdoorView implements SceneView {
       const art = PROP_ART[p.id];
       if (!art.door) return [];
       const { x, y, footY } = this.standing(p);
-      const { source, palette, key } = lookOf(p);
+      const { source, palette, key } = seasonLook(p, this.seasonShown);
       const box = { tx: p.tx, ty: p.ty, w: p.w, h: p.h };
       return [{ box, x, y, footY, door: art.door, key, source, palette }];
     });
@@ -710,10 +798,21 @@ export class OutdoorView implements SceneView {
    */
   private lotDrawables(nowMs: number): Drawable[] {
     const film = this.filmFrame();
-    return [...(this.zone.lots?.props() ?? []), ...(this.zone.decorations?.props() ?? [])].map(
-      (p) =>
+    return [
+      ...[
+        ...(this.zone.lots?.props() ?? []),
+        ...(this.zone.decorations?.props() ?? []),
+        // The town's projects as they stand (V1's R4).
+        ...(this.zone.sites?.props() ?? []),
+      ].map((p) =>
         p.id === 'filmScreen' && film !== null ? this.showing(p, film) : this.standing(p, nowMs),
-    );
+      ),
+      // A built footbridge is walked on: drawn from its top edge, under anyone on it.
+      ...(this.zone.sites?.flat() ?? []).map((p) => ({
+        ...this.standing(p, nowMs),
+        footY: p.ty * TILE_SIZE + 1,
+      })),
+    ];
   }
 
   /** Which frame of the film is on the screen, while film night is on (0.2's J3); null if not. */
@@ -738,7 +837,7 @@ export class OutdoorView implements SceneView {
    */
   private standing(p: PlacedProp, nowMs?: number): Drawable {
     const art = PROP_ART[p.id];
-    const { source, palette, form, key } = lookOf(p);
+    const { source, palette, form, key } = seasonLook(p, this.seasonShown);
     const sprite = bake(key, source, palette);
     const footY = (p.ty + p.h) * TILE_SIZE;
     const x = p.tx * TILE_SIZE + (p.w * TILE_SIZE - sprite.width) / 2;
@@ -768,7 +867,9 @@ export class OutdoorView implements SceneView {
   private mailboxDrawables(): Drawable[] {
     if (!this.mailbox) return [];
     const { drawable, full } = this.mailbox;
-    return [this.world.letters.unread > 0 ? { ...drawable, sprite: full } : drawable];
+    // Up once Ollie has put it in, if he's walking it over (V1's P4).
+    const up = this.world.letters.unread > 0 && !this.world.postRound.carrying;
+    return [up ? { ...drawable, sprite: full } : drawable];
   }
 
   /** The floating lanterns, each bobbing a pixel up and down in its own time. */
@@ -974,6 +1075,29 @@ export class OutdoorView implements SceneView {
     return [{ footY, sprite, x: x - sprite.width / 2 + lean, y: footY - sprite.height }];
   }
 
+  /** Whoever is passing through and stands here (V1's R3), facing her way. */
+  private passerDrawables(): Drawable[] {
+    return this.world.rareEvents.passers(this.zone.id).map((p) => {
+      const sprite = bakeFigure(p.id, 'down', 0);
+      const { x } = tileCentre(p);
+      const footY = p.ty * TILE_SIZE + 28;
+      return { footY, sprite, x: x - sprite.width / 2, y: footY - sprite.height };
+    });
+  }
+
+  /** A critter gone astray (V1's R3), bobbing where it waits, lit so it can be found. */
+  private strayDrawables(nowMs: number): Drawable[] {
+    const stray = this.world.rareEvents.stray();
+    if (!stray || stray.zone !== this.zone.id) return [];
+    const art = ITEM_ART[stray.critter];
+    const sprite = bakeIcon(`item:${stray.critter}`, art.source, art.palette);
+    const bob = 2 * Math.round(Math.sin(nowMs / 450));
+    const footY = stray.ty * TILE_SIZE + 18;
+    return [
+      { footY, sprite, x: stray.tx * TILE_SIZE, y: stray.ty * TILE_SIZE - 6 + bob, glow: sprite },
+    ];
+  }
+
   /** Tonight's snack, which only ever waits in town. */
   private snack() {
     return this.town ? this.world.gathering.snack() : null;
@@ -1006,6 +1130,7 @@ export class OutdoorView implements SceneView {
     for (const p of [
       ...(this.zone.lots?.props() ?? []),
       ...(this.zone.decorations?.props() ?? []),
+      ...(this.zone.sites?.props() ?? []),
     ]) {
       lights.push(...this.stallLights(p, this.standing(p).sprite, p.id));
     }

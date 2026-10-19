@@ -175,18 +175,28 @@ export const SPRINKLER_PALETTE: Palette = {
   i: C.stoneDark,
 };
 
-/** Just planted: a little mound, with the seeds peeking out. */
-export const SEEDED: SpriteSource = mound(new Sketch(SIZE, SIZE), BED_MIDDLE)
-  .set(11, 15, 'k')
-  .set(14, 14, 'k')
-  .set(17, 14, 'k')
-  .set(20, 15, 'k')
-  .toSource();
+/**
+ * Just planted: a little mound, with the seeds peeking out, each two pixels and shaded under so
+ * they still show on dark watered soil after dark (V1's L6).
+ */
+export const SEEDED: SpriteSource = (() => {
+  const s = mound(new Sketch(SIZE, SIZE), BED_MIDDLE);
+  for (const [x, y] of [
+    [10, 15],
+    [13, 14],
+    [17, 14],
+    [20, 15],
+  ] as const) {
+    s.rect(x, y - 1, 2, 2, 'k').rect(x, y + 1, 2, 1, 'K');
+  }
+  return s.toSource();
+})();
 
+/** A sprout: two seed leaves on a stem, lit on top, big enough to read on watered soil at night. */
 function drawSprout(): SpriteSource {
   const s = mound(new Sketch(SIZE, SIZE), BED_MIDDLE);
-  s.rect(15, 8, 2, 8, 's');
-  s.sphere(11, 7, 5, 3, 'dlL').sphere(21, 6, 5, 3, 'dlL');
+  s.rect(15, 7, 2, 9, 's');
+  s.sphere(10, 7, 6, 3.5, 'dlL').sphere(22, 6, 6, 3.5, 'dlL');
   s.outline(LEAF_LINE);
   return s.toSource();
 }
@@ -236,7 +246,8 @@ const GREENS: Palette = {
   m: C.soilLight,
   M: C.soil,
   D: C.soilDark,
-  k: C.cream,
+  k: C.ghost,
+  K: C.cream,
 };
 
 /** A pumpkin of three lobes on a curly stem. */

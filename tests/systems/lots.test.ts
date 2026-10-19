@@ -38,8 +38,9 @@ describe('their lots', () => {
   const open = (zone: MapZoneId) => (x: number, y: number) =>
     walkable(mapOf(zone), x, y) && !standing(zone).some((p) => covers(p, x, y));
 
-  it('are one each for those who came later, and nobody else', () => {
-    expect(LOTS.map((l) => l.owner).sort()).toEqual([...LATER].sort());
+  it('are one each for those who came later, and the mayor, and nobody else', () => {
+    // The town hall stands on a lot of its own by the square (V1's P3b).
+    expect(LOTS.map((l) => l.owner).sort()).toEqual([...LATER, 'robBoo'].sort());
     for (const id of LATER) expect(lotOf(id)?.inside, id).toBeDefined();
   });
 

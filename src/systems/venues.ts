@@ -15,3 +15,15 @@ export function knowFairground(open: boolean): void {
 export function atTheFair(): boolean {
   return fairOpen;
 }
+
+let bandstand = false;
+
+/** Whether the bandstand on the square is built (V1's R4): told by `Projects`, as it's built. */
+export function knowBandstand(built: boolean): void {
+  bandstand = built;
+}
+
+/** Whether Boothoven's recital has moved to the bandstand. */
+export function atTheBandstand(): boolean {
+  return bandstand;
+}

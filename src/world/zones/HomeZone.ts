@@ -5,6 +5,7 @@ import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { RoomId } from '../../types/ids';
 import type { Home } from '../Home';
+import type { Placed } from '../../data/home';
 import { besideInRoom, type Crossing, type Entry, type Zone } from './Zone';
 
 /** The storage chest, as a prop, so walking up to it arrives `at` it like any other. */
@@ -88,6 +89,14 @@ export class HomeZone implements Zone {
     return back
       ? { tile: { tx: back.tx, ty: back.ty }, facing: 'down' }
       : { tile: this.home.room.mat, facing: 'up' };
+  }
+
+  /**
+   * The pieces to sit on in the room she's in, standing on the floor (V1's P5: where Cody sits of
+   * an evening).
+   */
+  get seats(): readonly Placed[] {
+    return this.home.placed.filter((p) => !p.on && FURNITURE[p.id].seat !== undefined);
   }
 
   /** Whether she's in the front room, the one with the front door and the chest. */
