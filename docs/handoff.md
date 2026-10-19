@@ -6,7 +6,25 @@ things stand" further down is the long history.
 
 ## In progress
 
-Nothing is in progress.
+**The 1.1 plan is running** (`docs/v1.1_plan.md`, decisions 328–329; started 2026-10-19 by the
+coordinating session, Opus sub-agents in worktrees, two lanes at a time, lanes H and T first).
+Each lane's heading says where it is; the rules are the plan's "Running it in parallel".
+
+### Lane H: heard (H1 → H2; decisions from 330; never the save)
+
+H1 (`claude/h1-silent-switch`): not started.
+
+### Lane T: tooling (T1 → T2; decisions from 335; never the save)
+
+T1 (`claude/t1-smoke-split`): not started.
+
+### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
+
+Not started; after H and T.
+
+### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
+
+Not started; after H and T.
 
 ## After 1.0
 
