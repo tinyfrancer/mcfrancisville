@@ -14,13 +14,26 @@ the user's word. Decisions from **325**. Each session's heading below says where
 
 ### X1: the rules and the HUD (`claude/x1-rules-hud`)
 
-Not started. Owns `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main.ts`, the
-`1.0.1` `NOTES` row and the save (v54 if it changes it, in its last commit). Its list: she holds
-her rod indoors (art notes); the quick bar's seeds run under the bag sideways (art notes); the
-reel doesn't slow under reduced motion ("Where it hurts" 8); a trick can happen behind the pet
-sheet (8); a card before a project puts her things in the chest (7); the one-day rare events on
-the festival's ordinary days (9); a Today line for the fair's free go (R6b's note); what she ate
-saved so the chip is right after a reload (16, the save change).
+Under way, draft PR into `v1.1-dev`. Owns `world/`, `systems/`, `data/` (not art), `hud/`,
+`wiring/`, `main.ts`, the `1.0.1` `NOTES` row and the save (v54, in its last commit). Its list:
+she holds her rod indoors (art notes); the quick bar's seeds run under the bag sideways (art
+notes); the reel doesn't slow under reduced motion ("Where it hurts" 8); a trick can happen behind
+the pet sheet (8); a card before a project puts her things in the chest (7); the one-day rare
+events on the festival's ordinary days (9); a Today line for the fair's free go (R6b's note); what
+she ate saved so the chip is right after a reload (16, the save change).
+
+- **Done** (a commit each): the rod (`Hands.held` is her hands indoors when she carries a tool,
+  the save keeping the tool; no renderer change), the quick bar (its strip fades at an end with
+  more beyond, `scrollMore` in `QuickBar.ts`), the reel (`WorldOptions.slow`, `reelOf`'s `slow`
+  by `SLOW_SWEEP`), the trick (the sheet closes first, the line a toast off `petTrick`'s `line`),
+  the project card (`Projects.inTheWay`, `Yard.wouldMove`, `askFirst` in `ProjectsPanel.ts`),
+  rare events on a festival's ordinary days (`isFestivals` in `systems/rareEvents.ts`), the free
+  go's Today line (`freeGo`), the `1.0.1` `NOTES` row (four lines; **X2 adds one**), decision 325,
+  and the docs ("Where it hurts" 7, 8, 9, 16; the art notes' rod and seeds; `CLAUDE.md`).
+- **Next, in order:** merge `origin/v1.1-dev`, and last the meal's dish in the save
+  (`kitchen.ate`, v54, one commit), then mark the PR ready and merge it.
+- **For X2:** no renderer change was needed for the rod (`Hands.held` is her hands indoors). The
+  `1.0.1` notes row has four lines; add yours as the fifth.
 
 ### X2: the art (`claude/x2-art`)
 
@@ -1670,15 +1683,15 @@ screenshots and its own four days of play at phone size, and found:
 - **Big empty lawns** in the hidden clearing's middle and the fairground's south-east: L2's decals
   are there but thin. A meadow patch or a few standing props.
 - **The castle garden's beds are the same rectangle** four times over.
-- **She holds her rod indoors**: the quick bar hides at home, but what she held outside stays in
-  her hand in the house (seen with Cody on the sofa at 19:30). Harmless, a little odd.
+- ~~**She holds her rod indoors**~~: done in 1.0.1 (X1, decision 325); her net, can and rod wait
+  by the door while she's in (`Hands.held`).
 - **The tension bar is small** (44 world pixels, about a tile and a half at Close): it reads, but
   only just, and its dark green window less well at night (R6a's note).
 - **Jack-o'-lanterns all year.** The town's jack-o'-lanterns are map props, so in January they
   sit in the snow (smoke's `season-winter-sideways.png`). A `seasonLook` that turns them to snowmen
   or lanterns outside autumn, or `DECOR` for October only, would fit L4's seasons.
-- **Sideways, the quick bar's seeds run under the bag**: with four kinds of seed the last packet is
-  cut off at the bag button (it scrolls, so nothing is lost, but it reads as clipped).
+- ~~**Sideways, the quick bar's seeds run under the bag**~~: done in 1.0.1 (X1, decision 325);
+  the strip fades at an end with more beyond it, so the packet at the bag reads as "this way".
 - **Lane notes still open:** the body builds and the neutral faces on the noticeboard and the
   neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c), the noticeboard's art
   the same whatever is pinned (L6). Each is in "Where it hurts" too.

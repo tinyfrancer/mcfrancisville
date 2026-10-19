@@ -7685,3 +7685,56 @@ once); leaving the 0.5 row as the lanes left it (the ground and the seasons neve
 line worded as something Cody can switch on (it asks her to ask, and the switch is the user's
 job, not hers); fixing the larger rough edges the shakedown confirmed (body builds, the reel
 under reduced motion, rare events in October) in the review rather than in 1.1.
+
+## 325. 1.0.1, the rules and the HUD: October's ordinary days open to a rare event, tools by the door, a card before the greenhouse, a gentler reel, the trick seen, the free go in Today, and the dish kept (2026-10-18, 1.0.1's X1)
+
+_Session X1 of the fixes after 1.0, asked for by the user the evening 1.0 shipped ("fix whatever
+callouts you have or are logged right now"), beside X2 (the art, decisions from 327). Save v54
+(`kitchen.ate`). Personal touches parked (decision 177): every word is the warmest default;
+nothing was asked._
+
+- **A day's rare event may come on a festival's ordinary days** ("Where it hurts" 9). Decision
+  313 kept them out of every festival, and the Halloween Festival is all of October, the month she
+  plays most, so a phone taking 1.0 in October saw nothing rare until November. Now only a
+  festival's own days are kept clear (`isFestivals` in `systems/rareEvents.ts`): its first day,
+  its finale, and any day with one of its beats on (a `HappeningRow` `on: { festival }`: film
+  night's Saturdays, a week's picnic, sparklers or lights walk); holidays and her days stay clear as
+  before, and the wandering stall's week still never touches a festival. **The roll is unchanged**
+  (`RARE_ONE_IN` 11), so every day dealt outside a festival is the very day it was in 1.0, and
+  nothing the calendar or Today told her changes; the rate goes from about one day in 8.7 to one in
+  8.2 over six years (the test's 1/11 to 1/7.5 holds), and an October has about two (14 in six,
+  `tests/systems/rareEvents.test.ts`).
+- **Her net, can and rod wait by the door** (the art notes): `Hands.held` is her hands while she's
+  indoors (home or any building) and what she carries is a tool, and the tool again on the way
+  out; the save keeps what she carries. A seed or a sprinkler stays in her hand, for the planters
+  inside. Decided in the world from where she is, so the renderer's read (`playerDrawable`'s
+  `world.hands.held`) needed no change.
+- **A card before a project puts her things in the chest** ("Where it hurts" 7): Start on the
+  Projects tab asks `Projects.inTheWay(id)` (`Yard.wouldMove`, which moves nothing) and, only when
+  something of hers stands on the site, swaps Start for a little card naming it ("Your greenhouse
+  goes up right where your garden bench stands. It'll tuck into your storage chest for now…") with
+  **Not yet** and **Go ahead**. Asked at Start, because that's when `Yard.makeRoom` moves things.
+- **The reel sweeps gentler under reduced motion** ("Where it hurts" 8): `WorldOptions.slow`, the
+  phone's `prefers-reduced-motion`, one read in `main.ts` shared with the effects and the iris,
+  read by `Fishing` at the hook; `reelOf`'s `slow` stretches the sweep by the fair's `SLOW_SWEEP`
+  (1.6×), the window the same along the bar and so wider in time.
+- **A trick asked for on the pet sheet is seen**: Trick closes the sheet first, as Find and the
+  broom's flights do, and the trick's line comes as a toast off the `petTrick` moment's `line`.
+- **The quick bar's strip fades at an end with more beyond it** (`scrollMore` in `QuickBar.ts`, a
+  mask in `styles.ts`), so a seed cut off at the bag reads as "this way", not clipped.
+- **Today says which stall's first go is free** (R6b's note): a `freeGo` line from
+  `TodayFacts.freeGo` (`Activities.freeGo`, `freeToday`) until she has had it, a tap flying her up
+  to the stall.
+- **What she ate is kept** ("Where it hurts" 16, decision 223): `kitchen.ate`, the dish for each
+  course (save v54). A town saved before has none kept, so its chip shows the first dish of the
+  effect until she next eats, as it did.
+- **The mayor's notes** have a `1.0.1` card (four lines here; X2 adds one).
+
+**Rejected:** a bigger `RARE_ONE_IN` to hold the rate at 8.7 (it would re-deal every rare day of
+the year, and the calendar may already have told her one); letting the wandering stall into
+festivals (its shelf and the festival's would crowd each other, decision 313); counting trick or
+treat's evenings as the festival's own (every October evening has it, so October would stay
+empty); putting everything she holds down at the door (a seed in hand is how she plants a
+planter); hiding a held tool in the renderer (a rule, decision 9); asking only when the first stage
+stands (things move at Start); a right padding on the quick bar's strip (it moves the end, not the
+cut at rest); leaving the pet sheet up with the trick behind it.

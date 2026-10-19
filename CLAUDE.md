@@ -644,7 +644,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   A second tap on the rod she holds paints it (`src/hud/RodSheet.ts`, `data/rods.ts`); the colour
   is kept by the phone beside the save (`src/persistence/rod.ts`, decision 171) and handed to the
   drawing by `paintRod` (`render/scene.ts`).
-  `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
+  `world.hands` (`Hands`, save v20) keeps what she holds, her tools waiting by the door while
+  she's indoors (`held`, decision 325); a held seed is planted straight into an
   empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand:
   the net and rod from `HELD_ART`, a seed as `HELD_PACKET`, with her fist drawn over the grip
   (decision 131).
@@ -696,7 +697,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   neighbour asking a favour wears a parcel. **Weeks that differ** (V1's R3, decision 313): a
   daytime happening on Monday, Tuesday and Thursday and a festival week each spring, summer and
   winter (`RHYTHM_HAPPENINGS`, festivals as `CALENDAR` rows with a span), and rare events about one
-  day in nine, never during a festival (`RARE_EVENTS` in `src/data/rareEvents.ts`, dealt by
+  day in nine, never on a festival's own days but on its ordinary ones (decision 325), the stall's
+  week never in one (`RARE_EVENTS` in `src/data/rareEvents.ts`, dealt by
   `rareEventOn`, told by `world.rareEvents` with a keepsake the first time; the wandering stall for
   a week, a meteor shower, a wayfarer, a snow day, a stray critter), Moira at the shore every July,
   and the Moon Pie Man and the pop-up told when they arrive.
