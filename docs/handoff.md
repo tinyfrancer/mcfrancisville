@@ -113,6 +113,17 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
+**A5a in progress** (branch `claude/a5a-second-body`, draft PR against `v1.1-dev`; decision 354
+when it lands; no save change). Done: `tests/sprites/looksHeld.test.ts` holds her looks and every
+figure's as hashes of their layers, taken from the code before any change (rerun, never `-u`,
+but for the two stout neighbours' own lines); `doll.ts` split by family into `sprites/doll/`
+(`body`, `poses`, `paint`, `face`, `ink`, `hair`, `hats`, `prints`, `backs`, `cuts`), a pure
+move, `doll.ts` putting her together with the same exports. Next, in order: the `Build`
+(`data/builds.ts`) and a stout body (`sprites/doll/stout.ts`: parts drawn wider, a `Measure`
+the cuts read instead of column literals, `measureOf(body)`), the action and working bodies for
+it, `build` on Rufus's and Gourdon's rows, their touches on it, the docs and decision 354.
+Baseline renders (1,253 `doll:*`, `figure:*`, `sit:*` PNGs) were in the session's scratch.
+
 **A3 landed (PR #213, decision 352; no save change). Next: A5a.** The ice is drawn on the
 world's pixels (`sprites/ice.ts`, `drawIce`: patches of frosted, plain and clear ice, darker down
 the middle, a frost that comes and goes, stones in the bank's lip, cracks and skate marks from
