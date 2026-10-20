@@ -199,7 +199,7 @@ export const NOTE_SLOTS_UP = NOTE_SLOTS.length;
  * list always, a note for each of the window's notes not yet answered (a pin and a scrap of paper
  * where one was taken down), and a bright poster when the day has an event on.
  */
-function drawNoticeboard(open: number, poster: boolean): SpriteSource {
+function drawNoticeboard(open: number, poster: boolean, winter: boolean): SpriteSource {
   const s = new Sketch(64, 60);
   slab(s, 7, 12, 5, 47, TRIM);
   slab(s, 52, 12, 5, 47, TRIM);
@@ -263,11 +263,36 @@ function drawNoticeboard(open: number, poster: boolean): SpriteSource {
       s.set(px, y, lightOf(LEAVES)).set(px, y + 1, fillOf(LEAVES));
   }
   // A pumpkin at its foot, and grass round the posts.
-  s.sphere(47, 55, 5, 4, 'KaAl');
-  s.set(47, 50, fillOf(LEAVES)).set(48, 50, fillOf(LEAVES));
+  if (winter) {
+    // In winter a snowball packed into a pumpkin's shape, as the jack-o'-lanterns are snow
+    // lanterns (1.1's A2): its lobes creased in shade, a holly sprig for a stem with a berry.
+    s.ellipse(47, 55, 6, 5, SNOWBALL.rim).sphere(47, 55, 5, 4, SNOWBALL.ramp);
+    for (const x of [44, 50]) s.rect(x, 53, 1, 4, SNOWBALL.shade);
+    s.set(46, 50, fillOf(LEAVES)).set(47, 50, fillOf(LEAVES)).set(48, 51, fillOf(LEAVES));
+    s.set(47, 51, SNOWBALL.berry).set(46, 51, lightOf(LEAVES));
+  } else {
+    s.sphere(47, 55, 5, 4, 'KaAl');
+    s.set(47, 50, fillOf(LEAVES)).set(48, 50, fillOf(LEAVES));
+  }
   s.rect(4, 57, 10, 2, fillOf(LEAVES)).rect(50, 57, 10, 2, fillOf(LEAVES));
   return finish(s);
 }
+
+/** The winter snowball's keys: its rim, its tones from shade to light, and the holly's berry. */
+const SNOWBALL = { rim: '1', shade: '2', ramp: '234', berry: '5' } as const;
+
+/**
+ * The board's colours in winter (1.1's A2): the clutter's, with the snowball's in the snow's own
+ * tones as the snow lanterns are, and a scarlet berry.
+ */
+export const NOTICEBOARD_WINTER_PALETTE: Palette = {
+  ...CLUTTER_PALETTE,
+  1: mix(C.snowDeep, C.night, 0.45),
+  2: C.snowShade,
+  3: C.snow,
+  4: C.snowLight,
+  5: C.scarlet,
+};
 
 export const BENCH: SpriteSource = drawBench();
 const boards = new Map<string, SpriteSource>();
@@ -279,16 +304,19 @@ const boards = new Map<string, SpriteSource>();
 export function noticeboardLook(
   open: number,
   poster: boolean,
-): { key: string; source: SpriteSource } {
+  winter = false,
+): { key: string; source: SpriteSource; palette: Palette } {
   const up = Math.max(0, Math.min(NOTE_SLOTS_UP, Math.floor(open)));
-  const key = `prop:noticeboard:${up}${poster ? ':poster' : ''}`;
+  const key = `prop:noticeboard:${up}${poster ? ':poster' : ''}${winter ? '@winter' : ''}`;
   let source = boards.get(key);
-  if (!source) boards.set(key, (source = drawNoticeboard(up, poster)));
-  return { key, source };
+  if (!source) boards.set(key, (source = drawNoticeboard(up, poster, winter)));
+  return { key, source, palette: winter ? NOTICEBOARD_WINTER_PALETTE : CLUTTER_PALETTE };
 }
 
 /** The board as the catalogue and the overview show it: a full window's notes, no event. */
 export const NOTICEBOARD: SpriteSource = noticeboardLook(NOTE_SLOTS_UP, false).source;
+/** And in winter, its pumpkin a snowball (1.1's A2), for `RESHAPED`. */
+export const NOTICEBOARD_WINTER: SpriteSource = noticeboardLook(NOTE_SLOTS_UP, false, true).source;
 export const SIGNPOST: SpriteSource = signpostTo('town', 'right');
 export const BARREL_FORMS: readonly SpriteSource[] = [barrel(false), barrel(true)];
 

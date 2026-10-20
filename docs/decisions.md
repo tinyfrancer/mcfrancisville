@@ -8361,6 +8361,90 @@ in a walking line, a set piece's tile or beside a spot); new planter props (the 
 the shrink were enough, and a new prop wants seasons of its own); the square left 12 wide (the
 notched corners where the lanterns stood read as a cross, not a square).
 
+## 351. The woods' edges stepping in and out, three more trees, the lawns, the castle garden's four beds, and a snowball at the noticeboard (2026-10-19, 1.1's A2)
+
+_Session A2 of the 1.1 plan, lane A (decision 328), for V1's review's art notes "Woods are walls
+of one crown", "Big empty lawns" and "The castle garden's beds are the same rectangle", and 1.0.1's
+pumpkin left orange in winter (decision 327). No save change. Personal touches parked (decision
+177): every shape and place is the warmest default; nothing was asked._
+
+- **Three more trees** (`sprites/treeForms.ts`, after L2's conifer, dead tree and birch): a **tall
+  thin poplar** (a column of leafy clumps from a rounded point, widest a little below the middle),
+  a **leaning tree** (its trunk bowed over to the left from its foot, a lopsided crown out over
+  the grass and one bough back to the right under a little crown of its own) and an **old broken
+  tree** (a stout trunk snapped off in splinters, its break pale heartwood with a ring, a round
+  hollow, two shelves of fungus, and one bough still in leaf). Each is the tree's 96×120, in its
+  keys and lit as one mass by `paintCrown`, so each takes the three leaf colours and every
+  season's swap as the others do; the heartwood (`x`, `X` in `leaves()`, with the fungus `f`,
+  `F`) is capped with snow in winter (`BREAK_SNOW` in `sprites/seasons.ts`). **The tree's forms
+  are dealt from nine** by `formOf`, so every tree in every place is dealt again: round crowns go
+  from half of the trees to a third, and the town's trees change shape too (their colours, which
+  `variantOf` deals, don't).
+- **The woods' edges step in and out.** Whisperwood, Lantern Shore and the castle hill had a
+  hedge all round with the lawn running up to it and trees in rows behind. Now trees stand in
+  the hedge itself (30 tiles across the three places), a few step in a tile onto the lawn, and a
+  rock or a stump sits in a gap here and there (7), so no side runs eight tiles without something
+  standing in its edge or the line inside it. A tree in the edge shows its crown half off the
+  map, so the wood reads as going on past it. The hidden clearing's two dirt tiles at its top
+  edge, a dead-end path she could walk onto the edge by, are two trees now.
+- **The lawns.** The clearing's middle: a meadow patch east of the toadstool ring (rows 9–10),
+  long grass in its south-west corner, a log and a rock. The fairground's south-east: a meadow by
+  the pumpkin field's east end, a log, a rock, a clump of toadstools and a bush. None is on a
+  spot, a dig spot, a set piece or a project's site; no bench or log stands beside a stop, so no
+  one is newly sat down (`seatBeside`); the clearing and the fairground's south-east have no
+  stops there.
+- **The castle garden's four beds** are the milkweed in the map, so their shapes are the map's:
+  **a cross** (west, by the castle), **a corner** (east, hugging the path to the wedding arch),
+  **a long ribbon** (west, below the cross-path) and **a horseshoe** round a little nook of lawn
+  above the east bench (`sprites/flowerBeds.ts` rounds a bed wherever it ends, so a shape is just
+  where its tiles are). The roses, benches and hedges stay where they were. The R4 project's
+  castle garden (its posts, frames and two raised beds either side of the seat) is a different
+  corner and is left as it was: a matched pair flanking a seat is meant to match.
+- **The noticeboard's little pumpkin is a snowball in winter**, packed into a pumpkin's shape as
+  the jack-o'-lanterns are snow lanterns, its lobes creased in shade, a holly sprig and a berry
+  for a stem. It's in `RESHAPED` for winter beside the jack-o'-lanterns (`NOTICEBOARD_WINTER`),
+  and since the board's art changes with what's pinned up, `noticeboardLook(open, poster, winter)`
+  draws it for every look, with the snow's own tones in `NOTICEBOARD_WINTER_PALETTE` (the
+  pumpkin's keys are the poster's too, so a palette swap would have whitened the poster).
+  `OutdoorView`'s board passes the season it's drawing.
+- **Measured.** The props baked per place (distinct looks over each map, any season): the town
+  67 → 68 (its trees 8 → 9 looks), Whisperwood 33 → 42 (trees 18 → 27), Lantern Shore 29 → 35
+  (18 → 24), the castle hill 31 → 40 (17 → 26), the clearing 27 → 34 (18 → 24), the fairground 32
+  → 37, Boo Acres 42 → 43: each baked once, as before. `npm run perf` twice each way (draw mean
+  in ms, at 21:30, 4× throttled): town 43.5, 37.5 before and 33.9, 40.2 after; Whisperwood 29.4,
+  29.9 and 29.4, 29.6; the fairground 25.0, 22.7 and 21.6, 26.5; every other scene within the
+  same spread; the heap 29.5–32.6 MB before and 29.6–32.4 MB after.
+- **Looked at**: `npm run sprite -- 'place:*'` and `'season:*:<place>'` for the five places, the
+  tree forms at 4×, the noticeboard in autumn and winter, and the woods and the castle garden at
+  phone size, Close and Far, upright and on its side, at noon and 21:30. Smoke whole (622 checks)
+  and `smoke:offline` pass.
+- **Held by** `tests/data/maps.test.ts` ("the places' edges": every place outdoors closed in but
+  for its ways out, which only the town was held to; Whisperwood's, the shore's and the castle
+  hill's sides never eight tiles without something standing in their edge or the line inside it,
+  and some of it in the edge itself, the castle hill's top being its castle), `tests/sprites/
+treeForms.test.ts` (nine shapes, each its own in every colour), `tests/sprites/seasons.test.ts`
+  (the break snowed in winter only; the board's pumpkin a snowball in winter whatever is pinned
+  up, the board above it unchanged), and W1's snapshots, re-taken for exactly the tiles changed:
+  every tile's answer in every place, for a new town, every project built and 1.0's lived-in
+  save on the four days, compared against the old code's, differed only on the 106 tiles this
+  session put a prop on (`overlays`), and `arrivingAtProps` meets the new props first in its
+  sample of two of each kind (a tree in the edge, the stumps and rocks in gaps, the lawns' log,
+  rock and toadstools), each doing what its kind does.
+
+**Rejected:** a prop of its own for an edge tree (it would be shaken for nothing, belong to no
+critter's habitat and need a row in every system that knows trees; the tree's forms are dealt by
+tile, so the edge's are among them); picking the edge's forms by where the edge is (`lookOf` knows
+a tile, not a map, and `parseMap` is the world's); keeping the old six forms where they stood and
+dealing the new three only to some trees (a third of the woods' trees still came out round and
+teal; dealing all nine is simpler and the town gains from it too); a fourth leaf colour to dilute
+the teal (a new colouring wants a palette in every season, and the shapes were the note); trees on
+the very top row of every place (in Whisperwood and the castle hill the second row shows the crown
+over the hedge, where the top row shows a trunk with its crown off the map); rounding the cross
+bed's inner corners (a concave fillet needs the diagonal neighbours in `flowerBeds.ts` and the
+town's beds have none; the cross reads as a formal bed); a different picture for the project's
+two raised beds; a palette swap for the board's pumpkin; a small snowman (a new shape with no
+pumpkin to keep, where the lanterns kept theirs).
+
 ## 342. `Talk` out of `Neighbourhood`, the Apis by area, `main.ts` slimmed, the areas' order named once, and the legend's note (2026-10-19, 1.1's W3)
 
 _Session W3 of the 1.1 plan, lane W's last (decision 328), "Where it hurts" 12, 13 and 15. **No

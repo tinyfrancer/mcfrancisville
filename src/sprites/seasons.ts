@@ -6,6 +6,7 @@ import { mix, PALETTE as C, ramp } from './palette';
 import { lookOf, PROP_ART, type StandingProp } from './props';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
+import { NOTICEBOARD_WINTER, NOTICEBOARD_WINTER_PALETTE } from './clutter';
 import { SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
 import {
   E,
@@ -401,6 +402,12 @@ const EVERGREEN = fresh(C.canopyDark, C.canopy);
 /** Which of the tree's forms is the conifer (`MORE_TREE_FORMS`, after the three round ones). */
 const CONIFER = 3;
 
+/**
+ * Snow settled on the broken tree's break in winter (1.1's A2): its pale heartwood (`x`, the
+ * tree's key for it) under a cap, the ring in it a shade.
+ */
+const BREAK_SNOW: Palette = { x: C.snow, X: C.snowShade };
+
 /** Snow on a roof in winter: its texture and its lit edge white, its eaves still in shade. */
 const ROOF_SNOW: Palette = { [ROOF[2]!]: C.snowShade, [ROOF[3]!]: C.snow, [ROOF[4]!]: C.snowLight };
 
@@ -409,12 +416,17 @@ const ROOFED: ReadonlySet<PropId> = new Set(['well', 'farmWell']);
 
 /**
  * What stands in another shape through a season, form for form (1.0.1, decision 327): the town's
- * jack-o'-lanterns are snow lanterns in winter, each with its own face, so none sits in the snow.
+ * jack-o'-lanterns are snow lanterns in winter, each with its own face, so none sits in the snow;
+ * and the little pumpkin at the noticeboard's foot is a snowball (1.1's A2), which the view draws
+ * through `noticeboardLook` as the board's notes come and go.
  */
 const RESHAPED: Partial<
   Record<SeasonId, Partial<Record<PropId, { forms: readonly SpriteSource[]; palette: Palette }>>>
 > = {
-  winter: { pumpkin: { forms: SNOW_LANTERN_FORMS, palette: SNOW_LANTERN_PALETTE } },
+  winter: {
+    pumpkin: { forms: SNOW_LANTERN_FORMS, palette: SNOW_LANTERN_PALETTE },
+    noticeboard: { forms: [NOTICEBOARD_WINTER], palette: NOTICEBOARD_WINTER_PALETTE },
+  },
 };
 
 /** Whether a season changes how this prop is drawn. */
@@ -454,6 +466,7 @@ export function seasonLook(prop: StandingProp, season: SeasonId): ReturnType<typ
     ...base.palette,
     ...(leaves ?? {}),
     ...(roofed ? ROOF_SNOW : {}),
+    ...(season === 'winter' && prop.id === 'tree' ? BREAK_SNOW : {}),
   }));
   return { ...base, palette, key };
 }

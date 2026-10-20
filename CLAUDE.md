@@ -185,7 +185,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   world's grid inside a kerb, the well on setts that the flagstones ring a tile out
   (`src/sprites/paving.ts`; cobbles, flagstones and setts run on into each other, `PAVED`); trees,
   the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
-  take `forms` as well as `variants`; the tree's conifer, dead tree and birch are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
+  take `forms` as well as `variants`; the tree's conifer, dead tree and birch, and the woods' edge's poplar, leaning tree and broken tree, are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
   from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
   shared keys, decision 95): her house, Skelly and her pots in `houses.ts`, the shops, the pop-up
   and the cart in `shops.ts`, the neighbours' houses in `neighbourHouses.ts`. Water smooths a
