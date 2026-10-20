@@ -56,16 +56,24 @@ four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&pag
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
-**W3 in progress** (branch `claude/w3-talk-apis`, draft PR #210; no save change). Done and
-committed: `Talk` out of `Neighbourhood` (`services/Talk.ts`, made in `neighbours` just before the
-neighbourhood, which reads `talkingTo` from it and forwards the talk's ten reads for the view and
-the tests); `wiring/apis.ts` split into `wiring/apis/<area>.ts` (a pure move) with `apis.ts`
-composing; `main.ts` down to the boot, the loop and the views (the save and cloud
-`wiring/keeping.ts`, Settings' Apis `wiring/apis/settings.ts`, going in `wiring/greeting.ts`,
-touch, music, the dev handles); the areas' order named in `world/areas/order.ts` (`AREAS`, held
-by `tests/world/areaOrder.test.ts` through `options.areaMade`); the legend's note in
-`data/maps.ts`. Left: the numbers (`npm run perf` and a talk and a window turn timed, before on
-`v1.1-dev` and after), decision 342, the docs' last lines, merge `v1.1-dev`, rerun, merge.
+**W3 landed (PR #210, decision 342; no save change). Lane W is finished.** `Talk` is the talk
+(`services/Talk.ts`: the hello, heart moments, questions and replies, faces, calls' and visits'
+lines, gifts, favours, friendship and best friends' letters), made in `neighbours` just before
+`Neighbourhood`, which is who's where and the walking and reads `talkingTo` from it; the wiring,
+`World` and the areas call `world.talk`. The sheets' Apis are built by area in `wiring/apis/`
+(a pure move; `apis.ts` composes them). `main.ts` is the boot, the loop and the views; the save
+and cloud are `wiring/keeping.ts`, Settings' Apis `wiring/apis/settings.ts`, going in
+`wiring/greeting.ts`, touch, music and the dev handles `wiring/`'s too. The areas' order is
+`AREAS` (`world/areas/order.ts`), held by `tests/world/areaOrder.test.ts` through
+`options.areaMade`. The legend's note is at `LEGEND` in `data/maps.ts`. **For V1.1's review**:
+`Neighbourhood` still answers the talk's ten reads in a line each (`talk`, `reply`, `give`,
+`favour`, `doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`), as W2 left
+`Home`'s twenty-seven, so `src/render/` and the tests didn't move; a later session may point
+them at `world.talk` and drop them ("Where it hurts" 11 and 12). Talk actions stay in
+`wiring/talkActions.ts` (the sheet's buttons). A new service that listens for a signal is a
+word in its area's `AREAS` row, or the order test fails. Perf and a talk and a window's turn
+timed within noise (architecture.md's "1.1's W3"); smoke 622/622 on both, nothing she sees
+changed. No `NOTES` line (a refactor gets none).
 
 **W2 landed (PR #208, decision 341; save v55).** Her rooms are a keeper of their
 own, `Rooms` (`src/world/Rooms.ts`: each room's pieces with what they show and what stands on

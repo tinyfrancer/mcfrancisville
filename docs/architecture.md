@@ -984,6 +984,31 @@ shared with lane W's session (draw means, ms (p50); heap, MB):
 
 Within the spread everywhere; the heap half a megabyte up, the square's pieces.
 
+**1.1's W3** (2026-10-19, decision 342), `Talk` out of `Neighbourhood`, the Apis by area,
+`main.ts` slimmed and the areas' order named, changes no drawing; a neighbour's walk asks `Talk`
+who she's talking to, a call one function deeper. Timed in Node (vitest, a fake clock, the town
+settled 400 steps), alternating with `v1.1-dev`, each from its own copy: a talk opened and its
+buttons worked out (`neighbourhood.talk` and `talkActions`, every neighbour four times a day for
+six days, 312 a run) and the step that crosses into the afternoon or the evening (20 a run),
+medians of each run, quartiles across runs (24 runs on W3, 27 on `v1.1-dev`): a talk 0.089 ms
+(0.079–0.098) against 0.085 (0.077–0.095), a window's turn 3.3 ms (2.86–4.19) against 2.93
+(2.59–3.57), an ordinary step 0.19 against 0.18 ms. `npm run perf` at Close, 21:30, three runs
+each alternating (draw means, ms (p50); updates, ms):
+
+| Scene       | Draw, W3              | Draw, v1.1-dev        | Update W3 → v1.1-dev  |
+| ----------- | --------------------- | --------------------- | --------------------- |
+| Town        | 29.2–42.3 (20.4–29.8) | 29.1–42.8 (20.8–29.1) | 0.96–1.44 → 0.89–1.46 |
+| Home        | 14.6–21 (9.1–12.8)    | 14.2–20.3 (9–12.4)    | 0.73–1.18 → 0.68–1.16 |
+| Fairground  | 20.3–24.8 (13.8–16.9) | 18–24.5 (12.5–17)     | 0.61–0.79 → 0.52–0.8  |
+| Whisperwood | 21.5–28.5 (14.3–18.6) | 22–26.1 (14.4–18.8)   | 0.67–0.93 → 0.67–0.84 |
+| Boo Acres   | 16.4–20.5 (11.1–13.1) | 17.6–25.4 (11.3–15.3) | 0.57–0.69 → 0.58–0.88 |
+| Her yard    | 26.9–35.5 (20.7–27.2) | 27.4–40.9 (21.8–31.7) | 0.77–1.13 → 0.85–1.38 |
+| Back room   | 14.8–22 (10.1–15.2)   | 16.5–23.1 (11.5–16.4) | 0.89–1.24 → 0.9–1.42  |
+
+Every row within the other's spread, one way and the other; the window's turn leans a few tenths
+of a millisecond dearer in the middle of its runs and overlaps them end to end, the container's
+noise on a step that does a window's dealing.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -1098,7 +1123,7 @@ V1's weight on it.
     hand it something to sort); the lanes drew new things in files of their own
     (`render/effects.ts`, `fairGames.ts`, `transition.ts`), which is the way, and a view session
     could do the same for what's left. ~~The service and wiring files~~: done in 1.1's W3
-    (decision 342). `services/Neighbourhood.ts` (1,102 lines) is who's where and the walking (651)
+    (decision 342). `services/Neighbourhood.ts` (1,102 lines) is who's where and the walking (652)
     and `services/Talk.ts` the talk (534), the neighbourhood answering the talk's ten reads in a line
     each for the view and the tests; `wiring/apis.ts` (766) is 38 lines composing a builder an area
     in `wiring/apis/` (13 files, 24 to 139 lines, and `settings.ts`, 89, from `main.ts`); `main.ts`
