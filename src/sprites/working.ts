@@ -632,7 +632,8 @@ const POSES = new Map<string, WorkPose>();
 /**
  * A neighbour at their job (`frame` 0 or 1), facing the way the job faces, on the body of their
  * build; null for a job drawn another way (Maude's reading) or a view it isn't done in. On a
- * broader body, what's in their hands is as much wider as their hands are further apart.
+ * broader body, what's in their hands is as much wider as their hands are further apart, and on a
+ * narrower one as much narrower.
  */
 export function workPose(
   work: WorkId,

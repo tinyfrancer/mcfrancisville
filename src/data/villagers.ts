@@ -84,8 +84,11 @@ export interface VillagerRow {
   name: string;
   /** What they are, as they'd put it. */
   creature: string;
-  /** The body under their clothes (1.1's A5a, `data/builds.ts`); hers, `regular`, if none. */
-  build?: Build;
+  /**
+   * The body under their clothes (1.1's A5a, `data/builds.ts`), chosen for each neighbour by
+   * their lines and look (A5b, decision 355); `regular`, hers, where nothing argues otherwise.
+   */
+  build: Build;
   schedule: Schedule;
   /** What they say first when she finds them visiting her at home. `{name}` is her name. */
   dropsBy: string;
@@ -129,6 +132,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   maude: {
     name: 'Maude',
     creature: 'ghost librarian',
+    build: 'regular',
     schedule: {
       weekday: [
         { from: 5, at: 'graves' },
@@ -412,6 +416,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   wrapunzel: {
     name: 'Wrapunzel',
     creature: 'mummy baker',
+    build: 'regular',
     schedule: {
       weekday: [
         { from: 5, inside: 'crumbs', doing: 'tray' },
@@ -554,6 +559,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   agatha: {
     name: 'Agatha',
     creature: 'witch',
+    build: 'regular',
     schedule: {
       weekday: [
         { from: 5, inside: 'agathaCottage', doing: 'stirring' },
@@ -700,6 +706,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   barty: {
     name: 'Barty',
     creature: 'skeleton gardener',
+    // "All bones" (1.1's A5b).
+    build: 'slight',
     schedule: {
       weekday: [
         { from: 5, at: 'farmHostas', doing: 'digging' },
@@ -837,6 +845,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   cody: {
     name: 'Cody',
     creature: 'vampire',
+    build: 'regular',
     schedule: {
       weekday: [
         // He doesn't do mornings, so he does them at home.
@@ -980,6 +989,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   ollie: {
     name: 'Ollie',
     creature: 'postie',
+    build: 'regular',
     schedule: {
       weekday: [
         // Sorting the post first thing, out on the round all morning, and sorting again after.
@@ -1113,6 +1123,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   nessa: {
     name: 'Nessa',
     creature: 'lake monster',
+    build: 'regular',
     schedule: {
       weekday: [
         // Tending the lanterns on the lake: lit at dusk, and trimmed in the morning.
@@ -1378,6 +1389,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   hazel: {
     name: 'Hazel',
     creature: 'stargazer',
+    build: 'regular',
     schedule: {
       weekday: [
         // Up all night with her telescope, so she sleeps the afternoon away.
@@ -1510,6 +1522,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   boothoven: {
     name: 'Boothoven',
     creature: 'ghost composer',
+    build: 'regular',
     schedule: {
       weekday: [
         // Composing at the piano all morning, out to hear the town at noon, and the fountain at dusk.
