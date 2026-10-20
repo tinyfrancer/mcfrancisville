@@ -113,15 +113,21 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-**A4 in progress** (branch `claude/a4-outdoorview-split`, decision 353; no save change; run
-beside A3). `render/OutdoorView.ts` split into passes: `render/passes/pass.ts` (`Pass`, `Frame`,
-`composeLayers`), the passes in `render/passes/` and beside the yard, beds, fishing, fountain,
-holidays, doors and effects, the order in `OUTDOOR_LAYERS`, held by
-`tests/render/outdoorPasses.test.ts` and `tests/render/outdoorView.test.ts` (the surface).
-Done: the move (1,269 lines to 494), the suite green, smoke 622/622 on `v1.1-dev` once. Next:
-smoke twice on each side and the pictures compared (`compare.mjs`-style, as W1), `npm run perf`
-three runs alternating, the numbers in architecture.md's tables and decision 353, the plan's
-status line, then the PR ready and merged.
+**A4 landed (PR #212, decision 353; no save change). Next: A5a.** (Run beside A3.)
+`render/OutdoorView.ts` is drawn in passes (1,269 lines to 494): a `Pass`
+(`render/passes/pass.ts`) is a name and a part in any of a frame's layers (`ground`, `stand`,
+`wanted`, `over`, `lights`, `lit`), handed a `Frame`; the passes are in `render/passes/` or
+beside what they draw (yard, beds in `garden.ts`, fishing, fountain, holidays, doors, effects);
+the order of each layer is `OUTDOOR_LAYERS` in `OutdoorView.ts`, held by
+`tests/render/outdoorPasses.test.ts`, and `composeLayers` refuses a name without a pass or a part
+no layer names. **A new thing drawn outdoors is a pass and its name in `OUTDOOR_LAYERS`** (where
+it stands in `stand` is where it's drawn among things level with it). `OutdoorView`'s surface is
+held by `tests/render/outdoorView.test.ts`. **For A5a**: nothing in the doll or the villagers'
+drawing moved; neighbours are still `neighbourDrawables` (`render/villagers.ts`), called by
+`neighboursPass` (`passes/folk.ts`), the Moon Pie Man by `cartPass` and the passers and Wes by
+their passes through `bakeFigure`. Smoke's pictures compared as W1 did (two runs a side, nothing
+differs between the branches that doesn't run to run); perf within noise (architecture.md's
+"1.1's A4"). No `NOTES` line.
 
 **A2 landed (PR #211, decision 351; no save change). Next: A3.** Three more tree forms in
 `sprites/treeForms.ts` (a poplar, a leaning tree, a broken one), so the tree's forms are dealt

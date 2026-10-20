@@ -1034,6 +1034,27 @@ Every row within the other's spread, one way and the other; the window's turn le
 of a millisecond dearer in the middle of its runs and overlaps them end to end, the container's
 noise on a step that does a window's dealing.
 
+**1.1's A4** (2026-10-19, decision 353), `OutdoorView` drawn in passes, draws the same things in
+the same order: a frame walks seven short lists of passes where it called methods, makes one
+`Frame` and one `LitFrame`, and flattens each pass's drawables into the one list it sorted before.
+`npm run perf` at Close, 21:30, three runs each alternating, `v1.1-dev` and A4 each served from its
+own copy, on a container shared with A3's session (draw means, ms (p50); updates, ms; heap, MB):
+
+| Scene       | Draw, A4              | Draw, v1.1-dev        | Update A4 → v1.1-dev  | Heap, A4 / v1.1-dev   |
+| ----------- | --------------------- | --------------------- | --------------------- | --------------------- |
+| Town        | 35.2–39.2 (25.1–28)   | 36.3–39.7 (25.5–28)   | 1.15–1.47 → 1.21–1.49 | 29.8–31.9 / 29.8      |
+| Home        | 15.1–20.8 (10.1–12.4) | 16.2–19.3 (10.4–12.3) | 0.84–1.11 → 0.83–1.07 | 30.4–31 / 30.6–31     |
+| Fairground  | 23.5–28 (16.8–18.6)   | 23.3–25.3 (16.7–17.3) | 0.74–1.04 → 0.81–0.99 | 31.2–31.8 / 31–31.1   |
+| Whisperwood | 24.6–29.3 (16.6–19.9) | 26.8–28.2 (18.3–19.2) | 0.8–1.04 → 0.91–1.03  | 32–32.9 / 31.6–32.7   |
+| Boo Acres   | 17.5–23.8 (12–15.3)   | 18.8–20.8 (13–13.9)   | 0.64–0.86 → 0.65–0.75 | 32.5–33.3 / 32.2–32.5 |
+| Her yard    | 34.3–37 (26.6–29.2)   | 33.6–38.3 (25.3–30.2) | 1.19–1.3 → 1.17–1.19  | 32.4–34.2 / 32.2–32.8 |
+| Back room   | 18.1–26.2 (13.6–18.4) | 19.7–21.6 (13.9–15.7) | 1.17–1.73 → 1.21–1.37 | 32.6–33.1 / 32.4–33.2 |
+
+Every row within the other's spread or overlapping it, one way and the other; the home and the
+back room, whose views didn't change, spread as wide as the places that did, which is the
+container. The town's heap was 29.8 and 30.1 MB in two of A4's runs and 31.9 in the other, a
+collection's timing (its home in that run was the lowest of all six, 30.4). `?perf`'s overlay (`wiring/perf.ts`) is untouched.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
