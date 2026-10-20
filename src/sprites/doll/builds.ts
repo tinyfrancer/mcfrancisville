@@ -11,6 +11,7 @@ import {
   type Parts,
   type View,
 } from './body';
+import { SLIGHT_MEASURE, SLIGHT_PARTS, slightReach } from './slight';
 import { STOUT_MEASURE, STOUT_PARTS, stoutReach } from './stout';
 
 /*
@@ -41,6 +42,12 @@ function bodiesOf(parts: Parts, measure: Measure): Record<View, readonly Grid[]>
 
 export const PHYSIQUES: Record<Build, Physique> = {
   regular: { parts: REGULAR_PARTS, measure: REGULAR_MEASURE, reach: (p) => p, body: BODY },
+  slight: {
+    parts: SLIGHT_PARTS,
+    measure: SLIGHT_MEASURE,
+    reach: slightReach,
+    body: bodiesOf(SLIGHT_PARTS, SLIGHT_MEASURE),
+  },
   stout: {
     parts: STOUT_PARTS,
     measure: STOUT_MEASURE,

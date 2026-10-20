@@ -496,9 +496,10 @@ function actionBodiesOf(build: Build): ActionBodies {
 /** Her action bodies, by pose, view and frame. */
 export const ACTION_BODY: ActionBodies = actionBodiesOf('regular');
 
-/** Every build's action bodies (1.1's A5a): hers, and the same arms on the stout body. */
+/** Every build's action bodies (1.1's A5a, A5b): hers, and the same arms on each other body. */
 export const ACTION_BODIES: Record<Build, ActionBodies> = {
   regular: ACTION_BODY,
+  slight: actionBodiesOf('slight'),
   stout: actionBodiesOf('stout'),
 };
 
