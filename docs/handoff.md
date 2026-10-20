@@ -6,17 +6,7 @@ progress" and "After 1.0" first; "Where things stand" further down is the long h
 
 ## In progress
 
-### V1.1: the review and 1.2 (`claude/v11-review-1.2`, PR #216, decision 356; no save change)
-
-**Running; the last session of the 1.1 plan.** Done: the notes folded, the lived-in town
-(`lived-in-v55.json`), the shakedown (nothing small and wrong found but smoke's flaky "sealed"
-check, made deterministic; the rest logged in "Where it hurts" and the art notes), "Where it
-hurts" rewritten, `CLAUDE.md`'s "Project", this file's "After 1.0" rewritten with the lanes'
-headings kept under "1.1 and 1.2". **Half done:** perf (1.2 and 1.0 alternating, Close and Far,
-21:30 and noon, in a scratch run; its row goes in `docs/architecture.md` before "On her iPhone").
-**Next, in order:** the perf row, the art notes, the plan's status line, decision 356, this
-section emptied to "Nothing is in progress.", merge #216, then PR #201's title and body
-("Release 1.2 (with 1.0.1 and 1.1)"), never merged by a session.
+Nothing is in progress.
 
 ## After 1.0
 

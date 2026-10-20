@@ -1065,6 +1065,36 @@ back room, whose views didn't change, spread as wide as the places that did, whi
 container. The town's heap was 29.8 and 30.1 MB in two of A4's runs and 31.9 in the other, a
 collection's timing (its home in that run was the lowest of all six, 30.4). `?perf`'s overlay (`wiring/perf.ts`) is untouched.
 
+**1.2, V1.1's review** (2026-10-20, decision 356): the 1.1 plan whole (the lanes' tables above
+each against `v1.1-dev` before it) against 1.0 as it is on her phone, `v1.1-dev`'s head served
+from one copy and `origin/main` (1.0) from another, the same `scripts/perf.mjs` (which now walks
+Lantern Shore last, so every scene before it is walked as for 1.0's table), alternating, on a
+quiet container: two runs each at Close at 21:30, one each at noon and at Far by night and by
+day. Draw means, ms (p50 at Close by night); updates, ms (Close, 21:30); heap, MB (Close, 21:30):
+
+| Scene         | Close 21:30, 1.2      | Close 21:30, 1.0      | Noon, 1.2 / 1.0 | Far 21:30, 1.2 / 1.0 | Far noon, 1.2 / 1.0 | Updates 1.2 / 1.0     | Heap 1.2 / 1.0 |
+| ------------- | --------------------- | --------------------- | --------------- | -------------------- | ------------------- | --------------------- | -------------- |
+| Town          | 37.8–39.2 (26.9–27.4) | 33.8–36.7 (25.3–26.3) | 21.2 / 19.4     | 66.8 / 66.1          | 27.7 / 27.1         | 1.42–1.52 / 1.38–1.42 | 30.6 / 29      |
+| Home          | 19.8–20.5 (12.1–12.2) | 20.4–22.2 (12.6–13.3) | 6.7 / 6.3       | 21.1 / 21.6          | 6.7 / 6.5           | 1.06–1.09 / 1.08–1.13 | 31.6 / 29.6    |
+| Fairground    | 23.7–25 (16.8–17.4)   | 24.1–26.1 (16.9–18)   | 9.7 / 9.6       | 48.4 / 47.7          | 16.1 / 13.5         | 0.89–0.9 / 0.86–0.99  | 32.1 / 30.3    |
+| Whisperwood   | 29.7–30.8 (20.3–20.9) | 30.4–30.6 (20–20.6)   | 13 / 10.8       | 59.4 / 60            | 18.6 / 18.6         | 1.13–1.16 / 1.12–1.18 | 32.7 / 30.5    |
+| Boo Acres     | 22.6–22.9 (14.9–15.4) | 22.6–22.9 (14.8–14.9) | 10.4 / 9.2      | 44.3 / 46            | 14.7 / 15.1         | 0.9–0.92 / 0.91–1.04  | 33.2 / 31.2    |
+| Her yard      | 37.6–40.8 (29.1–30.7) | 37.5–39.1 (29–30.2)   | 17.9 / 18.3     | 65.6 / 70.8          | 28.5 / 24.6         | 1.41–1.52 / 1.31–1.44 | 33.1 / 31.5    |
+| Back room     | 24.4–26.6 (16.4–18.8) | 24–26 (16.3–17.1)     | 8.8 / 8.2       | 25.5 / 27.1          | 8.9 / 8.6           | 1.35–1.77 / 1.34–1.58 | 33.5 / 31.7    |
+| Lantern Shore | 26–27.7 (19.5–20.1)   | 25.9–26.1 (18.2–18.6) | 12 / 11.1       | 55.3 / 53            | 18 / 18.3           | 1.01–1.04 / 1–1.03    | 34.3 / 32      |
+
+No frame doubled, and every update overlaps 1.0's runs or is within a tenth or two. The town at
+Close by night is the one row clear of its spread, 2–4 ms of mean and a millisecond of median:
+most likely A1's flagstones and setts, pieces of their own baked as the walk reveals them (769
+against 696), since the noon and Far runs, which bake the same, sit within a millisecond or two.
+Whisperwood at noon is 2 ms dearer in its one run (A3's ice and A2's new forms are baked there
+too) and the same by night and at Far; Lantern Shore, whose ice meets the lake, a millisecond or
+two at most. Everywhere else 1.2 and 1.0 cross each other.
+The heap is about 2 MB higher everywhere (30.6 against 29 MB in town), the bodies' and builds'
+baked figures, the ice's and paving's pieces, each baked once. Against 1.0's own table above (a
+different day's container), the same: the town 37.8–39.2 against 32.6–32.8 there and 33.8–36.7
+here, so most of that gap is the day.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
