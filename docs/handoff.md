@@ -113,12 +113,19 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-**A3 is in progress** (branch `claude/a3-ice-creeks`, decision 352; no save change). Done: the
-ice drawn on the world's pixels (`sprites/ice.ts`: patches, frost, stones in the bank's lip,
-cracks, skate marks, banks that bend further), the melt at Lantern Shore's mouth (plates, open
-water, floes on the lake), snow on the ice in winter (`snowOnIce`, through `seasonPieces`), the
-sheen (`render/life.ts`, `Life.sheen`), held by `tests/sprites/ice.test.ts`. Next: perf before
-and after, decision 352's numbers, mark the PR ready, merge.
+**A3 landed (PR #213, decision 352; no save change). Next: A4.** The ice is drawn on the
+world's pixels (`sprites/ice.ts`, `drawIce`: patches of frosted, plain and clear ice, darker down
+the middle, a frost that comes and goes, stones in the bank's lip, cracks and skate marks from
+seeds two tiles round, creek banks that bend six pixels further, `meander`), every tile of ice a
+piece keyed by its place; the mouth at Lantern Shore melts (`meltNear`: plates, open water, floes
+on the lake's first tiles, `floeAt` in `water()`); snow drifts over it in winter (`snowOnIce`,
+laid by `seasonPieces`); a band of sheen glides over it (`Life.sheen`, drawn inside
+`drawShimmer`, so `OutdoorView` didn't change). Held by `tests/sprites/ice.test.ts`; W1's
+snapshots untouched (no tile changed). **For A4**: nothing of `OutdoorView.ts` moved; the sheen
+rides `drawShimmer`'s call. **For V1.1's review**: the frozen town pond now has a ring of plates
+and open water round the fountain (its tiles stay water), kept as charming; the bank pieces beside
+ice cost a little more to bake (Lantern Shore's ground 190–320 ms to 370–560 in Node, once a
+place). For her phone: whether the creeks read as ice at Close, and the sheen is gentle enough.
 
 **A2 landed (PR #211, decision 351; no save change). Next: A3.** Three more tree forms in
 `sprites/treeForms.ts` (a poplar, a leaning tree, a broken one), so the tree's forms are dealt
