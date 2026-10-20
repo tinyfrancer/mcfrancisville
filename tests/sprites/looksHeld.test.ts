@@ -149,7 +149,10 @@ describe("her looks, held as they were (1.1's A5a)", () => {
       stripesLeft: { ...DEFAULT_LOOK, stripesArm: 'left' },
       freckled: { ...DEFAULT_LOOK, freckles: true, nosePiercing: true },
       ...Object.fromEntries(
-        idsOf(HAIR_STYLES).map((hairStyle) => [`hair:${hairStyle}`, { ...DEFAULT_LOOK, hairStyle }]),
+        idsOf(HAIR_STYLES).map((hairStyle) => [
+          `hair:${hairStyle}`,
+          { ...DEFAULT_LOOK, hairStyle },
+        ]),
       ),
       ...Object.fromEntries(
         idsOf(TATTOOS).map((tattoos) => [`tattoos:${tattoos}`, { ...DEFAULT_LOOK, tattoos }]),
@@ -169,7 +172,9 @@ describe("her looks, held as they were (1.1's A5a)", () => {
       const on = wear(DEFAULT_LOOK, hem, EVERYTHING);
       held[`hem:${hem}`] = hash(shoes.map((s) => everyWay(wear(on, s, EVERYTHING), true)));
     }
-    const backs = EVERYTHING.filter((id) => ['cape', 'batWings', 'wings'].includes(OUTFITS[id].cut));
+    const backs = EVERYTHING.filter((id) =>
+      ['cape', 'batWings', 'wings'].includes(OUTFITS[id].cut),
+    );
     for (const back of backs) {
       held[`back:${back}`] = hash(
         idsOf(HAIR_STYLES).map((hairStyle) =>
@@ -181,7 +186,9 @@ describe("her looks, held as they were (1.1's A5a)", () => {
     const tops = EVERYTHING.filter((id) => OUTFITS[id].slot === 'top');
     for (const outer of outers) {
       held[`outer:${outer}`] = hash(
-        tops.map((top) => everyWay(wear(wear(DEFAULT_LOOK, top, EVERYTHING), outer, EVERYTHING), false)),
+        tops.map((top) =>
+          everyWay(wear(wear(DEFAULT_LOOK, top, EVERYTHING), outer, EVERYTHING), false),
+        ),
       );
     }
     expect(held).toMatchSnapshot();
@@ -231,7 +238,13 @@ function figureEveryWay(id: Figure): unknown[] {
 describe("her neighbours' looks, held as they were (1.1's A5a)", () => {
   it('draws every figure every way it stands, works and feels, as it did', () => {
     const held = Object.fromEntries(FIGURES.map((id) => [id, hash(figureEveryWay(id))]));
-    for (const half of ['butterfly', 'bugCatcher', 'ringmaster', 'scaredy', 'clueFinder'] as const) {
+    for (const half of [
+      'butterfly',
+      'bugCatcher',
+      'ringmaster',
+      'scaredy',
+      'clueFinder',
+    ] as const) {
       held[`cody:${half}`] = hash(
         FACINGS.map((facing) => layered(figureLayers('cody', facing, 0, half))),
       );
