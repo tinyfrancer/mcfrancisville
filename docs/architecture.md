@@ -409,12 +409,37 @@ pets' speech bubbles are still 16-pixel grids on purpose (decision 105): the HUD
 and the world at `ICON_SCALE` through `bakeIcon` (`render/items.ts`), so the scale belongs to where
 a grid is drawn, never to the grid.
 
+**A place outdoors is drawn in passes** (1.1's A4, decision 353). `OutdoorView` keeps the
+frame's setup: the camera, the ground (retiled as the pond freezes or the rows are built, its
+look turned with the season, the props baked again by `turnProps`), the one sort of what stands
+by its feet, the crowns, the moon's rims and the light. Everything else is a `Pass`
+(`render/passes/pass.ts`): a name and a part in any of a frame's layers, `ground(ctx, frame)`
+(on the ground), `stand(frame)` (its drawables, sorted with everything else's), `wanted()` (of
+those, what she might want behind a crown), `over(ctx, frame)` (over everything standing),
+`lights(frame)` (its pools of light) and `lit(ctx, frame)` (over the light), handed a `Frame`
+(the clock's `nowMs`, the camera, the weather, whether it's snowing, the season, the ground's
+life and her drawable; a `LitFrame` adds the `Daylight`). The order of each layer is
+`OUTDOOR_LAYERS` in `OutdoorView.ts`, by name, which `composeLayers` turns into the passes once as
+the view is made, refusing a name with no pass or no part there and a part no layer names; held
+by `tests/render/outdoorPasses.test.ts`, it is the order the view drew in before the split, so
+where two things stand level the one named first is drawn first, as before. The passes are in
+`render/passes/` (`props.ts` bakes the place's props once and hands each pass its share; the
+frames' `moving.ts` and the lanterns; `givers.ts`; `sites.ts`, the lots, decorations and projects,
+asking `filmNight.ts` for the film; `stalls.ts`, the pop-up and the cart; `mounds.ts`;
+`dressed.ts`, the mailbox, noticeboards, pots, geese, candy tree and gates; `aloft.ts`, the
+monarchs, flyers and leaves; `folk.ts`, who's about and her; `snack.ts`; `life.ts`; `weather.ts`,
+with the fireworks and meteors; `crowns.ts`, the see-through crowns; `standing.ts`, what they
+share) or beside what they draw (`yardPass`, `bedsPass` in `garden.ts`, `fishingPass`,
+`fountainPass`, `holidaysPass`, `doorsPass`, `effectsPass`). A new thing drawn outdoors is a pass
+and its name in `OUTDOOR_LAYERS`.
+
 **See-through trees** (0.3's A3, decision 222) are view state, never the world's: after
 `OutdoorView.draw` sorts what stands in a place, `coveredCrowns` (`render/occlusion.ts`) counts the
-pixels each crown draws over her or over something near her she might want, from each sprite's
-mask (read once and kept), and `SeeThrough` eases each such crown to half alpha by the fixed step,
-as the camera is. A faded crown is a copy in the frame's own list. **Her yard** (0.3's H5) is drawn
-among the town's props by `render/yard.ts`. **At home** (0.3's H3, S4) a small piece on a surface
+pixels each crown draws over her or over something near her she might want (the passes' `wanted`),
+from each sprite's mask (read once and kept), and `SeeThrough` eases each such crown to half alpha
+by the fixed step, as the camera is (`Crowns`, `render/passes/crowns.ts`). A faded crown is a copy
+in the frame's own list. **Her yard** (0.3's H5) is drawn among the town's props by
+`render/yard.ts`. **At home** (0.3's H3, S4) a small piece on a surface
 is drawn raised just after it; a window wallpaper's windows are hung by `windowsAlong` and painted
 with the sky of the hour and weather (`windowSky`, read off the same `Daylight` the room is lit
 by) into the room's cached shell; and a `WATCHERS` piece is drawn looking toward her.
@@ -1118,11 +1143,15 @@ V1's weight on it.
     forwarding to `Rooms` (twenty-seven one-liners, kept so `src/render/`, the sheets and the
     tests didn't move while lane A ran); a later session can point those readers at `home.rooms`
     and drop them.
-12. **Big view files.** `render/OutdoorView.ts` is 1,240 lines (the yard, the mounds, the sites,
+12. **Big view files.** ~~`render/OutdoorView.ts` is 1,240 lines (the yard, the mounds, the sites,
     the see-through crowns, the fishing line and reel, film night, the fountain and the effects all
-    hand it something to sort); the lanes drew new things in files of their own
-    (`render/effects.ts`, `fairGames.ts`, `transition.ts`), which is the way, and a view session
-    could do the same for what's left. ~~The service and wiring files~~: done in 1.1's W3
+    hand it something to sort)~~: done in 1.1's A4 (decision 353). `OutdoorView.ts` (1,269 lines
+    by then) is 494, the frame's setup, the one sort, the crowns, the light and `OUTDOOR_LAYERS`
+    (the order of each layer by pass, about seventy of those lines); its passes are 16 files in
+    `render/passes/` (32 to 198 lines) and a pass each beside the yard, beds, fishing, fountain,
+    holidays, doors and effects, as the lanes drew new things in files of their own
+    (`render/effects.ts`, `fairGames.ts`, `transition.ts`). `HomeView` (314) and `RoomView` (337)
+    are small enough as they are. ~~The service and wiring files~~: done in 1.1's W3
     (decision 342). `services/Neighbourhood.ts` (1,102 lines) is who's where and the walking (652)
     and `services/Talk.ts` the talk (534), the neighbourhood answering the talk's ten reads in a line
     each for the view and the tests; `wiring/apis.ts` (766) is 38 lines composing a builder an area

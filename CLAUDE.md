@@ -326,7 +326,13 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/world/options.ts`. `src/main.ts` is the boot, the loop and the views; the save and the
   cloud (`src/wiring/keeping.ts`), going in (`greeting.ts`), touch (`touch.ts`), the music
   (`music.ts`) and the dev handles (`debug.ts`) are `src/wiring/`'s. `World.save()` and `fromSave()` are the whole save.
-  `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
+  `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`: it lays the
+  ground, sorts what stands by its feet once and works out the light, and everything else is a
+  `Pass` (`src/render/passes/pass.ts`: a part in any of a frame's layers, `ground`, `stand`,
+  `wanted`, `over`, `lights`, `lit`) in `src/render/passes/` or beside what it draws (the yard,
+  beds, fishing, fountain, holidays, doors and effects), called in the order `OUTDOOR_LAYERS`
+  names (1.1's A4, decision 353; held by `tests/render/outdoorPasses.test.ts`); a new thing drawn
+  outdoors is a pass and its name in those lists. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
   a building goes in. Arriving at a prop is a table keyed by prop id (`PropArrivals`,
   `src/world/arrivals.ts`; 1.1's W1, decision 340): each row given by the area that makes the
@@ -360,7 +366,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
   (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
   (`seasonPiece` for the ground, `seasonLook` for a prop, baked under `<key>@<season>`), the ground
-  re-baked by `Ground.look`, the props by `OutdoorView.turn`; in winter snow lies on the lawn, the
+  re-baked by `Ground.look`, the props by `OutdoorView.turn` (`turnProps`); in winter snow lies on the lawn, the
   tracks and the roofs and the rain falls as snow, the jack-o'-lanterns are snow lanterns (a
   prop's other shape for a season is `RESHAPED`, 1.0.1's X2, decision 327), and Nessa skates on
   the frozen pond (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
@@ -633,7 +639,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
   moment); walking up to her corkboard opens `src/hud/CorkboardSheet.ts` (through `MysteryApi`).
-  Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
+  Wes is drawn half behind his tree by `wesPass` (`src/render/passes/folk.ts`), from the doll's parts like the Moon Pie Man.
   Since V1's P3a (decision 302) the mystery comes a step a week, a letter or a clue at a prop
   (`CHAIN` in `src/data/mysteryChain.ts`, `src/systems/mysteryChain.ts`), to the mayor's promise
   (`world.mystery.ready()`); Wes stays for a chat after the third glimpse (`src/data/wes.ts`,
@@ -716,7 +722,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   pumpkin a day once ripe (`world.pumpkinPatch`), carved into her cat-o'-lantern at the
   workbench; film night is a happening on the festival's Saturdays (`on: { festival, weekdays }`)
   with `seats`, `faces` and a `set` (the screen and popcorn table, which `Decorations` puts out;
-  art in `src/sprites/filmNight.ts`, the film shown by `OutdoorView`); and the mayor's story
+  art in `src/sprites/filmNight.ts`, the film shown by `src/render/passes/filmNight.ts`); and the mayor's story
   comes a chapter a week (`CHAPTERS` in `src/data/story.ts`, `story:n` letters), the last dropped
   by Wes (`world.mystery`), pinning a clue. The 31st is J4's (decision 157, `src/data/finale.ts`,
   `world.finale`): the costume contest (a happening before the party, the town lined up at the

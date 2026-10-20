@@ -113,6 +113,16 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
+**A4 in progress** (branch `claude/a4-outdoorview-split`, decision 353; no save change; run
+beside A3). `render/OutdoorView.ts` split into passes: `render/passes/pass.ts` (`Pass`, `Frame`,
+`composeLayers`), the passes in `render/passes/` and beside the yard, beds, fishing, fountain,
+holidays, doors and effects, the order in `OUTDOOR_LAYERS`, held by
+`tests/render/outdoorPasses.test.ts` and `tests/render/outdoorView.test.ts` (the surface).
+Done: the move (1,269 lines to 494), the suite green, smoke 622/622 on `v1.1-dev` once. Next:
+smoke twice on each side and the pictures compared (`compare.mjs`-style, as W1), `npm run perf`
+three runs alternating, the numbers in architecture.md's tables and decision 353, the plan's
+status line, then the PR ready and merged.
+
 **A2 landed (PR #211, decision 351; no save change). Next: A3.** Three more tree forms in
 `sprites/treeForms.ts` (a poplar, a leaning tree, a broken one), so the tree's forms are dealt
 from nine by `formOf` and every tree in every place, the town's too, was dealt again; the broken
