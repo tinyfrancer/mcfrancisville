@@ -4,7 +4,10 @@ import { ROD_TIP } from '../sprites/tools';
 import { CAST_MS } from '../systems/fishing';
 import { tileHash } from '../sprites/terrain';
 import type { Critter, World } from '../world/World';
+import { isFish } from '../data/critters';
+import type { MapZoneId } from '../types/ids';
 import type { Point } from './camera';
+import type { Pass } from './passes/pass';
 import type { Drawable } from './scene';
 
 /**
@@ -254,4 +257,27 @@ export function drawBite(
   ctx.fillRect(x + 4, y + 3, 5, 7);
   ctx.fillRect(x + 5, y + 10, 3, 2);
   ctx.fillRect(x + 4, y + 13, 5, 3);
+}
+
+/**
+ * Her fishing as a place outdoors draws it (1.1's A4): the rings over every fish and her line over
+ * everything standing, and the bite's "!" and the reel's tension bar over the light.
+ */
+export function fishingPass(world: World, zone: MapZoneId): Pass {
+  return {
+    name: 'fishing',
+    over(ctx, { cam, nowMs, me }) {
+      drawFishRings(
+        ctx,
+        world,
+        world.collecting.critters(zone).filter((c) => isFish(c.critter)),
+        cam,
+        nowMs,
+      );
+      drawLine(ctx, world, me, cam, nowMs);
+    },
+    lit(ctx, { cam, me }) {
+      drawBite(ctx, world, me, cam);
+    },
+  };
 }

@@ -17,9 +17,11 @@ import { tileHash } from '../sprites/terrain';
 import { plantingIsRare, stageOf, type Planting, type Stage } from '../systems/farming';
 import type { ZoneId } from '../types/ids';
 import { bedKey, type Plot } from '../world/Farm';
-import type { World } from '../world/World';
+import { tileCentre, type World } from '../world/World';
 import type { Point } from './camera';
-import { glowOf, type Drawable } from './scene';
+import { MOONPETAL_LIGHT } from './passes/givers';
+import type { Pass } from './passes/pass';
+import { glowOf, type Drawable, type WorldLight } from './scene';
 
 /*
  * Hosta La Vista Farm as it's drawn (phase P), and every bed beyond it (0.2's N1): each bed dry or
@@ -240,4 +242,35 @@ export function drawBedLook(
       ctx.fillRect(cx, dy > 0 ? cy : cy - arm + px, px, arm);
     }
   }
+}
+
+/**
+ * Her beds as a place outdoors draws them (1.1's A4): each bed sorted in among everything else,
+ * the sprinklers' spray over it, a glowing crop's light once ripe, and over the light the ripe
+ * twinkle and the brackets round the bed she's looking at.
+ */
+export function bedsPass(world: World, zone: ZoneId): Pass {
+  return {
+    name: 'beds',
+    stand: ({ weather }) => bedDrawables(world, zone, weather === 'rain'),
+    over(ctx, { cam, nowMs }) {
+      drawSprinklerSpray(ctx, world, zone, cam, nowMs);
+    },
+    lights() {
+      const lights: WorldLight[] = [];
+      const now = world.clock.now();
+      for (const bed of world.farm.bedsIn(zone)) {
+        const planting = world.farm.planting(bed);
+        if (!planting || !CROP_ART[planting.crop].glow) continue;
+        if (stageOf(planting, now, world.farm.sprinkled(bed)) !== 'ripe') continue;
+        const { x, y } = tileCentre(bed);
+        lights.push({ x, y: y - 16, radius: MOONPETAL_LIGHT.radius + 8, strength: 0.6 });
+      }
+      return lights;
+    },
+    lit(ctx, { cam, nowMs }) {
+      drawRipeSparkles(ctx, world, zone, cam, nowMs);
+      drawBedLook(ctx, world, zone, cam, nowMs);
+    },
+  };
 }

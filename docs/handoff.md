@@ -113,19 +113,35 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-**A3 landed (PR #213, decision 352; no save change). Next: A4.** The ice is drawn on the
+**A3 landed (PR #213, decision 352; no save change). Next: A5a.** The ice is drawn on the
 world's pixels (`sprites/ice.ts`, `drawIce`: patches of frosted, plain and clear ice, darker down
 the middle, a frost that comes and goes, stones in the bank's lip, cracks and skate marks from
 seeds two tiles round, creek banks that bend six pixels further, `meander`), every tile of ice a
 piece keyed by its place; the mouth at Lantern Shore melts (`meltNear`: plates, open water, floes
 on the lake's first tiles, `floeAt` in `water()`); snow drifts over it in winter (`snowOnIce`,
 laid by `seasonPieces`); a band of sheen glides over it (`Life.sheen`, drawn inside
-`drawShimmer`, so `OutdoorView` didn't change). Held by `tests/sprites/ice.test.ts`; W1's
-snapshots untouched (no tile changed). **For A4**: nothing of `OutdoorView.ts` moved; the sheen
-rides `drawShimmer`'s call. **For V1.1's review**: the frozen town pond now has a ring of plates
+`drawShimmer`). Held by `tests/sprites/ice.test.ts`; W1's
+snapshots untouched (no tile changed). Merged after A4: the sheen rides
+`drawShimmer`, which A4's life pass calls. **For V1.1's review**: the frozen town pond now has a ring of plates
 and open water round the fountain (its tiles stay water), kept as charming; the bank pieces beside
 ice cost a little more to bake (Lantern Shore's ground 190–320 ms to 370–560 in Node, once a
 place). For her phone: whether the creeks read as ice at Close, and the sheen is gentle enough.
+
+**A4 landed (PR #212, decision 353; no save change). Next: A5a.** (Run beside A3.)
+`render/OutdoorView.ts` is drawn in passes (1,269 lines to 494): a `Pass`
+(`render/passes/pass.ts`) is a name and a part in any of a frame's layers (`ground`, `stand`,
+`wanted`, `over`, `lights`, `lit`), handed a `Frame`; the passes are in `render/passes/` or
+beside what they draw (yard, beds in `garden.ts`, fishing, fountain, holidays, doors, effects);
+the order of each layer is `OUTDOOR_LAYERS` in `OutdoorView.ts`, held by
+`tests/render/outdoorPasses.test.ts`, and `composeLayers` refuses a name without a pass or a part
+no layer names. **A new thing drawn outdoors is a pass and its name in `OUTDOOR_LAYERS`** (where
+it stands in `stand` is where it's drawn among things level with it). `OutdoorView`'s surface is
+held by `tests/render/outdoorView.test.ts`. **For A5a**: nothing in the doll or the villagers'
+drawing moved; neighbours are still `neighbourDrawables` (`render/villagers.ts`), called by
+`neighboursPass` (`passes/folk.ts`), the Moon Pie Man by `cartPass` and the passers and Wes by
+their passes through `bakeFigure`. Smoke's pictures compared as W1 did (two runs a side, nothing
+differs between the branches that doesn't run to run); perf within noise (architecture.md's
+"1.1's A4"). No `NOTES` line.
 
 **A2 landed (PR #211, decision 351; no save change). Next: A3.** Three more tree forms in
 `sprites/treeForms.ts` (a poplar, a leaning tree, a broken one), so the tree's forms are dealt

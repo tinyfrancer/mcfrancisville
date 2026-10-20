@@ -14,11 +14,19 @@ import {
   HIDDEN_EGG,
   HIDDEN_EGG_PALETTES,
   LIT_BULB,
+  SKELLY_CHRISTMAS,
+  SKELLY_CHRISTMAS_GLOW,
+  SKELLY_CHRISTMAS_PALETTE,
 } from '../sprites/holidays';
 import { PALETTE } from '../sprites/palette';
+import { PROP_ART } from '../sprites/props';
 import type { SpriteSource } from '../sprites/sprite';
 import { hashString, seeded } from '../systems/random';
+import type { World } from '../world/World';
+import type { MapZone } from '../world/zones/MapZone';
 import type { Point } from './camera';
+import type { Pass } from './passes/pass';
+import { standing } from './passes/standing';
 import { glowOf, type Drawable } from './scene';
 
 /*
@@ -277,4 +285,61 @@ function burst(
   ctx.globalAlpha = (1 - t) * 0.8;
   ctx.fillStyle = PALETTE.candleBright;
   ctx.fillRect(Math.round(cx) - 1, Math.round(cy) - 1, 3, 3);
+}
+
+/**
+ * The holidays as a place outdoors draws them (1.1's A4): what hangs on every front door while a
+ * set of decorations is up, Skelly in his Santa hat and lights at Christmas (and as he always is
+ * otherwise), Easter's eggs hidden in the grass (what she might want behind a crown), and in town
+ * the garlands, the festival's banner and, over the light, the garlands' bulbs.
+ */
+export function holidaysPass(
+  world: World,
+  zone: MapZone,
+  town: boolean,
+  skellies: readonly Drawable[],
+  doors: readonly DrawnDoor[],
+): Pass {
+  let eggs: Drawable[] = [];
+  return {
+    name: 'holidays',
+    stand({ season }) {
+      eggs = town && world.holidays.decor() ? eggDrawables(world.holidays.eggs()) : [];
+      const decor = world.holidays.decor();
+      const skelly: readonly Drawable[] =
+        decor === 'christmas'
+          ? skellies.map((d) => {
+              const sprite = bake('skelly:christmas', SKELLY_CHRISTMAS, SKELLY_CHRISTMAS_PALETTE);
+              const glow = glowOf(
+                'glow:skelly:christmas',
+                SKELLY_CHRISTMAS,
+                SKELLY_CHRISTMAS_PALETTE,
+                SKELLY_CHRISTMAS_GLOW,
+              );
+              return { ...d, sprite, y: d.footY - sprite.height, glow };
+            })
+          : skellies;
+      if (!decor) return skelly;
+      const lots = (zone.lots?.props() ?? []).flatMap((p): DrawnDoor[] => {
+        const art = PROP_ART[p.id];
+        if (!art.door) return [];
+        const { x, y, footY } = standing(p, season);
+        const building = art.noEaves ? {} : { building: { key: p.id, source: art.source } };
+        return [{ x, y, footY, door: art.door, ...building }];
+      });
+      const all = [...doors, ...lots];
+      return [...skelly, ...doorDrawables(decor, all), ...eaveDrawables(decor, all), ...eggs];
+    },
+    wanted: () => eggs,
+    over(ctx, { cam }) {
+      const decor = world.holidays.decor();
+      if (town && decor) drawGarlands(ctx, decor, cam);
+      const banner = world.holidays.banner();
+      if (town && banner) drawBanner(ctx, banner, cam);
+    },
+    lit(ctx, { cam, nowMs, light }) {
+      const decor = world.holidays.decor();
+      if (town && decor) drawGarlandLights(ctx, decor, cam, nowMs, light.lamps);
+    },
+  };
 }

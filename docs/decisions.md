@@ -8589,3 +8589,67 @@ the world cost no more and never repeat); the snow as more keys on the ice's pal
 winter (it would show as frost the rest of the year, or need the ice drawn per season); a map
 change at the mouth (W1's snapshots hold walkability, and the plan asked for a look); melting the
 pond round the fountain shut (the hole of open water where the fountain runs reads as a reason).
+
+## 353. `OutdoorView` drawn in passes, each layer's order named once (2026-10-19, 1.1's A4)
+
+_Session A4 of the 1.1 plan, lane A (decision 328), "Where it hurts" 12. **No save change**;
+nothing she sees changes. Run beside A3, which owned the sprites, `render/life.ts`,
+`render/frames.ts` and the maps. Personal touches parked (decision 177): nothing was asked._
+
+- **A `Pass`** (`src/render/passes/pass.ts`) is a name and a part in any of a frame's six layers:
+  `ground(ctx, frame)` on the ground; `stand(frame)`, its drawables, sorted by their feet with
+  everyone else's; `wanted()`, of what it stood this frame, what she might be looking for behind
+  a crown; `over(ctx, frame)`, over everything standing; `lights(frame)`, its pools of light; and
+  `lit(ctx, frame)`, over the light. The `Frame` is what every pass shares: the clock's `nowMs`,
+  the camera, the canvas, the weather, whether it's snowing, the season the props are baked in,
+  the ground's life and her drawable; a `LitFrame` adds the `Daylight`. **Rejected:** the plan's
+  one `draw(ctx, frame)` and a sort list per pass (the fishing line is drawn before the light and
+  its bite after it, the fountain's lamps are lights and its notes over the light, the yard is a
+  dot on the lawn, pieces standing and an outline over them: one `draw` would have split each into
+  three passes sharing state); a pass per layer of a fixed order, each pass's parts in its own
+  order (the layers interleave: the holidays' garlands come before the beds' spray, their bulbs
+  before the fountain's notes, the weather's flash after them).
+- **The order is named once**, `OUTDOOR_LAYERS` in `OutdoorView.ts`, a list of names per layer,
+  written out from the view's own `draw` before the split and held by
+  `tests/render/outdoorPasses.test.ts`. `stand`'s order matters: the sort by feet is stable, so
+  where two things stand level the one listed first is drawn first, as it was. `composeLayers`
+  turns it into the passes once as the view is made, and refuses a name with no pass, a name whose
+  pass has no part in that layer, a pass's part that no layer names (it would never draw) and two
+  passes of one name; a view that can't compose fails as it's made, which every smoke area does.
+  **Rejected:** each pass saying where it goes (an order relative to others, or a number), since
+  the order is one picture of the frame and reads as one list.
+- **What stayed in `OutdoorView`** (1,269 lines to 494, about seventy of them the order): the
+  frame's setup (the camera, the ground retiled and turned, the props baked again as the season
+  turns, now `turnProps`), the one sort, the crowns faded (`Crowns`, `passes/crowns.ts`, eased by
+  `follow` and cleared by `rest`), the moon's rims, the light, and the surface `main.ts`, the dev
+  handles and smoke reach (`tap`, `tileToClient`, `follow`, `draw`, `daylight`, `weather`,
+  `motion`, `seeThroughCrowns`, `seasonNow`, `rest`, `groundMemory`, `groundSeams`), held by
+  `tests/render/outdoorView.test.ts`, written first. `motion()` asks the moving pass for each
+  prop's frame and the flyers' and leaves' passes how many they drew.
+- **Where the passes are**: in `src/render/passes/` (`props.ts` bakes the place's props once,
+  as the constructor did, and hands each pass its share as `BakedProps`; `moving.ts`, the frames
+  and the lanterns; `givers.ts`; `sites.ts`, the lots, decorations and projects; `filmNight.ts`;
+  `stalls.ts`, the pop-up and the cart; `mounds.ts`; `dressed.ts`, the mailbox, noticeboards,
+  pots, geese, candy tree and gates; `aloft.ts`, the monarchs, flyers and leaves; `folk.ts`, the
+  passers, the stray, neighbours, Wes, critters, pets, the bone and her; `snack.ts`; `life.ts`;
+  `weather.ts`, with the fireworks and meteors; `standing.ts`, what they share), or beside what
+  they draw where a file already did (`yardPass`, `bedsPass` in `garden.ts`, `fishingPass`,
+  `fountainPass`, `holidaysPass`, `doorsPass`, `effectsPass`). **Film night is a file, not a
+  pass**: its screen is one of the decorations, so the sites' pass asks `filmNight.ts` for the
+  film and draws it in its place among them; a pass of its own would have moved it in the list.
+  Each method went over as it was, its `this.` a closure; a pass that's read twice in a frame
+  (the yard's lights, the fountain's beat, what was stood for `wanted`) keeps what it worked out
+  from its first part, so each is read once a frame as before.
+- **Checked as W1 did (decision 340)**: smoke 622/622 twice on `v1.1-dev` and twice on A4,
+  alternating. Of 297 pictures, 188 differed between `v1.1-dev`'s two runs and 216 between A4's;
+  of the 80 the same in all four, 79 are byte for byte the same on both. The one,
+  `sideways-bag.png`, differs in a 26×23-pixel patch of the world at the top of the screen behind
+  the sheet; the next picture, `sideways-map.png`, has the same patch, and there A4's second run
+  is byte for byte `v1.1-dev`'s and its first isn't: the patch is one of three looks the world
+  behind the sheet is caught in by the real clock. Nothing differs between the branches that
+  doesn't differ run to run. `smoke:offline` 10/10; the suite 2,670 tests, the two new files 10
+  of them.
+- **Measured** (architecture.md's "1.1's A4"): `npm run perf` at Close, 21:30, three runs each
+  alternating, each side from its own copy: every scene within the other's spread (the town's
+  draw 35.2–39.2 ms on A4 against 36.3–39.7, her yard 34.3–37 against 33.6–38.3, the back room's
+  18.1–26.2 against 19.7–21.6 with its view unchanged). `?perf`'s overlay is untouched.
