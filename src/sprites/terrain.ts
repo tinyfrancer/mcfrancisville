@@ -5,6 +5,19 @@ import { drawLawn, LAWN_LOOKS, LAWN_PALETTE, MID, type LawnField } from './lawn'
 import { CLEAR, Sketch } from './sketch';
 import { drawFlagstones, drawSetts, PAVING_PALETTE } from './paving';
 import {
+  drawIce,
+  floeAt,
+  ICE_PALETTE,
+  ICE_SNOW_PALETTE,
+  iceSnow,
+  LIP,
+  meander,
+  meltNear,
+  sheenOf,
+  type At,
+  type Melt,
+} from './ice';
+import {
   DIRT_PALETTE,
   drawDirt,
   drawGravel,
@@ -69,7 +82,9 @@ export const NOTCH_SE_X = 1 << 18;
 export const NOTCH_SW_X = 1 << 19;
 /**
  * Where a frozen creek meets open water (0.2's K1): the sides of an ice tile that open onto
- * water, which the ice ends at in a ragged lip rather than running straight into it.
+ * water, which the ice thins and breaks up toward rather than running straight into it (since
+ * 1.1's A3 the ground in a place reads the water round it instead, `meltNear`; these say it for a
+ * piece on its own).
  */
 export const THAW_N = 1 << 20;
 export const THAW_E = 1 << 21;
@@ -522,7 +537,12 @@ const RIPPLES: readonly (readonly (readonly [number, number, number])[])[] = [
  * Water sunk below the grass: its far bank shows as a face of earth, the near one as a lip, a
  * light line where it laps at them, and deeper water dithered in away from the edge.
  */
-function water(mask: number, variant: number, field: readonly Edge[] = edges(mask, 15)) {
+function water(
+  mask: number,
+  variant: number,
+  field: readonly Edge[] = edges(mask, 15),
+  floes?: { at: At; melt: Melt },
+) {
   const s = new Sketch(TILE, TILE, 'w');
   for (const [x, y, length] of RIPPLES[variant]!) s.rect(x, y, length, 1, 'W');
   // A generous radius, so a diagonal run of pond tiles curves rather than stair-stepping; by the
@@ -540,8 +560,22 @@ function water(mask: number, variant: number, field: readonly Edge[] = edges(mas
     if (depth > dither(x, y)) return s.get(x, y) === 'W' ? 'w' : 'd';
     return s.get(x, y)!;
   });
+  // Floes drifting off a frozen creek where it melts into open water (1.1's A3).
+  if (floes) {
+    for (let y = 0; y < TILE; y++) {
+      for (let x = 0; x < TILE; x++) {
+        if (!AFLOAT.has(s.get(x, y)!)) continue;
+        const floe = floeAt(floes.at.tx * TILE + x, floes.at.ty * TILE + y, floes.melt);
+        if (floe) s.set(x, y, FLOE_KEYS[floe]);
+      }
+    }
+  }
   return s.toSource();
 }
+
+/** What of the water a floe may drift on: not its banks. */
+const AFLOAT: ReadonlySet<string> = new Set(['w', 'W', 'd', 'l']);
+const FLOE_KEYS = { floe: 'i', rim: 'K', shadow: 'd' } as const;
 
 const WATER_PALETTE: Palette = {
   [CLEAR]: null,
@@ -553,92 +587,9 @@ const WATER_PALETTE: Palette = {
   w: C.water,
   W: C.waterLight,
   d: ramp(C.water)[1],
-};
-
-// ---- Ice --------------------------------------------------------------------------------------
-
-/** Scratches on the ice where skates have been, as (x, y, length) running down to the right. */
-const SCRATCHES: readonly (readonly (readonly [number, number, number])[])[] = [
-  [
-    [3, 7, 7],
-    [16, 18, 9],
-    [6, 25, 5],
-  ],
-  [
-    [14, 4, 6],
-    [2, 16, 8],
-    [21, 24, 6],
-  ],
-];
-
-/**
- * A creek frozen over: sunk below the grass like water, with the same banks, but pale and still,
- * scored where skates have been, with a bluer depth under the middle.
- */
-function ice(mask: number, variant: number, field: readonly Edge[] = edges(mask, 15)) {
-  const s = new Sketch(TILE, TILE, 'w');
-  for (const [x, y, length] of SCRATCHES[variant]!) {
-    for (let i = 0; i < length; i++) s.set(x + i, y + Math.floor(i / 3), 'W');
-  }
-  paint(s, field, (e, x, y) => {
-    const bank = facesUp(e) ? 6 : facesDown(e) ? 1 : 2;
-    if (e.d < 1) return facesUp(e) ? 'G' : 'o';
-    if (e.d < bank) {
-      if (facesUp(e) && e.d < 2) return 'B';
-      return e.d >= bank - 1 ? 'o' : 'b';
-    }
-    if (e.d < bank + 2) return 'W';
-    const depth = (e.d - 9) / 10;
-    if (depth > dither(x, y) && s.get(x, y) !== 'W') return 'd';
-    return s.get(x, y)!;
-  });
-  thaw(s, mask);
-  return s.toSource();
-}
-
-/**
- * The ragged lip where the ice ends at open water: on each side that opens onto water, the last
- * few pixels are water, with the ice's bright rim along its edge, and where it ends toward the
- * front (below or to the right) its thickness and a shadow on the water under it.
- */
-function thaw(s: Sketch, mask: number): void {
-  const cut = (i: number, salt: number) => 2 + ((Math.imul(i + salt, 2654435761) >>> 28) % 3);
-  for (let i = 0; i < TILE; i++) {
-    if (mask & THAW_S) {
-      const c = cut(i >> 1, 3);
-      for (let y = TILE - c; y < TILE; y++) s.set(i, y, y === TILE - c ? 'V' : 'v');
-      s.set(i, TILE - c - 1, 'k').set(i, TILE - c - 2, 'W');
-    }
-    if (mask & THAW_N) {
-      const c = cut(i >> 1, 7);
-      for (let y = 0; y < c; y++) s.set(i, y, 'v');
-      s.set(i, c, 'W');
-    }
-    if (mask & THAW_W) {
-      const c = cut(i >> 1, 11);
-      for (let x = 0; x < c; x++) s.set(x, i, 'v');
-      s.set(c, i, 'W');
-    }
-    if (mask & THAW_E) {
-      const c = cut(i >> 1, 13);
-      for (let x = TILE - c; x < TILE; x++) s.set(x, i, x === TILE - c ? 'V' : 'v');
-      s.set(TILE - c - 1, i, 'k');
-    }
-  }
-}
-
-const ICE_PALETTE: Palette = {
-  [CLEAR]: null,
-  G: C.mossLight,
-  B: ramp(C.earth)[3],
-  b: C.earth,
-  o: ramp(C.earth)[0],
-  w: C.ice,
-  W: C.iceLight,
-  d: ramp(C.ice)[2],
-  k: ramp(C.ice)[1],
-  v: C.water,
-  V: ramp(C.water)[1],
+  // A floe off the melting ice, and its dark wet edge (1.1's A3).
+  i: ICE_PALETTE.R!,
+  K: ICE_PALETTE.K!,
 };
 
 // ---- A pier ------------------------------------------------------------------------------------
@@ -904,8 +855,8 @@ export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
   steps: { palette: ROCK_PALETTE, variants: 1, draw: steps },
   ice: {
     palette: ICE_PALETTE,
-    variants: SCRATCHES.length,
-    draw: (m, v) => ice(m, v),
+    variants: 2,
+    draw: (m, v) => iceAlone(m, v),
     slopes: true,
   },
   boards: { palette: BOARDS_PALETTE, variants: 2, draw: boards },
@@ -1023,12 +974,13 @@ export function groundPieces(
   const look = variantOf(tx, ty, GRASS_VARIANTS);
   const pieces = [lawn ? lawnPiece(cornersOf(lawn, tx, ty), look) : grassPiece(look)];
   const id = tileAt(tx, ty);
-  if (id !== undefined && id !== 'grass') {
+  if (id === 'ice') {
+    pieces.push(icePiece(tileAt, tx, ty).piece);
+  } else if (id !== undefined && id !== 'grass') {
     const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[id].variants);
     const slopes = TERRAIN_ART[id].slopes === true;
     const mask = neighbourMask(tileAt, tx, ty, { slopes });
-    const bank =
-      id === 'water' || id === 'ice' ? bankPiece(tileAt, tx, ty, id, mask, variant) : null;
+    const bank = id === 'water' ? waterPiece(tileAt, tx, ty, mask, variant) : null;
     const own = TERRAIN_ART[id].laid ? ownMask(tileAt, tx, ty) : mask & 0xff;
     pieces.push(bank ?? terrainPiece(id, mask, variant, { tx, ty }, own));
   } else if (id === 'grass') {
@@ -1046,32 +998,119 @@ const WET: Readonly<Record<'water' | 'ice', (id: TileId | undefined) => boolean>
 };
 
 /**
- * Water or ice by its bank, drawn from the water round it (`bankField`) rather than the tile's
- * shape; null in the middle of a pond, which is the plain piece.
+ * Water by its bank, drawn from the water round it (`bankField`) rather than the tile's shape,
+ * and water just off a frozen creek, with floes drifting off its melt (1.1's A3); null in the
+ * middle of a pond, which is the plain piece.
  */
-function bankPiece(
+function waterPiece(
   tileAt: (tx: number, ty: number) => TileId | undefined,
   tx: number,
   ty: number,
-  terrain: 'water' | 'ice',
   mask: number,
   variant: number,
 ): GroundPiece | null {
-  const around = wetAround(tileAt, tx, ty, WET[terrain]);
-  if (!around.includes('0')) return null;
-  const thaws = mask & (THAW_N | THAW_E | THAW_S | THAW_W);
-  const art = TERRAIN_ART[terrain];
+  const around = wetAround(tileAt, tx, ty, WET.water);
+  const iced = AROUND.some(([dx, dy]) => tileAt(tx + dx, ty + dy) === 'ice');
+  const melt = iced ? meltNear(tileAt, tx, ty) : null;
+  const floes = melt ? { at: { tx, ty }, melt } : undefined;
+  const banked = around.includes('0');
+  if (!banked && !floes) return null;
+  const ices = floes ? `:${openAround(tileAt, tx, ty)}` : '';
   return piece(
-    `ground:${terrain}:bank:${tx},${ty}:${around}:${thaws}:${variant}`,
-    art.palette,
-    () =>
-      terrain === 'water'
-        ? water(0, variant, bankField(tx, ty, around))
-        : ice(thaws, variant, bankField(tx, ty, around)),
+    `ground:water:bank:${tx},${ty}:${around}${banked ? '' : `:${mask}`}:${variant}${ices}`,
+    WATER_PALETTE,
+    () => water(banked ? 0 : mask, variant, banked ? bankField(tx, ty, around) : undefined, floes),
   );
 }
 
-/** The water or ice reaching over a tile of grass from beside it, or null where none does. */
+/** A tile of ice with no bank across it: every pixel deep in. */
+const DEEP: readonly Edge[] = Array.from({ length: TILE * TILE }, (_, i) => ({
+  d: Infinity,
+  nx: 0,
+  ny: 0,
+  along: i % TILE,
+}));
+
+/**
+ * A tile of ice where it lies (1.1's A3): its bank from the water and ice round it, as L6 drew it,
+ * and the open water near it for its melt, drawn for its place in the world (`drawIce`), so no two
+ * tiles of it are alike. Its field and melt are handed back for its sheen and its winter snow.
+ */
+function icePiece(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): { piece: GroundPiece; field: readonly Edge[]; melt: Melt | null } {
+  const around = wetAround(tileAt, tx, ty, WET.ice);
+  const field = around.includes('0') ? meander(bankField(tx, ty, around), { tx, ty }) : DEEP;
+  const melt = meltNear(tileAt, tx, ty);
+  const open = melt ? `:${openAround(tileAt, tx, ty)}` : '';
+  return {
+    piece: piece(`ground:ice:${tx},${ty}:${around}${open}`, ICE_PALETTE, () =>
+      drawIce(field, { tx, ty }, melt),
+    ),
+    field,
+    melt,
+  };
+}
+
+/**
+ * Which tiles three round a tile are open water, dry or off the map (the pier counting as off it):
+ * all a melt is drawn from, for its key.
+ */
+function openAround(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): string {
+  let out = '';
+  for (let y = ty - 3; y <= ty + 3; y++) {
+    for (let x = tx - 3; x <= tx + 3; x++) {
+      const id = tileAt(x, y);
+      out += id === 'water' ? '1' : id === undefined || id === 'boards' ? '-' : '0';
+    }
+  }
+  return out;
+}
+
+/**
+ * A tile of ice on its own, for the catalogue and the tests: shaped by its neighbours as every
+ * piece is, open water on the sides `mask` thaws toward, and set a few tiles along the world by
+ * its look, so each look has cracks of its own.
+ */
+function iceAlone(mask: number, variant: number): SpriteSource {
+  const at = { tx: variant * 5, ty: 0 };
+  const sides: readonly (readonly [number, number, number])[] = [
+    [0, -1, THAW_N],
+    [1, 0, THAW_E],
+    [0, 1, THAW_S],
+    [-1, 0, THAW_W],
+  ];
+  const tileAt = (x: number, y: number): TileId => {
+    const dx = x - at.tx;
+    const dy = y - at.ty;
+    if (dx === 0 && dy === 0) return 'ice';
+    return sides.some(([sx, sy, bit]) => sx === dx && sy === dy && mask & bit) ? 'water' : 'grass';
+  };
+  return drawIce(edges(mask, 15), at, meltNear(tileAt, at.tx, at.ty));
+}
+
+/** The ice reaching over a tile of grass from beside it, and the stones in its bank's lip. */
+function iceSpill(tx: number, ty: number, around: string): GroundPiece | null {
+  const key = `ground:ice:spill:${tx},${ty}:${around}`;
+  if (!spills.has(key)) {
+    const field = meander(bankField(tx, ty, around), { tx, ty });
+    spills.set(
+      key,
+      field.some((e) => e.d > -LIP)
+        ? piece(key, ICE_PALETTE, () => drawIce(field, { tx, ty }, null))
+        : null,
+    );
+  }
+  return spills.get(key) ?? null;
+}
+
+/** The water reaching over a tile of grass from beside it, or the ice, or null where none does. */
 function spillOf(
   tileAt: (tx: number, ty: number) => TileId | undefined,
   tx: number,
@@ -1084,21 +1123,56 @@ function spillOf(
       : null;
   if (!terrain) return null;
   const around = wetAround(tileAt, tx, ty, WET[terrain]);
-  const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[terrain].variants);
-  const key = `ground:${terrain}:spill:${tx},${ty}:${around}:${variant}`;
+  if (terrain === 'ice') return iceSpill(tx, ty, around);
+  const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART.water.variants);
+  const key = `ground:water:spill:${tx},${ty}:${around}:${variant}`;
   if (!spills.has(key)) {
     const field = bankField(tx, ty, around);
-    const art = TERRAIN_ART[terrain];
     spills.set(
       key,
-      field.some((e) => e.d > 0)
-        ? piece(key, art.palette, () =>
-            terrain === 'water' ? water(0, variant, field) : ice(0, variant, field),
-          )
-        : null,
+      field.some((e) => e.d > 0) ? piece(key, WATER_PALETTE, () => water(0, variant, field)) : null,
     );
   }
   return spills.get(key) ?? null;
+}
+
+/**
+ * The snow lying on a tile of ice in winter, or on the ice and its bank reaching over a tile of
+ * grass (`iceSnow`), or null on any other ground.
+ */
+export function snowOnIce(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): GroundPiece | null {
+  const id = tileAt(tx, ty);
+  if (id === 'ice') {
+    const { piece: under, field, melt } = icePiece(tileAt, tx, ty);
+    return piece(`ground:iceSnow:${under.key.slice('ground:ice:'.length)}`, ICE_SNOW_PALETTE, () =>
+      iceSnow(field, { tx, ty }, melt),
+    );
+  }
+  if (id !== 'grass') return null;
+  const spill = spillOf(tileAt, tx, ty);
+  if (!spill?.key.startsWith('ground:ice:')) return null;
+  const field = meander(bankField(tx, ty, wetAround(tileAt, tx, ty, WET.ice)), { tx, ty });
+  return piece(`ground:iceSnow:${spill.key.slice('ground:ice:'.length)}`, ICE_SNOW_PALETTE, () =>
+    iceSnow(field, { tx, ty }, null),
+  );
+}
+
+/**
+ * Where a sheen can pass over a tile of ice (`render/life.ts`), as local (x, y) pairs; empty for
+ * any other ground.
+ */
+export function iceSheen(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): Int8Array {
+  if (tileAt(tx, ty) !== 'ice') return new Int8Array(0);
+  const { piece: drawnIce, field } = icePiece(tileAt, tx, ty);
+  return sheenOf(drawnIce.source, field, { tx, ty });
 }
 
 /** Each tile of grass beside water: what of the water reaches over it, if any. */

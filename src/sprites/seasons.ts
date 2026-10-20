@@ -17,6 +17,7 @@ import {
   NW,
   S,
   SE,
+  snowOnIce,
   SW,
   variantOf,
   W,
@@ -273,7 +274,7 @@ function dustPiece(mask: number, variant: number): GroundPiece {
 /**
  * What the ground at (tx, ty) is drawn from in a season, bottom first: the tile's pieces in the
  * season's palettes (`groundPieces`, unchanged in autumn), and with snow lying, the snow drifted
- * onto a track.
+ * onto a track or the ice.
  */
 export function seasonPieces(
   tileAt: (tx: number, ty: number) => TileId | undefined,
@@ -287,6 +288,9 @@ export function seasonPieces(
   if (snow && DUSTED.has(tileAt(tx, ty))) {
     pieces.push(dustPiece(neighbourMask(tileAt, tx, ty), variantOf(tx + 7, ty + 3, 3)));
   }
+  // Snow drifted in over the frozen creek's banks and blown across it (1.1's A3).
+  const iced = snow ? snowOnIce(tileAt, tx, ty) : null;
+  if (iced) pieces.push(iced);
   return pieces;
 }
 
