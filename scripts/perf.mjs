@@ -9,7 +9,8 @@
  * town at night (the most lights and glows), then about her home, then about the fairground (its
  * string lights and stalls), and then 0.3's: Whisperwood's trees (the see-through crowns), Boo
  * Acres, her yard with every outdoor piece out, and her back room full of set pieces under a window
- * paper. A scene a build doesn't have is skipped, so the same script measures an older build.
+ * paper; and last Lantern Shore (V1.1's review). A scene a build doesn't have is skipped, so the
+ * same script measures an older build.
  *
  * Usage: npm run dev, then `node scripts/perf.mjs [--throttle=4] [--frames=900] [--view=far]
  * [--hour=12] [--day=2026-10-26]`.
@@ -313,6 +314,11 @@ const backRoom = await page.evaluate((pieces) => {
 const back = backRoom?.here === 'back' ? await walkAbout(Math.round(FRAMES / 2), 29) : null;
 const backHeap = back ? await heapMb() : 0;
 
+// The shore last (V1.1's review), so every scene before it is walked as it was for 1.0's table:
+// the lake's glints, its lanterns and the ice's melt at the creek's mouth (1.1's A3).
+const shore = (await goTo('lanternShore')) ? await walkAbout(FRAMES, 31) : null;
+const shoreHeap = shore ? await heapMb() : 0;
+
 const report = {
   throttle: THROTTLE,
   frames: FRAMES,
@@ -330,6 +336,7 @@ const report = {
   ...(acres && { booAcres: measured(acres, acresHeap) }),
   ...(yard && { yard: measured(yard, yardHeap, { piecesOut: yardBox?.out }) }),
   ...(back && { backRoom: measured(back, backHeap, { setPieces: backRoom?.placed }) }),
+  ...(shore && { lanternShore: measured(shore, shoreHeap) }),
 };
 console.log(JSON.stringify(report, null, 2));
 if (scene !== 'home') console.log(`note: she didn't get home (scene: ${scene})`);
