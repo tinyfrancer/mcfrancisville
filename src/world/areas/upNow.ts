@@ -24,6 +24,7 @@ import type { Fossils } from '../services/Fossils';
 import type { Garden } from '../services/Garden';
 import type { HonestyStall } from '../services/HonestyStall';
 import type { Neighbourhood } from '../services/Neighbourhood';
+import type { Talk } from '../services/Talk';
 import type { Noticeboard } from '../services/Noticeboard';
 import type { Shops } from '../services/Shops';
 import { UpNow } from '../services/UpNow';
@@ -36,6 +37,7 @@ export interface UpNowParts {
   garden: Garden;
   noticeboard: Noticeboard;
   neighbourhood: Neighbourhood;
+  talk: Talk;
   fossils: Fossils;
   shops: Shops;
   calendar: Calendar;
@@ -117,7 +119,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
         : null,
       notes: noticeboard.notices().map((n) => ({ from: n.from, done: n.done })),
       favours: VILLAGER_IDS.filter(inTown).flatMap((who) => {
-        const favour = neighbourhood.favour(who);
+        const favour = parts.talk.favour(who);
         if (!favour) return [];
         const zone = neighbourhood.whereIs(who)?.zone ?? null;
         return [{ who, item: favour.item, count: favour.count, zone }];

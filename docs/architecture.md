@@ -17,8 +17,8 @@ persistence/             the save: its shape, migrations, localStorage, the back
 render/                  drawing: reads the world once a frame, writes it only by taps
 hud/  ui/                the HTML overlay: reaches the world only through its Api interfaces
 audio/                   tunes and the SoundBoard: hears moments, never reads the world
-wiring/                  the sheets' Apis from the world's services, and each moment played
-main.ts                  runs it: the loop, the save, the views and touch
+wiring/                  the sheets' Apis by area, each moment played, the save kept, touch
+main.ts                  runs it: the boot, the loop and the views
 api/  (outside src/)     the cloud save's one function, its own tsconfig (V1's S2, decision 323)
 ```
 
@@ -65,19 +65,35 @@ that has them made and assigns them, and the save (`save()`, the one way its sta
 making is by area, a function each in `src/world/areas/` taking the shared parts and returning
 its services (0.3's W1, decision 218): `keepersOf` and the `Shared` parts in `shared.ts` (`ctx`,
 the keepers, `town`, the options, and `movement` read late), then `making` (the stall, workbench,
-stove and `Belongings`), `passive` (visits, the candy tree), `places` (the zones and stalls),
-`shopping` (Ollie's deliveries and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2; his figurines, C3), `neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
-`fairground`, `catching` (`collecting.ts`: the net, the rod and, since 0.3's C1, the fossils;
-since 1.1's W1 the buried keys' `Digging` too, so the mound's two owners are in one area),
-`going` (`travel.ts`: her movement, travel, the broom), `homeServices` (`home.ts`: decorating, the
-record player, what plays, and since 0.3's H1 and H2 the chest and what's on show), `petServices`
-(`pets.ts`), `her` (hands, novelty, milestones, sitting, poses), and V1's two: `firstDay`
-(`FirstDay`, R1, reading the town's keepers) and `upNow` (`UpNow`, R2: Today, a plain read of the
-services made before it), in that order. V1 also put `Joining` (P4's verbs at a happening),
-`PostRound` (Ollie's walk to her box) and `Marriage` (P5) in `neighbours`, `Projects` (R4, over
-the `Works` keeper and the `Sites` overlay) in `places`, and `RareEvents` (R3) in `festivals`: a service listens for its signals in the order it
-was made, and anything made later is read through a function. A new service is a line in its
-area's function and its interface, a field here and its assignment. An area whose service does
+stove and `Belongings`), `passive` (visits, the candy tree), V1's `firstDay` (`FirstDay`, R1,
+reading the stall, the tree and the visits), `places` (the zones and stalls), the everyday
+services the constructor makes itself (the garden, the barn, gathering, the shops, the mailbox and
+V1's `Projects`, over the `Works` keeper and the `Sites` overlay), `shopping` (Ollie's deliveries
+and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2; his figurines, C3), `neighbours`
+(since 1.1's W3 `Talk` first, then the `Neighbourhood` that reads it), `mystery`, `festivals`
+(`calendar.ts`), `outdoors` (weather, fountain), `fairground`, `catching` (`collecting.ts`: the
+net, the rod and, since 0.3's C1, the fossils; since 1.1's W1 the buried keys' `Digging` too, so
+the mound's two owners are in one area), `going` (`travel.ts`: her movement, travel, the broom),
+the world's own reset as she crosses, `homeServices` (`home.ts`: decorating, the record player,
+what plays, and since 0.3's H1 and H2 the chest and what's on show), `petServices` (`pets.ts`),
+`her` (hands, novelty, milestones, sitting, poses), and V1's `upNow` (`UpNow`, R2: Today, a plain
+read of the services made before it), in that order. V1 also put `Joining` (P4's verbs at a
+happening), `PostRound` (Ollie's walk to her box) and `Marriage` (P5) in `neighbours`, and
+`RareEvents` (R3) in `festivals`: a service listens for its signals in the order it was made, and
+anything made later is read through a function.
+
+**The order is named once** (1.1's W3, decision 342): `AREAS` in `src/world/areas/order.ts`, a row
+a step, each with what its services listen for on each bus (`signals`, `state`) in the order they
+start to, and why it stands where it does; the constructor's own two steps (`everyday`, `forget`)
+are rows too. The constructor tells `options.areaMade` after each step, and
+`tests/world/areaOrder.test.ts` holds the steps made in `AREAS`' order, each listening for exactly
+what its row says in that order (so who hears her cross, a letter opened or the bag first is
+read off the table: `crossed` the neighbourhood, the reset, the record player, decorating, the
+pets; `opened` the mystery, then the broom; `bag` `Belongings`, the first day, hands, novelty,
+milestones), and nothing sent on either bus while the world is made, so no service made later
+misses one. A new service is a line in its area's function and its interface, a field here and
+its assignment, and, if it listens for anything, a word in its area's row; one that must hear a
+signal after another goes in a later area. An area whose service does
 something when she walks up to a prop also returns its rows of the arrivals table (`arrivals`, a
 `PropArrivals`, 1.1's W1, decision 340), which the constructor joins into `propArrivals` with
 `arrivalsOf` (see "Taps and arrivals"). The options a world is made
@@ -85,7 +101,8 @@ from (`WorldOptions`, `fromSave`) are `src/world/options.ts`. What the services 
 her neighbours read of the town (her name, where she is, where a neighbour is, their hearts,
 whether they live here, and `thank`) is one `TownReads` object made at the top of the constructor
 and handed to each in `Shared`, so a new one takes it rather than writing the same six functions
-again. `build.ts` is about 500 lines, the constructor about 130 of them. `src/world/World.ts`
+again. `build.ts` is about 540 lines, the constructor about 180 of them (1.1's W3 added a line
+telling `areaMade` after each step). `src/world/World.ts`
 (about 580 lines, from 884 at 0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
 arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
 `forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
@@ -106,11 +123,11 @@ arrival, and steps everything in `update(deltaMs)`. The parts call back into it 
 So there are **two channels out of the world**: the state bus, which the HUD follows, and the list
 of moments `update()` returns (a catch, a harvest, a heart), which the view, the messages and the
 sound play. The music is the one thing told where she is rather than what happened: each step,
-`main.ts` names a `MusicKey` from the zone, the window (`windowOf`) and an `Occasion` (the
+`wiring/music.ts` (`Music`, 1.1's W3) names a `MusicKey` from the zone, the window (`windowOf`) and an `Occasion` (the
 festivals, the decorations, and whether `world.fountain` is playing), and the `SoundBoard`
 crossfades to it (decisions 172, 173), so `audio/` still reads no rule. The one thing back the
-other way is the music's beat (`SoundBoard.musicBeat`), which `main.ts` hands the town's view
-for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
+other way is the music's beat (`SoundBoard.musicBeat`), which `Music.fountainBeat` hands the
+town's view for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
 The ambience is told the same way (V1's S1, decision 321): `wiring/hearing.ts` reads the place,
 the hour, the weather and how near water she stands when she changes tile or place (or once a
 minute), and hands `SoundBoard.setAmbience` a `Bed` from `ambienceFor`; it also counts her
@@ -162,7 +179,8 @@ the World.
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet        |
 | `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`    |
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`     |
-| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, `scene`     |
+| `Neighbourhood` | where each is, and their walks in every place and room         | friends, `Talk`, `errand`, `pets`          |
+| `Talk`          | the hello, heart moments, questions, replies, gifts, favours   | friends, bag, wallet, mailbox, `scene`     |
 | `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)         |
 | `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox            |
 | `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits         |
@@ -201,7 +219,14 @@ the World.
 | `PostRound`     | Ollie walking a letter to her box when one comes (P4)          | `posted` signal, where she and he are      |
 | `Marriage`      | Cody married (P5): his evenings, "how was your day?", story    | lately, takings, bag, mailbox              |
 
-`Neighbourhood`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
+`Talk` (1.1's W3, decision 342) is the talk: the hello and what they bring up, a heart moment or
+their question and what she says back, the faces they say them with, the calls' and visits' first
+lines, gifts, favours, friendship growing (`thank`, `befriend`) and best friends' letters
+(`check`). `Neighbourhood` is who's where and the walking, and reads who she's talking to from
+`Talk`, so they wait for her; it answers the talk's reads too (`talk`, `reply`, `give`, `favour`,
+`doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`, one line each), for
+`src/render/` and the tests, while the wiring, the world and the areas call `world.talk`.
+`Talk`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
 talk from `Forecast`, `Hands`, `Collecting.caughtToday` and `PetCare`, for what a neighbour brings
 up (`systems/dialogue.ts`); it is read, never kept.
 
@@ -321,7 +346,7 @@ code, which runs the same migrations. A save that can't be read is moved aside, 
 Three things are kept by the phone beside the save, never in it, and a backup code doesn't carry
 them: the sound switches (`audio/settings.ts`), her rod's colour (`persistence/rod.ts`, 0.2's
 K2, decision 171) and how close the camera is (`src/settings.ts`, V1's L1, decision 290), read
-once in `main.ts` and handed to the fit and to Settings' View tab (`ViewApi`). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
+once in `main.ts` and handed to the fit and to Settings' View tab (`ViewApi`). The rod's is read in `wiring/apis/her.ts` and handed to the drawing by `paintRod`
 in `render/scene.ts`, so neither the world nor the save knows it.
 
 The cloud save (V1's S2, decision 323) is the one thing a server answers: `api/save.ts`, a Vercel
@@ -330,7 +355,7 @@ faked store, Upstash's REST API through plain `fetch`), outside `src/` and `dist
 `api/tsconfig.json`. The phone's key is kept beside the save (`persistence/cloudKey.ts`: 128
 random bits, a 28-symbol Crockford code with two check symbols); `persistence/cloudSeal.ts`
 hashes it into the id the function files under and the AES-GCM key the town is sealed with;
-`persistence/cloud.ts` (`CloudSave`) is made in `main.ts`, told each local write by the
+`persistence/cloud.ts` (`CloudSave`) is made by `keepTown` (`wiring/keeping.ts`), told each local write by the
 `AutoSaver`'s write, and flushed on `visibilitychange`, `pagehide` and `online`. It asks the
 cloud once (`check`) before anything goes up, against the loaded save's `updatedAt`, and a newer
 town is offered by `hud/CloudCard.ts` after the title (`offerCloud`), never swapped in. What goes
@@ -338,6 +363,13 @@ up is the backup code sealed, so restoring runs the backup's migrations. Setting
 shows the code and its QR (`hud/qr.ts`, our own encoder) through `SaveApi.cloud`.
 
 ## The loop
+
+`main.ts` is the boot, the loop and the views (1.1's W3: 278 lines, from 546); what it made
+besides is `wiring/`'s, each made where it was: `keepTown` (`wiring/keeping.ts`: the autosave, the
+flushes as the page hides, the cloud's check and its newer town offered past the title), `enterer`
+(`wiring/greeting.ts`: the creator, Cody's hello and the backup nudge), `listenForTaps`
+(`wiring/touch.ts`), `Music` (`wiring/music.ts`) and `exposeForDebugging` (`wiring/debug.ts`, a
+dev build's handles).
 
 `main.ts` runs the loop, and `src/loop.ts` (`FixedStep`) turns each frame into whole steps of
 1/120 s, so a walk is the same on every phone and a 60Hz frame always gets two steps (it allows a
@@ -449,8 +481,12 @@ list), `ProjectsPanelApi` (the noticeboard's Projects tab, inside `NoticeApi`), 
 `SaveApi`) and `ViewApi` (Close or Far), and
 `QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
 buttons), which `sheetApis` in
-`wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
-sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
+`wiring/apis.ts` composes from a builder an area in `wiring/apis/` (1.1's W3: `her`, `travel`,
+`making`, `garden`, `shopping`, `home`, `neighbours`, `collecting`, `pets`, `mystery`,
+`fairground`, `calendar` and `welcome`, matching `world/areas/` where they fit, what they share in
+`apis/shared.ts`), each from the world's services; Settings' save and sound are
+`apis/settings.ts`'s, which `main.ts` hands the HUD with its view. So a sheet is testable with a
+stub and never reaches into the world. The world's moments, from the loop
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
 opens, and its toast. A bed's card (phase P) is the one piece of the HUD that follows the world:
 `main.ts` tells it each frame where its bed is on the page (`hud.placeBed`), and where she is
@@ -948,6 +984,31 @@ shared with lane W's session (draw means, ms (p50); heap, MB):
 
 Within the spread everywhere; the heap half a megabyte up, the square's pieces.
 
+**1.1's W3** (2026-10-19, decision 342), `Talk` out of `Neighbourhood`, the Apis by area,
+`main.ts` slimmed and the areas' order named, changes no drawing; a neighbour's walk asks `Talk`
+who she's talking to, a call one function deeper. Timed in Node (vitest, a fake clock, the town
+settled 400 steps), alternating with `v1.1-dev`, each from its own copy: a talk opened and its
+buttons worked out (`neighbourhood.talk` and `talkActions`, every neighbour four times a day for
+six days, 312 a run) and the step that crosses into the afternoon or the evening (20 a run),
+medians of each run, quartiles across runs (24 runs on W3, 27 on `v1.1-dev`): a talk 0.089 ms
+(0.079–0.098) against 0.085 (0.077–0.095), a window's turn 3.3 ms (2.86–4.19) against 2.93
+(2.59–3.57), an ordinary step 0.19 against 0.18 ms. `npm run perf` at Close, 21:30, three runs
+each alternating (draw means, ms (p50); updates, ms):
+
+| Scene       | Draw, W3              | Draw, v1.1-dev        | Update W3 → v1.1-dev  |
+| ----------- | --------------------- | --------------------- | --------------------- |
+| Town        | 29.2–42.3 (20.4–29.8) | 29.1–42.8 (20.8–29.1) | 0.96–1.44 → 0.89–1.46 |
+| Home        | 14.6–21 (9.1–12.8)    | 14.2–20.3 (9–12.4)    | 0.73–1.18 → 0.68–1.16 |
+| Fairground  | 20.3–24.8 (13.8–16.9) | 18–24.5 (12.5–17)     | 0.61–0.79 → 0.52–0.8  |
+| Whisperwood | 21.5–28.5 (14.3–18.6) | 22–26.1 (14.4–18.8)   | 0.67–0.93 → 0.67–0.84 |
+| Boo Acres   | 16.4–20.5 (11.1–13.1) | 17.6–25.4 (11.3–15.3) | 0.57–0.69 → 0.58–0.88 |
+| Her yard    | 26.9–35.5 (20.7–27.2) | 27.4–40.9 (21.8–31.7) | 0.77–1.13 → 0.85–1.38 |
+| Back room   | 14.8–22 (10.1–15.2)   | 16.5–23.1 (11.5–16.4) | 0.89–1.24 → 0.9–1.42  |
+
+Every row within the other's spread, one way and the other; the window's turn leans a few tenths
+of a millisecond dearer in the middle of its runs and overlaps them end to end, the container's
+noise on a step that does a window's dealing.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -1057,24 +1118,31 @@ V1's weight on it.
     forwarding to `Rooms` (twenty-seven one-liners, kept so `src/render/`, the sheets and the
     tests didn't move while lane A ran); a later session can point those readers at `home.rooms`
     and drop them.
-12. **Big view, wiring and service files.** `render/OutdoorView.ts` is 1,240 lines (the yard, the
-    mounds, the sites, the see-through crowns, the fishing line and reel, film night, the fountain
-    and the effects all hand it something to sort), `services/Neighbourhood.ts` 1,100 (P1–P5 each
-    added talk, moments, calls and verbs to it), `wiring/apis.ts` 760 and `main.ts` 540. The lanes
-    drew new things in files of their own (`render/effects.ts`, `fairGames.ts`, `transition.ts`)
-    and put talk actions in `wiring/talkActions.ts`, which is the way; `Neighbourhood`'s talk (the
-    hello, moments, questions, replies) could be a `Talk` service of its own, and `apis.ts` split by
-    area as `world/areas/` was.
-13. **The areas' order still matters.** A service listens for a signal in the order it was made,
-    so one that hears a signal another already hears goes in an area made after it; V1 added two
-    areas at the end (`firstDay`, `upNow`) for that reason.
+12. **Big view files.** `render/OutdoorView.ts` is 1,240 lines (the yard, the mounds, the sites,
+    the see-through crowns, the fishing line and reel, film night, the fountain and the effects all
+    hand it something to sort); the lanes drew new things in files of their own
+    (`render/effects.ts`, `fairGames.ts`, `transition.ts`), which is the way, and a view session
+    could do the same for what's left. ~~The service and wiring files~~: done in 1.1's W3
+    (decision 342). `services/Neighbourhood.ts` (1,102 lines) is who's where and the walking (652)
+    and `services/Talk.ts` the talk (534), the neighbourhood answering the talk's ten reads in a line
+    each for the view and the tests; `wiring/apis.ts` (766) is 38 lines composing a builder an area
+    in `wiring/apis/` (13 files, 24 to 139 lines, and `settings.ts`, 89, from `main.ts`); `main.ts`
+    (546) is the boot, the loop and the views (278), the save and cloud, going in, touch, the music
+    and the dev handles in `wiring/`. Talk actions stay in `wiring/talkActions.ts` (they're the
+    HUD's buttons, worded from `hud/messages.ts`).
+13. ~~**The areas' order still matters.**~~ Done in 1.1's W3 (decision 342): it still matters,
+    and is named once, `AREAS` in `world/areas/order.ts`, a row a step with what it listens for
+    and why, held by `tests/world/areaOrder.test.ts` (the steps made in that order, each listening
+    for exactly its row, nothing sent while the world is made). `firstDay` was never last: it is
+    made third, after the passive Candy it reads; only `upNow` is.
 14. **Big data files and one big chunk.** `sprites/doll.ts` is 3,000 lines, `sprites/items.ts`
     2,600, `data/villagers.ts` 1,650, `types/ids.ts` 1,340. Fine as data; a redraw should split by
     family. The build is one 1.8 MB chunk (600 kB gzipped), precached once a version (decision
     322), so it costs a download per deploy, not a launch.
-15. **The town's legend is running out of characters.** About a dozen are left in `data/maps.ts`'s
-    shared legend; the fairground (`FAIR_LEGEND`, `9` and `0` used by R6b) and Boo Acres have their
-    own, which is the way for the next new place.
+15. ~~**The town's legend is running out of characters.**~~ Noted in 1.1's W3 (decision 342):
+    a comment at `LEGEND` in `data/maps.ts` says about a dozen are left and gives the rule, a
+    place-only prop in that place's own legend (`FAIR_LEGEND`, `FARM_LEGEND`), never a new shared
+    character.
 16. ~~**What she ate isn't saved**~~ Done in 1.0.1 (X1, decision 325, save v54): `kitchen.ate`
     keeps the dish for each course, so the chip is right after a reload.
 17. ~~**Pets walk tile to tile.**~~ Done in 1.1's W1 (decision 340): `Pet.walk` pulls its path

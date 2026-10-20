@@ -56,7 +56,26 @@ four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&pag
 
 ### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
 
-**W2 landed (PR #208, decision 341; save v55). Next: W3.** Her rooms are a keeper of their
+**W3 landed (PR #210, decision 342; no save change). Lane W is finished.** `Talk` is the talk
+(`services/Talk.ts`: the hello, heart moments, questions and replies, faces, calls' and visits'
+lines, gifts, favours, friendship and best friends' letters), made in `neighbours` just before
+`Neighbourhood`, which is who's where and the walking and reads `talkingTo` from it; the wiring,
+`World` and the areas call `world.talk`. The sheets' Apis are built by area in `wiring/apis/`
+(a pure move; `apis.ts` composes them). `main.ts` is the boot, the loop and the views; the save
+and cloud are `wiring/keeping.ts`, Settings' Apis `wiring/apis/settings.ts`, going in
+`wiring/greeting.ts`, touch, music and the dev handles `wiring/`'s too. The areas' order is
+`AREAS` (`world/areas/order.ts`), held by `tests/world/areaOrder.test.ts` through
+`options.areaMade`. The legend's note is at `LEGEND` in `data/maps.ts`. **For V1.1's review**:
+`Neighbourhood` still answers the talk's ten reads in a line each (`talk`, `reply`, `give`,
+`favour`, `doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`), as W2 left
+`Home`'s twenty-seven, so `src/render/` and the tests didn't move; a later session may point
+them at `world.talk` and drop them ("Where it hurts" 11 and 12). Talk actions stay in
+`wiring/talkActions.ts` (the sheet's buttons). A new service that listens for a signal is a
+word in its area's `AREAS` row, or the order test fails. Perf and a talk and a window's turn
+timed within noise (architecture.md's "1.1's W3"); smoke 622/622 on both, nothing she sees
+changed. No `NOTES` line (a refactor gets none).
+
+**W2 landed (PR #208, decision 341; save v55).** Her rooms are a keeper of their
 own, `Rooms` (`src/world/Rooms.ts`: each room's pieces with what they show and what stands on
 what, walls, floor, size, `here`, building and growing, the decorating moves; `Decorable`, as
 `Yard` is), and `Home` is the chest's two lists and the papers and floors she owns, with its

@@ -157,7 +157,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   sheet is two columns the whole height, its head and foot on the left and its body on the right
   (a landscape media query in `src/hud/styles.ts`, decisions 159, 160, 178). Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
-  `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
+  `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built by area in
+  `src/wiring/apis/` (`her.ts`, `home.ts`, `neighbours.ts`…, matching `src/world/areas/`, Settings'
+  in `settings.ts`), which `sheetApis` in `src/wiring/apis.ts` composes (1.1's W3), and
   every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106); a toast
   stays as long as it takes to read and goes at a tap (`src/hud/ToastLine.ts`, decision 140). Every
   sheet is built by `openSheet` (`src/hud/dom.ts`: a head with a `picture` beside the title and
@@ -315,9 +317,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   decision 84 the why. The parts are made and wired in `src/world/build.ts` (`WorldParts`, which
   `World` extends with the tap, the walk and the step, decision 139), each area's services by a
   function in `src/world/areas/` taking the `Shared` parts (decision 218): a new service is a
-  line in its area's function, a field in `build.ts` and its assignment there; what the
+  line in its area's function, a field in `build.ts` and its assignment there. The areas are made
+  in the order `AREAS` names (`src/world/areas/order.ts`, 1.1's W3, decision 342): a row each with
+  what its services listen for, which is who hears a signal first, and why it stands there, held
+  by `tests/world/areaOrder.test.ts`; a service that listens for something is a word in its area's
+  row, and one that must hear after another goes in a later area. What the
   neighbour-facing services read of the town is one `TownReads` (decision 210), and the options a world is made from, with `fromSave`, are
-  `src/world/options.ts`. `World.save()` and `fromSave()` are the whole save.
+  `src/world/options.ts`. `src/main.ts` is the boot, the loop and the views; the save and the
+  cloud (`src/wiring/keeping.ts`), going in (`greeting.ts`), touch (`touch.ts`), the music
+  (`music.ts`) and the dev handles (`debug.ts`) are `src/wiring/`'s. `World.save()` and `fromSave()` are the whole save.
   `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
   a building goes in. Arriving at a prop is a table keyed by prop id (`PropArrivals`,
@@ -526,8 +534,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   (decision 303): row and pieces `src/data/robBoo.ts`, art and the town hall `src/sprites/robBoo.ts`;
   he isn't about until she meets him at the castle (`inTown` in `src/systems/mayor.ts`).
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
-  villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
-  `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
+  villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` is who's where and the
+  walking, and `world.talk` (`Talk`, `src/world/services/Talk.ts`, 1.1's W3) the talk: `talk`,
+  `reply`, `give`, `favour`/`doFavour`, the faces, friendships and best friends' letters (the
+  neighbourhood answers the same reads, a line each, for the view and the tests); `world.mailbox`
+  the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
   (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154); the talk and mail sheets are
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The top bar's 👥 is the neighbours sheet (0.2's U3, decision

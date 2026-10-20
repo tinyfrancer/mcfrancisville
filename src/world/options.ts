@@ -25,6 +25,7 @@ import type { FreshSnapshot } from './services/Novelty';
 import type { VisitsSnapshot } from './services/Visits';
 import type { FirstDaySnapshot } from './services/FirstDay';
 import type { ClosetSnapshot } from './Wardrobe';
+import type { AreaName } from './areas/order';
 
 /** What of her finds is saved: the bag, and what she has taken today. */
 export interface FindsSnapshot {
@@ -34,6 +35,8 @@ export interface FindsSnapshot {
 
 export interface WorldOptions {
   map?: MapSource;
+  /** Told as each area of the world is made, in order (1.1's W3): how a test holds `AREAS`. */
+  areaMade?: (area: AreaName) => void;
   /** Where she was when the game was last saved. */
   player?: SavedPlayer;
   closet?: Partial<ClosetSnapshot>;

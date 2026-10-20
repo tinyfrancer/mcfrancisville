@@ -8444,3 +8444,72 @@ bed's inner corners (a concave fillet needs the diagonal neighbours in `flowerBe
 town's beds have none; the cross reads as a formal bed); a different picture for the project's
 two raised beds; a palette swap for the board's pumpkin; a small snowman (a new shape with no
 pumpkin to keep, where the lanterns kept theirs).
+
+## 342. `Talk` out of `Neighbourhood`, the Apis by area, `main.ts` slimmed, the areas' order named once, and the legend's note (2026-10-19, 1.1's W3)
+
+_Session W3 of the 1.1 plan, lane W's last (decision 328), "Where it hurts" 12, 13 and 15. **No
+save change**; nothing she sees changes. Personal touches parked (decision 177): nothing was
+asked._
+
+- **`Talk` (`src/world/services/Talk.ts`) is the talk**: the hello and what they bring up, a
+  heart moment or a question and her reply, the faces they say them with, the first lines of a
+  call or a visit, gifts, favours, friendship growing (`thank`, `befriend`) and best friends'
+  letters. It is made in the `neighbours` area just before `Neighbourhood`, which keeps who's
+  where and the walking (`Neighbourhood.ts` 1,102 lines to 652; `Talk.ts` 534) and reads who
+  she's talking to from `Talk`, so they wait for her. The wiring, `World` and the areas call
+  `world.talk`; **`Neighbourhood` still answers the talk's ten reads** (`talk`, `reply`, `give`,
+  `favour`, `doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`), a line each,
+  so `src/render/` (lane A's while W3 ran) and the tests didn't move, as W2 kept `Home`'s. A best
+  friend's call now is `callNow` in `systems/calls.ts` (the hearts handed in), read by both
+  services, the same rule as before. **Talk actions stay in `wiring/talkActions.ts`**: they are
+  the sheet's buttons, worded from `hud/messages.ts`, and the plan's "the talk actions move" read
+  as their rules, which are `Talk`'s now. **Rejected:** `Talk` in an area of its own (it reads
+  friends, the bag, the wallet and the mailbox as its neighbours do, and the neighbourhood reads
+  it, so the same area in that order); `Neighbourhood` making its `Talk` (a service inside a
+  service, not in `build.ts`'s list); dropping the ten one-liners now (a few hundred test calls
+  and the view, for no change she sees; noted in "Where it hurts" 12).
+- **`wiring/apis.ts` by area, a pure move**: each sheet's Api is built in
+  `src/wiring/apis/<area>.ts` (`her`, `travel`, `making`, `garden`, `shopping`, `home`,
+  `neighbours`, `collecting`, `pets`, `mystery`, `fairground`, `calendar`, `welcome`, matching
+  `world/areas/` where they fit), each block moved verbatim; what they share (`ApiWiring`,
+  `Waiting`, `seedsIn`, `holdablesIn`, `SheetApis`) is `apis/shared.ts`, and `apis.ts` (766 lines
+  to 38) composes them in `sheetApis` as before, so `main.ts` and `moments.ts` import as they
+  did. `tests/hud/noEmoji.test.ts` reads the folder too. They still read `home.*` through W2's
+  forwarders. **Rejected:** a builder per sheet (forty files of a dozen lines); one `buildApis`
+  per area returning an object spread together without the `SheetApis` type (a missing Api would
+  surface only in the HUD).
+- **`main.ts` is the boot, the loop and the views** (546 lines to 278). Moved as they were, each
+  into a function made where it was: the save and the cloud (`keepTown`, `wiring/keeping.ts`: the
+  autosave, the page-hide flushes, the cloud's check and its newer town offered past the title),
+  Settings' Backup and Sound Apis (`wiring/apis/settings.ts`), going in (`enterer`,
+  `wiring/greeting.ts`: the creator, Cody's hello, the backup nudge), touch (`listenForTaps`,
+  `wiring/touch.ts`), the music and the fountain's beat (`Music`, `wiring/music.ts`) and the dev
+  handles (`exposeForDebugging`, `wiring/debug.ts`). Everything is made in the order it was.
+- **The areas' order is named once**: `AREAS` in `src/world/areas/order.ts`, a row a step (the
+  constructor's own `everyday` and `forget` too), each with what its services listen for on each
+  bus (`signals`, `state`) in the order they start to and why it stands there. `WorldParts` tells
+  `options.areaMade` after each step, and `tests/world/areaOrder.test.ts` holds, for the town and
+  a bare map, the steps made in `AREAS`' order, each listening for exactly its row in that order
+  (spying on both buses' `on`), and nothing sent on either while the world is made, so a service
+  made later never misses one; and it reads off the table who hears her cross, a letter opened
+  and the bag first, as decision 218 kept them. `firstDay` was never last (it is made third,
+  after the passive Candy it reads); only `upNow` is. **Rejected:** each area function declaring
+  its own listeners (the plan's first way: the listeners are in the services' constructors, so a
+  declaration beside them would be a second list to keep, and the spy reads the real one); a
+  test that no area listens for a signal an earlier area sends during construction (nothing is
+  sent then at all, which is the stronger thing to hold); sorting the areas from the table
+  (`build.ts` hands each area what earlier ones made, so the order is the code's, and the table
+  names it).
+- **The legend's note**: a comment at `LEGEND` in `src/data/maps.ts` says about a dozen
+  characters are left and gives the rule, a prop that stands in one place goes in that place's
+  own legend (`FAIR_LEGEND`, `FARM_LEGEND`), never a new shared character. No tile changed.
+- **Measured** (architecture.md's "1.1's W3"): `npm run perf` at Close, 21:30, three runs each
+  alternating with `v1.1-dev`, each served from its own copy: every scene's draw and update within
+  the other's spread (the town's draw 29.2–42.3 ms on W3 against 29.1–42.8, its update 0.96–1.44
+  against 0.89–1.46). A talk opened and its buttons worked out (`neighbourhood.talk` and
+  `talkActions`, 312 a run) and the step that turns a window (20 a run), timed in Node, 24 runs
+  against 27 alternating: a talk's median 0.089 ms (quartiles 0.079–0.098) against 0.085
+  (0.077–0.095), a window's turn 3.3 ms (2.86–4.19) against 2.93 (2.59–3.57), an ordinary step
+  0.19 against 0.18; within the runs' spread.
+- **Checked**: the suite unchanged but for the new order test (W1's snapshots and the lived-in
+  fixtures pass without `-u`); smoke 622/622 on W3 and on `v1.1-dev`; `smoke:offline` 10/10.

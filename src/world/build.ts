@@ -26,6 +26,7 @@ import { shopping } from './areas/shopping';
 import { keepersOf, type Shared, type TownReads } from './areas/shared';
 import { going } from './areas/travel';
 import type { WorldOptions, WorldSave } from './options';
+import type { AreaName } from './areas/order';
 import { arrivalsOf, type PropArrivals } from './arrivals';
 import type { Atlas } from './Atlas';
 import type { Bag } from './Bag';
@@ -84,6 +85,7 @@ import { Mailbox } from './services/Mailbox';
 import type { Milestones } from './services/Milestones';
 import type { Mystery } from './services/Mystery';
 import type { Neighbourhood } from './services/Neighbourhood';
+import type { Talk } from './services/Talk';
 import type { Noticeboard } from './services/Noticeboard';
 import type { Novelty } from './services/Novelty';
 import type { PetCare } from './services/PetCare';
@@ -169,8 +171,10 @@ export abstract class WorldParts {
   readonly postRound: PostRound;
   /** The Hollow Fairground's games, fortune and snack stalls (0.2's M2). */
   readonly activities: Activities;
-  /** Her neighbours: their walks, talking, gifts, favours and friendships. */
+  /** Her neighbours: where each is, and their walks. */
   readonly neighbourhood: Neighbourhood;
+  /** Talking with them: the hello, heart moments, questions, gifts, favours and friendships. */
+  readonly talk: Talk;
   /** The window's small event: a neighbour's news, or something one of them has lost. */
   readonly smallEvents: SmallEvents;
   /** Their pets: the one out with her, those at home, and Fibi's bones. */
@@ -269,8 +273,10 @@ export abstract class WorldParts {
       scene: () => this.scene,
       zoneOf: (villager) => this.neighbourhood.neighbour(villager).zone,
       hearts: (villager) => this.friends.hearts(villager),
-      thank: (villager, points) => this.neighbourhood.thank(villager, points),
+      thank: (villager, points) => this.talk.thank(villager, points),
     };
+    // Told as each area is made, in `AREAS`' order (`areas/order.ts`), which a test holds.
+    const areaMade = (area: AreaName) => options.areaMade?.(area);
     this.map = parseMap(options.map ?? TOWN);
     this.clock = options.clock ?? systemClock;
     this.ctx = worldContext(this.clock);
@@ -287,6 +293,7 @@ export abstract class WorldParts {
     ({ wallet: this.wallet, atlas: this.atlas, porch: this.porch } = keepers);
     ({ keepsakes: this.keepsakes, dug: this.dug, yard: this.yard } = keepers);
     this.lately = keepers.lately;
+    areaMade('keepers');
     const shared: Shared = {
       ...keepers,
       ctx,
@@ -297,19 +304,24 @@ export abstract class WorldParts {
       peopled: (options.map ?? TOWN).neighbours === true,
       movement: () => this.movement,
     };
-    // Each area's services, in an order that matters (decisions.md 210, 218): what a service
-    // listens for is heard in the order they were made, and a read of one made later is a getter.
+    // Each area's services, in the order `AREAS` names with the why (decisions.md 210, 218; 1.1's
+    // W3): what a service listens for is heard in the order they were made, and a read of one made
+    // later is a getter.
     const made = making(shared);
     ({ stall: this.stall, workbench: this.workbench, kitchen: this.kitchen } = made);
     this.belongings = made.belongings;
+    areaMade('making');
     const passed = passive(shared, this.belongings);
     ({ visits: this.visits, candyTree: this.candyTree } = passed);
+    areaMade('passive');
     this.firstDay = firstDay(shared, { ...made, visits: this.visits, candyTree: this.candyTree });
+    areaMade('firstDay');
     // Travel is made after the places; until then (as she's first stood somewhere) every gate is
     // open.
     const place = places(shared, (zone) => (this.travel ? this.travel.isOpen(zone) : true));
     ({ stalls: this.stalls, townZone: this.townZone, homeZone: this.homeZone } = place);
     this.zones = place.zones;
+    areaMade('places');
     const { zones } = this;
     const outside = () => zones.outdoor(this.scene)?.id ?? null;
     // Her greenhouse's planters, once it's built, are under glass (V1's R4).
@@ -329,10 +341,12 @@ export abstract class WorldParts {
       mailbox,
       yard: keepers.yard,
     });
+    areaMade('everyday');
     const hasHad = (id: Had) => this.milestones.hasHad(id);
     const shop = shopping(shared, { mailbox, belongings, hasHad });
     ({ deliveries: this.deliveries, catalogue: this.catalogue, workshop: this.workshop } = shop);
     this.figurines = shop.figurines;
+    areaMade('shopping');
     const near = neighbours(shared, {
       mailbox,
       belongings,
@@ -350,9 +364,11 @@ export abstract class WorldParts {
     this.joining = near.joining;
     this.marriage = near.marriage;
     this.postRound = near.postRound;
-    ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood } = near);
+    ({ smallEvents: this.smallEvents, neighbourhood: this.neighbourhood, talk: this.talk } = near);
     ({ noticeboard: this.noticeboard, baking: this.baking, interiors: this.interiors } = near);
+    areaMade('neighbours');
     this.mystery = mystery(shared, mailbox, this.townZone);
+    areaMade('mystery');
     const festival = festivals(shared, {
       stalls: this.stalls,
       neighbourhood: this.neighbourhood,
@@ -366,20 +382,27 @@ export abstract class WorldParts {
     } = festival);
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
     this.rareEvents = festival.rareEvents;
+    areaMade('festivals');
     ({ weather: this.weather, fountain: this.fountain } = outdoors(shared, zones, outside));
+    areaMade('outdoors');
     this.activities = fairground(shared, this.weather).activities;
+    areaMade('fairground');
     const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
     ({ collecting: this.collecting, fishing: this.fishing, fossils: this.fossils } = caught);
     this.digging = caught.digging;
+    areaMade('catching');
     const gone = going(shared, { zones, mailbox, visits: this.visits });
     ({ movement: this.movement, travel: this.travel, broom: this.broom } = gone);
+    areaMade('going');
     // Whatever she was on her way to do is left behind, wherever she went.
     ctx.signals.on('crossed', () => this.forget());
+    areaMade('forget');
     const homes = homeServices(shared, () => this.forget());
     ({ recordPlayer: this.recordPlayer, instruments: this.instruments } = homes);
     this.decorating = homes.decorating;
     this.chest = homes.chest;
     this.display = homes.display;
+    areaMade('homeServices');
     this.propArrivals = arrivalsOf(
       made.arrivals,
       passed.arrivals,
@@ -394,11 +417,12 @@ export abstract class WorldParts {
       fossils: this.fossils,
       smallEvents: this.smallEvents,
     }).petCare;
+    areaMade('petServices');
     const { workbench, neighbourhood, petCare, decorating, recordPlayer, fishing } = this;
     const hers = her(shared, {
       workbench,
       mailbox,
-      neighbourhood,
+      talk: this.talk,
       petCare,
       decorating,
       recordPlayer,
@@ -407,11 +431,13 @@ export abstract class WorldParts {
     });
     ({ hands: this.hands, novelty: this.novelty, milestones: this.milestones } = hers);
     ({ sitting: this.sitting, poses: this.poses } = hers);
+    areaMade('her');
     const { candyTree, stall, garden, noticeboard, fossils, shops, calendar } = this;
     const today = { candyTree, stall, garden, noticeboard, fossils, shops, calendar };
     this.upNow = upNow(shared, {
       ...today,
       neighbourhood,
+      talk: this.talk,
       firstDay: this.firstDay,
       hasHad,
       rareEvents: this.rareEvents,
@@ -419,6 +445,7 @@ export abstract class WorldParts {
       projects: this.projects,
       activities: this.activities,
     });
+    areaMade('upNow');
   }
 
   /**
