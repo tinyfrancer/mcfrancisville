@@ -303,6 +303,20 @@ type Melted = 'water' | 'plate' | 'seam';
  * are still one sheet, cracked along their seams.
  */
 function meltedAt(wx: number, wy: number, melt: Melt): Melted | null {
+  // Each pixel is asked of again by the four round it, so what it is is kept for the melt.
+  let known = melting.get(melt);
+  if (!known) melting.set(melt, (known = new Map()));
+  const key = wx * 8192 + wy;
+  const was = known.get(key);
+  if (was !== undefined) return was;
+  const now = meltOf(wx, wy, melt);
+  known.set(key, now);
+  return now;
+}
+
+const melting = new WeakMap<Melt, Map<number, Melted | null>>();
+
+function meltOf(wx: number, wy: number, melt: Melt): Melted | null {
   const m = melt(wx, wy);
   if (!(m < MELT)) return null;
   if (m < -PLATE * 1.5) return 'water';
@@ -369,12 +383,18 @@ export function meltNear(
     }
     return best;
   };
+  const known = new Map<number, number>();
   return (wx, wy) => {
+    const key = wx * 8192 + wy;
+    const was = known.get(key);
+    if (was !== undefined) return was;
     const px = wx + 0.5;
     const py = wy + 0.5;
     const out = away(px, py, open);
     const signed = out > 0 ? out : -away(px, py, dry);
-    return signed - noise(wx, wy, 1.4, 17) * 4;
+    const m = signed - noise(wx, wy, 1.4, 17) * 4;
+    known.set(key, m);
+    return m;
   };
 }
 
