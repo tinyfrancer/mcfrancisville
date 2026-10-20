@@ -1,6 +1,7 @@
 import { photoOf } from './render/photo';
 import type { Tile } from './systems/pathfinding';
 import {
+  galleryPage,
   galleryRequested,
   dayRequested,
   hourRequested,
@@ -11,21 +12,16 @@ import {
 } from './config/flags';
 import { mountHud } from './hud/Hud';
 import { tickOnPress } from './hud/dom';
-import type { SaveApi } from './hud/SettingsSheet';
-import { newSave, saveService, type SaveState } from './persistence';
-import { AutoSaver } from './persistence/autosave';
-import { decodeBackup, encodeBackup } from './persistence/backup';
-import { requestPersistence, runningStandalone } from './persistence/persist';
+import { saveService } from './persistence';
+import { runningStandalone } from './persistence/persist';
 import { registerServiceWorker } from './pwa';
-import { voiceOf } from './audio/cues';
-import { isNight, musicFor, tuneOf, type MusicKey } from './audio/music';
 import { SoundBoard } from './audio/SoundBoard';
 import { showGallery } from './render/gallery';
 import { fitPixelScale, fitRoom, placeBetweenBars, TILES_ACROSS } from './render/pixelScale';
 import { readCloseness, writeCloseness } from './settings';
 import { HomeView } from './render/HomeView';
 import { RoomView } from './render/RoomView';
-import { playerDrawable, type SceneView } from './render/scene';
+import type { SceneView } from './render/scene';
 import { OutdoorView } from './render/OutdoorView';
 import { Effects, resolverFor } from './render/effects';
 import { Transitions } from './render/transition';
@@ -33,42 +29,26 @@ import { feelTap } from './wiring/taps';
 import { Chatter } from './wiring/chatter';
 import { Pats } from './wiring/codyHome';
 import { Hearing } from './wiring/hearing';
-import { clockFromDay, clockFromHour, dayKey, systemClock, windowOf } from './systems/clock';
-import { specialDayOf } from './systems/friendship';
-import { stanceOf } from './systems/neighbourLife';
-import { visitLine } from './hud/messages';
-import type { Welcome } from './world/services/Visits';
-import type { DebugView } from './types/debugView';
+import { clockFromDay, clockFromHour, systemClock } from './systems/clock';
 import type { ZoneId } from './types/ids';
 import { fromSave, tileOf, World, type WorldEvent } from './world/World';
 import { sheetApis, type Waiting } from './wiring/apis';
+import { saveApi, soundApi } from './wiring/apis/settings';
 import { playMoments } from './wiring/moments';
+import { keepTown } from './wiring/keeping';
+import { enterer } from './wiring/greeting';
+import { listenForTaps } from './wiring/touch';
+import { Music } from './wiring/music';
+import { exposeForDebugging } from './wiring/debug';
 import { FixedStep } from './loop';
-import { catchErrors, readErrorNotes, troubleOf } from './errorNotes';
-import { NOTES } from './data/patchNotes';
-import { SAFE_KEEPING } from './data/greetings';
-import { backedUpLine, nudgeFor } from './systems/backupNudge';
-import { markBackedUp, markNudged, readBackedUpAt, readNudgedAt } from './safekeeping';
+import { catchErrors } from './errorNotes';
 import { showPerf } from './wiring/perf';
-import { CloudSave, fetchKept, townFrom } from './persistence/cloud';
-import { cloudKey, fromCode, keepCloudKey, readable, toCode } from './persistence/cloudKey';
-import { sealerFor } from './persistence/cloudSeal';
-import { offerCloud } from './hud/CloudCard';
-
-/** How long the title waits for the cloud to say whether it has a newer town (V1's S2). */
-const CLOUD_WAIT_MS = 2500;
 
 /** A frame longer than this is a tab coming back from the background, not a frame to simulate. */
 const MAX_FRAME_MS = 100;
 
 /** Her feet are this far below her tile's centre (as `render/scene.ts` stands her). */
 const HER_FEET = 14;
-
-/**
- * How far a finger may wander and still be a tap (from the MMO). However long it rests is a tap
- * too: a slow thumb is still a tap (V1's E4, decision 283).
- */
-const TAP_SLOP_PX = 8;
 
 const root = document.getElementById('app') as HTMLElement;
 const canvas = document.getElementById('game') as HTMLCanvasElement;
@@ -77,13 +57,18 @@ const canvas = document.getElementById('game') as HTMLCanvasElement;
 catchErrors(window);
 
 if (galleryRequested(location.search)) {
-  showGallery(root);
+  showGallery(root, galleryPage(location.search));
 } else {
   startGame();
 }
 
 if (import.meta.env.PROD) registerServiceWorker();
 
+/**
+ * The boot sequence, the loop and the views: the town from the save, a view for each place she
+ * goes, the HUD over them, and a fixed step. What each sheet asks of the town, the save and the
+ * cloud, going in, touch and the dev handles are `wiring/`'s.
+ */
 function startGame(): void {
   const loaded = saveService.load();
   const hour = hourRequested(location.search);
@@ -96,19 +81,17 @@ function startGame(): void {
       : hour !== null
         ? clockFromHour(hour)
         : systemClock;
-  const world = new World({ clock, ...fromSave(loaded) });
+  // Her phone asking for less motion: the effects calm down, and the reel sweeps gentler (1.0.1).
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const world = new World({ clock, ...fromSave(loaded), slow: reduced });
   // What the moments look like where they happen (V1's E1), shared by every view.
-  const effects = new Effects({
-    reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
-  });
+  const effects = new Effects({ reduced });
   // Two neighbours standing together chatter, a bubble at a time (V1's E3).
   const chatter = new Chatter();
   // Cody pats her pets at hers of an evening (V1's P5).
   const pats = new Pats();
   // Between places, an iris on her and her broom seen flying; a wash as the day turns (V1's E4).
-  const transitions = new Transitions(canvas, {
-    reduced: () => matchMedia('(prefers-reduced-motion: reduce)').matches,
-  });
+  const transitions = new Transitions(canvas, { reduced });
   const ctx = canvas.getContext('2d');
   const leaving = () =>
     transitions.leaving(`${world.scene}:${world.scene === 'home' ? world.home.here : ''}`);
@@ -137,7 +120,7 @@ function startGame(): void {
       if (zone === 'home') made = new HomeView(world, canvas, { hour, weather, effects });
       else if (room) made = new RoomView(world, room, canvas, { hour, effects });
       else {
-        const options = { hour, weather, fountainBeat, effects };
+        const options = { hour, weather, fountainBeat: music.fountainBeat, effects };
         made = new OutdoorView(world, outdoors!, canvas, options);
       }
       views.set(zone, made);
@@ -150,137 +133,15 @@ function startGame(): void {
   };
   const sound = new SoundBoard();
   sound.listen(root);
-  let musicKey: MusicKey | null = null;
-  const music = () => {
-    musicKey = musicFor(world.scene, windowOf(clock.now()), {
-      festivals: world.holidays.festivals(),
-      decor: world.holidays.decor(),
-      fountain: world.fountain.playing(),
-      special: specialDayOf(dayKey(clock.now())),
-      night: isNight(new Date(clock.now()).getHours()),
-    });
-    sound.setMusic(musicKey);
-  };
-  music();
-  // The fountain's lights pulse to its music box, on the beat it's playing, or (with the music
-  // off) to the beat it would be (0.2's H2).
-  const fountainBeat = (): number | null => {
-    if (!musicKey?.endsWith('@musicBox')) return null;
-    const heard = sound.musicPlaying === musicKey ? sound.musicBeat() : null;
-    return heard ?? (performance.now() / 60_000) * tuneOf(musicKey).bpm;
-  };
+  // What plays, told where she is (decisions 172, 173), after every step.
+  const music = new Music(world, sound, clock);
+  music.play();
   const manual = import.meta.env.DEV && manualLoopRequested(location.search);
 
-  // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
-  let save: SaveState = loaded ?? newSave(Date.now(), world.snapshot());
-  const currentSave = (): SaveState => {
-    const now = Date.now();
-    save = {
-      ...save,
-      updatedAt: now,
-      lastPlayedAt: now,
-      ...world.save(),
-    };
-    return save;
-  };
-  // Her town kept in the cloud too (V1's S2, decision 323), under a key this phone makes once.
-  const key = cloudKey();
-  const sealer = key ? sealerFor(key.code) : Promise.resolve(null);
-  // A newer town in the cloud is offered once she's past the title, never swapped in silently.
-  let pastTitle = false;
-  let newerAt: number | null = null;
-  const cloud = new CloudSave({
-    sealer: () => sealer,
-    fetch: (url, init) => fetch(url, init),
-    now: () => Date.now(),
-    online: () => navigator.onLine !== false,
-    backedUp: (at) => markBackedUp(at),
-    onNewer: (at) => (pastTitle ? offerCloudTown(at) : (newerAt = at)),
-  });
-  const checking = cloud.check(loaded?.updatedAt ?? 0);
-  const autosave = new AutoSaver(() => {
-    const written = currentSave();
-    saveService.save(written);
-    cloud.saved(written);
-  });
-  // `pagehide` is the one iOS reliably fires as a Home Screen app is swiped away; a tab being
-  // hidden is the last moment anything is guaranteed to run at all.
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') autosave.flush();
-  });
-  window.addEventListener('pagehide', () => autosave.flush());
-  // After the save above: what's waiting for the cloud goes as the page hides, the game comes
-  // back to the front, or the signal comes back.
-  document.addEventListener('visibilitychange', () => {
-    void cloud.flush(document.visibilityState === 'hidden');
-  });
-  window.addEventListener('pagehide', () => void cloud.flush(true));
-  window.addEventListener('online', () => void cloud.flush());
-  const persisted = requestPersistence();
+  // Saved as she plays and kept in the cloud (decision 323); the HUD, made below, is read late.
+  const keeping = keepTown(world, loaded, () => hud);
+  const { autosave } = keeping;
   let closeness = readCloseness();
-
-  const saveApi: SaveApi = {
-    backupCode: () => encodeBackup(currentSave()),
-    async restore(code) {
-      const decoded = await decodeBackup(code);
-      if (!decoded.ok) return decoded;
-      autosave.stop();
-      cloud.stop();
-      // Stamped now, so the town she chose is the newest and the cloud's isn't offered over it.
-      saveService.save({ ...decoded.save, updatedAt: Date.now() });
-      location.reload();
-      return { ok: true };
-    },
-    cloud: {
-      code: () => (key ? readable(key.code) : null),
-      status: async () => {
-        await cloud.recheck();
-        return cloud.status();
-      },
-      async restore(text) {
-        const bytes = fromCode(text);
-        const theirs = bytes && (await sealerFor(toCode(bytes)));
-        if (!bytes || !theirs) {
-          return { ok: false, reason: "That doesn't look like a cloud code. Check each letter?" };
-        }
-        const got = await fetchKept(
-          theirs,
-          (url, init) => fetch(url, init),
-          () => navigator.onLine,
-        );
-        if (!got.ok) {
-          const why =
-            got.state === 'notSetUp'
-              ? "The cloud isn't set up yet."
-              : "The cloud can't be reached.";
-          return { ok: false, reason: `${why} Try again in a little while?` };
-        }
-        if (!got.kept) return { ok: false, reason: 'The cloud has no town under that code yet.' };
-        const town = await townFrom(got.kept, theirs);
-        if (!town.ok) return town;
-        autosave.stop();
-        cloud.stop();
-        // This phone takes that code as its own, so both keep the one town from now on.
-        keepCloudKey(toCode(bytes));
-        saveService.save(town.save);
-        location.reload();
-        return { ok: true };
-      },
-    },
-    status: async () => ({ persisted: await persisted, standalone: runningStandalone() }),
-    backedUpLine: () => backedUpLine(Date.now(), readBackedUpAt()),
-    backedUp: () => markBackedUp(Date.now()),
-  };
-  // A word under Cody's hello about keeping the town safe, about once a week, never on the first
-  // (V1's S3); when it's said is the phone's, never the save's.
-  const nudgeNow = (kind: string): string | null => {
-    const now = Date.now();
-    const standalone = runningStandalone();
-    const keeping = { now, standalone, backedUpAt: readBackedUpAt(), nudgedAt: readNudgedAt() };
-    const nudge = kind === 'first' ? null : nudgeFor({ ...keeping, since: save.createdAt });
-    if (nudge) markNudged(now);
-    return nudge && SAFE_KEEPING[nudge];
-  };
   // The ?perf corner (V1's S3): her phone's frame times, from her first tap.
   const perf = perfRequested(location.search) ? showPerf(root) : null;
   // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
@@ -292,19 +153,8 @@ function startGame(): void {
   const play = (events: WorldEvent[]) =>
     playMoments(events, { world, hud, sound, changed, waiting, snapshot, effects, transitions });
   const hud = mountHud(root, {
-    save: saveApi,
-    sound: {
-      effects: () => sound.effects,
-      music: () => sound.musicOn,
-      setEffects: (on) => sound.setEffectsOn(on),
-      setMusic: (on) => sound.setMusicOn(on),
-      silentHint: () => sound.silentHint(),
-      trouble: () =>
-        troubleOf(readErrorNotes(), Date.now(), {
-          version: NOTES[NOTES.length - 1]!.version,
-          userAgent: navigator.userAgent,
-        }),
-    },
+    save: saveApi(keeping),
+    sound: soundApi(sound),
     view: {
       closeness: () => closeness,
       setCloseness(chosen) {
@@ -318,73 +168,14 @@ function startGame(): void {
   });
   // Every button in the HUD ticks softly as it's pressed (V1's S1).
   tickOnPress(root, () => sound.uiTick());
-  // Cody's greeting, with what today's visit brought (decisions.md 24, 114, 115).
-  const greet = ({ greeting, visit }: Welcome) => {
-    const nudge = nudgeNow(greeting.kind);
-    hud.greet({
-      ...(nudge && { nudge }),
-      from: 'cody',
-      line: greeting.line,
-      reply: greeting.reply,
-      ...(visit && { gift: visitLine(visit.count, visit.gift) }),
-      ...(greeting.after && { after: greeting.after }),
-      ...(greeting.kind === 'redOne' && { redOne: true }),
-      // A new town's first hello is followed by his list for her first day (V1's R1).
-      ...(greeting.kind === 'first' && { then: () => hud.openFirstDay() }),
-    });
-    changed();
-  };
-  // No look yet means she hasn't met the creator: a new game, or a save from before phase 3. Once
-  // she has, Cody says hello; after that, he welcomes her back each time.
-  const enter = () => {
-    if (!world.wardrobe.created) {
-      hud.openCreator(() => {
-        autosave.flush();
-        const welcome = world.visits.welcome(null);
-        greet(welcome);
-        sound.cue(voiceOf('cody', welcome.greeting.line));
-      });
-    } else {
-      greet(world.visits.welcome(loaded?.lastPlayedAt ?? null));
-    }
-  };
-  // The cloud's newer town, offered (V1's S2); `then` once it's settled, if she keeps hers.
-  const offerCloudTown = (at: number, then?: () => void) =>
-    offerCloud(
-      hud.element,
-      at,
-      {
-        async take() {
-          const town = await cloud.newer();
-          if (!town?.ok)
-            return town?.reason ?? "The cloud's town couldn't be brought down just now.";
-          autosave.stop();
-          cloud.stop();
-          saveService.save(town.save);
-          location.reload();
-          return null;
-        },
-        keep: () => cloud.keepMine(),
-      },
-      then,
-    );
-  // In from the title once the cloud has said (or a moment has passed), asked first if it's newer.
-  const afterCloud = (go: () => void) => {
-    const waited = new Promise((done) => setTimeout(done, CLOUD_WAIT_MS));
-    void Promise.race([checking, waited]).then(() => {
-      pastTitle = true;
-      const at = newerAt;
-      newerAt = null;
-      if (at === null) go();
-      else offerCloudTown(at, go);
-    });
-  };
+  const lastPlayedAt = loaded?.lastPlayedAt ?? null;
+  const enter = enterer({ world, hud, sound, keeping, lastPlayedAt, changed });
   // The title screen first, every time (phase V), then the mayor's notes on a new version
   // (decision 142); a dev build's `?skiptitle` goes straight in.
   if (import.meta.env.DEV && titleSkipped(location.search)) {
-    pastTitle = true;
+    keeping.pastTitle();
     enter();
-  } else hud.openTitle(() => hud.whatsNew(() => afterCloud(enter)));
+  } else hud.openTitle(() => hud.whatsNew(() => keeping.afterCloud(enter)));
 
   // The world is drawn in the room between the bars (0.2's U1), from a whole device pixel, as
   // close as she chose (decision 290); a room indoors is fitted to show it whole.
@@ -425,30 +216,11 @@ function startGame(): void {
   resizing.observe(hud.viewport);
   resize();
 
-  let press: { id: number; x: number; y: number; travel: number } | null = null;
-  canvas.addEventListener('pointerdown', (e) => {
-    if (press) return;
-    press = { id: e.pointerId, x: e.clientX, y: e.clientY, travel: 0 };
-  });
-  // A held press is a tap, never the phone's own: no callout, no menu.
-  canvas.style.setProperty('-webkit-touch-callout', 'none');
-  canvas.style.setProperty('-webkit-user-select', 'none');
-  canvas.style.setProperty('user-select', 'none');
-  canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-  canvas.addEventListener('pointermove', (e) => {
-    if (!press || e.pointerId !== press.id) return;
-    press.travel += Math.hypot(e.clientX - press.x, e.clientY - press.y);
-    press.x = e.clientX;
-    press.y = e.clientY;
-  });
-  canvas.addEventListener('pointerup', (e) => {
-    if (!press || e.pointerId !== press.id) return;
-    const tap = press.travel <= TAP_SLOP_PX;
-    press = null;
-    if (tap) feelTap(view().tap(e.clientX, e.clientY), { world, effects, sound });
-    perf?.start();
-  });
-  canvas.addEventListener('pointercancel', () => (press = null));
+  listenForTaps(
+    canvas,
+    (x, y) => feelTap(view().tap(x, y), { world, effects, sound }),
+    () => perf?.start(),
+  );
 
   // A bed's pop-up rides over its bed as the camera eases after her.
   const placeBed = () => {
@@ -465,7 +237,7 @@ function startGame(): void {
   const steps = new FixedStep();
   const tick = (stepMs: number) => {
     play(world.update(stepMs));
-    music();
+    music.play();
     if (fitFor() !== fitted) resize();
     view().follow(stepMs);
     effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
@@ -490,51 +262,17 @@ function startGame(): void {
   requestAnimationFrame(frame);
 
   if (import.meta.env.DEV) {
-    const debug: DebugView = {
-      step(deltaMs, frames = 1) {
-        for (let i = 0; i < frames; i++) steps.advance(deltaMs, tick);
-        drawFrame(performance.now());
-      },
-      draw: () => drawFrame(performance.now()),
-      tileToClient: (tx, ty) => view().tileToClient(tx, ty),
-      cameraOrigin: () => view().cameraOrigin(),
-      playerDrawnAt: () => {
-        const { x, y } = playerDrawable(world);
-        return { x, y };
-      },
-      saveNow: () => autosave.flush(),
-      groundMemory: () => {
-        let chunks = 0;
-        let bytes = 0;
-        for (const v of views.values()) {
-          const m = v.groundMemory?.();
-          if (!m) continue;
-          chunks += m.chunks;
-          bytes += m.bytes;
-        }
-        return { chunks, bytes };
-      },
-      groundSeams: () => view().groundSeams?.() ?? null,
-      seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
-      effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
-      transition: () => transitions.state(),
-      motion: () => view().motion?.() ?? { props: [], flyers: 0, leaves: 0 },
-      season: () => view().seasonNow?.() ?? null,
-      figures: () =>
-        world.neighbourhood.neighboursIn(world.scene).map((n) => ({
-          id: n.id,
-          moving: n.moving,
-          stance: JSON.stringify(
-            stanceOf({ ...n, seated: n.seat !== null }, performance.now()) ?? 'walking',
-          ),
-        })),
-      faces: () => ({
-        her: world.poses.face(),
-        neighbours: world.neighbourhood
-          .neighboursIn(world.scene)
-          .map((n) => ({ id: n.id, feel: world.neighbourhood.feelingOf(n.id) })),
-      }),
-    };
-    Object.assign(window, { world, view: debug, sound });
+    exposeForDebugging({
+      world,
+      sound,
+      steps,
+      tick,
+      drawFrame,
+      view,
+      views,
+      autosave,
+      effects,
+      transitions,
+    });
   }
 }

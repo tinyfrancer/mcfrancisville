@@ -2,6 +2,7 @@ import type { InteriorId, ItemId, MapZoneId, VillagerId, WorkId } from '../types
 import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
+import type { Build } from './builds';
 import type { DayWindow } from './windows';
 import { SCARAH } from './scarah';
 import { ROB_BOO } from './robBoo';
@@ -83,6 +84,11 @@ export interface VillagerRow {
   name: string;
   /** What they are, as they'd put it. */
   creature: string;
+  /**
+   * The body under their clothes (1.1's A5a, `data/builds.ts`), chosen for each neighbour by
+   * their lines and look (A5b, decision 355); `regular`, hers, where nothing argues otherwise.
+   */
+  build: Build;
   schedule: Schedule;
   /** What they say first when she finds them visiting her at home. `{name}` is her name. */
   dropsBy: string;
@@ -126,6 +132,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   maude: {
     name: 'Maude',
     creature: 'ghost librarian',
+    build: 'regular',
     schedule: {
       weekday: [
         { from: 5, at: 'graves' },
@@ -259,19 +266,22 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   rufus: {
     name: 'Rufus',
     creature: 'werewolf florist',
+    // A big hugging wolf of a florist, all fluff and snacks.
+    build: 'stout',
     schedule: {
       weekday: [
         // Picking wildflowers in Whisperwood first thing, and arranging them at home after lunch.
         { from: 5, inside: 'rufusCabin' },
         { from: 7, zone: 'whisperwood', at: 'wildflowers', doing: 'flowers' },
-        { from: 11, at: 'squareNorth', doing: 'flowers' },
+        // Standing at his buckets, though a bench is beside him on the square (1.1's A1).
+        { from: 11, at: 'squareNorth', doing: 'flowers', sits: false },
         { from: 15, inside: 'rufusCabin' },
         { from: 18, at: 'farmGate' },
         { from: 21, at: 'pondEast' },
       ],
       weekend: [
         { from: 6, zone: 'whisperwood', at: 'wildflowers', doing: 'flowers' },
-        { from: 10, at: 'squareNorth', doing: 'flowers' },
+        { from: 10, at: 'squareNorth', doing: 'flowers', sits: false },
         // Sniffing the blossom in Boo Acres' orchard of a weekend (0.3's F1).
         { from: 14, zone: 'booAcres', at: 'orchard' },
         { from: 17, at: 'farmGate' },
@@ -406,6 +416,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   wrapunzel: {
     name: 'Wrapunzel',
     creature: 'mummy baker',
+    build: 'regular',
     schedule: {
       weekday: [
         { from: 5, inside: 'crumbs', doing: 'tray' },
@@ -548,6 +559,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   agatha: {
     name: 'Agatha',
     creature: 'witch',
+    build: 'regular',
     schedule: {
       weekday: [
         { from: 5, inside: 'agathaCottage', doing: 'stirring' },
@@ -694,6 +706,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   barty: {
     name: 'Barty',
     creature: 'skeleton gardener',
+    // "All bones" (1.1's A5b).
+    build: 'slight',
     schedule: {
       weekday: [
         { from: 5, at: 'farmHostas', doing: 'digging' },
@@ -831,6 +845,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   cody: {
     name: 'Cody',
     creature: 'vampire',
+    build: 'regular',
     schedule: {
       weekday: [
         // He doesn't do mornings, so he does them at home.
@@ -974,6 +989,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   ollie: {
     name: 'Ollie',
     creature: 'postie',
+    build: 'regular',
     schedule: {
       weekday: [
         // Sorting the post first thing, out on the round all morning, and sorting again after.
@@ -1107,6 +1123,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   nessa: {
     name: 'Nessa',
     creature: 'lake monster',
+    build: 'regular',
     schedule: {
       weekday: [
         // Tending the lanterns on the lake: lit at dusk, and trimmed in the morning.
@@ -1242,6 +1259,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   gourdon: {
     name: 'Gourdon',
     creature: 'pumpkin-headed carpenter',
+    // A carpenter as solid as his workbench, under a pumpkin as round as he is.
+    build: 'stout',
     schedule: {
       weekday: [
         { from: 5, inside: 'gourdonPumpkin' },
@@ -1370,6 +1389,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   hazel: {
     name: 'Hazel',
     creature: 'stargazer',
+    build: 'regular',
     schedule: {
       weekday: [
         // Up all night with her telescope, so she sleeps the afternoon away.
@@ -1502,6 +1522,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   boothoven: {
     name: 'Boothoven',
     creature: 'ghost composer',
+    build: 'regular',
     schedule: {
       weekday: [
         // Composing at the piano all morning, out to hear the town at noon, and the fountain at dusk.

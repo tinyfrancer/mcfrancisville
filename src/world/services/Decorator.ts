@@ -90,7 +90,7 @@ export class Decorator {
 
   /** Where she decorates now: the room she's in, or her yard. */
   private get place(): Decorable {
-    return this.outside ? this.yard : this.home;
+    return this.outside ? this.yard : this.home.rooms;
   }
 
   /** Says what changed, for the HUD and the save: her home, or her yard. */
@@ -160,11 +160,12 @@ export class Decorator {
     const why = place.move(selected, tx, ty, this.standing());
     if (why) this.ctx.moments.push({ kind: 'refused', why });
     else {
-      // A planter's bed goes with it, in her front room (the yard has none).
+      // A planter's bed goes with it, in the room she's in (the yard has none).
       if (!this.outside) {
+        const room = this.home.here;
         going.forEach((p, k) => {
           const to = { tx: p.tx, ty: p.ty };
-          this.ctx.signals.emit('moved', { piece: p.id, from: from[k]!, to });
+          this.ctx.signals.emit('moved', { piece: p.id, room, from: from[k]!, to });
         });
       }
       this.changed();
@@ -195,7 +196,8 @@ export class Decorator {
     const going = [piece, ...place.ridersOf(piece)];
     for (const shown of place.putAway(piece)) this.giveBack(shown);
     for (const p of this.outside ? [] : going) {
-      this.ctx.signals.emit('moved', { piece: p.id, from: { tx: p.tx, ty: p.ty }, to: null });
+      const from = { tx: p.tx, ty: p.ty };
+      this.ctx.signals.emit('moved', { piece: p.id, room: this.home.here, from, to: null });
     }
     this.select(null);
     this.changed();

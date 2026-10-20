@@ -20,7 +20,14 @@ import type { Glyph } from '../../src/data/glyphs';
 const SRC = join(__dirname, '..', '..', 'src');
 const EMOJI = /\p{Extended_Pictographic}/u;
 /** The chrome, and everything it reads its words from. */
-const CHROME = ['hud', 'data', 'wiring/talkActions.ts', 'wiring/apis.ts', 'wiring/moments.ts'];
+const CHROME = [
+  'hud',
+  'data',
+  'wiring/talkActions.ts',
+  'wiring/apis.ts',
+  'wiring/apis',
+  'wiring/moments.ts',
+];
 /** Said by someone, not the chrome's. */
 const SPOKEN = ['data/greetings.ts'];
 

@@ -5,6 +5,9 @@
  * `audioSession`'s type set to `playback`; before that, an `<audio>` element playing (silence, on
  * a loop) moves the page's whole audio session to playback, Web Audio with it. The element has to
  * be started from inside her touch, before the context is made or resumed in the same touch.
+ *
+ * Since 1.1 (H1, decision 330) none of that happens unless she turns on Play on silent in
+ * Settings: she turns the game's sound off with the switch, so by default the switch is obeyed.
  */
 
 /** The bit of an `<audio>` element this needs, so a test can stand in for one. */
@@ -71,13 +74,21 @@ export function browserPhone(): Phone {
   };
 }
 
-/** Plays the game's sound through the silent switch, as far as this phone lets it. */
+/**
+ * Plays the game's sound through the silent switch, as far as this phone lets it, while Play on
+ * silent is on; while it's off, touches nothing, so the switch mutes the game as it does any
+ * other page's sound.
+ */
 export class SilentSwitch {
   private readonly phone: Phone;
   private silence: Silence | null = null;
+  private on: boolean;
+  /** The session's type before the hint was given, to put back when Play on silent goes off. */
+  private found: string | null = null;
 
-  constructor(phone: Phone) {
+  constructor(phone: Phone, playOnSilent = false) {
     this.phone = phone;
+    this.on = playOnSilent;
   }
 
   /** Whether the phone takes the hint, so no silent element is needed. */
@@ -85,15 +96,48 @@ export class SilentSwitch {
     return this.phone.audioSession !== undefined;
   }
 
+  get playOnSilent(): boolean {
+    return this.on;
+  }
+
   /**
-   * Called first thing in each touch, before the audio context is made or resumed: the hint where
-   * the phone takes one, otherwise the silence started (again, if the page was hidden).
+   * Play on silent turned on or off, from a tap on its switch (which is a touch, so the silence
+   * may start in it). Off undoes it at once: the session's type put back as it was found, the
+   * silence paused, so the switch on the side of the phone mutes the game again straight away.
+   */
+  set(on: boolean): void {
+    this.on = on;
+    if (on) {
+      this.unlock();
+      return;
+    }
+    const session = this.phone.audioSession;
+    if (session && this.found !== null) {
+      try {
+        session.type = this.found;
+      } catch {
+        // A phone that won't take it back settles when the page is next opened.
+      }
+      this.found = null;
+    }
+    this.hide();
+  }
+
+  /**
+   * Called first thing in each touch, before the audio context is made or resumed: with Play on
+   * silent on, the hint where the phone takes one, otherwise the silence started (again, if the
+   * page was hidden); with it off, nothing.
    */
   unlock(): void {
+    if (!this.on) return;
     const session = this.phone.audioSession;
     if (session) {
       try {
-        if (session.type !== 'playback') session.type = 'playback';
+        if (session.type !== 'playback') {
+          const was = session.type;
+          session.type = 'playback';
+          this.found ??= was;
+        }
       } catch {
         // A phone that refuses the hint plays as it always has.
       }

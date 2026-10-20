@@ -6,6 +6,7 @@ import { footprint } from '../systems/decor';
 import type { Tile } from '../systems/pathfinding';
 import type { World } from '../world/World';
 import type { Point } from './camera';
+import type { Pass } from './passes/pass';
 import { pieceShadow, pieceSprite, type PieceSprite } from './room';
 import type { Drawable, WorldLight } from './scene';
 
@@ -111,4 +112,27 @@ export function yardPieceHit(world: World, at: Point): Tile | null {
     };
   }
   return null;
+}
+
+/**
+ * Her yard as the town draws it (0.3's H5; 1.1's A4): the dots on the lawn while she decorates,
+ * her pieces sorted in among everything else with their lamps, and the outline round the piece
+ * she has picked up. Anywhere but the town it draws nothing.
+ */
+export function yardPass(world: World, town: boolean): Pass {
+  let yard: { drawables: Drawable[]; lights: WorldLight[] } = { drawables: [], lights: [] };
+  return {
+    name: 'yard',
+    ground(ctx, { cam }) {
+      if (town) drawLawn(ctx, world, cam);
+    },
+    stand() {
+      yard = town ? yardDrawables(world) : { drawables: [], lights: [] };
+      return yard.drawables;
+    },
+    over(ctx, { cam, nowMs }) {
+      if (town) drawPicked(ctx, world, cam, nowMs);
+    },
+    lights: () => yard.lights,
+  };
 }

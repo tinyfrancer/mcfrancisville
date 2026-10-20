@@ -1,7 +1,9 @@
 import { CRITTER_IDS, isFish } from '../../data/critters';
 import type { ItemId, MapZoneId } from '../../types/ids';
+import type { PropArrivals } from '../arrivals';
 import { Collecting } from '../services/Collecting';
 import { Fishing } from '../services/Fishing';
+import { Digging } from '../services/Digging';
 import { Fossils } from '../services/Fossils';
 import type { Kitchen } from '../services/Kitchen';
 import type { Mailbox } from '../services/Mailbox';
@@ -13,6 +15,10 @@ export interface Catching {
   collecting: Collecting;
   fishing: Fishing;
   fossils: Fossils;
+  /** Digging up what's buried, once (phase I). */
+  digging: Digging;
+  /** A mound walked up to: today's fossil first, then a buried key. */
+  arrivals: PropArrivals;
 }
 
 interface CatchingParts {
@@ -41,6 +47,7 @@ export function catching(s: Shared, parts: CatchingParts): Catching {
     walking: () => s.movement().walking,
     hasFished: () => CRITTER_IDS.some((id) => isFish(id) && cabinet.caughtOn(id) !== null),
     eager: () => kitchen.eager(),
+    slow: () => s.options.slow?.() ?? false,
   });
   const fossils = new Fossils(ctx, {
     bag: s.bag,
@@ -50,5 +57,15 @@ export function catching(s: Shared, parts: CatchingParts): Catching {
     zones: parts.zones,
     hasHad: parts.hasHad,
   });
-  return { collecting, fishing, fossils };
+  const digging = new Digging(ctx, s.dug, s.bag);
+  const arrivals: PropArrivals = {
+    mound: ({ prop, place }) => {
+      if (!place) return null;
+      const dug = fossils.isToday(place.id, prop)
+        ? fossils.dig(place.id)
+        : digging.dig(place.id, prop);
+      return dug ? [dug] : [];
+    },
+  };
+  return { collecting, fishing, fossils, digging, arrivals };
 }

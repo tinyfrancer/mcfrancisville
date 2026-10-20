@@ -24,6 +24,7 @@ import {
 } from '../../systems/farming';
 import { dayKey } from '../../systems/clock';
 import { growsQuick } from '../../systems/greenhouse';
+import type { Tile } from '../../systems/pathfinding';
 import type { CropId, ItemId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
@@ -58,10 +59,10 @@ export class Garden {
     if (farm.strayed > 0) bag.add(SPRINKLER, farm.strayed);
     for (const seed of farm.strayedSeeds) bag.add(seed, 1);
     // A planter carries what's growing in it across her room; put away, it gives her what was in it.
-    ctx.signals.on('moved', ({ piece, from, to }) => {
+    ctx.signals.on('moved', ({ piece, room, from, to }) => {
       if (!FURNITURE[piece].planter) return;
-      const was = { zone: 'home' as const, ...from };
-      if (to) this.farm.move(was, { zone: 'home', ...to });
+      const was = { zone: 'home' as const, room, ...from };
+      if (to) this.farm.move(was, { zone: 'home', room, ...to });
       else this.uproot(was);
     });
   }
@@ -76,7 +77,7 @@ export class Garden {
     const same =
       bed === this.lookingAt || (bed && this.lookingAt && bedKey(bed) === bedKey(this.lookingAt));
     if (same) return;
-    this.lookingAt = bed ? { zone: placeOf(bed), tx: bed.tx, ty: bed.ty } : null;
+    this.lookingAt = bed ? this.farm.pin(bed) : null;
     this.ctx.events.emit('bed', this.lookingAt);
   }
 
@@ -204,13 +205,14 @@ export class Garden {
 
   /** The beds planting a row from `bed` with `seed` would fill, in the order it fills them. */
   row(bed: Plot, seed: ItemId): Plot[] {
-    const zone = placeOf(bed);
+    const { zone, room } = this.farm.pin(bed);
+    const at = (t: Tile): Plot => (room ? { zone, room, tx: t.tx, ty: t.ty } : { zone, ...t });
     return rowToSow(
       bed,
-      (t) => this.farm.isBed({ zone, ...t }),
-      (t) => !this.farm.planting({ zone, ...t }),
+      (t) => this.farm.isBed(at(t)),
+      (t) => !this.farm.planting(at(t)),
       this.bag.count(seed),
-    ).map((t) => ({ zone, tx: t.tx, ty: t.ty }));
+    ).map((t) => at({ tx: t.tx, ty: t.ty }));
   }
 
   /** Plants `seed` along the row from `bed`, tilling what's wild, as far as her seeds go. */

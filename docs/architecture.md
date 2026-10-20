@@ -17,8 +17,8 @@ persistence/             the save: its shape, migrations, localStorage, the back
 render/                  drawing: reads the world once a frame, writes it only by taps
 hud/  ui/                the HTML overlay: reaches the world only through its Api interfaces
 audio/                   tunes and the SoundBoard: hears moments, never reads the world
-wiring/                  the sheets' Apis from the world's services, and each moment played
-main.ts                  runs it: the loop, the save, the views and touch
+wiring/                  the sheets' Apis by area, each moment played, the save kept, touch
+main.ts                  runs it: the boot, the loop and the views
 api/  (outside src/)     the cloud save's one function, its own tsconfig (V1's S2, decision 323)
 ```
 
@@ -65,23 +65,44 @@ that has them made and assigns them, and the save (`save()`, the one way its sta
 making is by area, a function each in `src/world/areas/` taking the shared parts and returning
 its services (0.3's W1, decision 218): `keepersOf` and the `Shared` parts in `shared.ts` (`ctx`,
 the keepers, `town`, the options, and `movement` read late), then `making` (the stall, workbench,
-stove and `Belongings`), `passive` (visits, the candy tree), `places` (the zones and stalls),
-`shopping` (Ollie's deliveries and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2; his figurines, C3), `neighbours`, `mystery`, `festivals` (`calendar.ts`), `outdoors` (weather, fountain),
-`fairground`, `catching` (`collecting.ts`: the net, the rod and, since 0.3's C1, the fossils),
-`going` (`travel.ts`: her movement, travel, the broom), `homeServices` (`home.ts`: decorating, the
-record player, what plays, and since 0.3's H1 and H2 the chest and what's on show), `petServices`
-(`pets.ts`), `her` (hands, novelty, milestones, sitting, poses), and V1's two: `firstDay`
-(`FirstDay`, R1, reading the town's keepers) and `upNow` (`UpNow`, R2: Today, a plain read of the
-services made before it), in that order. V1 also put `Joining` (P4's verbs at a happening),
-`PostRound` (Ollie's walk to her box) and `Marriage` (P5) in `neighbours`, `Projects` (R4, over
-the `Works` keeper and the `Sites` overlay) in `places`, and `RareEvents` (R3) in `festivals`: a service listens for its signals in the order it
-was made, and anything made later is read through a function. A new service is a line in its
-area's function and its interface, a field here and its assignment. The options a world is made
+stove and `Belongings`), `passive` (visits, the candy tree), V1's `firstDay` (`FirstDay`, R1,
+reading the stall, the tree and the visits), `places` (the zones and stalls), the everyday
+services the constructor makes itself (the garden, the barn, gathering, the shops, the mailbox and
+V1's `Projects`, over the `Works` keeper and the `Sites` overlay), `shopping` (Ollie's deliveries
+and catalogue, 0.3's S1, after the mailbox; Gourdon's book, S2; his figurines, C3), `neighbours`
+(since 1.1's W3 `Talk` first, then the `Neighbourhood` that reads it), `mystery`, `festivals`
+(`calendar.ts`), `outdoors` (weather, fountain), `fairground`, `catching` (`collecting.ts`: the
+net, the rod and, since 0.3's C1, the fossils; since 1.1's W1 the buried keys' `Digging` too, so
+the mound's two owners are in one area), `going` (`travel.ts`: her movement, travel, the broom),
+the world's own reset as she crosses, `homeServices` (`home.ts`: decorating, the record player,
+what plays, and since 0.3's H1 and H2 the chest and what's on show), `petServices` (`pets.ts`),
+`her` (hands, novelty, milestones, sitting, poses), and V1's `upNow` (`UpNow`, R2: Today, a plain
+read of the services made before it), in that order. V1 also put `Joining` (P4's verbs at a
+happening), `PostRound` (Ollie's walk to her box) and `Marriage` (P5) in `neighbours`, and
+`RareEvents` (R3) in `festivals`: a service listens for its signals in the order it was made, and
+anything made later is read through a function.
+
+**The order is named once** (1.1's W3, decision 342): `AREAS` in `src/world/areas/order.ts`, a row
+a step, each with what its services listen for on each bus (`signals`, `state`) in the order they
+start to, and why it stands where it does; the constructor's own two steps (`everyday`, `forget`)
+are rows too. The constructor tells `options.areaMade` after each step, and
+`tests/world/areaOrder.test.ts` holds the steps made in `AREAS`' order, each listening for exactly
+what its row says in that order (so who hears her cross, a letter opened or the bag first is
+read off the table: `crossed` the neighbourhood, the reset, the record player, decorating, the
+pets; `opened` the mystery, then the broom; `bag` `Belongings`, the first day, hands, novelty,
+milestones), and nothing sent on either bus while the world is made, so no service made later
+misses one. A new service is a line in its area's function and its interface, a field here and
+its assignment, and, if it listens for anything, a word in its area's row; one that must hear a
+signal after another goes in a later area. An area whose service does
+something when she walks up to a prop also returns its rows of the arrivals table (`arrivals`, a
+`PropArrivals`, 1.1's W1, decision 340), which the constructor joins into `propArrivals` with
+`arrivalsOf` (see "Taps and arrivals"). The options a world is made
 from (`WorldOptions`, `fromSave`) are `src/world/options.ts`. What the services that talk with
 her neighbours read of the town (her name, where she is, where a neighbour is, their hearts,
 whether they live here, and `thank`) is one `TownReads` object made at the top of the constructor
 and handed to each in `Shared`, so a new one takes it rather than writing the same six functions
-again. `build.ts` is about 500 lines, the constructor about 130 of them. `src/world/World.ts`
+again. `build.ts` is about 540 lines, the constructor about 180 of them (1.1's W3 added a line
+telling `areaMade` after each step). `src/world/World.ts`
 (about 580 lines, from 884 at 0.1's end and 1,686 as `Town`) extends it: it turns a tap into a walk and a walk's end into an
 arrival, and steps everything in `update(deltaMs)`. The parts call back into it only through
 `forget()`, when she crosses somewhere or starts decorating. Neither holds a game rule of its own.
@@ -102,11 +123,11 @@ arrival, and steps everything in `update(deltaMs)`. The parts call back into it 
 So there are **two channels out of the world**: the state bus, which the HUD follows, and the list
 of moments `update()` returns (a catch, a harvest, a heart), which the view, the messages and the
 sound play. The music is the one thing told where she is rather than what happened: each step,
-`main.ts` names a `MusicKey` from the zone, the window (`windowOf`) and an `Occasion` (the
+`wiring/music.ts` (`Music`, 1.1's W3) names a `MusicKey` from the zone, the window (`windowOf`) and an `Occasion` (the
 festivals, the decorations, and whether `world.fountain` is playing), and the `SoundBoard`
 crossfades to it (decisions 172, 173), so `audio/` still reads no rule. The one thing back the
-other way is the music's beat (`SoundBoard.musicBeat`), which `main.ts` hands the town's view
-for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
+other way is the music's beat (`SoundBoard.musicBeat`), which `Music.fountainBeat` hands the
+town's view for the fountain's lamps to pulse to (`fountainBeat`); the view never imports `audio/`.
 The ambience is told the same way (V1's S1, decision 321): `wiring/hearing.ts` reads the place,
 the hour, the weather and how near water she stands when she changes tile or place (or once a
 minute), and hands `SoundBoard.setAmbience` a `Bed` from `ambienceFor`; it also counts her
@@ -117,13 +138,18 @@ plays when, so a script can build the same graph on an `OfflineAudioContext` to 
 ### Keepers and services
 
 A **keeper** holds state and its snapshot, and checks what it's given: `Bag`, `Wardrobe`, `Farm`,
-`Home`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`,
-`Dug`, `Lately`, `Works` (in `src/world/`; `Lately`, V1's P1, keeps the last piece she placed, crop she picked and thing she gave the museum, for her neighbours to remember, and since P5 her answer to Cody's "how was your day?" and the scenes of their story told; `Works`, V1's R4, the project under way, what she has given each and what's built). V1 also grew keepers' snapshots rather than adding keepers: `Friendship` keeps the moments told and the question answered (P1, P2), the `Casebook` the chain's clues and Wes (P3a), the `Cabinet` each fish's best (R6a), `Pets` each pet's fondness (R6c). Since 0.3 `Home` keeps her rooms (H4: `rooms`, each its pieces, paper,
-floor and size, and `here`, the one she's in, which everything that read "the room" reads), the
-chest's furniture and her things from her bag (`stored`, `items`, H1), what a display piece shows
-(`Placed.shows`, H2) and what stands on a surface (`Placed.on`, H3); `Yard` keeps what stands on the
-grass round her house and puts what it takes out and away through `Home`'s chest (H5). Both are
-`Decorable`, so `Decorator` works on whichever she's in. A keeper doesn't
+`Home`, `Rooms`, `Yard`, `Friends`, `Letters`, `Cabinet`, `Pets`, `Casebook`, `Atlas`, `Porch`, `Keepsakes`,
+`Dug`, `Lately`, `Works` (in `src/world/`; `Lately`, V1's P1, keeps the last piece she placed, crop she picked and thing she gave the museum, for her neighbours to remember, and since P5 her answer to Cody's "how was your day?" and the scenes of their story told; `Works`, V1's R4, the project under way, what she has given each and what's built). V1 also grew keepers' snapshots rather than adding keepers: `Friendship` keeps the moments told and the question answered (P1, P2), the `Casebook` the chain's clues and Wes (P3a), the `Cabinet` each fish's best (R6a), `Pets` each pet's fondness (R6c). Her rooms (0.3's H4) are `Rooms` since 1.1's W2 (decision 341, `src/world/Rooms.ts`): each
+room's pieces, with what a display piece shows (`Placed.shows`, H2) and what stands on a surface
+(`Placed.on`, H3), since both belong to the piece, its paper, floor and size, and `here`, the one
+she's in, which everything that reads "the room" reads; building a room, growing the front one,
+and the decorating moves. `Home` is what the rooms share: the storage chest's furniture and her
+things from her bag (`stored`, `items`, H1), and the papers and floors she owns, with its rooms
+as `home.rooms`; it still answers every read of the room she's in (`home.placed`, `home.room`,
+`home.pieceAt`…) through `Rooms`, so the views, sheets and tests read her home as they did.
+`Yard` keeps what stands on the grass round her house and puts what it takes out and away
+through `Home`'s chest (H5). `Rooms` and `Yard` are both `Decorable`, so `Decorator` works on
+whichever she's in, and both take the chest rather than owning one. A keeper doesn't
 know the clock or the other keepers, but for two narrow functions `keepersOf` (`world/areas/shared.ts`) hands across (0.2's W1,
 decision 164): the `Wardrobe` asks the bag how many of each bracelet she has, so none is worn that
 isn't there, and the `Bag` asks the wardrobe how many she has on (`keepWorn`), which `remove`
@@ -153,7 +179,8 @@ the World.
 | `Mystery`       | clues, Wes, the mayor's letters; hears `bought`/`opened`       | casebook, mailbox, friends, cabinet        |
 | `Collecting`    | each place's critters this hour (and a lured one), the net     | bag, takings, cabinet, mailbox, `Lurer`    |
 | `Fishing`       | her line in the water: the cast, nibbles, bite, reeling in     | collecting (its fish, `keep`), `eager`     |
-| `Neighbourhood` | their walks in every place and room, talk, gifts, favours      | friends, bag, wallet, mailbox, `scene`     |
+| `Neighbourhood` | where each is, and their walks in every place and room         | friends, `Talk`, `errand`, `pets`          |
+| `Talk`          | the hello, heart moments, questions, replies, gifts, favours   | friends, bag, wallet, mailbox, `scene`     |
 | `SmallEvents`   | the window's news or lost thing, the errand she carries        | wallet, takings, `thank` (friends)         |
 | `Travel`        | where she is, crossings, finding and opening places, flying    | zones, atlas, movement, mailbox            |
 | `Broom`         | Agatha's letter, the stand, the broom's colours, flying home   | bag, home, mailbox, travel, visits         |
@@ -192,7 +219,14 @@ the World.
 | `PostRound`     | Ollie walking a letter to her box when one comes (P4)          | `posted` signal, where she and he are      |
 | `Marriage`      | Cody married (P5): his evenings, "how was your day?", story    | lately, takings, bag, mailbox              |
 
-`Neighbourhood`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
+`Talk` (1.1's W3, decision 342) is the talk: the hello and what they bring up, a heart moment or
+their question and what she says back, the faces they say them with, the calls' and visits' first
+lines, gifts, favours, friendship growing (`thank`, `befriend`) and best friends' letters
+(`check`). `Neighbourhood` is who's where and the walking, and reads who she's talking to from
+`Talk`, so they wait for her; it answers the talk's reads too (`talk`, `reply`, `give`, `favour`,
+`doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`, one line each), for
+`src/render/` and the tests, while the wiring, the world and the areas call `world.talk`.
+`Talk`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
 talk from `Forecast`, `Hands`, `Collecting.caughtToday` and `PetCare`, for what a neighbour brings
 up (`systems/dialogue.ts`); it is read, never kept.
 
@@ -217,9 +251,13 @@ key and solid like a stall; the fairground has its own `Decorations` for what's 
 happening that has moved there (0.2's M3). A way out with a `gate`
 has it stand in the way, one tile in, while the place beyond is shut (`shutGates`, decision 104).
 Every place has its `Mounds` (0.3's C1): today's mound on one of its map's `digSpots`, solid and
-walked up to. The town's yard (0.3's H5) is solid under each piece of hers standing there. So
-`MapZone.canWalk` and `propAt` ask eight overlays besides the map (the stalls, a shut gate, the lots,
-the decorations, the farm's built rows, the yard, the mound and, since R4, the project sites). `HomeZone` is her home: the room
+walked up to. The town's yard (0.3's H5) is solid under each piece of hers standing there. Each
+of these is an `Overlay` (`zones/Overlay.ts`, 1.1's W1, decision 340: an optional `propAt` and a
+`blocks`), and `MapZone` holds them as one list, in the order `propAt` asks them: the lots, the
+decorations, the sites, the stalls (the pop-up, then the cart), a shut gate (`Gates`), today's
+mound, the farm's built rows (`Plots`) and the yard, the last two only in the way. `canWalk` is the
+map (or the ice) and no overlay `blocks`; `propAt` is the first overlay's prop on the tile, else
+the map's. A ninth thing standing in a place is an `Overlay` and a line in that list. `HomeZone` is her home: the room
 she's in and its furniture, and since 0.3's H4 a doorway in the front room's back wall into the
 back room, crossed within `home` (`doorAt` gives a `Crossing` with a `room`, which `Travel.cross`
 turns into `HomeZone.through`, which enters it), so the rooms are one place to the pets, guests and music. A `RoomZone` is the inside
@@ -240,7 +278,7 @@ own critters (decision 102) and gathering (trees, toadstools, flowers, keyed wit
 shares the day's weather (decision 107), which the critters' deal and the garden read from the day
 key themselves, and the views from `world.weather`; beds
 grow in town, by the creek, by the lake and in her planters (`Farm` keys them by place, decision
-165), each crop a day sooner where it `thrives` and in its `season`, read from the day it was
+165, and a planter's by its room too, decision 341), each crop a day sooner where it `thrives` and in its `season`, read from the day it was
 planted (`ripeDays`, decision 176); the stalls, the snack, Wes and Fibi's bone are still only ever in town (or at home, for the
 bone).
 
@@ -249,7 +287,9 @@ heads straight for the farthest point along it she can reach in a clear line, wh
 body, just under half a tile either side of her middle, never overlapping anything solid
 (`clearLine`, exact rather than sampled). So she walks straight across open ground and turns only
 at corners, and a new tap mid-step heads straight on from wherever she is. Her neighbours' paths
-are pulled the same way since phase S; pets still walk tile to tile.
+are pulled the same way since phase S, and her pets' since 1.1's W1 (`Pet.walk`, against her
+`BODY_RADIUS`, decision 340): where a pet goes is still `systems/pets.ts`'s, only the way there is
+pulled; the zoomies' lap stays a ring of tiles.
 
 Where a neighbour should be is worked out from the hour and the day key alone
 (`systems/schedules.ts`, phase S): the day's schedule (weekday or weekend, a stop in every window,
@@ -277,10 +317,19 @@ the nearest open tile beside it. A visit carries its `kind`, and her arrival loo
 `arrivals`, one handler per kind (phase K): talk, swing the net, pat the pet, tend the bed, use a
 thing in a building (`Interiors`), or a piece at home (its line, and the record player); anything whose row `plays` adds a `tune` from `Instruments`. The table
 is typed over every kind, so a new kind (a fishing spot, a stove) doesn't compile until it says
-what arriving does. A prop, or open ground, goes through `arriveOn`: the porch pots, a mound to dig
-(today's fossil mound first, `Fossils.isToday`, then the buried keys' `Digging`), a way out
-(`Travel.cross`), then whatever there is to gather (the orchard's trees among it). These are a
-chain of `if`s on the prop's id in `World.arriveOn` (see "Where it hurts"). A `piece` arrival is
+what arriving does. A prop, or open ground, goes through `arriveOn`: she faces it, sits if it's a
+seat and reads a signpost, then its row in the **arrivals table** (`propArrivals`, a
+`PropArrivals` keyed by prop id, `src/world/arrivals.ts`, 1.1's W1, decision 340), then a door or
+a way out (`Travel.cross`, a knock first on a festival evening), then, outdoors, whatever there is
+to gather (the orchard's trees among it), and on open ground what lies there and the stray. Each
+row is given by the area that makes the service doing it: `making` the honesty stall's tin,
+`passive` the porch pots, the candy tree and its saplings, `festivals` the pumpkin patch and the
+geese, `catching` the mound (today's fossil mound first, `Fossils.isToday`, then the buried keys'
+`Digging`, in one row), `homeServices` the built bandstand. A row returns the moments after her
+arrival, or null to let the prop go on to the door (a goose or a mound indoors). `arrivalsOf`
+refuses a prop two areas claim, so no two rows race, and a new one is a row in its area.
+`tests/world/arrivingAtProps.test.ts` walks up to every kind of prop in every place and holds what
+each does to a snapshot taken from the chain of `if`s the table replaced. A `piece` arrival is
 a piece at home or in her yard: its line, the record player, a seat, or (from the `arrived`
 moment in `main.ts`) a display piece's sheet. Every arrival comes from
 `update`, even one with no walk, so the moments have one source.
@@ -297,7 +346,7 @@ code, which runs the same migrations. A save that can't be read is moved aside, 
 Three things are kept by the phone beside the save, never in it, and a backup code doesn't carry
 them: the sound switches (`audio/settings.ts`), her rod's colour (`persistence/rod.ts`, 0.2's
 K2, decision 171) and how close the camera is (`src/settings.ts`, V1's L1, decision 290), read
-once in `main.ts` and handed to the fit and to Settings' View tab (`ViewApi`). The rod's is read in `wiring/apis.ts` and handed to the drawing by `paintRod`
+once in `main.ts` and handed to the fit and to Settings' View tab (`ViewApi`). The rod's is read in `wiring/apis/her.ts` and handed to the drawing by `paintRod`
 in `render/scene.ts`, so neither the world nor the save knows it.
 
 The cloud save (V1's S2, decision 323) is the one thing a server answers: `api/save.ts`, a Vercel
@@ -306,7 +355,7 @@ faked store, Upstash's REST API through plain `fetch`), outside `src/` and `dist
 `api/tsconfig.json`. The phone's key is kept beside the save (`persistence/cloudKey.ts`: 128
 random bits, a 28-symbol Crockford code with two check symbols); `persistence/cloudSeal.ts`
 hashes it into the id the function files under and the AES-GCM key the town is sealed with;
-`persistence/cloud.ts` (`CloudSave`) is made in `main.ts`, told each local write by the
+`persistence/cloud.ts` (`CloudSave`) is made by `keepTown` (`wiring/keeping.ts`), told each local write by the
 `AutoSaver`'s write, and flushed on `visibilitychange`, `pagehide` and `online`. It asks the
 cloud once (`check`) before anything goes up, against the loaded save's `updatedAt`, and a newer
 town is offered by `hud/CloudCard.ts` after the title (`offerCloud`), never swapped in. What goes
@@ -314,6 +363,13 @@ up is the backup code sealed, so restoring runs the backup's migrations. Setting
 shows the code and its QR (`hud/qr.ts`, our own encoder) through `SaveApi.cloud`.
 
 ## The loop
+
+`main.ts` is the boot, the loop and the views (1.1's W3: 278 lines, from 546); what it made
+besides is `wiring/`'s, each made where it was: `keepTown` (`wiring/keeping.ts`: the autosave, the
+flushes as the page hides, the cloud's check and its newer town offered past the title), `enterer`
+(`wiring/greeting.ts`: the creator, Cody's hello and the backup nudge), `listenForTaps`
+(`wiring/touch.ts`), `Music` (`wiring/music.ts`) and `exposeForDebugging` (`wiring/debug.ts`, a
+dev build's handles).
 
 `main.ts` runs the loop, and `src/loop.ts` (`FixedStep`) turns each frame into whole steps of
 1/120 s, so a walk is the same on every phone and a 60Hz frame always gets two steps (it allows a
@@ -335,7 +391,8 @@ back the way it came, so while the camera keeps pace she and the ground move by 
 pixels (decision 85). It cuts rather than eases when she jumps more than three tiles (a door). Sprites are pixel grids baked to cached canvases by palette swap
 (decision 2); `render/ground.ts` bakes the ground in 8×8-tile chunks (`render/chunks.ts`, decision
 138), each the first time the camera reaches it, each tile grass with its ground laid over it by
-neighbour mask (`sprites/terrain.ts`, decision 93), and a frame copies only the chunks under the
+neighbour mask (`sprites/terrain.ts`, decision 93; the square's paving, laid on the world's grid,
+also by which neighbours are its own kind, `ownMask`, decision 350), and a frame copies only the chunks under the
 view; the day the pond freezes or thaws only the chunks it touches are baked again, and a view
 she has left `rest`s, letting its chunks go until she's back; `render/lighting.ts` multiplies the
 hour's light over each frame. The canvas is fitted at the whole number of device pixels that
@@ -352,12 +409,37 @@ pets' speech bubbles are still 16-pixel grids on purpose (decision 105): the HUD
 and the world at `ICON_SCALE` through `bakeIcon` (`render/items.ts`), so the scale belongs to where
 a grid is drawn, never to the grid.
 
+**A place outdoors is drawn in passes** (1.1's A4, decision 353). `OutdoorView` keeps the
+frame's setup: the camera, the ground (retiled as the pond freezes or the rows are built, its
+look turned with the season, the props baked again by `turnProps`), the one sort of what stands
+by its feet, the crowns, the moon's rims and the light. Everything else is a `Pass`
+(`render/passes/pass.ts`): a name and a part in any of a frame's layers, `ground(ctx, frame)`
+(on the ground), `stand(frame)` (its drawables, sorted with everything else's), `wanted()` (of
+those, what she might want behind a crown), `over(ctx, frame)` (over everything standing),
+`lights(frame)` (its pools of light) and `lit(ctx, frame)` (over the light), handed a `Frame`
+(the clock's `nowMs`, the camera, the weather, whether it's snowing, the season, the ground's
+life and her drawable; a `LitFrame` adds the `Daylight`). The order of each layer is
+`OUTDOOR_LAYERS` in `OutdoorView.ts`, by name, which `composeLayers` turns into the passes once as
+the view is made, refusing a name with no pass or no part there and a part no layer names; held
+by `tests/render/outdoorPasses.test.ts`, it is the order the view drew in before the split, so
+where two things stand level the one named first is drawn first, as before. The passes are in
+`render/passes/` (`props.ts` bakes the place's props once and hands each pass its share; the
+frames' `moving.ts` and the lanterns; `givers.ts`; `sites.ts`, the lots, decorations and projects,
+asking `filmNight.ts` for the film; `stalls.ts`, the pop-up and the cart; `mounds.ts`;
+`dressed.ts`, the mailbox, noticeboards, pots, geese, candy tree and gates; `aloft.ts`, the
+monarchs, flyers and leaves; `folk.ts`, who's about and her; `snack.ts`; `life.ts`; `weather.ts`,
+with the fireworks and meteors; `crowns.ts`, the see-through crowns; `standing.ts`, what they
+share) or beside what they draw (`yardPass`, `bedsPass` in `garden.ts`, `fishingPass`,
+`fountainPass`, `holidaysPass`, `doorsPass`, `effectsPass`). A new thing drawn outdoors is a pass
+and its name in `OUTDOOR_LAYERS`.
+
 **See-through trees** (0.3's A3, decision 222) are view state, never the world's: after
 `OutdoorView.draw` sorts what stands in a place, `coveredCrowns` (`render/occlusion.ts`) counts the
-pixels each crown draws over her or over something near her she might want, from each sprite's
-mask (read once and kept), and `SeeThrough` eases each such crown to half alpha by the fixed step,
-as the camera is. A faded crown is a copy in the frame's own list. **Her yard** (0.3's H5) is drawn
-among the town's props by `render/yard.ts`. **At home** (0.3's H3, S4) a small piece on a surface
+pixels each crown draws over her or over something near her she might want (the passes' `wanted`),
+from each sprite's mask (read once and kept), and `SeeThrough` eases each such crown to half alpha
+by the fixed step, as the camera is (`Crowns`, `render/passes/crowns.ts`). A faded crown is a copy
+in the frame's own list. **Her yard** (0.3's H5) is drawn among the town's props by
+`render/yard.ts`. **At home** (0.3's H3, S4) a small piece on a surface
 is drawn raised just after it; a window wallpaper's windows are hung by `windowsAlong` and painted
 with the sky of the hour and weather (`windowSky`, read off the same `Daylight` the room is lit
 by) into the room's cached shell; and a `WATCHERS` piece is drawn looking toward her.
@@ -377,7 +459,17 @@ decals by its rules in `data/clutter.ts`).
 painted onto it (clothes) or drawn over it (hair, hats), each finished with its own light and soft
 outline (decision 88). The neighbours, Wes and the Moon Pie Man (`sprites/villagers.ts`) are the
 same parts in their own colours, with touches of their own on top. Poses are bodies of their own,
-chosen by `world.poses`; the view only asks which.
+chosen by `world.poses`; the view only asks which. Since 1.1's A5a (decision 354) `doll.ts` is
+the putting together (`dollLayers`, `dollKey`, where shoes go) and the public exports, and its
+families are files in `sprites/doll/`: `body.ts` (the regions, the `Parts` a build draws them
+with, the `Measure` a cut steps in from, `measureOf`), `builds.ts` (each build's `Physique`:
+parts, measure, where an arm drawn for her lands, its bodies), `stout.ts`, `poses.ts` (her poses,
+the action bodies for every build, the folds), `paint.ts` (painting, `finish`, the rows
+remembered per body), `face.ts`, `ink.ts` (tattoos and bracelets), `hair.ts`, `hats.ts`,
+`prints.ts`, `backs.ts` (cape and wings) and `cuts.ts`. A figure's build is `build` on its
+villager row (`data/builds.ts`), read by `buildOf` in `sprites/villagers.ts`; she is always
+`regular`. Her looks and every figure's are held by `tests/sprites/looksHeld.test.ts`, hashes of
+their layers taken before the second body came.
 
 **Making art.** `sprites/sketch.ts` draws grids of keys with shapes, lit spheres, bevels,
 outlines from a mask and dithering; `ramp` in `sprites/palette.ts` gives five hue-shifted tones.
@@ -424,8 +516,12 @@ list), `ProjectsPanelApi` (the noticeboard's Projects tab, inside `NoticeApi`), 
 `SaveApi`) and `ViewApi` (Close or Far), and
 `QuickApi`, `BedApi` and `FreshApi` for the quick bar, a bed's card and the dots on the corner
 buttons), which `sheetApis` in
-`wiring/apis.ts` builds from the world's services (the save's and the sound's are `main.ts`'s), so a
-sheet is testable with a stub and never reaches into the world. The world's moments, from the loop
+`wiring/apis.ts` composes from a builder an area in `wiring/apis/` (1.1's W3: `her`, `travel`,
+`making`, `garden`, `shopping`, `home`, `neighbours`, `collecting`, `pets`, `mystery`,
+`fairground`, `calendar` and `welcome`, matching `world/areas/` where they fit, what they share in
+`apis/shared.ts`), each from the world's services; Settings' save and sound are
+`apis/settings.ts`'s, which `main.ts` hands the HUD with its view. So a sheet is testable with a
+stub and never reaches into the world. The world's moments, from the loop
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
 opens, and its toast. A bed's card (phase P) is the one piece of the HUD that follows the world:
 `main.ts` tells it each frame where its bed is on the page (`hud.placeBed`), and where she is
@@ -858,6 +954,147 @@ dearer in town than E5 measured (22.3 against 13.1 ms), mostly L2's lawn tones b
 into chunks it hasn't seen; the second-pass check under L2 holds. Her phone is the real test:
 "On her iPhone" below.
 
+**1.1's W1** (2026-10-19, decision 340), the arrivals table, the overlays as a list and the pets'
+pulled paths, changes no drawing. `canWalk` was timed directly, as the hot path it is: 400 A\*
+paths between seeded open tiles across the town (722,889 `canWalk` calls, every project built),
+three runs each, alternating, on a quiet container: 958–1,023 ms (median of seven) on `v1.1-dev`
+against 984–1,072 ms on W1, and `canWalk` alone 981–1,040 ns against 952–1,066 ns a call, so the
+list costs nothing measurable over the inline checks (each path across town is about 2.5 ms, both
+ways). `npm run perf` at Close, 21:30, two runs each alternating, on a container shared with
+another session (draw means, ms (p50); updates, ms):
+
+| Scene       | Draw, W1              | Draw, v1.1-dev        | Update W1 → v1.1-dev  |
+| ----------- | --------------------- | --------------------- | --------------------- |
+| Town        | 36.7–37.4 (25.5–26.9) | 34.5–38.2 (24.5–27.9) | 1.18–1.25 → 1.12–1.35 |
+| Home        | 17–18 (10.6–11.1)     | 16.5–17.9 (10.5–11.1) | 0.92 → 0.89–1.03      |
+| Fairground  | 24–24.1 (15.8–17.1)   | 22.4–22.7 (15.2–16)   | 0.79–0.85 → 0.7–0.77  |
+| Whisperwood | 26.8–27.5 (17.6–18.4) | 28–28.3 (18.3–19.2)   | 0.89–0.94 → 0.96–1.01 |
+| Boo Acres   | 18.1–18.8 (12.1–12.4) | 19.8–22 (13.2–13.3)   | 0.65–0.69 → 0.72–0.81 |
+| Her yard    | 33–33.5 (26.5–26.8)   | 33.3–39.2 (26.7–29.1) | 1.04–1.1 → 1.07–1.24  |
+| Back room   | 21.1–21.7 (14.7–15.4) | 20–21.4 (14.8–15.1)   | 1.15–1.38 → 1.17–1.32 |
+
+Every row within the other's spread or a millisecond of it, one way and the other: the
+container's noise. A pet's pulled path is planned when its goal moves, as before, with a
+`stringPull` over a path of a few tiles.
+
+**1.1's W2** (2026-10-19, decision 341), her rooms a keeper of their own and a planter's bed
+keyed by its room, changes no drawing; `Home`'s reads are one call deeper, through `Rooms`, and
+the farm asks which room she's in for a bed at home. `npm run perf` at Close, 21:30, four runs
+each alternating, `v1.1-dev` and W2 each served from a copy of its own, on a container shared
+with lane A's session (draw means, ms (p50); updates, ms):
+
+| Scene       | Draw, W2              | Draw, v1.1-dev        | Update W2 → v1.1-dev  |
+| ----------- | --------------------- | --------------------- | --------------------- |
+| Town        | 33.7–47.3 (25.6–32.4) | 34.2–44.5 (25.3–31.1) | 1.22–1.69 → 1.19–1.51 |
+| Home        | 15.6–23.6 (10.2–14.2) | 15.4–23.5 (9.8–14.5)  | 0.83–1.44 → 0.87–1.47 |
+| Fairground  | 22.1–30.3 (15.7–20.4) | 20.5–35.8 (14.4–23.1) | 0.77–1.03 → 0.69–1.35 |
+| Whisperwood | 24.7–33.2 (16.7–22.9) | 23.5–37.2 (16.2–24.2) | 0.8–1.26 → 0.77–1.41  |
+| Boo Acres   | 21.8–29.5 (13.4–18)   | 21.2–29.4 (13.1–18.8) | 0.83–1.16 → 0.74–1.13 |
+| Her yard    | 35.4–44.1 (26.6–34.9) | 34.8–49.7 (27.2–37.7) | 1.14–1.52 → 1.08–1.58 |
+| Back room   | 19.7–28 (14.1–19.3)   | 21.5–27.8 (14.5–19)   | 1.12–1.76 → 1.34–1.79 |
+
+Every row within the other's spread, one way and the other; the spread itself is the container
+(a quiet pair, the second, had Home at 15.6 against 17.2 and the back room at 19.7 against 22.7).
+
+**1.1's A1** (2026-10-19, decision 350), the square's flagstones and setts and the cobbles' worn
+middle, adds no pass: it is all baked into the ground's chunks. What it costs is baking: the
+flagstones are drawn for 64 places in their eight-tile repeat, so the town has 769 distinct
+pieces against 696. `edges`, which every ground piece asks for its field, made a closure and
+three tables a pixel; it hoists the tables now and hands every tile with ground on all sides one
+shared field (a cache of every field was tried and held 6–10 MB of heap). Every place, its
+winter and every ground piece draw pixel for pixel as before that change. The town's whole
+ground drawn and rasterized fresh in Node (CPU ms, three runs): 805–887 on `v1.1-dev`, 777–863 on
+A1; the fairground's 475–503 and 428–546. `npm run perf` at Close, alternating, on a container
+shared with lane W's session (draw means, ms (p50); heap, MB):
+
+| Scene       | 21:30, A1             | 21:30, v1.1-dev       | Noon, A1 / v1.1-dev       | Heap, A1 / v1.1-dev   |
+| ----------- | --------------------- | --------------------- | ------------------------- | --------------------- |
+| Town        | 34–35.8 (23.8–24.8)   | 33.2–47.6 (23.2–33.9) | 32.6 (22.6) / 34.2 (24.8) | 29.5–29.6 / 28.9–29.2 |
+| Home        | 17–17.6 (10.1–10.6)   | 16.1–18.6 (10.1–11.1) | 5.4 (2.3) / 4.8 (1.8)     | 30.2–30.7 / 29.5–30   |
+| Fairground  | 22.9–23.5 (15.1–15.5) | 22.7–27.9 (15.3–19)   | 23.5 (15.9) / 23.6 (16.4) | 30.8 / 30.1–30.6      |
+| Whisperwood | 25.6–26 (16.8–16.9)   | 25.3–32.4 (16.1–22.9) | 25.6 (16.7) / 29 (19.7)   | 31.5–31.8 / 30.8–31   |
+| Boo Acres   | 20.7–20.9 (12.7–12.9) | 19.3–26.5 (12.3–17)   | 21.7 (14.1) / 21.4 (14.7) | 32.1–32.3 / 31.3–31.5 |
+| Her yard    | 34.9–36.6 (26.4–27.3) | 33.5–42.9 (25.7–34.8) | 33.7 (25.1) / 31.4 (24.8) | 31.9–32 / 31.4–31.7   |
+| Back room   | 20.4–20.9 (13.4–13.8) | 21.1–25.5 (13.6–17.8) | 7.5 (4.3) / 7.4 (4.4)     | 32.2 / 31.5–32        |
+
+Within the spread everywhere; the heap half a megabyte up, the square's pieces.
+
+**1.1's W3** (2026-10-19, decision 342), `Talk` out of `Neighbourhood`, the Apis by area,
+`main.ts` slimmed and the areas' order named, changes no drawing; a neighbour's walk asks `Talk`
+who she's talking to, a call one function deeper. Timed in Node (vitest, a fake clock, the town
+settled 400 steps), alternating with `v1.1-dev`, each from its own copy: a talk opened and its
+buttons worked out (`neighbourhood.talk` and `talkActions`, every neighbour four times a day for
+six days, 312 a run) and the step that crosses into the afternoon or the evening (20 a run),
+medians of each run, quartiles across runs (24 runs on W3, 27 on `v1.1-dev`): a talk 0.089 ms
+(0.079–0.098) against 0.085 (0.077–0.095), a window's turn 3.3 ms (2.86–4.19) against 2.93
+(2.59–3.57), an ordinary step 0.19 against 0.18 ms. `npm run perf` at Close, 21:30, three runs
+each alternating (draw means, ms (p50); updates, ms):
+
+| Scene       | Draw, W3              | Draw, v1.1-dev        | Update W3 → v1.1-dev  |
+| ----------- | --------------------- | --------------------- | --------------------- |
+| Town        | 29.2–42.3 (20.4–29.8) | 29.1–42.8 (20.8–29.1) | 0.96–1.44 → 0.89–1.46 |
+| Home        | 14.6–21 (9.1–12.8)    | 14.2–20.3 (9–12.4)    | 0.73–1.18 → 0.68–1.16 |
+| Fairground  | 20.3–24.8 (13.8–16.9) | 18–24.5 (12.5–17)     | 0.61–0.79 → 0.52–0.8  |
+| Whisperwood | 21.5–28.5 (14.3–18.6) | 22–26.1 (14.4–18.8)   | 0.67–0.93 → 0.67–0.84 |
+| Boo Acres   | 16.4–20.5 (11.1–13.1) | 17.6–25.4 (11.3–15.3) | 0.57–0.69 → 0.58–0.88 |
+| Her yard    | 26.9–35.5 (20.7–27.2) | 27.4–40.9 (21.8–31.7) | 0.77–1.13 → 0.85–1.38 |
+| Back room   | 14.8–22 (10.1–15.2)   | 16.5–23.1 (11.5–16.4) | 0.89–1.24 → 0.9–1.42  |
+
+Every row within the other's spread, one way and the other; the window's turn leans a few tenths
+of a millisecond dearer in the middle of its runs and overlaps them end to end, the container's
+noise on a step that does a window's dealing.
+
+**1.1's A4** (2026-10-19, decision 353), `OutdoorView` drawn in passes, draws the same things in
+the same order: a frame walks seven short lists of passes where it called methods, makes one
+`Frame` and one `LitFrame`, and flattens each pass's drawables into the one list it sorted before.
+`npm run perf` at Close, 21:30, three runs each alternating, `v1.1-dev` and A4 each served from its
+own copy, on a container shared with A3's session (draw means, ms (p50); updates, ms; heap, MB):
+
+| Scene       | Draw, A4              | Draw, v1.1-dev        | Update A4 → v1.1-dev  | Heap, A4 / v1.1-dev   |
+| ----------- | --------------------- | --------------------- | --------------------- | --------------------- |
+| Town        | 35.2–39.2 (25.1–28)   | 36.3–39.7 (25.5–28)   | 1.15–1.47 → 1.21–1.49 | 29.8–31.9 / 29.8      |
+| Home        | 15.1–20.8 (10.1–12.4) | 16.2–19.3 (10.4–12.3) | 0.84–1.11 → 0.83–1.07 | 30.4–31 / 30.6–31     |
+| Fairground  | 23.5–28 (16.8–18.6)   | 23.3–25.3 (16.7–17.3) | 0.74–1.04 → 0.81–0.99 | 31.2–31.8 / 31–31.1   |
+| Whisperwood | 24.6–29.3 (16.6–19.9) | 26.8–28.2 (18.3–19.2) | 0.8–1.04 → 0.91–1.03  | 32–32.9 / 31.6–32.7   |
+| Boo Acres   | 17.5–23.8 (12–15.3)   | 18.8–20.8 (13–13.9)   | 0.64–0.86 → 0.65–0.75 | 32.5–33.3 / 32.2–32.5 |
+| Her yard    | 34.3–37 (26.6–29.2)   | 33.6–38.3 (25.3–30.2) | 1.19–1.3 → 1.17–1.19  | 32.4–34.2 / 32.2–32.8 |
+| Back room   | 18.1–26.2 (13.6–18.4) | 19.7–21.6 (13.9–15.7) | 1.17–1.73 → 1.21–1.37 | 32.6–33.1 / 32.4–33.2 |
+
+Every row within the other's spread or overlapping it, one way and the other; the home and the
+back room, whose views didn't change, spread as wide as the places that did, which is the
+container. The town's heap was 29.8 and 30.1 MB in two of A4's runs and 31.9 in the other, a
+collection's timing (its home in that run was the lowest of all six, 30.4). `?perf`'s overlay (`wiring/perf.ts`) is untouched.
+
+**1.2, V1.1's review** (2026-10-20, decision 356): the 1.1 plan whole (the lanes' tables above
+each against `v1.1-dev` before it) against 1.0 as it is on her phone, `v1.1-dev`'s head served
+from one copy and `origin/main` (1.0) from another, the same `scripts/perf.mjs` (which now walks
+Lantern Shore last, so every scene before it is walked as for 1.0's table), alternating, on a
+quiet container: two runs each at Close at 21:30, one each at noon and at Far by night and by
+day. Draw means, ms (p50 at Close by night); updates, ms (Close, 21:30); heap, MB (Close, 21:30):
+
+| Scene         | Close 21:30, 1.2      | Close 21:30, 1.0      | Noon, 1.2 / 1.0 | Far 21:30, 1.2 / 1.0 | Far noon, 1.2 / 1.0 | Updates 1.2 / 1.0     | Heap 1.2 / 1.0 |
+| ------------- | --------------------- | --------------------- | --------------- | -------------------- | ------------------- | --------------------- | -------------- |
+| Town          | 37.8–39.2 (26.9–27.4) | 33.8–36.7 (25.3–26.3) | 21.2 / 19.4     | 66.8 / 66.1          | 27.7 / 27.1         | 1.42–1.52 / 1.38–1.42 | 30.6 / 29      |
+| Home          | 19.8–20.5 (12.1–12.2) | 20.4–22.2 (12.6–13.3) | 6.7 / 6.3       | 21.1 / 21.6          | 6.7 / 6.5           | 1.06–1.09 / 1.08–1.13 | 31.6 / 29.6    |
+| Fairground    | 23.7–25 (16.8–17.4)   | 24.1–26.1 (16.9–18)   | 9.7 / 9.6       | 48.4 / 47.7          | 16.1 / 13.5         | 0.89–0.9 / 0.86–0.99  | 32.1 / 30.3    |
+| Whisperwood   | 29.7–30.8 (20.3–20.9) | 30.4–30.6 (20–20.6)   | 13 / 10.8       | 59.4 / 60            | 18.6 / 18.6         | 1.13–1.16 / 1.12–1.18 | 32.7 / 30.5    |
+| Boo Acres     | 22.6–22.9 (14.9–15.4) | 22.6–22.9 (14.8–14.9) | 10.4 / 9.2      | 44.3 / 46            | 14.7 / 15.1         | 0.9–0.92 / 0.91–1.04  | 33.2 / 31.2    |
+| Her yard      | 37.6–40.8 (29.1–30.7) | 37.5–39.1 (29–30.2)   | 17.9 / 18.3     | 65.6 / 70.8          | 28.5 / 24.6         | 1.41–1.52 / 1.31–1.44 | 33.1 / 31.5    |
+| Back room     | 24.4–26.6 (16.4–18.8) | 24–26 (16.3–17.1)     | 8.8 / 8.2       | 25.5 / 27.1          | 8.9 / 8.6           | 1.35–1.77 / 1.34–1.58 | 33.5 / 31.7    |
+| Lantern Shore | 26–27.7 (19.5–20.1)   | 25.9–26.1 (18.2–18.6) | 12 / 11.1       | 55.3 / 53            | 18 / 18.3           | 1.01–1.04 / 1–1.03    | 34.3 / 32      |
+
+No frame doubled, and every update overlaps 1.0's runs or is within a tenth or two. The town at
+Close by night is the one row clear of its spread, 2–4 ms of mean and a millisecond of median:
+most likely A1's flagstones and setts, pieces of their own baked as the walk reveals them (769
+against 696), since the noon and Far runs, which bake the same, sit within a millisecond or two.
+Whisperwood at noon is 2 ms dearer in its one run (A3's ice and A2's new forms are baked there
+too) and the same by night and at Far; Lantern Shore, whose ice meets the lake, a millisecond or
+two at most. Everywhere else 1.2 and 1.0 cross each other.
+The heap is about 2 MB higher everywhere (30.6 against 29 MB in town), the bodies' and builds'
+baked figures, the ice's and paving's pieces, each baked once. Against 1.0's own table above (a
+different day's container), the same: the town 37.8–39.2 against 32.6–32.8 there and 33.8–36.7
+here, so most of that gap is the day.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -881,93 +1118,82 @@ costs a download per deploy, not a launch.
 
 ## Where it hurts
 
-Honest notes for whatever comes after 1.0, most pressing first, rewritten at V1's review after the
-V1 plan's five lanes. Every lane's "Left for the review" note is folded in here; of 0.3's list,
-nothing was moved (V1 was a feel release, not a refactor), so what's still true is below with
-V1's weight on it.
+Honest notes for whatever comes after 1.2, most pressing first, rewritten at V1.1's review
+(decision 356) after the 1.1 plan's four lanes. Of 1.0's list, the 1.1 plan did 2, 3, 5, 6, 10,
+11, 12, 13, 15 and 17 (1.0.1 did 4, 7, 8, 9 and 16); what each lane left for the review is folded
+in below, and what was done is said once at the end, so the list is what's left.
 
-1. **Two things only her phone and Vercel can say.** The cloud save's function (`api/save.ts`) has
-   never run on Vercel: it's tested with a faked store, and smoke fakes it with a route. The first
-   deploy to `main` that carries it is its first real test: the deployment's Functions tab should
-   list `api/save`, then README's `curl` should answer `{"save":null}` once the store is linked
-   (the user's step, README's "Cloud save"). If the build trips on TypeScript, the fallback is the
-   same file as `api/save.js` with JSDoc types. And no frame has been timed on her iPhone: `?perf`
-   (production too, `wiring/perf.ts`) is waiting, with a table under "On her iPhone" above. Both
-   are 1.0.x's first jobs.
-2. **The suite and smoke are slow, and smoke is one file.** 2,568 tests in 216 files take about
-   340 s in the container (90 s at 0.3's V1, 24 s at phase K), most of it building whole worlds
-   through `harness()` and the simulated years of the rarity and weeks tests; smoke is 7,800 lines
-   in one file, 622 checks, about twenty minutes, and a session's suite-then-smoke before a push
-   is half an hour. Services are made from plain parts and can be tested alone; a slow file should
-   share one world across cases that don't touch each other; smoke wants splitting into a file per
-   area (`scripts/smoke/*.mjs`) with the runner and its helpers in one, so a session can run its
-   own area and the whole on the last push. The gallery has grown past what CI's Chromium will
-   capture in one full-page screenshot (L7, decision 296), and smoke's `gallery` falls back to its
-   top: the next catalogue rows should page it rather than grow it.
-3. **One body under every look.** Every clothing cut, action pose (E2), working pose (E3, P4) and
-   face (L7) is painted onto the one 32×48 body, so every neighbour below the neck is her
-   silhouette in other colours. The plan's two or three body builds (decision 79 still holds the
-   size) were left for a pass of their own: a `Build` on a figure row picking a body grid in
-   `sprites/doll.ts`, with every cut's regions redrawn for it, would touch most of `doll.ts`'s 3,000
-   lines and the tailoring, so it wants a session that does nothing else.
-4. **Faces aren't everywhere yet.** The noticeboard's 48-pixel faces (`drawPortrait`) and the
-   greeting's and the neighbours sheet's busts are still neutral; `drawBust`'s `mood` takes a
-   `Feeling` when a caller wants one (L7). The noticeboard's own art is the same whatever is
-   pinned (an L6 note, still true).
-5. **Arriving at a prop is a chain of `if`s.** `World.arriveOn` asks the prop's id in turn: the
-   porch pots, the candy tree, a sapling, the pumpkin patch, the bandstand (R4), the honesty stall,
-   a goose, a mound (today's fossil first, then the buried keys), a way out, then gathering and
-   the stray (R3). The order matters, and each feature that does something on arrival has added a
-   line. The next should make them a table keyed by prop id, as phase K made `arrivals` one keyed
-   by visit kind, with the mound's two owners asked in one handler.
-6. **`MapZone` asks eight overlays where it can walk.** `canWalk` and `propAt` each check the
-   stalls, a shut gate, the lots, the decorations, the farm's built rows, her yard, today's mound
-   and, since R4, the project sites, after the map. A new thing standing in a place should make
-   them a list of overlays, each with its own `propAt` and `blocks`, rather than a ninth line.
-7. **A project in her yard moves her things without asking.** Starting the greenhouse (R4) keeps
-   its tiles from that day, and `Yard.makeRoom` puts any piece of hers standing there in the storage
-   chest, what stands on it too; the Projects tab says so after, but she isn't asked first. Nothing is lost (decision 11 holds), but a card before the start ("your bench will go
-   in the chest") would be kinder.
-8. **The reel and the tricks, R6's rough edges.** The tension bar doesn't slow under reduced
-   motion, because the world doesn't know the phone's setting (a tap out of time only slackens the
-   line, so nothing is lost; the fair games, drawn by the HUD, do slow): a `slow` in
-   `WorldOptions` read from `matchMedia` in `main.ts` would let `reelOf` stretch the period. Its
-   window's dark green reads less well over the night's water than the day's. A trick asked for on
-   the pet sheet can happen behind the sheet when the pet is low on the screen; Florence's
-   on-her-back frame and Gary's front are serviceable rather than lovely. V1's review took the
-   "!" off the hooked moment, which sat over the bar's right end.
-9. **October has no rare events.** `rareEventOn` never deals one during a festival, and the
-   Halloween Festival is all of October, so a phone that takes 1.0 in October sees its first rare
-   event on 10 November (a stranger) and the wandering stall's week from 16 November. By design,
-   but October is the month she plays most; 1.1 could let the one-day events in on the festival's
-   ordinary days. The heralds of the stall's week toast once a day all week.
-10. **Her home's bed key doesn't know the room.** A planter's bed is keyed `home` and its tile, so
-    planters stay in the front room (`refusesHere`, decision 233). A planter in the back room needs
-    the key to carry the room, a save change; until then the refusal says so kindly.
-11. **`Home` holds four features.** Her rooms, the chest's two lists, what's on show and what
-    stands on what are one 480-line keeper, with `Yard` beside it reusing the surface rules through
-    `Decorable`. A fifth (a second chest, a room of the yard's own) should take rooms out into a
-    `Room` keeper first.
-12. **Big view, wiring and service files.** `render/OutdoorView.ts` is 1,240 lines (the yard, the
-    mounds, the sites, the see-through crowns, the fishing line and reel, film night, the fountain
-    and the effects all hand it something to sort), `services/Neighbourhood.ts` 1,100 (P1–P5 each
-    added talk, moments, calls and verbs to it), `wiring/apis.ts` 760 and `main.ts` 540. The lanes
-    drew new things in files of their own (`render/effects.ts`, `fairGames.ts`, `transition.ts`)
-    and put talk actions in `wiring/talkActions.ts`, which is the way; `Neighbourhood`'s talk (the
-    hello, moments, questions, replies) could be a `Talk` service of its own, and `apis.ts` split by
-    area as `world/areas/` was.
-13. **The areas' order still matters.** A service listens for a signal in the order it was made,
-    so one that hears a signal another already hears goes in an area made after it; V1 added two
-    areas at the end (`firstDay`, `upNow`) for that reason.
-14. **Big data files and one big chunk.** `sprites/doll.ts` is 3,000 lines, `sprites/items.ts`
-    2,600, `data/villagers.ts` 1,650, `types/ids.ts` 1,340. Fine as data; a redraw should split by
-    family. The build is one 1.8 MB chunk (600 kB gzipped), precached once a version (decision
-    322), so it costs a download per deploy, not a launch.
-15. **The town's legend is running out of characters.** About a dozen are left in `data/maps.ts`'s
-    shared legend; the fairground (`FAIR_LEGEND`, `9` and `0` used by R6b) and Boo Acres have their
-    own, which is the way for the next new place.
-16. **What she ate isn't saved** (A4, decision 223): after a reload a meal's chip shows the first
-    dish with the same effect. One optional field in `kitchen` for the next session that changes
-    the save anyway.
-17. **Pets walk tile to tile.** She and her neighbours walk paths pulled taut; the pets' pottering
-    would look smoother the same way (`stringPull`), if an art pass wants it.
+1. **Two things only her phone and Vercel can say** (as at 1.0; the user's, not a session's).
+   The cloud save's function (`api/save.ts`) has never run on Vercel: it's tested with a faked
+   store, and smoke fakes it with a route. The first deploy to `main` that carries it (1.0 did,
+   unlinked) is its test: the deployment's Functions tab should list `api/save`, then README's
+   `curl` should answer `{"save":null}` once the store is linked (README's "Cloud save"). If the
+   build trips on TypeScript, the fallback is the same file as `api/save.js` with JSDoc types. And
+   no frame has been timed on her iPhone: `?perf` (production too, `wiring/perf.ts`) is waiting,
+   with the table under "On her iPhone" above.
+2. **A world step works out the hour's happenings for every neighbour, every step.**
+   `happeningsAt(hour, day)` (`systems/happenings.ts`) filters every happening row (the town's, the
+   rhythm's, the holidays', the fair's) and is asked through `whereabouts` for each neighbour on
+   every step, and by `happeningIn` for the place she's in. It's most of a world test's step (0.5
+   ms quiet, up to 1.8 ms loaded; T2's measure, decision 336) and a share of her phone's update
+   (town 1.1 ms a step in 1.0's table). Kept for the hour and the day (a `Map` keyed by
+   `${day}:${hour}`, dropped when either turns), it would make every world test and the frame
+   cheaper, and `finale.test.ts`'s settling cases could drop their stated 30 s timeout. A session
+   in `src/systems/` with the world tests as its proof.
+3. **`canWalk` works out the day key on every call.** `Decorations` and `Mounds`
+   (`world/zones/`) each ask `dayKey(now)` per call to say whether today's square piece, the frozen
+   pond or today's mound stands on a tile, and the pond's ice asks `Decorations` again; `canWalk` in
+   town is about 1 µs a call in the container (W1's measure, decision 340), a long A\* across town a
+   few milliseconds. Nothing she feels at a walk a tap; keeping the day by the minute (as `Stalls`
+   does) is the first thing to try if paths ever show in `?perf`.
+4. **Forwarders kept so nothing else had to move.** `Home` still answers the room she's in
+   through twenty-seven one-line reads of `home.rooms` (W2, decision 341), and `Neighbourhood`
+   the talk's ten (`talk`, `reply`, `give`, `favour`, `doFavour`, `feel`, `feelingOf`,
+   `startTalk`, `endTalk`, `talkingTo`) through `world.talk` (W3, decision 342), so
+   `src/render/`, the sheets, `wiring/apis/` and the tests didn't move while lane A ran beside
+   them. A session that points those readers at `home.rooms` and `world.talk` can drop all
+   thirty-seven; nothing she sees changes, and the lived-in fixtures and the arrivals and overlays
+   snapshots are its proof.
+5. **What a build doesn't reach.** The cast is cast (decision 355: Rufus, Gourdon and the Moon
+   Pie Man stout; Barty, Scarah, Rob Boo and Wes slight; everyone else and Cody hers), but the
+   passers-by (the wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default; a later look may
+   give one a build, a row there. What's at her middle on purpose: a
+   fly, the jackets' lapels and the ringmaster coat's buttons, the bow tie and the cravat from the
+   front (looked at on the slight mayor and the stout ones). Seen sideways, the mayor's sash is a
+   band down his side, as a sash would be.
+6. **Big data files and one big chunk.** `sprites/items.ts` 2,620 lines, `data/villagers.ts`
+   1,680, `types/ids.ts` 1,345; fine as data, and a redraw should split by family as
+   `sprites/doll/` was. The build is one chunk, 1.84 MB (613 kB gzipped) at 1.2, against 1.66 MB
+   (555 kB) at S3: the builds, the ice and the paving. Precached once a version (decision 322), it
+   costs a download per deploy, not a launch; one chunk stays the right shape for an installed app
+   (decision 328) until it costs her a slow first launch on a new version.
+7. **Small things the review noticed and left.** The dev build's `?day=` doesn't reach the save's
+   stamps: `keepTown` (`wiring/keeping.ts`) stamps `updatedAt` and `lastPlayedAt` with
+   `Date.now()`, not the world's clock, so a town played under `?day=` is saved as played today
+   (production's clock is the real one, so her phone is right; V1.1 set the fixture's stamps by
+   hand to the day it was played). W1's overlays snapshot (`tests/world/overlays.test.ts`) holds
+   the lived-in saves up to 1.0's; 1.2's isn't in it (no tile of hers moved in 1.1 that the
+   others don't already hold). The bed card's buttons wait `SETTLE_MS` after the card shows, so a
+   tap on the card the moment it appears does nothing (on purpose, against a stray tap; the second
+   tap on the bed does the job at once).
+
+**Done in the 1.1 plan** (decisions 330–355), kept short; the decisions and the lanes' tables
+above hold the detail:
+
+- ~~The suite and smoke slow, smoke one file~~ (T1, T2: smoke a file per area in
+  `scripts/smoke/`, 622 checks before and after, `npm run smoke -- town fair`; the suite two vitest
+  projects, 346 s to 121 s in the container).
+- ~~One body under every look~~ (A5a, A5b: `Build`s, `regular`, `stout`, `slight`, on every
+  villager row; `measureOf(body)` for every cut and touch; `sprites/doll/` by family; her looks
+  held to the pixel by `looksHeld`).
+- ~~Arriving a chain of `if`s; eight overlays asked where she can walk~~ (W1: `PropArrivals`, a
+  table by prop id; `Overlay`s, one list in `MapZone`; both held by snapshots from the old code).
+- ~~Her home's bed key without the room; `Home` holding four features~~ (W2: `Rooms`; a planter's
+  bed keyed by its room, save v55; the forwarders are 4 above).
+- ~~Big view, wiring and service files~~ (A4: `OutdoorView` in passes, 1,269 lines to 494,
+  `OUTDOOR_LAYERS`; W3: `Talk` out of `Neighbourhood`, the Apis by area in `wiring/apis/`,
+  `main.ts` the boot, the loop and the views).
+- ~~The areas' order mattering silently~~ (W3: `AREAS` in `world/areas/order.ts`, held by a test).
+- ~~The town's legend running out of characters~~ (W3: the rule noted at `LEGEND`, a place's own
+  legend for a place-only prop).
+- ~~Pets walking tile to tile~~ (W1: `Pet.walk` pulls its path with `stringPull`).

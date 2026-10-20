@@ -1,5 +1,5 @@
 import type { Rarity } from '../data/critters';
-import type { Grade } from './activities';
+import { SLOW_SWEEP, type Grade } from './activities';
 import { hashMixed, hashString } from './random';
 
 /*
@@ -132,12 +132,16 @@ export const REELS: Partial<Record<Rarity, Omit<Reel, 'target'>>> = {
 /** How many sweeps the needle makes before the line goes slack by itself, untapped. */
 export const REEL_SWEEPS = 3;
 
-/** A hooked fish's tension bar, or null if it needs no reeling: the same for the same cast. */
-export function reelOf(seed: string, rarity: Rarity): Reel | null {
+/**
+ * A hooked fish's tension bar, or null if it needs no reeling: the same for the same cast. With
+ * reduced motion asked for (`slow`, 1.0.1) the needle sweeps as the fair's games do then, gentler
+ * and never still, the window the same along the bar and so wider in time.
+ */
+export function reelOf(seed: string, rarity: Rarity, slow = false): Reel | null {
   const row = REELS[rarity];
   if (!row) return null;
   const target = 0.3 + (hashMixed(`reel:${seed}`) % 400) / 1000;
-  return { ...row, target };
+  return { ...row, target, ...(slow && { period: Math.round(row.period * SLOW_SWEEP) }) };
 }
 
 const frac = (x: number) => x - Math.floor(x);

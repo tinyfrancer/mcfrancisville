@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { heldLine, quickBar, type QuickApi } from '../../src/hud/QuickBar';
+import { heldLine, quickBar, scrollMore, type QuickApi } from '../../src/hud/QuickBar';
 import type { Stack } from '../../src/world/Bag';
 
 function stub(
@@ -81,5 +81,15 @@ describe("her broom on the quick bar (0.2's P1)", () => {
     bar.element.querySelector<HTMLButtonElement>('[aria-label="Broom home"]')!.click();
     expect(api.flown).toBe(1);
     expect(api.holding).toBe('hands');
+  });
+});
+
+describe('the strip’s ends (1.0.1)', () => {
+  it('fades the end with more beyond it, and neither when it all fits', () => {
+    expect(scrollMore(0, 426, 353)).toBe('end');
+    expect(scrollMore(73, 426, 353)).toBe('start');
+    expect(scrollMore(30, 426, 353)).toBe('both');
+    expect(scrollMore(0, 300, 353)).toBeNull();
+    expect(scrollMore(72.5, 426, 353)).toBe('start');
   });
 });

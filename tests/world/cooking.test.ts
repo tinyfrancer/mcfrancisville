@@ -170,6 +170,7 @@ describe('eating', () => {
       pep: h.clock.now(),
       bites: null,
       lure: { family: 'bat', at: h.clock.now() },
+      ate: { pep: 'pumpkinSoup', lure: 'pumpkinPie' },
     });
     const back = harness(undefined, { kitchen: save.kitchen, finds: save });
     back.clock.set(new Date(h.clock.now()));
@@ -210,7 +211,7 @@ describe("what her meals are doing (0.3's A4)", () => {
     expect(h.world.kitchen.buffs()).toEqual([]);
   });
 
-  it('shows the first dish that does the same, opened again, as the save keeps only when', () => {
+  it('shows what she ate after a reload, the save keeping the dish (1.0.1, v54)', () => {
     const h = kitchen([
       { id: 'midnightPizza', count: 1 },
       { id: 'lavenderShortbread', count: 1 },
@@ -221,8 +222,30 @@ describe("what her meals are doing (0.3's A4)", () => {
     const back = harness(undefined, { kitchen: save.kitchen, finds: save });
     back.clock.set(new Date(h.clock.now()));
     expect(back.world.kitchen.buffs()).toEqual([
+      { effect: 'pep', item: 'midnightPizza', until: 'evening' },
+      { effect: { lure: 'moth' }, item: 'lavenderShortbread', until: 'evening' },
+    ]);
+  });
+
+  it('shows the first dish that does the same for a town saved before it kept the dish', () => {
+    const h = kitchen([
+      { id: 'midnightPizza', count: 1 },
+      { id: 'lavenderShortbread', count: 1 },
+    ]);
+    h.world.kitchen.eat('midnightPizza');
+    h.world.kitchen.eat('lavenderShortbread');
+    const before = { ...h.world.save().kitchen };
+    delete before.ate;
+    const back = harness(undefined, { kitchen: before });
+    back.clock.set(new Date(h.clock.now()));
+    expect(back.world.kitchen.buffs()).toEqual([
       { effect: 'pep', item: 'pumpkinSoup', until: 'evening' },
       { effect: { lure: 'moth' }, item: 'moonpetalCake', until: 'evening' },
     ]);
+    // A dish this build doesn't know, or kept under a course it doesn't do, is let go.
+    const odd = harness(undefined, {
+      kitchen: { ...before, ate: { pep: 'somethingNew', lure: 'midnightPizza' } as never },
+    });
+    expect(odd.world.kitchen.snapshot().kitchen.ate).toBeUndefined();
   });
 });

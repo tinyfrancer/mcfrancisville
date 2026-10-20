@@ -102,7 +102,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     else if (activity) hud.toast({ text: world.activities.closed(activity) });
     // With a sheet already up, she can't talk now, so they needn't wait for her.
     if (event.kind === 'arrived' && event.villager && !hud.openTalk(event.villager)) {
-      world.neighbourhood.endTalk();
+      world.talk.endTalk();
     }
     if (event.kind === 'arrived' && event.pet && !hud.openPet(event.pet)) world.petCare.endPet();
     if (event.kind === 'arrived' && event.at === 'storageChest') hud.openStorage();

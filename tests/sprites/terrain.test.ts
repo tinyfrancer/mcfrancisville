@@ -13,6 +13,7 @@ import {
   NOTCH_NW_X,
   NOTCH_NW_Y,
   NW,
+  ownMask,
   S,
   SE,
   SW,
@@ -178,14 +179,69 @@ describe('the ground at 32', () => {
     }
   });
 
-  it('ends a frozen creek at open water in a lip, on the sides that meet it', () => {
+  it('thins a frozen creek into open water on the sides that meet it (1.1 A3)', () => {
     const at = lookup(['.-.', '~-~', '~~~'], { '.': 'grass', '-': 'ice', '~': 'water' });
     const tongue = neighbourMask(at, 1, 1);
     expect(tongue & (THAW_S | THAW_E | THAW_W)).toBe(THAW_S | THAW_E | THAW_W);
     expect(neighbourMask(at, 1, 0) & (THAW_S | THAW_E | THAW_W)).toBe(0);
-    const lip = rasterize(terrainPiece('ice', tongue, 0).source, TERRAIN_ART.ice.palette);
+    const melt = rasterize(terrainPiece('ice', tongue, 0).source, TERRAIN_ART.ice.palette);
     const plain = rasterize(terrainPiece('ice', tongue & 0xff, 0).source, TERRAIN_ART.ice.palette);
-    expect(lip.data).not.toEqual(plain.data);
+    expect(melt.data).not.toEqual(plain.data);
+  });
+
+  it('runs the cobbles, the square’s flagstones and its setts on into each other (1.1 A1)', () => {
+    const paved = ['path', 'flagstones', 'setts'] as const;
+    for (const a of paved) for (const b of paved) expect(continues(a, b), `${a} ${b}`).toBe(true);
+    for (const other of ['grass', 'dirt', 'gravel', 'water'] as const) {
+      expect(continues('flagstones', other)).toBe(false);
+      expect(continues('setts', other)).toBe(false);
+    }
+  });
+
+  it('stops the flagstones at a kerb by the cobbles, and lays a ring round the well’s setts', () => {
+    const at = lookup(['=__', '__W', '___'], { '=': 'path', _: 'flagstones', W: 'setts' });
+    // The flagstone beside the cobbles carries the paving on, but stops at its own kerb there.
+    expect(neighbourMask(at, 1, 0) & W).toBe(W);
+    expect(ownMask(at, 1, 0) & W).toBe(0);
+    // Beside the setts it runs on, and says which side they're on, eight bits up.
+    expect(ownMask(at, 1, 1) & E).toBe(E);
+    expect(ownMask(at, 1, 1) >> 8).toBe(E);
+    expect(ownMask(at, 1, 2) >> 8).toBe(NE);
+    // The ring: setts up against the well's side, slabs a tile away from it.
+    const keys = (mask: number, own: number) =>
+      terrainPiece('flagstones', mask, 0, { tx: 1, ty: 1 }, own).source.rows;
+    const SETT = /[sStuq]/;
+    const beside = keys(255, 255 | (E << 8));
+    expect(beside[16]![31]).toMatch(SETT);
+    expect(beside[16]![0]).not.toMatch(SETT);
+    // Off a corner the ring rounds: its corner reaches in, the far corner is slab.
+    const corner = keys(255, 255 | (NE << 8));
+    expect(corner[0]![31]).toMatch(SETT);
+    expect(corner[31]![0]).not.toMatch(SETT);
+    expect(corner[31]![31]).not.toMatch(SETT);
+  });
+
+  it('lays the flagstones on the world’s grid, so slabs run on over the seams (1.1 A1)', () => {
+    let across = 0;
+    for (let px = 0; px < 8; px++) {
+      const left = terrainPiece('flagstones', 255, 0, { tx: px, ty: 0 }).source.rows;
+      const right = terrainPiece('flagstones', 255, 0, { tx: px + 1, ty: 0 }).source.rows;
+      for (let y = 0; y < TILE; y++) if (left[y]![31] !== 'j' && right[y]![0] !== 'j') across++;
+    }
+    // Most of each seam is the middle of a slab, not a joint between two.
+    expect(across / (8 * TILE)).toBeGreaterThan(0.5);
+  });
+
+  it('wears a road’s cobbles smooth down its middle, never at its edge (1.1 A1)', () => {
+    // The top tile of a wide road, its edge along the top: worn toward the middle, below.
+    const rows = terrainPiece('path', E | SE | S | SW | W, 0).source.rows;
+    const worn = (from: number, to: number) =>
+      rows
+        .slice(from, to)
+        .join('')
+        .replace(/[^wvWn]/g, '').length;
+    expect(worn(0, 8)).toBe(0);
+    expect(worn(24, 32)).toBeGreaterThan(8 * TILE * 0.5);
   });
 
   it('lays grass under everything, and one piece over it for anything else', () => {

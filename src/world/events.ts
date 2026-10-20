@@ -50,6 +50,7 @@ import type {
   ProjectId,
   PropId,
   RecipeId,
+  RoomId,
   ShelfId,
   ShopId,
   VillagerId,
@@ -304,7 +305,14 @@ export type WorldEvent =
   /** A pet grew fond enough of her for a new level (V1's R6c): its job at one, its trick at two. */
   | { kind: 'petGrew'; pet: PetId; name: string; level: PetLevel; at: { x: number; y: number } }
   /** A pet did its trick (V1's R6c), asked on its sheet, or `own` of its own accord. */
-  | { kind: 'petTrick'; pet: PetId; at: { x: number; y: number }; own?: true }
+  | {
+      kind: 'petTrick';
+      pet: PetId;
+      at: { x: number; y: number };
+      own?: true;
+      /** What she sees it do, when she asked for it on its sheet (said once the sheet is down). */
+      line?: string;
+    }
   /** A pet did its job on a walk (V1's R6c), `at` what it found, barked out or drew in. */
   | { kind: 'petHelped'; pet: PetId; name: string; job: PetJob; at: { x: number; y: number } };
 
@@ -387,8 +395,11 @@ export interface Signals extends Record<string, unknown> {
   felt: { feeling: Feeling };
   /** She went from one place to another, and is standing in the new one. */
   crossed: { from: ZoneId; to: ZoneId };
-  /** A piece of furniture was moved across her room (`to`), or put away in the chest (null). */
-  moved: { piece: FurnitureId; from: Tile; to: Tile | null };
+  /**
+   * A piece of furniture was moved across one of her rooms (`to`), or put away in the chest (null);
+   * the room it was in, for a planter's bed (1.1's W2).
+   */
+  moved: { piece: FurnitureId; room: RoomId; from: Tile; to: Tile | null };
   /** She picked a crop (V1's P1), for her neighbours to remember. */
   harvested: { crop: CropId };
   /** She gave the museum a critter or a fossil (V1's P1). */

@@ -40,8 +40,9 @@ const ORCHARD: readonly PropId[] = ['appleTree', 'pearTree', 'plumTree', 'persim
 export const CLUTTER: Record<MapZoneId, readonly ClutterRule[]> = {
   town: [
     { decal: 'leaves', on: 'grass', oneIn: 2, near: TREES },
-    // Leaves blown up against the well, so the square isn't bare cobbles (0.2's K1).
-    { decal: 'leaves', on: 'path', oneIn: 2, near: ['well'] },
+    // Leaves blown up against the well, so the square isn't bare stone (0.2's K1), onto its ring
+    // of setts since 1.1's A1.
+    { decal: 'leaves', on: 'flagstones', oneIn: 2, near: ['well'] },
     { decal: 'pebbles', on: 'path', oneIn: 9 },
     { decal: 'lilyPad', on: 'water', oneIn: 6 },
     // V1's L2: the lawn's own, after the rules before them so those keep their tiles.

@@ -1,7 +1,6 @@
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   ambienceFor,
-  CRICKET_SONGS,
   FOOTFALL_MS,
   Footfalls,
   FOOTSTEPS,
@@ -12,11 +11,14 @@ import {
 } from '../../src/audio/ambience';
 import { softened } from '../../src/audio/graph';
 import { SilentSwitch, silentWav, type Phone } from '../../src/audio/session';
-import { readSilentHint, SILENT_HINT_KEY, writeSilentHint } from '../../src/audio/settings';
+import { readSoundSettings, SOUND_KEY, type SoundSettings } from '../../src/audio/settings';
 import { SoundBoard } from '../../src/audio/SoundBoard';
 import { midi, secondsOf, type Tune } from '../../src/audio/tune';
 import { tickOnPress } from '../../src/hud/dom';
-import { openSettings, SILENT_HINT, type SoundApi } from '../../src/hud/SettingsSheet';
+import { openSettings, SILENT_HINT, silentLine, type SoundApi } from '../../src/hud/SettingsSheet';
+
+/** A phone's sound as it starts: on, with the silent switch obeyed (1.1's H1). */
+const START: SoundSettings = { effects: true, music: true, ambience: true, playOnSilent: false };
 
 /** Every note inside its tune, at a pitch and gain a phone can play. */
 function wellFormed(name: string, tune: Tune) {
@@ -30,6 +32,61 @@ function wellFormed(name: string, tune: Tune) {
       expect(n.pitch, name).toBeLessThanOrEqual(midi('C8'));
     }
   }
+}
+
+/**
+ * A stand-in for Web Audio that takes any node made and any call on it, and logs the order; each
+ * node made is named in `made`, if given.
+ */
+function fakeContext(log: string[], made?: string[]) {
+  const param = () =>
+    new Proxy({ value: 0 } as Record<string | symbol, unknown>, {
+      get: (t, k) => (k in t ? t[k] : () => undefined),
+    });
+  const node = (): unknown =>
+    new Proxy({} as Record<string | symbol, unknown>, {
+      get(t, k) {
+        if (k in t) return t[k];
+        if (k === 'connect') return (n: unknown) => n;
+        if (
+          typeof k === 'string' &&
+          /^(gain|frequency|Q|detune|pan|threshold|knee|ratio|attack|release)$/.test(k)
+        ) {
+          return (t[k] = param());
+        }
+        return () => undefined;
+      },
+      set(t, k, v) {
+        t[k] = v;
+        return true;
+      },
+    });
+  const ctx = {
+    state: 'suspended' as AudioContextState,
+    currentTime: 0,
+    sampleRate: 8000,
+    destination: node(),
+    resume() {
+      log.push('resume');
+      ctx.state = 'running';
+      return Promise.resolve();
+    },
+    suspend: () => Promise.resolve(),
+    createBuffer: (_: number, length: number) => ({
+      getChannelData: () => new Float32Array(length),
+    }),
+  };
+  return new Proxy(ctx as Record<string | symbol, unknown>, {
+    get: (t, k) =>
+      k in t
+        ? t[k]
+        : typeof k === 'string' && k.startsWith('create')
+          ? () => {
+              made?.push(k);
+              return node();
+            }
+          : undefined,
+  }) as unknown as AudioContext;
 }
 
 describe('the silent switch (V1’s S1)', () => {
@@ -50,25 +107,77 @@ describe('the silent switch (V1’s S1)', () => {
     };
   };
 
-  it('takes the hint where the phone has one, and needs no silence', () => {
+  it('touches nothing by default, so the switch on the side of the phone mutes the game', () => {
+    for (const hinted of [false, true]) {
+      const log: string[] = [];
+      const session = { type: 'auto' };
+      let made = 0;
+      const s = new SilentSwitch({
+        ...(hinted && { audioSession: session }),
+        silence: () => {
+          made += 1;
+          return silence(log);
+        },
+      });
+      expect(s.playOnSilent).toBe(false);
+      s.unlock();
+      s.unlock();
+      s.hide();
+      expect(session.type).toBe('auto');
+      expect(made).toBe(0);
+      expect(log).toEqual([]);
+    }
+  });
+
+  it('with Play on silent, takes the hint where the phone has one, and needs no silence', () => {
     const log: string[] = [];
     const session = { type: 'auto' };
     const phone: Phone = { audioSession: session, silence: () => silence(log) };
-    const s = new SilentSwitch(phone);
+    const s = new SilentSwitch(phone, true);
     expect(s.hinted).toBe(true);
     s.unlock();
     expect(session.type).toBe('playback');
     expect(log).toEqual([]);
   });
 
-  it('otherwise plays a loop of silence, once, and stops it when the page is hidden', () => {
+  it('with Play on silent, otherwise loops silence, once, and stops it when the page is hidden', () => {
     const log: string[] = [];
-    const s = new SilentSwitch({ silence: () => silence(log) });
+    const s = new SilentSwitch({ silence: () => silence(log) }, true);
     s.unlock();
     s.unlock();
     expect(log).toEqual(['silence']);
     s.hide();
     s.unlock();
+    expect(log).toEqual(['silence', 'pause', 'silence']);
+  });
+
+  it('turned off mid-play, puts the session back as it found it and the switch works at once', () => {
+    const session = { type: 'auto' };
+    const hinted = new SilentSwitch({ audioSession: session, silence: () => silence([]) }, true);
+    hinted.unlock();
+    expect(session.type).toBe('playback');
+    hinted.set(false);
+    expect(session.type).toBe('auto');
+    hinted.unlock();
+    expect(session.type).toBe('auto');
+    // On again: the tap on its switch is a touch, so it takes hold in that tap.
+    hinted.set(true);
+    expect(session.type).toBe('playback');
+
+    // A session someone else had set to playback is left as it was.
+    const theirs = { type: 'playback' };
+    const left = new SilentSwitch({ audioSession: theirs, silence: () => silence([]) }, true);
+    left.unlock();
+    left.set(false);
+    expect(theirs.type).toBe('playback');
+
+    const log: string[] = [];
+    const looped = new SilentSwitch({ silence: () => silence(log) }, true);
+    looped.unlock();
+    looped.set(false);
+    looped.unlock();
+    expect(log).toEqual(['silence', 'pause']);
+    looped.set(true);
     expect(log).toEqual(['silence', 'pause', 'silence']);
   });
 
@@ -82,101 +191,129 @@ describe('the silent switch (V1’s S1)', () => {
     expect(bytes.slice(44).every((b) => b === 128)).toBe(true);
   });
 
-  /** A stand-in for Web Audio that takes any node made and any call on it, and logs the order. */
-  function fakeContext(log: string[]) {
-    const param = () =>
-      new Proxy({ value: 0 } as Record<string | symbol, unknown>, {
-        get: (t, k) => (k in t ? t[k] : () => undefined),
-      });
-    const node = (): unknown =>
-      new Proxy({} as Record<string | symbol, unknown>, {
-        get(t, k) {
-          if (k in t) return t[k];
-          if (k === 'connect') return (n: unknown) => n;
-          if (
-            typeof k === 'string' &&
-            /^(gain|frequency|Q|detune|pan|threshold|knee|ratio|attack|release)$/.test(k)
-          ) {
-            return (t[k] = param());
-          }
-          return () => undefined;
-        },
-        set(t, k, v) {
-          t[k] = v;
-          return true;
-        },
-      });
-    const ctx = {
-      state: 'suspended' as AudioContextState,
-      currentTime: 0,
-      sampleRate: 8000,
-      destination: node(),
-      resume() {
-        log.push('resume');
-        ctx.state = 'running';
-        return Promise.resolve();
-      },
-      suspend: () => Promise.resolve(),
-      createBuffer: (_: number, length: number) => ({
-        getChannelData: () => new Float32Array(length),
-      }),
-    };
-    return new Proxy(ctx as Record<string | symbol, unknown>, {
-      get: (t, k) =>
-        k in t ? t[k] : typeof k === 'string' && k.startsWith('create') ? node : undefined,
-    }) as unknown as AudioContext;
-  }
+  it('in her first touch, gets round the switch before the sound is started, if asked', async () => {
+    for (const playOnSilent of [false, true]) {
+      for (const hinted of [false, true]) {
+        const log: string[] = [];
+        const session = {
+          set type(t: string) {
+            log.push(`session:${t}`);
+          },
+          get type() {
+            return 'auto';
+          },
+        };
+        const phone: Phone = {
+          ...(hinted && { audioSession: session }),
+          silence: () => silence(log),
+        };
+        const settings = { ...START, playOnSilent };
+        const board = new SoundBoard(settings, phone, () => {
+          log.push('context');
+          return fakeContext(log);
+        });
+        const target = document.createElement('div');
+        board.listen(target);
+        target.dispatchEvent(new Event('pointerdown'));
+        await Promise.resolve();
+        const round = playOnSilent ? [hinted ? 'session:playback' : 'silence'] : [];
+        expect(log).toEqual([...round, 'context', 'resume']);
+        expect(board.state).toBe('running');
+      }
+    }
+  });
+});
 
-  it('in her first touch, gets round the switch before the sound is started', async () => {
-    for (const hinted of [false, true]) {
-      const log: string[] = [];
-      const session = {
-        set type(t: string) {
-          log.push(`session:${t}`);
-        },
-        get type() {
-          return 'auto';
-        },
-      };
-      const phone: Phone = {
-        ...(hinted && { audioSession: session }),
-        silence: () => silence(log),
-      };
-      const board = new SoundBoard({ effects: true, music: true }, phone, () => {
-        log.push('context');
-        return fakeContext(log);
+describe('the Ambience switch (1.1’s H1)', () => {
+  afterEach(() => localStorage.removeItem(SOUND_KEY));
+
+  it('hushes only the ambience: the bed fades out, the cues play on, and it comes back', async () => {
+    const made: string[] = [];
+    const board = new SoundBoard(START, { silence: () => silence() }, () => fakeContext([], made));
+    const target = document.createElement('div');
+    board.listen(target);
+    target.dispatchEvent(new Event('pointerdown'));
+    await Promise.resolve();
+    board.setAmbience({ wind: 0.5, water: 0.3 });
+    expect(board.ambiencePlaying.sort()).toEqual(['water', 'wind']);
+
+    board.setAmbienceOn(false);
+    expect(board.ambienceOn).toBe(false);
+    expect(board.ambiencePlaying).toEqual([]);
+    expect(board.ambience).toEqual({ wind: 0.5, water: 0.3 });
+    expect(board.effects).toBe(true);
+    expect(board.musicOn).toBe(true);
+    made.length = 0;
+    board.uiTick();
+    expect(made.length).toBeGreaterThan(0);
+    expect(readSoundSettings()).toEqual({ ...START, ambience: false });
+
+    board.setAmbienceOn(true);
+    expect(board.ambiencePlaying.sort()).toEqual(['water', 'wind']);
+  });
+
+  it('sings the crickets chirp by chirp as their time comes, and stops when they go (1.1’s H2)', async () => {
+    vi.useFakeTimers();
+    try {
+      const made: string[] = [];
+      let ctx: { currentTime: number } | undefined;
+      const board = new SoundBoard(START, { silence: () => silence() }, () => {
+        const c = fakeContext([], made);
+        ctx = c as unknown as { currentTime: number };
+        return c;
       });
       const target = document.createElement('div');
       board.listen(target);
       target.dispatchEvent(new Event('pointerdown'));
       await Promise.resolve();
-      expect(log).toEqual([hinted ? 'session:playback' : 'silence', 'context', 'resume']);
-      expect(board.state).toBe('running');
+      board.setAmbience({ crickets: 0.3 });
+      expect(board.ambiencePlaying).toEqual(['crickets']);
+      const sources = () => made.filter((k) => k === 'createBufferSource').length;
+      const before = sources();
+      ctx!.currentTime = 120;
+      vi.advanceTimersByTime(150);
+      const sung = sources() - before;
+      // Three pulses a chirp; two minutes of the chorus is a few phrases, never a constant chirp.
+      expect(sung % 3).toBe(0);
+      expect(sung / 3).toBeGreaterThanOrEqual(4);
+      expect(sung / 3).toBeLessThanOrEqual(120);
+
+      board.setAmbience({});
+      vi.advanceTimersByTime(4000);
+      expect(board.ambiencePlaying).toEqual([]);
+      const after = sources();
+      ctx!.currentTime = 240;
+      vi.advanceTimersByTime(150);
+      expect(sources()).toBe(after);
+    } finally {
+      vi.useRealTimers();
     }
   });
+
+  function silence() {
+    return { paused: true, play() {}, pause() {} };
+  }
 });
 
-describe('the silent switch’s hint in Settings (V1’s S1)', () => {
-  afterEach(() => localStorage.removeItem(SILENT_HINT_KEY));
+describe('Play on silent in Settings (1.1’s H1)', () => {
+  afterEach(() => localStorage.removeItem(SOUND_KEY));
 
-  it('is told once on this phone, the first time the Sound tab is shown', () => {
-    localStorage.removeItem(SILENT_HINT_KEY);
-    expect(readSilentHint()).toBe(false);
-    writeSilentHint();
-    expect(readSilentHint()).toBe(true);
-    localStorage.removeItem(SILENT_HINT_KEY);
-
+  it('says which way the switch is set, and says so again as it is flipped', () => {
+    const session = { type: 'auto' };
     const board = new SoundBoard(
-      { effects: true, music: true },
-      { silence: () => ({ paused: false, play() {}, pause() {} }) },
+      START,
+      { audioSession: session, silence: () => ({ paused: true, play() {}, pause() {} }) },
       () => null,
     );
     const sound: SoundApi = {
-      effects: () => true,
-      music: () => true,
-      setEffects() {},
-      setMusic() {},
-      silentHint: () => board.silentHint(),
+      effects: () => board.effects,
+      music: () => board.musicOn,
+      ambience: () => board.ambienceOn,
+      playOnSilent: () => board.playOnSilent,
+      setEffects: (on) => board.setEffectsOn(on),
+      setMusic: (on) => board.setMusicOn(on),
+      setAmbience: (on) => board.setAmbienceOn(on),
+      setPlayOnSilent: (on) => board.setPlayOnSilent(on),
     };
     const api = {
       backupCode: () => Promise.resolve('MFV'),
@@ -185,18 +322,23 @@ describe('the silent switch’s hint in Settings (V1’s S1)', () => {
     };
     const hud = document.createElement('div');
     const shown = () => hud.querySelector('.hud-sound-hint')?.textContent ?? null;
-    // With a view to pick, Settings opens on View, not Sound.
-    const view = { closeness: () => 'close' as const, setCloseness() {} };
-    let close = openSettings(hud, api, sound, () => {}, view);
-    expect(shown()).toBeNull();
-    const tab = [...hud.querySelectorAll<HTMLButtonElement>('.hud-sheet-tab')].find(
-      (b) => b.textContent === 'Sound',
-    )!;
-    tab.click();
-    expect(shown()).toBe(SILENT_HINT);
-    close();
-    close = openSettings(hud, api, sound, () => {}, view);
-    expect(shown()).toBeNull();
+    const switches = () => [...hud.querySelectorAll('.hud-toggle')].map((b) => b.textContent);
+    const close = openSettings(hud, api, sound, () => {});
+    expect(switches()).toEqual(['Sounds: on', 'Music: on', 'Ambience: on', 'Play on silent: off']);
+    expect(shown()).toBe(SILENT_HINT.off);
+    expect(silentLine(false)).toBe(SILENT_HINT.off);
+
+    const play = [...hud.querySelectorAll<HTMLButtonElement>('.hud-toggle')].at(-1)!;
+    play.click();
+    expect(play.textContent).toBe('Play on silent: on');
+    expect(shown()).toBe(SILENT_HINT.on);
+    expect(session.type).toBe('playback');
+    expect(readSoundSettings().playOnSilent).toBe(true);
+
+    play.click();
+    expect(shown()).toBe(SILENT_HINT.off);
+    expect(session.type).toBe('auto');
+    expect(readSoundSettings().playOnSilent).toBe(false);
     close();
   });
 });
@@ -266,7 +408,7 @@ describe('the ambience (V1’s S1)', () => {
     expect(ambienceFor({ ...day, zone: 'fairground', hour: 3 }).murmur).toBeUndefined();
     const inside = ambienceFor({ ...day, zone: 'home', outdoors: false });
     expect(Object.keys(inside)).toEqual(['hum']);
-    expect(ambienceFor({ ...day, zone: 'home', outdoors: false, weather: 'rain' }).roof).toBe(0.5);
+    expect(ambienceFor({ ...day, zone: 'home', outdoors: false, weather: 'rain' }).roof).toBe(0.4);
     // Under the music: no layer above full, and only a handful at once.
     const loud = ambienceFor({
       ...night,
@@ -314,14 +456,6 @@ describe('the ambience (V1’s S1)', () => {
     expect(fell).toEqual([1, 0, 1, 0]);
     expect(f.step({ moving: false, walkMs: 0 })).toBeNull();
     expect(f.step({ moving: true, walkMs: 0 })).toBeNull();
-  });
-
-  it('sings its crickets as loops of uneven lengths, high and quiet', () => {
-    for (const song of CRICKET_SONGS) {
-      wellFormed('cricket', song);
-      expect(song.parts.every((p) => p.wave === 'brush')).toBe(true);
-    }
-    expect(new Set(CRICKET_SONGS.map((s) => s.beats)).size).toBe(CRICKET_SONGS.length);
   });
 });
 

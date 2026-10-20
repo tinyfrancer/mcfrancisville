@@ -188,9 +188,166 @@ function drawBirch(): SpriteSource {
   return s.toSource();
 }
 
-/** The conifer, the dead tree and the birch, after the town tree's three. */
+/*
+ * Three more for the woods' edges (1.1's A2, decision 351), so the trees round a place read as a
+ * wood stepping in and out rather than a hedge of one round crown: a tall thin one, a leaning one
+ * and an old broken one. Each is the tree's size, in its keys and lit as one mass by `paintCrown`,
+ * so it takes every leaf colour and every season's swap as the others do.
+ */
+
+/**
+ * A tall thin tree, a poplar: a narrow column of leafy clumps from a rounded point at the top,
+ * widest a little below the middle, over a short trunk.
+ */
+function drawPoplar(): SpriteSource {
+  const s = new Sketch(W, H);
+  trunk(s, 86, 9);
+  s.bevel('w', 'W', 'v');
+  const crown: Crown = { x: 48, y: 50, rx: 21, ry: 45 };
+  const rand = seeded(131);
+  const clumps = [{ x: 47, y: 12, r: 7 }];
+  for (let y = 20; y <= 84; y += 11) {
+    const t = (y - 6) / 84;
+    const half = 5 + 12 * Math.sin(Math.PI * Math.pow(t, 0.8));
+    const r = 7 + half * 0.3 + rand() * 2;
+    const side = (y / 11) % 2 < 1 ? -1 : 1;
+    clumps.push({ x: 48 + side * half * 0.45, y: y + (rand() - 0.5) * 2, r });
+    clumps.push({ x: 48 - side * half * 0.4, y: y + 5 + (rand() - 0.5) * 2, r: r - 1 });
+  }
+  clumps.sort((a, b) => a.y - b.y);
+  const ownerAt = paintCrown(s, crown, clumps, 137, 34);
+  shadeUnder(s, ownerAt, 6);
+  s.outline({ ...LEAF_OUTLINE, w: 'u', W: 'u', v: 'u' });
+  return s.toSource();
+}
+
+/**
+ * A leaning tree: its trunk bowed over to the left from its foot, holding a lopsided crown out
+ * over the grass, with one bough reaching back to the right under a little crown of its own.
+ */
+function drawLeaning(): SpriteSource {
+  const s = new Sketch(W, H);
+  const top = 50;
+  const bowAt = (y: number) => -21 * ((FOOT.y - y) / (FOOT.y - top)) ** 1.6;
+  for (let y = top; y <= FOOT.y; y++) {
+    const up = (FOOT.y - y) / (FOOT.y - top);
+    const flare = y > FOOT.y - 5 ? Math.round(((y - (FOOT.y - 5)) / 5) ** 2 * 3) : 0;
+    const half = Math.round(6 - up * 2.5) + flare;
+    s.rect(FOOT.x - half + Math.round(bowAt(y)), y, half * 2, 1, 'w');
+  }
+  // The bough back to the right, rising as it goes.
+  for (let i = 0; i < 24; i++) {
+    const x = FOOT.x - 6 + i;
+    const y = 74 - Math.round(i * 0.55);
+    s.rect(x, y, 2, i < 14 ? 3 : 2, 'w');
+  }
+  // Roots braced against the lean, longer on the right.
+  for (const [side, length] of [
+    [-1, 6],
+    [1, 10],
+  ] as const) {
+    for (let i = 0; i < length; i++) {
+      const x = FOOT.x + side * (8 + i);
+      s.rect(side < 0 ? x - 1 : x, FOOT.y - 2 + Math.floor(i / 4), 2, 2 - Math.floor(i / 6), 'w');
+    }
+  }
+  s.bevel('w', 'W', 'v');
+  for (let y = 70; y < FOOT.y - 3; y++) {
+    if (y % 6 !== 0) s.set(FOOT.x + 2 + Math.round(bowAt(y)), y, 'v');
+  }
+  const crown: Crown = { x: 33, y: 38, rx: 31, ry: 27 };
+  const bough: Crown = { x: 70, y: 54, rx: 14, ry: 11 };
+  const clumps = [
+    ...clumpsOf(crown, 149, { count: 9, r: 10 }),
+    ...clumpsOf(bough, 151, { count: 5, r: 5 }),
+  ];
+  const ownerAt = paintCrown(s, crown, clumps, 157, 40);
+  shadeUnder(s, ownerAt, 6);
+  s.outline({ ...LEAF_OUTLINE, w: 'u', W: 'u', v: 'u' });
+  return s.toSource();
+}
+
+/**
+ * An old broken tree: a stout trunk snapped off at the top in a jagged crown of pale heartwood
+ * (`x`, which winter caps with snow), a round hollow, two little shelves of fungus, and one bough
+ * still in leaf off its side. Old and gentle, never dead.
+ */
+function drawBroken(): SpriteSource {
+  const s = new Sketch(W, H);
+  const snap = 52;
+  // The trunk, broad and barely tapering, up to the break.
+  for (let y = snap; y <= FOOT.y; y++) {
+    const up = (FOOT.y - y) / (FOOT.y - snap);
+    const flare = y > FOOT.y - 6 ? Math.round(((y - (FOOT.y - 6)) / 6) ** 2 * 5) : 0;
+    const half = Math.round(11 - up * 2) + flare;
+    s.rect(FOOT.x - half, y, half * 2, 1, 'w');
+  }
+  // Splinters standing up round the back of the break, tallest on the left.
+  for (const [x, w, h] of [
+    [FOOT.x - 10, 5, 10],
+    [FOOT.x - 5, 4, 5],
+    [FOOT.x - 1, 5, 8],
+    [FOOT.x + 4, 5, 4],
+  ] as const) {
+    for (let i = 0; i < h; i++) {
+      const across = Math.max(1, Math.round(w * (1 - i / h)));
+      s.rect(x, snap - i, across, 1, 'w');
+    }
+  }
+  for (const [side, length] of [
+    [-1, 10],
+    [1, 8],
+  ] as const) {
+    for (let i = 0; i < length; i++) {
+      const x = FOOT.x + side * (12 + i);
+      s.rect(side < 0 ? x - 1 : x, FOOT.y - 2 + Math.floor(i / 4), 2, 2 - Math.floor(i / 5), 'w');
+    }
+  }
+  // The living bough, out to the right and up.
+  for (let i = 0; i < 26; i++) {
+    const x = FOOT.x + 8 + i;
+    const y = 70 - Math.round(i * 0.9);
+    s.rect(x, y, 3, i < 12 ? 4 : 3, 'w');
+  }
+  s.bevel('w', 'W', 'v');
+  // The break's face, seen from a little above: pale heartwood with a ring in it.
+  s.ellipse(FOOT.x, snap + 2, 9, 3, 'x')
+    .ellipse(FOOT.x + 1, snap + 2, 5.5, 2, 'X')
+    .ellipse(FOOT.x + 1, snap + 2, 4.5, 1.2, 'x');
+  for (const [dx, from, to] of [
+    [-6, 60, 104],
+    [5, 66, 110],
+    [-1, 84, 112],
+  ] as const) {
+    for (let y = from; y < to; y++) if (y % 7 !== 0) s.set(FOOT.x + dx, y, 'v');
+  }
+  // The hollow, round and dark with a lit lip, a little way up.
+  s.ellipse(FOOT.x - 2, 84, 5, 7, 'v').ellipse(FOOT.x - 2, 85, 4, 5.5, 'k');
+  // Two shelves of fungus on the shaded side.
+  for (const [x, y, w] of [
+    [FOOT.x + 6, 94, 7],
+    [FOOT.x + 4, 100, 5],
+  ] as const) {
+    s.rect(x + 1, y - 1, w - 3, 1, 'f')
+      .rect(x, y, w, 1, 'f')
+      .rect(x + 1, y + 1, w - 2, 1, 'F');
+  }
+  s.outline({ w: 'u', W: 'u', v: 'u', k: 'u', x: 'u', X: 'u', f: 'u', F: 'u' });
+  const crown: Crown = { x: 72, y: 41, rx: 19, ry: 16 };
+  paintCrown(s, crown, clumpsOf(crown, 163, { count: 8, r: 6 }), 173, 26);
+  s.outline(LEAF_OUTLINE);
+  return s.toSource();
+}
+
+/**
+ * The conifer, the dead tree and the birch, after the town tree's three, then the woods' edge
+ * trees: the poplar, the leaning tree and the broken one.
+ */
 export const MORE_TREE_FORMS: readonly SpriteSource[] = [
   drawConifer(),
   drawDeadTree(),
   drawBirch(),
+  drawPoplar(),
+  drawLeaning(),
+  drawBroken(),
 ];

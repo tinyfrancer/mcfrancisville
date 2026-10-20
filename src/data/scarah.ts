@@ -22,6 +22,8 @@ const EVERY_SEED: readonly Ware[] = (Object.keys(ITEMS) as ItemId[])
 export const SCARAH: VillagerRow = {
   name: 'Scarah',
   creature: 'scarecrow',
+  // A scarecrow's frame, a pole and a crosspiece under the straw (1.1's A5b).
+  build: 'slight',
   schedule: {
     weekday: [
       // Out in the fields at first light, then minding her cart, picking in the orchard after

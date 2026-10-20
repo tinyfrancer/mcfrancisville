@@ -25,6 +25,7 @@ import type { FreshSnapshot } from './services/Novelty';
 import type { VisitsSnapshot } from './services/Visits';
 import type { FirstDaySnapshot } from './services/FirstDay';
 import type { ClosetSnapshot } from './Wardrobe';
+import type { AreaName } from './areas/order';
 
 /** What of her finds is saved: the bag, and what she has taken today. */
 export interface FindsSnapshot {
@@ -34,6 +35,8 @@ export interface FindsSnapshot {
 
 export interface WorldOptions {
   map?: MapSource;
+  /** Told as each area of the world is made, in order (1.1's W3): how a test holds `AREAS`. */
+  areaMade?: (area: AreaName) => void;
   /** Where she was when the game was last saved. */
   player?: SavedPlayer;
   closet?: Partial<ClosetSnapshot>;
@@ -105,6 +108,11 @@ export interface WorldOptions {
   /** The town's projects: the one she's funding, what's in each, those built (V1's R4). */
   projects?: Partial<WorksSnapshot>;
   clock?: Clock;
+  /**
+   * Whether her phone asks for reduced motion, read when it matters (1.0.1): the phone's, never
+   * the save's, so a test or the game passes it in.
+   */
+  slow?: () => boolean;
 }
 
 /** Everything of the world a save keeps; the save itself adds only its version and times. */

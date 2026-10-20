@@ -19,7 +19,6 @@ import { reach, tileCentre, walkedTiles, type Player } from './Movement';
 import { worthVisiting, type RoomThing } from './zones/RoomZone';
 import { WorldParts } from './build';
 import type { Arrived, Critter, TileBox, WorldEvent } from './events';
-import { GOOSE_OUTFITS } from '../data/geese';
 import { PROP_SEATS, type SeatRow } from '../data/seats';
 import { footprint } from '../systems/decor';
 import { boxOf } from './zones/RoomZone';
@@ -221,7 +220,7 @@ export class World extends WorldParts {
     const looking = this.garden.looking;
     this.garden.lookAt(null);
     this.recordPlayer.stop();
-    this.neighbourhood.endTalk();
+    this.talk.endTalk();
     this.petCare.endPet();
     const neighbour = this.neighbourhood.villagerAt(tx, ty);
     if (neighbour) return this.follow(neighbour, 0);
@@ -288,10 +287,12 @@ export class World extends WorldParts {
   /** Walks up to a bed to do `job` there, as its pop-up offers. */
   tendBed(bed: Plot, job: BedJob): boolean {
     if (placeOf(bed) !== this.scene || !this.farm.isBed(bed) || this.decorating.state) return false;
+    // A planter's bed in another of her rooms (1.1's W2) is through a doorway, not walked up to.
+    if (bed.room && bed.room !== this.home.here) return false;
     this.garden.lookAt(null);
     this.poses.stir();
     this.recordPlayer.stop();
-    this.neighbourhood.endTalk();
+    this.talk.endTalk();
     this.petCare.endPet();
     return this.walkTo(this.zone.standBeside(bed.tx, bed.ty), { kind: 'bed', bed, job });
   }
@@ -309,7 +310,7 @@ export class World extends WorldParts {
     if (reeled) this.ctx.moments.push(reeled);
     this.garden.lookAt(null);
     this.recordPlayer.stop();
-    this.neighbourhood.endTalk();
+    this.talk.endTalk();
     this.petCare.endPet();
     return this.follow(neighbour, 0);
   }
@@ -338,7 +339,7 @@ export class World extends WorldParts {
     this.travel.check();
     this.mystery.check();
     this.mailbox.checkSpecialDay();
-    this.neighbourhood.check();
+    this.talk.check();
     this.marriage.check();
     this.deliveries.check();
     this.weather.check();
@@ -486,7 +487,7 @@ export class World extends WorldParts {
       const n = this.neighbourhood.neighbour(visit.villager);
       if (n.zone === this.scene && reach(n.tile, here) <= 1) {
         arrived.villager = n.id;
-        this.neighbourhood.startTalk(n.id);
+        this.talk.startTalk(n.id);
         this.player.facing = facingFor(n.x - this.player.x, n.y - this.player.y);
         n.face(this.player.x, this.player.y);
         return [arrived];
@@ -530,8 +531,8 @@ export class World extends WorldParts {
   };
 
   /**
-   * Arriving at a prop, or on open ground: the porch pots, a mound to dig, a way out, or whatever
-   * there is to gather.
+   * Arriving at a prop, or on open ground: what the prop's row in the areas' table does (the porch
+   * pots, the candy tree, a mound…), else a door or a way out, else whatever there is to gather.
    */
   private arriveOn(here: Tile, prop: PlacedProp | undefined, arrived: Arrived): WorldEvent[] {
     if (prop) arrived.at = prop.id;
@@ -539,29 +540,9 @@ export class World extends WorldParts {
     if (arrived.toward) this.face(here, arrived.toward);
     if (prop) this.sitOn(prop, PROP_SEATS[prop.id], 'down', here);
     if (prop?.sign) arrived.sign = prop.sign.to;
-    if (prop?.id === 'pottedPlant') return [arrived, { kind: 'potted', plant: this.porch.swap() }];
-    if (prop?.id === 'candyTree') return [arrived, this.candyTree.shake()];
-    if (prop?.id === 'saplingPlot') return [arrived, this.candyTree.tend(prop)];
-    if (prop?.id === 'pumpkinPatch') return [arrived, this.pumpkinPatch.visit()];
-    // A built bandstand plays a tune as she walks up, Boothoven's she has learnt too (V1's R4).
-    if (prop?.id === 'bandstand') return [arrived, this.instruments.play('piano')];
-    if (prop?.id === 'honestyStall') {
-      const sold = this.stall.collect();
-      return sold ? [arrived, sold] : [arrived];
-    }
     const outdoors = this.zones.outdoor(this.scene);
-    if (prop?.id === 'goose' && outdoors) {
-      // The first goose in the map is hers, by her path; the other is Barty's.
-      const whose = outdoors.map.props.find((p) => p.id === 'goose') === prop ? 0 : 1;
-      arrived.says = GOOSE_OUTFITS[this.holidays.goose(whose)][whose];
-      return [arrived];
-    }
-    if (prop?.id === 'mound' && outdoors) {
-      const dug = this.fossils.isToday(outdoors.id, prop)
-        ? this.fossils.dig(outdoors.id)
-        : this.digging.dig(outdoors.id, prop);
-      return dug ? [arrived, dug] : [arrived];
-    }
+    const own = prop && this.propArrivals[prop.id]?.({ prop, here, arrived, place: outdoors });
+    if (own) return [arrived, ...own];
     const crossing = this.zone.doorAt(here, prop);
     if (crossing)
       return [arrived, this.trickOrTreat.knock(crossing.to) ?? this.travel.cross(crossing)];

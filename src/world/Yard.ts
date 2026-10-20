@@ -15,6 +15,7 @@ import type { Tile } from '../systems/pathfinding';
 import { inBox, standsOn, yardFit, yardRefusal, type Kept, type YardGround } from '../systems/yard';
 import type { FurnitureId, ItemId } from '../types/ids';
 import type { Home } from './Home';
+import type { Overlay } from './zones/Overlay';
 
 /**
  * Her yard (0.3's H5): what of hers stands on the grass round her house. It keeps the pieces and
@@ -22,7 +23,7 @@ import type { Home } from './Home';
  * chest is her home's, shared, so a piece put away from the yard goes in it and one taken out comes
  * from it. Nothing is ever lost: a saved piece that no longer fits waits in the chest.
  */
-export class Yard {
+export class Yard implements Overlay {
   private readonly ground: YardGround | null;
   private readonly home: Home;
   private readonly pieces: Placed[] = [];
@@ -184,18 +185,32 @@ export class Yard {
    */
   makeRoom(): FurnitureId[] {
     const moved: FurnitureId[] = [];
-    for (const piece of [...this.pieces]) {
-      if (piece.on || !this.pieces.includes(piece)) continue;
-      const { w, h } = footprint(piece.id, piece.turn);
-      let inTheWay = false;
-      for (let ty = piece.ty; ty < piece.ty + h; ty++) {
-        for (let tx = piece.tx; tx < piece.tx + w; tx++) inTheWay ||= this.kept(tx, ty);
-      }
-      if (!inTheWay) continue;
+    for (const piece of this.standingOn(this.kept)) {
+      if (!this.pieces.includes(piece)) continue;
       moved.push(piece.id, ...this.ridersOf(piece).map((p) => p.id));
       this.putAway(piece);
     }
     return moved;
+  }
+
+  /**
+   * What would go in the chest were `tiles` kept for a project, with what stands on it, so she
+   * can be asked first (1.0.1). Nothing is moved.
+   */
+  wouldMove(tiles: Kept): FurnitureId[] {
+    return this.standingOn(tiles).flatMap((p) => [p.id, ...this.ridersOf(p).map((r) => r.id)]);
+  }
+
+  /** The pieces standing on the grass with any of their tiles on `tiles` (what's on them aside). */
+  private standingOn(tiles: Kept): Placed[] {
+    return this.pieces.filter((piece) => {
+      if (piece.on) return false;
+      const { w, h } = footprint(piece.id, piece.turn);
+      for (let ty = piece.ty; ty < piece.ty + h; ty++) {
+        for (let tx = piece.tx; tx < piece.tx + w; tx++) if (tiles(tx, ty)) return true;
+      }
+      return false;
+    });
   }
 
   snapshot(): YardSnapshot {

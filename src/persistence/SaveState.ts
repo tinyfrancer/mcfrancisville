@@ -43,7 +43,7 @@ import type { WorksSnapshot } from '../world/Works';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 53;
+export const SAVE_VERSION = 55;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -88,9 +88,9 @@ export interface SaveState {
   /** What she has taken today, by its key, to the day key she took it on. */
   taken: Record<string, string>;
   /**
-   * The garden beds she has tilled, by place (save v29), and what's growing in each. A crop id is
-   * only checked to be a string here; the `Farm` drops any it doesn't know, and gives back the
-   * seed of what grew in any bed no longer there.
+   * The garden beds she has tilled, by place (save v29) and at home by room (v55), and what's
+   * growing in each. A crop id is only checked to be a string here; the `Farm` drops any it
+   * doesn't know, and gives back the seed of what grew in any bed no longer there.
    */
   beds: SavedBed[];
   /**
@@ -192,7 +192,9 @@ export interface SaveState {
   stall: StallSnapshot;
   /**
    * When she last ate for each effect of a meal (save v23): a spring in her step, eager fish, and
-   * the family a lure brings out. Only checked for shape; a family this build doesn't lure is let go.
+   * the family a lure brings out; and since v54 what she ate for each (`ate`, absent in a town
+   * saved before). Only checked for shape; a family this build doesn't lure, or a dish it doesn't
+   * know, is let go.
    */
   kitchen: Meals;
   /**
@@ -384,6 +386,8 @@ function isBedsShape(value: unknown): boolean {
       const b = bed as Record<string, unknown>;
       return (
         typeof b.zone === 'string' &&
+        // The room of hers a bed at home is in (1.1's W2, v55).
+        (b.room === undefined || typeof b.room === 'string') &&
         Number.isInteger(b.tx) &&
         Number.isInteger(b.ty) &&
         isPlantingShape(b.planting)
@@ -400,6 +404,7 @@ function isSprinklersShape(value: unknown): boolean {
       const r = s as Record<string, unknown>;
       return (
         typeof r.zone === 'string' &&
+        (r.room === undefined || typeof r.room === 'string') &&
         Number.isInteger(r.tx) &&
         Number.isInteger(r.ty) &&
         typeof r.since === 'string'
@@ -574,11 +579,17 @@ function isKitchenShape(value: unknown): boolean {
   const k = value as Record<string, unknown>;
   const time = (t: unknown) => t === null || (typeof t === 'number' && Number.isFinite(t));
   const lure = k.lure as Record<string, unknown> | null;
+  const ate = k.ate;
   return (
     time(k.pep) &&
     time(k.bites) &&
     (lure === null ||
-      (typeof lure === 'object' && typeof lure.family === 'string' && time(lure.at)))
+      (typeof lure === 'object' && typeof lure.family === 'string' && time(lure.at))) &&
+    (ate === undefined ||
+      (typeof ate === 'object' &&
+        ate !== null &&
+        !Array.isArray(ate) &&
+        Object.values(ate).every((item) => typeof item === 'string')))
   );
 }
 

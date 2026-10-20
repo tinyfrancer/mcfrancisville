@@ -3,6 +3,20 @@ import { mix, PALETTE as C, ramp } from './palette';
 import { bankField, wetAround } from './banks';
 import { drawLawn, LAWN_LOOKS, LAWN_PALETTE, MID, type LawnField } from './lawn';
 import { CLEAR, Sketch } from './sketch';
+import { drawFlagstones, drawSetts, PAVING_PALETTE } from './paving';
+import {
+  drawIce,
+  floeAt,
+  ICE_PALETTE,
+  ICE_SNOW_PALETTE,
+  iceSnow,
+  LIP,
+  meander,
+  meltNear,
+  sheenOf,
+  type At,
+  type Melt,
+} from './ice';
 import {
   DIRT_PALETTE,
   drawDirt,
@@ -14,6 +28,7 @@ import {
   inward,
   LONG_GRASS_PALETTE,
   MEADOW_PALETTE,
+  grainOf,
   wavy,
   type Phase,
 } from './tracks';
@@ -26,7 +41,9 @@ import { rasterize, type Palette, type Raster, type SpriteSource } from './sprit
  * and a cliff a face where the ground drops away. Each piece is still a grid of keys and a palette
  * (decision 2); the grids are drawn once per shape and cached. Since V1's L2 the grass is a lawn in
  * tones (`sprites/lawn.ts`), and the cobbles are the town's: the wilds' tracks are dirt and the
- * castle hill's gravel, with meadow and long grass on the open lawns (`sprites/tracks.ts`).
+ * castle hill's gravel, with meadow and long grass on the open lawns (`sprites/tracks.ts`). Since
+ * 1.1's A1 the square is flagstones with setts round its well (`sprites/paving.ts`), and the
+ * cobbles are worn smooth down the middle.
  */
 
 export const TILE = 32;
@@ -65,7 +82,9 @@ export const NOTCH_SE_X = 1 << 18;
 export const NOTCH_SW_X = 1 << 19;
 /**
  * Where a frozen creek meets open water (0.2's K1): the sides of an ice tile that open onto
- * water, which the ice ends at in a ragged lip rather than running straight into it.
+ * water, which the ice thins and breaks up toward rather than running straight into it (since
+ * 1.1's A3 the ground in a place reads the water round it instead, `meltNear`; these say it for a
+ * piece on its own).
  */
 export const THAW_N = 1 << 20;
 export const THAW_E = 1 << 21;
@@ -88,7 +107,21 @@ export const TERRAINS: readonly Terrain[] = [
   'gravel',
   'meadow',
   'longGrass',
+  'flagstones',
+  'setts',
 ];
+
+/** The town's paving (1.1's A1): cobbles, flagstones and setts run on into each other. */
+const PAVED: ReadonlySet<TileId | undefined> = new Set<TileId>(['path', 'flagstones', 'setts']);
+
+/**
+ * What a laid ground counts as its own, for where it stops at a kerb: the flagstones run on up to
+ * the setts under the well, and lay the ring round it themselves; the setts stop at anything else.
+ */
+const KIN: Partial<Record<TileId, ReadonlySet<TileId | undefined>>> = {
+  flagstones: new Set<TileId | undefined>(['flagstones', 'setts', undefined]),
+  setts: new Set<TileId | undefined>(['setts', undefined]),
+};
 
 /**
  * Whether `other` carries on the ground `self` is, so no edge is drawn between them. Off the map
@@ -97,6 +130,7 @@ export const TERRAINS: readonly Terrain[] = [
  */
 export function continues(self: TileId, other: TileId | undefined): boolean {
   if (other === undefined || other === self) return true;
+  if (PAVED.has(self) && PAVED.has(other)) return true;
   // Steps carry on any track up to them: the town's cobbles, a dirt track or gravel (V1's L2).
   if (self === 'path' || self === 'dirt' || self === 'gravel') return other === 'steps';
   if (self === 'steps') return other === 'path' || other === 'dirt' || other === 'gravel';
@@ -174,6 +208,31 @@ function slopesOf(c: (dx: number, dy: number) => boolean): number {
   return out;
 }
 
+/**
+ * Which neighbours of a laid ground (flagstones, setts) are its own kind (`KIN`), as bits, a corner
+ * counting only between two sides: where it ends at a kerb, as `neighbourMask` is where it ends at
+ * the lawn. For the flagstones, which of its neighbours are setts follow, eight bits up, every
+ * corner counting, for the ring they lay round the well. Any other ground's own neighbours are its
+ * continuing ones.
+ */
+export function ownMask(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): number {
+  const self = tileAt(tx, ty);
+  const kin = self === undefined ? undefined : KIN[self];
+  if (!kin) return neighbourMask(tileAt, tx, ty) & 0xff;
+  let mask = 0;
+  let setts = 0;
+  for (const [dx, dy, bit] of AROUND) {
+    const other = tileAt(tx + dx, ty + dy);
+    if (kin.has(other)) mask |= bit;
+    if (self === 'flagstones' && other === 'setts') setts |= bit;
+  }
+  return reduce(mask) | (setts << 8);
+}
+
 function reduce(mask: number): number {
   let out = mask & (N | E | S | W);
   for (const [corner, a, b] of [
@@ -222,15 +281,49 @@ interface Edge {
   along: number;
 }
 
+/** The corners cut along a diagonal, and the way out toward each. */
+const CUTS = [
+  [CUT_NW, -1, -1],
+  [CUT_NE, 1, -1],
+  [CUT_SE, 1, 1],
+  [CUT_SW, -1, 1],
+] as const;
+
+/** The inner corners: the two sides beside each, the corner, its point, and its two notches. */
+const INNER = [
+  [N, W, NW, 0, 0, NOTCH_NW_Y, NOTCH_NW_X],
+  [N, E, NE, TILE, 0, NOTCH_NE_Y, NOTCH_NE_X],
+  [S, W, SW, 0, TILE, NOTCH_SW_Y, NOTCH_SW_X],
+  [S, E, SE, TILE, TILE, NOTCH_SE_Y, NOTCH_SE_X],
+] as const;
+
+/** The cuts and notches, which only a tile with an open side or corner has. */
+const SLOPED = 0xfff00;
+
+/** A tile with ground on every side has no edge near: one field for all of them, only read. */
+const WHOLE: readonly Edge[] = Array.from({ length: TILE * TILE }, (_, i) => ({
+  d: Infinity,
+  nx: 0,
+  ny: 0,
+  along: i % TILE,
+}));
+
 /**
  * The distance to the edge for every pixel of a tile of the given shape. Open sides are straight
  * edges; where two open sides meet the corner is rounded to `radius`; where two closed sides meet
  * an open corner, the edge wraps round the point of it.
  */
-function edges(mask: number, radius: number): Edge[] {
+function edges(mask: number, radius: number): readonly Edge[] {
+  if ((mask & 0xff) === 0xff && !(mask & SLOPED)) return WHOLE;
   const open = (bit: number) => (mask & bit) === 0;
   const out: Edge[] = [];
   const r = radius;
+  const rounded = [
+    [N, W, r, r, CUT_NW],
+    [N, E, TILE - r, r, CUT_NE],
+    [S, W, r, TILE - r, CUT_SW],
+    [S, E, TILE - r, TILE - r, CUT_SE],
+  ] as const;
   for (let y = 0; y < TILE; y++) {
     for (let x = 0; x < TILE; x++) {
       const px = x + 0.5;
@@ -245,24 +338,14 @@ function edges(mask: number, radius: number): Edge[] {
       if (open(E)) take(TILE - px, 1, 0, y);
       // A corner cut along the diagonal, where a staircase of tiles is smoothed into a slope: the
       // line through the tile's two other corners.
-      for (const [cut, sx, sy] of [
-        [CUT_NW, -1, -1],
-        [CUT_NE, 1, -1],
-        [CUT_SE, 1, 1],
-        [CUT_SW, -1, 1],
-      ] as const) {
+      for (const [cut, sx, sy] of CUTS) {
         if (!(mask & cut)) continue;
         // How far out toward the corner, measured along the diagonal from the tile's middle.
         const out = ((px - TILE / 2) * sx + (py - TILE / 2) * sy) / Math.SQRT2;
         take(-out, sx / Math.SQRT2, sy / Math.SQRT2, x);
       }
       // Rounded outer corners: inside the corner's square, the arc is the edge.
-      for (const [a, b, cx, cy, cut] of [
-        [N, W, r, r, CUT_NW],
-        [N, E, TILE - r, r, CUT_NE],
-        [S, W, r, TILE - r, CUT_SW],
-        [S, E, TILE - r, TILE - r, CUT_SE],
-      ] as const) {
+      for (const [a, b, cx, cy, cut] of rounded) {
         if (!open(a) || !open(b) || mask & cut) continue;
         const inX = cx < TILE / 2 ? px < cx : px > cx;
         const inY = cy < TILE / 2 ? py < cy : py > cy;
@@ -274,12 +357,7 @@ function edges(mask: number, radius: number): Edge[] {
       }
       // Inner corners: the ground beyond the diagonal comes to a point at the corner, unless a
       // cut runs into it from a side, when on that side the edge follows the cut's line instead.
-      for (const [a, b, corner, cx, cy, notchY, notchX] of [
-        [N, W, NW, 0, 0, NOTCH_NW_Y, NOTCH_NW_X],
-        [N, E, NE, TILE, 0, NOTCH_NE_Y, NOTCH_NE_X],
-        [S, W, SW, 0, TILE, NOTCH_SW_Y, NOTCH_SW_X],
-        [S, E, SE, TILE, TILE, NOTCH_SE_Y, NOTCH_SE_X],
-      ] as const) {
+      for (const [a, b, corner, cx, cy, notchY, notchX] of INNER) {
         if (open(a) || open(b) || !open(corner)) continue;
         const dx = cx - px;
         const dy = cy - py;
@@ -367,19 +445,59 @@ const COBBLES: readonly (readonly (readonly [number, number, number, number])[])
 ];
 
 /**
+ * How far in from a road's edge its cobbles start to be worn smooth (1.1's A1), and how far in
+ * they're worn all over: down the middle of a road two tiles wide, a little down a narrow one, and
+ * all across where roads meet.
+ */
+const WORN_FROM = 11;
+const WORN_TO = 21;
+
+/** A cobble's key worn smooth: the stone paler, barely shaded, the joints filled with dust. */
+const WORN: Readonly<Record<string, string>> = { s: 'w', S: 'v', L: 'W', m: 'n' };
+
+/** How worn the ground is `d` in from the road's edge, from none to all. */
+function wear(d: number): number {
+  return Math.min(1, Math.max(0, (d - WORN_FROM) / (WORN_TO - WORN_FROM)));
+}
+
+/** Each pixel of a look of the cobbles as the stone it's part of, or -1 for the mortar. */
+const STONES: readonly (readonly number[])[] = COBBLES.map((set) => {
+  const s = new Sketch(TILE, TILE);
+  set.forEach(([cx, cy, rx, ry], i) => s.ellipse(cx, cy, rx, ry, String.fromCharCode(65 + i)));
+  return Array.from({ length: TILE * TILE }, (_, i) => {
+    const k = s.get(i % TILE, Math.floor(i / TILE))!;
+    return k === CLEAR ? -1 : k.charCodeAt(0) - 65;
+  });
+});
+
+/**
  * The town's cobbles set in mortar, meeting the grass softly along a gently waving edge: the
- * mortar gives way to the lawn between the last stones (V1's L2; it was a dark kerb).
+ * mortar gives way to the lawn between the last stones (V1's L2; it was a dark kerb). Down the
+ * middle, where feet go, the stones are worn lighter and smoother (1.1's A1), from the same field.
  */
 function path(mask: number, variant: number, phase: Phase = NO_PHASE): SpriteSource {
   const s = new Sketch(TILE, TILE, 'm');
-  for (const [cx, cy, rx, ry] of COBBLES[variant]!) s.ellipse(cx, cy, rx, ry, 's');
+  const cobbles = COBBLES[variant]!;
+  for (const [cx, cy, rx, ry] of cobbles) s.ellipse(cx, cy, rx, ry, 's');
   s.bevel('s', 'L', 'S');
+  const field = wavy(edges(mask, 8), phase, 1.5);
+  // A stone is worn whole or not at all, by how far in its middle is, so the worn middle thins
+  // out stone by stone rather than in a dither across them.
+  const worn = cobbles.map(([cx, cy], i) => {
+    const middle =
+      field[Math.min(TILE - 1, Math.round(cy)) * TILE + Math.min(TILE - 1, Math.round(cx))]!;
+    return wear(middle.d) > grainOf(i, variant, 13);
+  });
+  const stones = STONES[variant]!;
   // No kerb (V1's L2): toward the grass the mortar gives way to the lawn between the stones, and
   // the last stones stand loose in it.
-  paint(s, wavy(edges(mask, 8), phase, 1.5), (e, x, y) => {
+  paint(s, field, (e, x, y) => {
     const key = s.get(x, y)!;
-    if (key === 'm') return holds(e, x, y, 4) ? 'm' : CLEAR;
-    return e.d < 1.5 ? CLEAR : key;
+    if (key === 'm' && !holds(e, x, y, 4)) return CLEAR;
+    if (key !== 'm' && e.d < 1.5) return CLEAR;
+    const stone = stones[y * TILE + x]!;
+    const smooth = stone < 0 ? wear(e.d) > grainOf(x >> 1, y >> 1, 17) : worn[stone];
+    return smooth ? (WORN[key] ?? key) : key;
   });
   return s.toSource();
 }
@@ -390,6 +508,11 @@ const PATH_PALETTE: Palette = {
   s: C.stone,
   S: ramp(C.stone)[1],
   L: C.stoneLight,
+  // Worn smooth (1.1's A1): a paler, warmer stone, barely shaded, and dust in the joints.
+  w: mix(C.stoneLight, C.creamShade, 0.3),
+  v: mix(C.stone, mix(C.stoneLight, C.creamShade, 0.3), 0.55),
+  W: mix(C.stoneLight, C.creamShade, 0.6),
+  n: mix(C.stoneDark, C.stone, 0.6),
 };
 
 // ---- Water ------------------------------------------------------------------------------------
@@ -414,7 +537,12 @@ const RIPPLES: readonly (readonly (readonly [number, number, number])[])[] = [
  * Water sunk below the grass: its far bank shows as a face of earth, the near one as a lip, a
  * light line where it laps at them, and deeper water dithered in away from the edge.
  */
-function water(mask: number, variant: number, field: readonly Edge[] = edges(mask, 15)) {
+function water(
+  mask: number,
+  variant: number,
+  field: readonly Edge[] = edges(mask, 15),
+  floes?: { at: At; melt: Melt },
+) {
   const s = new Sketch(TILE, TILE, 'w');
   for (const [x, y, length] of RIPPLES[variant]!) s.rect(x, y, length, 1, 'W');
   // A generous radius, so a diagonal run of pond tiles curves rather than stair-stepping; by the
@@ -432,8 +560,22 @@ function water(mask: number, variant: number, field: readonly Edge[] = edges(mas
     if (depth > dither(x, y)) return s.get(x, y) === 'W' ? 'w' : 'd';
     return s.get(x, y)!;
   });
+  // Floes drifting off a frozen creek where it melts into open water (1.1's A3).
+  if (floes) {
+    for (let y = 0; y < TILE; y++) {
+      for (let x = 0; x < TILE; x++) {
+        if (!AFLOAT.has(s.get(x, y)!)) continue;
+        const floe = floeAt(floes.at.tx * TILE + x, floes.at.ty * TILE + y, floes.melt);
+        if (floe) s.set(x, y, FLOE_KEYS[floe]);
+      }
+    }
+  }
   return s.toSource();
 }
+
+/** What of the water a floe may drift on: not its banks. */
+const AFLOAT: ReadonlySet<string> = new Set(['w', 'W', 'd', 'l']);
+const FLOE_KEYS = { floe: 'i', rim: 'K', shadow: 'd' } as const;
 
 const WATER_PALETTE: Palette = {
   [CLEAR]: null,
@@ -445,92 +587,9 @@ const WATER_PALETTE: Palette = {
   w: C.water,
   W: C.waterLight,
   d: ramp(C.water)[1],
-};
-
-// ---- Ice --------------------------------------------------------------------------------------
-
-/** Scratches on the ice where skates have been, as (x, y, length) running down to the right. */
-const SCRATCHES: readonly (readonly (readonly [number, number, number])[])[] = [
-  [
-    [3, 7, 7],
-    [16, 18, 9],
-    [6, 25, 5],
-  ],
-  [
-    [14, 4, 6],
-    [2, 16, 8],
-    [21, 24, 6],
-  ],
-];
-
-/**
- * A creek frozen over: sunk below the grass like water, with the same banks, but pale and still,
- * scored where skates have been, with a bluer depth under the middle.
- */
-function ice(mask: number, variant: number, field: readonly Edge[] = edges(mask, 15)) {
-  const s = new Sketch(TILE, TILE, 'w');
-  for (const [x, y, length] of SCRATCHES[variant]!) {
-    for (let i = 0; i < length; i++) s.set(x + i, y + Math.floor(i / 3), 'W');
-  }
-  paint(s, field, (e, x, y) => {
-    const bank = facesUp(e) ? 6 : facesDown(e) ? 1 : 2;
-    if (e.d < 1) return facesUp(e) ? 'G' : 'o';
-    if (e.d < bank) {
-      if (facesUp(e) && e.d < 2) return 'B';
-      return e.d >= bank - 1 ? 'o' : 'b';
-    }
-    if (e.d < bank + 2) return 'W';
-    const depth = (e.d - 9) / 10;
-    if (depth > dither(x, y) && s.get(x, y) !== 'W') return 'd';
-    return s.get(x, y)!;
-  });
-  thaw(s, mask);
-  return s.toSource();
-}
-
-/**
- * The ragged lip where the ice ends at open water: on each side that opens onto water, the last
- * few pixels are water, with the ice's bright rim along its edge, and where it ends toward the
- * front (below or to the right) its thickness and a shadow on the water under it.
- */
-function thaw(s: Sketch, mask: number): void {
-  const cut = (i: number, salt: number) => 2 + ((Math.imul(i + salt, 2654435761) >>> 28) % 3);
-  for (let i = 0; i < TILE; i++) {
-    if (mask & THAW_S) {
-      const c = cut(i >> 1, 3);
-      for (let y = TILE - c; y < TILE; y++) s.set(i, y, y === TILE - c ? 'V' : 'v');
-      s.set(i, TILE - c - 1, 'k').set(i, TILE - c - 2, 'W');
-    }
-    if (mask & THAW_N) {
-      const c = cut(i >> 1, 7);
-      for (let y = 0; y < c; y++) s.set(i, y, 'v');
-      s.set(i, c, 'W');
-    }
-    if (mask & THAW_W) {
-      const c = cut(i >> 1, 11);
-      for (let x = 0; x < c; x++) s.set(x, i, 'v');
-      s.set(c, i, 'W');
-    }
-    if (mask & THAW_E) {
-      const c = cut(i >> 1, 13);
-      for (let x = TILE - c; x < TILE; x++) s.set(x, i, x === TILE - c ? 'V' : 'v');
-      s.set(TILE - c - 1, i, 'k');
-    }
-  }
-}
-
-const ICE_PALETTE: Palette = {
-  [CLEAR]: null,
-  G: C.mossLight,
-  B: ramp(C.earth)[3],
-  b: C.earth,
-  o: ramp(C.earth)[0],
-  w: C.ice,
-  W: C.iceLight,
-  d: ramp(C.ice)[2],
-  k: ramp(C.ice)[1],
-  v: C.water,
-  V: ramp(C.water)[1],
+  // A floe off the melting ice, and its dark wet edge (1.1's A3).
+  i: ICE_PALETTE.R!,
+  K: ICE_PALETTE.K!,
 };
 
 // ---- A pier ------------------------------------------------------------------------------------
@@ -767,7 +826,7 @@ interface TerrainArt {
   palette: Palette;
   /** How many looks it comes in. */
   variants: number;
-  draw: (mask: number, variant: number, phase: Phase) => SpriteSource;
+  draw: (mask: number, variant: number, phase: Phase, own: number) => SpriteSource;
   /** Whether a diagonal staircase of it is smoothed into a slope (`CUT_NW` and the rest). */
   slopes?: true;
   /**
@@ -775,6 +834,11 @@ interface TerrainArt {
    * for where the tile sits in the wave as well as its shape.
    */
   waves?: true;
+  /**
+   * Whether it's laid on the world's grid (1.1's A1, `sprites/paving.ts`), so every piece is drawn
+   * for where its tile sits in an eight-tile repeat, and for where it stops at a kerb (`ownMask`).
+   */
+  laid?: true;
 }
 
 export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
@@ -791,8 +855,8 @@ export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
   steps: { palette: ROCK_PALETTE, variants: 1, draw: steps },
   ice: {
     palette: ICE_PALETTE,
-    variants: SCRATCHES.length,
-    draw: (m, v) => ice(m, v),
+    variants: 2,
+    draw: (m, v) => iceAlone(m, v),
     slopes: true,
   },
   boards: { palette: BOARDS_PALETTE, variants: 2, draw: boards },
@@ -819,6 +883,22 @@ export const TERRAIN_ART: Record<Terrain, TerrainArt> = {
     variants: 3,
     draw: (m, v, at) => drawLongGrass(wavy(edges(m, 14), at, 4.5), v),
     waves: true,
+  },
+  flagstones: {
+    palette: PAVING_PALETTE,
+    variants: 1,
+    draw: (m, _v, at, own) => {
+      const lawn = edges(m, 4);
+      const kin = (own & 0xff) === (m & 0xff) ? lawn : edges(own & 0xff, 4);
+      return drawFlagstones(lawn, kin, own >> 8, at);
+    },
+    laid: true,
+  },
+  setts: {
+    palette: PAVING_PALETTE,
+    variants: 1,
+    draw: (m, _v, at, own) => drawSetts(edges(m, 4), edges(own, 1), at),
+    laid: true,
   },
 };
 
@@ -867,12 +947,18 @@ export function terrainPiece(
   mask: number,
   variant: number,
   at: { tx: number; ty: number } = { tx: 0, ty: 0 },
+  own: number = mask & 0xff,
 ): GroundPiece {
   const art = TERRAIN_ART[terrain];
+  if (art.laid) {
+    const phase = { px: at.tx & 7, py: at.ty & 7 };
+    const key = `ground:${terrain}:${mask}:${own}:${phase.px}${phase.py}`;
+    return piece(key, art.palette, () => art.draw(mask, variant, phase, own));
+  }
   // Only a tile with an edge waves, and only the phase along its edges matters.
   const phase = art.waves && (mask & 0xff) !== 0xff ? { px: at.tx & 3, py: at.ty & 3 } : NO_PHASE;
   const key = `ground:${terrain}:${mask}:${variant}${art.waves ? `:${phase.px}${phase.py}` : ''}`;
-  return piece(key, art.palette, () => art.draw(mask, variant, phase));
+  return piece(key, art.palette, () => art.draw(mask, variant, phase, own));
 }
 
 /**
@@ -888,13 +974,15 @@ export function groundPieces(
   const look = variantOf(tx, ty, GRASS_VARIANTS);
   const pieces = [lawn ? lawnPiece(cornersOf(lawn, tx, ty), look) : grassPiece(look)];
   const id = tileAt(tx, ty);
-  if (id !== undefined && id !== 'grass') {
+  if (id === 'ice') {
+    pieces.push(icePiece(tileAt, tx, ty).piece);
+  } else if (id !== undefined && id !== 'grass') {
     const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[id].variants);
     const slopes = TERRAIN_ART[id].slopes === true;
     const mask = neighbourMask(tileAt, tx, ty, { slopes });
-    const bank =
-      id === 'water' || id === 'ice' ? bankPiece(tileAt, tx, ty, id, mask, variant) : null;
-    pieces.push(bank ?? terrainPiece(id, mask, variant, { tx, ty }));
+    const bank = id === 'water' ? waterPiece(tileAt, tx, ty, mask, variant) : null;
+    const own = TERRAIN_ART[id].laid ? ownMask(tileAt, tx, ty) : mask & 0xff;
+    pieces.push(bank ?? terrainPiece(id, mask, variant, { tx, ty }, own));
   } else if (id === 'grass') {
     // Grass beside water may be wet at a corner, where the bank rounds out over it (V1's L6).
     const wet = spillOf(tileAt, tx, ty);
@@ -910,32 +998,119 @@ const WET: Readonly<Record<'water' | 'ice', (id: TileId | undefined) => boolean>
 };
 
 /**
- * Water or ice by its bank, drawn from the water round it (`bankField`) rather than the tile's
- * shape; null in the middle of a pond, which is the plain piece.
+ * Water by its bank, drawn from the water round it (`bankField`) rather than the tile's shape,
+ * and water just off a frozen creek, with floes drifting off its melt (1.1's A3); null in the
+ * middle of a pond, which is the plain piece.
  */
-function bankPiece(
+function waterPiece(
   tileAt: (tx: number, ty: number) => TileId | undefined,
   tx: number,
   ty: number,
-  terrain: 'water' | 'ice',
   mask: number,
   variant: number,
 ): GroundPiece | null {
-  const around = wetAround(tileAt, tx, ty, WET[terrain]);
-  if (!around.includes('0')) return null;
-  const thaws = mask & (THAW_N | THAW_E | THAW_S | THAW_W);
-  const art = TERRAIN_ART[terrain];
+  const around = wetAround(tileAt, tx, ty, WET.water);
+  const iced = AROUND.some(([dx, dy]) => tileAt(tx + dx, ty + dy) === 'ice');
+  const melt = iced ? meltNear(tileAt, tx, ty) : null;
+  const floes = melt ? { at: { tx, ty }, melt } : undefined;
+  const banked = around.includes('0');
+  if (!banked && !floes) return null;
+  const ices = floes ? `:${openAround(tileAt, tx, ty)}` : '';
   return piece(
-    `ground:${terrain}:bank:${tx},${ty}:${around}:${thaws}:${variant}`,
-    art.palette,
-    () =>
-      terrain === 'water'
-        ? water(0, variant, bankField(tx, ty, around))
-        : ice(thaws, variant, bankField(tx, ty, around)),
+    `ground:water:bank:${tx},${ty}:${around}${banked ? '' : `:${mask}`}:${variant}${ices}`,
+    WATER_PALETTE,
+    () => water(banked ? 0 : mask, variant, banked ? bankField(tx, ty, around) : undefined, floes),
   );
 }
 
-/** The water or ice reaching over a tile of grass from beside it, or null where none does. */
+/** A tile of ice with no bank across it: every pixel deep in. */
+const DEEP: readonly Edge[] = Array.from({ length: TILE * TILE }, (_, i) => ({
+  d: Infinity,
+  nx: 0,
+  ny: 0,
+  along: i % TILE,
+}));
+
+/**
+ * A tile of ice where it lies (1.1's A3): its bank from the water and ice round it, as L6 drew it,
+ * and the open water near it for its melt, drawn for its place in the world (`drawIce`), so no two
+ * tiles of it are alike. Its field and melt are handed back for its sheen and its winter snow.
+ */
+function icePiece(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): { piece: GroundPiece; field: readonly Edge[]; melt: Melt | null } {
+  const around = wetAround(tileAt, tx, ty, WET.ice);
+  const field = around.includes('0') ? meander(bankField(tx, ty, around), { tx, ty }) : DEEP;
+  const melt = meltNear(tileAt, tx, ty);
+  const open = melt ? `:${openAround(tileAt, tx, ty)}` : '';
+  return {
+    piece: piece(`ground:ice:${tx},${ty}:${around}${open}`, ICE_PALETTE, () =>
+      drawIce(field, { tx, ty }, melt),
+    ),
+    field,
+    melt,
+  };
+}
+
+/**
+ * Which tiles three round a tile are open water, dry or off the map (the pier counting as off it):
+ * all a melt is drawn from, for its key.
+ */
+function openAround(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): string {
+  let out = '';
+  for (let y = ty - 3; y <= ty + 3; y++) {
+    for (let x = tx - 3; x <= tx + 3; x++) {
+      const id = tileAt(x, y);
+      out += id === 'water' ? '1' : id === undefined || id === 'boards' ? '-' : '0';
+    }
+  }
+  return out;
+}
+
+/**
+ * A tile of ice on its own, for the catalogue and the tests: shaped by its neighbours as every
+ * piece is, open water on the sides `mask` thaws toward, and set a few tiles along the world by
+ * its look, so each look has cracks of its own.
+ */
+function iceAlone(mask: number, variant: number): SpriteSource {
+  const at = { tx: variant * 5, ty: 0 };
+  const sides: readonly (readonly [number, number, number])[] = [
+    [0, -1, THAW_N],
+    [1, 0, THAW_E],
+    [0, 1, THAW_S],
+    [-1, 0, THAW_W],
+  ];
+  const tileAt = (x: number, y: number): TileId => {
+    const dx = x - at.tx;
+    const dy = y - at.ty;
+    if (dx === 0 && dy === 0) return 'ice';
+    return sides.some(([sx, sy, bit]) => sx === dx && sy === dy && mask & bit) ? 'water' : 'grass';
+  };
+  return drawIce(edges(mask, 15), at, meltNear(tileAt, at.tx, at.ty));
+}
+
+/** The ice reaching over a tile of grass from beside it, and the stones in its bank's lip. */
+function iceSpill(tx: number, ty: number, around: string): GroundPiece | null {
+  const key = `ground:ice:spill:${tx},${ty}:${around}`;
+  if (!spills.has(key)) {
+    const field = meander(bankField(tx, ty, around), { tx, ty });
+    spills.set(
+      key,
+      field.some((e) => e.d > -LIP)
+        ? piece(key, ICE_PALETTE, () => drawIce(field, { tx, ty }, null))
+        : null,
+    );
+  }
+  return spills.get(key) ?? null;
+}
+
+/** The water reaching over a tile of grass from beside it, or the ice, or null where none does. */
 function spillOf(
   tileAt: (tx: number, ty: number) => TileId | undefined,
   tx: number,
@@ -948,21 +1123,56 @@ function spillOf(
       : null;
   if (!terrain) return null;
   const around = wetAround(tileAt, tx, ty, WET[terrain]);
-  const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART[terrain].variants);
-  const key = `ground:${terrain}:spill:${tx},${ty}:${around}:${variant}`;
+  if (terrain === 'ice') return iceSpill(tx, ty, around);
+  const variant = variantOf(tx + 101, ty + 37, TERRAIN_ART.water.variants);
+  const key = `ground:water:spill:${tx},${ty}:${around}:${variant}`;
   if (!spills.has(key)) {
     const field = bankField(tx, ty, around);
-    const art = TERRAIN_ART[terrain];
     spills.set(
       key,
-      field.some((e) => e.d > 0)
-        ? piece(key, art.palette, () =>
-            terrain === 'water' ? water(0, variant, field) : ice(0, variant, field),
-          )
-        : null,
+      field.some((e) => e.d > 0) ? piece(key, WATER_PALETTE, () => water(0, variant, field)) : null,
     );
   }
   return spills.get(key) ?? null;
+}
+
+/**
+ * The snow lying on a tile of ice in winter, or on the ice and its bank reaching over a tile of
+ * grass (`iceSnow`), or null on any other ground.
+ */
+export function snowOnIce(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): GroundPiece | null {
+  const id = tileAt(tx, ty);
+  if (id === 'ice') {
+    const { piece: under, field, melt } = icePiece(tileAt, tx, ty);
+    return piece(`ground:iceSnow:${under.key.slice('ground:ice:'.length)}`, ICE_SNOW_PALETTE, () =>
+      iceSnow(field, { tx, ty }, melt),
+    );
+  }
+  if (id !== 'grass') return null;
+  const spill = spillOf(tileAt, tx, ty);
+  if (!spill?.key.startsWith('ground:ice:')) return null;
+  const field = meander(bankField(tx, ty, wetAround(tileAt, tx, ty, WET.ice)), { tx, ty });
+  return piece(`ground:iceSnow:${spill.key.slice('ground:ice:'.length)}`, ICE_SNOW_PALETTE, () =>
+    iceSnow(field, { tx, ty }, null),
+  );
+}
+
+/**
+ * Where a sheen can pass over a tile of ice (`render/life.ts`), as local (x, y) pairs; empty for
+ * any other ground.
+ */
+export function iceSheen(
+  tileAt: (tx: number, ty: number) => TileId | undefined,
+  tx: number,
+  ty: number,
+): Int8Array {
+  if (tileAt(tx, ty) !== 'ice') return new Int8Array(0);
+  const { piece: drawnIce, field } = icePiece(tileAt, tx, ty);
+  return sheenOf(drawnIce.source, field, { tx, ty });
 }
 
 /** Each tile of grass beside water: what of the water reaches over it, if any. */
@@ -971,7 +1181,8 @@ const spills = new Map<string, GroundPiece | null>();
 /**
  * A patch of every kind of ground side by side, for looking at how the edges meet: a pond, a path
  * crossing the grass, a hedge, a garden bed, a cliff with steps up it, a frozen creek running into
- * open water, and a pier. Letters as in the maps.
+ * open water, a pier, and the square's flagstones round setts meeting the cobbles. Letters as in
+ * the maps, but for the flagstones (F) and setts (S).
  */
 const SAMPLE: readonly string[] = [
   '############',
@@ -990,6 +1201,9 @@ const SAMPLE: readonly string[] = [
   "#.'''.///d.#",
   '#dddd...dd.#',
   '#..dd.vvvv.#',
+  '#FFFFF=====#',
+  '#FFSFF=....#',
+  '#FFFFF.....#',
   '############',
 ];
 
@@ -1007,6 +1221,8 @@ const SAMPLE_KEY: Readonly<Record<string, TileId>> = {
   v: 'gravel',
   "'": 'meadow',
   '/': 'longGrass',
+  F: 'flagstones',
+  S: 'setts',
 };
 
 /** The sample patch of ground, drawn as the renderer lays it. */

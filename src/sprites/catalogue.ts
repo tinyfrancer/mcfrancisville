@@ -8,7 +8,8 @@ import { takeOff, wear } from '../systems/wardrobe';
 import { CANDY_SAPLING, CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE } from './nature';
 import { PUMPKIN_PATCH_ART, PUMPKIN_PATCH_PALETTE } from './pumpkinPatch';
 import { FILM_PALETTE, FILM_SHOWING } from './filmNight';
-import { HONESTY_STALL, HONESTY_STALL_PALETTE, signpostTo } from './clutter';
+import { PUMPKIN_LIT, SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
+import { HONESTY_STALL, HONESTY_STALL_PALETTE, noticeboardLook, signpostTo } from './clutter';
 import { SIGNPOSTS } from '../data/signposts';
 import { RED_ONE, RED_ONE_PALETTE } from './greetings';
 import type {
@@ -32,16 +33,27 @@ import { FEELINGS } from '../types/mood';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
 import {
+  ACTION_BODIES,
   ACTION_FRAMES,
   ACTION_POSES,
   BACKS,
+  backRows,
+  bodyOf,
   DOLL_FRAMES,
   dollLayers,
   hangsOver,
+  pieceRows,
   POSES,
+  raised,
   SIT_DROP,
   SIT_FROM,
+  skinPalette,
+  skinRows,
+  wornPalette,
+  type Grid,
 } from './doll';
+import { BUILD_IDS, type Build } from '../data/builds';
+import { SKIN_TONES } from './lookColours';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
@@ -208,6 +220,23 @@ const DISPLAY_SAMPLES: readonly (readonly [DisplayPiece, ItemId])[] = [
 ];
 
 /**
+ * The catalogue's rows to a page of `?gallery&page=n` (T1, decision 335): few enough that a page
+ * of the tallest of them is still one full-page screenshot, which the whole gallery outgrew.
+ */
+export const GALLERY_PAGE_ROWS = 50;
+
+/** Page `page` (from 1) of `entries` and how many pages there are; all of them for no page. */
+export function pageOf(
+  entries: readonly Entry[],
+  page: number | null,
+): { entries: Entry[]; pages: number } {
+  const pages = Math.max(1, Math.ceil(entries.length / GALLERY_PAGE_ROWS));
+  if (page === null) return { entries: [...entries], pages };
+  const from = (page - 1) * GALLERY_PAGE_ROWS;
+  return { entries: entries.slice(from, from + GALLERY_PAGE_ROWS), pages };
+}
+
+/**
  * Every sprite in the game, named: what `?gallery` shows and `npm run sprite` renders to a PNG.
  * Pure, so it runs in Node as well as the browser. The scale sheet comes first, since it's the
  * page that's being judged while the art is redrawn.
@@ -284,6 +313,11 @@ export function catalogue(): Entry[] {
     grid(`prop:signpost:${to}`, signpostTo(to, 'right'), PROP_ART.signpost.palette);
   }
   grid('prop:mailbox:full', MAILBOX_FULL, PROP_ART.mailbox.palette);
+  // The jack-o'-lanterns as snow lanterns in winter (1.0.1), by day and lit.
+  SNOW_LANTERN_FORMS.forEach((form, f) => {
+    grid(`prop:pumpkin:winter${f}`, form, SNOW_LANTERN_PALETTE);
+    if (f === 0) grid('prop:pumpkin:winter:lit', form, lit(SNOW_LANTERN_PALETTE, PUMPKIN_LIT));
+  });
   grid('prop:candyTree:few', CANDY_TREE.few, CANDY_TREE_PALETTE);
   grid('prop:candyTree:bare', CANDY_TREE.bare, CANDY_TREE_PALETTE);
   grid('prop:saplingPlot:sapling', CANDY_SAPLING, SAPLING_PALETTE);
@@ -292,6 +326,18 @@ export function catalogue(): Entry[] {
     grid(`prop:pumpkinPatch:${stage}`, PUMPKIN_PATCH_ART[stage], PUMPKIN_PATCH_PALETTE);
   }
   grid('prop:honestyStall:empty', HONESTY_STALL.empty, HONESTY_STALL_PALETTE);
+  // The noticeboard with its notes all answered, and with the day's event up too (1.0.1).
+  for (const [open, poster] of [
+    [0, false],
+    [1, true],
+    [3, true],
+  ] as const) {
+    const look = noticeboardLook(open, poster);
+    grid(look.key, look.source, look.palette);
+  }
+  // And in winter, its pumpkin a snowball (1.1's A2).
+  const winterBoard = noticeboardLook(1, true, true);
+  grid(winterBoard.key, winterBoard.source, winterBoard.palette);
   // The town's projects as the noticeboard shows them (V1's R4).
   for (const [id, picture] of Object.entries(PROJECT_PICTURES)) {
     grid(`project:${id}`, picture.source, picture.palette);
@@ -445,6 +491,60 @@ export function catalogue(): Entry[] {
             rasterizeLayers(figureLayers(id, 'down', 0, null, null, { feel, blink: true })),
           ]),
       });
+    }
+  }
+  // Every build's body bare (1.1's A5a): standing and walking from the front, behind and the
+  // side, then each action's every view and frame, a strip each, to judge a build by.
+  const skinned = (body: Grid, flip = false) =>
+    rasterizeLayers(
+      [{ source: { rows: skinRows(body) }, palette: skinPalette(SKIN_TONES.peach) }],
+      {
+        flipX: flip,
+      },
+    );
+  for (const build of BUILD_IDS) {
+    const body = bodyOf(build);
+    entries.push({
+      name: `body:${build}:walk`,
+      draw: () => beside([...body.front, ...body.side].map((b) => skinned(b))),
+    });
+    for (const pose of ACTION_POSES) {
+      const bodies = ACTION_BODIES[build][pose];
+      entries.push({
+        name: `body:${build}:act:${pose}`,
+        draw: () =>
+          beside(
+            [...bodies.front, ...bodies.back, ...bodies.side].map(({ body: b }) => skinned(b)),
+          ),
+      });
+    }
+  }
+  // And every piece on each build's bare body, a strip a slot, from the front and the side, to see
+  // each cut paint onto every build as it does onto hers.
+  const onBuild = (build: Build, view: 'front' | 'side', id: OutfitId) => {
+    const body = bodyOf(build)[view][0]!;
+    const worn = { id, fabric: OUTFITS[id].fabrics[0]! };
+    const layers: Layer[] = [];
+    const back = (part: 'behind' | 'over') => {
+      const rows = backRows(worn, view, body, part);
+      if (rows) layers.push({ source: { rows }, palette: wornPalette(worn) });
+    };
+    back('behind');
+    layers.push({ source: { rows: skinRows(body) }, palette: skinPalette(SKIN_TONES.peach) });
+    layers.push({ source: { rows: pieceRows(worn, view, body) }, palette: wornPalette(worn) });
+    back('over');
+    return rasterizeLayers(raised(layers));
+  };
+  const SLOTS = ['top', 'bottom', 'outer', 'tights', 'shoes', 'gloves', 'necklace', 'hat'] as const;
+  for (const build of BUILD_IDS) {
+    for (const slot of SLOTS) {
+      const ids = (Object.keys(OUTFITS) as OutfitId[]).filter((id) => OUTFITS[id].slot === slot);
+      for (const view of ['front', 'side'] as const) {
+        entries.push({
+          name: `body:${build}:wears:${slot}:${view}`,
+          draw: () => beside(ids.map((id) => onBuild(build, view, id))),
+        });
+      }
     }
   }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.

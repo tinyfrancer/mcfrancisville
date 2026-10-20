@@ -319,6 +319,8 @@ export interface GreetingCard {
   then?: () => void;
   /** A gentle word about keeping the town safe, under the rest (V1's S3). */
   nudge?: string;
+  /** Their face on the card as they say it (1.0.1); as usual if none. */
+  feel?: Feeling | null;
 }
 
 /**
@@ -332,7 +334,7 @@ export function openGreeting(
   answered: (after: string) => void,
 ): () => void {
   const { body, close } = openSheet(hud, {
-    ...speaker(card.from, api.portrait),
+    ...speaker(card.from, api.portrait, card.feel ?? null),
     className: 'hud-talk-sheet',
     done: card.reply,
     onClose: () => {

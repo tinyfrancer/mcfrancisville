@@ -5,6 +5,7 @@ import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { RoomId } from '../../types/ids';
 import type { Home } from '../Home';
+import type { Rooms } from '../Rooms';
 import type { Placed } from '../../data/home';
 import { besideInRoom, type Crossing, type Entry, type Zone } from './Zone';
 
@@ -17,35 +18,35 @@ const CHEST_PROP: PlacedProp = { id: 'storageChest', ...CHEST, w: 1, h: 1 };
  */
 export class HomeZone implements Zone {
   readonly id = 'home';
-  private readonly home: Home;
+  private readonly rooms: Rooms;
   /** The open floor as of a layout, since pets ask for it every step. */
   private roam: { layout: number; tiles: Tile[] } | null = null;
 
   constructor(home: Home) {
-    this.home = home;
+    this.rooms = home.rooms;
   }
 
   get width(): number {
-    return this.home.room.width;
+    return this.rooms.room.width;
   }
 
   get height(): number {
-    return this.home.room.height;
+    return this.rooms.room.height;
   }
 
-  canWalk = (tx: number, ty: number): boolean => this.home.canWalk(tx, ty);
+  canWalk = (tx: number, ty: number): boolean => this.rooms.canWalk(tx, ty);
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
-    const chest = this.home.room.chest;
+    const chest = this.rooms.room.chest;
     return chest && tx === chest.tx && ty === chest.ty ? CHEST_PROP : undefined;
   }
 
   standBeside(tx: number, ty: number): Tile[] {
     // A tap on a doorway's arch is a way through it: onto the doorway (0.3's H4).
-    const room = this.home.room;
+    const room = this.rooms.room;
     const arch = ty < room.wallRows && room.doorways.find((d) => d.tx === tx);
     if (arch) return [{ tx: arch.tx, ty: arch.ty }];
-    const piece = this.home.pieceAt(tx, ty);
+    const piece = this.rooms.pieceAt(tx, ty);
     const box = this.propAt(tx, ty) ??
       (piece ? { tx: piece.tx, ty: piece.ty, ...footprint(piece.id, piece.turn) } : undefined) ?? {
         tx,
@@ -53,7 +54,7 @@ export class HomeZone implements Zone {
         w: 1,
         h: 1,
       };
-    return besideInRoom(box, this.home.room.wallRows, this.canWalk);
+    return besideInRoom(box, this.rooms.room.wallRows, this.canWalk);
   }
 
   /**
@@ -61,7 +62,7 @@ export class HomeZone implements Zone {
    * room she's in further in (a guest, a pet), through its doorway, on its mat.
    */
   entry(): Entry {
-    return { tile: this.home.room.mat, facing: 'up' };
+    return { tile: this.rooms.room.mat, facing: 'up' };
   }
 
   /**
@@ -70,11 +71,11 @@ export class HomeZone implements Zone {
    */
   doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null {
     if (prop) return null;
-    const { mat, doorways } = this.home.room;
+    const { mat, doorways } = this.rooms.room;
     const doorway = doorways.find((d) => d.tx === here.tx && d.ty === here.ty);
     if (doorway) return { to: 'home', along: 0, room: doorway.to };
     if (here.tx !== mat.tx || here.ty !== mat.ty) return null;
-    const back = ROOMS[this.home.here].through?.from;
+    const back = ROOMS[this.rooms.here].through?.from;
     return back ? { to: 'home', along: 0, room: back } : { to: 'town', along: 0 };
   }
 
@@ -83,12 +84,12 @@ export class HomeZone implements Zone {
    * in; onto the doorway she came through to it, facing out of it, coming back.
    */
   through(to: RoomId): Entry {
-    const from = this.home.here;
-    this.home.enter(to);
-    const back = this.home.room.doorways.find((d) => d.to === from);
+    const from = this.rooms.here;
+    this.rooms.enter(to);
+    const back = this.rooms.room.doorways.find((d) => d.to === from);
     return back
       ? { tile: { tx: back.tx, ty: back.ty }, facing: 'down' }
-      : { tile: this.home.room.mat, facing: 'up' };
+      : { tile: this.rooms.room.mat, facing: 'up' };
   }
 
   /**
@@ -96,28 +97,28 @@ export class HomeZone implements Zone {
    * an evening).
    */
   get seats(): readonly Placed[] {
-    return this.home.placed.filter((p) => !p.on && FURNITURE[p.id].seat !== undefined);
+    return this.rooms.placed.filter((p) => !p.on && FURNITURE[p.id].seat !== undefined);
   }
 
   /** Whether she's in the front room, the one with the front door and the chest. */
   get inFrontRoom(): boolean {
-    return this.home.here === 'main';
+    return this.rooms.here === 'main';
   }
 
   /** She has gone out: whichever room she was in, she comes back in by the front door. */
   leave(): void {
-    this.home.enter('main');
+    this.rooms.enter('main');
   }
 
   /** The open floor a pet can wander to: anywhere but the door mat. */
   roamTiles(): readonly Tile[] {
-    const layout = this.home.layout;
+    const layout = this.rooms.layout;
     if (this.roam?.layout !== layout) this.roam = { layout, tiles: this.openFloor() };
     return this.roam.tiles;
   }
 
   private openFloor(): Tile[] {
-    const room = this.home.room;
+    const room = this.rooms.room;
     const tiles: Tile[] = [];
     for (let ty = 0; ty < room.height; ty++) {
       for (let tx = 0; tx < room.width; tx++) {
@@ -134,8 +135,8 @@ export class HomeZone implements Zone {
    */
   underFurniture(): Tile[] {
     const spots: Tile[] = [];
-    const placed = this.home.placedIn('main');
-    const room = roomOf(this.home.extensions, 'main', this.home.built);
+    const placed = this.rooms.placedIn('main');
+    const room = roomOf(this.rooms.extensions, 'main', this.rooms.built);
     for (const piece of placed) {
       if (FURNITURE[piece.id].layer !== 'floor' || piece.on) continue;
       const { w, h } = footprint(piece.id, piece.turn);

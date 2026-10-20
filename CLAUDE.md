@@ -18,10 +18,16 @@ store is the user's to link, README's "Cloud save").
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
 word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
-(V1's review, decision 324): all 29 sessions are on `v1-dev`, and **1.0 goes to her phone at the
-user's word** as the release PR from `v1-dev` to `main`. **0.4 is on her phone** (2026-10-07, PR
-#175, with 0.5's first sessions; save v43); 1.0 brings the save to v53. `docs/v0.3_plan.md`,
-`docs/v0.2_plan.md` and the plans before them are complete; there is no plan after V1 yet.
+(V1's review, decision 324) and **1.0 is on her phone** (2026-10-18, PR #198 from `v1-dev`, save
+v53; 0.4 before it, 2026-10-07, PR #175, save v43). 1.0.1, cut the next day (PR #201, save
+v54, decisions 325 and 327), was never merged: it grew into 1.2. **The 1.1 plan is
+complete** (`docs/v1.1_plan.md`, settled 2026-10-19, decision 328; its review, V1.1, decision
+356): four lanes from `v1.1-dev`, the sound (the silent switch silences the game, the crickets
+tamed), the refactors in "Where it hurts" and the art redesigns. **1.2 is the release PR #201**
+(`v1.1-dev` → `main`, "Release 1.2 (with 1.0.1 and 1.1)", save v53 → v55), the user's to merge;
+her phone is on 1.0 until then, and reads one card, `1.2`, folding 1.0.1 and 1.1. A session
+starting cold with nothing asked of it asks the user what they'd like next. `docs/v1.1_plan.md`,
+`docs/v1_plan.md` and the plans before them are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
@@ -43,11 +49,15 @@ npm run format:check # what CI runs
 npm run icons        # regenerate public/icons/ from the pixel grid in scripts/make-icons.mjs
 npm run sprite       # render sprites to PNGs in .sprites/ (`-- 'prop:*' --zoom=6`, `--list`, `--sheet`)
 npm run smoke        # Playwright check on an iPhone-sized touch viewport; needs `npm run dev` running
+npm run smoke -- town fair # only those areas (files in scripts/smoke/); `-- --list` names them
 npm run smoke:offline # the first launch with no signal; needs `npm run build` and `npm run preview`
 ```
 
 In a Claude Code cloud container, smoke needs `CHROMIUM_PATH=/opt/pw-browsers/chromium`. Never run
-`playwright install` there.
+`playwright install` there. Smoke is a file per area in `scripts/smoke/` (`run.mjs` the runner and
+the whole run's order, `lib.mjs` the helpers; T1, decision 335): run your own area as you work, and
+the whole before each push, as below; a new section goes in its area's list and in
+`run.mjs`'s `ORDER`.
 
 CI (`.github/workflows/ci.yml`) runs lint, format, typecheck, coverage, build and browser smoke in one
 job on Node 22, and typecheck, tests and build on Node 25, on every push to a PR, draft or ready
@@ -61,15 +71,15 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1-dev` was the integration branch for V1 (decision 266; `v0.3-dev` was 0.3's, decision
-212), and it ends with 1.0:** a later plan's integration branch is made from `main` once 1.0 has
-merged, and added to `vercel.json`'s no-preview list the day it's made (decision 265). While a
+**`v1.1-dev` is the integration branch after 1.0** (`v1-dev` was V1's, decision 266, and ended
+with 1.0; `v0.3-dev` was 0.3's, decision 212), made from `main` the day the release merged and
+added to `vercel.json`'s no-preview list (decision 265). While a
 plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
 0.6–0.9, decision 324). A session that changes the save bumps `SAVE_VERSION` only in its last
-commit, after merging the latest `v1-dev`, and says so in its handoff heading; save-bumping PRs
+commit, after merging the latest integration branch, and says so in its handoff heading; save-bumping PRs
 merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
@@ -150,7 +160,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   sheet is two columns the whole height, its head and foot on the left and its body on the right
   (a landscape media query in `src/hud/styles.ts`, decisions 159, 160, 178). Its
   controls are at least 44px, and they are kept clear of the notch and home bar with
-  `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built in `src/wiring/apis.ts`, and
+  `env(safe-area-inset-*)`. Each sheet reaches the game through an Api built by area in
+  `src/wiring/apis/` (`her.ts`, `home.ts`, `neighbours.ts`…, matching `src/world/areas/`, Settings'
+  in `settings.ts`), which `sheetApis` in `src/wiring/apis.ts` composes (1.1's W3), and
   every moment's cue, sheet and toast is played in `src/wiring/moments.ts` (decision 106); a toast
   stays as long as it takes to read and goes at a tap (`src/hud/ToastLine.ts`, decision 140). Every
   sheet is built by `openSheet` (`src/hud/dom.ts`: a head with a `picture` beside the title and
@@ -171,17 +183,22 @@ what each owns, and where it hurts. Update it when a seam moves.
   grass is a lawn in tones, one at each corner of the tiles (`src/sprites/lawn.ts`, which corner
   takes which from noise, trees' shade and worn doorsteps in `src/render/lawn.ts`), and the dirt,
   gravel, meadow and long grass are `src/sprites/tracks.ts`, each thinning into the lawn at its
-  edge (V1's L2, decision 293); trees,
+  edge (V1's L2, decision 293); the town's cobbles are worn smooth down the middle, a stone at a
+  time, from the same field (1.1's A1, decision 350), and the square is flagstones laid on the
+  world's grid inside a kerb, the well on setts that the flagstones ring a tile out
+  (`src/sprites/paving.ts`; cobbles, flagstones and setts run on into each other, `PAVED`); trees,
   the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
-  take `forms` as well as `variants`; the tree's conifer, dead tree and birch are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
+  take `forms` as well as `variants`; the tree's conifer, dead tree and birch, and the woods' edge's poplar, leaning tree and broken tree, are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
   from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
   shared keys, decision 95): her house, Skelly and her pots in `houses.ts`, the shops, the pop-up
   and the cart in `shops.ts`, the neighbours' houses in `neighbourHouses.ts`. Water smooths a
-  diagonal staircase of tiles into a slope (`slopes` in `terrain.ts`). A new prop is a grid, a palette, a `PROP_FOOTPRINT`
+  diagonal staircase of tiles into a slope (`slopes` in `terrain.ts`); ice is drawn on the world's
+  pixels, its patches, cracks, stoned banks, melt into open water and winter snow
+  (`src/sprites/ice.ts`, 1.1's A3, decision 352), and its sheen glides by in `render/life.ts`. A new prop is a grid, a palette, a `PROP_FOOTPRINT`
   row and a map legend character. Big art is drawn with `Sketch` (`src/sprites/sketch.ts`: shapes,
   lit spheres, bevels, outlines from a mask) and `ramp` in `palette.ts`. Every sprite is a row in
   `src/sprites/catalogue.ts` (decision 87), which `?gallery` shows, in production too (decision
-  21), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
+  21), a page of 50 at a time with `&page=n` (decision 335), and `npm run sprite` renders. The scale sheet (`src/sprites/scaleSheet.ts`) is first in both.
   `npm run sprite -- 'place:*'` draws each place outdoors whole (`src/render/overview.ts`), to
   judge a layout.
   What moves on its own (V1's E5, decision 284) is `frames` on a prop's, piece's or fixture's
@@ -259,7 +276,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   its colours; rows in `src/data/broom.ts`, art in `src/sprites/broom.ts`, the slot first on the
   quick bar and the sheet at the stand `src/hud/BroomSheet.ts` (`BroomApi`).
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
-  body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
+  body drawn in region keys (decision 27). It puts her together; its families are files in
+  `src/sprites/doll/` (1.1's A5a, decision 354): the body (`body.ts`), the builds (`builds.ts`,
+  `stout.ts`, `slight.ts`), poses and folds (`poses.ts`), painting and `finish` (`paint.ts`), the
+  face, ink, hair, hats, prints, backs and cuts. **A build** (`src/data/builds.ts`: `regular`,
+  hers, `stout` and `slight`; 1.1's A5a and A5b, decisions 354 and 355) is the body under the
+  look: wider or narrower parts on her rows and her head, so every cut paints onto it; a cut or a
+  neighbour's touch steps in from what the body measures (`measureOf`), never a column of hers,
+  and an arm drawn for her is moved out or in with a build's shoulders. `tests/sprites/looksHeld.test.ts` holds her looks and every figure's as
+  hashes of their layers (rerun, never `-u`, but for the figures a change means to alter). The pieces are rows in `src/data/outfits.ts` (a new one
   is a row with a description, plus a print in `OUTFIT_ART` if it has one; `fixed` if it comes in
   one colour only, decision 141); the rules for wearing them are
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns, and tops an
@@ -294,7 +319,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   tap stands her up, and the `sit` pose is her standing layers folded at the thighs (`seated`).
   She faces what she walks up to (`facingToward`, `src/systems/facing.ts`) and acts it out (V1's
   E2, decision 281): five `ActionPose`s (crouch, pour, swing, holdUp, wave) facing her way, a
-  body per view and frame (`ACTION_BODY` in `doll.ts`, a crouch a `folded` body), their verbs and
+  body per view and frame (`ACTION_BODY` in `doll/poses.ts`, a crouch a `folded` body), their verbs and
   beats in `systems/poses.ts` (`VERBS`), started from moments by `verbOf` in
   `world/services/Poses.ts`; the tipped can is `src/sprites/actions.ts`. Standing, she breathes
   and blinks (`poses.rest()`, `Rest` in `dollLayers`).
@@ -305,16 +330,37 @@ what each owns, and where it hurts. Update it when a seam moves.
   decision 84 the why. The parts are made and wired in `src/world/build.ts` (`WorldParts`, which
   `World` extends with the tap, the walk and the step, decision 139), each area's services by a
   function in `src/world/areas/` taking the `Shared` parts (decision 218): a new service is a
-  line in its area's function, a field in `build.ts` and its assignment there; what the
+  line in its area's function, a field in `build.ts` and its assignment there. The areas are made
+  in the order `AREAS` names (`src/world/areas/order.ts`, 1.1's W3, decision 342): a row each with
+  what its services listen for, which is who hears a signal first, and why it stands there, held
+  by `tests/world/areaOrder.test.ts`; a service that listens for something is a word in its area's
+  row, and one that must hear after another goes in a later area. What the
   neighbour-facing services read of the town is one `TownReads` (decision 210), and the options a world is made from, with `fromSave`, are
-  `src/world/options.ts`. `World.save()` and `fromSave()` are the whole save.
-  `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`. A tap on something solid walks
+  `src/world/options.ts`. `src/main.ts` is the boot, the loop and the views; the save and the
+  cloud (`src/wiring/keeping.ts`), going in (`greeting.ts`), touch (`touch.ts`), the music
+  (`music.ts`) and the dev handles (`debug.ts`) are `src/wiring/`'s. `World.save()` and `fromSave()` are the whole save.
+  `src/render/OutdoorView.ts` draws a place outdoors and forwards taps to `tapTile`: it lays the
+  ground, sorts what stands by its feet once and works out the light, and everything else is a
+  `Pass` (`src/render/passes/pass.ts`: a part in any of a frame's layers, `ground`, `stand`,
+  `wanted`, `over`, `lights`, `lit`) in `src/render/passes/` or beside what it draws (the yard,
+  beds, fishing, fountain, holidays, doors and effects), called in the order `OUTDOOR_LAYERS`
+  names (1.1's A4, decision 353; held by `tests/render/outdoorPasses.test.ts`); a new thing drawn
+  outdoors is a pass and its name in those lists. A tap on something solid walks
   to the open tile beside it, and its arrival names the prop (`at`), which is how walking up to
-  a building goes in. Arriving is also how she gathers: trees, rocks and flower patches (yields in
+  a building goes in. Arriving at a prop is a table keyed by prop id (`PropArrivals`,
+  `src/world/arrivals.ts`; 1.1's W1, decision 340): each row given by the area that makes the
+  service doing it (`arrivals` on its return, joined by `arrivalsOf`, which refuses a prop claimed
+  twice), asked before a door, a way out and gathering, which stay in `World.arriveOn`; a new one
+  is a row in its area, and `tests/world/arrivingAtProps.test.ts` holds what each prop does.
+  What stands over a place's map (the lots, decorations, sites, stalls, a shut gate, today's
+  mound, the farm's built rows, her yard) is one list of `Overlay`s in `MapZone`
+  (`src/world/zones/Overlay.ts`: `propAt` and `blocks`), so a new thing standing there is an
+  `Overlay` and a line in that list. Arriving is also how she gathers: trees, rocks and flower patches (yields in
   `src/data/gathering.ts`, rules in `src/systems/gathering.ts`, `world.gathering`), and the night's
   snack.
 - **Walking and the camera:** `src/world/Movement.ts` walks her along an A\* path pulled taut
-  (`stringPull` in `src/systems/pathfinding.ts`); `FollowCamera` (`src/render/camera.ts`) eases
+  (`stringPull` in `src/systems/pathfinding.ts`), as her neighbours and, since 1.1's W1, her pets
+  (`Pet.walk`) walk theirs; `FollowCamera` (`src/render/camera.ts`) eases
   after her by whole pixels. Smoke's `smooth` section fails on any pixel that shimmers (decision 85).
 - **Light and depth:** `src/render/ground.ts` lays the ground once, with its clutter and shadows;
   `src/render/lighting.ts` is the time of day, multiplied over each frame. `?hour=21.5` shows
@@ -333,9 +379,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
   (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
   (`seasonPiece` for the ground, `seasonLook` for a prop, baked under `<key>@<season>`), the ground
-  re-baked by `Ground.look`, the props by `OutdoorView.turn`; in winter snow lies on the lawn, the
-  tracks and the roofs and the rain falls as snow, and Nessa skates on the frozen pond
-  (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
+  re-baked by `Ground.look`, the props by `OutdoorView.turn` (`turnProps`); in winter snow lies on the lawn, the
+  tracks and the roofs and the rain falls as snow, the jack-o'-lanterns are snow lanterns (a
+  prop's other shape for a season is `RESHAPED`, 1.0.1's X2, decision 327), and Nessa skates on
+  the frozen pond (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are
@@ -362,7 +409,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   `season` a day sooner again, read from the day it went in (`plantedInSeason`, 0.2's N2,
   decision 176; `thrives` may name `home`, where basil likes a planter); the farm's extension rows are grass
   kept in the town map (`1`, `2`: `TileMap.plots`) until a `{ beds }` recipe builds them; and a
-  `planter` piece at home is a bed wherever it stands, carried by the decorator's `moved` signal. What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
+  `planter` piece at home is a bed wherever it stands, in any of her rooms (keyed by its room,
+  1.1's W2), carried by the decorator's `moved` signal. What a visit to a bed does is one rule, `bedAction` in `src/systems/beds.ts` (phase P,
   decisions 118–120): the first tap looks (`world.garden.looking`, a card from
   `src/hud/BedCard.ts` through `BedApi`, placed each frame by `main.ts`) and the second, or the
   card's button, walks up and does it (`world.tendBed`, `world.garden.visit`); with a seed in hand
@@ -410,14 +458,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   piece is a row, a drawing at 32 in `src/sprites/pieces.ts` or its family's file, and a place on
   a shop's shelf). Furniture is drawn in the building kit's materials with the helpers in
   `src/sprites/furnish.ts` (decision 105); walls, floors and the mat are `src/sprites/surfaces.ts`. What fits
-  where is `src/systems/decor.ts`, `src/world/Home.ts` keeps the room and the storage chest, and
+  where is `src/systems/decor.ts`, `src/world/Rooms.ts` keeps the rooms and `src/world/Home.ts`
+  the storage chest, and
   decorating is `world.decorating` (`Decorator`). `src/render/HomeView.ts` draws it (shared drawing is
   `src/render/scene.ts`), and `src/hud/HomeSheets.ts` reaches it only through `HomeApi`. Her home
-  is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, `Home` keeping each
-  room's pieces, walls, floor and size with the chest shared, and everything that reads "the
+  is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, kept by `Rooms` since
+  1.1's W2 (decision 341: each room's pieces with what they show and what stands on what, walls,
+  floor and size, `home.rooms`), `Home` keeping what they share (the chest, the papers and
+  floors she owns) and answering the room's reads through `Rooms`, and everything that reads "the
   room" reading the one she's in (`home.here`). They're all the one place, `home`: a doorway in
   a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
-  within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe.
+  within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe. A
+  planter stands in any room, its bed keyed by its room (`Plot.room`, save v55).
   The chest takes things from her bag too (0.3's H1, decision 230): `home.items`, moved by
   `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
   or what's on her wrist), put away from the bag's card at home and taken out on the chest
@@ -501,10 +553,16 @@ what each owns, and where it hurts. Update it when a seam moves.
   (decision 303): row and pieces `src/data/robBoo.ts`, art and the town hall `src/sprites/robBoo.ts`;
   he isn't about until she meets him at the castle (`inTown` in `src/systems/mayor.ts`).
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
-  villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` has `talk`, `give`,
-  `favour`/`doFavour`, and `world.mailbox` the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
+  villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` is who's where and the
+  walking, and `world.talk` (`Talk`, `src/world/services/Talk.ts`, 1.1's W3) the talk: `talk`,
+  `reply`, `give`, `favour`/`doFavour`, the faces, friendships and best friends' letters (the
+  neighbourhood answers the same reads, a line each, for the view and the tests); `world.mailbox`
+  the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
-  (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154); the talk and mail sheets are
+  (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154), on the body
+  their row's `build` names (required on every row; decision 355: Rufus, Gourdon and the Moon Pie
+  Man stout, Barty, Scarah, Rob Boo and Wes slight, everyone else and Cody hers; the unrowed's in
+  `UNROWED_BUILDS`); the talk and mail sheets are
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The top bar's 👥 is the neighbours sheet (0.2's U3, decision
   180, `src/hud/NeighboursSheet.ts` through `NeighboursApi`): a page each with hearts, birthday
   (`src/data/birthdays.ts`), loves, likes and gifts by band, where they are now
@@ -597,7 +655,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
   moment); walking up to her corkboard opens `src/hud/CorkboardSheet.ts` (through `MysteryApi`).
-  Wes is drawn half behind his tree in `TownView`, from the doll's parts like the Moon Pie Man.
+  Wes is drawn half behind his tree by `wesPass` (`src/render/passes/folk.ts`), from the doll's parts like the Moon Pie Man.
   Since V1's P3a (decision 302) the mystery comes a step a week, a letter or a clue at a prop
   (`CHAIN` in `src/data/mysteryChain.ts`, `src/systems/mysteryChain.ts`), to the mayor's promise
   (`world.mystery.ready()`); Wes stays for a chat after the third glimpse (`src/data/wes.ts`,
@@ -607,9 +665,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`inTown` in `src/systems/mayor.ts`).
 - **Sound:** `src/audio/`. Every sound is a `Tune` of note lines (`tune.ts`); the cues and the
   neighbours' voices are `cues.ts` (`cueOf` maps a moment to a cue), each record's tune is
-  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch, the
-  silent switch got round first (`session.ts`: `audioSession` `playback`, or a loop of made
-  silence; V1's S1, decision 321). Every voice goes through `graph.ts`'s `Mixer`: four buses
+  `records.ts`, and `SoundBoard.ts` plays them with Web Audio, starting on her first touch. The
+  switch on the side of her phone mutes the game unless she turns on **Play on silent** in
+  Settings (1.1's H1, decision 330): then the switch is got round first in each touch
+  (`session.ts`'s `SilentSwitch`: `audioSession` `playback`, or a loop of made silence; V1's S1,
+  decision 321), and turning it off puts the session back at once. Every voice goes through `graph.ts`'s `Mixer`: four buses
   (effects, music, records, ambience) into a master compressor, a send each to one reverb made
   from a generated impulse, a lowpass on triangle and square voices, a `pan` per part. The
   music (0.2's H1, decision 172) is a `THEMES` row per place in `music.ts` (a melody bar by bar, a
@@ -618,14 +678,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`variationOf`: a counter-melody, an octave, a bar left out; `tuneOf(key, pass)`);
   `musicFor(zone, window, occasion)` names a `MusicKey` and `SoundBoard.setMusic` crossfades to
   it. Behind it, `ambience.ts` (`ambienceFor`: crickets, rain, wind, water, the fair's murmur, a
-  hum indoors, by place, hour, weather and `waterNear`), read by `wiring/hearing.ts`, which also
+  hum indoors, by place, hour, weather and `waterNear`; the crickets a chorus of two that sings
+  in runs and rests, `chorus(seed)`, and every noise layer ebbing on its `EBB` row, 1.1's H2,
+  decision 331), read by `wiring/hearing.ts`, which also
   puts her footsteps down by ground (`FOOTSTEPS`); every HUD button ticks (`tickOnPress` in
   `hud/dom.ts`), and a question lifts at its end (`voiceOf`). The hall strums like "Wonderwall";
   the festival's tune plays in town, and Christmas's jingle while the tree is up. The pond's
   fountain (0.2's H2, decision 173) plays after dark while she's on its bank (`world.fountain`,
   `systems/fountain.ts`): any theme on its music box (`musicBox`, the key `fountain@musicBox`), its
   lamps pulsing to `SoundBoard.musicBeat` and notes floating off it (`src/render/fountain.ts`,
-  through the view's `fountainBeat`). The switches are per phone (`settings.ts`), in Settings. Walk
+  through the view's `fountainBeat`). The switches (Sounds, Music, Ambience, which
+  hushes only the ambience's bed, and Play on silent) are per phone (`audio/settings.ts`), on
+  Settings' Sound tab, the line under Play on silent saying which way it's set. Walk
   the Tomb gets her dancing (`world.recordPlayer.dance()`), with Cody.
 - **What plays** (0.2's G2, decision 190) is anything with a `plays` on its furniture or fixture
   row: her `piano` (a card at Cobweb Corner), Boothoven's grand, the hall's grand and its music box
@@ -644,7 +708,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   A second tap on the rod she holds paints it (`src/hud/RodSheet.ts`, `data/rods.ts`); the colour
   is kept by the phone beside the save (`src/persistence/rod.ts`, decision 171) and handed to the
   drawing by `paintRod` (`render/scene.ts`).
-  `world.hands` (`Hands`, save v20) keeps what she holds; a held seed is planted straight into an
+  `world.hands` (`Hands`, save v20) keeps what she holds, her tools waiting by the door while
+  she's indoors (`held`, decision 325); a held seed is planted straight into an
   empty bed (`world.garden.sow`). `playerDrawable` in `src/render/scene.ts` draws it in her hand:
   the net and rod from `HELD_ART`, a seed as `HELD_PACKET`, with her fist drawn over the grip
   (decision 131).
@@ -673,7 +738,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   pumpkin a day once ripe (`world.pumpkinPatch`), carved into her cat-o'-lantern at the
   workbench; film night is a happening on the festival's Saturdays (`on: { festival, weekdays }`)
   with `seats`, `faces` and a `set` (the screen and popcorn table, which `Decorations` puts out;
-  art in `src/sprites/filmNight.ts`, the film shown by `OutdoorView`); and the mayor's story
+  art in `src/sprites/filmNight.ts`, the film shown by `src/render/passes/filmNight.ts`); and the mayor's story
   comes a chapter a week (`CHAPTERS` in `src/data/story.ts`, `story:n` letters), the last dropped
   by Wes (`world.mystery`), pinning a clue. The 31st is J4's (decision 157, `src/data/finale.ts`,
   `world.finale`): the costume contest (a happening before the party, the town lined up at the
@@ -688,7 +753,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`birthdaysOn`, `CalendarApi.birthdays`). The
   noticeboard by the square (`noticeboard`, `N`) is `world.noticeboard`: three notes a window
   from `src/data/notices.ts`, dealt in `src/systems/notices.ts`, opened as
-  `src/hud/NoticeSheet.ts` (`NoticeApi`). **Today** (V1's R2, decision 312) is the calendar's
+  `src/hud/NoticeSheet.ts` (`NoticeApi`); the board's art shows what's up, picked by the view
+  (`noticeboardLook` in `src/sprites/clutter.ts`, decision 327). **Today** (V1's R2, decision 312) is the calendar's
   first tab: `todayLines` in `src/systems/today.ts` worked out each time from `TodayFacts`, which
   `src/world/areas/upNow.ts` reads off the services (`world.upNow`), its words in
   `src/hud/todayWords.ts`, a tap on a line walking or flying her there (`src/wiring/todayGo.ts`),
@@ -696,7 +762,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   neighbour asking a favour wears a parcel. **Weeks that differ** (V1's R3, decision 313): a
   daytime happening on Monday, Tuesday and Thursday and a festival week each spring, summer and
   winter (`RHYTHM_HAPPENINGS`, festivals as `CALENDAR` rows with a span), and rare events about one
-  day in nine, never during a festival (`RARE_EVENTS` in `src/data/rareEvents.ts`, dealt by
+  day in nine, never on a festival's own days but on its ordinary ones (decision 325), the stall's
+  week never in one (`RARE_EVENTS` in `src/data/rareEvents.ts`, dealt by
   `rareEventOn`, told by `world.rareEvents` with a keepsake the first time; the wandering stall for
   a week, a meteor shower, a wayfarer, a snow day, a stray critter), Moira at the shore every July,
   and the Moon Pie Man and the pop-up told when they arrive.
@@ -776,8 +843,15 @@ Game rules belong in vitest (`tests/world/`, `tests/systems/`) with a fake clock
 imports are held by `tests/architecture.test.ts`, and the economy's shape (what gathering pays
 against prices, no loop that makes Candy) by `tests/data/economy.test.ts` (decision 128). Lived-in saves from the releases on her phone are
 fixtures in `tests/persistence/fixtures/`, held by `tests/persistence/livedIn.test.ts`: nothing in
-them is lost (decision 210); a release that changes the save's shape adds its own. Smoke
-(`scripts/smoke.mjs`) covers only what needs a real browser: booting, real touch, layout at phone
+them is lost (decision 210); a release that changes the save's shape adds its own. The suite
+is two vitest projects (`vitest.config.ts`, 1.1's T2, decision 336): `dom`, `tests/hud/` and the
+few files named in `DOM`, each in a fresh jsdom; and `node`, everything else, in plain Node with
+its files sharing their modules (`isolate: false`). A test outside `tests/hud/` that needs
+`document` or `window` is named in `DOM`; a module-level `let` in `src/` that a world sets from
+outside (as `knowFairground` does) is put back in `tests/setup.ts`, or a file finds it as the one
+before left it. A world test is slow by its steps, not its building (about 50 ms): one that
+settles the town for long takes a stated timeout saying why, as `finale.test.ts` does. Smoke
+(`scripts/smoke/`, a file per area) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.
 

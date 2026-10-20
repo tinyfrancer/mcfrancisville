@@ -125,6 +125,29 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   so a row of poles reads as one unbroken string along a path. The bulbs are four keys never
   outlined (gold, scarlet, blue, green, as the festival's), lit after dark; they're part of the
   pole's sprite, so a string of lights costs no pass over the frame.
+- **A road is worn where feet go** (1.1's A1): the cobbles are paler and barely shaded down the
+  middle of a road, a whole stone at a time, from the same distance to the edge that thins them
+  into the lawn, so a road reads as a road and a crossing as trodden.
+- **The square is the town's one built floor** (1.1's A1, `src/sprites/paving.ts`): random
+  flagstones in a calm warm grey, laid on the world's grid so slabs run over the seams between
+  tiles, inside a kerb wherever they stop, and a darker ring of setts round the well in courses
+  that run round it. A paving laid like this is drawn for where its tile sits in its repeat, and
+  takes moss in its joints in spring and summer and frost in winter.
+- **A wood's edge steps in and out** (1.1's A2): round a place in the woods, trees stand in its
+  hedge and a tile inside it, never a whole side of hedge with a row of trees behind it, and a
+  rock or a stump sits in a gap here and there. Among them stand the edge's own trees, a tall
+  thin poplar, a leaning one and an old broken one (`src/sprites/treeForms.ts`), so the edge reads
+  as a wood and not a wall of one round crown.
+- **Ice is drawn on the world, not the tile** (1.1's A3, `src/sprites/ice.ts`): soft patches of
+  frosted, plain and clear ice from a slow noise, darker down the middle where it's thick over deep
+  water, a frost along the bank that comes and goes, stones in the bank's lip, a few hairline
+  cracks with a lit edge and the odd skate mark, all on the world's pixels, so it runs on over the
+  seams and never repeats. A creek's banks bend further than a pond's. Where ice meets open water
+  it thins, breaks into plates with a dark wet rim, and floes drift off; a slow band of sheen
+  glides over it (`render/life.ts`), and in winter snow drifts in over its banks.
+- **Flower beds in a garden have shapes of their own** (1.1's A2): the castle garden's milkweed
+  is a cross, a corner, a long ribbon and a horseshoe, laid in the map as tiles; a bed rounds off
+  wherever it ends (`src/sprites/flowerBeds.ts`), so a shape is just where its tiles are.
 - **A new place has a legend of its own** (`FAIR_LEGEND`, decision 200; Boo Acres'
   `FARM_LEGEND`, 0.3's F1) for its props, rather than taking more of the town's map characters.
 - **A farm is the kit in work clothes** (Boo Acres, `src/sprites/farm.ts`): the farmhouse, the
@@ -188,7 +211,7 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   two white pixels, claws are rounded, a skeleton smiles.
 - **Her** is the most detailed character on screen. Neighbours are drawn from the same body and
   parts (decision 27), so they share her proportions.
-- **Clothes are painted onto body regions** (`src/sprites/doll.ts`, decision 88): a short sleeve
+- **Clothes are painted onto body regions** (`src/sprites/doll/cuts.ts`, decision 88): a short sleeve
   is her upper arm, a ¾ sleeve reaches her elbow, a long one her forearm. Each layer gets its
   own light and soft outline from `finish`, so a new cut paints regions and never draws lines.
 - **Detail is worked out from the shape, not placed by hand** (decision 152). Hair's shine is a
@@ -198,7 +221,7 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
 - **A piece may reach past her** only where her side meets the air (her comfy shirt, a size too
   big, decision 155), never onto a line across her, so she still reads as one shape.
 - **Tattoos are laid along the arm**, from the hand up and the outside in (`SLEEVES` in
-  `doll.ts`), so the same design lands on any pose and any view, and clothes cover what they
+  `doll/ink.ts`), so the same design lands on any pose and any view, and clothes cover what they
   would. Her ink is black and white (decision 153): keep a motif to a few pixels of ink and grey
   against skin, so it reads as shape, never as a picture.
 - **A neighbour is her parts plus a touch of their own** (decision 154): what makes them a
@@ -206,6 +229,26 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   body for each view, like her clothes, so it follows every facing and frame. Keep it to a few
   pixels that read at 1×, in their own colours; a detail that reads as something else (two
   lines as legs, grey flecks as dirt) comes out.
+- **A build is the body under the look** (1.1's A5a and A5b, decisions 354 and 355;
+  `src/data/builds.ts`, `src/sprites/doll/`): her `regular` body, `stout` (Rufus, Gourdon, the
+  Moon Pie Man) and `slight` (Barty, Scarah, Rob Boo, Wes); everyone else is hers, and so is
+  Cody. A build changes only how wide each part of the body is: the stout chest two pixels out
+  each side and round over narrower hips, a thicker neck, arms a pixel thicker hung out past the
+  chest, legs a pixel thicker; the slight chest a pixel in each side (ten across) over hips as
+  narrow, a neck two wide, arms a pixel thinner (three at the shoulder and elbow, two at the
+  wrist, a hand three) hung in with it, legs four wide, and from the side two pixels shallower.
+  A limb is never thinner than two pixels inside its outline, so it still reads as an arm at 1×.
+  It **never** changes the frame (32×48), the head (so every face, hairstyle, hat and
+  glasses is hers), the rows (shoulders at 25, waist, hips at 34, the fold for sitting and
+  crouching, feet on the bottom row but one) or the regions' keys, so every cut paints onto it
+  as onto her. A cut that places a detail (a strap, a pocket, a button, a seam, a knee) steps in
+  from what the body measures (`measureOf`: the chest, hips, neck and legs), never from a column
+  of hers; a detail at the middle (a fly, laces, a lapel, a print) stays at the middle. So does
+  a neighbour's touch (Barty's ribs, the mayor's sash, Wes's trench, Scarah's patches, Cornelius
+  on her shoulder): it measures the body it's drawn on. An arm drawn for her (an action, a job)
+  lands on a build moved out or in with its shoulders, and what's in the hands is as much wider
+  or narrower as the hands are apart. She is always `regular`; a new neighbour's row says which
+  build fits them, `regular` where nothing in their lines or look argues otherwise.
 - **A ghost is the doll in pale tones**, not a see-through sprite: Boothoven (0.2's L1) is her
   body in ghostly white and lavender with wild hair; Maude, under her sheet, is the one drawn by
   hand. See-through and glowing is for the ghost pets.

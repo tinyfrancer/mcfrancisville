@@ -6,6 +6,8 @@ import { mix, PALETTE as C, ramp } from './palette';
 import { lookOf, PROP_ART, type StandingProp } from './props';
 import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
+import { NOTICEBOARD_WINTER, NOTICEBOARD_WINTER_PALETTE } from './clutter';
+import { SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
 import {
   E,
   groundPieces,
@@ -15,6 +17,7 @@ import {
   NW,
   S,
   SE,
+  snowOnIce,
   SW,
   variantOf,
   W,
@@ -110,10 +113,15 @@ const swap =
 /** Dried seed heads and straw through the snow. */
 const STRAW = mix(C.rope, C.snowShade, 0.25);
 
+/** Moss in the joints of the square's paving in spring and summer (1.1's A1), frost in winter. */
+const MOSSY = shift('jq', C.moss, 0.4);
+const FROSTED = shift('jqk', C.snowShade, 0.45);
+
 /**
  * What a season does to the ground laid over the grass, by kind, from the piece's own palette:
  * greener meadows, long grass and hedges in spring and summer; in winter snow on them, on the
- * grass at a cliff's top and along the top of a bank.
+ * grass at a cliff's top and along the top of a bank. The square's flagstones and setts take moss
+ * in their joints while the grass grows, and frost in winter.
  */
 const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Palette>>> = {
   autumn: {},
@@ -121,11 +129,15 @@ const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Pal
     meadow: shift('mMc', C.springGrass, 0.4),
     longGrass: shift('nNLok', C.springGrass, 0.35),
     hedge: shift('dhHL', C.springGrass, 0.3),
+    flagstones: MOSSY,
+    setts: MOSSY,
   },
   summer: {
     meadow: shift('mMc', C.summerGrass, 0.3),
     longGrass: shift('nNLok', C.summerGrass, 0.3),
     hedge: shift('dhHL', C.summerGrass, 0.2),
+    flagstones: MOSSY,
+    setts: MOSSY,
   },
   winter: {
     // Each in a snow of its own, so the snow isn't all one white (`tests/sprites/seasons.test.ts`).
@@ -151,6 +163,8 @@ const GROUND_SHIFTS: Record<SeasonId, Partial<Record<TileId, (p: Palette) => Pal
     cliff: swap({ g: C.snow, G: C.snowLight }),
     water: swap({ G: C.snow }),
     ice: swap({ G: C.snow }),
+    flagstones: FROSTED,
+    setts: FROSTED,
   },
 };
 
@@ -177,8 +191,18 @@ export function seasonPiece(piece: GroundPiece, season: SeasonId): GroundPiece {
   };
 }
 
-/** The tracks snow drifts in along in winter: the cobbles, dirt, gravel and a pier's boards. */
-const DUSTED: ReadonlySet<TileId | undefined> = new Set(['path', 'dirt', 'gravel', 'boards']);
+/**
+ * The tracks snow drifts in along in winter: the cobbles, the square's paving (1.1's A1), dirt,
+ * gravel and a pier's boards.
+ */
+const DUSTED: ReadonlySet<TileId | undefined> = new Set([
+  'path',
+  'flagstones',
+  'setts',
+  'dirt',
+  'gravel',
+  'boards',
+]);
 
 /** How far in from a track's open edge snow drifts, in pixels, before it thins to flecks. */
 const DRIFT = 5;
@@ -250,7 +274,7 @@ function dustPiece(mask: number, variant: number): GroundPiece {
 /**
  * What the ground at (tx, ty) is drawn from in a season, bottom first: the tile's pieces in the
  * season's palettes (`groundPieces`, unchanged in autumn), and with snow lying, the snow drifted
- * onto a track.
+ * onto a track or the ice.
  */
 export function seasonPieces(
   tileAt: (tx: number, ty: number) => TileId | undefined,
@@ -264,6 +288,9 @@ export function seasonPieces(
   if (snow && DUSTED.has(tileAt(tx, ty))) {
     pieces.push(dustPiece(neighbourMask(tileAt, tx, ty), variantOf(tx + 7, ty + 3, 3)));
   }
+  // Snow drifted in over the frozen creek's banks and blown across it (1.1's A3).
+  const iced = snow ? snowOnIce(tileAt, tx, ty) : null;
+  if (iced) pieces.push(iced);
   return pieces;
 }
 
@@ -379,26 +406,54 @@ const EVERGREEN = fresh(C.canopyDark, C.canopy);
 /** Which of the tree's forms is the conifer (`MORE_TREE_FORMS`, after the three round ones). */
 const CONIFER = 3;
 
+/**
+ * Snow settled on the broken tree's break in winter (1.1's A2): its pale heartwood (`x`, the
+ * tree's key for it) under a cap, the ring in it a shade.
+ */
+const BREAK_SNOW: Palette = { x: C.snow, X: C.snowShade };
+
 /** Snow on a roof in winter: its texture and its lit edge white, its eaves still in shade. */
 const ROOF_SNOW: Palette = { [ROOF[2]!]: C.snowShade, [ROOF[3]!]: C.snow, [ROOF[4]!]: C.snowLight };
 
 /** What else stands under a roof besides a building with a door: the wells. */
 const ROOFED: ReadonlySet<PropId> = new Set(['well', 'farmWell']);
 
+/**
+ * What stands in another shape through a season, form for form (1.0.1, decision 327): the town's
+ * jack-o'-lanterns are snow lanterns in winter, each with its own face, so none sits in the snow;
+ * and the little pumpkin at the noticeboard's foot is a snowball (1.1's A2), which the view draws
+ * through `noticeboardLook` as the board's notes come and go.
+ */
+const RESHAPED: Partial<
+  Record<SeasonId, Partial<Record<PropId, { forms: readonly SpriteSource[]; palette: Palette }>>>
+> = {
+  winter: {
+    pumpkin: { forms: SNOW_LANTERN_FORMS, palette: SNOW_LANTERN_PALETTE },
+    noticeboard: { forms: [NOTICEBOARD_WINTER], palette: NOTICEBOARD_WINTER_PALETTE },
+  },
+};
+
 /** Whether a season changes how this prop is drawn. */
 export function turnsWithSeasons(id: PropId): boolean {
   const art = PROP_ART[id];
   if ((art.door && !art.noEaves) || ROOFED.has(id)) return true;
+  if (Object.values(RESHAPED).some((r) => r[id] !== undefined)) return true;
   return Object.values(CROWNS).some((c) => c[id] !== undefined);
 }
 
 /**
  * How a prop looks in a season (`lookOf`, with the season's palette and a key of its own): its
- * crown in the season's colours, or snow on its roof in winter. Unchanged in autumn.
+ * crown in the season's colours, snow on its roof in winter, or another shape (`RESHAPED`).
+ * Unchanged in autumn.
  */
 export function seasonLook(prop: StandingProp, season: SeasonId): ReturnType<typeof lookOf> {
   const base = lookOf(prop);
   if (season === 'autumn' || prop.sign || prop.joins !== undefined) return base;
+  const reshaped = RESHAPED[season]?.[prop.id];
+  if (reshaped) {
+    const source = reshaped.forms[base.form] ?? reshaped.forms[0]!;
+    return { source, palette: reshaped.palette, form: base.form, key: `${base.key}@${season}` };
+  }
   const art = PROP_ART[prop.id];
   const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
   const leaves = CROWNS[season][prop.id]?.[v];
@@ -415,6 +470,7 @@ export function seasonLook(prop: StandingProp, season: SeasonId): ReturnType<typ
     ...base.palette,
     ...(leaves ?? {}),
     ...(roofed ? ROOF_SNOW : {}),
+    ...(season === 'winter' && prop.id === 'tree' ? BREAK_SNOW : {}),
   }));
   return { ...base, palette, key };
 }

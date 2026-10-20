@@ -1,11 +1,12 @@
 import { CRITTER_IDS } from '../../data/critters';
+import { isInterior } from '../../data/interiors';
 import type { Collecting } from '../services/Collecting';
 import type { Decorator } from '../services/Decorator';
 import type { Fishing } from '../services/Fishing';
 import { Hands } from '../services/Hands';
 import type { Mailbox } from '../services/Mailbox';
 import { Milestones } from '../services/Milestones';
-import type { Neighbourhood } from '../services/Neighbourhood';
+import type { Talk } from '../services/Talk';
 import { Novelty } from '../services/Novelty';
 import type { PetCare } from '../services/PetCare';
 import { Poses } from '../services/Poses';
@@ -27,7 +28,7 @@ export interface Her {
 interface HerParts {
   workbench: Workbench;
   mailbox: Mailbox;
-  neighbourhood: Neighbourhood;
+  talk: Talk;
   petCare: PetCare;
   decorating: Decorator;
   recordPlayer: RecordPlayer;
@@ -38,7 +39,10 @@ interface HerParts {
 
 export function her(s: Shared, parts: HerParts): Her {
   const { ctx, options, bag, wardrobe, home, cabinet } = s;
-  const hands = new Hands(ctx, bag, options.held);
+  const hands = new Hands(ctx, bag, options.held, () => {
+    const here = s.town.scene();
+    return here !== 'home' && !isInterior(here);
+  });
   const novelty = new Novelty(
     ctx,
     {
@@ -66,7 +70,7 @@ export function her(s: Shared, parts: HerParts): Her {
     moving: () => s.movement().player.moving,
     seated: () => sitting.seat !== null,
     busy: () =>
-      parts.neighbourhood.talkingTo !== null ||
+      parts.talk.talkingTo !== null ||
       parts.petCare.pettingNow !== null ||
       parts.decorating.state !== null ||
       parts.recordPlayer.dance() !== null ||

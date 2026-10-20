@@ -4,7 +4,10 @@ import { ROD_TIP } from '../sprites/tools';
 import { CAST_MS } from '../systems/fishing';
 import { tileHash } from '../sprites/terrain';
 import type { Critter, World } from '../world/World';
+import { isFish } from '../data/critters';
+import type { MapZoneId } from '../types/ids';
 import type { Point } from './camera';
+import type { Pass } from './passes/pass';
 import type { Drawable } from './scene';
 
 /**
@@ -129,36 +132,102 @@ function rings(ctx: CanvasRenderingContext2D, at: Point, state: string, nowMs: n
   );
 }
 
-/** How wide the tension bar over her head is, in world pixels (V1's R6a). */
-const BAR_W = 44;
+/**
+ * The tension bar's size in world pixels (V1's R6a; 1.0.1 made it two tiles wide, half again as
+ * tall): its whole box, a light rim outside an ink frame round the track, and how far the needle
+ * stands out above and below it.
+ */
+export const REEL_BAR = { w: 64, h: 12, needle: 2 } as const;
+
+/** The space between the bar and her, or the bar and her float. */
+const REEL_GAP = 4;
+
+/** How far the float and its rings reach round where it sits, for keeping the bar off them. */
+const FLOAT_REACH = 6;
+
+/** A box on the screen or in the world. */
+export interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
 
 /**
- * A rare fish hooked (V1's R6a): the tension bar over her head, its window glowing and its middle
- * brightest, and the needle sweeping across it, read off the world's clock as the score is.
+ * Where the tension bar goes, its box's top left (1.0.1): centred over her head, clear of her; or,
+ * when her float is up there (she fishes facing up the screen), centred under her feet instead,
+ * so it never covers her or the float. `her` is her sprite's box, `float` where the float is, and
+ * `width` the view's, which the bar is kept inside when she stands near its edge.
+ */
+export function reelBarAt(
+  her: Box,
+  float: { x: number; y: number },
+  width = Infinity,
+): { x: number; y: number } {
+  const centred = Math.round(her.x + her.w / 2 - REEL_BAR.w / 2);
+  const x = Math.max(1, Math.min(centred, width - REEL_BAR.w - 1));
+  const above = her.y - REEL_GAP - REEL_BAR.needle - REEL_BAR.h;
+  const span = above - REEL_BAR.needle - FLOAT_REACH;
+  const floatOver =
+    float.y < her.y + her.h / 2 &&
+    float.y >= span &&
+    float.x >= x - FLOAT_REACH &&
+    float.x <= x + REEL_BAR.w + FLOAT_REACH;
+  if (!floatOver) return { x, y: Math.round(above) };
+  return { x, y: Math.round(her.y + her.h + REEL_GAP + REEL_BAR.needle) };
+}
+
+/** The track, a dusky plum: dark enough for the window to glow on, light enough to hold at night. */
+const REEL_TRACK = C.dusk;
+
+/**
+ * A rare fish hooked (V1's R6a): the tension bar, its window glowing and its middle brightest, and
+ * the needle sweeping across it, read off the world's clock as the score is. Drawn over the night,
+ * with a light rim outside its ink frame so it reads on dark water as on the day's (1.0.1).
  */
 function drawReel(ctx: CanvasRenderingContext2D, world: World, me: Drawable, cam: Point): void {
-  const reeling = world.fishing.line?.reeling;
-  if (!reeling) return;
+  const line = world.fishing.line;
+  const reeling = line?.reeling;
+  if (!line || !reeling) return;
   const { reel, needle } = reeling;
-  const x = Math.round(me.x + me.sprite.width / 2 - cam.x) - BAR_W / 2;
-  const y = Math.round(me.y - cam.y) - 16;
-  const along = (u: number) => x + 2 + Math.round(u * (BAR_W - 4));
+  const her = {
+    x: me.x - cam.x,
+    y: me.y - cam.y,
+    w: me.sprite.width,
+    h: me.sprite.height,
+  };
+  const float = {
+    x: line.tx * TILE_SIZE + TILE_SIZE / 2 - cam.x,
+    y: line.ty * TILE_SIZE + TILE_SIZE / 2 - cam.y,
+  };
+  const { x, y } = reelBarAt(her, float, ctx.canvas.width);
+  const { w, h } = REEL_BAR;
+  // The light rim, rounded at its corners, then the ink frame and the track inside it.
+  ctx.fillStyle = C.ghost;
+  ctx.fillRect(x + 1, y, w - 2, h);
+  ctx.fillRect(x, y + 1, w, h - 2);
   ctx.fillStyle = C.ink;
-  ctx.fillRect(x, y, BAR_W, 8);
-  ctx.fillRect(x + 1, y - 1, BAR_W - 2, 10);
-  ctx.fillStyle = C.night;
-  ctx.fillRect(x + 2, y + 1, BAR_W - 4, 6);
+  ctx.fillRect(x + 1, y + 1, w - 2, h - 2);
+  ctx.fillStyle = REEL_TRACK;
+  const inner = { x: x + 2, y: y + 2, w: w - 4, h: h - 4 };
+  ctx.fillRect(inner.x, inner.y, inner.w, inner.h);
+  const along = (u: number) => inner.x + Math.round(u * inner.w);
   const good = [along(reel.target - reel.good), along(reel.target + reel.good)] as const;
-  ctx.fillStyle = C.orbGreenDark;
-  ctx.fillRect(good[0], y + 1, good[1] - good[0], 6);
-  const perfect = [along(reel.target - reel.perfect), along(reel.target + reel.perfect)] as const;
   ctx.fillStyle = C.orbGreen;
-  ctx.fillRect(perfect[0], y + 1, Math.max(2, perfect[1] - perfect[0]), 6);
+  ctx.fillRect(good[0], inner.y, good[1] - good[0], inner.h);
+  // A dark edge at each end of the window, so it stands out against the track.
+  ctx.fillStyle = C.orbGreenDark;
+  ctx.fillRect(good[0], inner.y, 1, inner.h);
+  ctx.fillRect(good[1] - 1, inner.y, 1, inner.h);
+  const perfect = [along(reel.target - reel.perfect), along(reel.target + reel.perfect)] as const;
+  ctx.fillStyle = C.orbGreenLight;
+  ctx.fillRect(perfect[0], inner.y, Math.max(2, perfect[1] - perfect[0]), inner.h);
   const at = along(needle);
+  const n = REEL_BAR.needle;
   ctx.fillStyle = C.ink;
-  ctx.fillRect(at - 2, y - 3, 4, 14);
+  ctx.fillRect(at - 2, y - n, 4, h + n * 2);
   ctx.fillStyle = C.white;
-  ctx.fillRect(at - 1, y - 2, 2, 12);
+  ctx.fillRect(at - 1, y - n + 1, 2, h + n * 2 - 2);
 }
 
 /**
@@ -188,4 +257,27 @@ export function drawBite(
   ctx.fillRect(x + 4, y + 3, 5, 7);
   ctx.fillRect(x + 5, y + 10, 3, 2);
   ctx.fillRect(x + 4, y + 13, 5, 3);
+}
+
+/**
+ * Her fishing as a place outdoors draws it (1.1's A4): the rings over every fish and her line over
+ * everything standing, and the bite's "!" and the reel's tension bar over the light.
+ */
+export function fishingPass(world: World, zone: MapZoneId): Pass {
+  return {
+    name: 'fishing',
+    over(ctx, { cam, nowMs, me }) {
+      drawFishRings(
+        ctx,
+        world,
+        world.collecting.critters(zone).filter((c) => isFish(c.critter)),
+        cam,
+        nowMs,
+      );
+      drawLine(ctx, world, me, cam, nowMs);
+    },
+    lit(ctx, { cam, me }) {
+      drawBite(ctx, world, me, cam);
+    },
+  };
 }

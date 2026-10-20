@@ -16,7 +16,10 @@ export type TileId =
   | 'dirt'
   | 'gravel'
   | 'meadow'
-  | 'longGrass';
+  | 'longGrass'
+  // 1.1's A1: the square's flagstones, and the ring of setts round its well.
+  | 'flagstones'
+  | 'setts';
 
 export type PropId =
   // The wandering stall, in town for a week now and then (V1's R3).

@@ -1,8 +1,8 @@
 # Handoff: picking up the game cold
 
 Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
-V1's review (decision 324) for after 1.0. Read "In progress" and "After 1.0" first; "Where
-things stand" further down is the long history.
+V1's review (decision 324) for after 1.0, and by V1.1's (decision 356) for after 1.2. Read "In
+progress" and "After 1.0" first; "Where things stand" further down is the long history.
 
 ## In progress
 
@@ -10,14 +10,16 @@ Nothing is in progress.
 
 ## After 1.0
 
-**The V1 plan is complete, and 1.0 is the release PR (#198, `v1-dev` → `main`), opened by
-V1's review ready and green and left for the user to merge: the release is theirs.** Her phone
-has 0.4 (2026-10-07, PR #175), which carried 0.5's sessions too, so it last showed her the
-mayor's "0.5" card; 1.0 brings everything else of the plan's 29 sessions, and she reads one card,
-`1.0`, five lines folding 0.6 to 0.9 (decision 324). The save goes from v43 (0.4 changed nothing
-in it) to v53 through P1's v44 to R6c's v53, all held by `livedIn.test.ts`'s fixtures, the 0.3
-town's and a 1.0 town played by taps (`lived-in-v53.json`). **Her notes leave the cloud save
-out** (decision 324): it does nothing until the store is linked, so nothing promises her it.
+**The 1.1 plan is complete, and 1.2 is the release PR #201** (`v1.1-dev` → `main`, "Release 1.2
+(with 1.0.1 and 1.1)"), **the user's to merge**; merging deploys to her phone. Her phone is on
+1.0 (PR #198, 2026-10-18) until then: 1.0.1 (X1, X2) and 1.1 (H1, H2) were cut as #201 and never
+merged, so everything since 1.0 goes at once. She reads one card, `1.2`, five lines folding
+1.0.1's and 1.1's (decision 356), and her save goes from v53 to v55 through step 53 (1.0.1's
+`kitchen.ate`, the identity) and step 54 (W2's planter beds given their room), held by
+`livedIn.test.ts`'s fixtures, 1.0's town and the same town played on in 1.2 (`lived-in-v55.json`).
+A session starting cold with nothing asked of it does nothing to the game and asks the user what
+they'd like next; "Where it hurts" in `docs/architecture.md` and the art notes below are what's
+logged, most pressing first.
 
 **The user's steps, after merging the release PR:**
 
@@ -25,24 +27,335 @@ out** (decision 324): it does nothing until the store is linked, so nothing prom
    Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
    **Redeploy** the production deployment, since a deployment only sees the variables it was built
    with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
-   set up yet". Check the deployment's Functions tab lists `api/save` (nobody has run it on Vercel
-   yet; if the build trips on TypeScript, the fallback is `api/save.js` with JSDoc types, decision
-   323), then README's `curl`, then Settings on her phone.
+   set up yet". Check the deployment's Functions tab lists `api/save` (if the build trips on
+   TypeScript, the fallback is `api/save.js` with JSDoc types, decision 323), then README's
+   `curl`, then Settings on her phone.
 2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
    town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
    readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
-   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 are the table just above it
-   (town at Close 32.6–32.8 ms mean at 21:30 and 22.3 at noon, 4× throttled Chromium).
-3. **Listen**: whether the game is heard with the silent switch on (S1, decision 321).
+   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 and 1.2 are the tables just
+   above it.
+3. **The silent switch**: with the switch down the game should be quiet; Settings → Sound → **Play
+   on silent** on, it plays through, and off again, quiet at once (on iOS before 17 perhaps from
+   the next open; decision 330).
+4. **The crickets**: at night outdoors, whether they now sound like a place and not a tick, and
+   whether any bed is still too much (the **Ambience** switch is hers).
+5. **The builds and the woods**: whether Barty, Scarah, the mayor and Wes read as slim rather than
+   small, the mayor's sash and Wes's trench sit right, and Rufus, Gourdon and the Moon Pie Man as
+   big and cosy; whether the woods' edges read as a wood at Close and the broken trees aren't too
+   many (the art notes below).
 
-**`v1-dev` ends with 1.0.** A later plan's integration branch is made from `main` after the
-release merges (as `v1-dev` was from 0.3's `main`), and added to `vercel.json`'s no-preview list
-the day it's made (decision 265). A session starting cold with nothing asked of it does nothing to
-the game and asks the user what they'd like next. **The 1.1 notes are collected already**: "Where
-it hurts" in `docs/architecture.md` (1.0.x's first candidates are 1 and 7–9: Vercel and her
-phone's first readings, a card before a project moves her things, the reel under reduced motion,
-rare events in October), the "Art notes for the final pass" below, and each lane's "For" notes
-under "Notes for 1.1".
+**`v1.1-dev` is the integration branch until 1.2 merges.** A later plan makes its own from
+`main` once #201 has merged (as `v1.1-dev` was from 1.0's `main`), and adds it to `vercel.json`'s
+no-preview list that day (decision 265).
+
+### 1.1 and 1.2 (the 1.1 plan's lanes and its review, 2026-10-19/20)
+
+`docs/v1.1_plan.md` (decisions 328–329): four lanes from `v1.1-dev`, H (heard) and T (tooling)
+first, then W (the world's shape) and A (the art), thirteen sessions, each a draft PR into
+`v1.1-dev` merged with a merge commit when green, and the review after. Each lane's heading as it
+left it follows, newest first; the decisions hold the detail.
+
+#### V1.1: the review and 1.2 (`claude/v11-review-1.2`, PR #216, decision 356; no save change)
+
+**Landed.** The notes: her phone last saw 1.0, so the `1.0.1` and `1.1` rows, which no phone
+saw, are one `1.2` row of five lines (the switch and Play on silent; the crickets and Ambience;
+the square, the woods and the ice; the builds, the pets' walks and the back room's planters;
+1.0.1's rest in a line), and a phone that saw 1.0 reads exactly that card. The lived-in town:
+1.0's (`lived-in-v53.json`) opened in a 1.2 dev build as her phone will, through steps 53 and 54,
+at Close, Far and sideways (one card, Cody's hello, no error notes; the only console error is the
+unlinked cloud's 503, as on her phone today), then played on by taps over four days, 19, 21 and
+22 September and 5 October (the square's bench, the fair's free go, Whisperwood and Lantern Shore
+found on foot and their ice skated at night, talks with every build of neighbour, the back room
+built and a pumpkin planted in a planter there, Fibi fond to her trick, Rufus's lost frog carried
+home), kept as `lived-in-v55.json`. The shakedown, perf and what was fixed or logged are decision
+356 and "Where it hurts"; the driver was a scratch script (the method is decision 324's: smoke's
+`lib.mjs` helpers in a context of its own on a dev server of its own, a day a run from the
+storage the last day left).
+
+#### Lane H: heard (H1 → H2; decisions from 330; never the save)
+
+**Lane H is finished: H2 landed (PR #204, decision 331), and ⬆ 1.1 is ready to cut** (the
+release PR `v1.1-dev` → `main`, at the user's word). The crickets are a chorus of two in runs
+and rests (`chorus(seed)` in `audio/ambience.ts`, held by `tests/audio/ambience.test.ts`: at
+most 34 chirps a minute over 200 seeds, 12.7 on average, from 270; a silence of 22 s or more
+in every two minutes), every noise layer ebbs on its `EBB` row, the levels trimmed, the `1.1`
+notes' fourth line in (four lines and H1's P.S.); rendered before and after through the real
+`Mixer`, the numbers in decision 331. For her phone: whether the nights now sound like a place
+and not a tick, and whether any bed is still too much (the Ambience switch is hers).
+
+**H1 landed (PR #203, decision 330).** What it left for H2: Play on silent (off by
+default) and Ambience are in `audio/settings.ts`; `SilentSwitch` touches nothing while it's off,
+and `set(false)` puts the session's type back and pauses the silence at once; the Ambience
+switch fades the bed out through `applyAmbience` (Sounds off still hushes it too). The `1.1`
+`NOTES` row has **three lines; H2 adds the crickets as the fourth** (and may change the P.S.).
+Smoke's sound section reads the four switches. For her phone: whether the switch now mutes the
+game, and on iOS before 17 whether Play on silent turned off mutes it at once or from the next
+open (decision 330).
+
+#### Lane T: tooling (T1 → T2; decisions from 335; never the save)
+
+**T2 landed (PR #207, decision 336). Lane T is finished.** The suite is two vitest
+projects (`vitest.config.ts`): `dom`, `tests/hud/` and the five files named in `DOM`, each in a
+fresh jsdom; and `node`, everything else, in plain Node with `isolate: false`, its files sharing
+their modules. **A test outside `tests/hud/` that needs `document` or `window` is named in
+`DOM`**, and a module-level `let` in `src/` that a world sets from outside goes in
+`tests/setup.ts`'s resets (today `knowFairground`, `knowBandstand`, `knowMayor`), or a file
+finds it as the one before left it. 346 s to 121 s in a quiet container (125 s with W1's tests);
+CI's Node 25 test step 84 to 161 s to 37 s, Node 22's coverage 168 to 258 s to 164 s.
+`finale.test.ts`'s settling describes take a stated 30 s: a world step is slow because
+`happeningsAt` filters every happening row for every neighbour on every step ("Where it hurts"
+2), which a session in `src/systems/` could fix. Smoke's `cloud` check "what the cloud keeps is
+sealed" can fail by chance (its `/player|wardrobe|MFV/` can match the sealed base64); it failed
+once and passed on the rerun.
+
+**T1 landed (PR #205, decision 335).** Smoke is `scripts/smoke/`: `run.mjs` (the
+browser, `ORDER`, `NEEDS`, the arguments), `lib.mjs` (the helpers, the shared `page`, swapped by
+`setPage`) and nineteen area files, each exporting `sections`; `npm run smoke -- town fair`, a
+section's own name, `--section=`, `-- --list`. 622 checks before and after. **A new section goes
+in its area's list and in `ORDER`** (the runner refuses to start otherwise), and if it leans on
+a section in another area, a line in `NEEDS`. Every area passes alone (12 s to 78 s; `gallery`
+four and a half minutes, 66 pages pictured). The gallery is paged, `?gallery&page=n`, 50 rows.
+
+#### Lane W: the world's shape (W1 → W2 → W3; decisions from 340; W2 bumps the save)
+
+**W3 landed (PR #210, decision 342; no save change). Lane W is finished.** `Talk` is the talk
+(`services/Talk.ts`: the hello, heart moments, questions and replies, faces, calls' and visits'
+lines, gifts, favours, friendship and best friends' letters), made in `neighbours` just before
+`Neighbourhood`, which is who's where and the walking and reads `talkingTo` from it; the wiring,
+`World` and the areas call `world.talk`. The sheets' Apis are built by area in `wiring/apis/`
+(a pure move; `apis.ts` composes them). `main.ts` is the boot, the loop and the views; the save
+and cloud are `wiring/keeping.ts`, Settings' Apis `wiring/apis/settings.ts`, going in
+`wiring/greeting.ts`, touch, music and the dev handles `wiring/`'s too. The areas' order is
+`AREAS` (`world/areas/order.ts`), held by `tests/world/areaOrder.test.ts` through
+`options.areaMade`. The legend's note is at `LEGEND` in `data/maps.ts`. **For V1.1's review**:
+`Neighbourhood` still answers the talk's ten reads in a line each (`talk`, `reply`, `give`,
+`favour`, `doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`), as W2 left
+`Home`'s twenty-seven, so `src/render/` and the tests didn't move; a later session may point
+them at `world.talk` and drop them ("Where it hurts" 11 and 12). Talk actions stay in
+`wiring/talkActions.ts` (the sheet's buttons). A new service that listens for a signal is a
+word in its area's `AREAS` row, or the order test fails. Perf and a talk and a window's turn
+timed within noise (architecture.md's "1.1's W3"); smoke 622/622 on both, nothing she sees
+changed. No `NOTES` line (a refactor gets none).
+
+**W2 landed (PR #208, decision 341; save v55).** Her rooms are a keeper of their
+own, `Rooms` (`src/world/Rooms.ts`: each room's pieces with what they show and what stands on
+what, walls, floor, size, `here`, building and growing, the decorating moves; `Decorable`, as
+`Yard` is), and `Home` is the chest's two lists and the papers and floors she owns, with its
+rooms as `home.rooms`; `Decorator` and `HomeZone` use `home.rooms`, and **`Home` still forwards
+every read of the room she's in** (27 one-liners) so `src/render/`, the sheets, `wiring/apis.ts`
+and the tests didn't move: a later session may point them at `home.rooms` and drop them
+("Where it hurts" 11). A planter's bed knows its room: `Plot.room` (saved on `SavedBed` and
+`SavedSprinkler` from v55), the farm keeping a bed at home by `bed:home:<room>:<tx>,<ty>`
+(`slotOf`); **a plot at home with no room is the room she's in** (how `HomeView` and a tap ask),
+a saved one the front room's; `bedKey`, which deals the harvest, is unchanged, so a front-room
+planter grows as it always has. The front room's refusal (`frontRoom`) is gone: a planter stands
+in any room. The `moved` signal carries the room. Step 54 writes `room: 'main'` on every bed and
+sprinkler at home; no fixture added (no lived-in save has a planter out; `livedIn.test.ts` builds
+one from 1.0's). **For W3**: `Neighbourhood`'s talk and `apis.ts` are untouched by W2;
+`wiring/apis.ts` reads `home.*` through the forwarders, which a split by area can keep or move
+to `home.rooms`. **For V1.1's 1.2 notes**: a planter in the back room is the one thing she could
+notice ("planters grow in the back room too" is a line if the review wants one). For her phone:
+a planter set down in the back room stays there and grows.
+
+**W1 landed (PR #206, decision 340; no save change).** Arriving at a prop is a
+table by prop id (`world/arrivals.ts`, `PropArrivals`): each area returns its rows as `arrivals`
+beside its services (`making`, `passive`, `festivals`, `catching`, `homeServices`), the
+constructor joins them with `arrivalsOf` (which throws on a prop claimed twice), and the door,
+way out, gathering and stray stay in `World.arriveOn`; `Digging` is made in `catching` now, with
+`Fossils`, the mound one row. `MapZone`'s overlays are one list of `Overlay`s
+(`zones/Overlay.ts`: optional `propAt`, `blocks`) in `propAt`'s order; the gates and the farm's
+rows are `zones/Gates.ts` and `zones/Plots.ts`, and `Yard` `implements Overlay` (its `blocks`),
+which W2 should keep when rooms come out of `Home`. Pets walk pulled paths (`Pet.walk`,
+`stringPull`, `Movement`'s exported `BODY_RADIUS`). Held by `tests/world/arrivingAtProps.test.ts`
+and `tests/world/overlays.test.ts`, snapshots taken from the old code (rerun them, never `-u`,
+unless a change means to alter what a prop does or where she can walk), and
+`tests/world/petPaths.test.ts`. Smoke's pictures aren't reproducible run to run (the real clock),
+so a refactor compares two runs of each side (decision 340's numbers). For her phone: the pets
+trot straight across a room or the lawn now, rather than tile by tile.
+
+#### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
+
+**A5b landed (PR #215, decision 355; no save change). Lane A is finished.** The slight body
+(`sprites/doll/slight.ts`: a chest ten across, hips as narrow, a neck two wide, arms and legs a
+pixel thinner; in `PHYSIQUES` and `ACTION_BODIES`, held things narrowed with the hands,
+`narrowed` in `working.ts`). The cast: `build` is required on every villager row (Barty, Scarah,
+Rob Boo slight; Rufus, Gourdon stout; Maude, Wrapunzel, Agatha, Cody, Ollie, Nessa, Hazel,
+Boothoven `regular`); the Moon Pie Man stout and Wes slight in `UNROWED_BUILDS`
+(`sprites/villagers.ts`), the passers hers. Every neighbour's touch that placed by her columns
+reads `measureOf(body)` (on the regular ones not a pixel moved). `looksHeld` changed for exactly
+those five; 123 of the 1,253 `doll:*`/`figure:*`/`sit:*` sprites differ, all theirs; perf
+within noise (decision 355's numbers). **For V1.1's review**: the bodies are a line for 1.2
+(Barty, Scarah, the mayor and Wes slimmer, the Moon Pie Man sturdier, beside Rufus and Gourdon);
+no `NOTES` line was written. `builds.test.ts`'s old width check measured nothing (fixed). For
+her phone: whether the slight four read as slim, and the mayor's sash and Wes's trench sit right.
+
+**A5a landed (PR #214, decision 354; no save change). Next: A5b.** A `Build`
+(`data/builds.ts`, `regular` and `stout`) is `build` on a villager row, read by `buildOf`
+(`sprites/villagers.ts`); Rufus and Gourdon are stout (Barty is "all bones", left for the slight
+build). `doll.ts` is split by family into `sprites/doll/` (`body`, `builds`, `stout`, `poses`,
+`paint`, `face`, `ink`, `hair`, `hats`, `prints`, `backs`, `cuts`) with the same exports. The
+stout body is her rows and head with wider parts (`stout.ts`: a `Parts`, a `Measure`, `stoutReach`
+for arms drawn for her); every action and job is drawn on it (`ACTION_BODIES`,
+`workPose(…, build)`, held things widened with the hands); cuts step in from `measureOf(body)`
+instead of her columns. Held by `tests/sprites/looksHeld.test.ts` (hashes of every look of hers
+and every figure's, taken before: only Rufus's and Gourdon's lines changed; rerun, never `-u`,
+but for figures a change means to alter) and `tests/sprites/builds.test.ts` (every build 32×48
+in regions, her head and rows, its measure what it draws, every piece on every body). Gallery:
+`body:<build>:walk`, `:act:<pose>`, `:wears:<slot>:<view>`. **For A5b**: add `'slight'` (a
+`slight.ts` like `stout.ts`, its rows in `PHYSIQUES` and `ACTION_BODIES`); the touches still
+placed by her columns are listed in architecture.md's "Where it hurts" 3; `measureOf(body)` is
+what they read. For her phone: whether Rufus and Gourdon read as big and cosy, and his belt and
+bucket sit right. No `NOTES` line (the review folds the art into 1.2).
+
+**A3 landed (PR #213, decision 352; no save change). Next: A5a.** The ice is drawn on the
+world's pixels (`sprites/ice.ts`, `drawIce`: patches of frosted, plain and clear ice, darker down
+the middle, a frost that comes and goes, stones in the bank's lip, cracks and skate marks from
+seeds two tiles round, creek banks that bend six pixels further, `meander`), every tile of ice a
+piece keyed by its place; the mouth at Lantern Shore melts (`meltNear`: plates, open water, floes
+on the lake's first tiles, `floeAt` in `water()`); snow drifts over it in winter (`snowOnIce`,
+laid by `seasonPieces`); a band of sheen glides over it (`Life.sheen`, drawn inside
+`drawShimmer`). Held by `tests/sprites/ice.test.ts`; W1's
+snapshots untouched (no tile changed). Merged after A4: the sheen rides
+`drawShimmer`, which A4's life pass calls. **For V1.1's review**: the frozen town pond now has a ring of plates
+and open water round the fountain (its tiles stay water), kept as charming; the bank pieces beside
+ice cost a little more to bake (Lantern Shore's ground 190–320 ms to 370–560 in Node, once a
+place). For her phone: whether the creeks read as ice at Close, and the sheen is gentle enough.
+
+**A4 landed (PR #212, decision 353; no save change). Next: A5a.** (Run beside A3.)
+`render/OutdoorView.ts` is drawn in passes (1,269 lines to 494): a `Pass`
+(`render/passes/pass.ts`) is a name and a part in any of a frame's layers (`ground`, `stand`,
+`wanted`, `over`, `lights`, `lit`), handed a `Frame`; the passes are in `render/passes/` or
+beside what they draw (yard, beds in `garden.ts`, fishing, fountain, holidays, doors, effects);
+the order of each layer is `OUTDOOR_LAYERS` in `OutdoorView.ts`, held by
+`tests/render/outdoorPasses.test.ts`, and `composeLayers` refuses a name without a pass or a part
+no layer names. **A new thing drawn outdoors is a pass and its name in `OUTDOOR_LAYERS`** (where
+it stands in `stand` is where it's drawn among things level with it). `OutdoorView`'s surface is
+held by `tests/render/outdoorView.test.ts`. **For A5a**: nothing in the doll or the villagers'
+drawing moved; neighbours are still `neighbourDrawables` (`render/villagers.ts`), called by
+`neighboursPass` (`passes/folk.ts`), the Moon Pie Man by `cartPass` and the passers and Wes by
+their passes through `bakeFigure`. Smoke's pictures compared as W1 did (two runs a side, nothing
+differs between the branches that doesn't run to run); perf within noise (architecture.md's
+"1.1's A4"). No `NOTES` line.
+
+**A2 landed (PR #211, decision 351; no save change). Next: A3.** Three more tree forms in
+`sprites/treeForms.ts` (a poplar, a leaning tree, a broken one), so the tree's forms are dealt
+from nine by `formOf` and every tree in every place, the town's too, was dealt again; the broken
+one's heartwood (`x`, `X` in `leaves()`) is snowed in winter (`BREAK_SNOW`). The woods' edges
+(Whisperwood, Lantern Shore, the castle hill) have trees in the hedge and a tile inside it, a
+rock or stump in a gap, held by `tests/data/maps.test.ts`'s "the places' edges" (every place
+closed in; no side of the woods eight tiles without something in its edge). The clearing's
+middle and the fairground's south-east have a meadow and a few props; the castle garden's
+milkweed is a cross, a corner, a ribbon and a horseshoe; the noticeboard's pumpkin is a snowball
+in winter (`RESHAPED`, and `noticeboardLook(open, poster, winter)` for the live board). W1's
+snapshots re-taken for exactly the 106 tiles given a prop. **For A3**: the creeks' tiles are
+untouched; the edge trees at Whisperwood's right side by the creek (25,24, 25,27's rock) and the
+hall key's glade (21,28) are clear of the ice; Lantern Shore's creek mouth is as it was. Smoke's
+`interiors` "she goes into codyManor" failed run alone at 19:00 on `v1.1-dev` as on this
+branch (likely the festival evening's knock at his door, by the real clock); it passed in the
+whole run. For her
+phone: whether the woods' edges read as a wood at Close, and the broken trees aren't too many.
+
+**A1 landed (PR #209, decision 350; no save change). Next: A2.** The square is flagstones
+(`flagstones`, `_` in the map: a 10×9 rectangle, cols 15–24, rows 18–26, a tile narrower each
+side than the cobbles were, its four lanterns on the lawn at its corners), the well on setts
+(`W`'s tile is `setts`) and a ring of setts a tile out round it that the flagstones lay
+themselves from which neighbours are setts (`ownMask`'s upper byte; `sprites/paving.ts`), two
+benches on its north edge either side of the way in (`[`, a bench on flagstones). The cobbles
+are worn smooth down the middle, a stone at a time (`path` in `sprites/terrain.ts`, the
+fairground's too). Paving is `PAVED` (cobbles, flagstones, setts run on into each other) and a
+laid ground draws for an eight-tile repeat (`laid` on its `TERRAIN_ART` row). **For A2**: the
+legend has `( ) < > ? \ ] { }` and the backtick left (A1 took `_` and `[`); a bench placed
+beside a neighbour's stop sits them there (`seatBeside`, above, either side, below), so check
+`SPOTS` beside any bench or log you stand in the woods, or give the stop `sits: false` as A1 did
+Rufus's flowers; `edges` hands every whole tile one shared field now, so a new ground's middle is
+free. For her phone: whether the square reads as the heart of town without shouting, and the
+worn middle of the roads at Close.
+
+### How 1.1 was run, for whoever plans 1.3
+
+The user asked, the morning after 1.0, for everything logged at once ("review/add everything
+besides the leftover cloud save steps, including the where it hurts"), with two sound complaints
+from her phone folded in. `docs/v1.1_plan.md` cut it into thirteen sessions in four lanes by the
+files they own (heard, tooling, the world's shape, the art), two lanes at a time, and this review
+alone after, run as V1 was: one coordinating session, an Opus sub-agent a session in a worktree
+of its own, `npm ci`, a branch from `v1.1-dev`, the whole suite and smoke on a dev-server port of
+its own before each push, a draft PR through `gh api`, merged by the session once green. What was
+new: **refactors measured and held** (each W and A4 session took snapshots from the old code
+first, the arrivals, the overlays, every look's layers as hashes, and compared smoke's pictures
+two runs a side, since the real clock makes no two runs alike; nothing she sees changed that a
+session didn't mean to); **tooling first** (T1's smoke by area and T2's quicker suite made every
+later session's push cheaper, about 2 minutes for the suite against 6); **sound heard before it
+merged** (H2 rendered the beds to WAVs through the real `Mixer` and counted chirps; V1.1 did the
+same for a night); and **the notes written once, by the review**, which folded the two rows the
+lanes wrote (1.0.1's and 1.1's) into the one her phone will read. What cost the most: the release
+PR #201 stood open the whole plan, so 1.0.1 and 1.1 never reached her and three releases went as
+one; and refactors left forwarders (`Home`'s 27, `Neighbourhood`'s 10) so lanes running beside
+them didn't collide. Worth keeping for 1.3: tooling first, snapshots taken before a refactor, a
+render to hear a sound change, notes written by the review; worth changing: cut a patch the day
+its lane finishes if it's to reach her (or plan it as one release from the start), and give a
+refactor's forwarders a session of their own straight after, rather than to "Where it hurts".
+
+### 1.0.1, the fixes after 1.0 (X1 and X2, 2026-10-18/19)
+
+Asked for by the user the evening 1.0 shipped ("fix whatever callouts you have or are logged").
+Two sessions from `v1.1-dev`, Opus sub-agents of the coordinating session, by the files they
+owned, each a draft PR into `v1.1-dev` merged with a merge commit when green (X1 PR #199, X2 PR
+#200); 1.0.1 was cut as the release PR #201 and never merged, so it goes to her phone in 1.2,
+its notes folded into 1.2's card. Decisions 325 and 327 (326 unused).
+
+#### X1: the rules and the HUD (`claude/x1-rules-hud`) · landed, save v54
+
+**Landed** (PR #199 into `v1.1-dev`, decision 325; **save v53 → v54**, `kitchen.ate`, in its last
+commit). Owned `world/`, `systems/`, `data/` (not art), `hud/`, `wiring/`, `main.ts`, the `1.0.1`
+`NOTES` row and the save. A commit each:
+
+- **Her rod indoors**: `Hands.held` is her hands while she's indoors and carries a tool, the tool
+  again on the way out, the save keeping it; a seed or sprinkler stays in hand. No renderer change.
+- **The quick bar sideways**: its strip fades at an end with more beyond it (`scrollMore` in
+  `QuickBar.ts`, a mask in `styles.ts`).
+- **The reel under reduced motion**: `WorldOptions.slow` (one `matchMedia` read in `main.ts`,
+  shared with the effects and the iris), `reelOf`'s `slow` by the fair's `SLOW_SWEEP`.
+- **A trick behind the pet sheet**: Trick closes the sheet first; the line is a toast off
+  `petTrick`'s `line`. Smoke's `petsThatGrow` checks it.
+- **A card before a project moves her things**: `Projects.inTheWay`, `Yard.wouldMove`, `askFirst`
+  in `ProjectsPanel.ts` (Not yet / Go ahead), held by `tests/hud/projectsPanel.test.ts`.
+- **October's rare events**: `isFestivals` in `systems/rareEvents.ts` keeps only a festival's own
+  days clear (its first, its finale, a day with one of its beats); the roll is unchanged, about 1
+  in 8.2 overall and two an October. **Smoke's October days now meet some** (5, 6 and 9 October
+  2026 are a stray critter's); smoke passed as it is.
+- **Today's free go**: `TodayFacts.freeGo`, a `freeGo` line, a tap flying her to the stall.
+- **What she ate**: `kitchen.ate` (optional; a town saved before has none, migration step 53 is
+  the identity), written only once she has eaten since.
+- The `1.0.1` `NOTES` row has **four lines; X2 adds the fifth**. "Where it hurts" 7, 8 (X1's
+  parts), 9 and 16, the art notes' rod and seeds, and `CLAUDE.md` are brought up to date.
+
+#### X2: the art (`claude/x2-art`) · landed, no save change
+
+**Landed** (PR #200 into `v1.1-dev`, decision 327; the save stays v54). Owned `sprites/`, `render/`, `data/seasons.ts`, `data/holidays.ts` and the art tests, and (X1
+having landed) the few lines of `systems/moods.ts`, `hud/`, `wiring/apis.ts` and `main.ts` the
+busts' feelings needed. Decision 327. **Done, a commit each:**
+
+- **Snow lanterns**: in winter the jack-o'-lanterns are snow lanterns with the same faces, lit as
+  before (`RESHAPED` in `sprites/seasons.ts`, `SNOW_LANTERN_FORMS` in `sprites/townProps.ts`);
+  carved pumpkins the rest of the year.
+- **The tension bar**: 64×12, a light rim, a light window, `reelBarAt` placing it clear of her and
+  the float (`tests/render/fishing.test.ts`).
+- **Busts with a feeling**: the neighbours sheet by closeness, Cody's greeting by his line, the
+  noticeboard's faces by their notes (`closenessFeeling`, `greetingFeeling`, `noteFeeling`).
+- **Florence on her back and Gary's front**, redrawn (`sprites/pets.ts`).
+- **The noticeboard** shows what's pinned (`noticeboardLook`, read by `OutdoorView`).
+- The `1.0.1` `NOTES` row's **fifth line**; "Where it hurts" 4 and 8, the art notes and
+  `CLAUDE.md` brought up to date.
+- `tests/persistence/cloud.test.ts` looks for a backup code's whole prefix (`MFV0-`/`MFV1-`) in
+  the sealed text: "MFV" alone turned up in its base64url by chance about one run in 150.
+
+**1.0.1 is whole on `v1.1-dev`**: the `NOTES` row has its five lines. What's left logged is the
+refactors in "Where it hurts" and the art notes that are a redesign (above).
+
+Left logged, not for 1.0.1: the refactors in "Where it hurts" (2, 3, 5, 6, 10–15, 17), and the
+art notes that are a redesign (the cobble and the square, the woods' crowns, the ice, the lawns,
+the castle beds), for the user's art review.
 
 ### V1 (after the lanes)
 
@@ -592,7 +905,7 @@ its season), so `wary` and a bite window by rarity apply to them as to any.
   the game; until then Settings says "The cloud isn't set up yet" and nothing else changes.
 - The QR holds the code as text (the camera shows it to copy); restoring is typed or pasted on
   the new phone. The backup code stays and is still the way for a phone with no signal.
-- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke.mjs`) on the
+- Smoke fakes the function with a Playwright route (`fakeCloud` in `scripts/smoke/lib.mjs`, since T1) on the
   main context and the `cloud` section's own; other contexts reach the dev server, which serves
   `api/save.ts` as JavaScript, read as out of reach, so nothing is ever PUT there.
 
@@ -1623,38 +1936,36 @@ plan's as decisions 78–83.
 ## Art notes for the final pass
 
 What still looks off, kept as sessions notice it (the user reviews the art all together: "Before
-phase G" in `docs/personal_touches.md`). L6 emptied the list (decision 292); **V1's review**
-(decision 324) looked again after L6, L2, L4 and L7, at `npm run sprite -- 'place:*'`, the smoke
-screenshots and its own four days of play at phone size, and found:
+phase G" in `docs/personal_touches.md`). L6 emptied the list (decision 292), V1's review filled it
+again (decision 324), 1.0.1 and the 1.1 plan's lane A struck all of it, and **V1.1's review**
+(decision 356) looked again at `npm run sprite -- 'place:*'` and the cast's figures, smoke's
+screenshots and its own four days of play at phone size, by day and at night. What's left is for
+the user's eye on her phone, none of it clearly wrong:
 
-- **The lavender cobble still carries the town.** L2 gave the woods and farm dirt and the castle
-  gravel, but the town's roads, its square and the fairground's paths are all one cobble, and the
-  square is a big empty plaza with a small well in the middle; it draws the eye more than the
-  buildings round it. A worn middle, a second paving for the square (flagstones, a ring round the
-  well), benches or planters on it, or the square made smaller, would each help.
-- **Woods are walls of one crown.** Whisperwood, the shore and the castle hill are edged with the
-  same round teal crown over and over (the purple and orange ones and the conifers break it up, but
-  not much at a distance); the forms L2 added are few beside it. More variety in the edge crowns,
-  and an uneven edge rather than a straight hedge of trees.
-- **Ice and the creeks are flat paint.** The frozen creek in Whisperwood and the one feeding the
-  lake at Lantern Shore are a flat pale blue ribbon with hard edges, beside water that L6 gave banks
-  and glints; and a frozen creek running into an open lake reads oddly. A texture on the ice
-  (cracks, a sheen) and the banks' soft edge would bring it in line.
-- **Big empty lawns** in the hidden clearing's middle and the fairground's south-east: L2's decals
-  are there but thin. A meadow patch or a few standing props.
-- **The castle garden's beds are the same rectangle** four times over.
-- **She holds her rod indoors**: the quick bar hides at home, but what she held outside stays in
-  her hand in the house (seen with Cody on the sofa at 19:30). Harmless, a little odd.
-- **The tension bar is small** (44 world pixels, about a tile and a half at Close): it reads, but
-  only just, and its dark green window less well at night (R6a's note).
-- **Jack-o'-lanterns all year.** The town's jack-o'-lanterns are map props, so in January they
-  sit in the snow (smoke's `season-winter-sideways.png`). A `seasonLook` that turns them to snowmen
-  or lanterns outside autumn, or `DECOR` for October only, would fit L4's seasons.
-- **Sideways, the quick bar's seeds run under the bag**: with four kinds of seed the last packet is
-  cut off at the bag button (it scrolls, so nothing is lost, but it reads as clipped).
-- **Lane notes still open:** the body builds and the neutral faces on the noticeboard and the
-  neighbours sheet (L7), Florence's on-her-back frame and Gary's front (R6c), the noticeboard's art
-  the same whatever is pinned (L6). Each is in "Where it hurts" too.
+- **The broken trees.** A2 dealt the tree's nine forms to every tree in every place by tile, so a
+  ninth of them are the broken one and a ninth the dead one: in the woods about one tree in five
+  is leafless (Whisperwood 19 broken and 22 dead of 184), and in town three broken (one beside
+  Cobweb Corner, one by the farm's sign, one by the graveyard) and three dead of 18, a third of
+  the town's trees. A2 asked "not too many?" and so does this. If she finds it so, the broken
+  (and leaning) forms could be dealt to the woods' edges only, a rule in `lookOf`, not a redraw.
+- **The frozen pond's ring** (A3 kept it): in winter the town pond is ice with a ring of plates and
+  open water round the fountain, which plays on. It reads as the fountain keeping its water open,
+  which is charming; kept.
+- **Whisperwood's creek at the map's east edge** ends square against the hedge, the ice's hard
+  edge meeting the edge trees, where it runs on out of the place. A curl of bank there, as the
+  creek's other bends have, would soften it.
+- **The slight and stout builds** read as slim and sturdy at 4× in the sprites (the mayor's sash is
+  a band down his side from the side, Wes's trench narrow to the hem); whether they do at Close on
+  her phone is hers to say.
+
+Struck since V1's review: ~~the lavender cobble carrying the town~~ (A1: the square in
+flagstones, the well on setts, two benches, the roads worn down the middle); ~~woods walls of one
+crown~~ (A2: a poplar, a leaning tree and a broken one, the edges stepping in and out); ~~ice and
+the creeks flat paint~~ (A3); ~~big empty lawns~~ and ~~the castle garden's same beds~~ (A2); ~~the
+noticeboard's pumpkin orange in winter~~ (A2: a snowball); ~~her rod indoors~~ and ~~the quick
+bar's seeds under the bag sideways~~ (1.0.1's X1); ~~the small tension bar~~, ~~jack-o'-lanterns
+all year~~, ~~the neutral faces~~, ~~Florence's and Gary's frames~~ and ~~the noticeboard the same
+whatever's pinned~~ (1.0.1's X2); ~~one body under every look~~ (A5a, A5b).
 
 ## Settled since
 

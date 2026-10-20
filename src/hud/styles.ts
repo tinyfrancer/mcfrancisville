@@ -648,6 +648,19 @@ const CSS = `
   pointer-events: auto;
 }
 .hud-quick-slots::-webkit-scrollbar { display: none; }
+/* An end with more beyond it fades rather than cuts a slot off at the bag (1.0.1). */
+.hud-quick-slots[data-more='end'] {
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 36px), transparent);
+}
+.hud-quick-slots[data-more='start'] {
+  -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to left, #000 calc(100% - 36px), transparent);
+}
+.hud-quick-slots[data-more='both'] {
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent);
+  mask-image: linear-gradient(to right, transparent, #000 36px, #000 calc(100% - 36px), transparent);
+}
 .hud .hud-quick-slot {
   position: relative;
   flex: none;

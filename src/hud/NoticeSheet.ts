@@ -6,6 +6,8 @@ import { VILLAGERS } from '../data/villagers';
 import type { ItemId, VillagerId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import type { Poster } from '../systems/notices';
+import { noteFeeling } from '../systems/moods';
+import type { Feeling } from '../types/mood';
 import { glyph, glyphed, price } from './glyph';
 import type { Notice } from '../world/services/Noticeboard';
 import { fitIcon, ROW_ICON } from './collection';
@@ -23,8 +25,8 @@ export interface NoticeApi {
   /** Hands over what a note asks for; false if she can't. */
   answer(slot: number): boolean;
   icon(canvas: HTMLCanvasElement, id: ItemId): void;
-  /** Draws a neighbour's head and shoulders at 1×. */
-  portrait(canvas: HTMLCanvasElement, id: VillagerId): void;
+  /** Draws a neighbour's head and shoulders at 1×, with `feel` their face (1.0.1). */
+  portrait(canvas: HTMLCanvasElement, id: VillagerId, feel?: Feeling | null): void;
   /** The town's projects, as the Projects tab shows them (V1's R4). */
   projects(): readonly ProjectView[];
   /**
@@ -32,6 +34,8 @@ export interface NoticeApi {
    * storage chest to make room for it.
    */
   startProject(id: ProjectId): readonly string[] | null;
+  /** The names of what of hers would go in the chest were it started now, to ask first (1.0.1). */
+  inTheWay(id: ProjectId): readonly string[];
   /** Gives the project under way lots of Candy or so many of a thing; false if nothing went. */
   giveProject(gift: Gift): boolean;
   /** Draws a project as it'll look built, at 1×. */
@@ -102,7 +106,7 @@ export function openNotices(hud: HTMLElement, api: NoticeApi, tab = 'notes'): ()
 
   function card(notice: Notice, bag: readonly Stack[]): HTMLElement {
     const face = el('canvas', { className: 'hud-portrait hud-notice-face' });
-    api.portrait(face, notice.from);
+    api.portrait(face, notice.from, noteFeeling(notice.note, notice.done));
     const icon = el('canvas', { className: 'hud-icon' });
     api.icon(icon, notice.item);
     fitIcon(icon, ROW_ICON / 2);

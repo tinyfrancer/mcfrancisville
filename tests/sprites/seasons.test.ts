@@ -5,7 +5,9 @@ import type { SeasonId } from '../../src/data/seasons';
 import { ZONES } from '../../src/data/zones';
 import { lawnOf } from '../../src/render/lawn';
 import { overview } from '../../src/render/overview';
+import { noticeboardLook } from '../../src/sprites/clutter';
 import { lookOf } from '../../src/sprites/props';
+import { PUMPKIN_LIT, SNOW_LANTERN_FORMS } from '../../src/sprites/townProps';
 import {
   seasonLook,
   seasonPieces,
@@ -100,11 +102,77 @@ describe('the seasons on what stands', () => {
     }
   });
 
+  // 1.1's A2 (decision 351): no pumpkin left orange in the snow at the noticeboard's foot either.
+  it('makes the noticeboard’s pumpkin a snowball in winter, whatever is pinned up', () => {
+    const board = town.props.find((p) => p.id === 'noticeboard')!;
+    expect(turnsWithSeasons('noticeboard')).toBe(true);
+    for (const s of ['spring', 'summer', 'autumn'] as const) {
+      expect(seasonLook(board, s), s).toEqual(lookOf(board));
+    }
+    const winter = seasonLook(board, 'winter');
+    expect(winter.key).toMatch(/@winter$/);
+    for (const [open, poster] of [
+      [0, false],
+      [2, true],
+      [3, false],
+    ] as const) {
+      const autumn = noticeboardLook(open, poster);
+      const snowy = noticeboardLook(open, poster, true);
+      const pumpkin = (rows: readonly string[]) =>
+        rows
+          .slice(48)
+          .join('')
+          .match(/[KaAl]/g) ?? [];
+      expect(pumpkin(autumn.source.rows).length).toBeGreaterThan(20);
+      expect(pumpkin(snowy.source.rows)).toEqual([]);
+      expect(snowy.key).not.toBe(autumn.key);
+      expect(snowy.palette[3]).toBe(winter.palette[3]);
+      // The board above its foot is the same board, notes and all.
+      expect(snowy.source.rows.slice(0, 48)).toEqual(autumn.source.rows.slice(0, 48));
+    }
+  });
+
+  // 1.1's A2 (decision 351): the broken tree's heartwood takes a cap of snow, as a roof does.
+  it('caps the broken tree’s break with snow in winter, and only then', () => {
+    const broken = town.props.find((p) => p.id === 'tree' && lookOf(p).form === 8)!;
+    expect(broken).toBeDefined();
+    expect(lookOf(broken).source.rows.some((row) => row.includes('x'))).toBe(true);
+    const snow = seasonLook(broken, 'winter').palette.x;
+    for (const s of ['spring', 'summer', 'autumn'] as const) {
+      expect(seasonLook(broken, s).palette.x, s).not.toBe(snow);
+    }
+    expect(snow).toBe(seasonLook(broken, 'winter').palette[3]);
+  });
+
   it('lays snow on the roofs in winter, but not on a pumpkin with no roof', () => {
     const house = town.props.find((p) => p.id === 'homeHouse')!;
     expect(seasonLook(house, 'winter').key).toMatch(/@winter$/);
     expect(seasonLook(house, 'summer').key).not.toMatch(/@/);
     expect(turnsWithSeasons('gourdonHouse')).toBe(false);
     expect(turnsWithSeasons('well')).toBe(true);
+  });
+
+  // 1.0.1 (decision 327): no jack-o'-lantern sits in the snow.
+  it('makes the jack-o-lanterns snow lanterns in winter, each its own face, lit as before', () => {
+    const lanterns = town.props.filter((p) => p.id === 'pumpkin');
+    expect(lanterns.length).toBeGreaterThan(0);
+    expect(turnsWithSeasons('pumpkin')).toBe(true);
+    const faces = new Set<number>();
+    for (const lantern of lanterns) {
+      const carved = lookOf(lantern);
+      for (const s of ['spring', 'summer', 'autumn'] as const) {
+        expect(seasonLook(lantern, s), s).toEqual(carved);
+      }
+      const winter = seasonLook(lantern, 'winter');
+      expect(winter.key).toBe(`${carved.key}@winter`);
+      expect(winter.form).toBe(carved.form);
+      expect(winter.source).toBe(SNOW_LANTERN_FORMS[carved.form]);
+      expect(winter.source).not.toBe(carved.source);
+      faces.add(winter.form);
+      // Its face is in the keys that glow after dark, as the pumpkin's is.
+      const glows = Object.keys(PUMPKIN_LIT);
+      expect(winter.source.rows.some((row) => glows.some((k) => row.includes(k)))).toBe(true);
+    }
+    expect(faces.size).toBeGreaterThan(1);
   });
 });

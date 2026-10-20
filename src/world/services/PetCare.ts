@@ -214,8 +214,9 @@ export class PetCare {
     if (this.pets.level(id) < 2) return null;
     const pet = this.pet(id);
     pet.perform(this.ctx.clock.now());
-    this.ctx.moments.push({ kind: 'petTrick', pet: id, at: over(pet) });
-    return TRICKS[id].line.replaceAll('{name}', this.pets.nameOf(id));
+    const line = TRICKS[id].line.replaceAll('{name}', this.pets.nameOf(id));
+    this.ctx.moments.push({ kind: 'petTrick', pet: id, at: over(pet), line });
+    return line;
   }
 
   /** Whether Dolly barked a critter out today, so it's settled and stays put for her net. */

@@ -29,7 +29,7 @@ import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { Lately } from '../Lately';
 import type { Mailbox } from './Mailbox';
-import type { Told } from './Neighbourhood';
+import type { Told } from './Talk';
 import type { Takings } from './Takings';
 
 /** What being married reaches into: her memory of the day, tonight's takings, her bag, her mail. */

@@ -526,6 +526,57 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("1.1's W2 step (54 to 55)", () => {
+  const planting = { crop: 'basil', plantedAt: 5, waterings: 1, lastWatered: '2026-10-18' };
+
+  it('puts every bed and sprinkler at home in the front room, and nothing else anywhere', () => {
+    const old = { ...structuredClone(SAVE), version: 54 } as Record<string, unknown>;
+    old.beds = [
+      { zone: 'home', tx: 6, ty: 6, planting },
+      { zone: 'town', tx: 11, ty: 6, planting: null },
+    ];
+    old.sprinklers = [
+      { zone: 'home', tx: 6, ty: 6, since: '2026-10-18' },
+      { zone: 'whisperwood', tx: 4, ty: 9, since: '2026-10-17' },
+    ];
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.beds).toEqual([
+      { zone: 'home', room: 'main', tx: 6, ty: 6, planting },
+      { zone: 'town', tx: 11, ty: 6, planting: null },
+    ]);
+    expect(up?.sprinklers).toEqual([
+      { zone: 'home', room: 'main', tx: 6, ty: 6, since: '2026-10-18' },
+      { zone: 'whisperwood', tx: 4, ty: 9, since: '2026-10-17' },
+    ]);
+  });
+
+  it('keeps a bed in the back room, and refuses a room that is not a name', () => {
+    const back = { zone: 'home', room: 'back', tx: 6, ty: 6, planting };
+    expect(migrateSave({ ...SAVE, beds: [back] })?.beds).toEqual([back]);
+    expect(migrateSave({ ...SAVE, beds: [{ ...back, room: 2 }] })).toBeNull();
+    const sprinkler = { zone: 'home', room: 'back', tx: 6, ty: 6, since: '2026-10-18' };
+    expect(migrateSave({ ...SAVE, sprinklers: [sprinkler] })?.sprinklers).toEqual([sprinkler]);
+    expect(migrateSave({ ...SAVE, sprinklers: [{ ...sprinkler, room: null }] })).toBeNull();
+  });
+});
+
+describe('the 1.0.1 step (53 to 54)', () => {
+  it('leaves what she ate unkept, as it was, and checks it once it is', () => {
+    const old = { ...structuredClone(SAVE), version: 53 } as Record<string, unknown>;
+    const meals = { pep: 1000, bites: null, lure: null };
+    old.kitchen = meals;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.kitchen).toEqual(meals);
+    const kept = { ...meals, ate: { pep: 'midnightPizza' } };
+    expect(migrateSave({ ...SAVE, kitchen: kept })?.kitchen).toEqual(kept);
+    expect(migrateSave({ ...SAVE, kitchen: { ...meals, ate: { pep: 3 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, kitchen: { ...meals, ate: ['midnightPizza'] } })).toBeNull();
+    expect(migrateSave({ ...SAVE, kitchen: { ...meals, ate: null } })).toBeNull();
+  });
+});
+
 describe("V1's R6c step (52 to 53)", () => {
   it('gives every pet no fondness yet, keeping its names, clothes and bones', () => {
     const old = { ...structuredClone(SAVE), version: 52 } as Record<string, unknown>;

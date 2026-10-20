@@ -6,11 +6,11 @@ import type { Tile } from './pathfinding';
 
 /**
  * Why a piece can't go somewhere: it doesn't fit (off its wall or floor, on the mat, a doorway or
- * the chest, or over another piece), she's standing there, it would shut off part of the room, or
- * it's a planter, which stays in the front room with the garden (0.3's H4); or out in her yard
- * (0.3's H5), it's a piece that stays indoors, or it would cut off somewhere in town.
+ * the chest, or over another piece), she's standing there, or it would shut off part of the room;
+ * or out in her yard (0.3's H5), it's a piece that stays indoors, or it would cut off somewhere in
+ * town. (A planter stayed in the front room until 1.1's W2 gave its bed a room.)
  */
-export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'frontRoom' | 'indoors' | 'inTheWay';
+export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'indoors' | 'inTheWay';
 
 /** The tiles a piece covers, which for a long piece turned on its side are the other way round. */
 export function footprint(id: FurnitureId, turn: number): { w: number; h: number } {

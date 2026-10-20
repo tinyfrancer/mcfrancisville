@@ -19,6 +19,11 @@ import { fromSave, World } from '../../src/world/World';
  * four days by real taps in a dev build, a new town from its title (Cody's first-day list done,
  * the bandstand started, a ghost minnow measured, Fibi fond to her first level, Wrapunzel's first
  * story told, Cody's question and his "how was your day?" answered, the wandering stall seen).
+ * 1.2's is 1.0's opened in a 1.2 dev build as her phone will open it (through steps 53 and 54),
+ * then played on by taps over four days to 5 October: the square's bench sat on, the fair's free
+ * go, Whisperwood and Lantern Shore found on foot and their ice skated, talks with every build of
+ * neighbour, the back room built with a pumpkin growing in a planter there, Fibi fond enough for
+ * her trick, and Rufus's lost frog carried home on a rare event's day.
  */
 const LIVED_IN = {
   '0.2.2': 'lived-in-v27.json',
@@ -26,6 +31,7 @@ const LIVED_IN = {
   '0.2.5': 'lived-in-v34.json',
   '0.3': 'lived-in-v43.json',
   '1.0': 'lived-in-v53.json',
+  '1.2': 'lived-in-v55.json',
 };
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
@@ -131,4 +137,42 @@ describe('a lived-in save from her phone', () => {
       }
     });
   }
+});
+
+describe('a planter in a lived-in front room (1.1’s W2, save v55)', () => {
+  it('comes through in the front room, with its crop growing and its sprinkler', () => {
+    const old = JSON.parse(readFileSync(join(FIXTURES, LIVED_IN['1.0']), 'utf8'));
+    const clock = new FakeClock(new Date(old.lastPlayedAt));
+    // Where a planter fits in 1.0's front room, as the decorator would set one down.
+    const probe = new World({ clock, ...fromSave(migrateSave(structuredClone(old))) });
+    probe.home.store('planterBox');
+    const at = probe.home.takeOut('planterBox', { tx: 6, ty: 6 }, null)!;
+    expect(at).not.toBeNull();
+    // As 1.0's code saved a planter: its bed and sprinkler at home, with no room.
+    const day = 24 * 60 * 60 * 1000;
+    const planting = {
+      crop: 'pumpkin',
+      plantedAt: old.lastPlayedAt - day,
+      waterings: 1,
+      lastWatered: null,
+    };
+    old.home.rooms.main.placed.push({ id: 'planterBox', tx: at.tx, ty: at.ty, turn: 0 });
+    old.beds.push({ zone: 'home', tx: at.tx, ty: at.ty, planting });
+    old.sprinklers.push({ zone: 'home', tx: at.tx, ty: at.ty, since: '2026-09-20' });
+    const migrated = migrateSave(structuredClone(old));
+    expect(migrated?.version).toBe(SAVE_VERSION);
+    const world = new World({ clock, ...fromSave(migrated) });
+    const bed = { zone: 'home' as const, room: 'main' as const, tx: at.tx, ty: at.ty };
+    expect(world.farm.planting(bed)).toEqual(planting);
+    expect(world.farm.hasSprinkler(bed)).toBe(true);
+    expect(world.farm.sprinkled(bed)).toBe('2026-09-20');
+    const saved = world.save();
+    expect(saved.beds).toContainEqual({ ...bed, planting });
+    expect(saved.sprinklers).toContainEqual({ ...bed, since: '2026-09-20' });
+    // Nothing went back in her bag: no seed from a bed gone, no sprinkler from nowhere.
+    const count = (id: string) => saved.bag.find((s) => s.id === id)?.count ?? 0;
+    const had = (id: string) => old.bag.find((s: { id: string }) => s.id === id)?.count ?? 0;
+    expect(count('pumpkinSeed')).toBe(had('pumpkinSeed'));
+    expect(count('sprinkler')).toBe(had('sprinkler'));
+  });
 });

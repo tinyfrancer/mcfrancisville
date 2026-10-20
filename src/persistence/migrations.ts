@@ -257,6 +257,20 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const pets = (state.pets ?? {}) as Record<string, unknown>;
     return { ...state, pets: { ...pets, affection: {} } };
   },
+  // 1.0.1: what she ate for each of a meal's effects (`kitchen.ate`). Nothing was kept of it
+  // before, so it's left absent, and a meal still on shows the first dish that does the same, as
+  // it did; the next she eats is kept.
+  53: (state) => state,
+  // 1.1's W2: a planter's bed knows its room. Until then a planter stood only in her front room,
+  // so every bed and sprinkler at home is the front room's; nothing anywhere else changes.
+  54: (state) => {
+    const inFrontRoom = (spot: unknown) =>
+      typeof spot === 'object' && spot !== null && (spot as { zone?: unknown }).zone === 'home'
+        ? { ...spot, room: 'main' }
+        : spot;
+    const each = (list: unknown) => (Array.isArray(list) ? list.map(inFrontRoom) : list);
+    return { ...state, beds: each(state.beds), sprinklers: each(state.sprinklers) };
+  },
 };
 
 /**

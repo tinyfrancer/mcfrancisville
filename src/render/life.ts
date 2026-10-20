@@ -5,20 +5,23 @@ import { tuftColours } from '../sprites/seasons';
 import type { SeasonId } from '../data/seasons';
 import { PALETTE } from '../sprites/palette';
 import { PROP_ART } from '../sprites/props';
-import { tileHash } from '../sprites/terrain';
+import { iceSheen, tileHash } from '../sprites/terrain';
 import { tileAt, walkable, type PlacedProp, type TileMap } from '../systems/grid';
 import type { TileId } from '../types/ids';
 import type { Point } from './camera';
 import { fillPixelEllipse } from './ground';
 
 /**
- * The small life of a place outdoors (phase L): glints on the water, long grass swaying in the
- * wind, and smoke from the chimneys. All of it is drawn over the baked ground each frame, and
- * only where the camera is; the ground itself is never baked again.
+ * The small life of a place outdoors (phase L): glints on the water, a sheen passing over the ice
+ * (1.1's A3), long grass swaying in the wind, and smoke from the chimneys. All of it is drawn over
+ * the baked ground each frame, and only where the camera is; the ground itself is never baked
+ * again.
  */
 export interface Life {
   /** Tiles of open water and ice, where a glint can catch the light. */
   water: readonly { tx: number; ty: number; ice: boolean }[];
+  /** Tiles of ice, and the pixels of each (local x, y pairs) a sheen can pass over. */
+  sheen: readonly { tx: number; ty: number; pixels: Int8Array }[];
   /** Where each tuft of long grass stands, in world pixels (its foot's left). */
   tufts: readonly Point[];
   /** Where each chimney's smoke rises from, in world pixels. */
@@ -40,13 +43,19 @@ export function lifeOf(map: TileMap): Life {
   }
   const patches = new Set(map.patches.map((p) => `${p.tx},${p.ty}`));
   const water: Life['water'][number][] = [];
+  const sheen: Life['sheen'][number][] = [];
   const tufts: Point[] = [];
+  const ground = (tx: number, ty: number) => tileAt(map, tx, ty);
   for (let ty = 0; ty < map.height; ty++) {
     for (let tx = 0; tx < map.width; tx++) {
       const id = tileAt(map, tx, ty);
       const key = `${tx},${ty}`;
       if ((id === 'water' || id === 'ice') && !standing.has(key)) {
         water.push({ tx, ty, ice: id === 'ice' });
+      }
+      if (id === 'ice') {
+        const pixels = iceSheen(ground, tx, ty);
+        if (pixels.length > 0) sheen.push({ tx, ty, pixels });
       }
       const h = tileHash(tx, ty);
       const oneIn = id === undefined ? undefined : TUFT_ONE_IN[id];
@@ -71,7 +80,7 @@ export function lifeOf(map: TileMap): Life {
       }
     }
   }
-  return { water, tufts, chimneys: chimneysOf(map.props) };
+  return { water, sheen, tufts, chimneys: chimneysOf(map.props) };
 }
 
 /** Where smoke rises from the chimneys of what stands in a place, in world pixels. */
@@ -94,10 +103,54 @@ function seen(x: number, y: number, w: number, h: number, cam: Point, canvas: HT
   return x + w > cam.x && y + h > cam.y && x < cam.x + canvas.width && y < cam.y + canvas.height;
 }
 
+/** How far apart the bands of sheen on the ice are, along the diagonal, in world pixels. */
+export const SHEEN_EVERY = 352;
+/** How far either side of a band's middle it catches the light, and its bright core. */
+const SHEEN_HALF = 16;
+const SHEEN_CORE = 5;
+/** How fast a band glides over the ice, down to the right: pixels a millisecond. */
+const SHEEN_SPEED = 0.008;
+
+/**
+ * Where the band of sheen nearest a world pixel's diagonal is, `nowMs` on the clock: how far
+ * from its middle the pixel lies, from 0 to half the bands' spacing.
+ */
+export function sheenFrom(wx: number, wy: number, nowMs: number): number {
+  const along = Math.floor(nowMs * SHEEN_SPEED) % SHEEN_EVERY;
+  const off = (((wx + wy - along) % SHEEN_EVERY) + SHEEN_EVERY) % SHEEN_EVERY;
+  return Math.min(off, SHEEN_EVERY - off);
+}
+
+/**
+ * The sheen on the ice (1.1's A3): broad bands of light gliding slowly down across it on the
+ * diagonal, a pixel at a time, lighting the dashes of its open face as they pass, brightest in
+ * the middle. Not in the rain, under a grey sky.
+ */
+function drawSheen(ctx: CanvasRenderingContext2D, life: Life, cam: Point, nowMs: number): void {
+  const canvas = ctx.canvas;
+  for (const pass of [0, 1] as const) {
+    ctx.fillStyle = pass === 0 ? PALETTE.iceLight : PALETTE.white;
+    for (const { tx, ty, pixels } of life.sheen) {
+      const x0 = tx * TILE_SIZE;
+      const y0 = ty * TILE_SIZE;
+      if (!seen(x0, y0, TILE_SIZE, TILE_SIZE, cam, canvas)) continue;
+      // The whole tile is out of every band: nothing to light.
+      if (sheenFrom(x0 + 16, y0 + 16, nowMs) > SHEEN_HALF + 32) continue;
+      for (let i = 0; i < pixels.length; i += 2) {
+        const x = x0 + pixels[i]!;
+        const y = y0 + pixels[i + 1]!;
+        const off = sheenFrom(x, y, nowMs);
+        if (off >= SHEEN_HALF || (pass === 1) !== off < SHEEN_CORE) continue;
+        ctx.fillRect(x - cam.x, y - cam.y, 1, 1);
+      }
+    }
+  }
+}
+
 /**
  * Glints on the water: a short bright dash on a tile now and then, each in its own time, growing
- * and shrinking again, and on ice a little star. `busy` (rain) keeps them fewer, since the
- * ripples are doing the work.
+ * and shrinking again, and on ice a little star and the sheen passing over it. `busy` (rain) keeps
+ * them fewer, since the ripples are doing the work, and the ice without its sheen.
  */
 export function drawShimmer(
   ctx: CanvasRenderingContext2D,
@@ -107,6 +160,7 @@ export function drawShimmer(
   busy: boolean,
 ): void {
   const canvas = ctx.canvas;
+  if (!busy) drawSheen(ctx, life, cam, nowMs);
   for (const { tx, ty, ice } of life.water) {
     const x0 = tx * TILE_SIZE;
     const y0 = ty * TILE_SIZE;

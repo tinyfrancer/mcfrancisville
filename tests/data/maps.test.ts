@@ -1,7 +1,9 @@
 import { describe, expect, it } from 'vitest';
 import { PATCHES } from '../../src/data/gathering';
 import { PROP_FOOTPRINT, TOWN } from '../../src/data/maps';
-import { parseMap, walkable } from '../../src/systems/grid';
+import { ZONES } from '../../src/data/zones';
+import { PROP_SEATS } from '../../src/data/seats';
+import { parseMap, tileAt, walkable } from '../../src/systems/grid';
 import { PROP_ART } from '../../src/sprites/props';
 import { TILE_SIZE } from '../../src/config/world';
 import type { PropId } from '../../src/types/ids';
@@ -201,10 +203,100 @@ describe('the town', () => {
     }
   });
 
+  it('paves the square in flagstones, the well on its setts, with benches on it (1.1 A1)', () => {
+    const well = map.props.find((p) => p.id === 'well')!;
+    // The square: the well's footprint is setts, every other tile of it flagstones or a bench's.
+    const square = { tx: 15, ty: 18, w: 10, h: 9 };
+    for (let ty = square.ty; ty < square.ty + square.h; ty++) {
+      for (let tx = square.tx; tx < square.tx + square.w; tx++) {
+        const under =
+          tx >= well.tx && tx < well.tx + well.w && ty >= well.ty && ty < well.ty + well.h;
+        expect(tileAt(map, tx, ty), `${tx},${ty}`).toBe(under ? 'setts' : 'flagstones');
+      }
+    }
+    const benches = map.props.filter(
+      (p) =>
+        p.id === 'bench' &&
+        p.tx >= square.tx &&
+        p.tx < square.tx + square.w &&
+        p.ty >= square.ty &&
+        p.ty < square.ty + square.h,
+    );
+    expect(benches.length).toBeGreaterThanOrEqual(2);
+    expect(PROP_SEATS.bench).toBeDefined();
+    // Nothing but the square is flagstones or setts.
+    for (let ty = 0; ty < map.height; ty++) {
+      for (let tx = 0; tx < map.width; tx++) {
+        const inside =
+          tx >= square.tx &&
+          tx < square.tx + square.w &&
+          ty >= square.ty &&
+          ty < square.ty + square.h;
+        if (!inside)
+          expect(['flagstones', 'setts'], `${tx},${ty}`).not.toContain(tileAt(map, tx, ty));
+      }
+    }
+  });
+
   it('draws every prop at least as wide as the ground it stands on', () => {
     for (const [id, { w }] of Object.entries(PROP_FOOTPRINT) as [PropId, { w: number }][]) {
       const width = PROP_ART[id].source.rows[0]!.length;
       expect(width, id).toBeGreaterThanOrEqual(w * TILE_SIZE);
+    }
+  });
+});
+
+describe("the places' edges (1.1 A2)", () => {
+  const places = Object.values(ZONES).flatMap((z) => (z.map ? [z.map] : []));
+
+  it('close in every place outdoors all round, but for its ways out', () => {
+    for (const source of places) {
+      const map = parseMap(source);
+      const shut = (tx: number, ty: number) =>
+        !walkable(map, tx, ty) || Boolean(exitAt(map.exits, { tx, ty }));
+      for (let tx = 0; tx < map.width; tx++) {
+        expect(shut(tx, 0), `${tx},0`).toBe(true);
+        expect(shut(tx, map.height - 1), `${tx},${map.height - 1}`).toBe(true);
+      }
+      for (let ty = 0; ty < map.height; ty++) {
+        expect(shut(0, ty), `0,${ty}`).toBe(true);
+        expect(shut(map.width - 1, ty), `${map.width - 1},${ty}`).toBe(true);
+      }
+    }
+  });
+
+  /** What stands in a wood's edge to break up its hedge. */
+  const STANDS: ReadonlySet<PropId> = new Set(['tree', 'oldTree', 'rock', 'stump', 'bush']);
+
+  it('edge the woods with trees stepping in and out, never a long straight hedge', () => {
+    for (const id of ['whisperwood', 'lanternShore', 'castleHill'] as const) {
+      const map = parseMap(ZONES[id].map!);
+      const stands = (tx: number, ty: number) =>
+        map.props.some(
+          (p) => STANDS.has(p.id) && tx >= p.tx && tx < p.tx + p.w && ty >= p.ty && ty < p.ty + p.h,
+        ) || Boolean(exitAt(map.exits, { tx, ty }));
+      // Along each side, the edge and the line inside it: something stands in them at least
+      // every eight tiles, and some of it in the edge itself.
+      const sides = [
+        (i: number, d: number) => [i, d] as const,
+        (i: number, d: number) => [i, map.height - 1 - d] as const,
+        (i: number, d: number) => [d, i] as const,
+        (i: number, d: number) => [map.width - 1 - d, i] as const,
+      ];
+      sides.forEach((at, side) => {
+        // The castle hill's top is the castle on its meadow, not a wood.
+        if (id === 'castleHill' && side === 0) return;
+        const length = side < 2 ? map.width : map.height;
+        let gap = 0;
+        let inEdge = 0;
+        for (let i = 1; i < length - 1; i++) {
+          const here = [0, 1].some((d) => stands(...at(i, d)));
+          if (stands(...at(i, 0))) inEdge++;
+          gap = here ? 0 : gap + 1;
+          expect(gap, `${id} side ${side} at ${i}`).toBeLessThan(8);
+        }
+        expect(inEdge, `${id} side ${side}`).toBeGreaterThan(1);
+      });
     }
   });
 });
