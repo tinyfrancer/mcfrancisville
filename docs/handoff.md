@@ -113,16 +113,23 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-**A5a in progress** (branch `claude/a5a-second-body`, draft PR against `v1.1-dev`; decision 354
-when it lands; no save change). Done: `tests/sprites/looksHeld.test.ts` holds her looks and every
-figure's as hashes of their layers, taken from the code before any change (rerun, never `-u`,
-but for the two stout neighbours' own lines); `doll.ts` split by family into `sprites/doll/`
-(`body`, `poses`, `paint`, `face`, `ink`, `hair`, `hats`, `prints`, `backs`, `cuts`), a pure
-move, `doll.ts` putting her together with the same exports. Next, in order: the `Build`
-(`data/builds.ts`) and a stout body (`sprites/doll/stout.ts`: parts drawn wider, a `Measure`
-the cuts read instead of column literals, `measureOf(body)`), the action and working bodies for
-it, `build` on Rufus's and Gourdon's rows, their touches on it, the docs and decision 354.
-Baseline renders (1,253 `doll:*`, `figure:*`, `sit:*` PNGs) were in the session's scratch.
+**A5a landed (PR #214, decision 354; no save change). Next: A5b.** A `Build`
+(`data/builds.ts`, `regular` and `stout`) is `build` on a villager row, read by `buildOf`
+(`sprites/villagers.ts`); Rufus and Gourdon are stout (Barty is "all bones", left for the slight
+build). `doll.ts` is split by family into `sprites/doll/` (`body`, `builds`, `stout`, `poses`,
+`paint`, `face`, `ink`, `hair`, `hats`, `prints`, `backs`, `cuts`) with the same exports. The
+stout body is her rows and head with wider parts (`stout.ts`: a `Parts`, a `Measure`, `stoutReach`
+for arms drawn for her); every action and job is drawn on it (`ACTION_BODIES`,
+`workPose(…, build)`, held things widened with the hands); cuts step in from `measureOf(body)`
+instead of her columns. Held by `tests/sprites/looksHeld.test.ts` (hashes of every look of hers
+and every figure's, taken before: only Rufus's and Gourdon's lines changed; rerun, never `-u`,
+but for figures a change means to alter) and `tests/sprites/builds.test.ts` (every build 32×48
+in regions, her head and rows, its measure what it draws, every piece on every body). Gallery:
+`body:<build>:walk`, `:act:<pose>`, `:wears:<slot>:<view>`. **For A5b**: add `'slight'` (a
+`slight.ts` like `stout.ts`, its rows in `PHYSIQUES` and `ACTION_BODIES`); the touches still
+placed by her columns are listed in architecture.md's "Where it hurts" 3; `measureOf(body)` is
+what they read. For her phone: whether Rufus and Gourdon read as big and cosy, and his belt and
+bucket sit right. No `NOTES` line (the review folds the art into 1.2).
 
 **A3 landed (PR #213, decision 352; no save change). Next: A5a.** The ice is drawn on the
 world's pixels (`sprites/ice.ts`, `drawIce`: patches of frosted, plain and clear ice, darker down

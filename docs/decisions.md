@@ -8653,3 +8653,101 @@ nothing she sees changes. Run beside A3, which owned the sprites, `render/life.t
   alternating, each side from its own copy: every scene within the other's spread (the town's
   draw 35.2–39.2 ms on A4 against 36.3–39.7, her yard 34.3–37 against 33.6–38.3, the back room's
   18.1–26.2 against 19.7–21.6 with its view unchanged). `?perf`'s overlay is untouched.
+
+## 354. A second body: the stout build, on Rufus and Gourdon, and `doll.ts` split by family (2026-10-20, 1.1's A5a)
+
+_Session A5a of the 1.1 plan, lane A (decision 328), "Where it hurts" 3 and 14's `doll.ts`. **No
+save change**; she looks exactly as she did. The user's word on the bodies was "no particular
+shape" (decision 329), so the session picked. Personal touches parked (decision 177): nothing was
+asked._
+
+- **A `Build`** (`src/data/builds.ts`: `regular`, hers, and `stout`; A5b adds `slight`) is
+  `build` on a villager row, `regular` if it has none, read by `buildOf` in
+  `sprites/villagers.ts` for `figureLayers` (and through it `bakeFigure`, the busts, costumes,
+  jobs, waves and seats). She is always `regular`; the Moon Pie Man, Wes and those passing
+  through are too until A5b says otherwise. **Rejected:** the build on the sprite's `FigureArt`
+  (the plan and lane table put it on the row, beside who they are); a build on her look (she
+  has one body, decision 79).
+- **The stout body** (`sprites/doll/stout.ts`) is hers drawn wider on her rows: the chest 16
+  pixels across (8–23, hers 10–21), the shoulder row sloping in to 12 and the hips 14 (9–22), so
+  it's round in the middle; the neck six wide; arms a pixel thicker (five at the shoulder and
+  elbow, four at the wrist, a hand five) hung out past the chest; legs six wide, a pixel thicker
+  on the outside, feet seven. From the side, a broad back a pixel further back than hers and a
+  tummy a pixel out in front, the legs seven wide, the near arm four. Same 32×48, the same head to
+  the pixel, the same rows for the neck, shoulders, waist, hips, legs and feet (held by
+  `tests/sprites/builds.test.ts`), so `raised`/`HAT_ROOM`, the folds for sitting, crouching and
+  breathing, every face, hair and hat and where she's placed by her feet hold unchanged.
+  **Rejected:** stretching her layers by inserting columns (no redraw: a tee's folds and a
+  boot's shaft would be doubled pixels, not a body); the first draw, hips as wide as the chest
+  and the shoulder row two short of it, which read as a box on legs set four apart (the sloped
+  shoulders and narrower hips were looked at against it in `body:stout:walk`).
+- **How a build is drawn** is a `Parts` (`body.ts`: trunk, legs, upper arm, hanging forearm,
+  side arm and the limb an action's arm is drawn with) and a `Physique` per build
+  (`builds.ts`: parts, measure, where an arm drawn for her lands, its bodies), so `frontBody`,
+  `sideBody` and the action bodies take one; hers are the old functions. **Every action** (crouch,
+  pour, swing, holdUp, wave, shrug) and **every job** is drawn on the stout body from her arms'
+  own points, moved out with its shoulders (`stoutReach`: two pixels out each side from the
+  front and behind, never so far that the arm's outline leaves the picture; where they were from
+  the side), with a limb four thick (four across up and down, the extra pixel on the outside;
+  four deep across, the extra underneath): `ACTION_BODIES`, `armsBody(view, arms, build)`,
+  `workPose(work, view, frame, build)`. **What's in their hands is widened as far as their hands
+  moved** (`widened` in `working.ts`): its two halves out two pixels, the middle drawn on across
+  the gap, outlined again, or less where it would leave the picture (Gourdon's trestle stays as
+  it was). **Rejected:** a hand-drawn arm per action, view and frame for each build (her arms'
+  points already say what the pose is; forty more paths per build to keep in step); held things
+  left as they were (the hands would sit two pixels outside the bucket's rim and the tray's
+  ends).
+- **Cuts measure from the body, not her columns.** A body grid is marked with its build's
+  `Measure` (`measured`, `measureOf(body)`, hers for any unmarked grid): the chest's columns from
+  the front and behind, the back and front from the side, the hips, the neck and each leg. What
+  placed a detail by a column of hers now steps in from that: the tee's waist folds and a crew
+  neck's rim, trousers' pockets and back seams and the jeans' knees, the sundress's straps, the
+  Peter Pan collar (round the neck), the corset's boning, the side edge of a jacket and a
+  cardigan, the velvet's square neck, the hoodie's hood, drawstrings and pocket, the overalls'
+  bib and straps, the platform boots' laces, the flats' bows, every skirt (from the hips' middle
+  and half-width), the cape (as much wider), both pairs of wings, and Gourdon's tool belt. What
+  sits at her middle stays there on purpose: a fly, the joggers' drawstring, the jackets' open
+  fronts, lapels, zip and pockets (beside the opening), the ringmaster coat's lapels and buttons,
+  the cardigan's opening, a print, a pendant, the rose. Her measure is her old numbers, so every
+  look of hers is the same to the last pixel. **Rejected:** measuring each grid as it's painted
+  (an arm crossing her chest in an action would move her buttons); a build name on each grid
+  (the measure is what a cut needs, and an unmarked grid is hers).
+- **Rufus and Gourdon are stout**, by their rows. Gourdon is the pumpkin-headed carpenter, as
+  solid as his bench, under a head already as wide as a stout body. Rufus, the werewolf florist,
+  is "all fluff", hugs Cody till he's covered in fur and eats the broken cookies: a big soft wolf.
+  **Barty, the plan's suggestion, isn't**: he's "all bones" ("Nothing in there to blame, mate.
+  I'm all bones"), the slight build A5b brings fits him, and a stout skeleton would need his ribs
+  drawn again for one session and again for the next. Their touches sit on it: Rufus's fur is
+  painted on regions and his ears, muzzle, mane and tail are on his head or behind him; Gourdon's
+  pumpkin is his head; his tool belt measures his waist. Their costumes (Rufus's sheep's hood,
+  Gourdon's bug catcher's shirt and hat), both jobs (the bucket of flowers, the plank on the
+  trestle), the wave, sitting, every feeling and a bracelet were looked at on them, and the busts
+  (`drawBust`) show the broader shoulders without a change, being cut from the figure.
+- **`doll.ts` split by family**, first as a pure move (each item's text as it was, a few gaining
+  an `export`) and then changed: `sprites/doll/` holds `body.ts`, `builds.ts`, `stout.ts`,
+  `poses.ts`, `paint.ts`, `face.ts`, `ink.ts`, `hair.ts`, `hats.ts`, `prints.ts`, `backs.ts` and
+  `cuts.ts`; `doll.ts` (356 lines from 3,065) puts her together (`dollLayers`, `dollKey`, where
+  shoes go) and re-exports the same names by name, plus `bodyOf`, `measureOf`, `Measure` and
+  `ACTION_BODIES`, so nothing that imported it moved.
+- **Held**: `tests/sprites/looksHeld.test.ts`, written and run on the code before any change,
+  hashes the layers of every piece in every fabric, facing, frame, pose, action, rest and
+  feeling of hers, every hairstyle, tattoo, bracelet, hem with every shoe, back piece with every
+  hairstyle and jacket over every top, every one of her bodies and what's painted on each; and
+  every figure every way it stands, works and feels, in costume and with a bracelet, Cody's
+  halves and every job. After the split and after the stout body, every hash is the same but
+  Rufus's and Gourdon's (updated for those two lines only); and the 1,253 `doll:*`,
+  `figure:*` and `sit:*` sprites rendered before and after: 1,195 byte for byte the same, the 58
+  that differ all Rufus's and Gourdon's. New gallery rows:
+  `body:<build>:walk`, `body:<build>:act:<pose>` and `body:<build>:wears:<slot>:<view>` (every
+  piece on each build's bare body), all looked at.
+- **Checked**: smoke 622/622 (the cloud's sealed check failed once by chance, as decision 336
+  noted, and passed alone), `smoke:offline` 10/10, the suite 2,692 tests. `npm run perf` at the
+  default hour, one run before and one after: every scene within noise (the town's draw 40.7 to
+  36.7 ms mean, home 19.0 to 20.2, the yard 37.0 to 36.0, the back room 21.6 to 22.8; update
+  1.3 to 1.4 in town). The stout bodies and their actions are made once as the module loads, and
+  each stout figure's pictures are baked as everyone's are, by key.
+- **For A5b**: add `'slight'` to `Build`, a `slight.ts` beside `stout.ts` (a `Parts`, a
+  `Measure`, a `reach`) and its row in `PHYSIQUES` and `ACTION_BODIES`; `builds.test.ts` holds
+  every build to the frame, head and rows. The touches that still place by her columns are
+  listed in architecture.md's "Where it hurts" 3; `measureOf(body)` is what they should read.
+  `looksHeld` will change for every neighbour A5b casts and must not change for her.

@@ -273,7 +273,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   its colours; rows in `src/data/broom.ts`, art in `src/sprites/broom.ts`, the slot first on the
   quick bar and the sheet at the stand `src/hud/BroomSheet.ts` (`BroomApi`).
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
-  body drawn in region keys (decision 27). The pieces are rows in `src/data/outfits.ts` (a new one
+  body drawn in region keys (decision 27). It puts her together; its families are files in
+  `src/sprites/doll/` (1.1's A5a, decision 354): the body (`body.ts`), the builds (`builds.ts`,
+  `stout.ts`), poses and folds (`poses.ts`), painting and `finish` (`paint.ts`), the face, ink,
+  hair, hats, prints, backs and cuts. **A build** (`src/data/builds.ts`: `regular`, hers, and
+  `stout`; `build` on a villager row, Rufus and Gourdon stout) is the body under the look: wider
+  parts on her rows and her head, so every cut paints onto it; a cut steps in from what the body
+  measures (`measureOf`), never a column of hers, and an arm drawn for her is moved out with a
+  build's shoulders. `tests/sprites/looksHeld.test.ts` holds her looks and every figure's as
+  hashes of their layers (rerun, never `-u`, but for the figures a change means to alter). The pieces are rows in `src/data/outfits.ts` (a new one
   is a row with a description, plus a print in `OUTFIT_ART` if it has one; `fixed` if it comes in
   one colour only, decision 141); the rules for wearing them are
   `src/systems/wardrobe.ts`; `src/world/Wardrobe.ts` holds what she wears and owns, and tops an
@@ -308,7 +316,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   tap stands her up, and the `sit` pose is her standing layers folded at the thighs (`seated`).
   She faces what she walks up to (`facingToward`, `src/systems/facing.ts`) and acts it out (V1's
   E2, decision 281): five `ActionPose`s (crouch, pour, swing, holdUp, wave) facing her way, a
-  body per view and frame (`ACTION_BODY` in `doll.ts`, a crouch a `folded` body), their verbs and
+  body per view and frame (`ACTION_BODY` in `doll/poses.ts`, a crouch a `folded` body), their verbs and
   beats in `systems/poses.ts` (`VERBS`), started from moments by `verbOf` in
   `world/services/Poses.ts`; the tipped can is `src/sprites/actions.ts`. Standing, she breathes
   and blinks (`poses.rest()`, `Rest` in `dollLayers`).
