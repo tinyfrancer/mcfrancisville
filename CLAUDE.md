@@ -275,12 +275,12 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **Her look:** `src/sprites/doll.ts` draws the paper doll in layers, painting most clothes onto a
   body drawn in region keys (decision 27). It puts her together; its families are files in
   `src/sprites/doll/` (1.1's A5a, decision 354): the body (`body.ts`), the builds (`builds.ts`,
-  `stout.ts`), poses and folds (`poses.ts`), painting and `finish` (`paint.ts`), the face, ink,
-  hair, hats, prints, backs and cuts. **A build** (`src/data/builds.ts`: `regular`, hers, and
-  `stout`; `build` on a villager row, Rufus and Gourdon stout) is the body under the look: wider
-  parts on her rows and her head, so every cut paints onto it; a cut steps in from what the body
-  measures (`measureOf`), never a column of hers, and an arm drawn for her is moved out with a
-  build's shoulders. `tests/sprites/looksHeld.test.ts` holds her looks and every figure's as
+  `stout.ts`, `slight.ts`), poses and folds (`poses.ts`), painting and `finish` (`paint.ts`), the
+  face, ink, hair, hats, prints, backs and cuts. **A build** (`src/data/builds.ts`: `regular`,
+  hers, `stout` and `slight`; 1.1's A5a and A5b, decisions 354 and 355) is the body under the
+  look: wider or narrower parts on her rows and her head, so every cut paints onto it; a cut or a
+  neighbour's touch steps in from what the body measures (`measureOf`), never a column of hers,
+  and an arm drawn for her is moved out or in with a build's shoulders. `tests/sprites/looksHeld.test.ts` holds her looks and every figure's as
   hashes of their layers (rerun, never `-u`, but for the figures a change means to alter). The pieces are rows in `src/data/outfits.ts` (a new one
   is a row with a description, plus a print in `OUTFIT_ART` if it has one; `fixed` if it comes in
   one colour only, decision 141); the rules for wearing them are
@@ -556,7 +556,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   neighbourhood answers the same reads, a line each, for the view and the tests); `world.mailbox`
   the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
-  (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154); the talk and mail sheets are
+  (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154), on the body
+  their row's `build` names (required on every row; decision 355: Rufus, Gourdon and the Moon Pie
+  Man stout, Barty, Scarah, Rob Boo and Wes slight, everyone else and Cody hers; the unrowed's in
+  `UNROWED_BUILDS`); the talk and mail sheets are
   `src/hud/TalkSheet.ts` and `src/hud/MailSheet.ts`. The top bar's 👥 is the neighbours sheet (0.2's U3, decision
   180, `src/hud/NeighboursSheet.ts` through `NeighboursApi`): a page each with hearts, birthday
   (`src/data/birthdays.ts`), loves, likes and gifts by band, where they are now
