@@ -8833,3 +8833,72 @@ asked._
   slimmer, the Moon Pie Man sturdier, as Rufus and Gourdon already are). For her phone: whether
   the slight four read as slim and not as hers in a smaller size, and the mayor's sash and Wes's
   trench sit right.
+
+## 356. 1.2: the review after the 1.1 plan, one card folding 1.0.1 and 1.1, a 1.0 town lived in on 1.2, and the shakedown logged (2026-10-20, 1.1's V1.1)
+
+_Session V1.1 of the 1.1 plan, the last: the review after all four lanes (decisions 330–355),
+alone, and the release PR #201 brought up to 1.2 for the user to merge. No save change (still
+v55). Personal touches parked (decision 177): the card's words are the warmest default; nothing
+was asked._
+
+- **One card for her, `1.2`.** Her phone is on 1.0 (`main` at PR #198): #201, cut for 1.0.1 and
+  grown into 1.1, was never merged, so no phone saw the `1.0.1` or `1.1` rows. By decision 324's
+  rule they are folded into one `1.2` row of five lines, in the mayor's voice: the silent switch
+  and Play on silent; the crickets' breath and the Ambience switch; the square, the woods' edges
+  and the ice; the builds ("I'm told I am; I had a new sash made"), the pets' straight walks and
+  the back room's planters; and 1.0.1's rest in a line (the free go in Today, the greenhouse's
+  card, October's surprises, snow lanterns). P.S. "Typed very quietly, in case your phone is on
+  silent. The W still sticks." `notesToShow('1.0')` is exactly that card, held by
+  `tests/systems/patchNotes.test.ts`; `1.0` stays as shipped. The refactors (T, W, A4) get no
+  line.
+- **A 1.2 town lived in, from her own.** Rather than a new town, 1.0's lived-in town
+  (`lived-in-v53.json`) was opened in a 1.2 dev build as her phone will open it (notes last seen
+  `1.0`, through steps 53 and 54), at Close, Far and sideways: one card, five lines, fitting each
+  way; Cody's hello; save v55; no error notes (the one console error is the unlinked cloud's 503,
+  as on her phone today). Then it was played on by taps over four days with a scratch Playwright
+  driver on smoke's helpers (19 September afternoon, 21 September at night, 22 September
+  afternoon, 5 October morning and afternoon): the square's bench sat on, the duck pond's free
+  go, Whisperwood and Lantern Shore found on foot (she had never been) and their ice skated at
+  night, talks with every build (Maude, Barty, Rufus, Gourdon, Scarah and more), the back room
+  built and a planter made, set down there and a pumpkin sown in it by a second tap on the bed,
+  Fibi patted, walked and treated each day from 28 points to 68 and her trick seen, and on a
+  rare event's day Rufus's frog Kevin Two found at Boo Acres and carried home. The back room's
+  wood and stone were topped up through the dev handle (59 wood, 16 stone), as smoke does, beyond
+  what four days' gathering found. The save's stamps were set to 5 October 17:30 UTC (an
+  afternoon in both her time zone and CI's), since a dev build's `?day=` doesn't reach them. Kept
+  as `tests/persistence/fixtures/lived-in-v55.json`, held by `livedIn.test.ts`.
+- **The shakedown** looked at smoke's screenshots (621/622 on the first whole run, the one the
+  known flaky "sealed" check), the cast's figures at 4× and 6× from every side, `place:town`, its
+  own days at phone size by day and at night, Settings' Sound tab, and a night outdoors heard:
+  each place's bed at 22:00 on a clear September night through the real `Mixer` on an
+  `OfflineAudioContext` (H2's method, three minutes at 22,050 Hz): 14 chirps a minute, the
+  longest silence 53 s, the town's bed 0.0001 RMS, Whisperwood's 0.0021 with its wind, the
+  shore's 0.0045 with its water, H2's numbers. **Fixed**: smoke's "what the cloud keeps is
+  sealed" now looks for whole JSON keys and a backup code's whole prefix (`"player"`,
+  `"wardrobe"`, `MFV0-`/`MFV1-`), as X2 did for the unit test; "MFV" alone turns up in base64url
+  by chance, and a quote never does. **Logged, not fixed**: a ninth of the trees are broken and a
+  ninth dead in every place, a third of the town's (the art notes: for her eye, and if too many a
+  rule in `lookOf` dealing the broken form to the woods only); the frozen pond's ring round the
+  fountain judged charming and kept; Whisperwood's creek ending square at the east edge; the
+  passers-by's build (hers); the dev build's save stamps; the overlays snapshot without 1.2's
+  save; and every lane's "left for the review" (`Home`'s 27 and `Neighbourhood`'s 10
+  forwarders, `happeningsAt` per step, `Decorations` and `Mounds` asking the day key per
+  `canWalk`, the chunk now 1.84 MB) in "Where it hurts", rewritten most pressing first.
+- **Perf** at Close and Far, 21:30 and noon, 1.2 against 1.0 served side by side and alternated:
+  no frame doubled, updates within a tenth or two; the town at Close by night 2–4 ms of mean
+  dearer (37.8–39.2 against 33.8–36.7, medians a millisecond apart), likely the square's pieces
+  baked as the walk reveals them; everywhere else crossing; the heap about 2 MB up. `npm run
+perf` walks Lantern Shore last now, after every scene 1.0's table had. The table is in
+  `docs/architecture.md`, "1.2, V1.1's review"; "On her iPhone" stays the user's.
+- **Docs**: `CLAUDE.md`'s "Project" says the 1.1 plan is complete and 1.2 is #201; the
+  handoff's "After 1.0" says the same with the user's five steps, keeps every lane's heading as a
+  record under "1.1 and 1.2", says how 1.1 was run for whoever plans 1.3, and its art notes are
+  what's left; "In progress" is empty.
+
+**Rejected:** three cards at one opening (`1.0.1`, `1.1`, `1.2`) of a release she gets at once; a
+new town for the fixture (her own town carried through the migrations is what her phone will do,
+and it reached the trick and the back room's planter in four days where a new town couldn't);
+dealing the broken trees to the woods only now (a look, not a bug, and the user's to judge on her
+phone); filling the frozen pond's ring (the fountain plays on in winter; open water round it is
+the truth of it); dropping the forwarders here (a refactor in a review, with lane A's reasons for
+them gone only now); splitting the chunk (decision 328).

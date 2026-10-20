@@ -19,12 +19,15 @@ store is the user's to link, README's "Cloud save").
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
 word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
 (V1's review, decision 324) and **1.0 is on her phone** (2026-10-18, PR #198 from `v1-dev`, save
-v53; 0.4 before it, 2026-10-07, PR #175, save v43). 1.0.1 followed the next day (PR
-#201, save v54, decisions 325 and 327). **The plan now is `docs/v1.1_plan.md`** (settled
-2026-10-19, decision 328): four lanes from `v1.1-dev`, the sound first (the silent switch
-silences the game, the crickets tamed: ⬆ 1.1), then the refactors in "Where it hurts" and the
-art redesigns (⬆ 1.2); its status line says which have landed. `docs/v1_plan.md`,
-`docs/v0.3_plan.md` and the plans before them are complete.
+v53; 0.4 before it, 2026-10-07, PR #175, save v43). 1.0.1, cut the next day (PR #201, save
+v54, decisions 325 and 327), was never merged: it grew into 1.2. **The 1.1 plan is
+complete** (`docs/v1.1_plan.md`, settled 2026-10-19, decision 328; its review, V1.1, decision
+356): four lanes from `v1.1-dev`, the sound (the silent switch silences the game, the crickets
+tamed), the refactors in "Where it hurts" and the art redesigns. **1.2 is the release PR #201**
+(`v1.1-dev` → `main`, "Release 1.2 (with 1.0.1 and 1.1)", save v53 → v55), the user's to merge;
+her phone is on 1.0 until then, and reads one card, `1.2`, folding 1.0.1 and 1.1. A session
+starting cold with nothing asked of it asks the user what they'd like next. `docs/v1.1_plan.md`,
+`docs/v1_plan.md` and the plans before them are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
