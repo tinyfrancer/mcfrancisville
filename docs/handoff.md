@@ -113,15 +113,19 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
-**A5b in progress** (branch `claude/a5b-third-body`, draft PR against `v1.1-dev`; no save
-change). Done: the slight body (`sprites/doll/slight.ts`, in `PHYSIQUES` and `ACTION_BODIES`;
-held things narrowed with the hands, `narrowed` in `working.ts`); the cast (`build` required on
-every villager row; Barty, Scarah, Rob Boo slight, Rufus, Gourdon stout, the rest `regular`; the
-Moon Pie Man stout and Wes slight in `UNROWED_BUILDS`, `sprites/villagers.ts`); every touch that
-placed by her columns now reads `measureOf(body)` (the regular ones' hashes unchanged); the looks
-test changed for exactly those five; `art_style.md`, `architecture.md` 3 and `CLAUDE.md` written.
-Next: the whole suite and smoke green, decision 355, the plan's status line, this heading to
-"landed", perf before and after, merge.
+**A5b landed (PR #215, decision 355; no save change). Lane A is finished.** The slight body
+(`sprites/doll/slight.ts`: a chest ten across, hips as narrow, a neck two wide, arms and legs a
+pixel thinner; in `PHYSIQUES` and `ACTION_BODIES`, held things narrowed with the hands,
+`narrowed` in `working.ts`). The cast: `build` is required on every villager row (Barty, Scarah,
+Rob Boo slight; Rufus, Gourdon stout; Maude, Wrapunzel, Agatha, Cody, Ollie, Nessa, Hazel,
+Boothoven `regular`); the Moon Pie Man stout and Wes slight in `UNROWED_BUILDS`
+(`sprites/villagers.ts`), the passers hers. Every neighbour's touch that placed by her columns
+reads `measureOf(body)` (on the regular ones not a pixel moved). `looksHeld` changed for exactly
+those five; 123 of the 1,253 `doll:*`/`figure:*`/`sit:*` sprites differ, all theirs; perf
+within noise (decision 355's numbers). **For V1.1's review**: the bodies are a line for 1.2
+(Barty, Scarah, the mayor and Wes slimmer, the Moon Pie Man sturdier, beside Rufus and Gourdon);
+no `NOTES` line was written. `builds.test.ts`'s old width check measured nothing (fixed). For
+her phone: whether the slight four read as slim, and the mayor's sash and Wes's trench sit right.
 
 **A5a landed (PR #214, decision 354; no save change). Next: A5b.** A `Build`
 (`data/builds.ts`, `regular` and `stout`) is `build` on a villager row, read by `buildOf`
