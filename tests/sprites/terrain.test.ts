@@ -179,14 +179,14 @@ describe('the ground at 32', () => {
     }
   });
 
-  it('ends a frozen creek at open water in a lip, on the sides that meet it', () => {
+  it('thins a frozen creek into open water on the sides that meet it (1.1 A3)', () => {
     const at = lookup(['.-.', '~-~', '~~~'], { '.': 'grass', '-': 'ice', '~': 'water' });
     const tongue = neighbourMask(at, 1, 1);
     expect(tongue & (THAW_S | THAW_E | THAW_W)).toBe(THAW_S | THAW_E | THAW_W);
     expect(neighbourMask(at, 1, 0) & (THAW_S | THAW_E | THAW_W)).toBe(0);
-    const lip = rasterize(terrainPiece('ice', tongue, 0).source, TERRAIN_ART.ice.palette);
+    const melt = rasterize(terrainPiece('ice', tongue, 0).source, TERRAIN_ART.ice.palette);
     const plain = rasterize(terrainPiece('ice', tongue & 0xff, 0).source, TERRAIN_ART.ice.palette);
-    expect(lip.data).not.toEqual(plain.data);
+    expect(melt.data).not.toEqual(plain.data);
   });
 
   it('runs the cobbles, the square’s flagstones and its setts on into each other (1.1 A1)', () => {

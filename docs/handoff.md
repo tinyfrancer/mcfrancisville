@@ -113,6 +113,20 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
+**A3 landed (PR #213, decision 352; no save change). Next: A5a.** The ice is drawn on the
+world's pixels (`sprites/ice.ts`, `drawIce`: patches of frosted, plain and clear ice, darker down
+the middle, a frost that comes and goes, stones in the bank's lip, cracks and skate marks from
+seeds two tiles round, creek banks that bend six pixels further, `meander`), every tile of ice a
+piece keyed by its place; the mouth at Lantern Shore melts (`meltNear`: plates, open water, floes
+on the lake's first tiles, `floeAt` in `water()`); snow drifts over it in winter (`snowOnIce`,
+laid by `seasonPieces`); a band of sheen glides over it (`Life.sheen`, drawn inside
+`drawShimmer`). Held by `tests/sprites/ice.test.ts`; W1's
+snapshots untouched (no tile changed). Merged after A4: the sheen rides
+`drawShimmer`, which A4's life pass calls. **For V1.1's review**: the frozen town pond now has a ring of plates
+and open water round the fountain (its tiles stay water), kept as charming; the bank pieces beside
+ice cost a little more to bake (Lantern Shore's ground 190–320 ms to 370–560 in Node, once a
+place). For her phone: whether the creeks read as ice at Close, and the sheen is gentle enough.
+
 **A4 landed (PR #212, decision 353; no save change). Next: A5a.** (Run beside A3.)
 `render/OutdoorView.ts` is drawn in passes (1,269 lines to 494): a `Pass`
 (`render/passes/pass.ts`) is a name and a part in any of a frame's layers (`ground`, `stand`,
@@ -1857,10 +1871,10 @@ screenshots and its own four days of play at phone size, and found:
 - ~~**Woods are walls of one crown.**~~: done in 1.1 (A2, decision 351); a poplar, a leaning
   tree and a broken one join the tree's forms (nine, dealt by tile), and the woods' edges step in
   and out, trees standing in the hedge and a tile inside it, a rock or a stump in a gap.
-- **Ice and the creeks are flat paint.** The frozen creek in Whisperwood and the one feeding the
-  lake at Lantern Shore are a flat pale blue ribbon with hard edges, beside water that L6 gave banks
-  and glints; and a frozen creek running into an open lake reads oddly. A texture on the ice
-  (cracks, a sheen) and the banks' soft edge would bring it in line.
+- ~~**Ice and the creeks are flat paint.**~~: done in 1.1 (A3, decision 352); the ice has
+  patches of frosted and clear ice, darker down the middle, a frost that comes and goes along a
+  bank set with stones, hairline cracks and a slow sheen, all on the world's pixels; the creeks'
+  banks bend; at the lake the ice breaks into plates and floes; snow drifts over it in winter.
 - ~~**Big empty lawns**~~: done in 1.1 (A2, decision 351); a meadow, long grass, a log and a rock
   in the clearing's middle, and a meadow, a log, a rock, toadstools and a bush in the
   fairground's south-east.

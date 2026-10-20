@@ -189,7 +189,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
   shared keys, decision 95): her house, Skelly and her pots in `houses.ts`, the shops, the pop-up
   and the cart in `shops.ts`, the neighbours' houses in `neighbourHouses.ts`. Water smooths a
-  diagonal staircase of tiles into a slope (`slopes` in `terrain.ts`). A new prop is a grid, a palette, a `PROP_FOOTPRINT`
+  diagonal staircase of tiles into a slope (`slopes` in `terrain.ts`); ice is drawn on the world's
+  pixels, its patches, cracks, stoned banks, melt into open water and winter snow
+  (`src/sprites/ice.ts`, 1.1's A3, decision 352), and its sheen glides by in `render/life.ts`. A new prop is a grid, a palette, a `PROP_FOOTPRINT`
   row and a map legend character. Big art is drawn with `Sketch` (`src/sprites/sketch.ts`: shapes,
   lit spheres, bevels, outlines from a mask) and `ramp` in `palette.ts`. Every sprite is a row in
   `src/sprites/catalogue.ts` (decision 87), which `?gallery` shows, in production too (decision

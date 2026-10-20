@@ -138,6 +138,13 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   rock or a stump sits in a gap here and there. Among them stand the edge's own trees, a tall
   thin poplar, a leaning one and an old broken one (`src/sprites/treeForms.ts`), so the edge reads
   as a wood and not a wall of one round crown.
+- **Ice is drawn on the world, not the tile** (1.1's A3, `src/sprites/ice.ts`): soft patches of
+  frosted, plain and clear ice from a slow noise, darker down the middle where it's thick over deep
+  water, a frost along the bank that comes and goes, stones in the bank's lip, a few hairline
+  cracks with a lit edge and the odd skate mark, all on the world's pixels, so it runs on over the
+  seams and never repeats. A creek's banks bend further than a pond's. Where ice meets open water
+  it thins, breaks into plates with a dark wet rim, and floes drift off; a slow band of sheen
+  glides over it (`render/life.ts`), and in winter snow drifts in over its banks.
 - **Flower beds in a garden have shapes of their own** (1.1's A2): the castle garden's milkweed
   is a cross, a corner, a long ribbon and a horseshoe, laid in the map as tiles; a bed rounds off
   wherever it ends (`src/sprites/flowerBeds.ts`), so a shape is just where its tiles are.

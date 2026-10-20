@@ -8514,6 +8514,82 @@ asked._
 - **Checked**: the suite unchanged but for the new order test (W1's snapshots and the lived-in
   fixtures pass without `-u`); smoke 622/622 on W3 and on `v1.1-dev`; `smoke:offline` 10/10.
 
+## 352. The ice drawn on the world's pixels: patches, frost, stones, cracks, a sheen, banks that bend, a melt at the lake, and snow in winter (2026-10-19, 1.1's A3)
+
+_Session A3 of the 1.1 plan, lane A (decision 328), for V1's review's art note "Ice and the creeks
+are flat paint". No save change, no map change. Personal touches parked (decision 177): every look
+is the warmest default; nothing was asked._
+
+- **The ice is drawn for where it lies** (`src/sprites/ice.ts`, `drawIce`). Every tile of ice is a
+  piece of its own, keyed by its place (as L6's bank pieces were), and everything on it is worked
+  out on the world's pixels, so it runs on over the seams and never repeats: soft patches of
+  frosted, plain and clear ice from a slow noise (two of the bank's wobble turned across each
+  other, so its shapes are blobs, not the boxes of one wobble's grid), darker down the middle where
+  it's thick over deep water, each tone stepping into the next over a two-pixel band of dither; a
+  frost along the bank from none to four pixels wide, coming and going; and a few hairline cracks
+  with a lit pixel below and to the right of each, and the odd skate mark, each grown from a seed
+  on two tiles in five within two tiles round (a crack wanders, a knot every five to eight pixels
+  turning it up to 30°, and sometimes forks), so a crack running out of one tile runs on into the
+  next. The town's pond frozen over at the new year is drawn the same way.
+- **The banks' soft edge**: L6's field still says where the bank is (where she can skate is still
+  the tiles), and on ice it bends further, up to six pixels more either way in long slow bends
+  (`meander`), so Lantern Shore's creek, a straight run of tiles, widens and narrows like a creek.
+  The bank's face of earth rises smoothly as it turns to the far side rather than switching from a
+  sliver to a face; the low banks are a lip of earth with a dark wet line only here and there, not
+  a dark line and a white rim all the way round; stones are set in the lip (a pebble in two cells
+  of five along it, lit from the top left), reaching onto the grass beside, which takes a piece of
+  the ice's own where they do (`LIP`). No clutter rule was needed: the stones are the bank's.
+- **The melt where the creek meets the lake** (`meltNear`, `floeAt`): how far each world pixel is
+  from open water, from the tiles three round, on a ragged line; within 26 pixels the ice darkens
+  as it thins, the sheet cracks along some of its plates' seams (plates nine pixels across on the
+  world's grid), and nearer still each plate lets go at its own distance, so the last stretch is
+  plates with a dark wet rim along their foot, open water between them in the lake's own depth and
+  dither, and a few floes drifting off on the lake's first tiles (the water beside ice draws them
+  too). It's a look on the ice tiles that were there. The fountain in the frozen town pond stands
+  in tiles that stay water, so it stands in a little hole of open water ringed with plates, which
+  was kept.
+- **Snow on the ice in winter** (`iceSnow`, laid by `seasonPieces` through `snowOnIce`): drifted
+  in over the low banks and a few pixels out onto the ice, at the foot of a face of earth (not
+  down it), wind-blown streaks out on it, a few flecks, the near side of each drift in shade;
+  never over the stones, the melt, or the lawn past the bank, which has its own snow.
+- **The sheen** (`render/life.ts`, `drawSheen` in `drawShimmer`, which `OutdoorView` already
+  calls): bands of light every 352 pixels along the diagonal, gliding down to the right at eight
+  pixels a second, lighting dashes on every fourth row of the ice's open face (`sheenOf`, worked
+  out once per tile in `lifeOf` as `Life.sheen`), a white core in an ice-light band, a pixel at a
+  time, so nothing goes back and forth. Not in the rain. The ice's little star glints stay.
+- **Measured.** `npm run perf` at Close, 21:30, 4× throttled, two runs each way alternating (draw
+  mean in ms): the town 47.6 and 38.4 on `v1.1-dev` against 35.1 and 35.6 on A3, home 19.4, 18.2
+  against 17.9, 15.1, the fairground 26.7, 27.5 against 23.4, 28.9, Whisperwood 27.9, 27.3 against
+  27.1, 29.2, Boo Acres 21.4, 24.0 against 18.8, 20.4, the yard 36.9, 36.4 against 36.2, 40.8, the
+  back room 18.9, 21.2 against 21.7, 17.5; the heap 29.9–33.0 MB both. With the creeks in view
+  (walking each one up and down, 600 frames): Lantern Shore 17.5, 22.0 against 21.7, 22.2, 19.6
+  at 21:30 and 7.4, 9.1 against 8.7, 9.3, 8.8 at noon, Whisperwood's creek 26.0, 27.3 against
+  22.9, 27.7, 25.1 and 9.6, 13.2 against 11.8, 14.2, 12.0: within the spread. Drawing every ground
+  piece of the wilds in Node (unthrottled, three runs): Lantern Shore 190–320 ms against 370–560,
+  Whisperwood 560–630 against 670–750, baked once a place and a look; the melting tiles are the
+  dearest (8–19 ms each), so the melt is kept a pixel at a time as the pixels round it ask again.
+- **Looked at**: `npm run sprite -- 'place:whisperwood' 'place:lanternShore'
+'season:*:whisperwood' 'season:winter:lanternShore'` before and after, and both creeks and the
+  frozen town pond at phone size, Close and Far, upright and on its side, at noon and 21:30, in
+  October, January, April and July. Smoke whole (622 checks) and `smoke:offline` pass.
+- **Held by** `tests/sprites/ice.test.ts` (no two tiles of the creek alike and each the same every
+  time; patches of three tones, none the whole creek, cracks, frost and stones; a crack leaving a
+  tile carries on into the next; the mouth melted, with floes on the lake and none of it three
+  tiles up; snow on the ice in winter only, a share of it; the sheen only on the open face, a whole
+  pixel at a time, under a dozen a second), the terrain test's thaw renamed for the melt, and W1's
+  snapshots unchanged (no tile changed).
+
+**Rejected:** a `frames` glow on the ice for the sheen (frames are a prop's, piece's or fixture's,
+and the ground is baked into chunks; a frame per ice tile would rebake the chunk or draw every tile
+twice); a decal or clutter rule for stones and roots at the creek's edge (a decal is a tile each
+and doesn't know where the wobbling bank runs; roots would need to know where the trees stand); the
+ice's cracks and patches in the tile's own pattern with two looks, as the scratches were (the
+pattern shows down a creek); a texture laid in an eight-tile repeat as the flagstones are (seeds on
+the world cost no more and never repeat); the snow as more keys on the ice's palette, swapped in
+winter (it would show as frost the rest of the year, or need the ice drawn per season); a map
+change at the mouth (W1's snapshots hold walkability, and the plan asked for a look); melting the
+pond round the fountain shut (the hole of open water where the fountain runs reads as a reason).
+
 ## 353. `OutdoorView` drawn in passes, each layer's order named once (2026-10-19, 1.1's A4)
 
 _Session A4 of the 1.1 plan, lane A (decision 328), "Where it hurts" 12. **No save change**;
