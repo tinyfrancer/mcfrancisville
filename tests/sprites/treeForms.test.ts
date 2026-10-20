@@ -21,9 +21,11 @@ function widest(r: Raster): number {
 describe('the trees (V1 L2)', () => {
   const tree = PROP_ART.tree;
 
-  it('come in six shapes the size of the town tree, every one its own, in every leaf colour', () => {
+  it('come in nine shapes the size of the town tree, every one its own, in every leaf colour', () => {
     const forms = tree.forms!;
-    expect(forms).toHaveLength(6);
+    // The town tree's three, L2's conifer, dead tree and birch, and A2's poplar, leaning and
+    // broken trees for the woods' edges.
+    expect(forms).toHaveLength(9);
     const seen = new Set<string>();
     for (const form of forms) {
       expect(spriteSize(form)).toEqual(spriteSize(tree.source));

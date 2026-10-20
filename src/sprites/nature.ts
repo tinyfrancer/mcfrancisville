@@ -279,6 +279,11 @@ export function leaves(base: string, light: string): Palette {
     // A birch's pale bark and a dead tree's hollow (V1's L2, `sprites/treeForms.ts`).
     ...tones('JjiI_', C.birch),
     k: ramp(C.bark)[0],
+    // The broken tree's heartwood and its shelves of fungus (1.1's A2).
+    x: mix(C.wood, C.cream, 0.45),
+    X: C.wood,
+    f: mix(C.cream, C.pumpkin, 0.3),
+    F: mix(C.pumpkinShade, C.wood, 0.4),
   };
 }
 
