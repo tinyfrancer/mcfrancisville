@@ -18,6 +18,8 @@ export const STAMP = 'APPROVED';
 export const ROB_BOO: VillagerRow = {
   name: 'Rob Boo',
   creature: 'ghost mayor',
+  // A wisp of a ghost on wobbly knees, so his hat is a size too big (1.1's A5b).
+  build: 'slight',
   schedule: {
     weekday: [
       // At his desk from first light, out on the town hall's steps to wave the town good morning,

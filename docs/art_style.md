@@ -229,18 +229,26 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   body for each view, like her clothes, so it follows every facing and frame. Keep it to a few
   pixels that read at 1×, in their own colours; a detail that reads as something else (two
   lines as legs, grey flecks as dirt) comes out.
-- **A build is the body under the look** (1.1's A5a, decision 354; `src/data/builds.ts`,
-  `src/sprites/doll/`): her `regular` body, and `stout` (Rufus, Gourdon). A build changes only
-  how wide each part of the body is: the stout chest two pixels out each side and round over
-  narrower hips, a thicker neck, arms a pixel thicker hung out past the chest, legs a pixel
-  thicker. It **never** changes the frame (32×48), the head (so every face, hairstyle, hat and
+- **A build is the body under the look** (1.1's A5a and A5b, decisions 354 and 355;
+  `src/data/builds.ts`, `src/sprites/doll/`): her `regular` body, `stout` (Rufus, Gourdon, the
+  Moon Pie Man) and `slight` (Barty, Scarah, Rob Boo, Wes); everyone else is hers, and so is
+  Cody. A build changes only how wide each part of the body is: the stout chest two pixels out
+  each side and round over narrower hips, a thicker neck, arms a pixel thicker hung out past the
+  chest, legs a pixel thicker; the slight chest a pixel in each side (ten across) over hips as
+  narrow, a neck two wide, arms a pixel thinner (three at the shoulder and elbow, two at the
+  wrist, a hand three) hung in with it, legs four wide, and from the side two pixels shallower.
+  A limb is never thinner than two pixels inside its outline, so it still reads as an arm at 1×.
+  It **never** changes the frame (32×48), the head (so every face, hairstyle, hat and
   glasses is hers), the rows (shoulders at 25, waist, hips at 34, the fold for sitting and
   crouching, feet on the bottom row but one) or the regions' keys, so every cut paints onto it
   as onto her. A cut that places a detail (a strap, a pocket, a button, a seam, a knee) steps in
   from what the body measures (`measureOf`: the chest, hips, neck and legs), never from a column
-  of hers; a detail at the middle (a fly, laces, a lapel, a print) stays at the middle. An arm
-  drawn for her (an action, a job) lands on a build moved out with its shoulders, and what's in
-  the hands is as much wider as the hands are apart. She is always `regular`.
+  of hers; a detail at the middle (a fly, laces, a lapel, a print) stays at the middle. So does
+  a neighbour's touch (Barty's ribs, the mayor's sash, Wes's trench, Scarah's patches, Cornelius
+  on her shoulder): it measures the body it's drawn on. An arm drawn for her (an action, a job)
+  lands on a build moved out or in with its shoulders, and what's in the hands is as much wider
+  or narrower as the hands are apart. She is always `regular`; a new neighbour's row says which
+  build fits them, `regular` where nothing in their lines or look argues otherwise.
 - **A ghost is the doll in pale tones**, not a see-through sprite: Boothoven (0.2's L1) is her
   body in ghostly white and lavender with wild hair; Maude, under her sheet, is the one drawn by
   hand. See-through and glowing is for the ghost pets.

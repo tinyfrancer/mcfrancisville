@@ -27,7 +27,7 @@ import {
   WHITE,
   window,
 } from './buildings';
-import { DOLL_HEIGHT, DOLL_WIDTH, type Grid, type View } from './doll';
+import { DOLL_HEIGHT, DOLL_WIDTH, measureOf, type Grid, type View } from './doll';
 import type { FurnitureArt } from './furniture';
 import { ball, palette, slab, WOOD } from './furnish';
 import type { FixtureArt } from './interiors';
@@ -293,17 +293,21 @@ const doll = () => new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
  * His sash, gold with a darker edge, from his right shoulder across to his left hip in front, the
  * other way behind, and a band down his chest from the side; a little rosette where it crosses.
  */
-export const MAYOR_SASH: RobTouch = (view) => {
+export const MAYOR_SASH: RobTouch = (view, body) => {
   const s = doll();
+  // Across his chest from edge to edge however wide it is (1.1's A5b).
+  const { left, right, front } = measureOf(body);
   if (view === 'side') {
-    s.rect(15, 24, 3, 9, 'g').rect(17, 24, 1, 9, 'G');
+    s.rect(front - 5, 24, 3, 9, 'g').rect(front - 3, 24, 1, 9, 'G');
   } else {
     const back = view === 'back';
+    const run = right - left - 2;
     for (let k = 0; k < 10; k++) {
-      const x = back ? 19 - k : 11 + k;
+      const step = Math.round((k * run) / 9);
+      const x = back ? right - 2 - step : left + 1 + step;
       s.rect(x, 24 + k, 3, 1, 'g').set(back ? x : x + 2, 24 + k, 'G');
     }
-    if (!back) s.rect(19, 32, 3, 3, 'r').set(20, 33, 'R');
+    if (!back) s.rect(right - 2, 32, 3, 3, 'r').set(right - 1, 33, 'R');
   }
   return {
     rows: s.rows,

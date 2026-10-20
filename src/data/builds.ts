@@ -5,7 +5,7 @@
  * hair and hats; what a build changes is how wide each part of the body is. She is always
  * `regular`; a neighbour's is `build` on their row (`data/villagers.ts`), `regular` if it has none.
  */
-export type Build = 'regular' | 'stout';
+export type Build = 'regular' | 'slight' | 'stout';
 
 export interface BuildRow {
   /** What it is, for the gallery and the tests. */
@@ -14,6 +14,7 @@ export interface BuildRow {
 
 export const BUILDS: Record<Build, BuildRow> = {
   regular: { name: 'her build, the one every look was first drawn on' },
+  slight: { name: 'narrow in the shoulders and hips, a thin neck, slender arms and legs' },
   stout: { name: 'broad in the shoulders, round in the middle, sturdy on thick legs' },
 };
 

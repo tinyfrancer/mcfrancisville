@@ -178,6 +178,7 @@ const FANGS = face(
  */
 const CAPE: Touch = (view, body) => {
   const s = sketch();
+  const { left, right } = measureOf(body);
   // Each collar point, from its tip down to where it meets his shoulder, lined where it opens.
   const collar = (tip: number, dir: 1 | -1) => {
     for (let y = 12; y <= 24; y++) {
@@ -196,8 +197,8 @@ const CAPE: Touch = (view, body) => {
       view === 'side'
         ? [[5, 7]]
         : [
-            [3, 4],
-            [25, 4],
+            [left - 7, 4],
+            [right + 4, 4],
           ];
     for (const [x, w] of sides) {
       s.rect(x!, 21, w!, 20, 'm');
@@ -218,13 +219,14 @@ const CAPE: Touch = (view, body) => {
 };
 
 /** The clasp that holds his cape at his throat: gold, with a garnet. */
-const CLASP = face(
-  (view) =>
+const CLASP: Touch = (view, body) => {
+  if (view === 'back') return null;
+  const s =
     view === 'front'
       ? sketch().rect(15, 25, 2, 2, 'g').set(16, 26, 'r')
-      : sketch().rect(19, 25, 1, 2, 'g'),
-  { '.': null, g: C.gold, r: C.scarlet },
-);
+      : sketch().rect(measureOf(body).front - 1, 25, 1, 2, 'g');
+  return { rows: s.rows, palette: { '.': null, g: C.gold, r: C.scarlet } };
+};
 
 // ---- Rufus: a werewolf, all fluff ----
 
@@ -418,27 +420,30 @@ const WITCHY = face(
 );
 
 /** A silver crescent moon on a fine chain. */
-const CRESCENT = face(
-  (view) => {
-    const s = sketch();
-    if (view === 'side') return s.set(19, 26, 'c').set(19, 27, 'm');
-    for (const [x, y] of [
-      [12, 25],
-      [13, 26],
-      [18, 26],
-      [19, 25],
-    ] as const) {
-      s.set(x, y, 'c');
-    }
-    return s
-      .rect(14, 27, 1, 1, 'c')
-      .rect(17, 27, 1, 1, 'c')
-      .rect(15, 28, 2, 1, 'm')
-      .set(15, 27, 'm')
-      .set(14, 28, 'm');
-  },
-  { '.': null, c: C.silverShade, m: C.silver },
-);
+const CRESCENT: Touch = (view, body) => {
+  if (view === 'back') return null;
+  const palette: Palette = { '.': null, c: C.silverShade, m: C.silver };
+  const { left, right, front } = measureOf(body);
+  const s = sketch();
+  if (view === 'side') {
+    return { rows: s.set(front - 1, 26, 'c').set(front - 1, 27, 'm').rows, palette };
+  }
+  // The chain from either side of her chest, down to the moon at her middle.
+  for (const [x, y] of [
+    [left + 2, 25],
+    [left + 3, 26],
+    [right - 3, 26],
+    [right - 2, 25],
+  ] as const) {
+    s.set(x, y, 'c');
+  }
+  s.rect(14, 27, 1, 1, 'c')
+    .rect(17, 27, 1, 1, 'c')
+    .rect(15, 28, 2, 1, 'm')
+    .set(15, 27, 'm')
+    .set(14, 28, 'm');
+  return { rows: s.rows, palette };
+};
 
 // ---- Barty: a skeleton, cheerful to the bone ----
 
@@ -457,34 +462,39 @@ const SKULL = face(
  * His bones: collarbones, a breastbone and ribs that curve down round his chest, a spine and
  * shoulder blades from behind, a pair of bones down each forearm, a knobbly elbow and knuckles.
  */
-const BONES: Touch = (view, body) => ({
-  rows: paint(body, (k, r, c) => {
-    if (k === 'e' && body[r - 1]?.[c] === 'a') return 'k';
-    if (k === 'w' && body[r]?.[c - 1] === 'w' && body[r]?.[c + 1] === 'w') return 'k';
-    if (k === 'A' && body[r + 1]?.[c] === 'o' && c % 2 === 1) return 'k';
-    if (k !== 'b') return null;
-    if (view === 'side') return (r === 27 || r === 29 || r === 31) && c >= 18 ? 'k' : null;
-    if (view === 'back') {
-      if (c === 15 || c === 16) return r % 2 === 0 ? 'k' : 'l';
-      const blade = r >= 27 && r <= 29 && (c === 12 || c === 19);
-      return blade || (r === 30 && (c === 13 || c === 18)) ? 'k' : null;
-    }
-    if (c === 15 || c === 16) return r >= 26 && r <= 31 ? 'l' : null;
-    const out = c < 15 ? 14 - c : c - 17;
-    if (r === 26) return out <= 3 ? 'k' : null;
-    // Each rib runs out from his breastbone and dips a row at its end.
-    for (const [rib, reach] of [
-      [28, 4],
-      [30, 4],
-      [32, 3],
-    ] as const) {
-      if (r === rib && out < reach - 1) return 'k';
-      if (r === rib + 1 && out === reach - 1) return 'k';
-    }
-    return null;
-  }),
-  palette: { '.': null, k: C.boneShade, l: C.white },
-});
+const BONES: Touch = (view, body) => {
+  // Measured from his chest (1.1's A5b), so the ribs stop short of its edge on any build.
+  const { left, right, front } = measureOf(body);
+  const half = (right - left + 1) / 2;
+  return {
+    rows: paint(body, (k, r, c) => {
+      if (k === 'e' && body[r - 1]?.[c] === 'a') return 'k';
+      if (k === 'w' && body[r]?.[c - 1] === 'w' && body[r]?.[c + 1] === 'w') return 'k';
+      if (k === 'A' && body[r + 1]?.[c] === 'o' && c % 2 === 1) return 'k';
+      if (k !== 'b') return null;
+      if (view === 'side') return (r === 27 || r === 29 || r === 31) && c >= front - 2 ? 'k' : null;
+      if (view === 'back') {
+        if (c === 15 || c === 16) return r % 2 === 0 ? 'k' : 'l';
+        const blade = r >= 27 && r <= 29 && (c === left + 2 || c === right - 2);
+        return blade || (r === 30 && (c === left + 3 || c === right - 3)) ? 'k' : null;
+      }
+      if (c === 15 || c === 16) return r >= 26 && r <= 31 ? 'l' : null;
+      const out = c < 15 ? 14 - c : c - 17;
+      if (r === 26) return out <= half - 3 ? 'k' : null;
+      // Each rib runs out from his breastbone and dips a row at its end.
+      for (const [rib, reach] of [
+        [28, half - 2],
+        [30, half - 2],
+        [32, half - 3],
+      ] as const) {
+        if (r === rib && out < reach - 1) return 'k';
+        if (r === rib + 1 && out === reach - 1) return 'k';
+      }
+      return null;
+    }),
+    palette: { '.': null, k: C.boneShade, l: C.white },
+  };
+};
 
 /** A daisy tucked in his hat band. */
 const DAISY: Touch = (view) => {
@@ -518,13 +528,14 @@ const SHADES = face(
 );
 
 /** A red bow tie at his collar, smart for the customers. */
-const BOW_TIE = face(
-  (view) =>
+const BOW_TIE: Touch = (view, body) => {
+  if (view === 'back') return null;
+  const s =
     view === 'front'
       ? sketch().rect(13, 25, 2, 2, 'r').rect(17, 25, 2, 2, 'r').rect(15, 25, 2, 1, 'R')
-      : sketch().rect(19, 25, 2, 2, 'r'),
-  { '.': null, r: C.scarlet, R: C.scarletShade },
-);
+      : sketch().rect(measureOf(body).front - 1, 25, 2, 2, 'r');
+  return { rows: s.rows, palette: { '.': null, r: C.scarlet, R: C.scarletShade } };
+};
 
 /** A little gold crescent pinned to his hat band: his moon pies' own. */
 const MOON_PIN: Touch = (view) => {
@@ -578,28 +589,29 @@ const MOUSTACHE = face(
  * His trench coat, belted and buckled at the waist, double-breasted, with its collar turned up
  * either side of his neck.
  */
-const TRENCH: Touch = (view) => {
+const TRENCH: Touch = (view, body) => {
   const s = sketch();
+  const { left, right, back, front } = measureOf(body);
   if (view === 'side') {
-    s.rect(11, 32, 11, 2, 'b').set(21, 32, 'g');
-    s.rect(17, 22, 3, 4, 'c').rect(17, 22, 1, 4, 'C');
+    s.rect(back, 32, front - back + 2, 2, 'b').set(front + 1, 32, 'g');
+    s.rect(front - 3, 22, 3, 4, 'c').rect(front - 3, 22, 1, 4, 'C');
   } else {
-    s.rect(10, 32, 12, 2, 'b');
+    s.rect(left, 32, right - left + 1, 2, 'b');
     if (view === 'front') {
       s.rect(15, 32, 2, 2, 'g').set(15, 32, 'b');
       for (const [x, y] of [
-        [13, 27],
-        [18, 27],
-        [13, 30],
-        [18, 30],
+        [left + 3, 27],
+        [right - 3, 27],
+        [left + 3, 30],
+        [right - 3, 30],
       ] as const) {
         s.set(x, y, 'k');
       }
-      s.rect(10, 22, 3, 4, 'c')
-        .rect(19, 22, 3, 4, 'c')
-        .rect(12, 23, 1, 3, 'C')
-        .rect(19, 23, 1, 3, 'C');
-    } else s.rect(9, 22, 14, 3, 'c');
+      s.rect(left, 22, 3, 4, 'c')
+        .rect(right - 2, 22, 3, 4, 'c')
+        .rect(left + 2, 23, 1, 3, 'C')
+        .rect(right - 2, 23, 1, 3, 'C');
+    } else s.rect(left - 1, 22, right - left + 3, 3, 'c');
   }
   return {
     rows: s.rows,
@@ -637,6 +649,7 @@ const POSTIE_CAP = drawn(
  */
 const SATCHEL: Touch = (view, body) => {
   const s = sketch();
+  const { left, right, back } = measureOf(body);
   const bag = (x: number, y: number, w: number, h: number) => {
     s.rect(x + 1, y - 2, 4, 2, 'w').set(x + 3, y - 1, 'r');
     s.rect(x, y, w, h, 'm')
@@ -644,14 +657,15 @@ const SATCHEL: Touch = (view, body) => {
       .rect(x, y + 1, w, 2, 'M');
     s.set(x + Math.floor(w / 2), y + 2, 'g');
   };
+  // Its strap from a pixel in from one side of the chest across to the other hip.
   if (view === 'front') {
-    for (let k = 0; k < 12; k++) s.rect(11 + k, 25 + k, 2, 1, 'm');
-    s.rect(15, 29, 2, 1, 'g');
-    bag(20, 35, 7, 5);
+    for (let k = 0; k < 12; k++) s.rect(left + 1 + k, 25 + k, 2, 1, 'm');
+    s.rect(left + 5, 29, 2, 1, 'g');
+    bag(right - 1, 35, 7, 5);
   } else if (view === 'side') {
-    bag(11, 34, 8, 6);
+    bag(back, 34, 8, 6);
   } else {
-    for (let k = 0; k < 12; k++) s.rect(20 - k, 25 + k, 2, 1, 'm');
+    for (let k = 0; k < 12; k++) s.rect(right - 1 - k, 25 + k, 2, 1, 'm');
   }
   return {
     rows: finish(s.rows, body, 'drawn'),
@@ -849,8 +863,10 @@ const STARDUST: Touch = (view) => {
 // ---- Boothoven: a ghost composer, his hair gone wild with composing (0.2's L1) ----
 
 /** A white cravat frothing at his collar, as a composer's should. */
-const CRAVAT = face(
-  (view) =>
+const CRAVAT: Touch = (view, body) => {
+  if (view === 'back') return null;
+  const f = measureOf(body).front;
+  const s =
     view === 'front'
       ? sketch()
           .rect(14, 23, 4, 2, 'w')
@@ -858,9 +874,12 @@ const CRAVAT = face(
           .rect(14, 27, 4, 2, 'w')
           .set(15, 26, 'W')
           .set(16, 28, 'W')
-      : sketch().rect(18, 23, 3, 2, 'w').rect(19, 25, 3, 3, 'w').set(20, 26, 'W'),
-  { '.': null, w: C.white, W: C.ghost },
-);
+      : sketch()
+          .rect(f - 2, 23, 3, 2, 'w')
+          .rect(f - 1, 25, 3, 3, 'w')
+          .set(f, 26, 'W');
+  return { rows: s.rows, palette: { '.': null, w: C.white, W: C.ghost } };
+};
 
 /** A little quaver that floats beside his head wherever he goes: there's always a tune about him. */
 const QUAVER_NOTE: Touch = (view) => {
@@ -906,18 +925,20 @@ const SEAMS: Touch = (_view, body) => {
 };
 
 /** Two patches sewn on her sundress's skirt, each with a stitch at its corners. */
-const PATCHES: Touch = (view) => {
+const PATCHES: Touch = (view, body) => {
   const s = sketch();
+  const { hips, back } = measureOf(body);
   const patch = (x: number, y: number, key: string) =>
     s
       .rect(x, y, 3, 3, key)
       .set(x, y, 'k')
       .set(x + 2, y + 2, 'k');
-  if (view === 'side') patch(14, 37, 'r');
+  // Placed from her hips, so they stay on the skirt whatever its width.
+  if (view === 'side') patch(back + 3, 37, 'r');
   else if (view === 'front') {
-    patch(11, 37, 'r');
-    patch(18, 35, 'p');
-  } else patch(17, 37, 'p');
+    patch(hips[0] + 1, 37, 'r');
+    patch(hips[1] - 3, 35, 'p');
+  } else patch(hips[1] - 4, 37, 'p');
   return { rows: s.rows, palette: { '.': null, r: C.rose, p: C.lavender, k: C.bark } };
 };
 
@@ -931,7 +952,10 @@ const PATCHES: Touch = (view) => {
 function cornelius(inAHat: boolean): Touch {
   return (view, body) => {
     const s = sketch();
-    const [x, dir] = view === 'front' ? [25, 1] : view === 'back' ? [7, -1] : [9, -1];
+    // On the outer edge of her shoulder, however broad it is (1.1's A5b).
+    const { spread, back } = measureOf(body);
+    const [x, dir] =
+      view === 'front' ? [25 + spread, 1] : view === 'back' ? [7 - spread, -1] : [back - 2, -1];
     const head = x + dir * 2;
     s.ellipse(x, 24, 3, 2.2, 'm');
     s.ellipse(head, 21, 2, 2, 'm');
@@ -1407,11 +1431,23 @@ export function stanceFolded(layers: Layer[], stance: Stance): Layer[] {
 }
 
 /**
- * The body under a figure's clothes (1.1's A5a): a neighbour's `build` on their row, and hers for
- * everyone else.
+ * The builds of those drawn here with no villager row (1.1's A5b): the Moon Pie Man sturdy from
+ * pushing his cart, and Wes a slip of an assistant behind his thin tree. Those passing through
+ * are hers.
+ */
+const UNROWED_BUILDS: Partial<Record<Exclude<Figure, VillagerId>, Build>> = {
+  moonPieMan: 'stout',
+  wes: 'slight',
+};
+
+/**
+ * The body under a figure's clothes (1.1's A5a): a neighbour's `build` on their row, the
+ * unrowed's above, and hers for everyone else.
  */
 export function buildOf(id: Figure): Build {
-  return (VILLAGERS as Partial<Record<Figure, { build?: Build }>>)[id]?.build ?? 'regular';
+  const row = (VILLAGERS as Partial<Record<Figure, { build?: Build }>>)[id];
+  if (row) return row.build ?? 'regular';
+  return UNROWED_BUILDS[id as Exclude<Figure, VillagerId>] ?? 'regular';
 }
 
 /** The arms a stance moves, for one view: a wave's, or a job's with what's in their hands. */

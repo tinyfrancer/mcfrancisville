@@ -8751,3 +8751,85 @@ asked._
   every build to the frame, head and rows. The touches that still place by her columns are
   listed in architecture.md's "Where it hurts" 3; `measureOf(body)` is what they should read.
   `looksHeld` will change for every neighbour A5b casts and must not change for her.
+
+## 355. The third body: the slight build, and the town cast into all three (2026-10-20, 1.1's A5b)
+
+_Session A5b of the 1.1 plan, lane A (decision 328), the rest of "Where it hurts" 3. **No save
+change**; she looks exactly as she did. The user's word on the bodies was "no particular shape"
+(decision 329), so the session picked. Personal touches parked (decision 177): nothing was
+asked._
+
+- **The slight body** (`sprites/doll/slight.ts`, a `Parts`, a `Measure` and `slightReach`, its
+  rows in `PHYSIQUES` and `ACTION_BODIES`) is hers drawn narrower on her rows and her head: the
+  chest ten across (11–20, hers 10–21), the shoulder row eight, the hips as narrow as the chest
+  (11–20), the neck two wide (15–16); arms a pixel thinner (three at the shoulder and elbow, two
+  at the wrist, a hand three) hung a pixel in with the chest; legs four wide, the pixel taken off
+  the inside so the gap between them stays two, feet five. From the side two pixels shallower
+  (12–19), the near arm two wide with a hand three, the legs five. An action's arm is a limb two
+  thick, the inside pixel left off going up and down and the underneath one going across, so it
+  mirrors as hers does. Same 32×48, head, rows and keys (held by `builds.test.ts` as the stout
+  body is). **Rejected:** one-pixel limbs (the art style's line is one pixel each side, and a
+  limb of one between two outlines reads as a seam, not an arm; two is the thinnest that still
+  reads at 1×, so arms and legs went exactly one thinner than hers); hips narrower than the
+  chest (the legs would have to come in again under them, a peg doll); narrowing only the torso
+  and keeping her arms and legs (the plan asked for the limbs too, and the arms are most of what
+  shows at 1×).
+- **What's in the hands is narrowed as the hands are** (`narrowed` in `working.ts`): its two
+  halves moved in a pixel each, the two columns at its middle that meet taken out, outlined
+  again; a thing held to one side (Scarah's can) moves in with the hand. **Rejected:** leaving
+  held things as they were (the hands would sit inside the mayor's paper and Barty's trowel).
+- **The cast**, by each row's lines and look; `build` is now **required** on every villager row,
+  so a neighbour who comes with a release says which:
+  - **Slight: Barty** ("Nothing in there to blame, mate. I'm all bones"); **Scarah** (a
+    scarecrow is a pole and a crosspiece under the straw; "hopeless at scaring things"); **Rob
+    Boo** (a wisp of a shy ghost on wobbly knees, so his hat is the size too big his lines say);
+    **Wes** (a nervous slip of an assistant who hides behind thin trees, and is still seen).
+  - **Stout: Rufus** and **Gourdon** (A5a's) and **the Moon Pie Man** (a jolly peddler, sturdy
+    from pushing his cart, round as his pies).
+  - **Hers: Maude** (a sheet drawn by hand; her row says `regular`, and no body is under it),
+    **Wrapunzel**, **Agatha**, **Ollie**, **Nessa**, **Hazel**, **Boothoven** (nothing in their
+    lines or look argues for another body), **Cody** (drawn as she is: his halves at the finale
+    pair with hers, and he is the one neighbour who is someone real), and **the wayfarer and
+    Moira** (passing through; nothing to go on).
+  - The two without a row are in `UNROWED_BUILDS` beside `buildOf` in `sprites/villagers.ts`;
+    passers stay hers there by default. **Rejected:** a `build` on `PasserRow` and a row for the
+    Moon Pie Man and Wes in `data/` (no row to put it on for those two, `data/rareEvents.ts` is
+    not lane A's, and the passers are hers anyway); Boothoven slight (his frock coat and cravat
+    want shoulders); Wrapunzel slight (a mummy, but a baker with a toque and
+    a tray of cakes); Rob Boo stout (a pompous mayor is the cliché; his lines are all shyness).
+- **Every touch that placed by her columns now measures the body** (`measureOf`): Barty's
+  collarbones, ribs and shoulder blades from his chest's half-width, the side's ribs from its
+  front; Scarah's patches from her hips and Cornelius on the outer edge of her shoulder (her
+  `spread`, and her back from the side); the mayor's sash from chest edge to edge, its rosette
+  at the chest's right; Wes's belt, buttons and collar from his chest; and, on bodies that are
+  hers so no pixel moved, Cody's cape and clasp, Agatha's crescent chain, Ollie's satchel strap
+  and bag, Boothoven's cravat from the side and the bow tie from the side. **Kept at the middle
+  on purpose**: the bow tie and the cravat from the front, the trench's buckle, the breastbone,
+  the ringmaster coat's buttons and lapels (looked at on the slight mayor, in his coat and in his
+  magician's costume: two rows of buttons either side of a narrower middle, still even), the
+  jackets' lapels (on the slight body's `wears:outer` strip).
+- **Costumes and Cody's halves checked**: Barty's flannel shirt, Scarah's crow (the Wednesday
+  dress, bat wings and beak, Cornelius in a hat), Rob Boo's magician (coat and vampire cape) all
+  on the slight body, front, back and side; Cody's five halves are on his body, hers, and their
+  hashes didn't move. The busts (`drawBust`) are cut from the figure, so they follow: Barty's in
+  the neighbours sheet shows the narrower shoulders with no change.
+- **Held**: `tests/sprites/looksHeld.test.ts` changed for exactly five lines, `barty`, `scarah`,
+  `robBoo`, `moonPieMan` and `wes`, and no other (her every look, every other figure, Cody's
+  halves, the pumpkin head and every job on her body the same hash). The 1,253 `doll:*`,
+  `figure:*` and `sit:*` sprites rendered before and after: **123 differ, every one of the five
+  cast's figure sprites** (29 each for Barty, Scarah and Rob Boo, 18 each for Wes and the Moon
+  Pie Man), 1,130 byte for byte the same, every `doll:*` and `sit:*` among them. All 123 looked
+  at, standing, walking, in costume, waving, sitting, blinking, every feeling and job.
+  `builds.test.ts`'s width check was found measuring nothing (it counted `s` in her bare body's
+  regions, where there is none, so any figure was "broader"); it now compares a figure's skin
+  against her body's regions, from the feet up so a tall hat doesn't lift it, stout wider and
+  slight narrower, and the cast is pinned by name.
+- **Checked**: the suite 2,692 tests, smoke 622/622 (`neighbours` and the neighbours sheet among
+  them), `smoke:offline` 10/10. `npm run perf` at the default hour, one run each, the base and
+  this branch: every scene within noise (the town's draw 37.0 to 36.6 ms mean, home 20.8 to 20.6,
+  the fairground 24.6 to 24.0, Whisperwood 27.8 to 28.5, the yard 36.7 to 36.7, the back room 24.3
+  to 24.1; update 1.38 to 1.34 in town; heap within 0.2 MB).
+- **For V1.1's review**: the bodies are a line for 1.2's notes (Barty, Scarah, the mayor and Wes
+  slimmer, the Moon Pie Man sturdier, as Rufus and Gourdon already are). For her phone: whether
+  the slight four read as slim and not as hers in a smaller size, and the mayor's sash and Wes's
+  trench sit right.

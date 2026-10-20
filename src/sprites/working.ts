@@ -74,6 +74,7 @@ function outlined(s: Sketch, palette: Palette, front?: true, lit?: Palette): Hel
 function widened(held: Held, spread: number): Held {
   const unlined = UNLINED.get(held.rows);
   if (!unlined) return held;
+  if (spread < 0) return narrowed(unlined, held, -spread);
   // Never so far that its outline would fall off the edge of the picture (Gourdon's trestle).
   const cols = [...Array(DOLL_WIDTH).keys()].filter((x) =>
     unlined.rows.some((row) => row[x] !== '.'),
@@ -83,6 +84,23 @@ function widened(held: Held, spread: number): Held {
   const from = (x: number) => (x < 16 - out ? x + out : x >= 16 + out ? x - out : x < 16 ? 15 : 16);
   const s = Sketch.from({
     rows: unlined.rows.map((row) => [...row].map((_, x) => row[from(x)]!).join('')),
+  });
+  s.outline(unlined.outline);
+  return { ...held, rows: s.rows };
+}
+
+/**
+ * A held thing for a narrower body (1.1's A5b): its two halves moved in `by` each side, as the
+ * hands holding it are, the columns at its middle that meet taken out, then outlined again.
+ */
+function narrowed(
+  unlined: { rows: string[]; outline: Record<string, string> },
+  held: Held,
+  by: number,
+): Held {
+  const from = (x: number) => (x < 16 ? x - by : x + by);
+  const s = Sketch.from({
+    rows: unlined.rows.map((row) => [...row].map((_, x) => row[from(x)] ?? '.').join('')),
   });
   s.outline(unlined.outline);
   return { ...held, rows: s.rows };
@@ -614,7 +632,8 @@ const POSES = new Map<string, WorkPose>();
 /**
  * A neighbour at their job (`frame` 0 or 1), facing the way the job faces, on the body of their
  * build; null for a job drawn another way (Maude's reading) or a view it isn't done in. On a
- * broader body, what's in their hands is as much wider as their hands are further apart.
+ * broader body, what's in their hands is as much wider as their hands are further apart, and on a
+ * narrower one as much narrower.
  */
 export function workPose(
   work: WorkId,

@@ -131,21 +131,36 @@ describe("the builds (1.1's A5a)", () => {
     }
   }, 60_000);
 
-  it('are given to Rufus and Gourdon, and everyone else is hers', () => {
-    const stout = VILLAGER_IDS.filter((id) => buildOf(id) === 'stout');
-    expect(stout.sort()).toEqual(['gourdon', 'rufus']);
-    for (const id of VILLAGER_IDS) expect(buildOf(id)).toBe(VILLAGERS[id].build ?? 'regular');
-    for (const id of ['moonPieMan', 'wes', 'wayfarer', 'moira'] as const) {
-      expect(buildOf(id)).toBe('regular');
-    }
+  it('cast the town (A5b): each neighbour on their row, the unrowed by name, hers for the rest', () => {
+    const cast = (build: string) =>
+      [...VILLAGER_IDS, 'moonPieMan', 'wes', 'wayfarer', 'moira']
+        .filter((id) => buildOf(id as Parameters<typeof buildOf>[0]) === build)
+        .sort();
+    expect(cast('stout')).toEqual(['gourdon', 'moonPieMan', 'rufus']);
+    expect(cast('slight')).toEqual(['barty', 'robBoo', 'scarah', 'wes']);
+    for (const id of VILLAGER_IDS) expect(buildOf(id)).toBe(VILLAGERS[id].build);
+    expect(buildOf('cody'), 'Cody is drawn as she is').toBe('regular');
+    for (const id of ['wayfarer', 'moira'] as const) expect(buildOf(id)).toBe('regular');
   });
 
-  it('draw a stout neighbour broader than her, every way, in costume and at work', () => {
-    const width = (rows: readonly string[]) => {
-      const c = rows.flatMap((row) => cols(row, 's'));
+  it('draw a stout neighbour broader than her and a slight one narrower, every way', () => {
+    const width = (rows: readonly string[], keys: string) => {
+      const c = rows.flatMap((row) => cols(row, keys));
       return Math.max(...c) - Math.min(...c);
     };
-    for (const id of ['rufus', 'gourdon'] as const) {
+    // Her body's regions below the head, against their skin's tones.
+    const hers = width(BODY.front[0]!.slice(24), 'nbpaewAlf');
+    expect(hers).toBe(19);
+    const cast = [
+      ['rufus', 1],
+      ['gourdon', 1],
+      ['moonPieMan', 1],
+      ['barty', -1],
+      ['scarah', -1],
+      ['robBoo', -1],
+      ['wes', -1],
+    ] as const;
+    for (const [id, way] of cast) {
       for (const facing of ['down', 'up', 'left', 'right'] as const) {
         for (let frame = 0; frame < DOLL_FRAMES; frame++) {
           for (const costume of [null, 'own'] as const) {
@@ -154,11 +169,10 @@ describe("the builds (1.1's A5a)", () => {
           }
         }
       }
-      // Their skin reaches further out than it would on her body.
+      // Their skin reaches further out, or less far, than it would on her body.
       const skin = figureLayers(id, 'down', 0).find((l) => /[sS]/.test(l.source.rows.join('')));
-      expect(width(skin!.source.rows.slice(24)), id).toBeGreaterThan(
-        width(BODY.front[0]!.slice(24)),
-      );
+      // From her feet up (a tall hat lifts every layer).
+      expect(Math.sign(width(skin!.source.rows.slice(-24), 'sS') - hers), id).toBe(way);
     }
   });
 

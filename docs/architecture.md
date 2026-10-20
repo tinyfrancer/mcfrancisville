@@ -1126,19 +1126,21 @@ V1's weight on it.
    `gallery` four and a half minutes, picturing its pages. The gallery is paged (`?gallery&page=n`, 50 rows a page, 66 pages,
    the tallest about 18,000 CSS pixels against the whole's 438,914), and smoke pictures every page
    whole instead of the whole's top.
-3. **One body under every look.** ~~Every clothing cut, action pose (E2), working pose (E3, P4)
-   and face (L7) is painted onto the one 32×48 body~~: half done in 1.1's A5a (decision 354). A
-   `Build` on a villager row (`data/builds.ts`) picks a body (`bodyOf`, `sprites/doll/builds.ts`):
-   hers, or the stout one (`sprites/doll/stout.ts`), every region redrawn broader on her rows, its
-   action bodies and every job's arms on it (`ACTION_BODIES`, `workPose(…, build)`), and the cuts,
-   the cape and wings and Gourdon's belt stepping in from what a body measures (`measureOf`)
-   instead of her columns. Rufus and Gourdon are stout; her looks are held to the pixel
-   (`tests/sprites/looksHeld.test.ts`). What's left is A5b's: the slight build, and every other
-   neighbour and Cody given the one that fits, their touches that still place by her columns
-   (Barty's bones, Cody's cape and clasp, Ollie's satchel, Wes's trench, Agatha's crescent,
-   Boothoven's cravat, the Moon Pie Man's bow tie, the mayor's sash, Scarah's patches and
-   Cornelius on her shoulder) moved onto `measureOf`, and the ringmaster coat's buttons and the
-   jackets' lapels, which stay at the middle on purpose, looked at on each.
+3. ~~**One body under every look.** Every clothing cut, action pose (E2), working pose (E3, P4)
+   and face (L7) is painted onto the one 32×48 body.~~ Done in 1.1's A5a and A5b (decisions 354
+   and 355). A `Build` (`data/builds.ts`: `regular`, `slight`, `stout`) is `build` on every
+   villager row, required, and `UNROWED_BUILDS` in `sprites/villagers.ts` for the Moon Pie Man
+   and Wes; it picks a body (`bodyOf`, `sprites/doll/builds.ts`): hers, the stout one
+   (`doll/stout.ts`) or the slight one (`doll/slight.ts`), every region redrawn on her rows and
+   her head, each with its action bodies and every job's arms (`ACTION_BODIES`,
+   `workPose(…, build)`, what's held widened or narrowed with the hands), and the cuts, the backs
+   and every neighbour's touch that places a detail stepping in from what the body measures
+   (`measureOf`), never her columns. Stout: Rufus, Gourdon, the Moon Pie Man; slight: Barty,
+   Scarah, Rob Boo, Wes; hers: everyone else, Cody too. Her looks are held to the pixel and each
+   figure's as a hash (`tests/sprites/looksHeld.test.ts`), the builds by
+   `tests/sprites/builds.test.ts`. What's still at her middle on purpose: a fly, the jackets'
+   lapels and the ringmaster coat's buttons (looked at on the slight mayor and the stout ones),
+   the bow tie and the cravat from the front.
 4. ~~**Faces aren't everywhere yet.**~~ Done in 1.0.1 (X2, decision 327): the neighbours sheet's
    busts by closeness, Cody's greeting by his line and the noticeboard's faces by their notes, each
    a rule in `systems/moods.ts`; and the noticeboard's art shows what's pinned up
@@ -1204,7 +1206,7 @@ V1's weight on it.
     made third, after the passive Candy it reads; only `upNow` is.
 14. **Big data files and one big chunk.** ~~`sprites/doll.ts` is 3,000 lines~~ (split by family
     into `sprites/doll/` in 1.1's A5a, decision 354: `doll.ts` 356 lines, the largest family
-    `cuts.ts` at about 750), `sprites/items.ts`
+    `cuts.ts` at about 750; A5b added `slight.ts` beside `stout.ts`), `sprites/items.ts`
     2,600, `data/villagers.ts` 1,650, `types/ids.ts` 1,340. Fine as data; a redraw should split by
     family. The build is one 1.8 MB chunk (600 kB gzipped), precached once a version (decision
     322), so it costs a download per deploy, not a launch.
