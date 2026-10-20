@@ -113,6 +113,13 @@ trot straight across a room or the lawn now, rather than tile by tile.
 
 ### Lane A: the art (A1 → A2 → A3 → A4 → A5a → A5b; decisions from 350; never the save)
 
+**A3 is in progress** (branch `claude/a3-ice-creeks`, decision 352; no save change). Done: the
+ice drawn on the world's pixels (`sprites/ice.ts`: patches, frost, stones in the bank's lip,
+cracks, skate marks, banks that bend further), the melt at Lantern Shore's mouth (plates, open
+water, floes on the lake), snow on the ice in winter (`snowOnIce`, through `seasonPieces`), the
+sheen (`render/life.ts`, `Life.sheen`), held by `tests/sprites/ice.test.ts`. Next: perf before
+and after, decision 352's numbers, mark the PR ready, merge.
+
 **A2 landed (PR #211, decision 351; no save change). Next: A3.** Three more tree forms in
 `sprites/treeForms.ts` (a poplar, a leaning tree, a broken one), so the tree's forms are dealt
 from nine by `formOf` and every tree in every place, the town's too, was dealt again; the broken
@@ -1841,10 +1848,10 @@ screenshots and its own four days of play at phone size, and found:
 - ~~**Woods are walls of one crown.**~~: done in 1.1 (A2, decision 351); a poplar, a leaning
   tree and a broken one join the tree's forms (nine, dealt by tile), and the woods' edges step in
   and out, trees standing in the hedge and a tile inside it, a rock or a stump in a gap.
-- **Ice and the creeks are flat paint.** The frozen creek in Whisperwood and the one feeding the
-  lake at Lantern Shore are a flat pale blue ribbon with hard edges, beside water that L6 gave banks
-  and glints; and a frozen creek running into an open lake reads oddly. A texture on the ice
-  (cracks, a sheen) and the banks' soft edge would bring it in line.
+- ~~**Ice and the creeks are flat paint.**~~: done in 1.1 (A3, decision 352); the ice has
+  patches of frosted and clear ice, darker down the middle, a frost that comes and goes along a
+  bank set with stones, hairline cracks and a slow sheen, all on the world's pixels; the creeks'
+  banks bend; at the lake the ice breaks into plates and floes; snow drifts over it in winter.
 - ~~**Big empty lawns**~~: done in 1.1 (A2, decision 351); a meadow, long grass, a log and a rock
   in the clearing's middle, and a meadow, a log, a rock, toadstools and a bush in the
   fairground's south-east.
