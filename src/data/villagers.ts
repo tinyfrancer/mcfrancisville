@@ -2,6 +2,7 @@ import type { InteriorId, ItemId, MapZoneId, VillagerId, WorkId } from '../types
 import type { ItemKind } from './items';
 import type { SpotName } from './maps';
 import type { Ware } from './shop';
+import type { Build } from './builds';
 import type { DayWindow } from './windows';
 import { SCARAH } from './scarah';
 import { ROB_BOO } from './robBoo';
@@ -83,6 +84,8 @@ export interface VillagerRow {
   name: string;
   /** What they are, as they'd put it. */
   creature: string;
+  /** The body under their clothes (1.1's A5a, `data/builds.ts`); hers, `regular`, if none. */
+  build?: Build;
   schedule: Schedule;
   /** What they say first when she finds them visiting her at home. `{name}` is her name. */
   dropsBy: string;
@@ -259,6 +262,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   rufus: {
     name: 'Rufus',
     creature: 'werewolf florist',
+    // A big hugging wolf of a florist, all fluff and snacks.
+    build: 'stout',
     schedule: {
       weekday: [
         // Picking wildflowers in Whisperwood first thing, and arranging them at home after lunch.
@@ -1243,6 +1248,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
   gourdon: {
     name: 'Gourdon',
     creature: 'pumpkin-headed carpenter',
+    // A carpenter as solid as his workbench, under a pumpkin as round as he is.
+    build: 'stout',
     schedule: {
       weekday: [
         { from: 5, inside: 'gourdonPumpkin' },

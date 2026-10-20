@@ -3,7 +3,17 @@ import type { CutId } from '../../types/ids';
 import type { Worn } from '../../types/look';
 import { CLEAR } from '../sketch';
 import { capeRows } from './backs';
-import { ARM, DOLL_WIDTH, EMPTY, type Grid, HEM, HIPS, SHOULDER, type View } from './body';
+import {
+  ARM,
+  DOLL_WIDTH,
+  EMPTY,
+  type Grid,
+  HEM,
+  HIPS,
+  measureOf,
+  SHOULDER,
+  type View,
+} from './body';
 import { glassesRows, HATS } from './hats';
 import { centred, finish, paint, remember, stamp } from './paint';
 import { OUTFIT_ART, type OutfitArt, withPattern } from './prints';
@@ -59,14 +69,17 @@ function cuffOf(body: Grid, r: number, c: number, beyond: string): boolean {
  * behind her arms and hands, which stay in front of it.
  */
 function skirt(body: Grid, view: View, rows: number, flare: number, pleats: boolean): string[] {
-  const half = view === 'side' ? 5 : 6;
+  const m = measureOf(body);
+  const [from, to] = view === 'side' ? [m.back, m.front] : m.hips;
+  const half = (to - from + 1) / 2;
+  const middle = (from + to + 1) / 2;
   return body.map((line, y) =>
     [...line]
       .map((key, x) => {
         const i = y - HIPS;
         if (i < 0 || i >= rows || ARM.includes(key)) return CLEAR;
         const w = half + (flare * i) / (rows - 1);
-        if (Math.abs(x + 0.5 - 16) > w) return CLEAR;
+        if (Math.abs(x + 0.5 - middle) > w) return CLEAR;
         return pleats && i > 0 && x % 3 === 0 ? 'M' : 'm';
       })
       .join(''),
@@ -123,6 +136,8 @@ function tailor(rows: string[], cut: CutId, view: View, body: Grid): string[] {
   const trousers = TROUSERS.includes(cut);
   if (!top && !trousers) return rows;
   const front = view === 'front';
+  const m = measureOf(body);
+  const [hipL, hipR] = m.hips;
   const folds = new Set<string>();
   const fold = (x: number, y: number) => folds.add(`${x},${y}`);
   if (top && view !== 'side') {
@@ -134,30 +149,36 @@ function tailor(rows: string[], cut: CutId, view: View, body: Grid): string[] {
         }
       }
     }
+    // Pulling in toward her waist, two and three in from each side.
     for (const [x, y] of [
-      [12, 30],
-      [13, 31],
-      [19, 30],
-      [18, 31],
+      [m.left + 2, 30],
+      [m.left + 3, 31],
+      [m.right - 2, 30],
+      [m.right - 3, 31],
     ] as const) {
       fold(x, y);
     }
-    if (front && CREW_NECKS.includes(cut)) for (let x = 13; x <= 18; x++) fold(x, SHOULDER);
+    if (front && CREW_NECKS.includes(cut)) {
+      for (let x = m.neck[0] - 1; x <= m.neck[1] + 1; x++) fold(x, SHOULDER);
+    }
   }
   if (trousers && view !== 'side') {
     const seams: [number, number][] = front
       ? [
           [16, HIPS],
           [16, HIPS + 1],
-          [11, HIPS],
-          [12, HIPS + 1],
-          [20, HIPS],
-          [19, HIPS + 1],
+          [hipL + 1, HIPS],
+          [hipL + 2, HIPS + 1],
+          [hipR - 1, HIPS],
+          [hipR - 2, HIPS + 1],
         ]
-      : [11, 12, 13, 18, 19, 20].map((x) => [x, HIPS + 1]);
+      : [hipL + 1, hipL + 2, hipL + 3, hipR - 3, hipR - 2, hipR - 1].map((x) => [x, HIPS + 1]);
     for (const [x, y] of seams) fold(x, y);
   }
-  const knees = new Set(trousers && cut === 'jeans' ? ['11,40', '18,40', '12,41', '19,41'] : []);
+  // A knee two rows tall, stepping in from the outside of each leg.
+  const knees = new Set(
+    trousers && cut === 'jeans' ? m.legs.flatMap(([x]) => [`${x + 1},40`, `${x + 2},41`]) : [],
+  );
   return rows.map((line, y) =>
     [...line]
       .map((ch, x) => {
@@ -175,6 +196,7 @@ const GLASSES: readonly CutId[] = ['roundGlasses', 'catEyeGlasses', 'squareGlass
 
 function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
   const front = view === 'front';
+  const m = measureOf(body);
   switch (cut) {
     case 'tee':
     case 'jersey':
@@ -201,7 +223,8 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       return rows;
     }
     case 'sundress': {
-      const straps = view === 'side' ? [18] : [11, 12, 19, 20];
+      const straps =
+        view === 'side' ? [m.front - 2] : [m.left + 1, m.left + 2, m.right - 2, m.right - 1];
       let rows = paint(body, (k, r, c) => {
         if (k !== 'b') return null;
         // A scooped neck: straps only, for the top four rows of her, room for her rose.
@@ -220,7 +243,14 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       return rows;
     }
     case 'collarDress': {
-      const collar = view === 'side' ? [16, 17, 18] : view === 'front' ? [12, 13, 18, 19] : null;
+      // A Peter Pan collar round her neck.
+      const [neckL, neckR] = m.neck;
+      const collar =
+        view === 'side'
+          ? [neckR - 1, neckR, neckR + 1]
+          : front
+            ? [neckL - 2, neckL - 1, neckR + 1, neckR + 2]
+            : null;
       const rows = paint(body, (k, r, c) => {
         if (k === 'b') {
           const peter = r === SHOULDER && (collar === null || collar.includes(c));
@@ -279,7 +309,7 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
       return paint(body, (k, r, c) => {
         if (k !== 'f') return null;
         if (view === 'side') return footEnd(body, r, c) === 'toe' ? 'x' : 'm';
-        return view === 'front' && (c === 13 || c === 18) ? 'x' : 'm';
+        return front && (c === m.legs[0][1] - 1 || c === m.legs[1][0] + 1) ? 'x' : 'm';
       });
     case 'tallBoots':
       return paint(body, (k, r, c) => {
@@ -447,7 +477,8 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
         const up = k === 'l' ? aboveFoot(body, r, c) : Infinity;
         if (up > 6) return null;
         if (up === 6) return 'M';
-        return front && (c === 12 || c === 19) && up % 2 === 0 ? 'x' : 'm';
+        const laces = c === m.legs[0][0] + 2 || c === m.legs[1][1] - 2;
+        return front && laces && up % 2 === 0 ? 'x' : 'm';
       });
     case 'cape':
       return capeRows(body, view, 'on');
@@ -477,6 +508,8 @@ function besideHer(body: Grid, r: number, c: number, covered: string): boolean {
 function corsetRows(body: Grid, view: View): string[] {
   const front = view === 'front';
   const laced = view !== 'side';
+  const m = measureOf(body);
+  const boning = laced ? [m.left + 2, m.right - 2] : [m.back + 3, m.front - 2];
   return paint(body, (k, r, c) => {
     if (k === 'p')
       return laced && r <= HIPS + 1 && Math.abs(c + 0.5 - 16) < HIPS + 2 - r ? 'm' : null;
@@ -485,7 +518,7 @@ function corsetRows(body: Grid, view: View): string[] {
     if (r === SHOULDER + 1) return front && middle ? null : 'x';
     if (front && r === SHOULDER + 2 && middle) return 'x';
     if (laced && middle) return (r + c) % 2 === 0 ? 'x' : 'M';
-    if (laced ? c === 12 || c === 19 : c === 14 || c === 18) return 'M';
+    if (boning.includes(c)) return 'M';
     return 'm';
   });
 }
@@ -519,7 +552,7 @@ function jacketRows(cut: CutId, body: Grid, view: View): string[] {
   const coat = cut === 'operaCoat';
   const open = (r: number, c: number) => {
     if (view === 'back') return false;
-    if (view === 'side') return c >= 19;
+    if (view === 'side') return c >= measureOf(body).front - 1;
     const spread = r > HIPS ? Math.floor((r - HIPS) / 3) : 0;
     return c >= 14 - spread && c <= 17 + spread;
   };
@@ -564,11 +597,12 @@ function jacketRows(cut: CutId, body: Grid, view: View): string[] {
  */
 function velvetRows(body: Grid, view: View): string[] {
   const front = view === 'front';
+  const [neckL, neckR] = measureOf(body).neck;
   const bodice = paint(body, (k, r, c) => {
     if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'M' : 'm';
     if (k !== 'b') return null;
-    if (front && r === SHOULDER && c >= 13 && c <= 18) return null;
-    return front && c === 13 && r > SHOULDER + 1 ? 'L' : 'm';
+    if (front && r === SHOULDER && c >= neckL - 1 && c <= neckR + 1) return null;
+    return front && c === neckL - 1 && r > SHOULDER + 1 ? 'L' : 'm';
   });
   const long = skirt(body, view, 10, 3, false).map((line, y) =>
     [...line].map((ch, x) => (ch === 'm' && y > HIPS + 1 && x % 4 === 1 ? 'L' : ch)).join(''),
@@ -603,22 +637,26 @@ function spacesuitRows(body: Grid, view: View): string[] {
  */
 function hoodieRows(body: Grid, view: View, art: OutfitArt): string[] {
   const front = view === 'front';
+  const m = measureOf(body);
+  // The hood gathered round her neck, its drawstrings either side of it.
+  const [hoodL, hoodR] = [m.neck[0] - 2, m.neck[1] + 2];
+  const [pocketL, pocketR] = [m.left + 2, m.right - 2];
   const rows = paint(body, (k, r, c) => {
     if ('aew'.includes(k)) return k === 'w' && cuffOf(body, r, c, 'A') ? 'M' : 'm';
     if (k === 'p') return r === HIPS ? 'M' : null;
     if (k === 'n') return view === 'back' ? 'm' : null;
     if (k !== 'b') return null;
     if (front) {
-      if (r === SHOULDER && (c <= 12 || c >= 19)) return 'M';
-      if ((c === 13 || c === 18) && r > SHOULDER && r <= SHOULDER + 4) return 'x';
-      if (r === HEM - 3 && c >= 12 && c <= 19) return 'M';
-      if ((c === 12 || c === 19) && r > HEM - 3) return 'M';
+      if (r === SHOULDER && (c <= hoodL || c >= hoodR)) return 'M';
+      if ((c === hoodL + 1 || c === hoodR - 1) && r > SHOULDER && r <= SHOULDER + 4) return 'x';
+      if (r === HEM - 3 && c >= pocketL && c <= pocketR) return 'M';
+      if ((c === pocketL || c === pocketR) && r > HEM - 3) return 'M';
     }
     if (view === 'back') {
-      if (r <= SHOULDER + 4 && (c === 12 || c === 19)) return 'M';
-      if (r === SHOULDER + 5 && c > 12 && c < 19) return 'M';
+      if (r <= SHOULDER + 4 && (c === hoodL || c === hoodR)) return 'M';
+      if (r === SHOULDER + 5 && c > hoodL && c < hoodR) return 'M';
     }
-    if (view === 'side' && c === 12 && r <= SHOULDER + 3) return 'M';
+    if (view === 'side' && c === m.back + 1 && r <= SHOULDER + 3) return 'M';
     return 'm';
   });
   // A band hoodie's print goes on its pocket, below where a pendant hangs.
@@ -642,7 +680,7 @@ function cardiganRows(body: Grid, view: View): string[] {
       if (c === 13 && buttons.includes(r)) return 'y';
       if (c === 13 || c === 18) return 'M';
     }
-    if (view === 'side' && c === 20) return 'M';
+    if (view === 'side' && c === measureOf(body).front) return 'M';
     return 'm';
   });
 }
@@ -683,23 +721,30 @@ function sweatsRows(body: Grid, front: boolean): string[] {
  */
 function overallRows(body: Grid, view: View): string[] {
   const bibTop = SHOULDER + 4;
+  const m = measureOf(body);
+  // The bib and its straps two in from her sides; from the side, from her front back.
+  const [bibL, bibR] = [m.left + 2, m.right - 2];
+  const strap = m.front - 2;
   return paint(body, (k, r, c) => {
     if (k === 'p') return 'm';
     if (k === 'l') return aboveFoot(body, r, c) === 1 ? 'M' : 'm';
     if (k !== 'b') return null;
     if (view === 'front') {
-      if (r >= bibTop && c >= 12 && c <= 19) {
-        if (r === bibTop && (c === 12 || c === 19)) return 'x';
+      if (r >= bibTop && c >= bibL && c <= bibR) {
+        if (r === bibTop && (c === bibL || c === bibR)) return 'x';
         return r === bibTop + 2 && c >= 14 && c <= 17 ? 'M' : 'm';
       }
-      return c === 12 || c === 19 ? 'm' : null;
+      return c === bibL || c === bibR ? 'm' : null;
     }
     if (view === 'back') {
-      if (r >= HEM - 1) return c >= 12 && c <= 19 ? 'm' : null;
+      if (r >= HEM - 1) return c >= bibL && c <= bibR ? 'm' : null;
       const t = (r - SHOULDER) / (HEM - 1 - SHOULDER);
-      return c === Math.round(12 + 7 * t) || c === Math.round(19 - 7 * t) ? 'm' : null;
+      return c === Math.round(bibL + (bibR - bibL) * t) ||
+        c === Math.round(bibR - (bibR - bibL) * t)
+        ? 'm'
+        : null;
     }
-    if (r >= bibTop && c >= 16) return r === bibTop && c === 18 ? 'x' : 'm';
-    return c === 18 ? 'm' : null;
+    if (r >= bibTop && c >= strap - 2) return r === bibTop && c === strap ? 'x' : 'm';
+    return c === strap ? 'm' : null;
   });
 }

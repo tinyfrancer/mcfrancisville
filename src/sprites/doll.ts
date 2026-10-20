@@ -56,12 +56,16 @@ export {
   DOLL_HEIGHT,
   DOLL_WIDTH,
   EMPTY,
+  measureOf,
   viewOf,
   type Grid,
+  type Measure,
   type PoseBody,
   type View,
 } from './doll/body';
+export { bodyOf } from './doll/builds';
 export {
+  ACTION_BODIES,
   ACTION_BODY,
   ACTION_FRAMES,
   ACTION_POSES,

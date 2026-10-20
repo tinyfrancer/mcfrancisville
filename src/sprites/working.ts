@@ -1,11 +1,14 @@
+import type { Build } from '../data/builds';
 import { WORKS } from '../data/work';
 import type { WorkId } from '../types/ids';
 import {
   arm,
   armsBody,
+  bodyOf,
   DOLL_HEIGHT,
   DOLL_WIDTH,
   forearm,
+  measureOf,
   mirror,
   viewOf,
   type ActionArms,
@@ -40,6 +43,12 @@ interface WorkFrame {
 
 const sketch = () => new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
 
+/** What a held thing was before its outline, and the outline's keys, to draw it again wider. */
+const UNLINED = new WeakMap<
+  readonly string[],
+  { rows: string[]; outline: Record<string, string> }
+>();
+
 /** A held thing outlined all round, each edge in the darkest tone of the colour it wraps. */
 function outlined(s: Sketch, palette: Palette, front?: true, lit?: Palette): Held {
   const pal: Record<string, string | null> = { '.': null, ...palette };
@@ -50,8 +59,33 @@ function outlined(s: Sketch, palette: Palette, front?: true, lit?: Palette): Hel
     outline[key] = edge;
     pal[edge] = ramp(colour)[0]!;
   });
+  const bare = s.rows;
   s.outline(outline);
-  return { rows: s.rows, palette: pal, ...(front ? { front } : {}), ...(lit ? { lit } : {}) };
+  const rows = s.rows;
+  UNLINED.set(rows, { rows: bare, outline });
+  return { rows, palette: pal, ...(front ? { front } : {}), ...(lit ? { lit } : {}) };
+}
+
+/**
+ * A held thing for a broader body (1.1's A5a): its two halves moved out `spread` each side, as the
+ * hands holding it are, the middle drawn on across the gap, then outlined again; or less, or not
+ * at all, where that would take it off the picture.
+ */
+function widened(held: Held, spread: number): Held {
+  const unlined = UNLINED.get(held.rows);
+  if (!unlined) return held;
+  // Never so far that its outline would fall off the edge of the picture (Gourdon's trestle).
+  const cols = [...Array(DOLL_WIDTH).keys()].filter((x) =>
+    unlined.rows.some((row) => row[x] !== '.'),
+  );
+  const out = Math.min(spread, Math.min(...cols) - 1, DOLL_WIDTH - 2 - Math.max(...cols));
+  if (out <= 0) return held;
+  const from = (x: number) => (x < 16 - out ? x + out : x >= 16 + out ? x - out : x < 16 ? 15 : 16);
+  const s = Sketch.from({
+    rows: unlined.rows.map((row) => [...row].map((_, x) => row[from(x)]!).join('')),
+  });
+  s.outline(unlined.outline);
+  return { ...held, rows: s.rows };
 }
 
 /** Keys kept for outlines, none of them one a held thing paints with. */
@@ -578,16 +612,23 @@ export interface WorkPose {
 const POSES = new Map<string, WorkPose>();
 
 /**
- * A neighbour at their job (`frame` 0 or 1), facing the way the job faces; null for a job drawn
- * another way (Maude's reading) or a view it isn't done in.
+ * A neighbour at their job (`frame` 0 or 1), facing the way the job faces, on the body of their
+ * build; null for a job drawn another way (Maude's reading) or a view it isn't done in. On a
+ * broader body, what's in their hands is as much wider as their hands are further apart.
  */
-export function workPose(work: WorkId, view: View, frame: number): WorkPose | null {
+export function workPose(
+  work: WorkId,
+  view: View,
+  frame: number,
+  build: Build = 'regular',
+): WorkPose | null {
   if (work === 'reading' || view !== viewOf(WORKS[work].faces)) return null;
-  const key = `${work}:${frame % 2}`;
+  const key = `${work}:${frame % 2}:${build}`;
   let pose = POSES.get(key);
   if (!pose) {
     const f = FRAMES[work][frame % 2]!;
-    pose = { body: armsBody(view, f.arms), held: f.held };
+    const spread = view === 'side' ? 0 : measureOf(bodyOf(build)[view][0]!).spread;
+    pose = { body: armsBody(view, f.arms, build), held: f.held.map((h) => widened(h, spread)) };
     POSES.set(key, pose);
   }
   return pose;

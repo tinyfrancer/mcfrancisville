@@ -2,7 +2,17 @@ import { OUTFITS } from '../../data/outfits';
 import type { CutId } from '../../types/ids';
 import type { Worn } from '../../types/look';
 import { CLEAR, Sketch } from '../sketch';
-import { DOLL_HEIGHT, DOLL_WIDTH, EMPTY, type Grid, HIPS, SHOULDER, type View } from './body';
+import {
+  DOLL_HEIGHT,
+  DOLL_WIDTH,
+  EMPTY,
+  type Grid,
+  HIPS,
+  measureOf,
+  REGULAR_MEASURE,
+  SHOULDER,
+  type View,
+} from './body';
 import { finish, remember } from './paint';
 import { OUTFIT_ART, withPattern } from './prints';
 
@@ -16,8 +26,9 @@ import { OUTFIT_ART, withPattern } from './prints';
  * and a lower wing each side, veined, with white dots at their edges. From the side they're one
  * pair behind her back. The wings are a layer of their own (`backRows`), the dress `pieceRows`.
  */
-function butterflyRows(view: View): string[] {
+function butterflyRows(view: View, body: Grid): string[] {
   const wings = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const { out, back } = broader(body);
   const pair = (x: number, lean: number, wide = 5.5) => {
     wings.ellipse(x, 24, wide, 9, 'm').ellipse(x + lean, 36, 4, 4.5, 'm');
     for (let i = 0; i < 7; i++) wings.set(x + Math.round((i - 3) * 0.5 * lean), 19 + i * 3, 'y');
@@ -32,17 +43,26 @@ function butterflyRows(view: View): string[] {
     }
     wings.set(x - 2 * lean, 39, 'x');
   };
-  if (view === 'side') pair(7, 1);
+  if (view === 'side') pair(7 - back, 1);
   else if (view === 'front') {
-    pair(4, 1);
-    pair(27, -1);
+    pair(4 - out, 1);
+    pair(27 + out, -1);
   } else {
     // From behind, as wide, but reaching in to meet down her spine, where they're sewn on.
-    pair(7, 1, 7);
-    pair(24, -1, 7);
+    pair(7 - out, 1, 7);
+    pair(24 + out, -1, 7);
     wings.rect(15, 17, 2, 21, 'y');
   }
   return wings.rows;
+}
+
+/**
+ * How much broader a body is than hers (1.1's A5a): each side from the front and behind, and at
+ * the back from the side, so what hangs round her hangs round a stout body as far out.
+ */
+function broader(body: Grid): { out: number; back: number } {
+  const m = measureOf(body);
+  return { out: m.spread, back: REGULAR_MEASURE.back - m.back };
 }
 
 /**
@@ -66,12 +86,13 @@ const COLLAR_TIP = 8;
 export function capeRows(body: Grid, view: View, part: Part): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
   const cx = view === 'side' ? 13 : 16;
+  const { out, back: deeper } = broader(body);
   for (let y = SHOULDER; y <= 44; y++) {
     const below = y - SHOULDER;
     // From behind it falls from her shoulders as wide as the collar, to cover all her hair.
-    const half = view === 'back' ? 12 + below * 0.3 : 10 + below * 0.45;
+    const half = (view === 'back' ? 12 + below * 0.3 : 10 + below * 0.45) + out;
     // From the side it falls straight down from the collar's back, flaring a little.
-    const back = 10.5 + below * 0.15;
+    const back = 10.5 + below * 0.15 + deeper;
     for (let x = 0; x < DOLL_WIDTH; x++) {
       const d = x + 0.5 - cx;
       if (view === 'side' ? d < -back || d > 1 : Math.abs(d) > half) continue;
@@ -122,8 +143,9 @@ export function capeRows(body: Grid, view: View, part: Part): string[] {
  * Little bat wings (0.2's W3), spreading from her back: a bony top edge rising to a tip, and a
  * scalloped edge underneath. They're behind her from the front and side, and over her from behind.
  */
-function batWingRows(view: View): string[] {
+function batWingRows(view: View, body: Grid): string[] {
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const m = measureOf(body);
   const wing = (root: number, out: -1 | 1) => {
     for (let i = 0; i <= 10; i++) {
       const top = Math.round(28 - i * 0.8);
@@ -131,10 +153,10 @@ function batWingRows(view: View): string[] {
       for (let y = top; y <= bottom; y++) s.set(root + out * i, y, y === top ? 'M' : 'm');
     }
   };
-  if (view === 'side') wing(12, -1);
+  if (view === 'side') wing(m.back + 1, -1);
   else {
-    wing(view === 'back' ? 15 : 10, -1);
-    wing(view === 'back' ? 16 : 21, 1);
+    wing(view === 'back' ? 15 : m.left, -1);
+    wing(view === 'back' ? 16 : m.right, 1);
   }
   return s.rows;
 }
@@ -157,7 +179,7 @@ export function backRows(
   const cut = OUTFITS[worn.id].cut;
   if (!BACKS.includes(cut)) return null;
   const rows = remember(body, `${part}:${worn.id}:${view}`, () => {
-    const wings = cut === 'wings' ? butterflyRows(view) : batWingRows(view);
+    const wings = cut === 'wings' ? butterflyRows(view, body) : batWingRows(view, body);
     const drawn =
       cut === 'cape'
         ? capeRows(body, view, part)

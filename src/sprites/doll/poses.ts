@@ -1,3 +1,4 @@
+import type { Build } from '../../data/builds';
 import type { ActionPose, Pose } from '../../types/ids';
 import { CLEAR, Sketch } from '../sketch';
 import type { Layer } from '../sprite';
@@ -7,17 +8,16 @@ import {
   DOLL_HEIGHT,
   DOLL_WIDTH,
   frontLegs,
-  hangingForearm,
   head,
   limb,
   outlineAll,
   type PoseBody,
-  sideLegs,
   trunk,
-  upperArm,
   upperArms,
   type View,
+  measured,
 } from './body';
+import { PHYSIQUES, type Physique } from './builds';
 
 /*
  * Her poses (decisions 88 and 89), her action poses (V1's E2, decision 281) and the folds that
@@ -404,16 +404,22 @@ export const SWING_HAND: Record<View, readonly { x: number; y: number }[]> = {
  * whatever they cross, her head included; and those arms again, to go over her hair and anything
  * drawn over her body (a skirt, overalls), since they're in front of her.
  */
-function actionBody(pose: ActionPose, view: View, arms: ActionArms): PoseBody {
+function actionBody(
+  pose: ActionPose,
+  view: View,
+  arms: ActionArms,
+  physique: Physique = PHYSIQUES.regular,
+): PoseBody {
+  const { parts, reach, measure } = physique;
   const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
-  trunk(s, view);
-  if (view === 'side') sideLegs(s, false);
+  parts.trunk(s, view);
+  if (view === 'side') parts.sideLegs(s, false);
   else {
-    frontLegs(s, 0);
+    parts.frontLegs(s, 0);
     for (const side of [-1, 1] as const) {
       const path = side === -1 ? arms.left : arms.right;
-      if (!path || path.keys[0] !== 'aae') upperArm(s, side);
-      if (!path) hangingForearm(s, side);
+      if (!path || path.keys[0] !== 'aae') parts.upperArm(s, side);
+      if (!path) parts.hangingForearm(s, side);
     }
   }
   head(s, view);
@@ -422,7 +428,8 @@ function actionBody(pose: ActionPose, view: View, arms: ActionArms): PoseBody {
   for (const path of [arms.left, arms.right, arms.near]) {
     if (!path) continue;
     const before = s.rows;
-    path.keys.forEach((keys, i) => limb(s, path.points[i]!, path.points[i + 1]!, keys));
+    const points = path.points.map((p) => reach(p, view));
+    path.keys.forEach((keys, i) => parts.limb(s, points[i]!, points[i + 1]!, keys));
     for (let y = 0; y < s.height; y++) {
       for (let x = 0; x < s.width; x++) if (s.get(x, y) !== before[y]![x]) moved.add(`${x},${y}`);
     }
@@ -439,7 +446,7 @@ function actionBody(pose: ActionPose, view: View, arms: ActionArms): PoseBody {
     }
   }
   for (const [x, y] of lines) s.set(x, y, 'o');
-  const body = s.rows;
+  const body = measured(s.rows, measure);
   if (pose === 'crouch' && view === 'back') return { body, over: null };
   const over = body.map((row, y) =>
     [...row]
@@ -455,30 +462,44 @@ function actionBody(pose: ActionPose, view: View, arms: ActionArms): PoseBody {
       })
       .join(''),
   );
-  return { body, over };
+  return { body, over: measured(over, measure) };
 }
 
 /**
  * A body with arms of its own for a neighbour's job (V1's E3): her standing body with `arms` drawn
  * over it as an action's are, and those arms again to go over hair and clothes.
  */
-export function armsBody(view: View, arms: ActionArms): PoseBody {
-  return actionBody('wave', view, arms);
+export function armsBody(view: View, arms: ActionArms, build: Build = 'regular'): PoseBody {
+  return actionBody('wave', view, arms, PHYSIQUES[build]);
 }
 
-/** Every action's body, by view and frame. */
-function actionBodies(pose: ActionPose): Record<View, readonly PoseBody[]> {
-  const of = (view: View) => ARMS[view][pose].map((arms) => actionBody(pose, view, arms));
+/** Every action's body, by view and frame, for a build. */
+function actionBodies(pose: ActionPose, build: Build): Record<View, readonly PoseBody[]> {
+  const of = (view: View) =>
+    ARMS[view][pose].map((arms) => actionBody(pose, view, arms, PHYSIQUES[build]));
   return { front: of('front'), back: of('back'), side: of('side') };
 }
 
-export const ACTION_BODY: Record<ActionPose, Record<View, readonly PoseBody[]>> = {
-  crouch: actionBodies('crouch'),
-  pour: actionBodies('pour'),
-  swing: actionBodies('swing'),
-  holdUp: actionBodies('holdUp'),
-  wave: actionBodies('wave'),
-  shrug: actionBodies('shrug'),
+type ActionBodies = Record<ActionPose, Record<View, readonly PoseBody[]>>;
+
+function actionBodiesOf(build: Build): ActionBodies {
+  return {
+    crouch: actionBodies('crouch', build),
+    pour: actionBodies('pour', build),
+    swing: actionBodies('swing', build),
+    holdUp: actionBodies('holdUp', build),
+    wave: actionBodies('wave', build),
+    shrug: actionBodies('shrug', build),
+  };
+}
+
+/** Her action bodies, by pose, view and frame. */
+export const ACTION_BODY: ActionBodies = actionBodiesOf('regular');
+
+/** Every build's action bodies (1.1's A5a): hers, and the same arms on the stout body. */
+export const ACTION_BODIES: Record<Build, ActionBodies> = {
+  regular: ACTION_BODY,
+  stout: actionBodiesOf('stout'),
 };
 
 /**
