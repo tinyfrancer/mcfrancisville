@@ -3,12 +3,14 @@ import type { BraceletId, Facing, VillagerId } from '../types/ids';
 import type { PasserId } from '../data/rareEvents';
 import type { Feeling } from '../types/mood';
 import type { Stance } from '../types/stance';
+import type { Build } from '../data/builds';
+import { VILLAGERS } from '../data/villagers';
 import { WORKS } from '../data/work';
 import type { Worn } from '../types/look';
 import {
-  ACTION_BODY,
-  BODY,
+  ACTION_BODIES,
   backRows,
+  bodyOf,
   BREATH_FROM,
   CROUCH_DROP,
   CROUCH_FROM,
@@ -26,6 +28,7 @@ import {
   HAIR,
   hairPalette,
   hairRows,
+  measureOf,
   paint,
   pieceRows,
   raised,
@@ -752,18 +755,28 @@ const PUMPKIN_HEAD: Touch = (view, body, _facing, feel = null) => {
   };
 };
 
-/** A carpenter's tool belt: a leather band with a buckle, a pouch, and his hammer at his hip. */
-const TOOL_BELT: Touch = (view) => {
+/**
+ * A carpenter's tool belt: a leather band with a buckle, a pouch, and his hammer at his hip, all
+ * round his waist however broad it is (1.1's A5a).
+ */
+const TOOL_BELT: Touch = (view, body) => {
   const s = sketch();
+  const { left, right, back, front } = measureOf(body);
   if (view === 'side') {
-    s.rect(11, 33, 11, 2, 'b').rect(18, 35, 3, 3, 'b');
-    s.rect(11, 35, 1, 5, 'h').rect(10, 34, 3, 2, 'i');
+    s.rect(back, 33, front - back + 2, 2, 'b').rect(front - 2, 35, 3, 3, 'b');
+    s.rect(back, 35, 1, 5, 'h').rect(back - 1, 34, 3, 2, 'i');
   } else {
-    s.rect(10, 33, 12, 2, 'b');
+    s.rect(left, 33, right - left + 1, 2, 'b');
     if (view === 'front') {
-      s.rect(15, 33, 2, 2, 'g').rect(10, 35, 3, 3, 'b').set(11, 35, 'y');
-      s.rect(21, 35, 1, 5, 'h').rect(20, 34, 3, 2, 'i');
-    } else s.rect(19, 35, 3, 3, 'b').rect(10, 35, 1, 5, 'h').rect(9, 34, 3, 2, 'i');
+      s.rect(15, 33, 2, 2, 'g')
+        .rect(left, 35, 3, 3, 'b')
+        .set(left + 1, 35, 'y');
+      s.rect(right, 35, 1, 5, 'h').rect(right - 1, 34, 3, 2, 'i');
+    } else {
+      s.rect(right - 2, 35, 3, 3, 'b')
+        .rect(left, 35, 1, 5, 'h')
+        .rect(left - 1, 34, 3, 2, 'i');
+    }
   }
   return {
     rows: s.rows,
@@ -788,7 +801,7 @@ export function pumpkinHead(
   feel: Feeling | null = null,
 ): { rows: readonly string[]; palette: Palette } {
   const view = viewOf(facing);
-  return PUMPKIN_HEAD(view, BODY[view][frame % DOLL_FRAMES]!, facing, feel)!;
+  return PUMPKIN_HEAD(view, bodyOf(buildOf('gourdon'))[view][frame % DOLL_FRAMES]!, facing, feel)!;
 }
 
 // ---- Hazel: a stargazer, with a star in her hair ----
@@ -1393,11 +1406,25 @@ export function stanceFolded(layers: Layer[], stance: Stance): Layer[] {
   return out;
 }
 
+/**
+ * The body under a figure's clothes (1.1's A5a): a neighbour's `build` on their row, and hers for
+ * everyone else.
+ */
+export function buildOf(id: Figure): Build {
+  return (VILLAGERS as Partial<Record<Figure, { build?: Build }>>)[id]?.build ?? 'regular';
+}
+
 /** The arms a stance moves, for one view: a wave's, or a job's with what's in their hands. */
-function armsOf(stance: Stance, view: View): { pose: PoseBody; held: readonly Held[] } | null {
+function armsOf(
+  stance: Stance,
+  view: View,
+  build: Build,
+): { pose: PoseBody; held: readonly Held[] } | null {
   const frame = stance.frame ?? 0;
-  if (stance.act === 'wave') return { pose: ACTION_BODY.wave[view][frame % 2]!, held: [] };
-  const work = stance.act ? workPose(stance.act, view, frame) : null;
+  if (stance.act === 'wave') {
+    return { pose: ACTION_BODIES[build].wave[view][frame % 2]!, held: [] };
+  }
+  const work = stance.act ? workPose(stance.act, view, frame, build) : null;
   return work ? { pose: work.body, held: work.held } : null;
 }
 
@@ -1416,7 +1443,9 @@ export function figureLayers(
   const costumed = costume !== null;
   const view = viewOf(facing);
   const acting = stance.act !== undefined;
-  const still = BODY[view][0]!;
+  const build = buildOf(id);
+  const bodies = bodyOf(build);
+  const still = bodies[view][0]!;
   if (id === 'maude') {
     const look: MaudeLook = {
       hem: acting ? 0 : frame,
@@ -1433,8 +1462,8 @@ export function figureLayers(
       stance,
     );
   }
-  const moved = armsOf(stance, view);
-  const body = moved ? moved.pose.body : BODY[view][frame % DOLL_FRAMES]!;
+  const moved = armsOf(stance, view, build);
+  const body = moved ? moved.pose.body : bodies[view][frame % DOLL_FRAMES]!;
   const own = FIGURES[id];
   const dressed =
     id === 'cody' && costume !== null && costume !== 'own' && costume !== 'lion'

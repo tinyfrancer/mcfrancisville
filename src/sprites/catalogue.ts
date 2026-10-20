@@ -33,16 +33,27 @@ import { FEELINGS } from '../types/mood';
 import { CRITTER_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
 import {
+  ACTION_BODIES,
   ACTION_FRAMES,
   ACTION_POSES,
   BACKS,
+  backRows,
+  bodyOf,
   DOLL_FRAMES,
   dollLayers,
   hangsOver,
+  pieceRows,
   POSES,
+  raised,
   SIT_DROP,
   SIT_FROM,
+  skinPalette,
+  skinRows,
+  wornPalette,
+  type Grid,
 } from './doll';
+import { BUILD_IDS, type Build } from '../data/builds';
+import { SKIN_TONES } from './lookColours';
 import { PROP_SEATS } from '../data/seats';
 import { FURNITURE } from '../data/furniture';
 import { FURNITURE_ART } from './furniture';
@@ -480,6 +491,60 @@ export function catalogue(): Entry[] {
             rasterizeLayers(figureLayers(id, 'down', 0, null, null, { feel, blink: true })),
           ]),
       });
+    }
+  }
+  // Every build's body bare (1.1's A5a): standing and walking from the front, behind and the
+  // side, then each action's every view and frame, a strip each, to judge a build by.
+  const skinned = (body: Grid, flip = false) =>
+    rasterizeLayers(
+      [{ source: { rows: skinRows(body) }, palette: skinPalette(SKIN_TONES.peach) }],
+      {
+        flipX: flip,
+      },
+    );
+  for (const build of BUILD_IDS) {
+    const body = bodyOf(build);
+    entries.push({
+      name: `body:${build}:walk`,
+      draw: () => beside([...body.front, ...body.side].map((b) => skinned(b))),
+    });
+    for (const pose of ACTION_POSES) {
+      const bodies = ACTION_BODIES[build][pose];
+      entries.push({
+        name: `body:${build}:act:${pose}`,
+        draw: () =>
+          beside(
+            [...bodies.front, ...bodies.back, ...bodies.side].map(({ body: b }) => skinned(b)),
+          ),
+      });
+    }
+  }
+  // And every piece on each build's bare body, a strip a slot, from the front and the side, to see
+  // each cut paint onto every build as it does onto hers.
+  const onBuild = (build: Build, view: 'front' | 'side', id: OutfitId) => {
+    const body = bodyOf(build)[view][0]!;
+    const worn = { id, fabric: OUTFITS[id].fabrics[0]! };
+    const layers: Layer[] = [];
+    const back = (part: 'behind' | 'over') => {
+      const rows = backRows(worn, view, body, part);
+      if (rows) layers.push({ source: { rows }, palette: wornPalette(worn) });
+    };
+    back('behind');
+    layers.push({ source: { rows: skinRows(body) }, palette: skinPalette(SKIN_TONES.peach) });
+    layers.push({ source: { rows: pieceRows(worn, view, body) }, palette: wornPalette(worn) });
+    back('over');
+    return rasterizeLayers(raised(layers));
+  };
+  const SLOTS = ['top', 'bottom', 'outer', 'tights', 'shoes', 'gloves', 'necklace', 'hat'] as const;
+  for (const build of BUILD_IDS) {
+    for (const slot of SLOTS) {
+      const ids = (Object.keys(OUTFITS) as OutfitId[]).filter((id) => OUTFITS[id].slot === slot);
+      for (const view of ['front', 'side'] as const) {
+        entries.push({
+          name: `body:${build}:wears:${slot}:${view}`,
+          draw: () => beside(ids.map((id) => onBuild(build, view, id))),
+        });
+      }
     }
   }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
