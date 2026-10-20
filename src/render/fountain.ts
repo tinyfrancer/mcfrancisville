@@ -1,5 +1,6 @@
 import { PALETTE } from '../sprites/palette';
 import type { Point } from './camera';
+import { REDUCED, type Pass } from './passes/pass';
 import type { WorldLight } from './scene';
 
 /*
@@ -56,4 +57,28 @@ export function drawFountainNotes(
       }
     });
   }
+}
+
+/**
+ * The fountains as a place outdoors draws them while the music box plays (1.1's A4): each one's
+ * lamps pulsed to the beat, read once a frame as its light is worked out, and the notes rising
+ * off its jet over the light.
+ */
+export function fountainPass(
+  fountains: readonly { lights: WorldLight[]; top: Point }[],
+  fountainBeat: () => number | null,
+): Pass {
+  let beat: number | null = null;
+  return {
+    name: 'fountain',
+    lights() {
+      beat = fountainBeat();
+      return fountains.flatMap((f) => pulsed(f.lights, beat));
+    },
+    lit(ctx, { cam }) {
+      if (beat !== null && !REDUCED()) {
+        for (const f of fountains) drawFountainNotes(ctx, f.top, beat, cam);
+      }
+    },
+  };
 }

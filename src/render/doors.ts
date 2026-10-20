@@ -2,9 +2,14 @@ import { TILE_SIZE } from '../config/world';
 import { bake } from '../sprites/bake';
 import type { DoorRect } from '../sprites/buildings';
 import { OPEN_DOOR_GLOW, OPEN_DOOR_PALETTE, openDoor, type Opening } from '../sprites/doorsOpen';
+import { PROP_ART } from '../sprites/props';
+import { seasonLook } from '../sprites/seasons';
 import type { Palette, SpriteSource } from '../sprites/sprite';
 import type { TileBox } from '../world/events';
 import type { World } from '../world/World';
+import type { MapZone } from '../world/zones/MapZone';
+import type { Pass } from './passes/pass';
+import { standing } from './passes/standing';
 import { glowOf, type Drawable } from './scene';
 
 /** A building's front door where it stands: what it is, where, and what it's drawn in. */
@@ -62,5 +67,26 @@ export function openDoorDrawable(world: World, e: Entrance): Drawable | null {
     x: e.x + e.door.x,
     y: e.y + e.door.y,
     glow: glowOf(`glow:${key}`, source, palette, OPEN_DOOR_GLOW),
+  };
+}
+
+/**
+ * Each front door she's walking up to or has just come out of, standing open (V1's E5): the
+ * place's buildings', and the houses' on its lots as they stand today (1.1's A4).
+ */
+export function doorsPass(world: World, zone: MapZone, entrances: readonly Entrance[]): Pass {
+  return {
+    name: 'doors',
+    stand({ season }) {
+      const lots = (zone.lots?.props() ?? []).flatMap((p): Entrance[] => {
+        const art = PROP_ART[p.id];
+        if (!art.door) return [];
+        const { x, y, footY } = standing(p, season);
+        const { source, palette, key } = seasonLook(p, season);
+        const box = { tx: p.tx, ty: p.ty, w: p.w, h: p.h };
+        return [{ box, x, y, footY, door: art.door, key, source, palette }];
+      });
+      return [...entrances, ...lots].flatMap((e) => openDoorDrawable(world, e) ?? []);
+    },
   };
 }
