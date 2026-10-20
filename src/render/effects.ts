@@ -13,8 +13,10 @@ import type { World } from '../world/World';
 import type { TileBox } from '../world/events';
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
+import { drawGlints } from './bloom';
 import type { Point } from './camera';
 import { bakeIcon } from './items';
+import type { Pass } from './passes/pass';
 import { playerDrawable } from './scene';
 import { overHead } from './villagers';
 
@@ -734,4 +736,15 @@ function drawBrackets(
     }
   }
   ctx.globalAlpha = 1;
+}
+
+/** What the moments look like where they happen, drawn last over a place outdoors (1.1's A4). */
+export function effectsPass(world: World, zone: ZoneId, effects: Effects | null): Pass {
+  return {
+    name: 'effects',
+    lit(ctx, { cam, light }) {
+      if (effects) drawGlints(ctx, effects.glints(zone), cam, light.lamps);
+      effects?.draw(ctx, zone, cam, resolverFor(world));
+    },
+  };
 }
