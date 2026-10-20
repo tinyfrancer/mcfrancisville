@@ -3,7 +3,8 @@
  * 142): nobody has met the mayor, so the notes come off their typewriter, warm and a little too
  * busy, like their letters in `mystery.ts`. Oldest first, and only ever added to: the last row is
  * the version on her phone, and a release to `main` adds its row (or finishes the newest one).
- * A row her phone never saw may be folded into the next one (1.0 holds 0.6 to 0.9, decision 324),
+ * A row her phone never saw may be folded into the next one (1.0 holds 0.6 to 0.9, decision 324;
+ * 1.2 holds 1.0.1 and 1.1, decision 356),
  * so she reads one card; a row she has seen is never changed (but for L5's emoji, put in words,
  * decision 295).
  */
@@ -168,34 +169,20 @@ export const NOTES: readonly PatchNotes[] = [
     ps: 'P.S. A big one, so I typed it on my best paper. The W still sticks. It always will.',
   },
   {
-    version: '1.0.1',
+    version: '1.2',
     lines: [
-      "Today says which stall's first go at the fair is free, and a tap takes you there. The " +
-        'ducks have been asked to look lucky.',
-      'Before your greenhouse goes up where your things stand, a little card asks first. ' +
-        'Anything in the way waits, snug, in your storage chest.',
-      "October's quieter days have room for a surprise now. A wayfarer may wander through. Do " +
-        'wave.',
-      "Your rod waits by the door while you're in, tricks happen where you can see them, the " +
-        'reel goes gently on a calm phone, and your snack remembers what it was.',
-      "Come winter, our jack-o'-lanterns turn to snow lanterns, same grins. The reeling bar is " +
-        "bigger, and the noticeboard shows what's pinned up.",
+      'The little switch on the side of your phone hushes the whole town now. Want us anyway? ' +
+        "Settings has Play on silent, and we'll play right through.",
+      'The crickets have learnt to take a breath, a little song then a long rest. An Ambience ' +
+        'switch hushes the wind, rain and crickets; the music stays.',
+      'The square is flagstones now, with two benches and a ring round the well. The woods ' +
+        'wander at their edges, and the ice has cracks, a shine and floes.',
+      "Some neighbours are sturdier and some slimmer (I'm told I am; I had a new sash made). " +
+        'Pets trot straight to you, and planters grow in the back room too.',
+      "Today says which fair stall's first go is free, a card asks before your greenhouse " +
+        "moves things, October has surprises, and winter's pumpkins are snow lanterns.",
     ],
-    ps: 'P.S. Small fixes, so I typed them small. The W still sticks.',
-  },
-  {
-    version: '1.1',
-    lines: [
-      'The little switch on the side of your phone hushes the whole town now, as a good switch ' +
-        'should. Shh, everyone.',
-      "If you'd like us heard anyway, Settings has Play on silent. Flip it on and we'll play " +
-        'right through.',
-      'There is an Ambience switch beside Sounds and Music now, for the wind, the rain and the ' +
-        'crickets. The music stays.',
-      'And the crickets have learnt to take a breath: a little song each, then a good long ' +
-        'rest, so the night gets its quiet back.',
-    ],
-    ps: 'P.S. Typed very quietly, in case your phone is on silent.',
+    ps: 'P.S. Typed very quietly, in case your phone is on silent. The W still sticks.',
   },
 ];
 

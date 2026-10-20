@@ -10,6 +10,19 @@ things stand" further down is the long history.
 coordinating session, Opus sub-agents in worktrees, two lanes at a time, lanes H and T first).
 Each lane's heading says where it is; the rules are the plan's "Running it in parallel".
 
+### V1.1: the review and 1.2 (`claude/v11-review-1.2`, decision 356; no save change)
+
+**Running.** Every lane has merged into `v1.1-dev`; this is the last session. Done so far:
+the notes folded (`1.0.1` and `1.1` into one `1.2` row of five lines, `notesToShow('1.0')` is
+exactly the 1.2 card, `tests/systems/patchNotes.test.ts`); the 1.0 lived-in town opened in a 1.2
+dev build at Close, Far and sideways (one card, Cody's hello, save v55, no error notes) and played
+on by taps over four days to 5 October, kept as `tests/persistence/fixtures/lived-in-v55.json`
+(held by `livedIn.test.ts`). The driver is a scratch script, not in the repo. **Next, in order:**
+the shakedown (smoke's screenshots, the sprites of the cast, a night heard as a WAV), perf at
+Close and Far against 1.0's table, the docs (architecture's "Where it hurts", this file emptied
+to a record under "After 1.0", `CLAUDE.md`, the plan's status line, decision 356), merge, then
+PR #201's title and body ("Release 1.2 (with 1.0.1 and 1.1)"), never merged by a session.
+
 ### Lane H: heard (H1 → H2; decisions from 330; never the save)
 
 **Lane H is finished: H2 landed (PR #204, decision 331), and ⬆ 1.1 is ready to cut** (the

@@ -93,7 +93,9 @@ async function cloudSave() {
   const stored = [...cloudStore.values()][0];
   check(
     'what the cloud keeps is sealed: no town to read in it',
-    !!stored && !/player|wardrobe|MFV/.test(stored.data),
+    // Whole keys and a backup code's whole prefix: "MFV" alone turns up in the sealed base64url by
+    // chance (V1.1's review, as X2 found for the unit test), and a quote never does.
+    !!stored && !/"player"|"wardrobe"|MFV[01]-/.test(stored.data),
     stored ? stored.data.slice(0, 24) : 'nothing kept',
   );
   await tapElement('.hud-settings');

@@ -19,6 +19,11 @@ import { fromSave, World } from '../../src/world/World';
  * four days by real taps in a dev build, a new town from its title (Cody's first-day list done,
  * the bandstand started, a ghost minnow measured, Fibi fond to her first level, Wrapunzel's first
  * story told, Cody's question and his "how was your day?" answered, the wandering stall seen).
+ * 1.2's is 1.0's opened in a 1.2 dev build as her phone will open it (through steps 53 and 54),
+ * then played on by taps over four days to 5 October: the square's bench sat on, the fair's free
+ * go, Whisperwood and Lantern Shore found on foot and their ice skated, talks with every build of
+ * neighbour, the back room built with a pumpkin growing in a planter there, Fibi fond enough for
+ * her trick, and Rufus's lost frog carried home on a rare event's day.
  */
 const LIVED_IN = {
   '0.2.2': 'lived-in-v27.json',
@@ -26,6 +31,7 @@ const LIVED_IN = {
   '0.2.5': 'lived-in-v34.json',
   '0.3': 'lived-in-v43.json',
   '1.0': 'lived-in-v53.json',
+  '1.2': 'lived-in-v55.json',
 };
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
