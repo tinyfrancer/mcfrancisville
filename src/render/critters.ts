@@ -154,7 +154,8 @@ export function drawShinyGlints(
     const beat = Math.floor((t - turn) * 8);
     // Four beats of the eight a glint, then a rest: swelling, full, full, fading.
     if (beat > 3) continue;
-    const arm = beat === 1 || beat === 2 ? px * 2 : px;
+    const full = beat === 1 || beat === 2;
+    const arm = full ? px * 3 : px;
     const { x, y } = pose(c, nowMs);
     const corner = turn % 2 === 0 ? { dx: 20, dy: 2 } : { dx: 2, dy: 18 };
     const sx = x + corner.dx - cam.x;
@@ -162,6 +163,12 @@ export function drawShinyGlints(
     ctx.fillStyle = PALETTE.candle;
     ctx.fillRect(sx - arm, sy, arm * 2 + px, px);
     ctx.fillRect(sx, sy - arm, px, arm * 2 + px);
+    if (full) {
+      // Its heart swells too, so it reads from across the lawn.
+      ctx.fillStyle = PALETTE.candleBright;
+      ctx.fillRect(sx - px, sy, px * 3, px);
+      ctx.fillRect(sx, sy - px, px, px * 3);
+    }
     ctx.fillStyle = PALETTE.white;
     ctx.fillRect(sx, sy, px, px);
     if (arm > px) {
