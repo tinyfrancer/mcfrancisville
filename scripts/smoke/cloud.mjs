@@ -204,7 +204,8 @@ async function cloudSave() {
     );
     await main.evaluate(() => document.dispatchEvent(new Event('visibilitychange')));
     await newer.then((r) => r.response()).catch(() => {});
-    await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${PLAIN_DAY}&hour=10`, {
+    // On the real clock: a town played on a made-up day (`?day=`) is never asked about a newer one.
+    await page.goto(`${URL_BASE}?loop=manual&skiptitle`, {
       waitUntil: 'load',
       timeout: 60_000,
     });
