@@ -29,9 +29,26 @@ Corner (November to February), Cosy Cabin and Midnight Observatory, the star win
 **1.4's `NOTES` row** was made by G1 and G2 at once and folded at G1's merge into four lines, two
 each, shinies first, G2's P.S.: **G3 adds the fifth**, the last.
 
-### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+### G3: ice fishing (`claude/g3-ice-fishing`; decision 372; no save change)
 
-Not started; in the plan's order.
+**In progress.** Done and pushed: (1) casting through the ice: while the town's pond is frozen
+over (`FROZEN`, 15 December to 15 January) its fish swim on under it (`Collecting.canBe`), a tap
+on one's dim shadow casts from beside it through a hole drawn on the ground under the float
+(`drawHole`, `holeOf` in `render/fishing.ts`, the fishing pass's new `ground` part), tests in
+`tests/world/iceFishing.test.ts`; (2) four winter fish (icicle smelt, bobble perch, aurora trout,
+cold moon sturgeon; December to February, the pond and the lake), their art, shines, sizes, the
+museum's tenth case (fish), `museum:74`, the rarity bound 11 → 12 months. **Next, in order:** (3)
+the ice hut, the fifth town project (`PROJECTS.iceHut`, on the pond's north-east bank at 31,38,
+2×2, stages in `sprites/projects.ts`, a door into `INTERIORS.iceHut` through `Sites`); (4) the
+hut's room: a stove that `frames`, a bench, a hole fixture (`FIXTURES.iceHole`, `fishing: true`)
+that casts into the pond's winter fish in winter, its ordinary fish out of it (`Collecting.holeFish`,
+two slots an hour, `iceHut:critter:<hour>:<slot>`), the line drawn in `RoomView`; (5) Today's
+`iceFishing` line on frozen days; (6) smoke in `critters` and `projects`; (7) 1.4's fifth notes
+line; (8) docs: CLAUDE.md, decision 372, the plan's status line. No save bump planned.
+
+### G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+
+Not started; in the plan's order (G4 runs beside G3).
 
 ## If you are starting cold after a long gap
 
