@@ -282,6 +282,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
     return { ...state, cabinet: { ...cabinet, stars: {} } };
   },
+  // 1.5's G6: the attic. Her rooms were a record by room already, and a room not saved is one not
+  // built, so a town has no attic until she builds one; the bump keeps a build that doesn't know
+  // an attic from opening (and dropping) one.
+  57: (state) => state,
 };
 
 /**
