@@ -17,14 +17,10 @@ Not started.
 
 ### F2: her phone's frame (`claude/f2-frame`; Sonnet; decision 361)
 
-In progress (draft PR against `v1.3-dev`). Done and pushed: `happeningsAt` kept for the hour
-(`systems/happenings.ts`, keyed `${day}:${floor(hour of night)}` and `mayorTold()` from
-`systems/mayor.ts`, since the mayor's hello and birthday read whether she has met him), the day key by
-the minute in `Decorations` and `Mounds` (`world/zones/MinuteDay.ts`), `finale.test.ts`'s 30 s
-timeout dropped, tests (`tests/world/dayByTheMinute.test.ts`, the new block in
-`tests/systems/happenings.test.ts`). To do, in order: the before/after numbers (`npm run perf`, the
-400 A\* paths, the suite's wall time) into the PR body and `docs/architecture.md`; "Where it hurts" 2
-and 3 struck through; decision 361; the plan's status line; smoke 622/622 and `smoke:offline`; merge.
+F2 landed (PR #217, decision 361): `happeningsAt` kept for the hour (keyed by day, whole hour and
+`mayorTold()`), the day key by the minute in `Decorations` and `Mounds` (`world/zones/MinuteDay.ts`),
+`finale.test.ts`'s 30 s timeout gone; numbers in `docs/architecture.md` ("1.3's F2"). No save
+change.
 
 ### F3 the creatures, F4 the scenery, F5 the touches, F6 the forwarders, V1.3 the review
 

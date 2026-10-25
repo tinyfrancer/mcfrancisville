@@ -8931,3 +8931,58 @@ night stays the moon-bound critters'); visitors every week (the Cabinet is meant
 year's work, decision 150; a fortnight answers the complaint without making it a month's); a new
 neighbour or place (a week isn't a release with a theme, decision 270); refactors first (they
 change nothing she sees).
+
+## 361. Her phone's frame: happenings kept for the hour, the day key kept by the minute (2026-10-25, 1.3's F2)
+
+**Context:** "Where it hurts" 2 and 3 (decision 336's T2 had named `happeningsAt` as the cost left in
+`src/`; decision 340's W1 had found most of `canWalk`'s microsecond in `dayKey`). A world step
+filtered every happening row for every neighbour (`whereabouts`, `happeningOf`) and `Decorations`
+and `Mounds` each built a `Date` and a padded string on every `canWalk`, the pond's ice asking
+`Decorations` again.
+
+**Decision:**
+
+- **`happeningsAt(hour, day)` keeps its last answer**, one entry, keyed `${day}:${floor(hour of
+night)}` plus `mayorTold()`, a counter `systems/mayor.ts` bumps when `knowMayor` is told
+  something new. The hour, not the second: every row's `from` and `until` is a whole hour, so the
+  filter cannot change inside one, and a test holds it (a row on the half hour fails that test and
+  the key moves to the half hour). Past midnight is the night before's, as `hourOfNight` already
+  has it. It returns a `readonly` array shared by every caller (none wrote to it).
+- **Why the mayor is in the key:** `happensOn` already keeps what the day key alone decides, but
+  the mayor's hello (`unmasking`) and his birthday read whether she has met him (`inTown`,
+  `unmaskingOn`), which a clue pinned while she plays changes inside the hour. Nothing else
+  `happeningsAt` reads is module state (the rows, the calendar, the weather, birthdays are the day
+  key's). `venueOf`, which reads the fairground's gate and the bandstand, is not in `happeningsAt`
+  and is not kept. `tests/setup.ts` needs no new line: it already calls `knowMayor(null, null)`,
+  and the counter moves only when the story does, so a memo from the file before is good or
+  dropped, never wrong.
+- **The day key by the minute** in `Decorations` and `Mounds`, through a small `MinuteDay`
+  (`world/zones/MinuteDay.ts`) that reads `dayKey(now)` when `Math.floor(now / 60_000)` has
+  changed, as `Stalls` keeps its stands (compared with `!==`, not "later", so a clock set back is
+  read afresh). The 5am turn needs no rule of its own: 5:00 is a minute boundary in every zone and
+  across a clock change, so the day cannot turn between two reads in one minute. Held by a test
+  that steps a fake clock through the last two minutes of the old day and across 5:00 for the
+  square's piece, the pond and the mound, and by one that checks `MinuteDay` against `dayKey`
+  at the edges of every day of a year. `Decorations` also hands back one shared answer when none
+  of hers is out, where it built an object a call.
+- **`finale.test.ts`'s 30 s timeout is gone** with its comment: the settling cases run 0.15–0.7 s
+  where they ran 0.18–1.9 s.
+- **Measured** (architecture.md's "1.3's F2"): 400 A\* paths across town 1,057–1,094 ms on
+  `v1.3-dev` against 349–378 ms; `canWalk` 1,579–1,633 ns a call (the harness's measure) against
+  521–565; a world step 220–228 µs against 66–67; `npm run perf` at Close, 21:30, the town's update
+  1.11–1.35 ms against 0.69–0.83 and the other scenes' down by a third to a half, the draws
+  within each other's spread or a little under; `npm run test` 147.7–152.2 s against 122.9–125.8.
+  The suite, the lived-in fixtures and W1's overlays and arrivals snapshots are unchanged (never
+  `-u`), smoke 622 of 622.
+- **Found on the way:** smoke's `neighbours` check "Wes says hello, and stays" failed from 24
+  October on, on `v1.3-dev` alike (Wes's first words are the story's last chapter once it's due);
+  F1's PR fixed the check the same day, so F2 carries no change to smoke.
+
+**Rejected:** a `Map` of many hours (the step asks one hour at a time; one entry is enough and
+nothing grows); keying on the exact hour (it moves every second, a hundred steps of misses a
+time against one a whole hour); caching in `whereabouts` or `Neighbourhood` (every other caller
+of `happeningOf` gains from the memo where they are, and `happeningsOn` and `happensOn` already
+keep the day's); a minute-keyed memo of `canWalk` itself (the overlays are the cost, not the
+tiles); a `Clock` helper in `systems/clock.ts` (F1's files are near; the helper is the zones'
+own); dropping `Stalls`' own two caches to use `MinuteDay` (they cache more than the day, and a
+refactor of working code buys nothing she sees).

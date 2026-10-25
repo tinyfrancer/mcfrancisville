@@ -1095,6 +1095,41 @@ baked figures, the ice's and paving's pieces, each baked once. Against 1.0's own
 different day's container), the same: the town 37.8–39.2 against 32.6–32.8 there and 33.8–36.7
 here, so most of that gap is the day.
 
+**1.3's F2** (2026-10-25, decision 361), `happeningsAt` kept for the hour and the day key kept by
+the minute in `Decorations` and `Mounds`, changes no drawing and no rule. Measured on a container
+shared with F1's session, `v1.3-dev` and F2 each served from a copy of its own, alternating, three
+runs each. A long A\* across town (400 seeded paths between open tiles, 669,726 `canWalk` calls,
+timed in a world test at 21:30 on 24 October, the festival's square up; W1's method, decision
+340), the median of seven passes per run, and a world step (`World.update(16)` with the clock
+advancing, the same town, the median of five runs of 2,000 steps), then `npm run perf` at Close,
+21:30 (draw means, ms (p50); updates, ms), then the suite's wall time:
+
+| Measure                         | `v1.3-dev`  | F2          |
+| ------------------------------- | ----------- | ----------- |
+| 400 A\* paths, ms               | 1,057–1,094 | 349–378     |
+| `canWalk`, ns a call (harness)  | 1,579–1,633 | 521–565     |
+| A town step in a world test, µs | 220–228     | 66–67       |
+| `npm run test`, s (wall)        | 147.7–152.2 | 122.9–125.8 |
+
+| Scene         | Draw, F2              | Draw, v1.3-dev        | Update F2 → v1.3-dev  |
+| ------------- | --------------------- | --------------------- | --------------------- |
+| Town          | 33–37.1 (23.2–27.2)   | 33.1–39.8 (24.7–28.8) | 0.69–0.83 → 1.11–1.35 |
+| Home          | 17.9–20.8 (10.2–12.3) | 18.9–20.1 (11.3–11.6) | 0.62–0.89 → 0.89–0.95 |
+| Fairground    | 18.3–22.4 (13.7–15.6) | 23.4–23.5 (16.6–16.9) | 0.4–0.54 → 0.65–0.77  |
+| Whisperwood   | 25.3–26.4 (17.1–18.7) | 26.4–27.8 (18.3–19.6) | 0.38–0.69 → 0.61–0.92 |
+| Boo Acres     | 17.4–20.1 (12.3–13.2) | 20.4–21.3 (13.9–14.3) | 0.39–0.51 → 0.62–0.77 |
+| Her yard      | 28.9–37.8 (22.8–30.5) | 34.5–40.7 (26.2–33)   | 0.58–0.66 → 1.05–1.27 |
+| Back room     | 21.2–23 (13.9–15.6)   | 22.2–24 (14.9–16.1)   | 0.79–1.25 → 1.04–1.27 |
+| Lantern Shore | 23.6–25.2 (17.1–17.8) | 25.1–26 (18–18.9)     | 0.41–0.64 → 0.61–0.83 |
+
+The updates are down by a third to a half wherever neighbours are about (the town's 1.1–1.35 ms
+is 0.7–0.8; 1.2's baseline was 1.42–1.52), the draws within each other's spread or a little under
+(`Decorations.frozen` and the overlays are asked while the view draws too). The heavier saving is
+the walk: `canWalk` was most of its microsecond in `dayKey` (`new Date` and a padded string, three
+times a call in town: the decorations, the pond's ice, the mound), and a path across town is a
+third of what it was. The suite is 17% shorter, its world tests' steps (the settling cases in
+`finale.test.ts` run 0.15–0.7 s a case against 0.18–1.9 s, so their stated 30 s timeout is gone).
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -1131,21 +1166,16 @@ in below, and what was done is said once at the end, so the list is what's left.
    build trips on TypeScript, the fallback is the same file as `api/save.js` with JSDoc types. And
    no frame has been timed on her iPhone: `?perf` (production too, `wiring/perf.ts`) is waiting,
    with the table under "On her iPhone" above.
-2. **A world step works out the hour's happenings for every neighbour, every step.**
-   `happeningsAt(hour, day)` (`systems/happenings.ts`) filters every happening row (the town's, the
-   rhythm's, the holidays', the fair's) and is asked through `whereabouts` for each neighbour on
-   every step, and by `happeningIn` for the place she's in. It's most of a world test's step (0.5
-   ms quiet, up to 1.8 ms loaded; T2's measure, decision 336) and a share of her phone's update
-   (town 1.1 ms a step in 1.0's table). Kept for the hour and the day (a `Map` keyed by
-   `${day}:${hour}`, dropped when either turns), it would make every world test and the frame
-   cheaper, and `finale.test.ts`'s settling cases could drop their stated 30 s timeout. A session
-   in `src/systems/` with the world tests as its proof.
-3. **`canWalk` works out the day key on every call.** `Decorations` and `Mounds`
-   (`world/zones/`) each ask `dayKey(now)` per call to say whether today's square piece, the frozen
-   pond or today's mound stands on a tile, and the pond's ice asks `Decorations` again; `canWalk` in
-   town is about 1 µs a call in the container (W1's measure, decision 340), a long A\* across town a
-   few milliseconds. Nothing she feels at a walk a tap; keeping the day by the minute (as `Stalls`
-   does) is the first thing to try if paths ever show in `?perf`.
+2. ~~**A world step works out the hour's happenings for every neighbour, every step.**~~ Done in
+   1.3's F2 (decision 361): `happeningsAt(hour, day)` keeps its last answer for the whole hour
+   of the day (rows begin and end on whole hours, held by a test) and for as long as the mayor's
+   story is told the same (`mayorTold()`), so a step filters the rows once an hour, not once per
+   neighbour per step. A town step at Close, 21:30, is 0.69–0.83 ms against 1.11–1.35, and a
+   world test's step under a third of what it was.
+3. ~~**`canWalk` works out the day key on every call.**~~ Done in 1.3's F2: `Decorations` and
+   `Mounds` read the day through `MinuteDay` (`world/zones/MinuteDay.ts`), which works `dayKey`
+   out once a minute as `Stalls` does; `canWalk` in town went from about 1.6 µs to 0.55 µs a call
+   (the harness's measure, with its wrapper), a long A\* across town three times faster.
 4. **Forwarders kept so nothing else had to move.** `Home` still answers the room she's in
    through twenty-seven one-line reads of `home.rooms` (W2, decision 341), and `Neighbourhood`
    the talk's ten (`talk`, `reply`, `give`, `favour`, `doFavour`, `feel`, `feelingOf`,
@@ -1197,3 +1227,5 @@ above hold the detail:
 - ~~The town's legend running out of characters~~ (W3: the rule noted at `LEGEND`, a place's own
   legend for a place-only prop).
 - ~~Pets walking tile to tile~~ (W1: `Pet.walk` pulls its path with `stringPull`).
+- ~~`happeningsAt` filtered per neighbour per step; `canWalk` worked out the day key per call~~
+  (1.3's F2, decision 361: 2 and 3 above, struck through).
