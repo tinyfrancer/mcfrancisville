@@ -22,7 +22,19 @@ F2 landed (PR #217, decision 361): `happeningsAt` kept for the hour (keyed by da
 `finale.test.ts`'s 30 s timeout gone; numbers in `docs/architecture.md` ("1.3's F2"). No save
 change.
 
-### F3 the creatures, F4 the scenery, F5 the touches, F6 the forwarders, V1.3 the review
+### F3: the creatures (`claude/f3-creatures`; Opus; decision 362)
+
+In progress, draft PR open. Done: every critter (16 and 24, its shadow) and every pet frame
+rendered at 6× and at 3× (a phone at Close) on its ground by day and night, and ranked (41
+critters weak in 13 drawings, and Fibi's and Dolly's face-on frames; the table is in the PR
+body). Next, in order: the bats, the moths, the generic and round fish (and their shadows), the
+orbs, the hoppers, the twig knight, the woolly bear and glowworm, the lantern fish, the skull
+beetle's skull, the reed frog's stripe, the two dark jumpers' faces, then Fibi's and Dolly's
+muzzles; each family's 16 and 24 from the same numbers; `tests/sprites/critters.test.ts` holding
+each redrawn critter's 16 and 24 to one silhouette class and palette family; then decision 362,
+the art notes, the plan's status line. No save change; `looksHeld` untouched.
+
+### F4 the scenery, F5 the touches, F6 the forwarders, V1.3 the review
 
 Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
 (below), recorded in `docs/personal_touches.md` by the coordinator as they come.
