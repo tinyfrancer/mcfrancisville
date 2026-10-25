@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { LANTERN_SHORE, TOWN, WHISPERWOOD } from '../../src/data/maps';
 import { lifeOf, sheenFrom, SHEEN_EVERY } from '../../src/render/life';
+import { wetAround } from '../../src/sprites/banks';
 import { MELT, meltNear } from '../../src/sprites/ice';
 import { seasonPieces } from '../../src/sprites/seasons';
 import { groundPieces, snowOnIce, TILE } from '../../src/sprites/terrain';
@@ -133,5 +134,27 @@ describe('the frozen creeks (1.1 A3)', () => {
     expect(steps).toBeLessThan(12);
     expect(steps).toBeGreaterThan(2);
     expect(sheenFrom(100 + SHEEN_EVERY, 100, 500)).toBe(sheenFrom(100, 100, 500));
+  });
+});
+
+// 1.3's F4 (decision 363): Whisperwood's creek stopped square against the hedge at its east end.
+describe('where a creek meets the edge (1.3 F4)', () => {
+  /** The wet round a tile as rows of five, top first. */
+  const ring = (map: typeof wood, tx: number, ty: number) =>
+    wetAround(at(map), tx, ty, (id) => id === 'ice' || id === 'water').match(/.{5}/g)!;
+
+  it('curls its bank round where it meets the hedge unbroken', () => {
+    for (const ty of [25, 26]) {
+      const rows = ring(wood, 24, ty);
+      // The hedge beyond the creek's last tile is dry, so the bank closes it there.
+      expect(rows.map((r) => r.slice(3)).join(''), `24,${ty}`).not.toContain('1');
+      expect(rows[2]![1], `24,${ty}`).toBe('1');
+    }
+  });
+
+  it('runs on off the map where it leaves through a gap in the hedge', () => {
+    // Whisperwood's creek out to the shore at the bottom, and the shore's in from the woods.
+    expect(ring(wood, 17, 36)[4]).toMatch(/11/);
+    expect(ring(shore, 12, 1)[0]).toMatch(/11/);
   });
 });

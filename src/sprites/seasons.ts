@@ -8,6 +8,7 @@ import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 import { NOTICEBOARD_WINTER, NOTICEBOARD_WINTER_PALETTE } from './clutter';
 import { SNOW_LANTERN_FORMS, SNOW_LANTERN_PALETTE } from './townProps';
+import { CONIFER_FORM } from './treeForms';
 import {
   E,
   groundPieces,
@@ -403,9 +404,6 @@ const CROWNS: Record<
 /** An evergreen: a conifer keeps its needles while the other trees blossom or go green. */
 const EVERGREEN = fresh(C.canopyDark, C.canopy);
 
-/** Which of the tree's forms is the conifer (`MORE_TREE_FORMS`, after the three round ones). */
-const CONIFER = 3;
-
 /**
  * Snow settled on the broken tree's break in winter (1.1's A2): its pale heartwood (`x`, the
  * tree's key for it) under a cap, the ring in it a shade.
@@ -459,7 +457,7 @@ export function seasonLook(prop: StandingProp, season: SeasonId): ReturnType<typ
   const leaves = CROWNS[season][prop.id]?.[v];
   const roofed =
     season === 'winter' && !art.noEaves && (art.door !== undefined || ROOFED.has(prop.id));
-  const needles = prop.id === 'tree' && base.form === CONIFER && season !== 'winter';
+  const needles = prop.id === 'tree' && base.form === CONIFER_FORM && season !== 'winter';
   if (needles) {
     const key = `${base.key}@${season}`;
     return { ...base, key, palette: once(key, () => ({ ...base.palette, ...EVERGREEN })) };

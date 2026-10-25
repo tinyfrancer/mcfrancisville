@@ -22,7 +22,15 @@ F2 landed (PR #217, decision 361): `happeningsAt` kept for the hour (keyed by da
 `finale.test.ts`'s 30 s timeout gone; numbers in `docs/architecture.md` ("1.3's F2"). No save
 change.
 
-### F3 the creatures, F4 the scenery, F5 the touches, F6 the forwarders, V1.3 the review
+### F4: the scenery (`claude/f4-scenery`; Opus; decision 363)
+
+F4 landed (PR #221, decision 363): the bare and bent tree forms kept to where they stand
+(`grove` from `parseMap`, `treeFormOf` in `sprites/props.ts`; the town 6 bare of 18 to 1, the
+graveyard's), Whisperwood's creek curled round at the hedge (`wetAround`), the frozen pond's ring
+kept, three small things logged in the art notes. No save change. For 1.3's notes: the town's
+trees have all their leaves back.
+
+### F3 the creatures, F5 the touches, F6 the forwarders, V1.3 the review
 
 Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
 (below), recorded in `docs/personal_touches.md` by the coordinator as they come.
@@ -1958,21 +1966,26 @@ What still looks off, kept as sessions notice it (the user reviews the art all t
 phase G" in `docs/personal_touches.md`). L6 emptied the list (decision 292), V1's review filled it
 again (decision 324), 1.0.1 and the 1.1 plan's lane A struck all of it, and **V1.1's review**
 (decision 356) looked again at `npm run sprite -- 'place:*'` and the cast's figures, smoke's
-screenshots and its own four days of play at phone size, by day and at night. What's left is for
-the user's eye on her phone, none of it clearly wrong:
+screenshots and its own four days of play at phone size, by day and at night. **1.3's F4**
+(decision 363) struck the trees and the creek, looked over every place whole in each season and
+smoke's screenshots at Close both ways, and added three. What's left is for the user's eye on her
+phone, none of it clearly wrong:
 
-- **The broken trees.** A2 dealt the tree's nine forms to every tree in every place by tile, so a
-  ninth of them are the broken one and a ninth the dead one: in the woods about one tree in five
-  is leafless (Whisperwood 19 broken and 22 dead of 184), and in town three broken (one beside
-  Cobweb Corner, one by the farm's sign, one by the graveyard) and three dead of 18, a third of
-  the town's trees. A2 asked "not too many?" and so does this. If she finds it so, the broken
-  (and leaning) forms could be dealt to the woods' edges only, a rule in `lookOf`, not a redraw.
-- **The frozen pond's ring** (A3 kept it): in winter the town pond is ice with a ring of plates and
-  open water round the fountain, which plays on. It reads as the fountain keeping its water open,
-  which is charming; kept.
-- **Whisperwood's creek at the map's east edge** ends square against the hedge, the ice's hard
-  edge meeting the edge trees, where it runs on out of the place. A curl of bank there, as the
-  creek's other bends have, would soften it.
+- **The frozen pond's ring** (A3 kept it, V1.1 and 1.3's F4 too): in winter the town pond is ice
+  with a ring of plates and open water round the fountain, which plays on. Looked at again at
+  Close on Christmas Eve's night (smoke's `frozen-pond`): the hole is round the fountain's basin
+  and no wider, its plates lit at their edges, the jets and lamps going, so it reads as the
+  fountain keeping its water open, not as a hole in the drawing; kept.
+- **Whisperwood's creek meets the dirt path square** where the path from the beds runs into its
+  west bank (tiles 16–17, rows 28–29, the footbridge project's site): the ice's edge is a straight
+  line against the track for two tiles, where every other bank wobbles. The footbridge covers it
+  once built; before then a bank there wants the track's edge and the ice's field to agree, more
+  than a pixel (1.3's F4).
+- **The ghost daisies in the graveyard stay green under the snow** in winter, a bright patch on
+  white, and the meadows' moonpetals and forget-me-boos bloom in it too. They're gathered all year,
+  so they're there all year; whether they want a frosted look in winter is hers to say (1.3's F4).
+- **The dead tree carries no snow in winter**, where every tree in leaf and the broken one's break
+  do: one stands by the graveyard now, and a few in each wood (1.3's F4).
 - **The slight and stout builds** read as slim and sturdy at 4× in the sprites (the mayor's sash is
   a band down his side from the side, Wes's trench narrow to the hem); whether they do at Close on
   her phone is hers to say.
@@ -1984,7 +1997,10 @@ the creeks flat paint~~ (A3); ~~big empty lawns~~ and ~~the castle garden's same
 noticeboard's pumpkin orange in winter~~ (A2: a snowball); ~~her rod indoors~~ and ~~the quick
 bar's seeds under the bag sideways~~ (1.0.1's X1); ~~the small tension bar~~, ~~jack-o'-lanterns
 all year~~, ~~the neutral faces~~, ~~Florence's and Gary's frames~~ and ~~the noticeboard the same
-whatever's pinned~~ (1.0.1's X2); ~~one body under every look~~ (A5a, A5b).
+whatever's pinned~~ (1.0.1's X2); ~~one body under every look~~ (A5a, A5b); ~~the broken trees,
+a third of the town's bare~~ (1.3's F4: the broken and leaning trees only in a wood's edge, the
+dead one in the woods and by the graves, the town in leaf but the graveyard's one); ~~Whisperwood's
+creek square against the hedge~~ (1.3's F4: its bank curls round to an end there).
 
 ## Settled since
 

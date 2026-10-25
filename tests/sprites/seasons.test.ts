@@ -134,7 +134,9 @@ describe('the seasons on what stands', () => {
 
   // 1.1's A2 (decision 351): the broken tree's heartwood takes a cap of snow, as a roof does.
   it('caps the broken tree’s break with snow in winter, and only then', () => {
-    const broken = town.props.find((p) => p.id === 'tree' && lookOf(p).form === 8)!;
+    // In a wood's edge: the town's trees are all in leaf since 1.3's F4.
+    const wood = parseMap(ZONES.whisperwood.map!);
+    const broken = wood.props.find((p) => p.id === 'tree' && lookOf(p).form === 8)!;
     expect(broken).toBeDefined();
     expect(lookOf(broken).source.rows.some((row) => row.includes('x'))).toBe(true);
     const snow = seasonLook(broken, 'winter').palette.x;
