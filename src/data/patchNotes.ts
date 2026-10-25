@@ -200,6 +200,19 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. I shall keep the typewriter oiled, just in case. The W still sticks. I have grown rather fond of it.',
   },
+  {
+    version: '1.4',
+    lines: [
+      // 1.4's G1: the shinies.
+      'Once in a while a critter is the wrong colour on purpose, and prettier for it. Look for ' +
+        'a twinkle: a shiny one is about.',
+      "A shiny is worth twice as much, takes its case at the museum in the plain one's place, " +
+        'and three of one make Gourdon carve it in gold leaf.',
+      'The Cabinet marks every shiny you find. Wrapunzel is keeping two new shelves for them, ' +
+        'and she is very excited about both.',
+    ],
+    ps: 'P.S. I have not typed for a whole week. I missed the W.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

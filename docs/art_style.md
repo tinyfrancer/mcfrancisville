@@ -301,6 +301,15 @@ She finds spiders frightening, and they are still in the game, drawn gently
   bands; a slug under a little ghost sheet; a glowworm whose tail glows; a cricket, a grasshopper,
   a stick insect in an acorn-cap helmet, a roly-poly in plates. Two frames, 900ms each: a slow
   wiggle where it is, never pottering toward her.
+- **A shiny is the same critter in another palette** (1.4's G1, decision 370), never a new grid:
+  a gem's `ramp` (`GEMS`, `SHINIES` in `src/sprites/critterLooks.ts`) laid over its colours by how
+  light each is, so its shading, spots and outline keep their places and it reads as itself in
+  colours it never has (a golden bat, a rose koi, a sky-blue monarch). What makes one read at 3×:
+  a hue far from the plain one, not a lighter or darker step of it; an accent gem only where the
+  creature has a part of its own (a shell, spots, a bow, the other orb); its eyes and ink kept, and
+  a lamp, a glowing tail or a peacock's fan kept as they are; nothing on the ramp's darkest tone, or
+  a dark critter's shiny goes muddy. In her bag it wears a four-pointed sparkle in its top right
+  corner, ringed in ink where it lies over the critter; out and about a slow glint over the light.
 - **A fossil is drawn once, at 24** (0.3's C1, `src/sprites/fossils.ts`), stone and amber in
   the kit's warm greys, and that one picture is its bag icon, its case in the Cabinet, its nook
   at the museum and its figurine. What's magic in it (the ghost shell, the amber, the egg's

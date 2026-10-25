@@ -89,7 +89,11 @@ async function critters() {
     await page.evaluate(() => window.view.step(40));
     if (tries === 0) await page.screenshot({ path: '.smoke/net.png' });
   }
-  const caught = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  // It may have come out shiny (1.4's G1), a thing of its own in her bag.
+  const caught = await page.evaluate(
+    (id) => window.world.bag.count(id) + window.world.bag.count(`${id}Shiny`),
+    target.critter,
+  );
   check('tapping a critter walks her up to it and nets it', caught >= 1, target.critter);
   const found = await page.evaluate(() => window.world.cabinet.found);
   check(
@@ -141,8 +145,9 @@ async function critters() {
   );
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
-    // Nine squishies (the fairground's own since V1's R6b) and eight dolls.
-    book.shelves === 15 && book.sets === 17 && book.setsFit,
+    // Nine squishies (the fairground's own since V1's R6b) and eight dolls; the shinies' two
+    // shelves since 1.4's G1.
+    book.shelves === 17 && book.sets === 17 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
@@ -398,7 +403,11 @@ async function crawlies() {
     await page.evaluate(() => window.view.step(40));
     if (tries === 0) await page.screenshot({ path: '.smoke/crawly.png' });
   }
-  const caught = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  // It may have come out shiny (1.4's G1), a thing of its own in her bag.
+  const caught = await page.evaluate(
+    (id) => window.world.bag.count(id) + window.world.bag.count(`${id}Shiny`),
+    target.critter,
+  );
   check(
     'tapping a creepy-crawly at Boo Acres walks her up to it and nets it',
     caught >= 1,

@@ -631,7 +631,14 @@ what each owns, and where it hurts. Update it when a seam moves.
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters; the museum's
   cases, three tiles wide, show each donated critter's 24-pixel art in a `nooks` box. Art is
-  `src/sprites/critters.ts`, drawn by `src/render/critters.ts`. Shelves to finish (0.2's F2,
+  `src/sprites/critters.ts`, drawn by `src/render/critters.ts`. **Shinies** (1.4's G1, decision
+  370): every critter's second palette (`SHINIES` in `src/sprites/critterLooks.ts`, `SHINY_ART`),
+  dealt by a roll of its own per slot (`isShinyDeal`, 1 in 12 to 1 in 40 by tier; a kind nine
+  months caught with no shiny is charmed, `isCharmed`), glinting over the light
+  (`drawShinyGlints`), kept as items of their own (`lunaMothShiny`, `src/data/shinies.ts`, worth
+  double), noted in `Cabinet.shinies` and `shinyShown` (save v56), shown in place of the plain at
+  the museum, carved as shiny figurines (`EVERY_CARVABLE`), two shelves, and told by Today and the
+  `shiny` small talk. Shelves to finish (0.2's F2,
   decision 167) are rows in `src/data/milestones.ts`: a family caught, a season's own, a wing of
   the museum, every squishy or monster doll (kind `doll`, art `src/sprites/dolls.ts`) she has
   had; `world.milestones` works them out (`src/systems/milestones.ts`) and posts a `shelf:<id>`
