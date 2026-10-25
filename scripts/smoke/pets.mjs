@@ -69,7 +69,7 @@ async function pets() {
   await tapElement('.hud-pet-sheet button:text-is("Bye")');
 
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes out with Dolly');
   await page.evaluate(() => window.view.step(40, 20));

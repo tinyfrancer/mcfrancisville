@@ -42,7 +42,15 @@ graveyard's), Whisperwood's creek curled round at the hedge (`wetAround`), the f
 kept, three small things logged in the art notes. No save change. For 1.3's notes: the town's
 trees have all their leaves back.
 
-### F5 the touches, F6 the forwarders, V1.3 the review
+### F6: the forwarders and the small things (`claude/f6-forwarders`; Sonnet; decision 365)
+
+In progress. Done: `Home`'s 27 forwarders dropped, every reader (src, tests, `scripts/` smoke and
+perf, which reach `window.world.home`) on `home.rooms.<x>`. Next, in order: `Neighbourhood`'s ten talk
+forwarders to `world.talk`; `keepTown` stamped by the world's clock (+ test, check `cloud.ts`);
+`lived-in-v55.json` in `tests/world/overlays.test.ts`; proof (suite, smoke 622, offline, perf);
+docs (architecture 4 and 7, CLAUDE.md, plan status, decision 365). No save change.
+
+### F5 the touches, V1.3 the review
 
 Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
 (below), recorded in `docs/personal_touches.md` by the coordinator as they come.

@@ -564,7 +564,7 @@ async function furnitureSets() {
   await tapTile(7, 8);
   await page.evaluate(() => window.view.step(40));
   const placed = await page.evaluate(
-    (id) => window.world.home.placed.find((p) => p.id === id) ?? null,
+    (id) => window.world.home.rooms.placed.find((p) => p.id === id) ?? null,
     picked,
   );
   check(
@@ -577,13 +577,13 @@ async function furnitureSets() {
   await page.screenshot({ path: '.smoke/set-placed.png' });
   // Back in the chest, for the sections after.
   await page.evaluate((id) => {
-    const p = window.world.home.placed.find((q) => q.id === id);
+    const p = window.world.home.rooms.placed.find((q) => q.id === id);
     window.world.decorating.start(p ?? null);
   }, picked);
   await tapElement('.hud-decor-bar button:text-is("Put away")');
   await tapElement('.hud-decor-bar button:text-is("Done")');
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }

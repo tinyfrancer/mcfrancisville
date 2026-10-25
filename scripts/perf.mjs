@@ -289,27 +289,27 @@ const SET_PIECES = [
 ];
 const backRoom = await page.evaluate((pieces) => {
   const world = window.world;
-  if (typeof world.home.build !== 'function') return null;
+  if (typeof world.home.rooms.build !== 'function') return null;
   const house = world.map.props.find((p) => p.id === 'homeHouse');
   if (house) world.tapTile(house.tx + 1, house.ty + 1);
   for (let i = 0; i < 3000 && world.scene !== 'home'; i++) window.view.step(16);
-  world.home.build('back');
-  const way = world.home.room.doorways[0];
+  world.home.rooms.build('back');
+  const way = world.home.rooms.room.doorways[0];
   if (!way) return null;
   world.tapTile(way.tx, way.ty);
-  for (let i = 0; i < 3000 && world.home.here !== 'back'; i++) window.view.step(16);
+  for (let i = 0; i < 3000 && world.home.rooms.here !== 'back'; i++) window.view.step(16);
   world.home.giveWallpaper('archWindow');
-  world.home.paper('archWindow');
+  world.home.rooms.paper('archWindow');
   let placed = 0;
   for (const id of pieces) {
     world.home.store(id);
-    const { width, height } = world.home.room;
+    const { width, height } = world.home.rooms.room;
     const near = { tx: 1 + (placed % (width - 2)), ty: 2 + Math.floor(placed / (width - 2)) };
-    if (world.home.takeOut(id, near, world.movement.tile)) placed++;
+    if (world.home.rooms.takeOut(id, near, world.movement.tile)) placed++;
     if (placed > 0 && near.ty >= height - 1) break;
   }
   window.view.step(16, 120);
-  return { placed, here: world.home.here };
+  return { placed, here: world.home.rooms.here };
 }, SET_PIECES);
 const back = backRoom?.here === 'back' ? await walkAbout(Math.round(FRAMES / 2), 29) : null;
 const backHeap = back ? await heapMb() : 0;

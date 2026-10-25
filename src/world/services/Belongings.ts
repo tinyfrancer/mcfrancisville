@@ -108,7 +108,7 @@ export class Belongings {
 
   /** Counts what she has now, wherever it is. */
   private notice(): void {
-    const pieces = [...this.home.everyPiece, ...this.yard.placed];
+    const pieces = [...this.home.rooms.everyPiece, ...this.yard.placed];
     const owned = {
       items: [
         ...this.bag.contents.map((s) => s.id),

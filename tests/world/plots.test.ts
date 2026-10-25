@@ -233,7 +233,7 @@ describe('planters', () => {
     h.world.workbench.craft('planterBox');
     expect(h.world.decorating.takeOut('planterBox')).toBe(true);
     h.world.decorating.stop();
-    const piece = h.world.home.placed.find((p) => FURNITURE[p.id].planter)!;
+    const piece = h.world.home.rooms.placed.find((p) => FURNITURE[p.id].planter)!;
     return { h, bed: { zone: 'home', tx: piece.tx, ty: piece.ty } };
   }
 
@@ -256,7 +256,7 @@ describe('planters', () => {
     const { h, bed } = withPlanter();
     tend(h, bed);
     h.world.garden.plant(bed, 'pumpkinSeed');
-    const piece = h.world.home.placed.find((p) => FURNITURE[p.id].planter)!;
+    const piece = h.world.home.rooms.placed.find((p) => FURNITURE[p.id].planter)!;
     h.world.decorating.start(piece);
     const to = { tx: bed.tx + 1, ty: bed.ty + 1 };
     expect(h.world.decorating.tap(to.tx, to.ty)).toBe(true);

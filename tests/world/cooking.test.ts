@@ -19,7 +19,7 @@ const kitchen = (bag: { id: Parameters<Harness['world']['bag']['add']>[0]; count
 describe('her stove', () => {
   it('stands beside her workbench from the first day, and walking up to it opens it', () => {
     const h = goHome();
-    expect(h.world.home.pieceAt(6, 3)?.id).toBe('stove');
+    expect(h.world.home.rooms.pieceAt(6, 3)?.id).toBe('stove');
     h.world.tapTile(6, 3);
     const events = h.until(() => !h.world.player.moving, 'walking to the stove');
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', piece: 'stove' }));

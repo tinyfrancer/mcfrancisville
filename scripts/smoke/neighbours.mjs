@@ -367,7 +367,7 @@ async function mystery() {
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
   const board = await page.evaluate(
-    () => window.world.home.placed.find((p) => p.id === 'mysteryCorkboard') ?? null,
+    () => window.world.home.rooms.placed.find((p) => p.id === 'mysteryCorkboard') ?? null,
   );
   check('her corkboard is up at home', board !== null);
   if (!board) return;
@@ -401,7 +401,7 @@ async function mystery() {
     await tapElement('.hud-corkboard-sheet button:text-is("Done")');
   }
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
   await wesChat();

@@ -33,7 +33,7 @@ function goHome(h: Harness): void {
 }
 
 function goOut(h: Harness): void {
-  const mat = h.world.home.room.mat;
+  const mat = h.world.home.rooms.room.mat;
   h.world.tapTile(mat.tx, mat.ty);
   h.until(() => h.world.scene === 'town', 'going out');
 }
@@ -54,7 +54,7 @@ describe('pets', () => {
     expect(world.petCare.here()).toEqual([]);
     for (const pet of world.petCare.all) {
       expect(pet.scene).toBe('home');
-      expect(world.home.canWalk(pet.tile.tx, pet.tile.ty)).toBe(true);
+      expect(world.home.rooms.canWalk(pet.tile.tx, pet.tile.ty)).toBe(true);
     }
     expect(world.pets.wearing('fibi')).toBe('pinkSpikedCollar');
     expect(world.pets.wearing('dolly')).toBe('blueBandana');
@@ -249,7 +249,7 @@ describe("Fibi's bones", () => {
     goHome(h);
     dayWithBone(h, 'home');
     const bone = h.world.petCare.lostBone()!;
-    expect(h.world.home.canWalk(bone.tx, bone.ty)).toBe(true);
+    expect(h.world.home.rooms.canWalk(bone.tx, bone.ty)).toBe(true);
     const events = walkTo(h, bone.tx, bone.ty);
     expect(events).toContainEqual(expect.objectContaining({ kind: 'gathered', from: 'bone' }));
   });

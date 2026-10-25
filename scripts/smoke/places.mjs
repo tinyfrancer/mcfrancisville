@@ -446,7 +446,8 @@ async function broom() {
   check(
     "Agatha's letter brings her broom, and its stand by her mat",
     await page.evaluate(
-      () => window.world.broom.has && window.world.home.placed.some((p) => p.id === 'broomStand'),
+      () =>
+        window.world.broom.has && window.world.home.rooms.placed.some((p) => p.id === 'broomStand'),
     ),
   );
   await page.evaluate(() => window.view.step(40));
@@ -494,7 +495,7 @@ async function broom() {
   await stepUntil(() => window.world.scene === 'home', 'she swoops home');
   await page.evaluate(() => window.view.step(40, 3));
   const landed = await page.evaluate(() => {
-    const mat = window.world.home.room.mat;
+    const mat = window.world.home.rooms.room.mat;
     const at = window.world.movement.tile;
     return at.tx === mat.tx && at.ty === mat.ty;
   });
@@ -502,7 +503,7 @@ async function broom() {
   await page.screenshot({ path: '.smoke/broom-home.png' });
 
   const stand = await page.evaluate(
-    () => window.world.home.placed.find((p) => p.id === 'broomStand') ?? null,
+    () => window.world.home.rooms.placed.find((p) => p.id === 'broomStand') ?? null,
   );
   if (!stand) return;
   await tapTile(stand.tx, stand.ty);

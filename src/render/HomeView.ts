@@ -118,7 +118,7 @@ export class HomeView implements SceneView {
 
   draw(nowMs: number): void {
     const { ctx, canvas } = this;
-    const room = this.world.home.room;
+    const room = this.world.home.rooms.room;
     const size = { width: room.width * TILE_SIZE, height: room.height * TILE_SIZE };
     this.camera = this.follower.origin(this.world.player, canvas, size);
     const cam = this.camera;
@@ -128,13 +128,19 @@ export class HomeView implements SceneView {
     drawRoomFrame(ctx, room, cam);
     const home = this.world.home;
     const sky = windowSky(this.daylight(), this.weatherShown ?? this.world.weather.today());
-    const shell = roomShell(room, home.wallpaper, home.flooring, sky, this.hungColumns());
+    const shell = roomShell(
+      room,
+      home.rooms.wallpaper,
+      home.rooms.flooring,
+      sky,
+      this.hungColumns(),
+    );
     ctx.drawImage(shell, -cam.x, -cam.y);
 
     const pieces = this.pieceSprites().map((s) => animatePiece(s, nowMs));
     const selected = this.world.decorating.state?.selected ?? null;
     const lifted = (p: Placed) =>
-      p === selected || (!!selected && this.world.home.surfaceUnder(p) === selected);
+      p === selected || (!!selected && this.world.home.rooms.surfaceUnder(p) === selected);
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of pieces) {
         if (FURNITURE[s.piece.id].layer !== layer) continue;
@@ -204,7 +210,7 @@ export class HomeView implements SceneView {
   /** The columns of her back wall something hangs in, which a window keeps out of (0.3's S4). */
   private hungColumns(): number[] {
     const columns = new Set<number>();
-    for (const p of this.world.home.placed) {
+    for (const p of this.world.home.rooms.placed) {
       if (FURNITURE[p.id].layer !== 'wall') continue;
       const { w } = footprint(p.id, p.turn);
       for (let tx = p.tx; tx < p.tx + w; tx++) columns.add(tx);
@@ -215,8 +221,8 @@ export class HomeView implements SceneView {
   /** Every placed piece as it's drawn, what stands on a surface raised to its top (0.3's H3). */
   private pieceSprites(): PieceSprite[] {
     const { home, broom, display } = this.world;
-    return home.placed.map((p) => {
-      const under = home.surfaceUnder(p);
+    return home.rooms.placed.map((p) => {
+      const under = home.rooms.surfaceUnder(p);
       const raised = under ? surfaceTop(under.id) : 0;
       return pieceSprite(p, broom.look, display.contents(p), raised, this.world.player.x);
     });

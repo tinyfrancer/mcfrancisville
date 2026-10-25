@@ -65,7 +65,7 @@ describe('sitting', () => {
     const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
     h.world.tapTile(house.tx + 1, house.ty + 1);
     h.until(() => h.world.scene === 'home', 'going in');
-    const chair = h.world.home.placed.find((p) => p.id === 'pumpkinChair')!;
+    const chair = h.world.home.rooms.placed.find((p) => p.id === 'pumpkinChair')!;
     walkTo(h, chair.tx, chair.ty);
     expect(h.world.sitting.seat?.floor).toBe((chair.ty + 1) * TILE_SIZE);
     expect(h.world.poses.pose()).toBe('sit');
@@ -107,7 +107,7 @@ describe('sitting', () => {
     const house = h.world.map.props.find((p) => p.id === 'homeHouse')!;
     h.world.tapTile(house.tx + 1, house.ty + 1);
     h.until(() => h.world.scene === 'home', 'going in');
-    const bed = h.world.home.placed.find((p) => p.id === 'batBed')!;
+    const bed = h.world.home.rooms.placed.find((p) => p.id === 'batBed')!;
     walkTo(h, bed.tx, bed.ty);
     expect(h.world.sitting.seat).toBeNull();
   });

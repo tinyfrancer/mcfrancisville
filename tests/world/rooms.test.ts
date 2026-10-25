@@ -60,12 +60,12 @@ describe('a second room (0.3’s H4)', () => {
 
   it('starts with none, and fits round every first-day piece', () => {
     const home = new Home();
-    expect(home.built).toEqual(['main']);
-    expect(home.build('back')).toEqual([]);
-    expect(home.built).toEqual(['main', 'back']);
-    expect(home.placed).toEqual(STARTER_HOME.rooms.main.placed);
-    expect(home.room.doorways).toEqual([{ ...DOORWAY, to: 'back' }]);
-    expect(home.build('back')).toBeNull();
+    expect(home.rooms.built).toEqual(['main']);
+    expect(home.rooms.build('back')).toEqual([]);
+    expect(home.rooms.built).toEqual(['main', 'back']);
+    expect(home.rooms.placed).toEqual(STARTER_HOME.rooms.main.placed);
+    expect(home.rooms.room.doorways).toEqual([{ ...DOORWAY, to: 'back' }]);
+    expect(home.rooms.build('back')).toBeNull();
   });
 
   it('puts what is in the doorway’s way in the chest as it is built, and what it showed', () => {
@@ -81,9 +81,9 @@ describe('a second room (0.3’s H4)', () => {
       },
       stored: [],
     });
-    const moved = home.build('back')!;
+    const moved = home.rooms.build('back')!;
     expect(moved.map((p) => p.id).sort()).toEqual(['bellJar', 'ghostPortrait']);
-    expect(home.placed.map((p) => p.id)).toEqual(['cauldron']);
+    expect(home.rooms.placed.map((p) => p.id)).toEqual(['cauldron']);
     expect(home.stored).toEqual([
       { id: 'ghostPortrait', count: 1 },
       { id: 'bellJar', count: 1 },
@@ -93,48 +93,48 @@ describe('a second room (0.3’s H4)', () => {
 
   it('keeps each room’s pieces, walls and floor, and which she is in, through a save', () => {
     const home = new Home();
-    home.build('back');
+    home.rooms.build('back');
     home.giveWallpaper('batDamask');
     home.store('cauldron');
-    expect(home.enter('back')).toBe(true);
-    expect(home.wallpaper).toBe(STARTER_HOME.rooms.main.wallpaper);
-    expect(home.paper('batDamask')).toBe(true);
-    const pot = home.takeOut('cauldron', { tx: 5, ty: 6 }, null)!;
-    expect(home.placed).toEqual([pot]);
+    expect(home.rooms.enter('back')).toBe(true);
+    expect(home.rooms.wallpaper).toBe(STARTER_HOME.rooms.main.wallpaper);
+    expect(home.rooms.paper('batDamask')).toBe(true);
+    const pot = home.rooms.takeOut('cauldron', { tx: 5, ty: 6 }, null)!;
+    expect(home.rooms.placed).toEqual([pot]);
     const again = new Home(home.snapshot());
-    expect(again.here).toBe('back');
-    expect(again.placed).toEqual([pot]);
-    expect(again.wallpaper).toBe('batDamask');
-    expect(again.placedIn('main')).toEqual(home.placedIn('main'));
-    again.enter('main');
-    expect(again.wallpaper).toBe(STARTER_HOME.rooms.main.wallpaper);
-    expect(again.everyPiece).toHaveLength(STARTER_HOME.rooms.main.placed.length + 1);
+    expect(again.rooms.here).toBe('back');
+    expect(again.rooms.placed).toEqual([pot]);
+    expect(again.rooms.wallpaper).toBe('batDamask');
+    expect(again.rooms.placedIn('main')).toEqual(home.rooms.placedIn('main'));
+    again.rooms.enter('main');
+    expect(again.rooms.wallpaper).toBe(STARTER_HOME.rooms.main.wallpaper);
+    expect(again.rooms.everyPiece).toHaveLength(STARTER_HOME.rooms.main.placed.length + 1);
   });
 
   it('reads a save in a room she hasn’t built as in the front room', () => {
     const home = new Home({ ...new Home().snapshot(), here: 'back' });
-    expect(home.built).toEqual(['main']);
-    expect(home.here).toBe('main');
+    expect(home.rooms.built).toEqual(['main']);
+    expect(home.rooms.here).toBe('main');
   });
 
   it('lets a planter stand in the back room too, once its bed knows its room (1.1’s W2)', () => {
     const home = new Home({ rooms: { main: { placed: [] } }, stored: [] });
-    home.build('back');
+    home.rooms.build('back');
     home.store('planterBox');
-    home.enter('back');
+    home.rooms.enter('back');
     expect(home.rooms.refusesHere()).toBeNull();
-    const planter = home.takeOut('planterBox', { tx: 5, ty: 6 }, null);
+    const planter = home.rooms.takeOut('planterBox', { tx: 5, ty: 6 }, null);
     expect(planter).toEqual({ id: 'planterBox', tx: 5, ty: 6, turn: 0 });
     expect(home.stored).toEqual([]);
-    expect(new Home(home.snapshot()).placedIn('back')).toEqual([planter]);
+    expect(new Home(home.snapshot()).rooms.placedIn('back')).toEqual([planter]);
   });
 
   it('keeps the pets’ open floor to the room she is in', () => {
     const home = new Home();
-    home.build('back');
+    home.rooms.build('back');
     const zone = new HomeZone(home);
     const front = zone.roamTiles();
-    home.enter('back');
+    home.rooms.enter('back');
     const back = zone.roamTiles();
     expect(back).not.toEqual(front);
     expect(back.every((t) => t.tx < 11 && t.ty < 11)).toBe(true);
@@ -153,7 +153,7 @@ describe('building it and going through', () => {
     h.world.events.on('home', () => changed++);
     expect(h.world.workbench.craft('backRoom')).toMatchObject({ made: { newRoom: 'back' } });
     expect(changed).toBe(1);
-    expect(h.world.home.built).toEqual(['main', 'back']);
+    expect(h.world.home.rooms.built).toEqual(['main', 'back']);
     expect(h.world.bag.count('wood')).toBe(0);
     expect(h.world.workbench.cantMake('backRoom')).toBe('built');
   });
@@ -164,17 +164,17 @@ describe('building it and going through', () => {
     const through = walkOnto(h, DOORWAY.tx, DOORWAY.ty);
     expect(through).toContainEqual({ kind: 'entered', scene: 'home' });
     expect(h.world.scene).toBe('home');
-    expect(h.world.home.here).toBe('back');
-    const back = h.world.home.room;
+    expect(h.world.home.rooms.here).toBe('back');
+    const back = h.world.home.rooms.room;
     expect(tileOfPlayer(h)).toEqual(back.mat);
     expect(h.world.size).toEqual({ width: back.width, height: back.height });
     // The back room's mat goes back through, onto the doorway.
     walkOnto(h, back.mat.tx - 1, back.mat.ty);
     walkOnto(h, back.mat.tx, back.mat.ty);
-    expect(h.world.home.here).toBe('main');
+    expect(h.world.home.rooms.here).toBe('main');
     expect(tileOfPlayer(h)).toEqual(DOORWAY);
     expect(h.world.player.facing).toBe('down');
-    const mat = h.world.home.room.mat;
+    const mat = h.world.home.rooms.room.mat;
     walkOnto(h, mat.tx, mat.ty);
     expect(h.world.scene).toBe('town');
   });
@@ -183,7 +183,7 @@ describe('building it and going through', () => {
     const h = goHome(harness(undefined, { finds: { bag: BUILDS } }));
     h.world.workbench.craft('backRoom');
     h.world.tapTile(DOORWAY.tx, 1);
-    h.until(() => h.world.home.here === 'back', 'going through the arch');
+    h.until(() => h.world.home.rooms.here === 'back', 'going through the arch');
   });
 
   it('comes in by the front door after leaving from the back room by the map', () => {
@@ -192,7 +192,7 @@ describe('building it and going through', () => {
     walkOnto(h, DOORWAY.tx, DOORWAY.ty);
     h.world.atlas.find('whisperwood');
     expect(h.world.travel.go('whisperwood')).toBe(true);
-    expect(h.world.home.here).toBe('main');
+    expect(h.world.home.rooms.here).toBe('main');
     expect(h.world.save().home.here).toBe('main');
   });
 
@@ -203,15 +203,15 @@ describe('building it and going through', () => {
     h.world.home.store('cauldron');
     expect(h.world.decorating.takeOut('cauldron')).toBe(true);
     h.world.tapTile(3, 5);
-    expect(h.world.home.pieceAt(3, 5)?.id).toBe('cauldron');
+    expect(h.world.home.rooms.pieceAt(3, 5)?.id).toBe('cauldron');
     h.world.decorating.stop();
     const save = h.world.save();
     expect(save.home.here).toBe('back');
     expect(save.home.rooms.back?.placed).toEqual([{ id: 'cauldron', tx: 3, ty: 5, turn: 0 }]);
     const again = new World({ clock: new FakeClock(h.clock.now()), ...fromSave(save) });
     expect(again.scene).toBe('home');
-    expect(again.home.here).toBe('back');
-    expect(again.home.pieceAt(3, 5)?.id).toBe('cauldron');
+    expect(again.home.rooms.here).toBe('back');
+    expect(again.home.rooms.pieceAt(3, 5)?.id).toBe('cauldron');
     expect(tileOf(again.player.x, again.player.y)).toEqual(tileOfPlayer(h));
   });
 
@@ -221,7 +221,7 @@ describe('building it and going through', () => {
     h.world.petCare.walkWith('fibi');
     walkOnto(h, DOORWAY.tx, DOORWAY.ty);
     h.tick(5);
-    const room = h.world.home.room;
+    const room = h.world.home.rooms.room;
     for (const pet of h.world.petCare.here()) {
       const t = pet.tile;
       expect(
@@ -265,10 +265,10 @@ describe('a planter in each room (1.1’s W2)', () => {
 
   it('keeps a bed of its own in each room, on the same tile, through a save', () => {
     const h = twoPlanters();
-    expect(h.world.home.placedIn('back')).toEqual([PLANTER]);
+    expect(h.world.home.rooms.placedIn('back')).toEqual([PLANTER]);
     plant(h, 'pumpkinSeed');
     walkOnto(h, DOORWAY.tx, DOORWAY.ty);
-    expect(h.world.home.here).toBe('back');
+    expect(h.world.home.rooms.here).toBe('back');
     // The back room's planter is a bed of its own, empty until she plants it.
     expect(h.world.farm.bedsIn('home')).toEqual([BED]);
     expect(h.world.farm.isTilled(BED)).toBe(false);
@@ -282,7 +282,7 @@ describe('a planter in each room (1.1’s W2)', () => {
       ['back', 'basil'],
     ]);
     const again = new World({ clock: new FakeClock(h.clock.now()), ...fromSave(saved) });
-    expect(again.home.here).toBe('back');
+    expect(again.home.rooms.here).toBe('back');
     expect(again.farm.planting(BED)?.crop).toBe('basil');
     expect(again.farm.planting({ ...BED, room: 'main' })?.crop).toBe('pumpkin');
   });
@@ -292,7 +292,7 @@ describe('a planter in each room (1.1’s W2)', () => {
     plant(h, 'pumpkinSeed');
     walkOnto(h, DOORWAY.tx, DOORWAY.ty);
     plant(h, 'basilSeed');
-    const piece = h.world.home.pieceAt(PLANTER.tx, PLANTER.ty)!;
+    const piece = h.world.home.rooms.pieceAt(PLANTER.tx, PLANTER.ty)!;
     h.world.decorating.start(piece);
     expect(h.world.decorating.tap(PLANTER.tx + 2, PLANTER.ty)).toBe(true);
     const moved = { ...BED, tx: piece.tx, ty: piece.ty };
