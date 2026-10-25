@@ -29,9 +29,25 @@ Corner (November to February), Cosy Cabin and Midnight Observatory, the star win
 **1.4's `NOTES` row** was made by G1 and G2 at once and folded at G1's merge into four lines, two
 each, shinies first, G2's P.S.: **G3 adds the fifth**, the last.
 
-### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+### G4: the night sky (`claude/g4-night-sky`; decision 373; **save to be bumped to v57 last**)
 
-Not started; in the plan's order.
+**Under way.** Done: the fifteen constellations (`src/data/constellations.ts`: twelve by month,
+three by a holiday's decorations), their rules (`src/systems/stars.ts`: `skyOf`, `findableOn`
+this month's and the two before, `tapStar`, `starAt`), `Cabinet.stars` (the day each was traced,
+in the snapshot; **no `SAVE_VERSION` bump, migration or `isSaveState` yet**: those are the last
+commit, after merging `origin/v1.4-dev`), `world.stargazing` (`Stargazing`, the outdoors area),
+the `telescope` prop by the castle hill's gate (`I` in `CASTLE_LEGEND`, tile 11,39; the
+overlays and arrivals snapshots retaken for that tile alone), the brass telescope and Hazel's
+telescope at home opening the sky at night (`STARGAZERS`), Hazel's first letter with her star
+map (`stars:first`), two shelves (`halfTheSky`, `wholeSky`) and their pieces, cues and toasts.
+Next: the Sky sheet (`src/hud/SkySheet.ts`, `SkyApi`, drawn by `src/render/stargazing.ts`), the
+Cabinet's Sky tab, the world's sky pass over the castle hill, Today's line, Hazel's and Agatha's
+small talk, the calendar's mark, smoke, the `1.5` notes row, the docs and decision 373, then
+merge `origin/v1.4-dev` and bump the save (v57) last.
+
+### G3 ice fishing, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+
+Not started (G3 runs beside G4); in the plan's order.
 
 ## If you are starting cold after a long gap
 

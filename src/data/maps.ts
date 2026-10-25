@@ -174,6 +174,7 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   rowboat: { w: 2, h: 1 },
   mound: { w: 1, h: 1 },
   gatePost: { w: 1, h: 1 },
+  telescope: { w: 1, h: 1 },
   castle: { w: 9, h: 5, door: 4 },
   weddingArch: { w: 2, h: 1 },
   // Never written in a map: it hangs across a way out with a `gate`, one tile in, while the place
@@ -370,6 +371,8 @@ export const WILD_LEGEND: Record<string, LegendEntry> = {
 export const CASTLE_LEGEND: Record<string, LegendEntry> = {
   ...LEGEND,
   '=': { tile: 'gravel' },
+  // The telescope at the lookout by the gate (1.5's G4).
+  I: { tile: 'grass', prop: 'telescope' },
 };
 
 /**
@@ -891,7 +894,7 @@ export const CASTLE_HILL: MapSource = {
     '#..T.T..TTq..==...T.T.....T#',
     '#.T.TT;......==....TT......T',
     '#.......oo..L==L..TT.T..RT.T',
-    'T.T...TT.....==...TT...T...#',
+    'T.T...TT...I.==...TT...T...#',
     '#.T.T...TT..P==P...T..T..T.#',
     '###T#####T###==####T####T###',
   ],

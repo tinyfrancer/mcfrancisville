@@ -1,3 +1,4 @@
+import { STARGAZERS } from '../data/constellations';
 import { FURNITURE } from '../data/furniture';
 import { FIXTURES } from '../data/interiors';
 import type { Placed } from '../data/home';
@@ -524,7 +525,11 @@ export class World extends WorldParts {
       const says = FURNITURE[piece.id].says;
       if (says) arrived.says = sayTo(says, this.name, dayKey(this.clock.now()));
       const plays = FURNITURE[piece.id].plays;
-      if (plays) return [arrived, this.instruments.play(plays)];
+      // A telescope at home looks at the sky after dark on a clear night (1.5's G4), as it plays.
+      const looked = STARGAZERS.includes(piece.id) ? this.stargazing.lookUp(true) : null;
+      const sky = looked ? [looked] : [];
+      if (plays) return [arrived, this.instruments.play(plays), ...sky];
+      if (looked) return [arrived, ...sky];
       if (piece.id !== 'recordPlayer') return [arrived];
       return [arrived, this.recordPlayer.play(here, this.canWalk)];
     },

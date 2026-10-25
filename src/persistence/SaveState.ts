@@ -285,7 +285,7 @@ export function newSave(
     recipes: [],
     friends: {},
     mail: [],
-    cabinet: { caught: {}, donated: [], best: {}, shinies: {}, shinyShown: [] },
+    cabinet: { caught: {}, donated: [], best: {}, shinies: {}, shinyShown: [], stars: {} },
     pets: structuredClone(STARTER_PETS),
     mystery: { clues: {}, began: null, wes: { glimpses: 0, chats: 0, talked: null } },
     atlas: { found: ['town', 'home'], opened: [] },

@@ -23,7 +23,9 @@ export type Shelf =
   | { wing: Family | 'fossil' }
   | { had: 'squishy' | 'doll' | 'fossil' | 'figurine' }
   // 1.4's G1: a shiny caught of every family, or of every critter there is.
-  | { shiny: 'family' | 'all' };
+  | { shiny: 'family' | 'all' }
+  // 1.5's G4: half the sky on her star chart, or all of it.
+  | { stars: 'half' | 'all' };
 
 export interface MilestoneRow {
   shelf: Shelf;
@@ -308,6 +310,27 @@ export const MILESTONES: Record<MilestoneId, MilestoneRow> = {
       'which seemed right.' +
       SIGNED,
     gift: { furniture: 'shinyDome' },
+  },
+  // The night sky (1.5's G4): half her star chart traced, and the whole of it. From Hazel.
+  halfTheSky: {
+    shelf: { stars: 'half' },
+    name: 'Half the sky',
+    from: 'hazel',
+    letter:
+      "{name}!\n\nHalf the sky on your star chart! Half! I've been drawing the stars for years " +
+      "and I'm not sure I'd found half by my second year. I had the Bat framed for you, in gold " +
+      'stars on midnight blue. It was the first one I ever found too.\n\nKeep looking up,\nHazel',
+    gift: { furniture: 'framedConstellation' },
+  },
+  wholeSky: {
+    shelf: { stars: 'all' },
+    name: 'The whole sky',
+    from: 'hazel',
+    letter:
+      '{name}!\n\nEvery constellation in the sky over McFrancisVille, traced by you. The holidays ' +
+      "too! There's nothing left up there you haven't found, so I put it all under glass for " +
+      'you, so you can have the whole sky indoors on a cloudy night.\n\nYour friend in the dark,\nHazel',
+    gift: { furniture: 'skyDome' },
   },
 };
 

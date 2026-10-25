@@ -325,6 +325,8 @@ describe('selling', () => {
       'wayfarerPostcard',
       'snowflakeCharm',
       'finderRosette',
+      // Hazel's star map (1.5's G4).
+      'starMap',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));
