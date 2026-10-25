@@ -61,11 +61,14 @@ focus on a fun game instead"). Decision 364 stays unused.
 ### V1.3: the review and 1.3 (`claude/v13-review`; Opus; decision 366)
 
 Started 2026-10-25 from `v1.3-dev` at `5746d24`. Done: the `1.3` `NOTES` row (five lines and a
-P.S.) with the `1.2.1` row folded into it, `notesToShow('1.2')` → exactly the 1.3 card. Next, in
-order: open `lived-in-v55.json` in a 1.3 dev build as her phone will (Close, Far, sideways) and
-play a day or two by taps (a visiting day, the day after a new moon); the shakedown (smoke's
-screenshots, the creatures, the trees, the moon's words, Settings, `npm run perf` against 1.2's
-table); the docs (this file's cold-start section, "After 1.0", "Where it hurts", `CLAUDE.md`,
+P.S.) with the `1.2.1` row folded into it, `notesToShow('1.2')` → exactly the 1.3 card; 1.2's
+town opened as her phone will at Close, Far and sideways (one card, Cody's hello, no error notes,
+the unlinked cloud's 503 alone) and played on by taps on 12 October (the day after the new moon,
+25 critters visiting; a skull beetle and a velvet bat netted) and 13 October (Today, the Cabinet,
+talks, the back room's planter): the save's shape unchanged, so no new fixture; smoke's `yard`
+section puts away a visitor's talk before Decorate (on the real clock Hazel stood on its tile),
+smoke 622 of 622, offline 10 of 10. Next, in order: `npm run perf` against 1.2 (origin/main
+extracted to the scratchpad, served beside); the docs (this file's cold-start section, "After 1.0", "Where it hurts", `CLAUDE.md`,
 the plan's status line, decision 366); merge into `v1.3-dev`; PR #219's title and body.
 
 ## After 1.0
