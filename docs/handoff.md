@@ -14,7 +14,15 @@ her phone** (PR #219, merged 2026-10-25). Each session's heading says where it i
 
 ### G1: shiny morphs (`claude/g1-shinies`; decision 370; save v56)
 
-Not started.
+Under way. **Done:** the shiny palettes (`SHINIES`, `GEMS`, `shinePalette` at the end of
+`src/sprites/critterLooks.ts`; `SHINY_ART`, `critterArt(id, shiny)` in `src/sprites/critters.ts`;
+`shiny:<id>`, `:16`, `:lit` in the catalogue, plain and shiny side by side: `npm run sprite --
+'shiny:*' --sheet`). **Next, in order:** the dealing (`shiny` on `OutCritter`, from its own hash
+of the day, place, hour and slot, `SHINY_ONE_IN` by rarity) and the sparkle over one in the
+world; the catch (a shiny is its own item, `${CritterId}Shiny`, `src/data/shinies.ts`),
+`Cabinet.shinies`, the museum's nook, the shiny figurines, selling at double; the two shelves; the
+Cabinet sheet's marks; Today, small talk, the toast, cue and sparkle pop; tests; the 1.4 `NOTES`
+row; docs and decision 370; then merge `origin/v1.4-dev` and bump the save to v56 last.
 
 ### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
 

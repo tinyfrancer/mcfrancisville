@@ -18,6 +18,8 @@ import {
   owlEyed,
   skulled,
   roundFishShape,
+  shinePalette,
+  SHINIES,
   striped,
   tombstoned,
 } from './critterLooks';
@@ -1018,6 +1020,33 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   ...HOLIDAY_ART,
   ...JUMPER_ART,
 };
+
+/**
+ * A critter's shiny (1.4's G1, decision 370): its own frames, at 16 and 24, in its shine's
+ * palette (`SHINIES`, `shinePalette`), and what glows of it glowing in its new colours.
+ */
+function shinyOf(id: CritterId): CritterArt {
+  const art = CRITTER_ART[id];
+  const palette = shinePalette(art.palette, SHINIES[id]);
+  if (!art.glow) return { ...art, palette };
+  const glow = Object.fromEntries(
+    Object.entries(art.glow).map(([key, colour]) => [
+      key,
+      palette[key] !== art.palette[key] ? (palette[key] ?? colour) : colour,
+    ]),
+  );
+  return { ...art, palette, glow };
+}
+
+/** Every critter's shiny, as `CRITTER_ART` has the plain. */
+export const SHINY_ART = Object.fromEntries(
+  (Object.keys(CRITTER_ART) as CritterId[]).map((id) => [id, shinyOf(id)]),
+) as Record<CritterId, CritterArt>;
+
+/** A critter's art, plain or shiny. */
+export function critterArt(id: CritterId, shiny = false): CritterArt {
+  return (shiny ? SHINY_ART : CRITTER_ART)[id];
+}
 
 /**
  * A critter all in one colour: plum for the Curiosity Cabinet to show where one is still missing,

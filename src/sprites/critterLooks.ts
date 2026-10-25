@@ -1,5 +1,7 @@
+import type { CritterId } from '../types/ids';
+import { mix, PALETTE as C, ramp } from './palette';
 import { CLEAR, Sketch } from './sketch';
-import type { SpriteSource } from './sprite';
+import type { Palette, SpriteSource } from './sprite';
 
 /*
  * The critters redrawn where they read wrong at phone size (V1's L6, decision 292): the frog, a
@@ -663,3 +665,155 @@ export function striped(source: SpriteSource): SpriteSource {
     (key === 'g' || key === 's') && stripe.has(`${x},${y}`) ? 'c' : key,
   );
 }
+
+// ---- 1.4's G1 (decision 370): the shinies, every critter in a second palette, no new grids ------
+
+/**
+ * The colours a shiny is recoloured into, each a ramp's base (`ramp`), so its shading still runs
+ * from the night's plum to candlelight like everything else in the game. Mostly what a critter
+ * of that family never is: a golden bat, a rose koi, a pearl moth.
+ */
+export const GEMS = {
+  gold: C.gold,
+  rose: C.rose,
+  blush: C.hairPink,
+  pearl: mix(C.skinGhostly, C.blossom, 0.45),
+  mint: C.mint,
+  jade: mix(C.mint, C.teal, 0.5),
+  emerald: C.leaf,
+  frost: C.ice,
+  sky: C.sky,
+  sapphire: C.blueFabric,
+  midnight: C.navy,
+  amethyst: C.lavender,
+  lilac: C.hairLavender,
+  plum: C.plumLight,
+  ruby: C.scarlet,
+  coral: C.coral,
+  peach: mix(C.coral, C.candle, 0.5),
+  copper: C.copper,
+  silver: C.silver,
+} as const;
+
+export type Gem = keyof typeof GEMS;
+
+/**
+ * How a critter shines: one gem over the whole of it, or a gem with an `accent` gem on some of its
+ * keys (a snail's shell, a frog's spots, an orb pair's other orb), and `keep` for keys left their
+ * own colour (a lantern fish's lamp, a peacock jumper's fan). The eyes, their glints and the ink
+ * are always kept, so a shiny is the same creature looking back.
+ */
+export type Shine = Gem | { gem: Gem; accent?: Gem; keys?: string; keep?: string };
+
+/** The keys a shiny never recolours: eyes, their glints and fangs. */
+const EYES = 'eEF';
+
+/** How light a colour looks, 0 to 1. */
+function lightness(hex: string): number {
+  const n = parseInt(hex.slice(1), 16);
+  return (0.2126 * ((n >> 16) & 0xff) + 0.7152 * ((n >> 8) & 0xff) + 0.0722 * (n & 0xff)) / 255;
+}
+
+/**
+ * A palette recoloured to a shine (1.4's G1): each colour of it moved onto the gem's ramp by how
+ * light it is among the critter's own colours and how light it is at all, so its shadows, lights,
+ * spots and outline keep their places and the whole reads as the same critter in another colour.
+ * Ink and the eyes stay as they are.
+ */
+export function shinePalette(palette: Palette, shine: Shine): Palette {
+  const { gem, accent, keys = '', keep = '' } = typeof shine === 'string' ? { gem: shine } : shine;
+  const recolours = (key: string, colour: string | null): colour is string =>
+    colour !== null && colour !== C.ink && !EYES.includes(key) && !keep.includes(key);
+  const colours = [
+    ...new Set(Object.entries(palette).flatMap(([k, v]) => (recolours(k, v) ? [v] : []))),
+  ].sort((a, b) => lightness(a) - lightness(b));
+  const toneOf = (colour: string) => {
+    const rank = colours.length > 1 ? colours.indexOf(colour) / (colours.length - 1) : 0.5;
+    const light = Math.min(1, Math.max(0, (lightness(colour) - 0.1) / 0.85));
+    return 1 + Math.round((rank * 0.6 + light * 0.4) * 3);
+  };
+  return Object.fromEntries(
+    Object.entries(palette).map(([key, colour]) => {
+      if (!recolours(key, colour)) return [key, colour];
+      const on = accent && keys.includes(key) ? accent : gem;
+      return [key, ramp(GEMS[on])[toneOf(colour)]!];
+    }),
+  );
+}
+
+/**
+ * Every critter's shiny (1.4's G1, decision 370): a surprising colour that's still pretty, picked
+ * to be what its plain self isn't. A legendary one's is the grandest.
+ */
+export const SHINIES: Record<CritterId, Shine> = {
+  lunaMoth: { gem: 'blush', accent: 'gold', keys: 's' },
+  candleMoth: 'lilac',
+  owlEyeMoth: { gem: 'frost', accent: 'gold', keys: 's' },
+  ghostMoth: 'mint',
+  pumpkinBat: 'gold',
+  velvetBat: 'jade',
+  vampireBat: 'silver',
+  lilyFrog: 'rose',
+  pumpkinToad: 'amethyst',
+  glowToad: { gem: 'ruby', accent: 'gold', keys: 's' },
+  greenOrb: 'blush',
+  blueOrb: 'gold',
+  orbPair: { gem: 'blush', accent: 'gold', keys: 'hd' },
+  skullBeetle: 'jade',
+  jewelBeetle: 'emerald',
+  firefly: { gem: 'sapphire', keep: 'tT' },
+  ghostMinnow: 'gold',
+  booKoi: 'rose',
+  lanternFish: { gem: 'jade', keep: 'l' },
+  toadstoolToad: { gem: 'frost', accent: 'amethyst', keys: 'cCq' },
+  mossBeetle: 'copper',
+  wisp: 'mint',
+  mistNewt: { gem: 'gold', accent: 'ruby', keys: 's' },
+  moonCarp: 'peach',
+  ghostPike: 'amethyst',
+  lanternBat: 'sky',
+  wishingMoth: { gem: 'gold', accent: 'sapphire', keys: 's' },
+  monarch: 'sky',
+  raindropFrog: 'coral',
+  veilMoth: 'amethyst',
+  pumpkinseed: 'sapphire',
+  catfish: 'gold',
+  fogEel: 'coral',
+  blueMoonfish: { gem: 'gold', accent: 'pearl', keys: 'm' },
+  tombstoneToad: { gem: 'pearl', accent: 'mint', keys: 's' },
+  mourningCloak: { gem: 'jade', keep: 'pq' },
+  reedFrog: 'sapphire',
+  ladybug: 'sky',
+  herculesBeetle: 'amethyst',
+  axolotl: 'gold',
+  glowJelly: 'mint',
+  pumpkinSnail: { gem: 'pearl', accent: 'amethyst', keys: 'sSlk', keep: 'c' },
+  booSlug: 'mint',
+  glowworm: { gem: 'plum', keep: 'tT' },
+  woollyBear: { gem: 'pearl', accent: 'blush', keys: 'rRf', keep: 'c' },
+  bowSpider: { gem: 'gold', accent: 'sky', keys: 'pP' },
+  moonCricket: 'ruby',
+  fiddleHopper: 'blush',
+  twigKnight: { gem: 'silver', keep: 'p' },
+  rolyPoly: 'sky',
+  wiggleWorm: 'gold',
+  goldenSnail: { gem: 'pearl', accent: 'midnight', keys: 'sSlk', keep: 'cg' },
+  fruitBat: 'peach',
+  mudPuppy: { gem: 'pearl', accent: 'ruby', keys: 'gG' },
+  crawdad: 'sapphire',
+  longEaredBat: 'lilac',
+  ghostBat: 'rose',
+  snowMoth: 'blush',
+  frostBeetle: 'rose',
+  snowglobeFish: 'rose',
+  confettiMoth: { gem: 'midnight', keep: 'pqr' },
+  lovebug: 'mint',
+  luckyFrog: { gem: 'gold', accent: 'emerald', keys: 'skK' },
+  bunnyBat: 'sky',
+  sparklerOrb: 'amethyst',
+  turkeyTailMoth: 'plum',
+  baubleBeetle: { gem: 'emerald', keep: 'h' },
+  zebraJumper: 'blush',
+  boldJumper: 'copper',
+  peacockJumper: { gem: 'gold', keep: 'pqr' },
+};
