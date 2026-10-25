@@ -112,11 +112,11 @@ function shelvesOf(api: CabinetApi): HTMLElement {
 
 /**
  * When a critter is out, as the Cabinet tells it: "all year", "in May and June", "for
- * Valentine's Day", and the day after each full moon for one that visits then (V1's R5).
+ * Valentine's Day", and the day after each full or new moon for one that visits then (V1's R5).
  */
 function seasonOf(id: CritterId): string {
   const { season, holiday, weather, moon } = CRITTERS[id];
-  const visits = ', and the day after each full moon';
+  const visits = ', and the day after each full or new moon';
   if (holiday) return `for ${CALENDAR[DECOR[holiday].holiday].name}${visits}`;
   if (season) {
     const [from, to] = season.map((m) => MONTHS[m - 1]!);

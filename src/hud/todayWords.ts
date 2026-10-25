@@ -122,14 +122,14 @@ export function todayWords(line: TodayLine): TodayWords {
         small:
           fresh.length > 0
             ? `New to you: ${list(more > 0 ? [...fresh, `${more} more`] : fresh)}.`
-            : 'The day after the full moon, they come to call.',
+            : 'The day after a full or new moon, they come to call.',
         glyph: { item: line.fresh[0] ?? line.visiting[0]! },
       };
     }
     case 'visitsSoon':
       return {
         text: `Critters come visiting out of season ${line.days === 1 ? 'tomorrow' : `in ${line.days} days`}`,
-        small: 'The day after the full moon.',
+        small: 'The day after a full or new moon.',
         glyph: 'evening',
       };
     case 'wanted':

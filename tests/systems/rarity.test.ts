@@ -20,7 +20,9 @@ import type { CritterId, FossilId, MapZoneId } from '../../src/types/ids';
 
 /*
  * 0.2's F1 (decision 150): real rarity, and seasons, so the last of the Curiosity Cabinet takes
- * most of a year. Done when a simulated year of play at an hour a day fills it in about ten months.
+ * most of a year. Done when a simulated year of play at an hour a day fills it in about ten months;
+ * since visitors come every fortnight (1.3's F1, decision 360) it is seven and a half to ten, nine
+ * on average, the last to come being the moon-bound legendaries, who still wait for a full moon.
  */
 
 const PLACES = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined).map((id) => {
@@ -67,14 +69,14 @@ const YEARS = Array.from({ length: 12 }, (_, m) => {
 });
 
 describe('filling the Curiosity Cabinet', () => {
-  it('takes about ten months at an hour a day, whenever in the year she starts', () => {
+  it('takes most of a year at an hour a day, whenever in the year she starts', () => {
     for (const { start, firsts } of YEARS) {
       expect(
         CRITTER_IDS.filter((id) => !firsts.has(id)),
         start,
       ).toEqual([]);
       const last = Math.max(...firsts.values());
-      expect(last / MONTH, start).toBeGreaterThan(8.5);
+      expect(last / MONTH, start).toBeGreaterThan(7);
       expect(last / MONTH, start).toBeLessThan(11);
     }
   });
@@ -104,7 +106,9 @@ describe('filling the Curiosity Cabinet', () => {
 
 /*
  * V1's R5 (decisions 271 and 310): no critter is ever more than a month away. Out of its season,
- * off its holiday or in the wrong weather, it visits round each full moon.
+ * off its holiday or in the wrong weather, it visits round each full moon, and since 1.3's F1
+ * (decision 360) round each new moon too, so it is never more than about a fortnight away. Only
+ * the critters that wait on the full moon's own night still wait a month.
  */
 
 describe('the wait for any critter', () => {
@@ -127,6 +131,8 @@ describe('the wait for any critter', () => {
       return [id, Math.max(...at.slice(1).map((d, i) => d - at[i]!))] as const;
     });
     expect(longest.filter(([, wait]) => wait > 31)).toEqual([]);
+    // The rest are never a fortnight and a day away (a day to the first visit, 15 or 16 between).
+    expect(longest.filter(([id, wait]) => !CRITTERS[id].moon && wait > 17)).toEqual([]);
     // And the Cabinet says so: the next chance from any day is the one these give.
     expect(daysBetween('2026-10-01', nextChance('pumpkinBat', '2026-12-01', 5)!.day)).toBe(
       chances.get('pumpkinBat')!.find((d) => d >= 61),

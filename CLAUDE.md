@@ -604,10 +604,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   critters dealt from the day key (decision 102). Rarity is four tiers, 12:5:2:1, with a
   legendary one waiting for its hours, weather or full moon, and `isAbout` is the one test of
   whether a critter could be out (0.2's F1, decision 150); since V1's R5 (decision 310) every
-  critter comes out the day after each full moon when out of its season or weather (`comesOut`,
-  `isVisiting`), never more than 29 days away, and the Cabinet says when (`nextChance`); seven
+  critter comes out the day after a full moon, and since 1.3's F1 (decision 360) the day after a
+  new one too (`isVisitDay`, `isNewMoon`), when out of its season or weather (`comesOut`,
+  `isVisiting`), never more than about a fortnight away (a moon-bound one keeps the full moon's
+  night), and the Cabinet says when (`nextChance`); seven
   holiday critters and three jumping spiders stay all year. `tests/systems/rarity.test.ts` holds
-  a simulated year filling the Cabinet in about ten months: rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
+  a simulated year filling the Cabinet in about nine months (seven and a half to ten): rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
   too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
   tapping one walks her to the bank and casts her rod (`world.fishing`,
