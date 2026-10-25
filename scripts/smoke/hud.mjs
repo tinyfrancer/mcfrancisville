@@ -5,7 +5,9 @@ import {
   answerCody,
   check,
   closeSheets,
+  context,
   framed,
+  goOut,
   page,
   playerTile,
   stepUntil,
@@ -92,6 +94,180 @@ async function starChart() {
   );
   await page.screenshot({ path: '.smoke/sky-chart.png' });
   await tapElement('.hud-cabinet-sheet button:text-is("Done")');
+}
+
+/**
+ * A finger dragged across the page from one point to another, as a real touch.
+ * @param {{ x: number, y: number }} from @param {{ x: number, y: number }} to
+ */
+async function dragTouch(from, to, steps = 6) {
+  const cdp = await context.newCDPSession(page);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [from] });
+  for (let i = 1; i <= steps; i++) {
+    const point = {
+      x: from.x + ((to.x - from.x) * i) / steps,
+      y: from.y + ((to.y - from.y) * i) / steps,
+    };
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point] });
+  }
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await cdp.detach();
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
+}
+
+/** 1.5's G5: her camera, the viewfinder, a filter, a sticker, a caption, the shutter and its card. */
+async function photoMode() {
+  await closeSheets();
+  if (await page.evaluate(() => window.world.zones.inside(window.world.scene) !== undefined)) {
+    await goOut();
+  }
+  // A squishy for a sticker, taken back after so nothing later finds it.
+  await page.evaluate(() => window.world.bag.add('ghostGooBall', 1));
+  check(
+    'the camera has a slot on the quick bar outdoors',
+    (await page.locator('.hud-quick-camera').count()) === 1,
+  );
+  await tapElement('.hud-camera-open');
+  await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
+  const up = await page.evaluate(() => {
+    /** @param {string} s */
+    const shown = (s) => {
+      const r = document.querySelector(s)?.getBoundingClientRect();
+      return !!r && r.width > 0 && r.height > 0;
+    };
+    const strip = document.querySelector('.hud-camera-strip')?.getBoundingClientRect();
+    const buttons = [...document.querySelectorAll('.hud-camera-strip button')].map((b) => {
+      const r = b.getBoundingClientRect();
+      return r.width >= 44 && r.height >= 44 && r.left >= 0 && r.right <= innerWidth;
+    });
+    return {
+      posing: window.world.posing,
+      top: shown('.hud-top'),
+      quick: shown('.hud-quick'),
+      strip: strip ? strip.bottom - strip.top : 0,
+      buttons,
+    };
+  });
+  check(
+    'lifting it holds the town for the photo, the bars gone but for its strip',
+    up.posing && !up.top && !up.quick && up.strip > 0 && up.strip <= 80,
+    JSON.stringify(up),
+  );
+  check(
+    "every one of the strip's buttons is a thumb wide and on screen",
+    up.buttons.length === 6 && up.buttons.every(Boolean),
+    JSON.stringify(up.buttons),
+  );
+  // Dragging pans the camera about the place, up to its edges.
+  const before = await page.evaluate(() => window.view.cameraOrigin());
+  const middle = { x: PHONE.width / 2, y: PHONE.height / 2 - 60 };
+  await dragTouch(middle, { x: middle.x - 120, y: middle.y - 80 });
+  let after = await page.evaluate(() => window.view.cameraOrigin());
+  if (after.x === before.x && after.y === before.y) {
+    await dragTouch(middle, { x: middle.x + 120, y: middle.y + 80 });
+    after = await page.evaluate(() => window.view.cameraOrigin());
+  }
+  check(
+    'a finger dragged across it looks about the place',
+    after.x !== before.x || after.y !== before.y,
+    `${JSON.stringify(before)} -> ${JSON.stringify(after)}`,
+  );
+  // A filter, shown live.
+  await tapElement('.hud-camera-strip [aria-label="Filters"]');
+  await tapElement('.hud-camera-drawer .hud-filter-spooky');
+  check(
+    'the spooky filter is picked',
+    (await page.locator('.hud-filter-spooky[aria-pressed="true"]').count()) === 1,
+  );
+  // A sticker, from the critters she has caught.
+  await tapElement('.hud-camera-strip [aria-label="Stickers"]');
+  const picks = await page.locator('.hud-camera-sticker-pick').count();
+  check('the sticker drawer has her squishy in it', picks >= 1, String(picks));
+  await tapElement('.hud-camera-sticker-pick >> nth=0');
+  const sticker = await page.locator('.hud-camera-sticker').boundingBox();
+  check('a sticker goes on the photo', !!sticker && sticker.width > 20, JSON.stringify(sticker));
+  if (sticker) {
+    const at = { x: sticker.x + sticker.width / 2, y: sticker.y + sticker.height / 2 };
+    await dragTouch(at, { x: at.x + 40, y: at.y + 30 });
+    const moved = await page.locator('.hud-camera-sticker').boundingBox();
+    check(
+      'and is dragged where she likes',
+      !!moved && Math.abs(moved.x - sticker.x - 40) < 6,
+      JSON.stringify(moved),
+    );
+  }
+  // A caption, typed.
+  await tapElement('.hud-camera-strip [aria-label="Caption"]');
+  await page.locator('.hud-camera-input').fill('Us at the well');
+  const caption = (await page.locator('.hud-camera-caption').textContent()) ?? '';
+  check('the caption is written on the polaroid', caption === 'Us at the well', caption);
+  await page.screenshot({ path: '.smoke/photo-mode.png' });
+  // Sideways, the strip still fits and the photo is still on screen.
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.waitForTimeout(300);
+  const side = await page.evaluate(() => {
+    const strip = document.querySelector('.hud-camera-strip')?.getBoundingClientRect();
+    const view = document.querySelector('.hud-view')?.getBoundingClientRect();
+    const words = document.querySelector('.hud-camera-caption')?.getBoundingClientRect();
+    return {
+      strip: strip ? { left: strip.left, right: strip.right, bottom: strip.bottom } : null,
+      view: view ? { top: view.top, bottom: view.bottom } : null,
+      words: words ? { top: words.top, bottom: words.bottom } : null,
+      width: innerWidth,
+      height: innerHeight,
+    };
+  });
+  await page.screenshot({ path: '.smoke/photo-mode-sideways.png' });
+  check(
+    'on its side, the strip is along the bottom and the polaroid in the room above it',
+    !!side.strip &&
+      !!side.view &&
+      !!side.words &&
+      side.strip.right <= side.width &&
+      side.strip.bottom <= side.height &&
+      side.words.top >= side.view.top &&
+      side.words.bottom <= side.view.bottom + 1,
+    JSON.stringify(side),
+  );
+  await page.setViewportSize(PHONE);
+  await page.waitForTimeout(300);
+  // The shutter: a flash, and the photo on its card.
+  await tapElement('.hud-camera-shutter');
+  await page.waitForSelector('.hud-photo-sheet', { timeout: 5_000 });
+  const card = await page.evaluate(() => {
+    const picture = document.querySelector('.hud-photo-sheet .hud-photo-picture');
+    return {
+      picture: picture instanceof HTMLCanvasElement ? picture.width : 0,
+      caption: document.querySelector('.hud-photo-sheet figcaption')?.textContent ?? '',
+      keep: !!document.querySelector('.hud-photo-sheet .hud-photo-keep'),
+      another: !!document.querySelector('.hud-photo-sheet .hud-photo-another'),
+    };
+  });
+  await page.screenshot({ path: '.smoke/photo-card.png' });
+  check(
+    'the shutter shows the photo on its card, captioned, with Keep and Another',
+    card.picture > 100 && card.caption === 'Us at the well' && card.keep && card.another,
+    JSON.stringify(card),
+  );
+  await tapElement('.hud-photo-sheet .hud-photo-another');
+  await page.waitForTimeout(250);
+  check(
+    'Another goes back to the viewfinder',
+    (await page.locator('.hud-photo-sheet').count()) === 0 &&
+      (await page.locator('.hud-camera-strip').count()) === 1,
+  );
+  await tapElement('.hud-camera-done');
+  const down = await page.evaluate(() => ({
+    posing: window.world.posing,
+    top: (document.querySelector('.hud-top')?.getBoundingClientRect().height ?? 0) > 0,
+    strip: document.querySelectorAll('.hud-camera-strip').length,
+  }));
+  check(
+    'Done puts the camera down: the town carries on, the bars come back',
+    !down.posing && down.top && down.strip === 0,
+    JSON.stringify(down),
+  );
+  await page.evaluate(() => window.world.bag.remove('ghostGooBall', 1));
 }
 
 async function calendar() {
@@ -394,6 +570,7 @@ export const sections = [
   ['bag', bag],
   ['calendar', calendar],
   ['starChart', starChart],
+  ['photoMode', photoMode],
   ['settings', settings],
   ['sideways', sideways],
 ];

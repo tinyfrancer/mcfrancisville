@@ -97,6 +97,7 @@ const ORDER = [
   'bag',
   'calendar',
   'starChart',
+  'photoMode',
   'notices',
   'projects',
   'passive',

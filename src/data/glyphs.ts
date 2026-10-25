@@ -63,6 +63,12 @@ export type GlyphId =
   | 'wave'
   | 'topHat'
   | 'telescope'
+  // The photo mode's strip (1.5's G5).
+  | 'filters'
+  | 'sticker'
+  | 'pencil'
+  | 'zoomIn'
+  | 'zoomOut'
   | 'hammer'
   | 'bottle'
   | 'star'

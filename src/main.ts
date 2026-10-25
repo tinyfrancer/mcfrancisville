@@ -34,13 +34,16 @@ import type { ZoneId } from './types/ids';
 import { fromSave, tileOf, World, type WorldEvent } from './world/World';
 import { sheetApis, type Waiting } from './wiring/apis';
 import { saveApi, soundApi } from './wiring/apis/settings';
+import { cameraApi, type Viewfinder } from './wiring/apis/camera';
+import { drawViewfinder } from './render/viewfinder';
+import type { Closeness } from './types/view';
 import { playMoments } from './wiring/moments';
 import { keepTown } from './wiring/keeping';
 import { enterer } from './wiring/greeting';
 import { listenForTaps } from './wiring/touch';
 import { Music } from './wiring/music';
 import { exposeForDebugging } from './wiring/debug';
-import { FixedStep } from './loop';
+import { FixedStep, STEP_MS } from './loop';
 import { catchErrors } from './errorNotes';
 import { showPerf } from './wiring/perf';
 
@@ -93,6 +96,8 @@ function startGame(): void {
   // Between places, an iris on her and her broom seen flying; a wash as the day turns (V1's E4).
   const transitions = new Transitions(canvas, { reduced });
   const ctx = canvas.getContext('2d');
+  // Her camera's viewfinder (1.5's G5), laid over each frame while it's up.
+  const viewfinder: Viewfinder = { up: false, filter: 'plain' };
   const leaving = () =>
     transitions.leaving(`${world.scene}:${world.scene === 'home' ? world.home.rooms.here : ''}`);
   // A frame: the view, then over it any transition under way (only then), and where it drew her.
@@ -104,6 +109,7 @@ function startGame(): void {
     const { x, y } = world.player;
     transitions.seen({ x: x - cam.x, y: y + HER_FEET - cam.y });
     if (ctx) transitions.draw(ctx);
+    if (ctx && viewfinder.up) drawViewfinder(ctx, canvas, viewfinder.filter, now);
   };
   // The place's ambience and her footsteps (V1's S1).
   const hearing = new Hearing();
@@ -142,6 +148,9 @@ function startGame(): void {
   const keeping = keepTown(world, loaded, () => hud);
   const { autosave } = keeping;
   let closeness = readCloseness();
+  // The viewfinder's own closeness while her camera is up (1.5's G5), never kept as hers.
+  let lens: Closeness | null = null;
+  const shownCloseness = () => lens ?? closeness;
   // The ?perf corner (V1's S3): her phone's frame times, from her first tap.
   const perf = perfRequested(location.search) ? showPerf(root) : null;
   // A piece moved while decorating is no moment in `update`'s list, but it's worth keeping.
@@ -164,6 +173,19 @@ function startGame(): void {
       },
     },
     ...sheetApis({ world, sound, changed, play, waiting }),
+    camera: cameraApi({
+      world,
+      sound,
+      canvas,
+      view,
+      viewfinder,
+      lens: shownCloseness,
+      setLens(to) {
+        lens = to;
+        resize();
+      },
+      settle: () => tick(STEP_MS),
+    }),
     standalone: runningStandalone(),
   });
   // Every button in the HUD ticks softly as it's pressed (V1's S1).
@@ -183,7 +205,7 @@ function startGame(): void {
     world.scene === 'home' ? world.home.rooms.room : world.zones.inside(world.scene)?.room;
   const fitFor = () => {
     const inside = indoors();
-    return `${closeness}:${inside ? `${inside.width}x${inside.height}` : 'out'}`;
+    return `${shownCloseness()}:${inside ? `${inside.width}x${inside.height}` : 'out'}`;
   };
   let fitted = '';
   const resize = () => {
@@ -196,7 +218,7 @@ function startGame(): void {
       dpr,
     );
     const inside = indoors();
-    const tiles = TILES_ACROSS[closeness];
+    const tiles = TILES_ACROSS[shownCloseness()];
     const fit = inside
       ? fitRoom(room.width, room.height, dpr, inside, tiles)
       : fitPixelScale(room.width, room.height, dpr, tiles);
@@ -252,7 +274,8 @@ function startGame(): void {
     const started = performance.now();
     const delta = Math.min(now - last, MAX_FRAME_MS);
     last = now;
-    if (!manual) steps.advance(delta, tick);
+    // With her camera up the town holds still (1.5's G5); only the view's own clock moves on.
+    if (!manual && !world.posing) steps.advance(delta, tick);
     if (fitFor() !== fitted) resize();
     drawFrame(now);
     placeBed();

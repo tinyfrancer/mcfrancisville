@@ -24,6 +24,7 @@ import { mealChips, type MealsApi } from './MealChips';
 import { openMap, type MapApi } from './MapSheet';
 import { openNotes, whatsNew, type NotesApi } from './NotesCard';
 import { openPhoto } from './PhotoCard';
+import { openCamera, type CameraApi } from './CameraSheet';
 import { openShop, type ShopApi } from './ShopSheet';
 import { openCatalogue, type CatalogueApi } from './CatalogueSheet';
 import { openPet, type PetApi } from './PetSheet';
@@ -83,6 +84,8 @@ export interface HudOptions {
   fair: FairApi;
   /** The night sky through a telescope (1.5's G4). */
   sky: SkyApi;
+  /** Her camera, the photo mode (1.5's G5). */
+  camera: CameraApi;
   quick: QuickApi;
   broom: BroomApi;
   rod: RodApi;
@@ -153,6 +156,10 @@ export interface Hud {
   openFirstDay(): void;
   /** Their photo at the Halloween party, flash and all, over whatever's up (0.2's J4). */
   photo(picture: HTMLCanvasElement, caption: string, print?: () => Promise<Blob | null>): void;
+  /** Lifts her camera, unless a sheet is up or it already is (1.5's G5). */
+  openCamera(): void;
+  /** Whether her camera is up. */
+  cameraUp(): boolean;
   /** Fades the game in from dark, as she comes into a new place. */
   fade(): void;
   /** The bag or her Candy gives a little bump, as what she got lands (V1's E1). */
@@ -261,10 +268,22 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
   const meals = mealChips(options.meals, (toast) => api.toast(toast));
   top.append(purse, day, trim, meals.element, neighbours, settings);
 
+  // Her camera (1.5's G5): the viewfinder over the town, the bars down to a strip.
+  let camera: { close(): void } | null = null;
+  const liftCamera = () => {
+    if (camera || sheetOpen(hud)) return;
+    bottom.removeAttribute('data-open');
+    camera = openCamera(hud, viewport, bottom, options.camera, () => (camera = null));
+  };
+
   // What she's holding, outdoors; the decorating bar, at home while she decorates.
-  const quick = quickBar(options.quick, () => {
-    if (!sheetOpen(hud)) openRod(hud, options.rod, () => quick.render());
-  });
+  const quick = quickBar(
+    options.quick,
+    () => {
+      if (!sheetOpen(hud)) openRod(hud, options.rod, () => quick.render());
+    },
+    () => liftCamera(),
+  );
   options.quick.onChange(quick.render);
   const home = options.home;
   const bar = decorBar(hud, home);
@@ -295,6 +314,7 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     closet,
     cornerButton('hud-map-button', 'Map', 'map', () => openMap(hud, options.map)),
     cabinet,
+    cornerButton('hud-camera-open', 'Camera', 'camera', liftCamera),
   );
   const more = cornerButton('hud-more', 'More', 'more', () =>
     bottom.toggleAttribute('data-open', !bottom.hasAttribute('data-open')),
@@ -473,6 +493,8 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
       if (!sheetOpen(hud) && options.firstDay.open()) openFirstDay(hud, options.firstDay);
     },
     placeBed: bed.place,
+    openCamera: liftCamera,
+    cameraUp: () => camera !== null,
     playerAt: toasts.playerAt,
     bump(what) {
       const button = what === 'bag' ? bag : purse;

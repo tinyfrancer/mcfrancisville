@@ -73,13 +73,40 @@ export class FollowCamera {
     stepAxis(a.y, her.y, k);
   }
 
-  /** The view's top-left, centred on her drawn pixel less her lead. */
+  /**
+   * How far the photo mode's viewfinder has looked away from her (1.5's G5), in world pixels; kept
+   * to as far as the map's edges let the view go, so dragging back comes back at once.
+   */
+  private look: Point = { x: 0, y: 0 };
+
+  /** Looks further away from her by this many world pixels, or back at her with null. */
+  pan(by: Point | null): void {
+    this.look = by ? { x: this.look.x + by.x, y: this.look.y + by.y } : { x: 0, y: 0 };
+  }
+
+  /** The view's top-left, centred on her drawn pixel less her lead, and where the camera looks. */
   origin(her: Point, view: Size, map: Size): Point {
     const a = this.axes;
     const focus = a
       ? { x: Math.round(her.x) - a.x.lead, y: Math.round(her.y) - a.y.lead }
       : { x: Math.round(her.x), y: Math.round(her.y) };
-    return cameraOrigin(focus, view, map);
+    if (this.look.x === 0 && this.look.y === 0) return cameraOrigin(focus, view, map);
+    // Kept to the looks that move the view, so past an edge it stops, and dragging back from one
+    // comes back at once; within them it keeps its part of a pixel.
+    const reach = (look: number, centre: number, viewLen: number, mapLen: number) => {
+      if (mapLen <= viewLen) return 0;
+      const least = Math.floor(viewLen / 2) - centre;
+      return Math.min(Math.max(look, least), least + mapLen - viewLen);
+    };
+    this.look = {
+      x: reach(this.look.x, focus.x, view.width, map.width),
+      y: reach(this.look.y, focus.y, view.height, map.height),
+    };
+    return cameraOrigin(
+      { x: focus.x + Math.round(this.look.x), y: focus.y + Math.round(this.look.y) },
+      view,
+      map,
+    );
   }
 }
 
