@@ -1,12 +1,12 @@
 import { DECOR } from '../../data/holidays';
 import { PROP_FOOTPRINT } from '../../data/maps';
 import type { FurnitureId, MapZoneId, PropId } from '../../types/ids';
-import { dayKey } from '../../systems/clock';
 import type { PlacedProp } from '../../systems/grid';
 import { happeningsOn, venueOf } from '../../systems/happenings';
 import { decorOn, isFrozen } from '../../systems/holidays';
 import { wanderingStallOn } from '../../systems/rareEvents';
 import { atTheFair } from '../../systems/venues';
+import { MinuteDay } from './MinuteDay';
 import type { Overlay } from './Overlay';
 import { covers } from './Zone';
 
@@ -19,7 +19,7 @@ import { covers } from './Zone';
  * happening there.
  */
 export class Decorations implements Overlay {
-  private readonly now: () => number;
+  private readonly today: MinuteDay;
   /** Whether she has a piece of furniture, for a set's piece that's hers (her carving). */
   private readonly has: (piece: FurnitureId) => boolean;
   private readonly zone: MapZoneId;
@@ -34,6 +34,8 @@ export class Decorations implements Overlay {
     props: readonly PlacedProp[];
     hers: readonly { piece: FurnitureId; prop: PlacedProp }[];
     frozen: boolean;
+    /** The answer when none of hers is out, shared: asked on every call to `canWalk`. */
+    plain: { props: readonly PlacedProp[]; frozen: boolean };
   } | null = null;
 
   constructor(
@@ -41,13 +43,13 @@ export class Decorations implements Overlay {
     has: (piece: FurnitureId) => boolean = () => false,
     zone: MapZoneId = 'town',
   ) {
-    this.now = now;
+    this.today = new MinuteDay(now);
     this.has = has;
     this.zone = zone;
   }
 
-  private today(): { props: readonly PlacedProp[]; frozen: boolean } {
-    const day = dayKey(this.now());
+  private state(): { props: readonly PlacedProp[]; frozen: boolean } {
+    const day = this.today.get();
     const fair = atTheFair();
     if (this.cache?.day !== day || this.cache.fair !== fair) {
       const town = this.zone === 'town';
@@ -70,10 +72,11 @@ export class Decorations implements Overlay {
         ...(stall ? [{ prop: 'wanderingStall' as const, ...stall }] : []),
       ].map(place);
       const hers = sets.flatMap((p) => (p.hers ? [{ piece: p.hers, prop: place(p) }] : []));
-      this.cache = { day, fair, props, hers, frozen: town && isFrozen(day) };
+      const frozen = town && isFrozen(day);
+      this.cache = { day, fair, props, hers, frozen, plain: { props, frozen } };
     }
-    const { props, hers, frozen } = this.cache;
-    if (hers.length === 0) return { props, frozen };
+    const { props, hers, frozen, plain } = this.cache;
+    if (hers.length === 0) return plain;
     return {
       props: [...props, ...hers.filter((h) => this.has(h.piece)).map((h) => h.prop)],
       frozen,
@@ -82,12 +85,12 @@ export class Decorations implements Overlay {
 
   /** What stands in the square (or before the fairground's stage) today. */
   props(): readonly PlacedProp[] {
-    return this.today().props;
+    return this.state().props;
   }
 
   /** Whether the pond is frozen over today. */
   get frozen(): boolean {
-    return this.today().frozen;
+    return this.state().frozen;
   }
 
   propAt(tx: number, ty: number): PlacedProp | undefined {
