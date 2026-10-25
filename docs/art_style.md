@@ -320,6 +320,13 @@ She finds spiders frightening, and they are still in the game, drawn gently
   at the museum and its figurine. What's magic in it (the ghost shell, the amber, the egg's
   crack) glows after dark.
 
+## Stars
+
+- **Stars are whole pixels at 32** (1.5's G4, decision 373, `src/sprites/stars.ts`): a speck, a
+  heart with four arms, or longer arms with a halo, in cream and lavender until traced and gold
+  once lit, the lines between them a pixel wide; the sky behind them is the title screen's bands
+  dithered into each other, and tonight's moon is the title's, at tonight's phase.
+
 ## Animation
 
 - Two to four frames, gentle and slow: a walk is two steps a tile, a flutter a few frames.

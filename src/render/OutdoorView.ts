@@ -31,7 +31,13 @@ import {
   type SceneView,
   type Tapped,
 } from './scene';
-import { butterfliesPass, flyersPass, leavesPass, type CountingPass } from './passes/aloft';
+import {
+  butterfliesPass,
+  flyersPass,
+  leavesPass,
+  starsPass,
+  type CountingPass,
+} from './passes/aloft';
 import { Crowns } from './passes/crowns';
 import {
   boardsPass,
@@ -128,6 +134,7 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'yard',
   ],
   lit: [
+    'stars',
     'holidays',
     'fountain',
     'weather',
@@ -234,6 +241,7 @@ export class OutdoorView implements SceneView {
         gatesPass(world, zone),
         lanternsPass(b.bobbing),
         butterfliesPass(world, zone, hour),
+        starsPass(world, zone, hour),
         this.flyers,
         this.leaves,
         cartPass(zone),

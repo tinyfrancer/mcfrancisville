@@ -7,6 +7,7 @@ import { DOLL_ART } from './dolls';
 import { FOSSIL_ART } from './fossils';
 import { ORCHARD_ITEM_ART } from './orchard';
 import { RARE_KEEPSAKE_ART } from './rareEvents';
+import { STAR_MAP_ART } from './stars';
 import { FAIR_PRIZE_ART } from './fairPrizes';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
@@ -2602,6 +2603,8 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   ...FOSSIL_ART,
   // The rare events' keepsakes (V1's R3).
   ...RARE_KEEPSAKE_ART,
+  // Hazel's star map (1.5's G4).
+  starMap: STAR_MAP_ART,
   // Only ever won at the Hollow Fairground (V1's R6b).
   ...FAIR_PRIZE_ART,
 };

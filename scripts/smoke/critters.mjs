@@ -104,7 +104,7 @@ async function critters() {
   );
 
   await tapElement('.hud-cabinet');
-  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Shelves'] });
+  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Sky', 'Shelves'] });
   const cases = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
@@ -147,8 +147,8 @@ async function critters() {
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
     // Nine squishies (the fairground's own since V1's R6b) and eight dolls; the shinies' two
-    // shelves since 1.4's G1.
-    book.shelves === 17 && book.sets === 17 && book.setsFit,
+    // shelves since 1.4's G1, and the star chart's two since 1.5's G4.
+    book.shelves === 19 && book.sets === 17 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.

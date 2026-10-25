@@ -3,6 +3,7 @@ import { HAPPENINGS } from '../data/happenings';
 import { TOWN_SPOTS } from '../data/maps';
 import { WANDERING_STALL_AT, type PasserId, type RareEventId } from '../data/rareEvents';
 import type {
+  ConstellationId,
   CritterId,
   HappeningId,
   ItemId,
@@ -122,6 +123,11 @@ export interface TodayFacts {
   shiny?: { critter: CritterId; zone: MapZoneId; tile: Tile; hour: number } | null;
   /** The town's pond frozen over today, its fish under the ice to fish through (1.4's G3). */
   iceFishing?: boolean;
+  /**
+   * A clear night for the telescope (1.5's G4): the first of tonight's constellations she hasn't
+   * traced (or the month's), whether it's on her chart, and whether the whole sky is out.
+   */
+  stars?: { constellation: ConstellationId; found: boolean; showers: boolean } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -162,6 +168,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'shiny'; critter: CritterId; zone: MapZoneId }
   // 1.4's G3: the pond frozen thick enough to fish through.
   | { kind: 'iceFishing' }
+  // 1.5's G4: a clear night for the telescope at the castle.
+  | { kind: 'stars'; constellation: ConstellationId; found: boolean; showers: boolean }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -284,6 +292,14 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       now: isOn(hour, row.from, row.until),
       key: `happening:${next}:${day}`,
       go: { zone },
+    });
+  }
+  if (facts.stars) {
+    lines.push({
+      kind: 'stars',
+      ...facts.stars,
+      key: `stars:${day}:${facts.stars.constellation}`,
+      go: { zone: 'castleHill', prop: 'telescope' },
     });
   }
   if (facts.freeGo) {

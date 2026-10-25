@@ -55,6 +55,7 @@ export class Milestones {
     this.facts = {
       caught: (id) => reads.cabinet.caughtOn(id) !== null,
       shiny: (id) => reads.cabinet.shinyOn(id) !== null,
+      star: (id) => reads.cabinet.tracedOn(id) !== null,
       donated: (id) => reads.cabinet.isDonated(id),
       had: (id) => this.had.has(id),
     };

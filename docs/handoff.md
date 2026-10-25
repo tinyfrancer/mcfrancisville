@@ -42,9 +42,22 @@ The lake was left unfrozen (it never froze; decision 372 says why). The rarity t
 11 → 12 months (9.1 average). One line in `hud/CabinetSheet.ts`'s `seasonOf` (G4's file) says a
 moon-bound critter with a season visits on the full moon. **1.4 is ready to cut** (G1–G3 in).
 
-### G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+### G4: the night sky (`claude/g4-night-sky`; decision 373; **save bumped to v57**)
 
-Not started; in the plan's order (G4 runs beside G3).
+**Landed** (PR #226, into `v1.4-dev`): a telescope by the castle hill's gate (and the brass
+telescope and Hazel's at home after dark) opening the Sky sheet on a clear night; fifteen
+constellations (`src/data/constellations.ts`, twelve by month and three for holidays), this
+month's and the two before findable, every one on a meteor shower's night; traced by taps in
+order, a wrong tap only twinkling; `Cabinet.stars` (save v57: step 56 gives an empty chart), the
+Cabinet's Sky tab, Hazel's first letter with her star map, two shelves, the month's constellation
+faint over the castle hill at night, Today, a `stars` small-talk topic, the calendar's mark.
+Decision 373 says what and why. Nothing half done. **The `1.5` NOTES row** is made, three lines
+(the notes' minimum) and a P.S.: G5–G7 add theirs and the review folds to five (or into 1.4's if
+1.4 isn't cut first). **G6 bumps next (v58).**
+
+### G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+
+Not started; in the plan's order.
 
 ## If you are starting cold after a long gap
 

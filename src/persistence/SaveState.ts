@@ -43,7 +43,7 @@ import type { WorksSnapshot } from '../world/Works';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 56;
+export const SAVE_VERSION = 57;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -285,7 +285,7 @@ export function newSave(
     recipes: [],
     friends: {},
     mail: [],
-    cabinet: { caught: {}, donated: [], best: {}, shinies: {}, shinyShown: [] },
+    cabinet: { caught: {}, donated: [], best: {}, shinies: {}, shinyShown: [], stars: {} },
     pets: structuredClone(STARTER_PETS),
     mystery: { clues: {}, began: null, wes: { glimpses: 0, chats: 0, talked: null } },
     atlas: { found: ['town', 'home'], opened: [] },
@@ -528,7 +528,9 @@ function isCabinetShape(value: unknown): boolean {
     c.shinies !== null &&
     !Array.isArray(c.shinies) &&
     Object.values(c.shinies).every((day) => typeof day === 'string') &&
-    isStringList(c.shinyShown)
+    isStringList(c.shinyShown) &&
+    // 1.5's G4: her star chart, the day she first traced each constellation.
+    isStringRecord(c.stars)
   );
 }
 

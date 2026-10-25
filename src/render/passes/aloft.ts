@@ -5,7 +5,8 @@ import type { MapZone } from '../../world/zones/MapZone';
 import { butterflyDrawables, fluttersOf } from '../butterflies';
 import { leafDrawables, leavesFall } from '../leaves';
 import type { Drawable } from '../scene';
-import { perchDrawables, skyDrawables } from '../sky';
+import { overheadOn, perchDrawables, skyDrawables } from '../sky';
+import { drawOverhead } from '../stargazing';
 import type { Pass } from './pass';
 
 /*
@@ -50,6 +51,27 @@ export function flyersPass(
       return flyers;
     },
     drawn: () => count,
+  };
+}
+
+/**
+ * The month's constellation faint over the castle hill at night once she has traced it (1.5's
+ * G4), fixed to the view as the sky is, over the light so it shines in the dark.
+ */
+export function starsPass(world: World, zone: MapZone, hour: number | null): Pass {
+  return {
+    name: 'stars',
+    lit(ctx, { weather, nowMs }) {
+      const now = world.clock.now();
+      const id = overheadOn(
+        zone.id,
+        dayKey(now),
+        hour ?? hourOf(now),
+        weather,
+        (c) => world.cabinet.tracedOn(c) !== null,
+      );
+      if (id) drawOverhead(ctx, id, nowMs);
+    },
   };
 }
 

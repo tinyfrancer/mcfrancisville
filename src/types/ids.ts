@@ -69,6 +69,8 @@ export type PropId =
   | 'castle'
   | 'weddingArch'
   | 'gate'
+  // The telescope at the castle lookout (1.5's G4).
+  | 'telescope'
   // Clutter (phase L).
   | 'bush'
   | 'stump'
@@ -320,6 +322,8 @@ export type ItemId =
   | 'plushGhost'
   // A keepsake the first time each rare event comes (V1's R3).
   | RareKeepsakeId
+  // Hazel's star map, the first time she traces a constellation (1.5's G4).
+  | 'starMap'
   | DishId
   | FruitId
   | CritterId
@@ -332,6 +336,30 @@ export type ShinyId = `${CritterId}Shiny`;
 
 /** What the shiny shelves send her (1.4's G1): a framed shiny luna moth, a dome of shiny orbs. */
 export type ShinyPiece = 'framedShiny' | 'shinyDome';
+
+/**
+ * The constellations (1.5's G4, decision 373): one for each month, traced through the telescope
+ * at the castle lookout, and three that come out for a holiday.
+ */
+export type ConstellationId =
+  | 'snowflake'
+  | 'candle'
+  | 'toadstool'
+  | 'moth'
+  | 'broom'
+  | 'lantern'
+  | 'key'
+  | 'cat'
+  | 'cauldron'
+  | 'bat'
+  | 'pumpkin'
+  | 'ghost'
+  | 'heart'
+  | 'egg'
+  | 'christmasStar';
+
+/** What the star chart's shelves send her (1.5's G4): the Bat framed, and the sky under glass. */
+export type StarPiece = 'framedConstellation' | 'skyDome';
 
 /**
  * The fossils she digs up (0.3's C1), one mound a day in each place: something for her bag, her
@@ -824,7 +852,10 @@ export type MilestoneId =
   | 'figurines'
   // The shinies (1.4's G1): one of every family, and one of everything.
   | 'shinyFamilies'
-  | 'shinies';
+  | 'shinies'
+  // The night sky (1.5's G4): half the sky on her star chart, and the whole of it.
+  | 'halfTheSky'
+  | 'wholeSky';
 
 export type FurnitureId =
   | 'batBed'
@@ -948,6 +979,8 @@ export type FurnitureId =
   | CrawlyPiece
   // What the shinies send her (1.4's G1).
   | ShinyPiece
+  // What the star chart sends her (1.5's G4).
+  | StarPiece
   // Gourdon's figurines (0.3's C3), carved from three of a kind, and the one he carved of himself.
   | FigurineId
   | 'carvedGourdon'

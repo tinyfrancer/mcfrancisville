@@ -1,5 +1,5 @@
 import type { CalendarApi } from '../../hud/CalendarSheet';
-import { drawCalendarMark, drawPlainMark } from '../../render/items';
+import { drawCalendarMark, drawConstellationMark, drawPlainMark } from '../../render/items';
 import { townsfolk } from '../../systems/mayor';
 import { canGoToday, goToday, TODAY_TOLD_BY } from '../todayGo';
 import type { ApiWiring, SheetApis } from './shared';
@@ -12,6 +12,7 @@ export function calendarApis({ world }: ApiWiring): Pick<SheetApis, 'calendar'> 
     comingUp: () => world.calendar.comingUp(),
     mark: drawCalendarMark,
     plain: drawPlainMark,
+    stars: drawConstellationMark,
     birthdays: () => townsfolk(),
     onChange: (listener) => world.events.on('today', listener),
     // What's up now (V1's R2), and where a line of it takes her.

@@ -219,6 +219,19 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. The typewriter keys are cold in the mornings now. I type in mittens. Please excuse the typos.',
   },
+  {
+    version: '1.5',
+    lines: [
+      // 1.5's G4: the night sky.
+      'There is a telescope by the castle gate now. On a clear night, look through it: a ' +
+        'constellation a month, and three more for the holidays.',
+      'Tap its stars in order and it lights up. Tap the wrong one and it only twinkles at you. ' +
+        "The stars are very forgiving. I've checked.",
+      'Every one you trace goes on your star chart, in the Cabinet. Hazel would like you to ' +
+        'know she has been waiting years for someone to say so.',
+    ],
+    ps: 'P.S. Hazel has asked me to say: the stars come out after eight, and so should you. Wrap up warm.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

@@ -54,8 +54,9 @@ const ADDED: Record<string, readonly string[]> = {
   home: ['items'],
   // V1's P3a: the day the chain began, and Wes.
   mystery: ['began', 'wes'],
-  // V1's R6a: the biggest of each fish she has landed; 1.4's G1: her shinies, and those on show.
-  cabinet: ['best', 'shinies', 'shinyShown'],
+  // V1's R6a: the biggest of each fish she has landed; 1.4's G1: her shinies, and those on show;
+  // 1.5's G4: her star chart.
+  cabinet: ['best', 'shinies', 'shinyShown', 'stars'],
   // V1's R6c: how fond each pet has grown of her.
   pets: ['affection'],
 };
@@ -154,6 +155,23 @@ describe("1.2's town on her phone opening 1.4 (1.4's G1, save v56)", () => {
     expect(world.cabinet.found).toBe(Object.keys(old.cabinet.caught).length);
     expect(world.milestones.progress('shinies').have).toBe(0);
     expect(world.mailbox.letters.has('shelf:shinyFamilies')).toBe(false);
+  });
+});
+
+describe("1.2's town on her phone opening 1.5 (1.5's G4, save v57)", () => {
+  it('opens with an empty star chart, and every critter it had still had', () => {
+    const old = JSON.parse(readFileSync(join(FIXTURES, LIVED_IN['1.2']), 'utf8'));
+    const migrated = migrateSave(structuredClone(old));
+    expect(migrated?.version).toBe(SAVE_VERSION);
+    expect(migrated?.cabinet.stars).toEqual({});
+    const world = new World({
+      clock: new FakeClock(new Date(old.lastPlayedAt)),
+      ...fromSave(migrated),
+    });
+    expect(world.cabinet.stars).toBe(0);
+    expect(world.cabinet.found).toBe(Object.keys(old.cabinet.caught).length);
+    expect(world.milestones.progress('halfTheSky')).toEqual({ have: 0, total: 8, done: false });
+    expect(world.mailbox.letters.has('stars:first')).toBe(false);
   });
 });
 

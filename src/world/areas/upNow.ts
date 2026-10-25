@@ -30,6 +30,7 @@ import type { Talk } from '../services/Talk';
 import type { Noticeboard } from '../services/Noticeboard';
 import type { Shops } from '../services/Shops';
 import { UpNow } from '../services/UpNow';
+import type { Stargazing } from '../services/Stargazing';
 import type { Shared } from './shared';
 
 /** What Today reads (V1's R2), each a service made before it. */
@@ -54,6 +55,21 @@ export interface UpNowParts {
   activities: Activities;
   /** Her net's critters, for a shiny about where she is (1.4's G1). */
   collecting: Collecting;
+  /** The night sky, for a clear night at the telescope (1.5's G4). */
+  stargazing: Stargazing;
+}
+
+/** A clear night for the telescope, and what's to trace (1.5's G4). */
+function starsTonight(stargazing: Stargazing): TodayFacts['stars'] {
+  const tonight = stargazing.tonight();
+  if (tonight.open !== 'open') return null;
+  const constellation =
+    tonight.findable.find((id) => stargazing.tracedOn(id) === null) ?? tonight.month;
+  return {
+    constellation,
+    found: stargazing.tracedOn(constellation) !== null,
+    showers: tonight.showers,
+  };
 }
 
 /** What Today reads of the rare events, the passers-by and the peddlers (V1's R3). */
@@ -147,6 +163,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       freeGo: freeGoOf(parts.activities),
       shiny: parts.collecting.shinyHere(),
       iceFishing: isFrozen(day),
+      stars: starsTonight(parts.stargazing),
     };
   });
 }

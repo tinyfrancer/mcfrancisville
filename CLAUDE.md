@@ -669,6 +669,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   dug once a day by walking up to it (`world.fossils`, `mound:<zone>` in `Takings`). A fossil she
   has had is found (`collected`); the Cabinet's Fossils tab shows them, the museum's seventh case
   holds the donated (`cabinet.donated`, save v43), and `fossilWing` and `fossils` are shelves.
+- **The night sky** (1.5's G4, decision 373): fifteen constellations in
+  `src/data/constellations.ts` (twelve by month, three while a holiday's decorations are up),
+  their rules in `src/systems/stars.ts` (`skyOf`: open after 8pm on a clear day; `findableOn`:
+  this month's and the two before, every one on a meteor shower's night; `tapStar`, a wrong star
+  only twinkling), kept by `world.stargazing` (`Stargazing`, the outdoors area). The `telescope`
+  prop by the castle hill's gate (`I` in `CASTLE_LEGEND`, art in `src/sprites/castle.ts`), and the
+  pieces in `STARGAZERS` at home after dark, open `src/hud/SkySheet.ts` (`SkyApi`, drawn by
+  `src/render/stargazing.ts`, stars `src/sprites/stars.ts`), or toast why not. A traced one is
+  `Cabinet.stars` (save v57), the Cabinet's Sky tab, Hazel's first letter with her star map
+  (`stars:first`), two shelves (`halfTheSky`, `wholeSky`), the month's faint over the castle
+  hill at night (`starsPass`, `STARRY` in `src/data/sky.ts`), Today, a `stars` small-talk topic
+  and the calendar Month tab's mark.
 - **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says

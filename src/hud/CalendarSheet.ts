@@ -3,7 +3,9 @@ import { CALENDAR, type CalendarId, type FestivalId } from '../data/calendar';
 import { HAPPENINGS } from '../data/happenings';
 import { SHOPS } from '../data/shop';
 import { VILLAGERS } from '../data/villagers';
-import type { HappeningId, VillagerId } from '../types/ids';
+import type { ConstellationId, HappeningId, VillagerId } from '../types/ids';
+import { constellationOf } from '../systems/stars';
+import { named } from './SkySheet';
 import { WINDOW_FROM, type DayWindow } from '../systems/clock';
 import {
   festivalDay,
@@ -33,6 +35,8 @@ export interface CalendarApi {
   onChange(listener: () => void): () => void;
   /** Draws a day's mark at 1×. */
   mark(canvas: HTMLCanvasElement, id: CalendarId): void;
+  /** Draws a month's constellation's mark at 1× (1.5's G4). */
+  stars(canvas: HTMLCanvasElement, id: ConstellationId): void;
   /** Draws a neighbour's birthday cake, or a plain page of the calendar, at 1× (0.2's U4). */
   plain(canvas: HTMLCanvasElement, mark: 'neighbourBirthday' | 'page'): void;
   /** The neighbours whose birthdays she knows (0.2's U4): everyone in town. */
@@ -345,7 +349,20 @@ export function openCalendar(hud: HTMLElement, api: CalendarApi): () => void {
         return cell;
       }),
     );
-    keys.replaceChildren(...[...spans].map(([id, day]) => spanKey(id, day)));
+    keys.replaceChildren(...[...spans].map(([id, day]) => spanKey(id, day)), starsKey(month));
+  };
+  // The month's constellation (1.5's G4), up through the castle's telescope on clear nights.
+  const starsKey = (m: number) => {
+    const id = constellationOf(m);
+    const mark = el('canvas', { className: 'hud-cal-mark' });
+    api.stars(mark, id);
+    fitIcon(mark, 16);
+    return el(
+      'p',
+      { className: 'hud-cal-key hud-cal-stars' },
+      mark,
+      ` ${named(id)} is up this month: trace it through the castle's telescope on a clear night.`,
+    );
   };
   const page = (by: number) => {
     month += by;

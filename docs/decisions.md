@@ -9515,3 +9515,73 @@ plan didn't ask for, and every fish's dealing at two places would shift); a long
 an unlimited hole (two an hour keeps it a treat beside the pond's three or four); a new save field
 (the hut is a project in `Works`, its catches in `Takings`); the sturgeon with no season (the
 brief's four are winter's own).
+
+## 373. The night sky: a telescope by the castle gate, fifteen constellations traced by taps, three months to find each, and a star chart (2026-10-25, 1.5's G4)
+
+**Context:** the 1.4/1.5 plan's G4 (decision 367): a telescope, a constellation a month to trace by
+taps, a star chart in the Cabinet, the meteor shower showing them all, two shelves, the sky over
+the castle hill. Personal touches parked (decision 177): the shapes, names and words are the
+warmest plain defaults.
+
+**Decision:**
+
+- **Fifteen constellations** (`src/data/constellations.ts`), spooky-cute shapes of five to nine
+  stars in a 60×40 box, lines between them: the Snowflake (January), the Candle, the Toadstool,
+  the Moth, the Broom, the Lantern, the Key, the Cat, the Cauldron, the Bat (October), the
+  Pumpkin, the Ghost (December); and three while a holiday's decorations are up (`decorOn`): the
+  Sweetheart (Valentine's), the Egg (Easter), the Christmas Star. Each has two lines about it.
+- **Findable: this month's and the two months' before** (`findableOn`), and a holiday's while
+  its decorations are up, and on a meteor shower's night (V1's R3) every one. A month alone would
+  leave a missed month a year away; three months means a month of rain or a busy few weeks loses
+  nothing, and still each is its season's. The chart takes a year at most, nothing on it more than
+  a year away, and is never lost (decision 11).
+- **The sky is open after dark on a clear day** (`skyOf`): the snack's night, 8pm to 5am
+  (`isNight`), by the day's own weather. By day the castle's telescope toasts "the stars come out
+  after eight", in rain or fog "cloud, cloud and more cloud".
+- **The telescope** is a prop, `telescope` (a brass tube on a wooden tripod, `src/sprites/castle.ts`),
+  at tile 11,39 on the castle hill, beside the gate's left post, off every spot, dig spot and site,
+  in `CASTLE_LEGEND` as `I` (the shared legend is full, "Where it hurts" 15). Its tile is solid,
+  so `tests/world/overlays.test.ts` and `arrivingAtProps.test.ts` were retaken for castleHill
+  alone. **At home**, the observatory set's brass telescope and Hazel's ten-heart telescope
+  (`STARGAZERS`) open the same sheet after dark on a clear night, through the piece's arrival in
+  `World` beside its `plays` (the Starlight Lullaby plays under the stars); by day they're just
+  telescopes. A list, not an `opens` on the furniture row: a piece opening a sheet only sometimes
+  is a rule, and the rule is the world's (`Stargazing.lookUp`).
+- **The trace** (`tapStar`): the stars in the row's order; the next one lights and draws every
+  line whose both ends are lit, the last lights the whole; any other star only twinkles, and
+  shows which star is next for a moment (decision 272's skill with a floor). The first star
+  pulses to start her off. Nothing is scored: there's nothing to fail, and a grade on a shape she
+  either traced or didn't would only be a way to feel she did it badly. A trace isn't saved: a
+  sheet closed halfway starts the shape again.
+- **The Sky sheet** (`src/hud/SkySheet.ts`, `SkyApi`): tonight's line, the stage (96×64 of the
+  sky's pixels at a whole scale: the title's dithered bands, a seeded field of faint stars kept
+  off the shape, tonight's moon as the title hangs it, `drawMoon` exported), its words in a box of
+  fixed height so the stage never moves under her finger, and a chip for each of tonight's and
+  each found before, looked at lit again any clear night. A meteor shower adds shooting stars.
+- **The star chart**: `Cabinet.stars`, the day each was first traced (**save v57**, a step that
+  gives an older town none); the Cabinet's **Sky** tab draws the whole sky as a map, fifteen
+  cells, the traced lit in gold and the rest faint with a question mark, a tap (or a name below)
+  saying what it is, or when it's up and where to look.
+- **Hazel, not Agatha**, reads the stars here: the plan named Agatha, but Hazel is the town's
+  astronomer already (her telescope at the lookout, her stargazing happening, the meteor shower's
+  letter and star shard). Her letter after the first trace brings her star map (`starMap`, a
+  keepsake); the two shelves (`halfTheSky`: any eight; `wholeSky`: all fifteen) are hers, the Bat
+  framed in gold and a little night sky under glass. Agatha has her own lines in the new `stars`
+  small-talk topic, which every neighbour has three of (the topics need every neighbour), said for
+  two days after she traces one.
+- **The world's sky**: the month's constellation, once traced, hangs faint in the top right of
+  the view over the castle hill after dark on a clear night (`starsPass`, first of `lit`; `STARRY`
+  in `src/data/sky.ts`), fixed to the view as a sky is, its stars breathing slowly. Only there:
+  the view looks down and shows no horizon, and over the town it would be clutter. The meteor
+  shower's shooting stars were already over every place (V1's R3).
+- **Told**: Today's "A clear night for the telescope" (the first of tonight's not yet traced, or
+  the whole sky on a shower's night), a tap taking her to the telescope; the calendar's Month tab
+  shows the month's constellation's 16-pixel mark under the grid.
+- **Notes**: the `1.5` row, three lines and a P.S. from the mayor (the notes need three at least);
+  G5–G7 add theirs, and the review folds them to five, or into 1.4's if 1.4 isn't cut first.
+
+**Rejected:** a month alone (a missed October a year away); every constellation any night (a
+chart in an evening, and no reason to look up next month); a score for the trace (nothing to
+fail is the brief); the stars over every place (no horizon to put them on); a new legend
+character in the shared legend (full); an `opens` on a furniture row (a sheet only at night is a
+rule, not a row).

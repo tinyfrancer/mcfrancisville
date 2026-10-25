@@ -7,8 +7,10 @@ import { HAPPENING_CALLED, SMALL_TALK, TOPICS, type Topic } from '../data/smallT
 import { SPECIAL_DAYS } from '../data/specialDays';
 import { isTool, type Held } from '../data/tools';
 import type { Weather } from '../data/weather';
+import { CONSTELLATIONS } from '../data/constellations';
 import type {
   BraceletId,
+  ConstellationId,
   CritterId,
   CropId,
   FossilId,
@@ -43,6 +45,8 @@ export interface Around {
   caught: CritterId | null;
   /** The last shiny she caught today, if any (1.4's G1). */
   shiny?: CritterId | null;
+  /** The constellation she traced most lately, and the day (1.5's G4). */
+  stars?: { id: ConstellationId; day: string } | null;
   /** The pet out walking with her, by the name she has given it. */
   pet: string | null;
   /** The pieces she has on. */
@@ -139,6 +143,10 @@ function aroundNow(
   // A shiny caught today is all anyone wants to hear about (1.4's G1).
   if (scene.shiny) fits.push({ topic: 'shiny', fill: { catch: aThing(shinyName(scene.shiny)) } });
   else if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
+  // A constellation traced in the last day or two (1.5's G4).
+  if (scene.stars && daysBetween(scene.stars.day, day) <= STARS_NEWS_DAYS) {
+    fits.push({ topic: 'stars', fill: { stars: CONSTELLATIONS[scene.stars.id].name } });
+  }
   if (scene.pet) fits.push({ topic: 'pet', fill: { pet: scene.pet } });
   // A clue pinned lately, which they theorise about (V1's P3a), until she has met the mayor, and
   // then for a few days the meeting, which is all anyone talks about (V1's P3b).
@@ -152,6 +160,9 @@ function aroundNow(
   fits.push({ topic: windowAtHour(hour), fill: {} });
   return fits;
 }
+
+/** How many days after she traces a constellation it's still news (1.5's G4). */
+const STARS_NEWS_DAYS = 2;
 
 const URGENT: ReadonlySet<Topic> = new Set<Topic>(['band', 'away', 'missed']);
 
