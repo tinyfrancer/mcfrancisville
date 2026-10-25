@@ -356,6 +356,49 @@ const FOREVER_ORBS: Tune = {
   ],
 };
 
+// ---- The Starlight Lullaby: the observatory's telescope, a slow waltz of chimes, C major ----
+
+const LULLABY_CHORDS = ['C', 'Am', 'G', 'Am', 'F', 'C', 'G', 'C'];
+const LULLABY_ROLL: Record<string, [string, string, string]> = {
+  C: ['C3', 'G3', 'C4'],
+  Am: ['A2', 'E3', 'A3'],
+  G: ['G2', 'D3', 'G3'],
+  F: ['F2', 'C3', 'F3'],
+};
+const LULLABY_MELODY =
+  'E6:1 D6:.5 C6:.5 G5:1 A5:1 C6:1 E6:1 D6:2 -:1 C6:1 A5:.5 G5:.5 E5:1 ' +
+  'G5:1 A5:1 C6:1 E6:1.5 D6:.5 C6:1 D6:1 G5:1 A5:1 C6:3';
+
+/** One note a star: a chime high up, a faint shimmer an octave over it, and a soft rolling bass. */
+const STARLIGHT_LULLABY: Tune = {
+  bpm: 66,
+  beats: 24,
+  parts: [
+    { wave: 'sine', notes: line(LULLABY_MELODY), gain: 0.3, pluck: true, release: 0.6 },
+    {
+      wave: 'triangle',
+      notes: line(LULLABY_MELODY).map((n) => ({ ...n, pitch: n.pitch + 12 })),
+      gain: 0.04,
+      pluck: true,
+      release: 0.5,
+    },
+    {
+      wave: 'triangle',
+      notes: bars(
+        (c) => {
+          const [root, fifth, octave] = LULLABY_ROLL[c]!;
+          return `${root}:1 ${fifth}:1 ${octave}:1`;
+        },
+        LULLABY_CHORDS,
+        3,
+      ),
+      gain: 0.16,
+      pluck: true,
+      release: 0.4,
+    },
+  ],
+};
+
 /** Each tune's notes. The music box plays their first dance, the hall's own tune, on its tines. */
 export const PIANO_TUNES: Record<TuneId, Tune> = {
   hushUpAndDance: HUSH_UP_AND_DANCE,
@@ -368,4 +411,5 @@ export const PIANO_TUNES: Record<TuneId, Tune> = {
   belfryBoogie: BELFRY_BOOGIE,
   phantomGalop: PHANTOM_GALOP,
   foreverOrbs: FOREVER_ORBS,
+  starlightLullaby: STARLIGHT_LULLABY,
 };

@@ -1,11 +1,13 @@
 import type {
   BathroomPiece,
   BedroomPiece,
+  CabinPiece,
   GardenRoomPiece,
   KitchenPiece,
   LibraryPiece,
   LoungePiece,
   MusicPiece,
+  ObservatoryPiece,
   SuiteId,
   SuitePiece,
   WitchPiece,
@@ -519,7 +521,138 @@ const HAUNTED_LOUNGE: Record<LoungePiece, FurnitureRow> = {
   },
 };
 
-/** Every piece of 0.3's S3 and S4, spread into `FURNITURE`. */
+/** A cosy cabin of logs, red plaid and moss, warm by the stove all winter (1.4's G2). */
+const COSY_CABIN: Record<CabinPiece, FurnitureRow> = {
+  logStove: {
+    name: 'Log stove',
+    description:
+      'A little pot-bellied stove with a fire crackling behind its window and a pipe up to the ceiling. Toes, meet warmth.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You hold your hands out to the fire. Crackle, pop. Bliss.',
+    price: 760,
+  },
+  knitRug: {
+    name: 'Braided rag rug',
+    description:
+      'An oval rug braided round and round from old scarves and jumpers, in red, cream and moss.',
+    layer: 'rug',
+    size: { w: 2, h: 1 },
+    says: 'You wiggle your toes in it. Squishy.',
+    price: 380,
+  },
+  bearRug: {
+    name: 'Not-a-bear rug',
+    description:
+      'A big patchwork rug sewn in the shape of a bear, with button eyes and a stitched smile. It is a rug. It is definitely a rug.',
+    layer: 'rug',
+    size: { w: 2, h: 2 },
+    says: 'You lie on the rug for a bit. It does not mind. It is a rug.',
+    price: 560,
+  },
+  rockingChair: {
+    name: 'Rocking chair',
+    description:
+      'A wooden rocking chair with a plaid cushion and a knitted throw over its arm. Creak, creak, cosy.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'Creak. Creak. You could rock here all winter.',
+    price: 620,
+    seat: { height: 13 },
+  },
+  quiltBed: {
+    name: 'Log cabin bed',
+    description:
+      'A bed of round logs under a patchwork quilt, with a red plaid blanket folded at the foot. Made for snow days.',
+    layer: 'floor',
+    size: { w: 2, h: 2 },
+    says: 'You burrow under the quilt for one minute. Then five more.',
+    price: 880,
+  },
+  mugTree: {
+    name: 'Mug tree',
+    description:
+      'A little wooden tree for the table, three fat mugs hung on its branches, ready for cocoa.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'Which mug? The red one. The red one is the cocoa mug.',
+    price: 300,
+  },
+  twinkleLights: {
+    name: 'Twinkly garland',
+    description:
+      'A swag of pine on the wall with a string of little lights twinkling along it, warm and slow.',
+    layer: 'wall',
+    size: { w: 2, h: 1 },
+    says: 'The lights twinkle, one, then another. It smells of pine.',
+    price: 420,
+  },
+};
+
+/** A midnight observatory in navy, brass and plum velvet, for watching the stars (1.4's G2). */
+const MIDNIGHT_OBSERVATORY: Record<ObservatoryPiece, FurnitureRow> = {
+  brassTelescope: {
+    name: 'Brass telescope',
+    description:
+      'A gleaming brass telescope on a wooden tripod, pointed at the sky. Look through it and it hums a little starry tune.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    turns: 'mirror',
+    says: 'You peer through it. Stars, stars, and a moon that looks back.',
+    price: 860,
+    plays: 'telescope',
+  },
+  celestialChart: {
+    name: 'Celestial chart',
+    description:
+      'A map of the night sky in a dark wood frame, the constellations joined up in gold and a little moon in the corner.',
+    layer: 'wall',
+    size: { w: 2, h: 1 },
+    says: 'You find the Big Ladle. Or is it the Bat? Both, probably.',
+    price: 480,
+  },
+  lunarGlobe: {
+    name: 'Moon on a stand',
+    description:
+      'A little moon, craters and all, in a brass crescent on a wooden foot. It glows faintly after dark.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'You give the moon a spin. Goodnight, moon.',
+    price: 360,
+  },
+  velvetChaise: {
+    name: 'Velvet chaise',
+    description:
+      'A long plum velvet chaise with a scrolled end, brass feet and a cushion embroidered with a star. For lounging under the sky.',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    turns: 'mirror',
+    says: 'You stretch out on the velvet and count the stars on the ceiling.',
+    price: 780,
+    seat: { height: 12 },
+  },
+  candleCluster: {
+    name: 'Candle cluster',
+    description:
+      'Three candles, tall, middling and wee, on a little brass tray. They flicker together.',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The three flames lean together, whispering.',
+    price: 320,
+  },
+  constellationRug: {
+    name: 'Constellation rug',
+    description:
+      'A deep blue rug with the stars stitched on in gold and their constellations joined up.',
+    layer: 'rug',
+    size: { w: 2, h: 1 },
+    says: 'You stand on the Cat. It purrs. Probably.',
+    price: 440,
+  },
+};
+
+/** Every piece of 0.3's S3 and S4 and 1.4's G2, spread into `FURNITURE`. */
 export const SET_FURNITURE: Record<SuitePiece, FurnitureRow> = {
   ...KITCHEN,
   ...BEDROOM,
@@ -529,9 +662,11 @@ export const SET_FURNITURE: Record<SuitePiece, FurnitureRow> = {
   ...GARDEN_ROOM,
   ...MUSIC_CORNER,
   ...HAUNTED_LOUNGE,
+  ...COSY_CABIN,
+  ...MIDNIGHT_OBSERVATORY,
 };
 
-/** The eight sets, each dealt whole as Cobweb Corner's set of the week. */
+/** The ten sets, each dealt whole as Cobweb Corner's set of the week. */
 export const SUITES: Record<SuiteId, SuiteRow> = {
   cosyKitchen: { name: 'Cosy kitchen', pieces: Object.keys(KITCHEN) as KitchenPiece[] },
   bedroom: { name: 'Bedroom', pieces: Object.keys(BEDROOM) as BedroomPiece[] },
@@ -541,6 +676,11 @@ export const SUITES: Record<SuiteId, SuiteRow> = {
   gardenRoom: { name: 'Garden room', pieces: Object.keys(GARDEN_ROOM) as GardenRoomPiece[] },
   musicCorner: { name: 'Music corner', pieces: Object.keys(MUSIC_CORNER) as MusicPiece[] },
   hauntedLounge: { name: 'Haunted lounge', pieces: Object.keys(HAUNTED_LOUNGE) as LoungePiece[] },
+  cosyCabin: { name: 'Cosy cabin', pieces: Object.keys(COSY_CABIN) as CabinPiece[] },
+  midnightObservatory: {
+    name: 'Midnight observatory',
+    pieces: Object.keys(MIDNIGHT_OBSERVATORY) as ObservatoryPiece[],
+  },
 };
 
 /** Every set's pieces, for the shelves that deal from all of them. */

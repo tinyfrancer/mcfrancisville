@@ -186,6 +186,11 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   the music corner black, cherry red and chrome; the haunted lounge dark wood, crimson velvet and
   old silver), so any two pieces of a set side by side read as a room. A new colour a set needs
   goes in the palette with a name (`sage`, `copper`, `mint`, `terracotta`).
+- **Knitting and fur are rows and rings of their own tones** (1.4's G2, `src/sprites/setsThree.ts`
+  and `doll/winter.ts`): a braid a stitch at a time round its ring, a jumper's band of diamonds
+  between two lines, cables as a two-pixel zigzag up a leg, a puffer's quilting a line every
+  three rows (its sleeves out of step with its body, so her arms read), a patchwork's squares
+  with a running stitch along every seam. Never a dither: at 32 it reads as dirt.
 - **Pieces meant to stand in a run share a line.** The kitchen's counter, sink and stove have one
   worktop height from the floor (`WORKTOP_FROM`), so side by side they're one run of cupboards;
   a new piece for that run (a bathroom's washstand) takes the same height.

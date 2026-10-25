@@ -41,8 +41,8 @@ describe("the sky through her windows (0.3's S4)", () => {
     }
   });
 
-  it('draws six window wallpapers, every window under every sky, on the wall', () => {
-    expect(WINDOW_PAPER_IDS).toHaveLength(6);
+  it('draws seven window wallpapers, every window under every sky, on the wall', () => {
+    expect(WINDOW_PAPER_IDS).toHaveLength(7);
     for (const id of WINDOW_PAPER_IDS) {
       expect(isWindowPaper(id)).toBe(true);
       expect(WALLPAPERS[id].price).toBeGreaterThan(0);

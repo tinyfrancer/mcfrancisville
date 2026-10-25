@@ -267,6 +267,24 @@ export const OUTFIT_PRICE: Partial<Record<OutfitId, number>> = {
   batWings: 280,
   mummyWraps: 360,
   devilHorns: 220,
+  // The winter wardrobe (1.4's G2): knitwear about what a band tee is, boots and the bigger
+  // knits what fancy shoes are, and a good coat the dearest, within a day's rounds.
+  duffelCoat: 620,
+  pufferJacket: 540,
+  longScarf: 220,
+  mittens: 220,
+  snowflakeHat: 260,
+  earmuffs: 240,
+  cableTights: 240,
+  snowBoots: 460,
+  fairIsleJumper: 340,
+  chunkyCardigan: 420,
+  pyjamaTop: 260,
+  pyjamaBottoms: 240,
+  dressingGown: 420,
+  batOnesie: 480,
+  batHood: 240,
+  fluffySlippers: 260,
 };
 
 const items = (...ids: ItemId[]): Ware[] => ids.map((item) => ({ item }));
@@ -315,6 +333,44 @@ const BOUTIQUE_LOOKS: readonly (readonly OutfitId[])[] = [
   ['ballGown', 'tiara'],
   ['velvetDress', 'operaCoat'],
   ['corsetTop', 'tulleSkirt', 'fishnets', 'platformBoots'],
+];
+
+/**
+ * The winter wardrobe (1.4's G2), out from November to February: two pieces a day, and a whole
+ * snug look a week.
+ */
+const WINTER_MONTHS: readonly number[] = [11, 12, 1, 2];
+
+const WINTER_WOOLLIES = outfits(
+  'duffelCoat',
+  'pufferJacket',
+  'longScarf',
+  'mittens',
+  'snowflakeHat',
+  'earmuffs',
+  'cableTights',
+  'snowBoots',
+  'fairIsleJumper',
+  'chunkyCardigan',
+  'pyjamaTop',
+  'pyjamaBottoms',
+  'dressingGown',
+  'batOnesie',
+  'batHood',
+  'fluffySlippers',
+);
+
+const SNUG_LOOKS: readonly (readonly OutfitId[])[] = [
+  // A snow day.
+  ['duffelCoat', 'snowflakeHat', 'mittens', 'snowBoots'],
+  // Nights in.
+  ['pyjamaTop', 'pyjamaBottoms', 'dressingGown', 'fluffySlippers'],
+  // A cosy afternoon.
+  ['fairIsleJumper', 'longScarf', 'cableTights', 'earmuffs'],
+  // A bat at bedtime.
+  ['batOnesie', 'batHood', 'fluffySlippers'],
+  // Out in the cold.
+  ['pufferJacket', 'chunkyCardigan', 'mittens', 'snowBoots'],
 ];
 
 const SEEDS = items(
@@ -525,6 +581,8 @@ export interface ShelfRow {
   off?: number;
   /** Put out only on the days of a town event (market day's table) or a festival. */
   on?: TownEventId | FestivalId;
+  /** Put out only in these months, 1 to 12 (the winter wardrobe's, 1.4's G2). */
+  months?: readonly number[];
   /** Put out at this shop instead once the fairground is open (market day's table, 0.2's M3). */
   moves?: ShopId;
 }
@@ -642,6 +700,18 @@ export const SHOPS: Record<ShopId, ShopRow> = {
           { from: WINDOW_PAPERS, count: 1 },
           { from: SET_FLOORING_WARES, count: 1 },
         ],
+      },
+      // The winter wardrobe (1.4's G2), last, so the shelves before deal as they always have.
+      {
+        name: 'Winter woollies',
+        picks: [{ from: WINTER_WOOLLIES, count: 2 }],
+        months: WINTER_MONTHS,
+      },
+      {
+        name: "This week's snug look",
+        picks: [looks(SNUG_LOOKS)],
+        everyWeek: true,
+        months: WINTER_MONTHS,
       },
     ],
   },

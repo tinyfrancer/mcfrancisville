@@ -18,20 +18,14 @@ Not started.
 
 ### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
 
-Branch `claude/g2-winter` from `v1.4-dev`, draft PR into `v1.4-dev`.
-
-- **Done:** sixteen winter pieces (rows in `src/data/outfits.ts`, prints in `doll/prints.ts`, cuts
-  in a new `src/sprites/doll/winter.ts`, the three hats in `doll/hats.ts`): duffel coat, puffer,
-  long scarf (the `necklace` slot, drawn over a coat), mittens, snowflake bobble hat, earmuffs,
-  cable-knit tights, snow boots, Fair Isle jumper, chunky cardigan, flannel pyjama top and bottoms
-  (a `tartan` pattern), dressing gown, bat onesie, bat hood, fluffy slippers. A coat done up
-  (`DONE_UP` in `cuts.ts`) keeps her top's print off her raised arms. `looksHeld` holds the old
-  hashes over the pieces there were (`BEFORE`) and the winter ones in a block of their own.
-  `npm run sprite -- 'doll:winter:*'` shows each look every way.
-- **Next, in order:** the shelves (a `months` on a `ShelfRow`, Nov–Feb: "Winter woollies" and
-  a weekly snug look), prices; Cosy Cabin and Midnight Observatory (`src/data/sets.ts`, art in a
-  new `src/sprites/setsThree.ts`, the telescope's tune, the star window paper); tests; smoke in
-  `look` and `home`; the 1.4 notes line; docs and decision 371.
+Branch `claude/g2-winter` from `v1.4-dev`, PR #225 into `v1.4-dev`. **All built** (decision 371
+says what and why): sixteen winter pieces (`src/sprites/doll/winter.ts`, the scarf in the
+`necklace` slot), sold at Cobweb Corner November to February (a shelf's `months`: "Winter
+woollies" and "This week's snug look"); Cosy Cabin and Midnight Observatory (`src/data/sets.ts`,
+`src/sprites/setsThree.ts`, the telescope's `telescope` tune), the `starWindow` paper; tests
+(`looksHeld`'s winter block, `shop`, `sets`, `world/winterSets`), smoke `winter` (look) and
+`winterSets` (home); 1.4's `NOTES` row made with three lines (G1 and G3 add one each). Left: the
+whole smoke run, CI, merging `v1.4-dev` and the merge.
 
 ### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
 

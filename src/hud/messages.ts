@@ -477,7 +477,10 @@ export function eventToast(event: WorldEvent): Toast | null {
           }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
     case 'tune':
-      return { text: event.line ?? TUNES[event.tune].line, icon: 'piano' };
+      return {
+        text: event.line ?? TUNES[event.tune].line,
+        icon: TUNES[event.tune].instrument === 'telescope' ? 'telescope' : 'piano',
+      };
     case 'refused':
       return { text: REFUSED[event.why] };
     case 'mail':

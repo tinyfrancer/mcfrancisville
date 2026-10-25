@@ -109,10 +109,10 @@ function pickSome<T>(from: readonly T[], count: number, seed: string): T[] {
 /**
  * What a shop has on its shelves on `day` (a day key) in a window: the same all day, and new at
  * 5am, but for a shelf dealt each window, new at noon and 6pm too, a shelf dealt each week, new on
- * Monday, and a shelf put out only on a town event's days. A shelf that `moves` is at the shop it
- * moves to once the fairground is open (`atFair`, 0.2's M3), dealt the same. Nothing is saved:
- * each shelf is dealt from its pool by a hash of the shop, the shelf and the day or window
- * (decisions.md 42, 81).
+ * Monday, and a shelf put out only on a town event's days or in its `months`. A shelf that `moves`
+ * is at the shop it moves to once the fairground is open (`atFair`, 0.2's M3), dealt the same.
+ * Nothing is saved: each shelf is dealt from its pool by a hash of the shop, the shelf and the day
+ * or window (decisions.md 42, 81).
  */
 export function stockOf(
   shop: ShopId,
@@ -127,6 +127,7 @@ export function stockOf(
   );
   return shelves.flatMap(({ from, shelf, s }) => {
     if (shelf.on && !isHappening(shelf.on, day)) return [];
+    if (shelf.months && !shelf.months.includes(Number(day.slice(5, 7)))) return [];
     const when = shelf.everyWindow
       ? `${day}@${window}`
       : shelf.everyWeek
