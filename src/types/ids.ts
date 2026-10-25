@@ -588,7 +588,24 @@ export type CutId =
   | 'wraps'
   | 'horns'
   // A farmer's floppy straw hat (0.3's F3).
-  | 'farmHat';
+  | 'farmHat'
+  // The winter wardrobe (1.4's G2).
+  | 'duffel'
+  | 'puffer'
+  | 'scarf'
+  | 'mittens'
+  | 'earflapHat'
+  | 'earmuffs'
+  | 'knitTights'
+  | 'snowBoots'
+  | 'jumper'
+  | 'chunkyCardigan'
+  | 'pyjamaTop'
+  | 'pyjamaBottoms'
+  | 'dressingGown'
+  | 'onesie'
+  | 'batHood'
+  | 'slippers';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -686,7 +703,24 @@ export type OutfitId =
   // Scarah's straw hat, the twin of hers (0.3's F3).
   | 'scarahHat'
   // Rob Boo's top hat, the twin of his (V1's P3b).
-  | 'mayorHat';
+  | 'mayorHat'
+  // The winter wardrobe (1.4's G2).
+  | 'duffelCoat'
+  | 'pufferJacket'
+  | 'longScarf'
+  | 'mittens'
+  | 'snowflakeHat'
+  | 'earmuffs'
+  | 'cableTights'
+  | 'snowBoots'
+  | 'fairIsleJumper'
+  | 'chunkyCardigan'
+  | 'pyjamaTop'
+  | 'pyjamaBottoms'
+  | 'dressingGown'
+  | 'batOnesie'
+  | 'batHood'
+  | 'fluffySlippers';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
