@@ -5,12 +5,18 @@ import type { Palette, SpriteSource } from './sprite';
 import { CRAWLY_ART } from './crawlies';
 import { JUMPER_ART } from './jumpers';
 import {
+  batShape,
   cloaked,
   eel,
   fireflyFrame,
+  fishShape,
+  forkedTail,
   frogFace,
   hercules,
+  mothShape,
   newt,
+  owlEyed,
+  roundFishShape,
   striped,
   tombstoned,
 } from './critterLooks';
@@ -19,138 +25,6 @@ import {
  * The critters (phase 10), each 16×16 so it fits its tile and doubles as its picture in her bag.
  * Every family is one or two grids, and each critter is a palette over them.
  */
-/** A moth with its wings open. `W`/`w` wing, `s` spot, `b` body, `a` antenna. */
-const MOTH_OPEN: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '....a......a....',
-    '.....a....a.....',
-    '.oooo.a..a.oooo.',
-    'oWWWwo.bb.owwWWo',
-    'oWsWwwobbowwWsWo',
-    'oWWwwwobbowwwWWo',
-    '.owwwwobbowwwwo.',
-    '..owwoobboowwo..',
-    '.owwwo.bb.owwwo.',
-    '.owWwo.bb.owWwo.',
-    '..ooo..oo..ooo..',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
-/** The same moth mid-flap, its wings raised. */
-const MOTH_UP: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '..ooo......ooo..',
-    '.oWWwo.aa.owWWo.',
-    '.oWswwobbowwsWo.',
-    '..owwwobbowwwo..',
-    '...owwobbowwo...',
-    '....ooobbooo....',
-    '......obbo......',
-    '......obbo......',
-    '.......oo.......',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
-/** The luna moth, with its long swishy tails. */
-const LUNA_OPEN: SpriteSource = {
-  rows: [
-    '................',
-    '....a......a....',
-    '.....a....a.....',
-    '.oooo.a..a.oooo.',
-    'oWWWwo.bb.owwWWo',
-    'oWsWwwobbowwWsWo',
-    'oWWwwwobbowwwWWo',
-    '.owwwwobbowwwwo.',
-    '..owwoobboowwo..',
-    '..owwo.bb.owwo..',
-    '..owwo.oo.owwo..',
-    '...owo....owo...',
-    '...owo....owo...',
-    '....oo....oo....',
-    '................',
-    '................',
-  ],
-};
-
-/** The luna moth mid-flap, its tails hanging. */
-const LUNA_UP: SpriteSource = {
-  rows: [
-    '................',
-    '..ooo......ooo..',
-    '.oWWwo.aa.owWWo.',
-    '.oWswwobbowwsWo.',
-    '..owwwobbowwwo..',
-    '...owwobbowwo...',
-    '....ooobbooo....',
-    '.....owbbwo.....',
-    '.....owoowo.....',
-    '.....ow..wo.....',
-    '.....ow..wo.....',
-    '......o..o......',
-    '................',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
-/** A bat with its wings spread. `W` wing, `b` body, `c` tummy, `e` eyes. */
-const BAT_OPEN: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '.....o....o.....',
-    '.....oboobo.....',
-    'oo..obbbbbbo..oo',
-    'oWo.obebbebo.oWo',
-    'oWWoobbccbbooWWo',
-    'oWWWWobccboWWWWo',
-    '.oWWWWobboWWWWo.',
-    '..oWoWooooWoWo..',
-    '...o.o....o.o...',
-    '................',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
-/** The same bat with its wings raised. */
-const BAT_UP: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    'oo............oo',
-    'oWo..o....o..oWo',
-    'oWWo.oboobo.oWWo',
-    '.oWWobbbbbboWWo.',
-    '..oWobebbeboWo..',
-    '...oobbccbboo...',
-    '.....obccbo.....',
-    '......obbo......',
-    '.......oo.......',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
 /** A frog sitting pretty. `g` skin, `G` its light tummy, `m` its mouth, `s` spots. */
 const FROG: SpriteSource = {
   rows: [
@@ -169,28 +43,6 @@ const FROG: SpriteSource = {
     '.oGggsggggsggGo.',
     'ogGGoggggggoGGgo',
     '.ooo.oooooo.ooo.',
-    '................',
-  ],
-};
-
-/** An orb: a soft glow with a bright heart. `r` its rim, `g` glow, `c` and `w` its heart. */
-const ORB: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '......rrrr......',
-    '....rrggggrr....',
-    '...rgggccgggr...',
-    '...rgecwwcegr...',
-    '...rggcwwcggr...',
-    '...rgggccgggr...',
-    '....rrggggrr....',
-    '......rrrr......',
-    '................',
-    '................',
-    '................',
     '................',
   ],
 };
@@ -283,72 +135,6 @@ const FIREFLY: SpriteSource = {
   ],
 };
 
-/** A ghost-fish, side on. `f` body, `s` spots, `e` eye. */
-const FISH: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '.....oooo.......',
-    '...ooffffoo..oo.',
-    '..oeffsffffsoffo',
-    '..offfsfffffffo.',
-    '...ooffffoo..oo.',
-    '.....oooo.......',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
-/** The fish with a flick of its tail. */
-const FISH_FLICK: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '................',
-    '.....oooo.......',
-    '...ooffffoo.....',
-    '..oeffsffffsoo..',
-    '..offfsfffffooo.',
-    '...ooffffoo..ffo',
-    '.....oooo.....o.',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
-/** The lantern fish, and its little light (`l`). */
-const LANTERN_FISH: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '................',
-    '..ll............',
-    '..llo...........',
-    '....o...........',
-    '.....ooooo......',
-    '....offfffo..oo.',
-    '...oeffffffooffo',
-    '...offffffffffo.',
-    '....offffffooffo',
-    '.....ooooooo..oo',
-    '................',
-    '................',
-    '................',
-  ],
-};
-
 // ---- In town, at 32 pixels a tile (decisions.md 79) --------------------------------------------
 
 /** The size of a critter as it's drawn in town: a little under a tile, so it reads beside her. */
@@ -360,52 +146,31 @@ function outlined(s: Sketch, bare = ''): SpriteSource {
   return s.toSource();
 }
 
-/** A moth, wings open or raised, with its tails if it's a luna. */
-function mothWorld(up: boolean, tails: boolean): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  const left = new Sketch(WORLD, WORLD);
-  if (up) {
-    left.ellipse(8, 7, 3.5, 5.5, 'W').ellipse(9, 13, 2.5, 3, 'W');
-    left.ellipse(8, 6, 1.5, 1.5, 's');
+/**
+ * A wisp of light (1.3's F3), 16 or 24 across: a round glow (`g`) with a brighter heart toward the
+ * light (`c`) and a white gleam (`w`), rimmed in its own darkest tone (`r`), a little flame of a
+ * tail flicking off behind it, two eyes (`e`) and, at 24, a smile. Flat tones, never dithered:
+ * the glow after dark is what softens it. The tail flicks the other way between frames.
+ */
+function orbShape(size: 16 | 24, flick: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  const tail = new Sketch(size, size);
+  tail.ellipse(8 * k, 16 * k, 3.5 * k, 3 * k, 'g');
+  tail.ellipse((flick ? 4 : 4.5) * k, (flick ? 18.5 : 19.5) * k, 2 * k, 1.8 * k, 'g');
+  tail.ellipse((flick ? 2 : 3) * k, (flick ? 19.5 : 21.5) * k, 1.1 * k, 1.1 * k, 'g');
+  s.stamp(tail, 0, 0);
+  s.ellipse(13 * k, 12 * k, 7 * k, 7 * k, 'g');
+  s.ellipse(12 * k, 11 * k, 4.5 * k, 4.5 * k, 'c');
+  s.rect(at(10), at(8), Math.max(1, at(2)), Math.max(1, at(2)), 'w');
+  s.outline(() => 'r');
+  if (size === 24) {
+    s.rect(11, 12, 1, 2, 'e').rect(15, 12, 1, 2, 'e');
+    s.set(13, 15, 'e');
   } else {
-    left.ellipse(6, 10, 5.5, 4.5, 'W').ellipse(8, 16, 3.5, 3, 'W');
-    left.ellipse(5, 10, 1.5, 1.5, 's');
+    s.set(7, 8, 'e').set(10, 8, 'e');
   }
-  if (tails) left.rect(8, up ? 15 : 18, 2, 5, 'W').rect(7, up ? 19 : 22, 2, 2, 'W');
-  // The half of each wing toward the body is its second colour.
-  for (let y = 0; y < WORLD; y++) {
-    for (let x = 0; x < WORLD; x++) if (left.get(x, y) === 'W' && x >= 8) left.set(x, y, 'w');
-  }
-  s.stamp(left, 0, 0).stamp(left, 0, 0, { flipX: true });
-  s.rect(11, 7, 2, 11, 'b').set(11, 17, CLEAR).set(12, 17, 'b');
-  s.line(11, 6, 8, 2, 'a').line(12, 6, 15, 2, 'a');
-  return outlined(s, 'a');
-}
-
-/** A bat, wings spread or folded up in a flap. */
-function batWorld(up: boolean): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  const wing = new Sketch(WORLD, WORLD);
-  for (let x = 1; x < 11; x++) {
-    const reach = up ? 3 + Math.round((11 - x) * 0.6) : 9 + Math.round(Math.abs(x - 6) * 0.3);
-    const top = up ? 12 - reach : reach;
-    const bottom = up ? 13 : 15 - (x % 3 === 1 ? 1 : 0);
-    wing.rect(x, top, 1, bottom - top, 'W');
-  }
-  s.stamp(wing, 0, 0).stamp(wing, 0, 0, { flipX: true });
-  s.ellipse(12, 13, 3.5, 4, 'b');
-  s.rect(9, 7, 2, 3, 'b').rect(13, 7, 2, 3, 'b');
-  s.ellipse(12, 15, 2, 1.5, 'c');
-  s.set(10, 11, 'e').set(13, 11, 'e');
-  return outlined(s);
-}
-
-/** A wisp of light: a soft round glow, lit from the top left, with two little eyes. */
-function orbWorld(): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  s.sphere(12, 12, 7, 7, 'rggcc', { dither: true });
-  s.rect(9, 8, 2, 2, 'w');
-  s.set(10, 12, 'e').set(14, 12, 'e');
   return s.toSource();
 }
 
@@ -431,58 +196,57 @@ function beetleWorld(): SpriteSource {
   return outlined(s, 'o');
 }
 
-/** A fish side on, facing right, its tail straight or flicked. */
-function fishWorld(flick: boolean): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  s.ellipse(13, 12, 7, 3.5, 'f');
-  const tail: readonly [number, number][] = flick
-    ? [
-        [5, 9],
-        [4, 8],
-        [5, 10],
-        [4, 10],
-        [3, 9],
-        [5, 11],
-      ]
-    : [
-        [5, 11],
-        [4, 10],
-        [3, 9],
-        [4, 12],
-        [3, 13],
-        [5, 12],
-      ];
-  for (const [x, y] of tail) s.set(x, y, 'f').set(x - 1, y, 'f');
-  s.rect(11, 8, 3, 1, 's').rect(12, 15, 2, 1, 's');
-  s.set(17, 11, 'e');
-  return outlined(s);
-}
-
-/** A lantern fish: a round plum body and a candle-bright lure on a stalk before its nose. */
-function lanternFishWorld(): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  s.ellipse(11, 14, 7, 5, 'f');
-  s.rect(2, 12, 3, 5, 'f');
-  s.line(14, 9, 17, 5, 'o').line(17, 5, 19, 6, 'o');
-  s.ellipse(20, 7.5, 1.5, 1.5, 'l');
-  s.set(15, 13, 'e');
-  s.rect(15, 16, 3, 1, 'o');
-  return outlined(s, 'lo');
-}
-
-/** A pike: long and lean, a jutting jaw with two little teeth, its tail straight or flicked. */
-function pikeWorld(flick: boolean): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  s.ellipse(13, 12, 9.5, 3, 'f');
-  s.rect(20, 12, 3, 1, 'f');
-  const lift = flick ? 1 : 0;
-  for (let i = 0; i < 4; i++) {
-    const half = 3 - i;
-    s.rect(1 + i, 12 - half - (i < 2 ? lift : 0), 1, 2 + half * 2, 'f');
+/**
+ * A lantern fish (1.3's F3), 16 or 24 across: a round plum angler, its belly paler (`b`), a big
+ * candle-bright eye (`e`, its pupil `k`), a wide grin with two little white teeth (`w`), a forked
+ * tail, and its lure (`l`) glowing on a stalk curled up over its nose. It bobs its lure between
+ * frames.
+ */
+function lanternFish(size: 16 | 24, bob: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  const lift = bob ? 1 : 0;
+  forkedTail(s, k, 6.5, 13.5, 5, bob);
+  s.ellipse(9 * k, 8.5 * k, 2.2 * k, 1.6 * k, 'f');
+  s.ellipse(13 * k, 13.5 * k, 7 * k, 5.5 * k, 'f');
+  s.ellipse(14 * k, 16.5 * k, 4.5 * k, 2 * k, 'b');
+  s.outline((key) => (key === 'f' || key === 'b' ? 'o' : null));
+  // The stalk from its brow, curling up and forward over its nose to the lure.
+  s.line(at(14), at(8), at(15), at(5) - lift, 'o').line(
+    at(15),
+    at(5) - lift,
+    at(18),
+    at(3) - lift,
+    'o',
+  );
+  s.ellipse(19.5 * k, (4 - lift) * k, 1.6 * k, 1.6 * k, 'l');
+  if (size === 24) {
+    s.rect(15, 10, 3, 3, 'e').set(17, 12, 'k');
+    s.line(15, 16, 19, 15, 'o').set(16, 16, 'w').set(18, 16, 'w');
+  } else {
+    s.set(10, 7, 'e').line(10, 10, 12, 10, 'o');
   }
-  s.rect(9, 9, 4, 1, 's').rect(14, 15, 3, 1, 's');
-  s.set(19, 11, 'e').set(21, 13, 'w').set(20, 13, 'w');
-  return outlined(s, 'w');
+  return s.toSource();
+}
+
+/**
+ * A pike, 16 or 24 across: long and lean, a jutting jaw with two little teeth (`w`), its back
+ * fin set far back by its tail (1.3's F3: a forked tail on a narrow wrist, so its shadow reads).
+ */
+function pike(size: 16 | 24, flick: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  forkedTail(s, k, 6.5, 12, 6, flick);
+  s.ellipse(9.5 * k, 9.5 * k, 2.5 * k, 1.5 * k, 'f').ellipse(10 * k, 14.5 * k, 2 * k, 1.2 * k, 'f');
+  s.ellipse(14 * k, 12 * k, 8.5 * k, 3 * k, 'f');
+  s.rect(at(20), at(12), at(3), 1, 'f');
+  s.rect(at(9), at(10), at(5), 1, 's').rect(at(14), at(14), at(3), 1, 's');
+  s.outline((key) => (key === 'f' || key === 's' ? 'o' : null));
+  if (size === 24) s.rect(18, 10, 2, 2, 'e').set(21, 13, 'w').set(19, 13, 'w');
+  else s.set(at(19), at(11), 'e');
+  return s.toSource();
 }
 
 /** A fish's fanned tail, rooted at `x` and spreading back to the left; flicked, it tilts up. */
@@ -492,51 +256,6 @@ function fishTail(s: Sketch, x: number, y: number, length: number, flick: boolea
     const lift = flick ? Math.round(i * 0.5) : 0;
     s.rect(x - i, y - half - lift, 1, half * 2 + 1, 'f');
   }
-}
-
-/**
- * A round, deep-bodied fish (phase Q), 16 or 24 across: the pumpkinseed with a dark spot at its
- * gill (`s`), or the blue moonfish with a pale crescent (`m`) on its side.
- */
-function roundFish(size: 16 | 24, flick: boolean, mark: 'spot' | 'moon'): SpriteSource {
-  const k = size / WORLD;
-  const s = new Sketch(size, size);
-  s.ellipse(13 * k, 12 * k, 6.5 * k, 5 * k, 'f');
-  s.ellipse(14 * k, 14.5 * k, 4.5 * k, 2 * k, 'b');
-  s.rect(Math.round(10 * k), Math.round(6.5 * k), Math.round(5 * k), 1, 'f');
-  fishTail(s, Math.round(7 * k), Math.round(12 * k), Math.round(4 * k), flick);
-  if (mark === 'spot') {
-    s.set(Math.round(16 * k), Math.round(12 * k), 's');
-    s.set(Math.round(12 * k), Math.round(10 * k), 's').set(
-      Math.round(10 * k),
-      Math.round(13 * k),
-      's',
-    );
-  } else {
-    // Set by hand, a "(" a pixel thick: two circles, one cut from the other, left an L.
-    const crescent =
-      size === 16
-        ? [
-            [8, 6],
-            [7, 7],
-            [7, 8],
-            [8, 9],
-          ]
-        : [
-            [12, 8],
-            [11, 9],
-            [10, 10],
-            [10, 11],
-            [10, 12],
-            [11, 13],
-            [12, 14],
-            [13, 8],
-            [13, 14],
-          ];
-    for (const [x, y] of crescent) s.set(x!, y!, 'm');
-  }
-  s.set(Math.round(17 * k), Math.round(11 * k), 'e');
-  return outlined(s, 'm');
 }
 
 /**
@@ -679,13 +398,17 @@ function longEared(
   return s.toSource();
 }
 
-const MOTH_WORLD = [mothWorld(false, false), mothWorld(true, false)] as const;
-const LUNA_WORLD = [mothWorld(false, true), mothWorld(true, true)] as const;
-const BAT_WORLD = [batWorld(false), batWorld(true)] as const;
+const MOTH_WORLD = [mothShape(24, false, false), mothShape(24, true, false)] as const;
+const LUNA_WORLD = [mothShape(24, false, true), mothShape(24, true, true)] as const;
+const MOTH_SMALL = [mothShape(16, false, false), mothShape(16, true, false)] as const;
+const LUNA_SMALL = [mothShape(16, false, true), mothShape(16, true, true)] as const;
+const BAT_WORLD = [batShape(24, false), batShape(24, true)] as const;
+const BAT_SMALL = [batShape(16, false), batShape(16, true)] as const;
 const FROG_WORLD = frogFace();
-const ORB_WORLD = orbWorld();
+const ORB_WORLD = orbShape(24, false);
+const ORB_SMALL = [orbShape(16, false), orbShape(16, true)] as const;
+const ORB_WORLDS = [ORB_WORLD, orbShape(24, true)] as const;
 const BEETLE_WORLD = beetleWorld();
-const FISH_WORLD = [fishWorld(false), fishWorld(true)] as const;
 
 export interface CritterArt {
   /**
@@ -701,15 +424,27 @@ export interface CritterArt {
 }
 
 const moth = (W: string, w: string, s: string, b: string, a: string = C.barkDark): CritterArt => ({
-  frames: [MOTH_OPEN, MOTH_UP],
+  frames: MOTH_SMALL,
   world: MOTH_WORLD,
-  palette: { '.': null, o: C.ink, W, w, s, b, a },
+  palette: { '.': null, o: C.ink, W, w, s, b, a, e: C.ink },
+});
+
+/** A bat's palette: its wings' finger bones a step darker than the membrane, and white fangs. */
+const batPalette = (o: string, W: string, b: string, c: string, e: string): Palette => ({
+  '.': null,
+  o,
+  W,
+  v: mix(W, C.ink, 0.35),
+  b,
+  c,
+  e,
+  F: C.white,
 });
 
 const bat = (W: string, b: string, c: string, e: string): CritterArt => ({
-  frames: [BAT_OPEN, BAT_UP],
+  frames: BAT_SMALL,
   world: BAT_WORLD,
-  palette: { '.': null, o: C.ink, W, b, c, e },
+  palette: batPalette(C.ink, W, b, c, e),
 });
 
 const frog = (g: string, G: string, m: string, s: string): CritterArt => ({
@@ -721,8 +456,8 @@ const frog = (g: string, G: string, m: string, s: string): CritterArt => ({
 const orb = (r: string, g: string, c: string): CritterArt => {
   const palette = { '.': null, r, g, c, w: C.white, e: C.ink };
   return {
-    frames: [ORB, ORB],
-    world: [ORB_WORLD, ORB_WORLD],
+    frames: ORB_SMALL,
+    world: ORB_WORLDS,
     palette,
     glow: { r, g, c, w: C.white },
   };
@@ -734,9 +469,9 @@ const beetle = (W: string, w: string, s: string, h: string): CritterArt => ({
   palette: { '.': null, o: C.ink, W, w, s, h },
 });
 
-const fish = (o: string, f: string, s: string): CritterArt => ({
-  frames: [FISH, FISH_FLICK],
-  world: FISH_WORLD,
+const fish = (o: string, f: string, s: string, kind: 'minnow' | 'koi' | 'carp'): CritterArt => ({
+  frames: [fishShape(16, false, kind), fishShape(16, true, kind)],
+  world: [fishShape(24, false, kind), fishShape(24, true, kind)],
   palette: { '.': null, o, f, s, e: C.ink },
 });
 
@@ -812,7 +547,7 @@ const BUNNY_EARS = {
 const HOLIDAY_ART = {
   confettiMoth: {
     ...moth(C.cream, C.lavender, C.hairPink, C.plum),
-    frames: [confetti(MOTH_OPEN), confetti(MOTH_UP)],
+    frames: [confetti(MOTH_SMALL[0]), confetti(MOTH_SMALL[1])],
     world: [confetti(MOTH_WORLD[0]), confetti(MOTH_WORLD[1])],
     palette: {
       '.': null,
@@ -825,6 +560,7 @@ const HOLIDAY_ART = {
       p: C.hairPink,
       q: C.sky,
       r: C.candle,
+      e: C.ink,
     },
   },
   lovebug: {
@@ -883,17 +619,20 @@ const HOLIDAY_ART = {
   },
   bunnyBat: {
     ...bat(C.ghost, C.white, C.roseLight, C.ink),
-    frames: [longEared(BAT_OPEN, ...BUNNY_EARS.frames), longEared(BAT_UP, ...BUNNY_EARS.frames)],
+    frames: [
+      longEared(BAT_SMALL[0], ...BUNNY_EARS.frames),
+      longEared(BAT_SMALL[1], ...BUNNY_EARS.frames),
+    ],
     world: [
       longEared(BAT_WORLD[0], ...BUNNY_EARS.world),
       longEared(BAT_WORLD[1], ...BUNNY_EARS.world),
     ],
-    palette: { '.': null, o: C.lavenderShade, W: C.ghost, b: C.white, c: C.roseLight, e: C.ink },
+    palette: batPalette(C.lavenderShade, C.ghost, C.white, C.roseLight, C.ink),
   },
   sparklerOrb: {
     ...orb(C.scarlet, C.sky, C.white),
     frames: [
-      sparks(ORB, [
+      sparks(ORB_SMALL[0], [
         [2, 3, 'x'],
         [13, 4, 'y'],
         [1, 8, 'y'],
@@ -901,7 +640,7 @@ const HOLIDAY_ART = {
         [4, 13, 'x'],
         [11, 13, 'y'],
       ]),
-      sparks(ORB, [
+      sparks(ORB_SMALL[1], [
         [3, 2, 'y'],
         [12, 2, 'x'],
         [1, 11, 'x'],
@@ -920,7 +659,7 @@ const HOLIDAY_ART = {
         [17, 21, 'y'],
         [12, 2, 'y'],
       ]),
-      sparks(ORB_WORLD, [
+      sparks(ORB_WORLDS[1], [
         [5, 2, 'y'],
         [18, 3, 'x'],
         [1, 10, 'x'],
@@ -944,7 +683,7 @@ const HOLIDAY_ART = {
   },
   turkeyTailMoth: {
     ...moth(C.copper, C.cream, C.pumpkin, C.bark),
-    frames: [banded(MOTH_OPEN), banded(MOTH_UP)],
+    frames: [banded(MOTH_SMALL[0]), banded(MOTH_SMALL[1])],
     world: [banded(MOTH_WORLD[0]), banded(MOTH_WORLD[1])],
     palette: {
       '.': null,
@@ -955,6 +694,7 @@ const HOLIDAY_ART = {
       b: C.bark,
       a: C.barkDark,
       v: C.bark,
+      e: C.ink,
     },
   },
   baubleBeetle: {
@@ -994,7 +734,7 @@ const PAIR: Palette = {
 
 export const CRITTER_ART: Record<CritterId, CritterArt> = {
   lunaMoth: {
-    frames: [LUNA_OPEN, LUNA_UP],
+    frames: LUNA_SMALL,
     world: LUNA_WORLD,
     palette: {
       '.': null,
@@ -1004,11 +744,17 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
       s: C.candle,
       b: C.white,
       a: C.bark,
+      e: C.ink,
     },
     glow: { W: C.luna },
   },
   candleMoth: moth(C.cream, C.candle, C.pumpkinLight, C.creamShade),
-  owlEyeMoth: moth(C.furLight, C.fur, C.candle, C.furShade),
+  owlEyeMoth: {
+    ...moth(C.furLight, C.fur, C.candle, C.furShade),
+    frames: [owlEyed(MOTH_SMALL[0]), owlEyed(MOTH_SMALL[1])],
+    world: [owlEyed(MOTH_WORLD[0]), owlEyed(MOTH_WORLD[1])],
+    palette: { ...moth(C.furLight, C.fur, C.candle, C.furShade).palette, k: C.ink },
+  },
   ghostMoth: {
     ...moth(C.white, C.ghost, C.lavender, C.skinGhostly, C.stoneLight),
     glow: { W: C.white },
@@ -1049,12 +795,21 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     },
     glow: { t: C.fireflyGlow, T: mix(C.fireflyGlow, C.white, 0.6) },
   },
-  ghostMinnow: fish(C.stoneLight, C.ghost, C.ghost),
-  booKoi: fish(C.plum, C.white, C.lavender),
+  ghostMinnow: fish(C.stoneLight, C.ghost, C.ghost, 'minnow'),
+  booKoi: fish(C.plum, C.white, C.lavender, 'koi'),
   lanternFish: {
-    frames: [LANTERN_FISH, LANTERN_FISH],
-    world: [lanternFishWorld(), lanternFishWorld()],
-    palette: { '.': null, o: C.ink, f: C.plum, e: C.candle, l: C.candleBright },
+    frames: [lanternFish(16, false), lanternFish(16, true)],
+    world: [lanternFish(24, false), lanternFish(24, true)],
+    palette: {
+      '.': null,
+      o: C.ink,
+      f: C.plum,
+      b: C.plumLight,
+      e: C.candle,
+      k: C.ink,
+      w: C.white,
+      l: C.candleBright,
+    },
     glow: { l: C.candleBright, e: C.candle },
   },
   // Beyond the town (phase I).
@@ -1093,10 +848,10 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     },
     glow: { s: C.orbBlueLight },
   },
-  moonCarp: fish(C.stoneDark, C.silver, C.white),
+  moonCarp: fish(C.stoneDark, C.silver, C.white, 'carp'),
   ghostPike: {
-    frames: [FISH, FISH_FLICK],
-    world: [pikeWorld(false), pikeWorld(true)],
+    frames: [pike(16, false), pike(16, true)],
+    world: [pike(24, false), pike(24, true)],
     palette: { '.': null, o: C.stoneLight, f: C.ghost, s: C.skinGhostly, e: C.ink, w: C.white },
     glow: { f: C.ghost },
   },
@@ -1111,8 +866,8 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   veilMoth: moth(C.silver, C.silverShade, C.white, C.stoneDark, C.stoneLight),
   // Caught with her rod (phase Q).
   pumpkinseed: {
-    frames: [roundFish(16, false, 'spot'), roundFish(16, true, 'spot')],
-    world: [roundFish(24, false, 'spot'), roundFish(24, true, 'spot')],
+    frames: [roundFishShape(16, false, 'spot'), roundFishShape(16, true, 'spot')],
+    world: [roundFishShape(24, false, 'spot'), roundFishShape(24, true, 'spot')],
     palette: { '.': null, o: C.pumpkinDark, f: C.pumpkin, b: C.candle, s: C.iron, e: C.ink },
   },
   catfish: {
@@ -1127,8 +882,8 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     palette: { '.': null, o: C.stoneDark, f: C.silver, s: C.white, e: C.ink, m: C.stoneDark },
   },
   blueMoonfish: {
-    frames: [roundFish(16, false, 'moon'), roundFish(16, true, 'moon')],
-    world: [roundFish(24, false, 'moon'), roundFish(24, true, 'moon')],
+    frames: [roundFishShape(16, false, 'moon'), roundFishShape(16, true, 'moon')],
+    world: [roundFishShape(24, false, 'moon'), roundFishShape(24, true, 'moon')],
     palette: {
       '.': null,
       o: C.navy,
@@ -1151,7 +906,7 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   },
   mourningCloak: {
     ...moth(C.maroonShade, C.maroon, C.maroon, C.inkFabric),
-    frames: [cloaked(MOTH_OPEN), cloaked(MOTH_UP)],
+    frames: [cloaked(MOTH_SMALL[0]), cloaked(MOTH_SMALL[1])],
     world: [cloaked(MOTH_WORLD[0]), cloaked(MOTH_WORLD[1])],
     palette: {
       ...moth(C.maroonShade, C.maroon, C.maroon, C.inkFabric).palette,
@@ -1214,7 +969,7 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     ...bat(C.furShade, C.fur, C.roseLight, C.ink),
     frames: [
       longEared(
-        BAT_OPEN,
+        BAT_SMALL[0],
         [
           { x: 6, w: 1 },
           { x: 9, w: 1 },
@@ -1223,7 +978,7 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
         4,
       ),
       longEared(
-        BAT_UP,
+        BAT_SMALL[1],
         [
           { x: 6, w: 1 },
           { x: 9, w: 1 },
@@ -1260,8 +1015,8 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   snowMoth: moth(C.white, C.ghost, C.iceLight, C.silver, C.stoneLight),
   frostBeetle: beetle(C.iceLight, C.sky, C.white, C.navy),
   snowglobeFish: {
-    frames: [roundFish(16, false, 'spot'), roundFish(16, true, 'spot')],
-    world: [roundFish(24, false, 'spot'), roundFish(24, true, 'spot')],
+    frames: [roundFishShape(16, false, 'spot'), roundFishShape(16, true, 'spot')],
+    world: [roundFishShape(24, false, 'spot'), roundFishShape(24, true, 'spot')],
     palette: { '.': null, o: C.navy, f: C.sky, b: C.white, s: C.white, e: C.ink },
   },
   // V1's R5: a critter for each big holiday, and three jumping spiders.
