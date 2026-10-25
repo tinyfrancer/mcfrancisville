@@ -68,6 +68,8 @@ export interface PetSurroundings {
   following: boolean;
   /** She is walking up to it, or has its sheet open, so it waits for her. */
   held: boolean;
+  /** Her camera is up (1.5's G5): it stops where it is and sits facing her for the photo. */
+  posing?: boolean;
   /** Where her neighbours are standing, for Dolly to bark at. */
   villagers: readonly Tile[];
   /** The open tiles it can wander to at home. */
@@ -180,6 +182,22 @@ export class Pet {
     this.looking = her.y < this.y - TILE_SIZE / 2 ? 'back' : 'front';
   }
 
+  /**
+   * Her camera is up (1.5's G5): wherever it is, mid-trot or mid-trick, asleep or not, it stops
+   * and sits looking at her, on its perch if it's up on one, until the camera goes down.
+   */
+  private sitForPhoto(her: Her): void {
+    this.path = [];
+    this.headedFor = null;
+    this.moving = false;
+    this.walkMs = 0;
+    this.zooming = false;
+    this.fetching = null;
+    this.trickAt = null;
+    this.lookAt(her);
+    this.pose = 'sit';
+  }
+
   /** Does its trick (V1's R6c), from the start. */
   perform(now: number): void {
     this.trickAt = now;
@@ -194,6 +212,10 @@ export class Pet {
 
   update(deltaMs: number, s: PetSurroundings): PetDeed | null {
     this.level = s.level ?? 0;
+    if (s.posing) {
+      this.sitForPhoto(s.her);
+      return null;
+    }
     if (this.trickAt !== null) {
       const over = s.now - this.trickAt >= TRICKS[this.id].ms;
       if (over || (s.following && s.her.moving && !s.held)) {

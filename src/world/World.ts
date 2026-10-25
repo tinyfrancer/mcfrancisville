@@ -89,6 +89,11 @@ export class World extends WorldParts {
   private visiting: Visit | undefined;
   /** An arrival with no walk, made by the next `update` so every arrival comes from one place. */
   private arrivedInPlace: Tile | null = null;
+  /**
+   * Her camera is up (1.5's G5): her neighbours within three tiles pose for it and her pets sit
+   * facing her, until it goes down. Set by the photo mode through its Api; never saved.
+   */
+  posing = false;
 
   protected forget(): void {
     this.visiting = undefined;
@@ -372,12 +377,13 @@ export class World extends WorldParts {
       this.neighbourhood.neighboursIn('town').map((n) => n.tile),
     );
     const heading = this.visiting?.kind === 'villager' ? this.visiting.villager : null;
-    this.neighbourhood.step(deltaMs, this.player, heading);
+    this.neighbourhood.step(deltaMs, this.player, heading, this.posing);
     this.postRound.step(deltaMs);
     this.petCare.step(
       deltaMs,
       this.visiting?.kind === 'pet' ? this.visiting.pet : null,
       this.neighbourhood.neighboursIn(this.scene).map((n) => n.tile),
+      this.posing,
     );
     const events = this.ctx.moments.drain();
     events.push(...this.fishing.step());

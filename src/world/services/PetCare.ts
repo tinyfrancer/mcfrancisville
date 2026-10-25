@@ -418,7 +418,7 @@ export class PetCare {
    * and those at home potter about. One she's walking up to (`heading`), or whose sheet is open,
    * waits. `villagers` are the tiles her neighbours stand on, where she is.
    */
-  step(deltaMs: number, heading: PetId | null, villagers: readonly Tile[]): void {
+  step(deltaMs: number, heading: PetId | null, villagers: readonly Tile[], posing = false): void {
     const p = this.reads.movement.player;
     if (p.moving) this.stillMs = 0;
     else this.stillMs += deltaMs;
@@ -446,6 +446,7 @@ export class PetCare {
         ...surroundings,
         following,
         held: pet.id === this.petting || pet.id === heading,
+        posing,
         level,
         rest: where === 'home' && !following ? this.restOf(pet.id) : null,
         finds,

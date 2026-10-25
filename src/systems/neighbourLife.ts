@@ -103,6 +103,20 @@ export function waveFrame(left: number): 0 | 1 {
   return Math.floor((NEIGHBOUR_WAVE_MS - left) / WAVE_FRAME_MS) % 2 === 0 ? 0 : 1;
 }
 
+// ---- A pose for her camera (1.5's G5) --------------------------------------------------------
+
+/** Within this many tiles of her, they turn to her camera and pose while it's up. */
+export const POSE_TILES = 3;
+
+/**
+ * How a neighbour poses for her camera: a hand up to it (one way or the other, theirs to pick),
+ * smiling, or for a few, laughing. Held still, eyes open, for as long as the camera is up.
+ */
+export function poseOf(id: VillagerId, sit: boolean): Stance {
+  const pick = hashMixed(`pose:${id}`);
+  return { act: 'pose', frame: pick % 2, sit, feel: pick % 5 === 0 ? 'laugh' : 'happy' };
+}
+
 // ---- A breath, a blink, and their job, each to a beat of their own ---------------------------
 
 /** Where in their breath and blink a neighbour is, so a crowd doesn't breathe as one. */
@@ -130,15 +144,19 @@ export interface Standing {
   working: WorkId | null;
   /** Sat on a seat beside their stop. */
   seated: boolean;
+  /** Posing for her camera (1.5's G5). */
+  posing?: boolean;
 }
 
 /**
- * How a neighbour stands, `ms` on the clock, or null walking: waving as she comes near, at their
- * job, or standing (or sitting) breathing and blinking. Never one still frame for long.
+ * How a neighbour stands, `ms` on the clock, or null walking: posing for her camera while it's
+ * up, waving as she comes near, at their job, or standing (or sitting) breathing and blinking.
+ * Never one still frame for long, but for the pose, which is held for the photo.
  */
 export function stanceOf(n: Standing, ms: number): Stance | null {
   if (n.moving) return null;
   const sit = n.seated;
+  if (n.posing) return poseOf(n.id, sit);
   if (n.waveMs > 0) return { act: 'wave', frame: waveFrame(n.waveMs), sit };
   const { out, blink } = restOf(n.id, ms);
   if (n.working) return { act: n.working, frame: workFrame(n.id, n.working, ms), sit, blink };
