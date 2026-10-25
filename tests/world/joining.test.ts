@@ -54,7 +54,7 @@ describe("joining in at a happening (V1's P4)", () => {
     )!.called;
     const remembered = later.world.joining.recall('bookClub', 'maude')!;
     expect(remembered).toContain(called);
-    const line = later.world.neighbourhood.talk('maude').line;
+    const line = later.world.talk.talk('maude').line;
     expect(line).toContain(called);
     expect(line).not.toContain('{');
     // And the week's picks have turned over.

@@ -135,8 +135,7 @@ describe("the mystery, chapter by chapter (V1's P3a)", () => {
 
 describe("the neighbours theorising (V1's P3a)", () => {
   /** What Agatha says over a dozen talks today. */
-  const heard = (h: Harness) =>
-    Array.from({ length: 12 }, () => h.world.neighbourhood.talk('agatha').line);
+  const heard = (h: Harness) => Array.from({ length: 12 }, () => h.world.talk.talk('agatha').line);
   const theories = MYSTERY_TALK.agatha.map((l) => fill(l, { name: 'Em' }));
 
   it('bring the mystery up for a few days after a clue is pinned, and not after', () => {

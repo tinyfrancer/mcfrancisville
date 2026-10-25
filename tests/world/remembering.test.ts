@@ -23,35 +23,35 @@ describe("what her neighbours remember (V1's P1)", () => {
   it('remembers the last gift she gave each, and brings it up in the days after', () => {
     const h = harness();
     h.world.bag.add('moonflower', 1);
-    h.world.neighbourhood.give('barty', 'moonflower');
+    h.world.talk.give('barty', 'moonflower');
     expect(h.world.friends.of('barty').gave).toBe('moonflower');
     h.clock.advance(DAY_MS);
-    const heard = Array.from({ length: 10 }, () => h.world.neighbourhood.talk('barty').line);
+    const heard = Array.from({ length: 10 }, () => h.world.talk.talk('barty').line);
     expect(heard.some((line) => onTopic(line, 'gift', 'barty'))).toBe(true);
     expect(heard.some((line) => /\bmoonflower\b.*\byesterday\b/.test(line))).toBe(true);
   });
 
   it('says how long it has been, first, after three days or more without a talk', () => {
     const h = harness();
-    h.world.neighbourhood.talk('maude');
+    h.world.talk.talk('maude');
     h.clock.advance(5 * DAY_MS);
-    const first = h.world.neighbourhood.talk('maude').line;
+    const first = h.world.talk.talk('maude').line;
     expect(onTopic(first, 'away', 'maude'), first).toBe(true);
     expect(first).toContain('five days');
     h.clock.advance(DAY_MS);
-    expect(onTopic(h.world.neighbourhood.talk('maude').line, 'away', 'maude')).toBe(false);
+    expect(onTopic(h.world.talk.talk('maude').line, 'away', 'maude')).toBe(false);
   });
 
   it('says a band has been reached once, on the talk that reaches it', () => {
     const h = harness();
-    h.world.neighbourhood.talk('ollie');
+    h.world.talk.talk('ollie');
     h.world.friends.update('ollie', { points: 295 });
     h.clock.advance(DAY_MS);
     // The day's first talk brings them to three hearts, and says so.
-    const first = h.world.neighbourhood.talk('ollie').line;
+    const first = h.world.talk.talk('ollie').line;
     expect(h.world.friends.hearts('ollie')).toBe(3);
     expect(onTopic(first, 'band', 'ollie'), first).toBe(true);
-    const later = Array.from({ length: 6 }, () => h.world.neighbourhood.talk('ollie').line);
+    const later = Array.from({ length: 6 }, () => h.world.talk.talk('ollie').line);
     expect(later.some((line) => onTopic(line, 'band', 'ollie'))).toBe(false);
   });
 
@@ -70,7 +70,7 @@ describe("what her neighbours remember (V1's P1)", () => {
       herDay: null,
       told: [],
     });
-    const heard = Array.from({ length: 12 }, () => h.world.neighbourhood.talk('wrapunzel').line);
+    const heard = Array.from({ length: 12 }, () => h.world.talk.talk('wrapunzel').line);
     for (const topic of ['harvest', 'donated', 'placed'] as const) {
       expect(
         heard.some((line) => onTopic(line, topic, 'wrapunzel')),
@@ -83,7 +83,7 @@ describe("what her neighbours remember (V1's P1)", () => {
   it('opens each day of a week with something new', () => {
     const h = harness();
     for (let d = 0; d < 10; d++) {
-      h.world.neighbourhood.talk('gourdon');
+      h.world.talk.talk('gourdon');
       h.clock.advance(DAY_MS);
     }
     const opened = h.world.friends.of('gourdon').opened ?? [];
@@ -95,8 +95,8 @@ describe("what her neighbours remember (V1's P1)", () => {
   it('keeps what they remember through a save', () => {
     const h = harness();
     h.world.bag.add('moonflower', 1);
-    h.world.neighbourhood.give('hazel', 'moonflower');
-    h.world.neighbourhood.talk('hazel');
+    h.world.talk.give('hazel', 'moonflower');
+    h.world.talk.talk('hazel');
     h.world.ctx.signals.emit('harvested', { crop: 'basil' });
     const save = h.world.save();
     const again = new World({ friends: save, lately: h.world.lately.snapshot().lately });

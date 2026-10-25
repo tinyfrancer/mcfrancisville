@@ -84,14 +84,14 @@ async function neighbours() {
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
     'saying bye lets them go on their way',
-    (await page.evaluate(() => window.world.neighbourhood.talkingTo)) === null,
+    (await page.evaluate(() => window.world.talk.talkingTo)) === null,
   );
 
   // A letter: as if Maude were nearly three hearts along, then a hello.
   await page.evaluate(() => {
     window.world.friends.update('maude', { points: 295 });
-    window.world.neighbourhood.talk('maude');
-    window.world.neighbourhood.endTalk();
+    window.world.talk.talk('maude');
+    window.world.talk.endTalk();
   });
   await page.evaluate(() => window.view.step(40));
   const mailbox = await propTile('mailbox');
@@ -154,8 +154,8 @@ async function neighbours() {
     const n = window.world.neighbourhood.neighboursIn(window.world.scene)[0];
     if (!n) return null;
     window.world.friends.update(n.id, { points: 350, moments: [2], answered: undefined });
-    window.world.neighbourhood.talk(n.id);
-    window.world.neighbourhood.endTalk();
+    window.world.talk.talk(n.id);
+    window.world.talk.endTalk();
     return { id: n.id, tile: n.tile };
   });
   if (!asker) check('someone is here to ask her something', false);

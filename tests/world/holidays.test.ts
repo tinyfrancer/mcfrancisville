@@ -131,22 +131,22 @@ describe('talking on a holiday', () => {
   it('has each neighbour say their holiday line first, and hand her a treat on Halloween', () => {
     const h = harness();
     h.clock.set(new Date(2026, 9, 31, 12));
-    const chat = h.world.neighbourhood.talk('rufus');
+    const chat = h.world.talk.talk('rufus');
     expect(chat.line).toBe(fill(HOLIDAY_LINES.halloween.rufus, { name: h.world.name }));
     expect(chat.gift).toBe('candyCorn');
     expect(h.world.bag.count('candyCorn')).toBe(1);
     // Once each.
-    expect(h.world.neighbourhood.talk('rufus').gift).toBeUndefined();
-    expect(h.world.neighbourhood.talk('maude').gift).toBe('candyCorn');
+    expect(h.world.talk.talk('rufus').gift).toBeUndefined();
+    expect(h.world.talk.talk('maude').gift).toBe('candyCorn');
     expect(h.world.bag.count('candyCorn')).toBe(2);
   });
 
   it('gives her the party host line, and gift, at a holiday gathering after hello', () => {
     const h = harness();
     h.clock.set(new Date(2026, 11, 24, 19));
-    const hello = h.world.neighbourhood.talk('maude');
+    const hello = h.world.talk.talk('maude');
     expect(hello.line).toBe(fill(HOLIDAY_LINES.christmasEve.maude, { name: h.world.name }));
-    const carols = h.world.neighbourhood.talk('maude');
+    const carols = h.world.talk.talk('maude');
     expect(carols.gift).toBe('gingerbreadBat');
     expect(h.world.bag.count('gingerbreadBat')).toBe(1);
   });

@@ -7,51 +7,51 @@ import { harness } from './harness';
 describe("faces that feel (V1's L7)", () => {
   it('a loved gift makes them laugh for joy, on their face in the world, and her too', () => {
     const h = harness();
-    h.world.neighbourhood.startTalk('maude');
-    expect(h.world.neighbourhood.feelingOf('maude')).toBeNull();
+    h.world.talk.startTalk('maude');
+    expect(h.world.talk.feelingOf('maude')).toBeNull();
     h.world.bag.add('loveBracelet', 1);
-    const given = h.world.neighbourhood.give('maude', 'loveBracelet');
+    const given = h.world.talk.give('maude', 'loveBracelet');
     expect(given?.feels).toBe('laugh');
-    expect(h.world.neighbourhood.feelingOf('maude')).toBe('laugh');
+    expect(h.world.talk.feelingOf('maude')).toBe('laugh');
     // Only the one she's talking to.
-    expect(h.world.neighbourhood.feelingOf('rufus')).toBeNull();
+    expect(h.world.talk.feelingOf('rufus')).toBeNull();
     h.tick(1);
     expect(h.world.poses.face()).toBe('laugh');
     // While she stays to talk it stays; once she goes, a moment more.
     h.clock.advance(60_000);
-    expect(h.world.neighbourhood.feelingOf('maude')).toBe('laugh');
-    h.world.neighbourhood.endTalk();
+    expect(h.world.talk.feelingOf('maude')).toBe('laugh');
+    h.world.talk.endTalk();
     h.clock.advance(FEEL_AFTER_MS - 100);
-    expect(h.world.neighbourhood.feelingOf('maude')).toBe('laugh');
+    expect(h.world.talk.feelingOf('maude')).toBe('laugh');
     h.clock.advance(200);
-    expect(h.world.neighbourhood.feelingOf('maude')).toBeNull();
+    expect(h.world.talk.feelingOf('maude')).toBeNull();
   });
 
   it('a second gift in a day is turned down bashfully', () => {
     const h = harness();
     h.world.bag.add('moonflower', 2);
-    h.world.neighbourhood.give('barty', 'moonflower');
-    expect(h.world.neighbourhood.give('barty', 'moonflower')?.feels).toBe('shy');
+    h.world.talk.give('barty', 'moonflower');
+    expect(h.world.talk.give('barty', 'moonflower')?.feels).toBe('shy');
   });
 
   it('says how each line of a heart moment is said, and her chip that is a feeling shows', () => {
     const h = harness();
     h.world.friends.update('rufus', { points: 1000, moments: [2, 4, 5] });
-    h.world.neighbourhood.startTalk('rufus');
-    h.world.neighbourhood.talk('rufus');
-    const told = h.world.neighbourhood.talk('rufus');
+    h.world.talk.startTalk('rufus');
+    h.world.talk.talk('rufus');
+    const told = h.world.talk.talk('rufus');
     // The eight-heart moment's own moods.
     expect([told.feels, ...(told.moreFeels ?? [])]).toEqual(['shy', 'sad', 'sad', 'happy']);
-    expect(h.world.neighbourhood.feelingOf('rufus')).toBe('shy');
-    h.world.neighbourhood.feel('rufus', 'happy');
-    expect(h.world.neighbourhood.feelingOf('rufus')).toBe('happy');
+    expect(h.world.talk.feelingOf('rufus')).toBe('shy');
+    h.world.talk.feel('rufus', 'happy');
+    expect(h.world.talk.feelingOf('rufus')).toBe('happy');
 
     h.clock.advance(24 * 3_600_000);
-    h.world.neighbourhood.talk('rufus');
-    const ten = h.world.neighbourhood.talk('rufus');
+    h.world.talk.talk('rufus');
+    const ten = h.world.talk.talk('rufus');
     expect(ten.replies?.[0]).toBe("It's allowed!");
     expect(h.world.poses.face()).toBeNull();
-    const back = h.world.neighbourhood.reply('rufus', 0);
+    const back = h.world.talk.reply('rufus', 0);
     // "YES! I'm telling the moon!…" is said gladly, and her "It's allowed!" shows on her face.
     expect(back?.feels).toBe('happy');
     expect(h.world.poses.face()).toBe('happy');
@@ -60,11 +60,11 @@ describe("faces that feel (V1's L7)", () => {
   it('gives every talk a feeling or none, the one on their face', () => {
     const h = harness();
     for (const id of ['cody', 'maude', 'gourdon', 'barty'] as const) {
-      h.world.neighbourhood.startTalk(id);
-      const chat = h.world.neighbourhood.talk(id);
+      h.world.talk.startTalk(id);
+      const chat = h.world.talk.talk(id);
       expect(chat.feels).not.toBeUndefined();
-      expect(h.world.neighbourhood.feelingOf(id)).toBe(chat.feels);
-      h.world.neighbourhood.endTalk();
+      expect(h.world.talk.feelingOf(id)).toBe(chat.feels);
+      h.world.talk.endTalk();
     }
   });
 

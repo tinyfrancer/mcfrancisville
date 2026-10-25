@@ -70,7 +70,7 @@ describe("jobs seen (V1's P4)", () => {
     h.clock.set(new Date(2027, 1, 14, 12));
     h.tick(1);
     const had = h.world.bag.count('rose');
-    const chat = h.world.neighbourhood.talk('rufus');
+    const chat = h.world.talk.talk('rufus');
     expect(chat.gift).toBe('rose');
     expect(h.world.bag.count('rose')).toBe(had + 1);
   });
@@ -84,7 +84,7 @@ describe("birthdays as days (V1's P4)", () => {
     const h = harness();
     h.clock.set(birthday);
     h.tick(1);
-    const line = h.world.neighbourhood.talk('gourdon').line;
+    const line = h.world.talk.talk('gourdon').line;
     expect(line).toBe(
       BIRTHDAY_LINES.gourdon.replace('{name}', h.world.wardrobe.look.name || 'friend'),
     );
@@ -100,8 +100,8 @@ describe("birthdays as days (V1's P4)", () => {
       h.world.bag.add('wood', 1);
     }
     const before = plain.world.friends.of('gourdon').points;
-    plain.world.neighbourhood.give('gourdon', 'wood');
-    const given = party.world.neighbourhood.give('gourdon', 'wood')!;
+    plain.world.talk.give('gourdon', 'wood');
+    const given = party.world.talk.give('gourdon', 'wood')!;
     const points = GIFT_POINTS[reactionTo('gourdon', 'wood')];
     expect(plain.world.friends.of('gourdon').points - before).toBe(points);
     expect(party.world.friends.of('gourdon').points - before).toBe(points * BIRTHDAY_GIFT_TIMES);

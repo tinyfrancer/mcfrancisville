@@ -121,7 +121,7 @@ export function neighbourDrawables(
       // Standing, they breathe, blink, wave, sit and work (V1's E3).
       const life = stanceOf({ ...n, seated: n.seat !== null }, nowMs) ?? {};
       // And how they feel about what they're telling her, the face on their bust (V1's L7).
-      const feel = world.neighbourhood.feelingOf(n.id);
+      const feel = world.talk.feelingOf(n.id);
       const stance: Stance = feel ? { ...life, feel } : life;
       const costume = world.finale.costumeOf(n.id);
       const sprite = bakeFigure(n.id, n.facing, frame, costume, wears, stance);
@@ -328,10 +328,7 @@ export function drawNeighbourBubbles(
   nowMs: number,
 ): void {
   for (const n of world.neighbourhood.neighboursIn(zone)) {
-    const bubbles = bubblesOver(
-      world.smallEvents.bubble(n.id),
-      world.neighbourhood.favour(n.id) !== null,
-    );
+    const bubbles = bubblesOver(world.smallEvents.bubble(n.id), world.talk.favour(n.id) !== null);
     if (bubbles.length === 0) continue;
     const bob = 2 * (Math.floor(nowMs / 500) % 2);
     const head = overHead(world, n);

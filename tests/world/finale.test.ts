@@ -97,10 +97,10 @@ describe('the party (0.2 J4)', () => {
     // Her husband asks his question from the first day (V1's P5); she has answered it.
     h.world.friends.update('cody', { answered: QUESTIONS.cody.answers[0]!.id });
     h.world.tapTile(cody.tile.tx, cody.tile.ty);
-    h.until(() => h.world.neighbourhood.talkingTo === 'cody', 'walking up to Cody', 120_000);
+    h.until(() => h.world.talk.talkingTo === 'cody', 'walking up to Cody', 120_000);
     // His Halloween line and treat come first; the party's, and his chili, after.
-    h.world.neighbourhood.talk('cody');
-    expect(h.world.neighbourhood.talk('cody').line).toMatch(/chili/);
+    h.world.talk.talk('cody');
+    expect(h.world.talk.talk('cody').line).toMatch(/chili/);
     expect(h.world.bag.count('whiteChickenChili')).toBe(1);
     expect(h.world.finale.canPhoto('cody')).toBe(true);
     expect(h.world.finale.photo()).toEqual({

@@ -85,8 +85,8 @@ describe('cooking', () => {
       { id: 'ghostChili', count: 1 },
       { id: 'pumpkinSoup', count: 1 },
     ]);
-    expect(h.world.neighbourhood.give('cody', 'ghostChili')).toMatchObject({ reaction: 'loved' });
-    expect(h.world.neighbourhood.give('maude', 'pumpkinSoup')).toMatchObject({
+    expect(h.world.talk.give('cody', 'ghostChili')).toMatchObject({ reaction: 'loved' });
+    expect(h.world.talk.give('maude', 'pumpkinSoup')).toMatchObject({
       reaction: 'liked',
     });
   });
