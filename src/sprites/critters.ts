@@ -22,10 +22,14 @@ import {
   tombstoned,
 } from './critterLooks';
 
-/**
- * The critters (phase 10), each 16×16 so it fits its tile and doubles as its picture in her bag.
- * Every family is one or two grids, and each critter is a palette over them.
+/*
+ * The critters (phase 10): each at 24, as she sees it out and about and in her bag, the Cabinet
+ * and the museum, and at 16 for a small fish's shadow and the gallery. Every family is a shape
+ * or two and each critter a palette over them; since 1.3's F3 (decision 362) most families'
+ * shapes are worked out at either size from the 24's numbers (`critterLooks.ts`), and the 16-pixel
+ * grids typed here are the frogs', the orb pair's and the firefly's.
  */
+
 /** A frog sitting pretty. `g` skin, `G` its light tummy, `m` its mouth, `s` spots. */
 const FROG: SpriteSource = {
   rows: [

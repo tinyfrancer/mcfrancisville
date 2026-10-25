@@ -285,6 +285,13 @@ She finds spiders frightening, and they are still in the game, drawn gently
   numbers (0.3's C2: a shape worked out from a size, `src/sprites/crawlies.ts`), lit from the
   top left and softly outlined. A new critter in a family is the family's shape in its own
   colours (the long-eared bat is the bat with tall ears), not a new drawing.
+- **Each 16 is the 24 drawn small** (1.3's F3, decision 362): a shape is worked out from the
+  24's numbers at either size, never drawn twice by hand, so the bag, the Cabinet, the museum,
+  a small fish's shadow and the world show one creature. What a family must have to read at 3×
+  on a phone: a bat's wing is a membrane on finger bones with a scalloped edge; a moth has a
+  forewing and a hindwing with a seam between; a fish narrows to a wrist before its forked tail
+  (that wrist is all that makes its shadow a fish); an orb is flat tones, never dithered; an
+  insect stands low on bent legs, and a thin leg isn't outlined, or it stands like a fence post.
 - **The creepy-crawlies keep to the ground and are friendly at a glance:** a snail side on with
   eye stalks and a smile, its shell a pumpkin's ribs or a golden spiral; a woolly bear in soft
   bands; a slug under a little ghost sheet; a glowworm whose tail glows; a cricket, a grasshopper,
