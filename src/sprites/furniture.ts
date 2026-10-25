@@ -23,6 +23,7 @@ import { FIRST_DAY_ART } from './firstDay';
 import { FOSSIL_PIECES_ART } from './fossilPieces';
 import { CRAWLY_PIECES_ART } from './crawlyPieces';
 import { FIGURINE_ART } from './figurines';
+import { SHINY_PIECES_ART } from './milestones';
 import { PIECES_ART } from './pieces';
 import { PIANO_ART } from './pianos';
 import { TOUCHES_ART } from './touches';
@@ -71,6 +72,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...FOSSIL_PIECES_ART,
   ...CRAWLY_PIECES_ART,
   ...FIGURINE_ART,
+  ...SHINY_PIECES_ART,
   ...HOLIDAY_FURNITURE_ART,
   broomStand: broomStandArt(FIRST_BROOM),
   halloweenPhoto: HALLOWEEN_PHOTO_ART,

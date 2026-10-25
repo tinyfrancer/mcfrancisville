@@ -48,10 +48,14 @@ describe("the mayor's notes", () => {
     expect(NOTES.find((n) => n.version === '1.3')!.lines).toHaveLength(5);
   });
 
-  it("shows her phone, which has 1.3, the 1.4 card: the winter wardrobe and sets (1.4's G2)", () => {
-    expect(notesToShow('1.3', true).map((n) => n.version)).toEqual(['1.4']);
+  it('shows her phone, which has 1.3, the 1.4 card: the shinies first, then the winter', () => {
+    // 1.4's G1 made the row and G2 added to it, two lines each; G3 adds one, five at most.
+    const shown = notesToShow('1.3', true);
+    expect(shown.map((n) => n.version)).toEqual(['1.4']);
     expect(newest.version).toBe('1.4');
+    expect(newest.lines[0]).toMatch(/wrong colour on purpose, and prettier for it/);
     expect(newest.lines.join(' ')).toMatch(/winter woollies/);
+    expect(newest.lines.length).toBeLessThanOrEqual(5);
   });
 
   it('shows the newest to a phone that last saw a version these notes no longer know', () => {

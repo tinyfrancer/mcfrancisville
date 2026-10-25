@@ -4,6 +4,7 @@ import type { Instrument } from './instruments';
 import { DISPLAY_FURNITURE } from './display';
 import { FOSSIL_FURNITURE } from './fossils';
 import { CRAWLY_FURNITURE } from './crawlies';
+import { SHINY_FURNITURE } from './shinies';
 import { CARVED_GOURDON, FIGURINE_FURNITURE } from './figurines';
 import { TABLETOP_FURNITURE } from './tabletop';
 import { YARD_FURNITURE } from './yard';
@@ -582,6 +583,7 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...CRAWLY_FURNITURE,
   ...FIGURINE_FURNITURE,
   ...CARVED_GOURDON,
+  ...SHINY_FURNITURE,
   batBed: {
     name: 'Bat-wing bed',
     description: 'A four-poster with a bat-wing headboard and a quilt of little moons.',

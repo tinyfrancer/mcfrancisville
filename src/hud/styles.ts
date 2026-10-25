@@ -397,6 +397,7 @@ const CSS = `
 .hud-colours small { color: ${T.muted}; font-size: 13px; }
 .hud-colours p { margin: 2px 0 0 !important; font-size: 14px !important; }
 .hud-colours .hud-choices { margin: 4px 0 0; }
+.hud-badge { position: absolute; top: 1px; right: 1px; line-height: 0; pointer-events: none; }
 .hud-count {
   position: absolute;
   right: 3px;

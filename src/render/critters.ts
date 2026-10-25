@@ -1,7 +1,7 @@
 import { TILE_SIZE } from '../config/world';
 import { CRITTERS, flies } from '../data/critters';
 import { bake } from '../sprites/bake';
-import { CRITTER_ART, glows, RIM, rimmed, silhouetteOf } from '../sprites/critters';
+import { CRITTER_ART, critterArt, glows, RIM, rimmed, silhouetteOf } from '../sprites/critters';
 import type { CritterId } from '../types/ids';
 import { PALETTE } from '../sprites/palette';
 import type { Palette } from '../sprites/sprite';
@@ -94,14 +94,14 @@ function settled(
 
 /** A critter where it is this frame, with its little shadow, and what of it glows. */
 export function critterDrawable(c: Critter, nowMs: number): Drawable {
-  const art = CRITTER_ART[c.critter];
+  const art = critterArt(c.critter, c.shiny);
   const { x, y, frame, flip } = pose(c, nowMs);
   const row = CRITTERS[c.critter];
   const fish = row.family === 'fish';
   // A fish is only its shadow in the water (phase Q), a small one its 16-pixel shape.
   const small = fish && row.shadow === 1;
   const source = (small ? art.frames : art.world)[frame]!;
-  const look = fish ? 'shadow' : 'world';
+  const look = fish ? 'shadow' : c.shiny ? 'shiny' : 'world';
   const key = `critter:${look}:${c.critter}:${frame}:${flip ? 'l' : 'r'}`;
   const sprite = fish
     ? bake(key, rimmed(source, art.palette), shadowPalette(c.critter), { flipX: flip })
@@ -129,6 +129,54 @@ export function critterDrawable(c: Critter, nowMs: number): Drawable {
     d.glow = glowOf(`glow:${key}`, source, art.palette, art.glow, { flipX: flip });
   }
   return d;
+}
+
+/** How long a shiny's glint takes to come round (1.4's G1): slow, so it reads as a twinkle. */
+const GLINT_MS = 1800;
+
+/**
+ * The glint over a shiny critter (1.4's G1), drawn over the light so it's seen from across the
+ * lawn by day or night: a little four-pointed star that swells and fades at one corner of it,
+ * then the other, as the ripe twinkle does over a bed, but slower and brighter. A fish's glints
+ * are over its shadow in the water.
+ */
+export function drawShinyGlints(
+  ctx: CanvasRenderingContext2D,
+  critters: readonly Critter[],
+  cam: Point,
+  nowMs: number,
+): void {
+  const px = 2;
+  for (const c of critters) {
+    if (!c.shiny) continue;
+    const t = (nowMs + tileHash(c.tx, c.ty) * 13) / GLINT_MS;
+    const turn = Math.floor(t);
+    const beat = Math.floor((t - turn) * 8);
+    // Four beats of the eight a glint, then a rest: swelling, full, full, fading.
+    if (beat > 3) continue;
+    const full = beat === 1 || beat === 2;
+    const arm = full ? px * 3 : px;
+    const { x, y } = pose(c, nowMs);
+    const corner = turn % 2 === 0 ? { dx: 20, dy: 2 } : { dx: 2, dy: 18 };
+    const sx = x + corner.dx - cam.x;
+    const sy = y + corner.dy - cam.y;
+    ctx.fillStyle = PALETTE.candle;
+    ctx.fillRect(sx - arm, sy, arm * 2 + px, px);
+    ctx.fillRect(sx, sy - arm, px, arm * 2 + px);
+    if (full) {
+      // Its heart swells too, so it reads from across the lawn.
+      ctx.fillStyle = PALETTE.candleBright;
+      ctx.fillRect(sx - px, sy, px * 3, px);
+      ctx.fillRect(sx, sy - px, px, px * 3);
+    }
+    ctx.fillStyle = PALETTE.white;
+    ctx.fillRect(sx, sy, px, px);
+    if (arm > px) {
+      // A fleck beside it at its brightest.
+      ctx.fillStyle = PALETTE.candleBright;
+      ctx.fillRect(sx + (turn % 2 === 0 ? -10 : 10), sy + 8, px, px);
+    }
+  }
 }
 
 /** The little light a glowing critter casts after dark. */

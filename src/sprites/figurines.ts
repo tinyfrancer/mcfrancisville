@@ -1,4 +1,5 @@
-import { CARVABLE, carvedKindOf, figurineOf, type CarvedKind } from '../data/figurines';
+import { carvedKindOf, EVERY_CARVABLE, figurineOf, type CarvedKind } from '../data/figurines';
+import { isShiny, plainOf } from '../data/shinies';
 import type { Carvable, CritterId, FigurineId, FossilId, ItemId } from '../types/ids';
 import {
   ACCENT,
@@ -15,7 +16,7 @@ import {
   TRIM,
   WALL,
 } from './buildings';
-import { CRITTER_ART } from './critters';
+import { CRITTER_ART, SHINY_ART } from './critters';
 import { FOSSIL_ART } from './fossils';
 import type { FurnitureArt } from './furniture';
 import { ball, palette, slab, WOOD } from './furnish';
@@ -57,7 +58,7 @@ const PLINTH_WOOD: Record<CarvedKind, string> = {
 function pictureOf(thing: Carvable): { source: SpriteSource; palette: Palette; glow?: Palette } {
   const kind = carvedKindOf(thing);
   if (kind === 'critter') {
-    const art = CRITTER_ART[thing as CritterId];
+    const art = isShiny(thing) ? SHINY_ART[plainOf(thing)] : CRITTER_ART[thing as CritterId];
     return { source: art.world[0], palette: art.palette, ...(art.glow ? { glow: art.glow } : {}) };
   }
   if (kind === 'fossil') return FOSSIL_ART[thing as FossilId];
@@ -98,7 +99,9 @@ function figurine(thing: Carvable): FurnitureArt {
   const rows = trimmed(figure.rows, clear).map((r) =>
     [...r].map((k) => (clear(k) ? CLEAR : k)).join(''),
   );
-  const plinth = palette({ ...WOOD, trim: PLINTH_WOOD[carvedKindOf(thing)], accentTwo: C.gold });
+  // A shiny's stands on a gilded plinth (1.4's G1).
+  const trim = isShiny(thing) ? C.gold : PLINTH_WOOD[carvedKindOf(thing)];
+  const plinth = palette({ ...WOOD, trim, accentTwo: C.gold });
   return {
     source: standing(rows),
     palette: { ...plinth, ...figure.palette },
@@ -132,7 +135,7 @@ const LITTLE_GOURDON = (() => {
 })();
 
 const FIGURINES = Object.fromEntries(
-  CARVABLE.map((thing) => [figurineOf(thing), figurine(thing)]),
+  EVERY_CARVABLE.map((thing) => [figurineOf(thing), figurine(thing)]),
 ) as Record<FigurineId, FurnitureArt>;
 
 export const FIGURINE_ART: Record<FigurineId | 'carvedGourdon', FurnitureArt> = {

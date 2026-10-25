@@ -1,3 +1,4 @@
+import type { Glyph } from '../data/glyphs';
 import { el } from './dom';
 import { glyph } from './glyph';
 
@@ -15,6 +16,8 @@ export interface Entry {
   mark?: string;
   /** A word on its slot where "new" would go, if it isn't new: "on" for a bracelet she wears. */
   tag?: string;
+  /** A little drawn mark in its top right corner: a sparkle for a critter she has had shiny. */
+  badge?: Glyph;
 }
 
 export type SortId = 'kind' | 'name' | 'new' | 'most';
@@ -214,6 +217,7 @@ export function collection<E extends Entry>(options: CollectionOptions<E>): Coll
     if (entry.count !== undefined && entry.count > 1) {
       b.append(el('span', { className: 'hud-count' }, String(entry.count)));
     } else if (entry.mark) b.append(el('span', { className: 'hud-count' }, entry.mark));
+    if (entry.badge) b.append(el('span', { className: 'hud-badge' }, glyph(entry.badge)));
     if (entry.isNew) b.append(el('span', { className: 'hud-new' }, 'new'));
     else if (entry.tag) b.append(el('span', { className: 'hud-new hud-tag' }, entry.tag));
     b.addEventListener('click', () => {

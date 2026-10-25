@@ -117,6 +117,8 @@ export interface TodayFacts {
   project: { id: ProjectId; stage: ProjectStage | null; progress: number } | null;
   /** The fair's free go today (V1's R6b), until she has had it, and whether its stall is open. */
   freeGo: { id: ActivityId; open: boolean } | null;
+  /** A shiny out where she is this hour (1.4's G1), and where. */
+  shiny?: { critter: CritterId; zone: MapZoneId; tile: Tile; hour: number } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -153,6 +155,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'project'; id: ProjectId; percent: number }
   // 1.0.1: the day's first go at one of the fair's stalls is free, until she has had it.
   | { kind: 'freeGo'; id: ActivityId; open: boolean }
+  // 1.4's G1: something glittering where she is, a shiny critter.
+  | { kind: 'shiny'; critter: CritterId; zone: MapZoneId }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -312,6 +316,16 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
 function outOfTheOrdinary(facts: TodayFacts): TodayLine[] {
   const { day, hour } = facts;
   const lines: TodayLine[] = [];
+  if (facts.shiny) {
+    const { critter, zone, tile } = facts.shiny;
+    lines.push({
+      kind: 'shiny',
+      critter,
+      zone,
+      key: `shiny:${zone}:${day}@${facts.shiny.hour}:${tile.tx},${tile.ty}`,
+      go: { zone, tile },
+    });
+  }
   if (facts.rare) {
     const { id, began } = facts.rare;
     lines.push({

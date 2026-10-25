@@ -9304,6 +9304,82 @@ happenings (she has 52 and 20; they're not what she does most); a second Cabinet
 postcards (a shiny of what she already hunts is more of the same joy, not a new chore); refactors
 (nothing she sees).
 
+## 370. Shinies: a second palette for every critter, dealt from the slot, kept as items of their own, charmed after nine months (2026-10-25, 1.4's G1)
+
+**Context:** the 1.4 plan's G1 (decision 367): once in a while a critter is the wrong colour on
+purpose, and prettier for it. Every critter (70 now) needs a shiny drawn by palette swap only,
+dealt the same for anyone who looks, caught as the same critter with a mark, shown in the
+Cabinet, the museum and the figurines, two shelves, and told.
+
+**Decision:**
+
+- **The looks**: a `Shine` per critter in `SHINIES` (`src/sprites/critterLooks.ts`): a gem (one of
+  nineteen `GEMS`, each a palette colour used as a `ramp`'s base), an `accent` gem on some keys,
+  and `keep` for keys left as they are. `shinePalette` moves each of the palette's colours onto
+  the gem's ramp, tones 1 to 4, by how light it is among the critter's own colours (0.6) and how
+  light it is at all (0.4); ink, eyes, glints and fangs are always kept. `SHINY_ART` in
+  `sprites/critters.ts` is every critter's frames in its shine, its glow following. Picked to be
+  what the plain isn't: a golden pumpkin bat, axolotl and ghost minnow, a rose koi, a blush luna
+  moth with golden eyespots, a sky-blue monarch and ladybug, a sapphire crawdad, a silver vampire
+  bat and twig knight, a pearl tombstone toad, a midnight-shelled golden snail. Looked at plain and
+  shiny side by side at 24, 16 and lit (`npm run sprite -- 'shiny:*' --sheet`); a dark critter's
+  shiny once came out muddy (the catfish), so no colour goes to the ramp's darkest tone.
+- **The dealing**: `isShinyDeal` in `systems/critters.ts`, `hashMixed` of
+  `shiny:<seed>@<hour>#<slot>` modulo `SHINY_ONE_IN` (common 12, uncommon 20, rare 30, legendary 40) by the dealt critter's rarity, set on `OutCritter.shiny`. Its own roll, so it never changes
+  which critter is dealt. `hashString` (FNV-1a) alone dealt the rare and legendary tiers about one
+  in 44 and one in 85 in play, its low bits following the dealing's own roll; mixed, a year of
+  every place and hour deals one in 12.1, 20.3, 27.4 and 41.3 (`tests/systems/shinies.test.ts`
+  holds each within ±30%). A lured critter is never shiny.
+- **The charm**: at an hour a day in two places, the rare and legendary kinds come out a few times a
+  year each, so at one in thirty or forty a shiny of everything took **four to five years** in the
+  rarity test's play (49 to 60 months, nine kinds still missing after five years). So a kind first
+  caught `SHINY_CHARM_DAYS` (270) or more days ago with no shiny yet comes out shiny every time
+  until she catches one (`isCharmed`, applied by `Collecting.critters` from `Cabinet.caughtOn` and
+  `shinyOn`): a shiny of everything now takes **18 to 24 months, about 21**, most of a second year
+  (`tests/systems/rarity.test.ts`, four starts). The plain Cabinet's fill is unchanged.
+- **The sparkle**: `drawShinyGlints` (`render/critters.ts`), the critters pass's `lit` part (so
+  after the light and the weather, seen by night and in fog): a four-pointed star, candle arms and
+  a white heart, swelling and fading at one corner then the other every 1.8 s, the ripe twinkle's
+  way but slower and brighter, with a fleck beside it at its brightest. Over a fish's shadow too.
+- **The mark**: a shiny is an item of its own, `ShinyId` = `` `${CritterId}Shiny` `` (rows made in
+  `src/data/shinies.ts`, kind `critter`, "Shiny luna moth"), as a blue rose is a rose's rare
+  harvest and each bracelet its own id: the bag, the chest, the display pieces, selling and giving
+  all work unchanged, where a count beside the plain one would have needed every one of them to
+  choose. It sells for twice its plain self (`SHINY_VALUES`). Its icon is its shiny self at 24
+  with a sparkle in the top right corner, ringed in ink where it lies over the critter
+  (`sparkled`). The pop of a catch shows it.
+- **The Cabinet**: `shinies` (the day she first caught each kind shiny) and `shinyShown` (the cases
+  that show a shiny) on `CabinetSnapshot`, **save v56**; a step that gives a v55 town none. The
+  Cabinet's cases wear a drawn sparkle (`badge: 'sparkle'` on a collection `Entry`, new) for a
+  kind she has had shiny, the card shows the shiny beside the plain and when she first caught it,
+  and the sheet's line counts "n of 70 shinies".
+- **The museum**: a shiny goes in its case in place of the plain one, once (`Cabinet.donate(id,
+true)`), whether the plain was given first or not; the To donate tab lists shinies, the case
+  draws it (`RoomView.onShow`), Wrapunzel has three labels of her own for it (`MUSEUM_SHINY`).
+- **Figurines**: `Carvable` takes `ShinyId`, so `FigurineId`'s template gives `lunaMothShinyFigurine`
+  with no new type; painted from the shiny's picture on a gilded plinth. `CARVABLE` and
+  `FIGURINE_IDS` stay the plain ones (the figurines' shelf is unchanged and still finished where it
+  was); `EVERY_CARVABLE` and `EVERY_FIGURINE` add the shinies'.
+- **Shelves**: `shinyFamilies` (a shiny of every family: a framed shiny luna moth, `framedShiny`)
+  and `shinies` (a shiny of every critter: the shiny orb pair under a dome, `shinyDome`), a
+  `{ shiny: 'family' | 'all' }` shelf read from `ShelfFacts.shiny`, Wrapunzel's letters.
+- **Told**: Today's line while a shiny is out where she is ("Something glittered by the frozen
+  creek", never which; `Collecting.shinyHere`, `TodayFacts.shiny`); a `shiny` small-talk topic
+  ahead of `caught`, three lines a neighbour, when she caught one today
+  (`Collecting.shinyToday`, `Around.shiny`); the `caught` moment's `shiny` and `firstShiny`, a
+  toast of its own ("It's the wrong colour on purpose, and prettier for it."), the `shinyCatch`
+  cue (the catch's chime and a quick glitter rising to B7) and a shower of sparkles.
+- **Notes**: 1.4's `NOTES` row, made here and G2's at once (they ran side by side), folded at the
+  merge into one: two lines each, the shinies first, G2's P.S.; one left for G3.
+
+**Rejected:** a `shiny: true` on a bag stack or a count beside the plain (every keeper and sheet
+would choose plain or shiny; the precedent is an id each); new grids (the brief, and the 16 is the
+24 drawn small); a shiny lured by a meal (a lure is a promise of a critter, not of a colour); the
+brief's rates without a charm (four or five years); raising the rare tiers' rates instead (the
+brief's "rarer up the tiers"); a per-catch counter for the charm (a new count in the save, where
+the first catch's day is already kept); a second nook in a case for the shiny (the cases are laid
+out for one of each, and in place is what she'd show off).
+
 ## 371. A winter wardrobe of sixteen pieces, Cosy Cabin and Midnight Observatory (2026-10-25, 1.4's G2)
 
 _Session G2 of the 1.4 plan (`docs/v1.4_plan.md`). No save change. Personal touches parked

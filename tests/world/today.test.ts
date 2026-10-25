@@ -107,6 +107,10 @@ function holds(h: Harness, line: TodayLine): boolean {
       );
     }
     // 1.0.1.
+    case 'shiny':
+      return w.collecting
+        .critters(line.zone)
+        .some((c) => c.shiny === true && c.critter === line.critter);
     case 'freeGo':
       return (
         w.activities.freeGo() === line.id &&

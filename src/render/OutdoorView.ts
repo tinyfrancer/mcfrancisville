@@ -133,6 +133,7 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'weather',
     'snack',
     'beds',
+    'critters',
     'lost',
     'pets',
     'neighbours',

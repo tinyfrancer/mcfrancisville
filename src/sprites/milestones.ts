@@ -1,6 +1,6 @@
-import type { CritterId, MilestonePiece } from '../types/ids';
+import type { CritterId, MilestonePiece, ShinyPiece } from '../types/ids';
 import { ACCENT_TWO, darkOf, fillOf, finish, GLASS, GLINT, lightOf, ROOF, TRIM } from './buildings';
-import { CRITTER_ART } from './critters';
+import { critterArt } from './critters';
 import { SHOWCASE_FURNITURE_ART } from './display';
 import type { FurnitureArt } from './furniture';
 import { frame, palette, slab, WOOD } from './furnish';
@@ -16,8 +16,11 @@ import type { Palette, SpriteSource } from './sprite';
 const SPARE = 'αβγδεζηθικλμνξπρστυφχψω';
 
 /** A critter's town-sized picture and palette, its keys moved to ones the kit leaves alone. */
-function specimen(id: CritterId): { rows: string[]; palette: Palette; glow: Palette } {
-  const art = CRITTER_ART[id];
+function specimen(
+  id: CritterId,
+  shiny = false,
+): { rows: string[]; palette: Palette; glow: Palette } {
+  const art = critterArt(id, shiny);
   return specimenOf(art.world[0], art.palette, art.glow);
 }
 
@@ -100,8 +103,8 @@ const FRAMED: Record<Extract<MilestonePiece, `framed${string}` | `${string}Dome`
 const FRAME_COLOURS = palette({ ...WOOD, accentTwo: C.gold, roof: C.navy });
 const DOME_COLOURS = palette({ ...WOOD, trim: C.bark, accentTwo: C.gold, glass: C.ghost });
 
-export function framed(id: CritterId): FurnitureArt {
-  const critter = specimen(id);
+export function framed(id: CritterId, shiny = false): FurnitureArt {
+  const critter = specimen(id, shiny);
   return {
     source: laid(FRAME, critter.rows, 4, 4),
     palette: { ...FRAME_COLOURS, ...critter.palette },
@@ -109,8 +112,8 @@ export function framed(id: CritterId): FurnitureArt {
   };
 }
 
-export function domed(id: CritterId): FurnitureArt {
-  return domeOver(specimen(id));
+export function domed(id: CritterId, shiny = false): FurnitureArt {
+  return domeOver(specimen(id, shiny));
 }
 
 /** Anything at 24 under the glass dome: its rows, its palette and what of it glows. */
@@ -142,4 +145,10 @@ export const MILESTONE_ART: Record<MilestonePiece, FurnitureArt> = {
   // They show the squishies and dolls she has (0.3's H2), drawn with the other display pieces.
   squishyShelf: SHOWCASE_FURNITURE_ART.squishyShelf,
   dollHouse: SHOWCASE_FURNITURE_ART.dollHouse,
+};
+
+/** What the shiny shelves send her (1.4's G1): her own luna moth framed shiny, and the orbs. */
+export const SHINY_PIECES_ART: Record<ShinyPiece, FurnitureArt> = {
+  framedShiny: framed('lunaMoth', true),
+  shinyDome: domed('orbPair', true),
 };

@@ -1,4 +1,4 @@
-import { CRITTER_IDS, CRITTERS } from '../data/critters';
+import { CRITTER_IDS, CRITTERS, FAMILIES, type Family } from '../data/critters';
 import { FIGURINE_IDS } from '../data/figurines';
 import { FOSSIL_IDS } from '../data/fossils';
 import { ITEMS } from '../data/items';
@@ -13,6 +13,8 @@ export interface ShelfFacts {
   caught: (id: CritterId) => boolean;
   donated: (id: CritterId | FossilId) => boolean;
   had: (id: Had) => boolean;
+  /** Whether she has ever caught one in its shiny colours (1.4's G1). */
+  shiny: (id: CritterId) => boolean;
 }
 
 /** The season a critter is a season's own in, by the month it first comes out; none if all year. */
@@ -23,8 +25,9 @@ export function seasonOf(id: CritterId): SeasonId | null {
   return (Object.keys(SEASON_MONTHS) as SeasonId[]).find((s) => SEASON_MONTHS[s].includes(first))!;
 }
 
-/** The things that fill a shelf, in the order the Cabinet keeps them. */
-export function shelfOf(shelf: Shelf): readonly (CritterId | Had)[] {
+/** The things that fill a shelf, in the order the Cabinet keeps them; a family for the shinies'. */
+export function shelfOf(shelf: Shelf): readonly (CritterId | Had | Family)[] {
+  if ('shiny' in shelf) return shelf.shiny === 'family' ? FAMILIES : CRITTER_IDS;
   if ('caught' in shelf) return CRITTER_IDS.filter((id) => CRITTERS[id].family === shelf.caught);
   if ('wing' in shelf) {
     if (shelf.wing === 'fossil') return FOSSIL_IDS;
@@ -36,7 +39,11 @@ export function shelfOf(shelf: Shelf): readonly (CritterId | Had)[] {
 }
 
 /** Whether one thing on a shelf is there yet. */
-function filled(shelf: Shelf, id: CritterId | Had, facts: ShelfFacts): boolean {
+function filled(shelf: Shelf, id: CritterId | Had | Family, facts: ShelfFacts): boolean {
+  if ('shiny' in shelf) {
+    if (shelf.shiny === 'all') return facts.shiny(id as CritterId);
+    return CRITTER_IDS.some((c) => CRITTERS[c].family === id && facts.shiny(c));
+  }
   if ('had' in shelf) return facts.had(id as Had);
   if ('wing' in shelf) return facts.donated(id as CritterId | FossilId);
   return facts.caught(id as CritterId);

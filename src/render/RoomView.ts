@@ -6,7 +6,7 @@ import { TILE_SIZE } from '../config/world';
 import { CRITTERS } from '../data/critters';
 import { FIXTURES, INTERIORS } from '../data/interiors';
 import { bake } from '../sprites/bake';
-import { CRITTER_ART } from '../sprites/critters';
+import { critterArt } from '../sprites/critters';
 import { FIXTURE_ART } from '../sprites/interiors';
 import { PLANTER_SOIL } from '../sprites/crafted';
 import { drawBedLook, drawRipeSparkles, plantedDrawable } from './garden';
@@ -248,8 +248,11 @@ export class RoomView implements SceneView {
     family.slice(Math.max(0, first)).forEach((id, i) => {
       const nook = nooks[i];
       if (!nook || !this.world.cabinet.isDonated(id)) return;
-      const art = CRITTER_ART[id];
-      const sprite = bake(`critter:world:${id}:0:r`, art.world[0], art.palette);
+      // A shiny given to the museum stands in its case in place of the plain one (1.4's G1).
+      const shiny = this.world.cabinet.isShinyShown(id);
+      const art = critterArt(id, shiny);
+      const look = shiny ? 'shiny' : 'world';
+      const sprite = bake(`critter:${look}:${id}:0:r`, art.world[0], art.palette);
       shown.push({ footY: s.footY + 0.5, sprite, x: s.x + nook.x, y: s.y + nook.y });
     });
     return shown;

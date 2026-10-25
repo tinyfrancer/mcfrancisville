@@ -1,4 +1,5 @@
 import { CRITTERS } from '../data/critters';
+import { shinyName } from '../data/shinies';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
 import type { ClueId } from '../data/mystery';
@@ -40,6 +41,8 @@ export interface Around {
   holding: Held;
   /** The last critter she caught today, if any. */
   caught: CritterId | null;
+  /** The last shiny she caught today, if any (1.4's G1). */
+  shiny?: CritterId | null;
   /** The pet out walking with her, by the name she has given it. */
   pet: string | null;
   /** The pieces she has on. */
@@ -133,7 +136,9 @@ function aroundNow(
     // A best friend asks her along (V1's P2).
     fits.push({ topic: isBest(scene.band) ? 'invite' : 'happening', fill });
   }
-  if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
+  // A shiny caught today is all anyone wants to hear about (1.4's G1).
+  if (scene.shiny) fits.push({ topic: 'shiny', fill: { catch: aThing(shinyName(scene.shiny)) } });
+  else if (scene.caught) fits.push({ topic: 'caught', fill: { catch: aCritter(scene.caught) } });
   if (scene.pet) fits.push({ topic: 'pet', fill: { pet: scene.pet } });
   // A clue pinned lately, which they theorise about (V1's P3a), until she has met the mayor, and
   // then for a few days the meeting, which is all anyone talks about (V1's P3b).

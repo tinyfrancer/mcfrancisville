@@ -53,6 +53,12 @@ export const CUES = {
     chime('C5:.2 E5:.2 G5:.2 C6:.2 E6:.2 G6:.2 C7:1'),
     pluck('-:.6 C4+G4:1.2', 0.14),
   ),
+  // A shiny caught (1.4's G1): a short glitter rising high, quick and light, over the catch's chime.
+  shinyCatch: cue(
+    { wave: 'hat', notes: line('C4:.3'), gain: 0.12 },
+    chime('E5:.2 G5:.2 B5:.2 E6:.4'),
+    chime('-:.6 B6:.1 C#7:.1 E7:.1 G#7:.1 B7:.8', 0.14),
+  ),
   fled: cue(chime('E6:.2 C6:.2 A5:.2 E5:.5', 0.16)),
   // Her rod (phase Q): a plop as the float goes in, a tick at a nibble, a splash and a ring at a bite.
   cast: cue(
@@ -183,6 +189,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'built':
       return 'treat';
     case 'caught':
+      if (event.shiny) return 'shinyCatch';
       return event.first ? 'firstCatch' : 'caught';
     case 'unearthed':
       return event.first ? 'firstCatch' : 'treat';

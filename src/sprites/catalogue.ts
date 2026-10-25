@@ -31,7 +31,7 @@ import type {
 } from '../types/ids';
 import type { Look } from '../types/look';
 import { FEELINGS } from '../types/mood';
-import { CRITTER_ART, silhouetteOf } from './critters';
+import { CRITTER_ART, SHINY_ART, silhouetteOf } from './critters';
 import { FOSSIL_ART, fossilSilhouette, type FossilArt } from './fossils';
 import {
   ACTION_BODIES,
@@ -619,6 +619,30 @@ export function catalogue(): Entry[] {
     art.world.forEach((frame, i) => grid(`critter:${id}:world:${i}`, frame, art.palette));
     if (art.glow) grid(`critter:${id}:lit`, art.frames[0]!, lit(art.palette, art.glow));
     grid(`critter:${id}:missing`, art.world[0], silhouetteOf(id));
+    // Its shiny (1.4's G1): the plain and the shiny side by side, at 24 and at 16, and lit.
+    const shiny = SHINY_ART[id];
+    const pair = (a: SpriteSource, b: SpriteSource, pa: Palette, pb: Palette) => {
+      const spare = 'αβγδεζηθικλμνξπρστυφχψω';
+      const keys = new Map(Object.keys(pb).map((k, i) => [k, k === '.' ? '.' : spare[i]!]));
+      const rows = a.rows.map((row, y) =>
+        [row, '..', [...(b.rows[y] ?? '')].map((k) => keys.get(k) ?? '.').join('')].join(''),
+      );
+      const moved = Object.fromEntries([...keys].map(([k, s]) => [s, pb[k] ?? null]));
+      return { source: { rows }, palette: { ...pa, ...moved } };
+    };
+    const big = pair(art.world[0], shiny.world[0], art.palette, shiny.palette);
+    grid(`shiny:${id}`, big.source, big.palette);
+    const small = pair(art.frames[0], shiny.frames[0], art.palette, shiny.palette);
+    grid(`shiny:${id}:16`, small.source, small.palette);
+    if (art.glow) {
+      const glowing = pair(
+        art.world[0],
+        shiny.world[0],
+        lit(art.palette, art.glow),
+        lit(shiny.palette, shiny.glow),
+      );
+      grid(`shiny:${id}:lit`, glowing.source, glowing.palette);
+    }
   }
   // The fossils (0.3's C1), lit after dark, and as the Curiosity Cabinet shows one still to dig.
   for (const [id, art] of Object.entries(FOSSIL_ART) as [FossilId, FossilArt][]) {

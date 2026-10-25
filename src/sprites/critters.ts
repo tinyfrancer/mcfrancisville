@@ -18,6 +18,8 @@ import {
   owlEyed,
   skulled,
   roundFishShape,
+  shinePalette,
+  SHINIES,
   striped,
   tombstoned,
 } from './critterLooks';
@@ -1018,6 +1020,76 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
   ...HOLIDAY_ART,
   ...JUMPER_ART,
 };
+
+/**
+ * A critter's shiny (1.4's G1, decision 370): its own frames, at 16 and 24, in its shine's
+ * palette (`SHINIES`, `shinePalette`), and what glows of it glowing in its new colours.
+ */
+function shinyOf(id: CritterId): CritterArt {
+  const art = CRITTER_ART[id];
+  const palette = shinePalette(art.palette, SHINIES[id]);
+  if (!art.glow) return { ...art, palette };
+  const glow = Object.fromEntries(
+    Object.entries(art.glow).map(([key, colour]) => [
+      key,
+      palette[key] !== art.palette[key] ? (palette[key] ?? colour) : colour,
+    ]),
+  );
+  return { ...art, palette, glow };
+}
+
+/** Every critter's shiny, as `CRITTER_ART` has the plain. */
+export const SHINY_ART = Object.fromEntries(
+  (Object.keys(CRITTER_ART) as CritterId[]).map((id) => [id, shinyOf(id)]),
+) as Record<CritterId, CritterArt>;
+
+/** The keys of a shiny's sparkle on its icon, which no critter's palette uses. */
+const SPARKLE = { arm: '✦', heart: '✧', ring: '✩' } as const;
+
+/**
+ * A four-pointed sparkle in a picture's top right corner (1.4's G1), so a shiny in her bag, a
+ * display piece or a sheet is told from its plain self at a glance; where it lies over the critter
+ * it's ringed in ink, so it reads on a pale wing as well as on the dark.
+ */
+export function sparkled(source: SpriteSource): SpriteSource {
+  const width = source.rows[0]?.length ?? 0;
+  const cx = width - 3;
+  const cy = 2;
+  const star = (x: number, y: number): string | null => {
+    if (x === cx && y === cy) return SPARKLE.heart;
+    if ((x === cx && Math.abs(y - cy) <= 2) || (y === cy && Math.abs(x - cx) <= 2)) {
+      return SPARKLE.arm;
+    }
+    return null;
+  };
+  const painted = (key: string) => key !== '.' && key !== CLEAR;
+  const mark = (x: number, y: number, key: string): string => {
+    const own = star(x, y);
+    if (own) return own;
+    const beside = [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ].some(([dx, dy]) => star(x + dx!, y + dy!) !== null);
+    return beside && painted(key) ? SPARKLE.ring : key;
+  };
+  return {
+    rows: source.rows.map((row, y) => [...row].map((key, x) => mark(x, y, key)).join('')),
+  };
+}
+
+/** The sparkle's colours, added to a shiny's palette. */
+export const SPARKLE_PALETTE: Palette = {
+  [SPARKLE.arm]: C.candle,
+  [SPARKLE.heart]: C.white,
+  [SPARKLE.ring]: C.ink,
+};
+
+/** A critter's art, plain or shiny. */
+export function critterArt(id: CritterId, shiny = false): CritterArt {
+  return (shiny ? SHINY_ART : CRITTER_ART)[id];
+}
 
 /**
  * A critter all in one colour: plum for the Curiosity Cabinet to show where one is still missing,

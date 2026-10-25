@@ -68,3 +68,13 @@ export const MUSEUM_SPECIAL: Partial<Record<CritterId, string>> = {
   goldenSnail:
     'The golden snail gets a case lined with velvet. Wrapunzel polishes the glass twice.',
 };
+
+/**
+ * Wrapunzel's label for a shiny as it goes in its case (1.4's G1), in place of the plain one if
+ * there was one; `{critter}` is its name.
+ */
+export const MUSEUM_SHINY: readonly string[] = [
+  'A shiny {critter}! Wrapunzel gasps, then gasps again, and gives it the case by the window.',
+  'The shiny {critter} goes in its case, and the whole back room looks a little brighter.',
+  'A shiny {critter}, in colours all its own! Wrapunzel is writing the label in gold ink.',
+];

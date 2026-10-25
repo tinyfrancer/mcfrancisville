@@ -1,4 +1,5 @@
 import { ACTIVITIES } from '../data/activities';
+import { CRITTERS, HABITAT_NAMES } from '../data/critters';
 import type { Glyph } from '../data/glyphs';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
@@ -137,6 +138,13 @@ export function todayWords(line: TodayLine): TodayWords {
         text: wantedLine(line.items),
         small: 'Cobweb Corner pays double for them.',
         glyph: { item: line.items[0]! },
+      };
+    // 1.4's G1: a shiny about where she is, never said which.
+    case 'shiny':
+      return {
+        text: `Something glittered ${HABITAT_NAMES[CRITTERS[line.critter].habitat]}`,
+        small: "It's a shiny one! Creep up and see what it is, before the hour's out.",
+        glyph: 'sparkle',
       };
     // V1's R3: what's out of the ordinary today.
     case 'rare': {

@@ -10,6 +10,7 @@ import {
 } from '../data/critters';
 import { FOSSIL_IDS, FOSSILS } from '../data/fossils';
 import { MUSEUM_GREETING } from '../data/museum';
+import { shinyName, shinyOf } from '../data/shinies';
 import { WEATHER_NAMES } from '../data/weather';
 import { hoursOf, nextChance } from '../systems/critters';
 import { handsOf } from '../systems/catchSize';
@@ -38,11 +39,17 @@ export interface CabinetApi {
     donated: boolean;
     outNow: boolean;
     best?: number | null;
+    /** The day she first caught it shiny, and whether its case shows a shiny (1.4's G1). */
+    shinyOn?: string | null;
+    shinyShown?: boolean;
   };
   /** How many she has in her bag. */
-  inBag(id: CritterId | FossilId): number;
-  /** Puts one from her bag on show: its label, or null if it couldn't be. */
-  donate(id: CritterId): string | null;
+  inBag(id: ItemId): number;
+  /**
+   * Puts one from her bag on show, or its shiny in its case in place of the plain one: its label,
+   * or null if it couldn't be.
+   */
+  donate(id: CritterId, shiny?: boolean): string | null;
   /** Whether she caught it for the first time since she last looked in the Cabinet. */
   isNew(id: CritterId): boolean;
   /** She has looked in the Cabinet. */
@@ -232,9 +239,10 @@ interface CaseEntry extends Entry {
 export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
   const found = CRITTER_IDS.filter((id) => api.critter(id).caughtOn !== null).length;
   const shown = CRITTER_IDS.filter((id) => api.critter(id).donated).length;
+  const shinies = CRITTER_IDS.filter((id) => api.critter(id).shinyOn).length;
   const sheet = openSheet(hud, {
     title: 'Curiosity Cabinet',
-    line: `${found} of ${CRITTER_IDS.length} found, ${shown} on show at Crumbs & Curios.`,
+    line: `${found} of ${CRITTER_IDS.length} found, ${shown} on show at Crumbs & Curios. ${shinies} of ${CRITTER_IDS.length} shinies.`,
     className: 'hud-cabinet-sheet',
     onClose: () => api.seen(),
     tabs: [
@@ -262,6 +270,10 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     'Shadows are critters still to find. A ✦ means one could be out right now, somewhere.',
   );
   const when = el('p', { className: 'hud-message' });
+  // Its shiny beside it, once she has caught one (1.4's G1).
+  const shinyPicture = el('canvas', { className: 'hud-icon' });
+  const shinyBox = el('span', { className: 'hud-icon-box' }, shinyPicture);
+  shinyBox.hidden = true;
   let picked: CritterId | null = null;
 
   const cases = collection<CaseEntry>({
@@ -277,6 +289,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
           group: CRITTERS[id].family,
           isNew: api.isNew(id),
           ...(entry.outNow ? { mark: '✦' } : {}),
+          ...(entry.shinyOn ? { badge: 'sparkle' as const } : {}),
         };
       }),
     groups: FAMILY_GROUPS,
@@ -296,11 +309,21 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
         ? ` First caught ${dated(entry.caughtOn!)}.${shownLine}${biggest(e.id, entry.best)}`
         : '';
       const shy = e.known && drifts(e.id) ? ` ${SHY}` : '';
-      when.textContent = `${whenAndWhere(e.id, api.now())}.${out}${caught}${shy}`;
+      const shone = entry.shinyOn
+        ? ` A shiny one first caught ${dated(entry.shinyOn)}.`
+        : e.known
+          ? ' Now and then one comes out shiny: look for a twinkle.'
+          : '';
+      when.textContent = `${whenAndWhere(e.id, api.now())}.${out}${caught}${shone}${shy}`;
       if (e.known) api.icon(picture, e.id);
       else api.silhouette(picture, e.id);
       fitIcon(picture, CARD_ICON);
       box.hidden = false;
+      shinyBox.hidden = !entry.shinyOn;
+      if (entry.shinyOn) {
+        api.item(shinyPicture, shinyOf(e.id));
+        fitIcon(shinyPicture, CARD_ICON);
+      }
     },
     pressed: (e) => e.id === picked,
     empty: '',
@@ -310,6 +333,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     'div',
     { className: 'hud-detail hud-item-card' },
     box,
+    shinyBox,
     el('div', { className: 'hud-item-text' }, name, about, when),
   );
   // The fossils she has dug up (0.3's C1), and shadows for the ones still in the ground.
@@ -394,6 +418,10 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
 
   const render = () => {
     const give = CRITTER_IDS.filter((id) => api.inBag(id) > 0 && !api.critter(id).donated);
+    // A shiny takes its case in place of the plain one (1.4's G1), once.
+    const giveShinies = CRITTER_IDS.filter(
+      (id) => api.inBag(shinyOf(id)) > 0 && !api.critter(id).shinyShown,
+    );
     const giveFossils = FOSSIL_IDS.filter((id) => api.inBag(id) > 0 && !api.fossil(id).donated);
     const rows = give.map((id) => {
       const donate = el('button', {
@@ -445,7 +473,41 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
         donate,
       );
     });
-    rows.push(...fossilRows);
+    const shinyRows = giveShinies.map((id) => {
+      const donate = el('button', {
+        type: 'button',
+        className: 'hud-price hud-primary',
+        textContent: 'Donate',
+      });
+      donate.addEventListener('click', () => {
+        const label = api.donate(id, true);
+        if (label === null) return;
+        render();
+        message.textContent = label;
+      });
+      const canvas = el('canvas', { className: 'hud-icon' });
+      api.item(canvas, shinyOf(id));
+      fitIcon(canvas, SLOT_ICON);
+      return el(
+        'div',
+        { className: 'hud-ware' },
+        el('span', { className: 'hud-icon-box' }, canvas),
+        el(
+          'div',
+          { className: 'hud-ware-text' },
+          el('strong', {}, shinyName(id)),
+          el(
+            'small',
+            {},
+            api.critter(id).donated
+              ? 'Would take its case in place of the plain one'
+              : 'Not in the museum yet',
+          ),
+        ),
+        donate,
+      );
+    });
+    rows.push(...shinyRows, ...fossilRows);
     // A wing of the museum for each family, filling as she donates (0.2's F2), and the fossils'
     // seventh case (0.3's C1).
     const wings = MILESTONE_IDS.flatMap((wing) => {
@@ -465,11 +527,19 @@ export function openMuseum(hud: HTMLElement, api: CabinetApi): () => void {
         return [el('h4', {}, tally(api, wing)), grid];
       }
       const cases = (shelfOf(shelf) as CritterId[]).map((id) => {
-        const shown = api.critter(id).donated;
+        const { donated: shown, shinyShown } = api.critter(id);
         const slot = el('div', { className: shown ? 'hud-slot' : 'hud-slot hud-slot-empty' });
         slot.setAttribute('role', 'listitem');
-        slot.setAttribute('aria-label', shown ? CRITTERS[id].name : 'An empty case');
-        if (shown) slot.append(critterCanvas(api, id, false));
+        slot.setAttribute(
+          'aria-label',
+          shinyShown ? shinyName(id) : shown ? CRITTERS[id].name : 'An empty case',
+        );
+        if (shinyShown) {
+          const canvas = el('canvas', { className: 'hud-icon' });
+          api.item(canvas, shinyOf(id));
+          fitIcon(canvas, SLOT_ICON);
+          slot.append(canvas);
+        } else if (shown) slot.append(critterCanvas(api, id, false));
         return slot;
       });
       const grid = el('div', { className: 'hud-bag' }, ...cases);

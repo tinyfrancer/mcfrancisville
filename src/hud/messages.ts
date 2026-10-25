@@ -2,6 +2,7 @@ import { PROJECTS, type ProjectStage } from '../data/projects';
 import { GREW_LINES } from '../data/affection';
 import { DECOR } from '../data/holidays';
 import { CRITTERS } from '../data/critters';
+import { shinyName, shinyOf } from '../data/shinies';
 import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
@@ -662,7 +663,9 @@ export function eventToast(event: WorldEvent): Toast | null {
         icon: { mark: 'marketDay' },
       };
     case 'caught':
-      return caughtToast(event.critter, event.first, event);
+      return event.shiny
+        ? shinyToast(event.critter, event.first, event.firstShiny === true)
+        : caughtToast(event.critter, event.first, event);
     case 'hooked':
       return {
         text: 'Hooked! Tap as the needle crosses the glowing part of the line to reel it in.',
@@ -760,6 +763,21 @@ export function caughtToast(
   return size.whopper || size.best === 'best'
     ? { ...told, text: told.text + more, special: true }
     : { ...told, text: told.text + more };
+}
+
+/**
+ * A shiny caught (1.4's G1): always a fuss, and more of one the first of its kind, and the
+ * Cabinet's word if it's the first of the critter at all.
+ */
+export function shinyToast(critter: CritterId, first: boolean, firstShiny: boolean): Toast {
+  const name = shinyName(critter).toLowerCase();
+  const a = /^[aeiou]/.test(name) ? 'an' : 'a';
+  const icon: Glyph = { item: shinyOf(critter) };
+  const cabinet = first ? ' New in your Curiosity Cabinet, shine and all.' : '';
+  const told = firstShiny
+    ? `You caught ${a} ${name}! It's the wrong colour on purpose, and prettier for it.`
+    : `You caught ${a} ${name}! Another one, glittering away.`;
+  return { text: told + cabinet, special: true, icon };
 }
 
 function caughtWords(critter: CritterId, first: boolean): Toast {

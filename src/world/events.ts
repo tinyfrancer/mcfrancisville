@@ -210,6 +210,9 @@ export type WorldEvent =
       grade?: Grade;
       /** The water a fish came up out of. */
       water?: Tile;
+      /** In its shiny colours (1.4's G1), and whether it's the first shiny of its kind. */
+      shiny?: true;
+      firstShiny?: true;
     }
   | { kind: 'fled'; critter: CritterId }
   | { kind: 'drifted'; critter: CritterId; first?: true }

@@ -203,12 +203,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '1.4',
     lines: [
-      'Cobweb Corner has winter woollies from November: duffel coats, mittens, bobble hats, ' +
-        'snow boots, tartan pyjamas and, I am told, a bat onesie.',
+      // 1.4's G1: the shinies.
+      'Once in a while a critter is the wrong colour on purpose, and prettier for it. Look for ' +
+        'a twinkle: a shiny one is about.',
+      "A shiny is worth twice as much, takes its museum case in the plain one's place, and " +
+        'Wrapunzel has two new shelves just for them.',
+      // 1.4's G2: the winter wardrobe and sets.
+      'Cobweb Corner has winter woollies from November, a snug look each week: duffel coats, ' +
+        'mittens, bobble hats and, I am told, a bat onesie.',
       'Two new sets for long evenings: a Cosy Cabin with a crackling log stove, and a Midnight ' +
         'Observatory whose telescope hums to the stars.',
-      'A whole snug look comes in each week of the winter, bobble to boots. I have bought three ' +
-        'scarves already. I regret nothing.',
     ],
     ps: 'P.S. The typewriter keys are cold in the mornings now. I type in mittens. Please excuse the typos.',
   },

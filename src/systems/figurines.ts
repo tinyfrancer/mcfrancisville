@@ -1,7 +1,7 @@
 import {
-  CARVABLE,
   CARVE_COUNT,
   carvedKindOf,
+  EVERY_CARVABLE,
   FIGURINE_IDS,
   figurineOf,
   type CarvedKind,
@@ -23,7 +23,7 @@ export interface Carving {
 
 /** Every carvable thing she has one of or more, in the order they're kept. */
 export function carvingsFrom(count: (id: ItemId) => number): Carving[] {
-  return CARVABLE.flatMap((thing) => {
+  return EVERY_CARVABLE.flatMap((thing) => {
     const have = count(thing);
     return have > 0
       ? [{ thing, figurine: figurineOf(thing), kind: carvedKindOf(thing), have }]
@@ -37,7 +37,7 @@ export function canCarve(have: number): boolean {
 }
 
 const FIGURINES: ReadonlyMap<FurnitureId, Carvable> = new Map(
-  CARVABLE.map((thing) => [figurineOf(thing), thing]),
+  EVERY_CARVABLE.map((thing) => [figurineOf(thing), thing]),
 );
 
 /** Whether a piece is one of his figurines. */
@@ -50,5 +50,5 @@ export function carvedFrom(piece: FurnitureId): Carvable | null {
   return FIGURINES.get(piece) ?? null;
 }
 
-/** How many figurines there are to have. */
+/** How many figurines there are to have for the shelf: the plain ones'. */
 export const FIGURINE_COUNT = FIGURINE_IDS.length;

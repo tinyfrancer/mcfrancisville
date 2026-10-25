@@ -11,6 +11,7 @@ import { CRITTER_IDS } from './critters';
 import { FOSSIL_IDS } from './fossils';
 import type { FurnitureRow } from './furniture';
 import { ITEMS } from './items';
+import { isShiny, SHINY_IDS } from './shinies';
 
 /**
  * Gourdon's figurines (0.3's C3): three of a kind she has, a critter, a squishy, a doll or a
@@ -72,6 +73,18 @@ export function figurineOf(thing: Carvable): FigurineId {
 /** Every figurine, in the order of what they're carved from. */
 export const FIGURINE_IDS: readonly FigurineId[] = CARVABLE.map(figurineOf);
 
+/**
+ * The shinies' figurines (1.4's G1), painted in their shiny colours on a gilded plinth: a treat on
+ * top of the set, so the figurines' shelf still asks only for the plain.
+ */
+export const SHINY_FIGURINE_IDS: readonly FigurineId[] = SHINY_IDS.map(figurineOf);
+
+/** Everything he carves, the plain and then the shinies. */
+export const EVERY_CARVABLE: readonly Carvable[] = [...CARVABLE, ...SHINY_IDS];
+
+/** Every figurine there is, the plain and then the shinies'. */
+export const EVERY_FIGURINE: readonly FigurineId[] = [...FIGURINE_IDS, ...SHINY_FIGURINE_IDS];
+
 /** What each kind's figurine says of itself, after the thing's own name. */
 const DESCRIBED: Record<CarvedKind, string> = {
   critter: 'carved in wood and painted true to life, on a little plinth. Made from three of them.',
@@ -88,12 +101,16 @@ const SAYS: Record<CarvedKind, string> = {
   fossil: 'A fossil of a fossil. Gourdon says that makes it twice as old.',
 };
 
+/** What a shiny's figurine says of itself, after its name. */
+const SHINY_DESCRIBED =
+  'carved in wood and painted as shiny as the day it was caught, gold leaf and all, on a gilded plinth.';
+
 function figurineRow(thing: Carvable): FurnitureRow {
   const kind = carvedKindOf(thing);
   const { name } = ITEMS[thing];
   return {
     name: `${name} figurine`,
-    description: `${name}, ${DESCRIBED[kind]}`,
+    description: `${name}, ${isShiny(thing) ? SHINY_DESCRIBED : DESCRIBED[kind]}`,
     layer: 'floor',
     size: { w: 1, h: 1 },
     turns: 'mirror',
@@ -103,7 +120,7 @@ function figurineRow(thing: Carvable): FurnitureRow {
 
 /** Every figurine's row, made from the row of what it's carved from. */
 export const FIGURINE_FURNITURE = Object.fromEntries(
-  CARVABLE.map((thing) => [figurineOf(thing), figurineRow(thing)]),
+  EVERY_CARVABLE.map((thing) => [figurineOf(thing), figurineRow(thing)]),
 ) as Record<FigurineId, FurnitureRow>;
 
 /** The one he carves of himself, for every figurine there is (the `figurines` shelf). */
@@ -127,9 +144,9 @@ export const CARVING_LINE =
 export const NOTHING_TO_CARVE =
   "Nothing to carve from yet. Catch a few critters, or dig something up. I'll be here.";
 
-/** Whether a thing is a critter (for the type: every carvable thing but these is an item). */
+/** Whether a thing is a critter in its plain colours (a shiny is a critter of its own kind). */
 export function isCritterThing(thing: Carvable): thing is CritterId {
-  return carvedKindOf(thing) === 'critter';
+  return carvedKindOf(thing) === 'critter' && !isShiny(thing);
 }
 
 /** Whether a thing is a fossil. */

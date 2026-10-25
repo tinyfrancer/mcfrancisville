@@ -320,7 +320,15 @@ export type ItemId =
   | DishId
   | FruitId
   | CritterId
+  // A critter in its shiny colours (1.4's G1), kept as a thing of its own.
+  | ShinyId
   | FossilId;
+
+/** A critter's shiny (1.4's G1, decision 370), as a thing in her bag: `lunaMothShiny`. */
+export type ShinyId = `${CritterId}Shiny`;
+
+/** What the shiny shelves send her (1.4's G1): a framed shiny luna moth, a dome of shiny orbs. */
+export type ShinyPiece = 'framedShiny' | 'shinyDome';
 
 /**
  * The fossils she digs up (0.3's C1), one mound a day in each place: something for her bag, her
@@ -805,7 +813,10 @@ export type MilestoneId =
   | 'crawlies'
   | 'crawlyWing'
   // Every figurine Gourdon carves (0.3's C3).
-  | 'figurines';
+  | 'figurines'
+  // The shinies (1.4's G1): one of every family, and one of everything.
+  | 'shinyFamilies'
+  | 'shinies';
 
 export type FurnitureId =
   | 'batBed'
@@ -927,6 +938,8 @@ export type FurnitureId =
   | FossilPiece
   // What the creepy-crawlies send her (0.3's C2).
   | CrawlyPiece
+  // What the shinies send her (1.4's G1).
+  | ShinyPiece
   // Gourdon's figurines (0.3's C3), carved from three of a kind, and the one he carved of himself.
   | FigurineId
   | 'carvedGourdon'
@@ -948,8 +961,11 @@ export type SquishyId =
 /** What's only ever won at the Hollow Fairground (V1's R6b): a squishy of its own. */
 export type FairPrizeId = 'luckyDuckSquish';
 
-/** What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil. */
-export type Carvable = CritterId | SquishyId | DollId | FossilId;
+/**
+ * What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil,
+ * or a shiny (1.4's G1), whose figurine is painted in its shiny colours.
+ */
+export type Carvable = CritterId | SquishyId | DollId | FossilId | ShinyId;
 
 /** A figurine, one for every carvable thing, its id made from the thing's (`lunaMothFigurine`). */
 export type FigurineId = `${Carvable}Figurine`;
