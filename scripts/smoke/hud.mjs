@@ -110,6 +110,10 @@ async function dragTouch(from, to, steps = 6) {
     };
     await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [point] });
   }
+  // Held still a moment before lifting: a finger let go moving is a fling, and Chromium spends
+  // the next tap stopping it rather than clicking.
+  await page.waitForTimeout(250);
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [to] });
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await cdp.detach();
   await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));
@@ -193,6 +197,7 @@ async function photoMode() {
     drawer.open && drawer.chips === 4,
     JSON.stringify(drawer),
   );
+  await tapElement('.hud-camera-drawer .hud-filter-spooky');
   check(
     'the spooky filter is picked',
     (await page.locator('.hud-filter-spooky[aria-pressed="true"]').count()) === 1,
