@@ -18,14 +18,10 @@ Not started.
 
 ### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
 
-Branch `claude/g2-winter` from `v1.4-dev`, PR #225 into `v1.4-dev`. **All built** (decision 371
-says what and why): sixteen winter pieces (`src/sprites/doll/winter.ts`, the scarf in the
-`necklace` slot), sold at Cobweb Corner November to February (a shelf's `months`: "Winter
-woollies" and "This week's snug look"); Cosy Cabin and Midnight Observatory (`src/data/sets.ts`,
-`src/sprites/setsThree.ts`, the telescope's `telescope` tune), the `starWindow` paper; tests
-(`looksHeld`'s winter block, `shop`, `sets`, `world/winterSets`), smoke `winter` (look) and
-`winterSets` (home); 1.4's `NOTES` row made with three lines (G1 and G3 add one each). Left: the
-whole smoke run, CI, merging `v1.4-dev` and the merge.
+**Landed** (PR #225, merged into `v1.4-dev`): sixteen winter pieces, the winter shelves at Cobweb
+Corner (November to February), Cosy Cabin and Midnight Observatory, the star window paper, and
+1.4's `NOTES` row with three lines (G1 and G3 add one each, five at most). Decision 371 says what
+and why. Nothing half done.
 
 ### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
 
