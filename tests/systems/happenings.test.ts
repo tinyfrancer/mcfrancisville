@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { HAPPENING_IDS, HAPPENINGS } from '../../src/data/happenings';
 import { INTERIORS } from '../../src/data/interiors';
 import { isFullMoon } from '../../src/systems/calendar';
@@ -9,6 +9,7 @@ import {
   hourOfNight,
   placeAt,
 } from '../../src/systems/happenings';
+import { knowMayor } from '../../src/systems/mayor';
 import { whereabouts } from '../../src/systems/schedules';
 
 /** A year of day keys from the start of 2027. */
@@ -104,5 +105,64 @@ describe('film night (0.2 J3)', () => {
     expect(seats.every((s) => s.zone === 'town' && s.ty > 28)).toBe(true);
     expect('seats' in where).toBe(true);
     expect(faces).toBe('up');
+  });
+});
+
+describe("the hour's happenings, kept (1.3's F2)", () => {
+  afterEach(() => knowMayor(null, null));
+
+  it('begin and end on whole hours, which is what lets the hour be the key', () => {
+    for (const id of HAPPENING_IDS) {
+      expect(Number.isInteger(HAPPENINGS[id].from), id).toBe(true);
+      expect(Number.isInteger(HAPPENINGS[id].until), id).toBe(true);
+    }
+  });
+
+  it('are the same array for the whole hour of a day, and a new one when either turns', () => {
+    const evening = happeningsAt(19, '2026-10-02');
+    expect(happeningsAt(19.5, '2026-10-02')).toBe(evening);
+    expect(happeningsAt(19.9999, '2026-10-02')).toBe(evening);
+    const next = happeningsAt(20, '2026-10-02');
+    expect(next).not.toBe(evening);
+    expect(happeningsAt(20.25, '2026-10-02')).toBe(next);
+    expect(happeningsAt(20, '2026-10-03')).not.toBe(next);
+  });
+
+  it('turn over at the day, past midnight too: one in the morning is still the night before', () => {
+    const late = happeningsAt(1, '2026-10-02');
+    expect(happeningsAt(1.75, '2026-10-02')).toBe(late);
+    expect(late).toContain('midnightBake');
+    expect(happeningsAt(5, '2026-10-02')).not.toContain('midnightBake');
+  });
+
+  it('answer as they would unkept, for every hour of a spell of days', () => {
+    const days = YEAR.filter((_, i) => i % 9 === 0);
+    const fresh = (hour: number, day: string) => {
+      // Asking another hour in between drops what was kept.
+      happeningsAt((hour + 7) % 24, '2000-01-01');
+      return [...happeningsAt(hour, day)];
+    };
+    for (const day of days) {
+      for (let hour = 0; hour < 24; hour += 0.5) {
+        const kept = [...happeningsAt(hour, day)];
+        expect(happeningsAt(hour, day), `${day} ${hour}`).toEqual(kept);
+        expect(fresh(hour, day), `${day} ${hour}`).toEqual(kept);
+      }
+    }
+  });
+
+  it("follow the mayor's story while she plays, without the hour turning", () => {
+    const day = '2026-11-10';
+    const hour = 20;
+    expect(happeningsAt(hour, day)).not.toContain('unmasking');
+    knowMayor('2026-11-09', null);
+    expect(happeningsAt(hour, day)).toContain('unmasking');
+    expect(happeningsAt(hour, day)[0]).toBe('unmasking');
+    knowMayor('2026-11-09', day);
+    expect(happeningsAt(hour, day)).toContain('unmasking');
+    knowMayor('2026-11-09', '2026-11-10');
+    expect(happeningsAt(hour, '2026-11-11')).not.toContain('unmasking');
+    knowMayor(null, null);
+    expect(happeningsAt(hour, day)).not.toContain('unmasking');
   });
 });

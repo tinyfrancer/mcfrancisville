@@ -532,7 +532,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   and her birthday party; `Neighbourhood` walks only those where she is (decision 92), through
   doors and mats, and they're drawn in every view by `neighbourDrawables` (`src/render/villagers.ts`).
   Their happenings (the book club, the midnight bake…) are rows in `src/data/happenings.ts`,
-  worked out in `src/systems/happenings.ts`; the window's small event (news, or something lost
+  worked out in `src/systems/happenings.ts` (`happeningsAt` kept for the whole hour and the day, and
+  for as long as `mayorTold()` says the mayor's story is told the same; 1.3's F2, decision 361; a
+  new row begins and ends on a whole hour, held by a test); the window's small event (news, or something lost
   to hand back) is `world.smallEvents` (`SmallEvents`, rows in `src/data/smallEvents.ts`, the
   errand she carries in save v24); anyone may let one go on a talk (`puffs` on a villager row,
   `puffsOnTalk`), and `fill` puts her name into a line, a capital where it starts a sentence
@@ -854,7 +856,8 @@ its files sharing their modules (`isolate: false`). A test outside `tests/hud/` 
 `document` or `window` is named in `DOM`; a module-level `let` in `src/` that a world sets from
 outside (as `knowFairground` does) is put back in `tests/setup.ts`, or a file finds it as the one
 before left it. A world test is slow by its steps, not its building (about 50 ms): one that
-settles the town for long takes a stated timeout saying why, as `finale.test.ts` does. Smoke
+settles the town for long takes a stated timeout saying why (`finale.test.ts` needed none after
+1.3's F2). Smoke
 (`scripts/smoke/`, a file per area) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.

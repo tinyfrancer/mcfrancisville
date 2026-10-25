@@ -17,7 +17,10 @@ F1 landed (PR #218, decision 360). ⬆ 1.2.1 ready.
 
 ### F2: her phone's frame (`claude/f2-frame`; Sonnet; decision 361)
 
-Not started.
+F2 landed (PR #217, decision 361): `happeningsAt` kept for the hour (keyed by day, whole hour and
+`mayorTold()`), the day key by the minute in `Decorations` and `Mounds` (`world/zones/MinuteDay.ts`),
+`finale.test.ts`'s 30 s timeout gone; numbers in `docs/architecture.md` ("1.3's F2"). No save
+change.
 
 ### F3 the creatures, F4 the scenery, F5 the touches, F6 the forwarders, V1.3 the review
 

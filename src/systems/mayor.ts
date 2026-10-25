@@ -15,11 +15,22 @@ export const MAYOR: VillagerId = 'robBoo';
 
 let promised: string | null = null;
 let met: string | null = null;
+let told = 0;
 
 /** What her corkboard says of the mayor: the day of the promise, and the day she met him. */
 export function knowMayor(ready: string | null, metOn: string | null): void {
+  if (ready !== promised || metOn !== met) told++;
   promised = ready;
   met = metOn;
+}
+
+/**
+ * Which telling of the mayor's story this is, for what is kept against it (1.3's F2): the hour's
+ * happenings read whether he's about and whether the unmasking is on, so a memo of them is good
+ * only while this number stays the same.
+ */
+export function mayorTold(): number {
+  return told;
 }
 
 /** The day she met the mayor at the castle, or null while he's still a mystery. */

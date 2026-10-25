@@ -14,7 +14,7 @@ import type { HappeningId, InteriorId, MapZoneId, VillagerId, ZoneId } from '../
 import { CALENDAR } from '../data/calendar';
 import { fallsOn, festivalsOn, isFullMoon, partsOf } from './calendar';
 import { DAY_STARTS_AT_HOUR } from './clock';
-import { inTown, unmaskingOn } from './mayor';
+import { inTown, mayorTold, unmaskingOn } from './mayor';
 import { isBirthday } from '../data/birthdays';
 import { weatherOn } from './weather';
 import { hashString } from './random';
@@ -83,9 +83,20 @@ export function isHolidays(id: HappeningId): boolean {
   );
 }
 
-/** The happenings going on at an hour of a day, a holiday's first. */
-export function happeningsAt(hour: number, day: string): HappeningId[] {
+/** The last hour's answer, kept (1.3's F2, decision 361): asked of every neighbour every step. */
+let kept: { key: string; mayor: number; on: readonly HappeningId[] } | null = null;
+
+/**
+ * The happenings going on at an hour of a day, a holiday's first. Every row begins and ends on a
+ * whole hour (held by a test), so the answer is the same all that hour and is kept for it, with
+ * the day, and for as long as the mayor's story is told the same (his hello and birthday read
+ * whether she has met him). The array is shared: callers read it.
+ */
+export function happeningsAt(hour: number, day: string): readonly HappeningId[] {
   const h = hourOfNight(hour);
+  const key = `${day}:${Math.floor(h)}`;
+  const mayor = mayorTold();
+  if (kept?.key === key && kept.mayor === mayor) return kept.on;
   const on = HAPPENING_IDS.filter((id) => {
     const row = HAPPENINGS[id];
     return row.from <= h && h < row.until && happensOn(id, day);
@@ -93,7 +104,9 @@ export function happeningsAt(hour: number, day: string): HappeningId[] {
   // The mayor's hello (V1's P3b) comes before anything else: it happens once.
   const once = on.filter((id) => 'unmasking' in HAPPENINGS[id].on);
   const rest = on.filter((id) => !once.includes(id));
-  return [...once, ...rest.filter(isHolidays), ...rest.filter((id) => !isHolidays(id))];
+  const answer = [...once, ...rest.filter(isHolidays), ...rest.filter((id) => !isHolidays(id))];
+  kept = { key, mayor, on: answer };
+  return answer;
 }
 
 /**
