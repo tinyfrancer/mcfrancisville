@@ -31,9 +31,11 @@ subscription: visitors every fortnight, her phone's frame, the creatures and the
 forwarders, from `v1.3-dev`, the model fit to each session (the personal touches, F5, dropped at
 the user's word). **1.3 is the release PR #219** (`v1.3-dev` → `main`, "Release 1.3 (with
 1.2.1)", save v55 unchanged), the user's to merge; `main` after it is the game as it stands.
-**There is no plan after 1.3**: `docs/v1.3_plan.md`, `docs/v1.1_plan.md`, `docs/v1_plan.md` and
-the plans before them are complete, and a session with nothing asked of it changes nothing and
-asks the user what they'd like next.
+**1.3 was merged by the coordinator at the user's word on 2026-10-25: it is on her phone.** **The
+plan now is `docs/v1.4_plan.md`** (settled 2026-10-25, decision 367): content from `v1.4-dev`,
+every session Opus, two at a time: shinies, a winter wardrobe and two sets, ice fishing (⬆ 1.4),
+the night sky, a photo mode, an attic, a seventh pet, a review (⬆ 1.5). `docs/v1.3_plan.md`,
+`docs/v1.1_plan.md`, `docs/v1_plan.md` and the plans before them are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
@@ -78,10 +80,9 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.3-dev` was the integration branch for 1.3** and ends with it (`v1.1-dev` was 1.1's,
-`v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212). **The next plan makes its own from
-`main`** once the release PR #219 has merged, and adds it to `vercel.json`'s no-preview list that
-day (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
+**`v1.4-dev` is the integration branch for 1.4 and 1.5** (`v1.3-dev` was 1.3's, `v1.1-dev`
+1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212), made from `main` the day 1.3
+merged and added to `vercel.json`'s no-preview list (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds

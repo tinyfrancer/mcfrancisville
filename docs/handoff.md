@@ -8,7 +8,21 @@ history.
 
 ## In progress
 
-Nothing is in progress.
+**The 1.4 plan is running** (`docs/v1.4_plan.md`, decision 367; started 2026-10-25 by the
+coordinating session: Opus sub-agents in worktrees, two at a time, from `v1.4-dev`). **1.3 is on
+her phone** (PR #219, merged 2026-10-25). Each session's heading says where it is.
+
+### G1: shiny morphs (`claude/g1-shinies`; decision 370; save v56)
+
+Not started.
+
+### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
+
+Not started.
+
+### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+
+Not started; in the plan's order.
 
 ## If you are starting cold after a long gap
 

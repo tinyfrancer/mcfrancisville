@@ -9286,3 +9286,20 @@ own); saying goodbye in the card (the town goes on and nothing expires, decision
 only stops typing); opening smoke's real-clock sections on a named day here (a change to how a
 whole run meets the town, for a later session that wants it); running F5 with the defaults (the
 user said hold).
+
+## 367. The plan for 1.4 and 1.5: shinies, a winter wardrobe and sets, ice fishing, the night sky, a photo mode, an attic and a seventh pet (2026-10-25)
+
+**Context:** 1.3 shipped at midday (PR #219). The user has most of the week's usage left and
+asked what else it could buy; told the choices, they said "go for it". No personal touches
+(decision 177, held again 2026-10-25); no refactors; "a fun game".
+
+**Decision:** `docs/v1.4_plan.md`: seven content sessions and a review from `v1.4-dev` (made from
+`main` today, in `vercel.json`'s no-preview list), every one Opus, two at a time by files, 1.4
+after shinies, the winter wardrobe and sets, and ice fishing; 1.5 after the night sky, the photo
+mode, the attic, the pet and the review. Content on the seams the earlier plans made: a critter a
+row, a set a const and a row, a piece a row and a print, a project a row, a room a row.
+
+**Rejected:** a new neighbour (a week isn't a themed release, decision 270); more recipes or
+happenings (she has 52 and 20; they're not what she does most); a second Cabinet of stickers or
+postcards (a shiny of what she already hunts is more of the same joy, not a new chore); refactors
+(nothing she sees).
