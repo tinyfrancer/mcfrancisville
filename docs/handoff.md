@@ -13,7 +13,7 @@ the user 2026-10-20). Each session's heading says where it is.
 
 ### F1: visitors every fortnight (`claude/f1-fortnight`; Sonnet; decision 360)
 
-Not started.
+F1 landed (PR #218, decision 360). ⬆ 1.2.1 ready.
 
 ### F2: her phone's frame (`claude/f2-frame`; Sonnet; decision 361)
 

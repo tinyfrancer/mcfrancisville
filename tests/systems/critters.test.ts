@@ -5,7 +5,7 @@ import { MUSEUM_LETTERS } from '../../src/data/museum';
 import { TOWN } from '../../src/data/maps';
 import { ZONE_IDS, ZONES } from '../../src/data/zones';
 import { ITEM_VALUE } from '../../src/data/shop';
-import { isFullMoon, shiftDay } from '../../src/systems/calendar';
+import { daysBetween, isFullMoon, isNewMoon, shiftDay } from '../../src/systems/calendar';
 import { dayKey } from '../../src/systems/clock';
 import {
   CRITTERS_PER_HOUR,
@@ -132,7 +132,7 @@ describe('the critters', () => {
 describe('critters in the weather', () => {
   /**
    * Every critter dealt in town through the year, at every hour, in one weather. A critter in the
-   * wrong weather visits the day after a full moon (V1's R5), so those days are left out.
+   * wrong weather visits the day after a full or new moon (V1's R5, 1.3's F1), so those days are left out.
    */
   const dealtIn = (weather: 'clear' | 'rain' | 'fog') =>
     YEAR.filter((day) => !isVisitDay(day))
@@ -374,7 +374,7 @@ describe("rarity and the seasons (0.2's F1)", () => {
     }
   });
 
-  it('deal one out of season only the day after a full moon, and the blue moonfish only under one', () => {
+  it('deal one out of season only the day after a full or new moon, and the blue moonfish only under one', () => {
     for (const day of YEAR) {
       for (const h of [2, 12, 21]) {
         for (const place of PLACES) {
@@ -413,6 +413,31 @@ describe("visits (V1's R5, decision 310)", () => {
     expect(isVisiting('blueMoonfish', next, 'clear')).toBe(false);
   });
 
+  it("come every fortnight (1.3's F1, decision 360): the day after each full and new moon", () => {
+    const days = Array.from({ length: 800 }, (_, k) => shiftDay('2026-10-01', k));
+    for (const day of days) {
+      const before = shiftDay(day, -1);
+      expect(isVisitDay(day), day).toBe(isFullMoon(before) || isNewMoon(before));
+      // Never on a moon's own day.
+      if (isFullMoon(day) || isNewMoon(day)) expect(isVisitDay(day), day).toBe(false);
+    }
+    const visits = days.filter(isVisitDay);
+    expect(visits.some((d) => isNewMoon(shiftDay(d, -1)))).toBe(true);
+    // The gaps between visits: about half a moon, so never a fortnight and two days.
+    const gaps = visits.slice(1).map((d, i) => daysBetween(visits[i]!, d));
+    expect(Math.min(...gaps)).toBeGreaterThanOrEqual(13);
+    expect(Math.max(...gaps)).toBeLessThanOrEqual(16);
+    expect(visits.length).toBeGreaterThanOrEqual(2 * 26);
+  });
+
+  it('keep a moon-bound critter to the full moon, whatever the new moon does', () => {
+    const fresh = '2026-12-10';
+    expect(isNewMoon(shiftDay(fresh, -1))).toBe(true);
+    expect(isVisitDay(fresh)).toBe(true);
+    expect(isVisiting('blueMoonfish', fresh, 'clear')).toBe(false);
+    expect(isAbout('blueMoonfish', fresh, 22, 'clear')).toBe(false);
+  });
+
   it('deal a visitor at half a legendary, and a holiday critter off its days at a little more', () => {
     expect(VISIT_WEIGHT * 2).toBe(RARITY_WEIGHT.legendary);
     expect(HOLIDAY_VISIT_WEIGHT).toBeGreaterThan(RARITY_WEIGHT.legendary);
@@ -432,7 +457,7 @@ describe("visits (V1's R5, decision 310)", () => {
       visit: false,
     });
     // The pumpkin bat's season is October and November; in January it next visits the day after
-    // the full moon.
+    // a full or new moon.
     const visit = nextChance('pumpkinBat', '2027-01-01', 12)!;
     expect(visit.visit).toBe(true);
     expect(isVisitDay(visit.day)).toBe(true);

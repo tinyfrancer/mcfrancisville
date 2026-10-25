@@ -107,6 +107,14 @@ export function isFullMoon(day: string): boolean {
   return age >= full - 0.5 && age < full + 0.5;
 }
 
+/** Whether a day is the new moon's, as `isFullMoon` finds the full: noon within half a day of it. */
+export function isNewMoon(day: string): boolean {
+  const { year, month, date } = partsOf(day);
+  const noon = Date.UTC(year, month - 1, date, 12);
+  const age = ((((noon - NEW_MOON) / DAY_MS) % SYNODIC_DAYS) + SYNODIC_DAYS) % SYNODIC_DAYS;
+  return age < 0.5 || age >= SYNODIC_DAYS - 0.5;
+}
+
 /** How many days old the moon is at a day's noon (UTC), from 0 at the new moon (V1's L5). */
 export function moonAge(day: string): number {
   const { year, month, date } = partsOf(day);

@@ -102,7 +102,7 @@ describe("Today's lines (V1's R2)", () => {
     expect(at(17.5).some((l) => l.kind === 'callers')).toBe(false);
   });
 
-  it('says the critters are coming in a day or two, the day after a full moon', () => {
+  it('says the critters are coming in a day or two, the day after a full or new moon', () => {
     let day = '2026-10-01';
     while (!isVisitDay(day)) day = shiftDay(day, 1);
     expect(visitsIn(shiftDay(day, -2))).toBe(2);

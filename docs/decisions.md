@@ -8931,3 +8931,39 @@ night stays the moon-bound critters'); visitors every week (the Cabinet is meant
 year's work, decision 150; a fortnight answers the complaint without making it a month's); a new
 neighbour or place (a week isn't a release with a theme, decision 270); refactors first (they
 change nothing she sees).
+
+## 360. Visitors every fortnight: a critter out of its time comes the day after the full moon and the day after the new one (1.3's F1, 2026-10-24)
+
+**Context:** her one complaint after 1.2, in the user's words: "it takes too long to get the once a
+month full moon bugs. Maybe make 2 weeks the maximum in between." R5 (decision 310) had a critter
+out of its season, its holiday or its weather come visiting the day after each full moon, so the
+wait was up to 29 days.
+
+**Decision:** `isVisitDay` is true the day after a full moon **and** the day after a new moon
+(`isNewMoon` in `systems/calendar.ts`, beside `isFullMoon`: the day whose noon, UTC, is within
+half a day of the moon's age being 0 or `SYNODIC_DAYS`). Visits fall 14 or 15 days apart (never
+fewer than 13 or more than 16, held over two simulated years), so a critter that isn't a
+moon-bound one is never more than about a fortnight away, and the rarity test now holds that. The
+moon-bound critters (`moon` on the row: the blue moonfish, the ghost bat) keep the full moon's own
+night, unchanged. `nextChance`, which walks forward day by day, found the nearer day on its own;
+the Cabinet's hint now says "the day after each full or new moon", Today's two lines say "the day
+after a full or new moon", and no small talk or memory line promised the full moon alone.
+Her notes: a `1.2.1` `NOTES` row of three lines (a phone that saw `1.2` reads exactly that card).
+
+**The numbers:** the rarity test's simulated year (an hour a day, from the first of each of twelve
+months) filled the Cabinet in **9.1 to 10.2 months, 9.7 on average** before, and **7.4 to 10.2,
+8.9 on average** now. Seven of the twelve starts (January, February, March, May, July, August,
+September) don't move at all: the last to come there is a moon-bound legendary, whose wait is the
+same. The other five gain 1.0 to 2.5 months (October 10.1 to 7.6, November 9.1 to 7.4, December
+10.2 to 9.1, April 10.1 to 8.3, June 10.0 to 8.1). Decision 150 still holds (most of a year's
+work: the test's window is now over 7 and under 11 months, where it was over 8.5), and the floor
+this session was set to stop at, about 7 months, is not crossed. Every start still finds every
+critter, and the first month's find is as before (the "about a third still to find" test passes unchanged).
+
+**Rejected:** a visit on the new moon's own day (R5's reason holds: the full moon's night is the
+moon-bound critters', and the new moon is dark; the day after is warm and keeps the rule one
+sentence); visitors every week (decision 357: a fortnight answers the complaint without making
+the Cabinet a quarter's work); retuning `VISIT_WEIGHT` or any critter row to win back the months
+(the user asked for the fortnight, and the Cabinet is still most of a year); a Cabinet word for
+"the moon's turn" (it reads vaguer than "full or new moon", which she can see in the sky and on
+the calendar).

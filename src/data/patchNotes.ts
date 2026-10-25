@@ -184,6 +184,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Typed very quietly, in case your phone is on silent. The W still sticks.',
   },
+  {
+    version: '1.2.1',
+    lines: [
+      'The moon sends visitors twice a month now: the day after it is full, and the day ' +
+        'after it is new. No critter is more than a fortnight off.',
+      'Out-of-season critters and critters in the wrong weather turn up on both days. The ' +
+        'ones who wait for a full moon still wait, being fussy.',
+      'The Cabinet and Today say which day is next, so the moon no longer has to be asked. ' +
+        'It was getting tired of being asked.',
+    ],
+    ps: 'P.S. I counted the new moons myself. There were no surprises. There never are.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

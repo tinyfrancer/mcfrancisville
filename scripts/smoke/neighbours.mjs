@@ -444,7 +444,13 @@ async function wesChat() {
   if (!open) return;
   await framed('.hud-wes-sheet', { picture: true });
   const first = (await page.locator('.hud-wes-sheet .hud-speech').textContent()) ?? '';
-  check('Wes says hello, and stays', /Hello/.test(first), first.slice(0, 40));
+  // From the real day the October story's last chapter is due (about 24 October) he leads with
+  // delivering it instead of a hello (`WES_DELIVERS`), so either opens the chat.
+  check(
+    'Wes says hello, and stays',
+    /Hello/.test(first) || /last chapter of the mayor's story/.test(first),
+    first.slice(0, 40),
+  );
   await page.screenshot({ path: '.smoke/wes.png' });
   await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
   await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => done(null))));

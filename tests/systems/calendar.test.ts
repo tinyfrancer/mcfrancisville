@@ -9,10 +9,12 @@ import {
   festivalsOn,
   happeningOn,
   isFullMoon,
+  isNewMoon,
   keyOf,
   monthOf,
   nextDay,
   partsOf,
+  shiftDay,
   weekOf,
 } from '../../src/systems/calendar';
 
@@ -63,6 +65,16 @@ describe('the calendar', () => {
       expect(near(want), want).toBe(true);
     }
     expect(isFullMoon('2026-09-12')).toBe(false);
+  });
+
+  it('finds the new moons, half a moon from the full ones', () => {
+    const days = Array.from({ length: 365 }, (_, k) => shiftDay('2026-10-01', k));
+    const news = days.filter(isNewMoon);
+    expect(news.length).toBeGreaterThanOrEqual(12);
+    expect(news.length).toBeLessThanOrEqual(13);
+    // New moons of 2026-27, give or take the day a time zone puts them on.
+    for (const want of ['2026-12-09', '2027-01-07', '2027-02-06']) expect(news).toContain(want);
+    expect(news.some(isFullMoon)).toBe(false);
   });
 
   it('finds the Friday the 13ths', () => {
