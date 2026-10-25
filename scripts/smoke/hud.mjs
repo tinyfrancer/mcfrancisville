@@ -174,7 +174,25 @@ async function photoMode() {
   );
   // A filter, shown live.
   await tapElement('.hud-camera-strip [aria-label="Filters"]');
-  await tapElement('.hud-camera-drawer .hud-filter-spooky');
+  const drawer = await page.evaluate(() => {
+    const b = document.querySelector('.hud-camera-strip [aria-label="Filters"]');
+    const r = b?.getBoundingClientRect();
+    const at = r ? document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2) : null;
+    const tray = document.querySelector('.hud-camera-drawer');
+    return {
+      open: !!tray && !(/** @type {HTMLElement} */ (tray).hidden),
+      chips: tray?.children.length ?? 0,
+      pressed: b?.getAttribute('aria-pressed'),
+      at: at ? `${at.tagName}.${at.className}` : null,
+      sheets: document.querySelectorAll('.hud-sheet').length,
+      box: r ? [r.left, r.top, r.width, r.height].map(Math.round) : null,
+    };
+  });
+  check(
+    'Filters opens its drawer of four',
+    drawer.open && drawer.chips === 4,
+    JSON.stringify(drawer),
+  );
   check(
     'the spooky filter is picked',
     (await page.locator('.hud-filter-spooky[aria-pressed="true"]').count()) === 1,
