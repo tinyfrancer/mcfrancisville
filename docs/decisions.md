@@ -9171,3 +9171,50 @@ hedge as a wood's edge (a fair is tended); every tree by the graves dead (three 
 fence; one reads as the graveyard's); a reed clump at the creek's end (reeds stand in water, not
 ice, and the curl of bank alone closes it); a map change at the creek (the tiles stay, W1's
 snapshots hold them); ice over the fountain's tiles in winter (the ring reads as a reason).
+
+## 365. The forwarders dropped, the save stamped by the world's clock, 1.2's town in the overlays snapshot (1.3's F6, 2026-10-25)
+
+_Session F6 of the 1.3 plan (decision 357), for V1.1's "Where it hurts" 4 and 7 (decision 356).
+A refactor: nothing she sees changes, no save change (still v55), `looksHeld` unchanged,
+`src/sprites/` untouched. 364 is F5's, the touches; the gap is left for it._
+
+- **`Home`'s twenty-seven forwarders are gone** (W2's, decision 341: `room`, `here`, `built`,
+  `has`, `enter`, `build`, `extensions`, `canGrow`, `grow`, `layout`, `placed`, `placedIn`,
+  `everyPiece`, `wallpaper`, `flooring`, `pieceAt`, `surfaceUnder`, `ridersOf`, `canWalk`,
+  `takeOut`, `move`, `turn`, `putAway`, `showIn`, `onShow`, `paper`, `lay`), and every reader
+  asks `home.rooms.<x>`: the sheets' Api (`wiring/apis/home.ts`), `HomeView`, `main.ts`, the
+  services (`Decorator`, `Display`, `Broom`, `PetCare`, `Workbench`, `Belongings`), the areas, the
+  world and 12 test files. `Home` is the chest, the papers and floors she owns, and `rooms`.
+  **`Neighbourhood`'s ten** (W3's, decision 342: `talk`, `reply`, `give`, `favour`, `doFavour`,
+  `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`) are gone, readers on `world.talk` (the
+  view's two reads in `render/villagers.ts` and 22 test files). The compiler found every reader
+  (delete, then `tsc`); the readers it can't see, smoke's and perf's `window.world.home.*` and
+  `window.world.neighbourhood.*` in `scripts/`, were found by grep and moved with them.
+- **`keepTown` stamps `updatedAt` and `lastPlayedAt` with `world.clock.now()`**, so a town played
+  under a dev build's `?day=` is saved as played then. On her phone the clock is `systemClock`, so
+  the stamps are the same `Date.now()` as ever. `createdAt` stays the phone's own time: the weekly
+  nudge counts from it against `Date.now()`, and a made-up creation day made it fire every time.
+  `tests/wiring/keeping.test.ts` (a DOM file) holds the stamps by a fake clock moving.
+- **The cloud keeps real time.** It orders towns by `updatedAt` (`savedAt` up, `check(opened)`
+  down), so a town stamped on a past `?day=` would sort behind every real one and be offered
+  "a newer town in the cloud" on each load (smoke found it: the whole run's fake cloud holds a
+  real-time town from its first page). `keepTown` therefore hands the cloud the phone's real time
+  for a town played on a made-up clock (`world.clock !== systemClock`: `?day=` or `?hour=`) and
+  asks it nothing, as its own stamps are fiction; with the real clock, which is every phone's
+  and every real session, nothing differs from before. The dev server has no `api/save`, so this
+  only shows in smoke's fake cloud: its "opened behind the cloud, it asks before taking the newer
+  town" check opens on the real clock now (`?day=` pages are never asked). **Rejected:** a
+  phone-side real stamp beside the save (more machinery on her phone's save path for a dev-only
+  case); leaving the cloud on the fiction (the offer card over every smoke section after the first
+  real-time page); moving `settings.ts`'s restore onto the world's clock (a restore is the
+  phone's own act, real time, as the cloud's).
+- **1.2's lived-in town is in W1's overlays snapshot** (`lived-in-v55` added to `SAVES`): its first
+  snapshot taken from the code as it stands, the one addition; the existing snapshots, and the
+  arrivals', are byte for byte what they were (never `-u`).
+- **Held by** the suite (2,719 tests), the lived-in fixtures, the overlays and arrivals snapshots,
+  `looksHeld`, smoke whole (622 of 622) and `smoke:offline` (10 of 10). `npm run perf` at Close,
+  21:30, three runs each alternating, `v1.3-dev` and F6 each served from a copy of its own, means
+  in ms (base | F6): town update 0.84-0.89 | 0.74-0.86, draw 35.4-37.1 | 33.7-36.1; home update
+  0.72-0.84 | 0.69-0.84, draw 19.8-20.5 | 18.6-20.4; yard draw 34.2-35.7 | 32.6-37.9; back room
+  update 1.10-1.17 | 1.10-1.25, draw 23.4-24.4 | 23.4-25.4. Every row within the other's spread:
+  noise, as a one-line forward is not what a frame costs.

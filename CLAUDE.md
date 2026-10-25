@@ -467,8 +467,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, kept by `Rooms` since
   1.1's W2 (decision 341: each room's pieces with what they show and what stands on what, walls,
   floor and size, `home.rooms`), `Home` keeping what they share (the chest, the papers and
-  floors she owns) and answering the room's reads through `Rooms`, and everything that reads "the
-  room" reading the one she's in (`home.here`). They're all the one place, `home`: a doorway in
+  floors she owns), with no reads of the room of its own (1.3's F6, decision 365), and everything
+  that reads "the room" reading the one she's in through `home.rooms` (`home.rooms.here`,
+  `home.rooms.placed`). They're all the one place, `home`: a doorway in
   a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
   within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe. A
   planter stands in any room, its bed keyed by its room (`Plot.room`, save v55).
@@ -488,7 +489,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   dresser, the counter, the low shelf, the curiosity cabinet: how high each top is) and `SMALL`
   (lamps, vases, jars, cakes, curios and the trinkets, art in `src/sprites/tabletop.ts`). A small
   piece on a surface's tile is `on` (`Placed.on`, one to a tile; `surfaceAt`, `riderAt`,
-  `ridersOf` in `systems/decor.ts`), rides along when `Home.move` moves its surface, goes in the
+  `ridersOf` in `systems/decor.ts`), rides along when `Rooms.move` moves its surface, goes in the
   chest with it, and is drawn raised to its top (`pieceSprite`'s `raised`).
   The furniture sets (0.3's S3 and S4, decisions 262–263) are rows in `src/data/sets.ts` (a set is
   a "suite" in code: `SuiteId`, `SUITES`, `SET_FURNITURE`; H2's `SetPiece` was taken), art in
@@ -559,8 +560,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` is who's where and the
   walking, and `world.talk` (`Talk`, `src/world/services/Talk.ts`, 1.1's W3) the talk: `talk`,
-  `reply`, `give`, `favour`/`doFavour`, the faces, friendships and best friends' letters (the
-  neighbourhood answers the same reads, a line each, for the view and the tests); `world.mailbox`
+  `reply`, `give`, `favour`/`doFavour`, the faces, friendships and best friends' letters (asked
+  of `world.talk` by the view and the tests too, `Neighbourhood` having no forwarders since
+  1.3's F6, decision 365); `world.mailbox`
   the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
   (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154), on the body

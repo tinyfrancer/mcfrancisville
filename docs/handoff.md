@@ -44,11 +44,14 @@ trees have all their leaves back.
 
 ### F6: the forwarders and the small things (`claude/f6-forwarders`; Sonnet; decision 365)
 
-In progress. Done: `Home`'s 27 forwarders dropped, every reader (src, tests, `scripts/` smoke and
-perf, which reach `window.world.home`) on `home.rooms.<x>`. Next, in order: `Neighbourhood`'s ten talk
-forwarders to `world.talk`; `keepTown` stamped by the world's clock (+ test, check `cloud.ts`);
-`lived-in-v55.json` in `tests/world/overlays.test.ts`; proof (suite, smoke 622, offline, perf);
-docs (architecture 4 and 7, CLAUDE.md, plan status, decision 365). No save change.
+F6 landed (PR #PRN, decision 365): `Home`'s 27 and `Neighbourhood`'s 10 forwarders dropped, every
+reader (src, tests, and smoke's and perf's `window.world` reads in `scripts/`) on `home.rooms.<x>`
+and `world.talk.<x>`; `keepTown` stamps `updatedAt` and `lastPlayedAt` by the world's clock (a
+`?day=` town is saved as played then; `createdAt` stays real), and the cloud is given real time for
+a town played on a made-up clock and never asked about a newer one (smoke's "asks before taking
+the newer town" check opens on the real clock now); `lived-in-v55` is in W1's overlays snapshot.
+No save change (v55), `looksHeld` and every existing snapshot unchanged, smoke 622 of 622, perf
+within noise. No `NOTES` line.
 
 ### F5 the touches, V1.3 the review
 
