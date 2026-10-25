@@ -25,14 +25,19 @@ complete** (`docs/v1.1_plan.md`, settled 2026-10-19, decision 328; its review, V
 356): four lanes from `v1.1-dev`, the sound (the silent switch silences the game, the crickets
 tamed), the refactors in "Where it hurts" and the art redesigns. **1.2 is the release PR #201**
 (`v1.1-dev` → `main`, "Release 1.2 (with 1.0.1 and 1.1)", save v53 → v55), **merged by the user
-on 2026-10-20: 1.2 is on her phone.** **The plan now is `docs/v1.3_plan.md`** (settled
-2026-10-24, decision 357), the last week of the user's subscription: visitors every fortnight
-(⬆ 1.2.1), her phone's frame, the creatures and the scenery, the personal touches, a review
-(⬆ 1.3), from `v1.3-dev`, the model fit to each session. `docs/v1.1_plan.md`,
-`docs/v1_plan.md` and the plans before them are complete.
+on 2026-10-20: 1.2 is on her phone.** **The 1.3 plan is complete** (`docs/v1.3_plan.md`,
+settled 2026-10-24, decision 357; its review, V1.3, decision 366), the last week of the user's
+subscription: visitors every fortnight, her phone's frame, the creatures and the scenery, the
+forwarders, from `v1.3-dev`, the model fit to each session (the personal touches, F5, dropped at
+the user's word). **1.3 is the release PR #219** (`v1.3-dev` → `main`, "Release 1.3 (with
+1.2.1)", save v55 unchanged), the user's to merge; `main` after it is the game as it stands.
+**There is no plan after 1.3**: `docs/v1.3_plan.md`, `docs/v1.1_plan.md`, `docs/v1_plan.md` and
+the plans before them are complete, and a session with nothing asked of it changes nothing and
+asks the user what they'd like next.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
-**A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
+**A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
+after a long gap" before anything else. Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
 
@@ -73,10 +78,10 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.3-dev` is the integration branch after 1.2** (`v1.1-dev` was 1.1's, `v1-dev` V1's, decision 266, and ended
-with 1.0; `v0.3-dev` was 0.3's, decision 212), made from `main` the day the release merged and
-added to `vercel.json`'s no-preview list (decision 265). While a
-plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
+**`v1.3-dev` was the integration branch for 1.3** and ends with it (`v1.1-dev` was 1.1's,
+`v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212). **The next plan makes its own from
+`main`** once the release PR #219 has merged, and adds it to `vercel.json`'s no-preview list that
+day (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
