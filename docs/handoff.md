@@ -55,23 +55,22 @@ Decision 373 says what and why. Nothing half done. **The `1.5` NOTES row** is ma
 (the notes' minimum) and a P.S.: G5–G7 add theirs and the review folds to five (or into 1.4's if
 1.4 isn't cut first). **G6 bumps next (v58).**
 
-### G6: an attic (`claude/g6-attic`; decision 375; **bumps the save to v58, in its last commit**)
+### G6: an attic (`claude/g6-attic`; decision 375; **save bumped to v58**)
 
-**In progress** (draft PR into `v1.4-dev`). Done: the `attic` `ROOMS` row (7×5, one extension to
-9×7, `through: { from: 'back', tx: 9 }`, `eaves`, its first paper `atticPlanks` and floor
-`oakBoards`), the ladder in the back room's wall (`Doorway.ladder`, `ladderArt` in
-`sprites/doorway.ts`) and the hatch down (`HATCH_ART`, drawn where the mat would be), the sloped
-ceiling and round window in `roomShell` (`eavesArt`, `atticWindowArt` in
-`sprites/wallsAndFloors.ts`), the eaves rule (`underEaves` in `systems/decor.ts`, refusal
-`eaves`, `TALL` in `data/home.ts` held to the art by `tests/world/attic.test.ts`), the recipes
-`attic` and `atticExtension` (`Made` `{ room, in }`, `Rooms.grow(id)`, `sizeOf`), the toasts,
-`tests/world/attic.test.ts`, smoke's `attic` section in `home`, the `1.5` notes row (made by G6
-with three lines and a P.S.; G5 and G7 add theirs, the review folds), `CLAUDE.md`, decision 375.
-Next, in order: the plan's status line; merge `origin/v1.4-dev`; then the bump
-(v58, step 57 an identity: the rooms' record is open-ended and a missing attic is one not built)
-as the last commit; CI; merge.
+**Landed** (PR #230, into `v1.4-dev`): the attic, a third `ROOMS` row (7×5, one extension to 9×7,
+`through: { from: 'back', tx: 9 }`, `eaves`), up a ladder in the back room's wall
+(`Doorway.ladder`, `ladderArt` in `sprites/doorway.ts`) and down a hatch where its mat would be
+(`HATCH_ART`); a sloped ceiling and a round window showing the sky in `roomShell` (`eavesArt`,
+`atticWindowArt`); its own whitewashed planks (`atticPlanks`, a row's `first`); the eaves rule
+(`underEaves`, refusal `eaves`, `TALL` in `data/home.ts` held to the art by
+`tests/world/attic.test.ts`: a new tall piece fails it until listed); the recipes `attic` and
+`atticExtension` (`Made` `{ room, in }`, `Rooms.grow(id)`); the toasts; smoke's `attic` section.
+Save v58: step 57 is the identity (the rooms' record was open-ended; a missing attic is one not
+built). **The `1.5` NOTES row** was made by G6, three lines and a P.S.: G5 and G7 add theirs and
+the review folds to five. Decision 375 says what and why. Nothing half done. **G7 bumps next
+(v59) if a row needs it.**
 
-### G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+### G5 the photo mode, G7 the pet, V1.5 the review
 
 Not started; in the plan's order.
 
