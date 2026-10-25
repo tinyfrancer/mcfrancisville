@@ -1,4 +1,7 @@
-import { FLYER_HOURS, SKY, type Flyer } from '../data/sky';
+import { FLYER_HOURS, SKY, STARRY, type Flyer } from '../data/sky';
+import type { Weather } from '../data/weather';
+import { partsOf } from '../systems/calendar';
+import { constellationOf, skyOf } from '../systems/stars';
 import { bake } from '../sprites/bake';
 import {
   BAT_FLYING,
@@ -9,7 +12,7 @@ import {
   PERCH_FEET,
 } from '../sprites/sky';
 import { tileHash } from '../sprites/terrain';
-import type { MapZoneId } from '../types/ids';
+import type { ConstellationId, MapZoneId } from '../types/ids';
 import type { Point } from './camera';
 import type { Drawable } from './scene';
 
@@ -105,6 +108,22 @@ export function skyDrawables(
     if (!overlaps(d, her)) drawn.push(d);
   });
   return drawn;
+}
+
+/**
+ * The constellation hung faint over a place tonight (1.5's G4): the month's, over a `STARRY`
+ * place, once she has traced it, after dark on a clear night; else null.
+ */
+export function overheadOn(
+  zone: MapZoneId,
+  day: string,
+  hour: number,
+  weather: Weather,
+  traced: (id: ConstellationId) => boolean,
+): ConstellationId | null {
+  if (!STARRY.includes(zone) || skyOf(hour, weather) !== 'open') return null;
+  const id = constellationOf(partsOf(day).month);
+  return traced(id) ? id : null;
 }
 
 /** A crow's round at the scarecrow: in, a sit, and away again, then a while with none. */

@@ -21,7 +21,9 @@ import { daysBetween } from '../systems/calendar';
 import { ITEMS } from '../data/items';
 import { MILESTONE_IDS, MILESTONES } from '../data/milestones';
 import { shelfOf } from '../systems/milestones';
-import type { CritterId, FossilId, ItemId, MilestoneId } from '../types/ids';
+import type { ConstellationId, CritterId, FossilId, ItemId, MilestoneId } from '../types/ids';
+import { CONSTELLATION_IDS, CONSTELLATIONS, FINDABLE_MONTHS } from '../data/constellations';
+import { named } from './SkySheet';
 import { collection, fitIcon, SLOT_ICON, type Entry, type Group } from './collection';
 import { MONTHS } from './CalendarSheet';
 import { el, openSheet } from './dom';
@@ -70,6 +72,12 @@ export interface CabinetApi {
   donateFossil(id: FossilId): string | null;
   /** Draws a fossil as a shadow of itself, for one she hasn't dug up. */
   fossilSilhouette(canvas: HTMLCanvasElement, id: FossilId): void;
+  /** The day she first traced a constellation, or null (1.5's G4). */
+  star(id: ConstellationId): string | null;
+  /** Draws her star chart, the one picked framed. */
+  chart(canvas: HTMLCanvasElement, picked: ConstellationId | null): void;
+  /** The constellation at a fraction across and down the chart, or null. */
+  chartAt(fx: number, fy: number): ConstellationId | null;
   /** Today's day key and the hour, for when each critter's next chance is (V1's R5). */
   now(): { day: string; hour: number };
 }
@@ -114,6 +122,73 @@ function shelvesOf(api: CabinetApi): HTMLElement {
     el('h3', {}, 'Shelves to finish'),
     el('p', {}, 'Finish one and someone will write. Wrapunzel is keeping count.'),
     ...lines,
+  );
+}
+
+/** When a constellation she hasn't found is up, as the chart tells it (1.5's G4). */
+function upWhen(id: ConstellationId): { short: string; long: string } {
+  const when = CONSTELLATIONS[id].when;
+  if ('holiday' in when) {
+    const name = CALENDAR[DECOR[when.holiday].holiday].name;
+    return { short: name, long: `Out for ${name}, while the decorations are up` };
+  }
+  const from = MONTHS[when.month - 1]!;
+  const to = MONTHS[(when.month + FINDABLE_MONTHS - 2) % 12]!;
+  return { short: from, long: `Up from ${from} to the end of ${to}` };
+}
+
+/**
+ * Her star chart (1.5's G4): the whole sky drawn as a map, each constellation lit once she has
+ * traced it and faint with a question mark until then; a tap on one, or its name below, says
+ * what it is, or when it's up and where to look.
+ */
+function skyOf(api: CabinetApi): HTMLElement {
+  const found = CONSTELLATION_IDS.filter((id) => api.star(id) !== null).length;
+  const chart = el('canvas', { className: 'hud-sky-chart' });
+  const name = el('h3', {}, 'Tap a constellation to look closer');
+  const about = el(
+    'p',
+    {},
+    'Look through the telescope by the castle gate on a clear night, and trace the stars in order.',
+  );
+  const names = el('div', { className: 'hud-sky-chips' });
+  let picked: ConstellationId | null = null;
+  const pick = (id: ConstellationId | null) => {
+    picked = id;
+    api.chart(chart, picked);
+    for (const chip of names.children) {
+      chip.setAttribute('aria-pressed', String(chip.getAttribute('data-id') === picked));
+    }
+    if (!id) return;
+    const on = api.star(id);
+    name.textContent = on ? named(id) : 'Not found yet';
+    about.textContent = on
+      ? `${CONSTELLATIONS[id].about} Traced ${dated(on)}.`
+      : `${upWhen(id).long}, through the telescope by the castle gate on a clear night.`;
+  };
+  chart.addEventListener('click', (e) => {
+    const box = chart.getBoundingClientRect();
+    if (box.width === 0 || box.height === 0) return;
+    pick(api.chartAt((e.clientX - box.left) / box.width, (e.clientY - box.top) / box.height));
+  });
+  chart.setAttribute('aria-hidden', 'true');
+  names.setAttribute('role', 'group');
+  names.setAttribute('aria-label', 'Your star chart');
+  for (const id of CONSTELLATION_IDS) {
+    const chip = el('button', { type: 'button', className: 'hud-sky-chip' });
+    chip.textContent = api.star(id) !== null ? named(id) : `? ${upWhen(id).short}`;
+    chip.setAttribute('data-id', id);
+    chip.addEventListener('click', () => pick(id));
+    names.append(chip);
+  }
+  pick(null);
+  return el(
+    'section',
+    { className: 'hud-sky-tab' },
+    el('p', {}, `${found} of ${CONSTELLATION_IDS.length} constellations on your star chart.`),
+    chart,
+    el('div', { className: 'hud-detail' }, name, about),
+    names,
   );
 }
 
@@ -248,6 +323,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
     tabs: [
       { id: 'cases', label: 'Cases' },
       { id: 'fossils', label: 'Fossils' },
+      { id: 'sky', label: 'Sky' },
       { id: 'shelves', label: 'Shelves' },
     ],
     memory: 'cabinet',
@@ -393,6 +469,7 @@ export function openCabinet(hud: HTMLElement, api: CabinetApi): () => void {
   sheet.head.append(cases.tools, fossils.tools);
   sheet.panel('cases').append(cases.list);
   sheet.panel('fossils').append(fossils.list);
+  sheet.panel('sky').append(skyOf(api));
   sheet.panel('shelves').append(shelvesOf(api));
   cases.tools.hidden = sheet.tab() !== 'cases';
   fossils.tools.hidden = sheet.tab() !== 'fossils';

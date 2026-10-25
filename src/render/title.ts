@@ -80,7 +80,7 @@ function paintSky(ctx: CanvasRenderingContext2D, width: number, day: string): vo
       ctx.fillRect(sx, sy - 1, 1, 3);
     }
   }
-  drawMoon(ctx, moonAge(day));
+  drawMoon(ctx, moonAge(day), MOON);
   // The woods behind the town, a dark line of crowns along the horizon.
   const woods = seeded(hashString('title-woods'));
   ctx.fillStyle = C.hedgeDark;
@@ -93,11 +93,16 @@ function paintSky(ctx: CanvasRenderingContext2D, width: number, day: string): vo
 }
 
 /**
- * The moon at an age (days since the new moon): lit on the right as it waxes and the left as it
- * wanes, the rest of it a shade lighter than the sky so it's always there.
+ * The moon at an age (days since the new moon), at `at`: lit on the right as it waxes and the left
+ * as it wanes, the rest of it a shade lighter than the sky so it's always there. The sky sheet
+ * hangs tonight's the same way (1.5's G4).
  */
-function drawMoon(ctx: CanvasRenderingContext2D, age: number): void {
-  const { x: cx, y: cy, r } = MOON;
+export function drawMoon(
+  ctx: CanvasRenderingContext2D,
+  age: number,
+  at: { x: number; y: number; r: number },
+): void {
+  const { x: cx, y: cy, r } = at;
   const phase = (age / SYNODIC_DAYS) * Math.PI * 2;
   const waxing = age < SYNODIC_DAYS / 2;
   // A soft ring of light round it first, two dithered steps.

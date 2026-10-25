@@ -61,6 +61,14 @@ export const SLIPPED =
   'Whoa! The ice is slippery as anything, and you slide right back to the bank. A pair of skates ' +
   'would do it!';
 
+/** The castle's telescope by day, and on a cloudy night (1.5's G4). */
+export const SKY_SHUT = {
+  bright:
+    'You peek through the telescope. Sky, very blue, and a cloud shaped like a sheep. The stars come out after eight: try a clear night!',
+  cloudy:
+    'You peek through the telescope. Cloud, cloud and more cloud. The stars are up there somewhere: try a clear night!',
+} as const;
+
 export interface Toast {
   text: string;
   /** Something worth a little fuss: the night's snack, a blue rose. Shown in candlelight. */
@@ -477,6 +485,9 @@ export function eventToast(event: WorldEvent): Toast | null {
             icon: { item: event.record },
           }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
+    // 1.5's G4: the castle's telescope on a night it can't see, or in the day.
+    case 'stargaze':
+      return event.sky === 'open' ? null : { text: SKY_SHUT[event.sky], icon: 'telescope' };
     case 'tune':
       return {
         text: event.line ?? TUNES[event.tune].line,

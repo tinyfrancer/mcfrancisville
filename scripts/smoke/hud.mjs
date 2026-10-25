@@ -4,6 +4,7 @@ import {
   URL_BASE,
   answerCody,
   check,
+  closeSheets,
   framed,
   page,
   playerTile,
@@ -62,6 +63,37 @@ async function bag() {
 }
 
 /** The day under her Candy, and the calendar it opens. */
+/**
+ * Her star chart (1.5's G4): the Cabinet's Sky tab, the whole sky drawn as a map, one she has
+ * traced lit and the rest asking when they're up, a tap on a name saying which.
+ */
+async function starChart() {
+  await closeSheets();
+  await page.evaluate(() => window.world.cabinet.chart('cat', '2026-08-14'));
+  await tapElement('.hud-cabinet');
+  await tapElement('.hud-cabinet-sheet .hud-sheet-tab:text-is("Sky")');
+  const chart = await page.locator('.hud-cabinet-sheet .hud-sky-chart').boundingBox();
+  check(
+    'the Sky tab draws her star chart across the sheet',
+    !!chart && chart.width > 200 && chart.x >= 0 && chart.x + chart.width <= PHONE.width,
+    JSON.stringify(chart),
+  );
+  const chips = await page.locator('.hud-cabinet-sheet .hud-sky-chip').count();
+  check('with a name for every constellation, twelve and three', chips === 15, String(chips));
+  await tapElement('.hud-cabinet-sheet .hud-sky-chip:text-is("The Cat")');
+  const named = (await page.locator('.hud-sky-tab .hud-detail h3').textContent()) ?? '';
+  check('a tap on one she has traced says what it is', named === 'The Cat', named);
+  await tapElement('.hud-cabinet-sheet .hud-sky-chip:has-text("October")');
+  const about = (await page.locator('.hud-sky-tab .hud-detail p').textContent()) ?? '';
+  check(
+    "and one she hasn't, when it's up and where to look",
+    /October.*telescope/.test(about),
+    about,
+  );
+  await page.screenshot({ path: '.smoke/sky-chart.png' });
+  await tapElement('.hud-cabinet-sheet button:text-is("Done")');
+}
+
 async function calendar() {
   const boxes = await page.evaluate(() =>
     ['.hud-today', '.hud-candy', '.hud-settings', '.hud-menu', '.hud-quick'].map((s) => {
@@ -361,6 +393,7 @@ async function sideways() {
 export const sections = [
   ['bag', bag],
   ['calendar', calendar],
+  ['starChart', starChart],
   ['settings', settings],
   ['sideways', sideways],
 ];

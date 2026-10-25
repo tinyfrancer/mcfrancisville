@@ -1,6 +1,7 @@
 import { CRITTER_IDS, isCritter } from '../data/critters';
+import { CONSTELLATION_IDS } from '../data/constellations';
 import { FOSSIL_IDS, isFossil } from '../data/fossils';
-import type { CritterId, FossilId } from '../types/ids';
+import type { ConstellationId, CritterId, FossilId } from '../types/ids';
 
 /**
  * What of the Curiosity Cabinet is saved: the day each critter was first caught, and what's on
@@ -15,7 +16,12 @@ export interface CabinetSnapshot {
   shinies: Partial<Record<CritterId, string>>;
   /** The critters whose case at the museum shows a shiny (1.4's G1, save v56). */
   shinyShown: CritterId[];
+  /** Her star chart: the day she first traced each constellation (1.5's G4, save v57). */
+  stars: Partial<Record<ConstellationId, string>>;
 }
+
+const isConstellation = (id: string): id is ConstellationId =>
+  (CONSTELLATION_IDS as readonly string[]).includes(id);
 
 /**
  * Her Curiosity Cabinet: every critter she has ever caught, and the day she first did, and which
@@ -28,6 +34,7 @@ export class Cabinet {
   private readonly biggest = new Map<CritterId, number>();
   private readonly shone = new Map<CritterId, string>();
   private readonly shownShiny = new Set<CritterId>();
+  private readonly traced = new Map<ConstellationId, string>();
 
   /** An id a later build added, that this one doesn't know, is left out. */
   constructor(saved: Partial<CabinetSnapshot> = {}) {
@@ -42,6 +49,33 @@ export class Cabinet {
       if (isCritter(id) && typeof day === 'string') this.shone.set(id, day);
     }
     for (const id of saved.shinyShown ?? []) if (isCritter(id)) this.shownShiny.add(id);
+    for (const [id, day] of Object.entries(saved.stars ?? {})) {
+      if (isConstellation(id) && typeof day === 'string') this.traced.set(id, day);
+    }
+  }
+
+  /** Puts a constellation on her star chart (1.5's G4). True if it's the first time she traced it. */
+  chart(id: ConstellationId, day: string): boolean {
+    if (this.traced.has(id)) return false;
+    this.traced.set(id, day);
+    return true;
+  }
+
+  /** The day she first traced a constellation, or null if it isn't on her chart yet. */
+  tracedOn(id: ConstellationId): string | null {
+    return this.traced.get(id) ?? null;
+  }
+
+  /** How many constellations are on her star chart. */
+  get stars(): number {
+    return this.traced.size;
+  }
+
+  /** The one she traced most lately, and the day: what Hazel and Agatha bring up. */
+  get newestStar(): { id: ConstellationId; day: string } | null {
+    let newest: { id: ConstellationId; day: string } | null = null;
+    for (const [id, day] of this.traced) if (!newest || day >= newest.day) newest = { id, day };
+    return newest;
   }
 
   /** Notes a shiny caught (1.4's G1). True if it's the first shiny of its kind she's caught. */
@@ -142,6 +176,12 @@ export class Cabinet {
         CRITTER_IDS.filter((id) => this.shone.has(id)).map((id) => [id, this.shone.get(id)!]),
       ),
       shinyShown: CRITTER_IDS.filter((id) => this.shownShiny.has(id)),
+      stars: Object.fromEntries(
+        CONSTELLATION_IDS.filter((id) => this.traced.has(id)).map((id) => [
+          id,
+          this.traced.get(id)!,
+        ]),
+      ),
     };
   }
 }

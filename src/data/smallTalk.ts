@@ -25,6 +25,7 @@ export type Topic =
   | 'happening'
   | 'shiny'
   | 'caught'
+  | 'stars'
   | 'pet'
   | 'net'
   | 'can'
@@ -60,6 +61,7 @@ export const TOPICS: readonly Topic[] = [
   'gift',
   'shiny',
   'caught',
+  'stars',
   'harvest',
   'donated',
   'placed',
@@ -527,6 +529,75 @@ const AROUND_HER: Record<
       "{name}, {catch}! I'm declaring a holiday. Well. A very short one. Just now. There, it's over.",
       'You caught {catch}? On behalf of the town council, which is me, ooh. Ooh, ooh, ooh.',
       "Caught {catch} today? I'll have it in the town records in my best typing. Mind the Ws.",
+    ],
+  },
+  // 1.5's G4: a constellation she traced through the castle's telescope lately; `{stars}` is
+  // "the Bat". Hazel draws the stars and Agatha reads them.
+  stars: {
+    cody: [
+      'Babe, you found {stars} through the big telescope? I looked up last night and waved at it. It waved back. Probably.',
+      'Mi amor, you traced {stars}! Show me which one. No, the other one. Oh, that one. Beautiful. Like you.',
+      'You found {stars}? We should take a blanket up the castle hill and look at it together, babe.',
+    ],
+    agatha: [
+      "You traced {stars}, dearie? The stars don't show themselves to just anybody. I'd say it's a lucky sign.",
+      'Ah, {stars}. I read it in my tea leaves this morning, before you even found it. Funny, that.',
+      "{name}, your name is in {stars} now. Not written. Twinkled. It's an old witch thing.",
+    ],
+    maude: [
+      'You found {stars} up in the sky? Mama always said the sky is a quilt, and the stars are the knots.',
+      'Hazel told me you traced {stars}! I squinted all evening. I found a moth. It was on my glasses.',
+      'Oh, {stars}! I shall bake a biscuit in its shape. It will come out round. They always come out round.',
+    ],
+    rufus: [
+      "You found {stars}? Good eyes, mate. I've only ever found the moon, and that's the easy one.",
+      'Traced {stars}, did you? I howled at it a bit last night. Friendly howl. It seemed to like it.',
+      'So that bit of sky is {stars}, eh? I always thought it looked like a sausage. I stand corrected.',
+    ],
+    wrapunzel: [
+      "You traced {stars}! I'd put it in the museum if I could reach it. I measured. I can't.",
+      'You found {stars}! The old books say sailors steered by it. Or bakers proved by it. The page was smudged.',
+      "Oh, {name}, {stars}! I'll write a little label for the sky: 'Found by our {name}.'",
+    ],
+    barty: [
+      'You found {stars}? From up here they look like old bones on a dark rug. Pretty ones. Polished.',
+      'Traced {stars}, did you? I lay on the lawn and counted its stars. Then I counted mine. Seven ribs short.',
+      "You found {stars}? Grand. If it ever falls, it's mine. Finders keepers, that's the rule with bones and stars.",
+    ],
+    ollie: [
+      "You found {stars}? I'd post you a letter up there if I knew the address! Sky Lane, maybe?",
+      'Traced {stars}! Hazel was so excited she nearly signed for her own parcel. Twice.',
+      'I look for {stars} on my night rounds now. It keeps me company between mailboxes.',
+    ],
+    nessa: [
+      'You traced {stars}? I saw it from the ice last night. I did a twirl for it. It twinkled.',
+      'Have you seen {stars}? Like a lantern hung up too high to light. Somebody tall did it. A giant, probably.',
+      "{name}, you found {stars}? Next time, wave. I'll be out on the pond, waving back.",
+    ],
+    gourdon: [
+      'You found {stars}? Hm. Good lines. Straight joins. Somebody measured that sky twice.',
+      'I might carve {stars}. Small, on a lid. Little brass pins for the stars. Hm.',
+      "Traced {stars}, did you? Built Hazel that stool for her telescope. Glad it's getting use.",
+    ],
+    hazel: [
+      'You traced {stars}! Through the big telescope by the gate? Oh, I knew you would! I knew it!',
+      "Did you see how the third star of {stars} wobbles? It's not wobbling. It's waving. At you.",
+      '{name}, you found {stars}! Next month brings a new one. I have my notebook ready. Have you?',
+    ],
+    boothoven: [
+      'You found {stars}! {name}, every constellation has a chord, and that one is in a major key.',
+      "You traced {stars}? I've written it a nocturne. Short. Twinkly. A little bit sad in the middle.",
+      'Ah, {stars}, the brightest in the castle sky! I played to it last night. It applauded. Quietly.',
+    ],
+    scarah: [
+      "You found {stars}? Cornelius stared at it all night. He's convinced it's a very far-away crow.",
+      'I saw {stars} over my fields too. The pumpkins all turned to look. I may have imagined that.',
+      "{name}, you traced {stars}? I'll name a row of beans after it. The bean row of {stars}.",
+    ],
+    robBoo: [
+      'You traced {stars}! I could see the lookout from the castle. I applauded. Alone. In the dark.',
+      'Found by our {name}: {stars}! I shall have it entered in the town records. The sky section.',
+      'Ooh, {stars}. I named it, you know. Well. I tried to. It already had a name. Ooh.',
     ],
   },
   pet: {

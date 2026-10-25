@@ -1,4 +1,5 @@
 import { FESTIVAL_LINES } from '../data/festivalLines';
+import { FIRST_STARS, FIRST_STARS_LETTER } from '../data/constellations';
 import { RARE_EVENTS, type RareEventId } from '../data/rareEvents';
 import { HUSBAND, MARRIED_LINES } from '../data/cody';
 import { ITEMS } from '../data/items';
@@ -324,6 +325,8 @@ export function letterOf(id: string): Letter | null {
     const rare = n && n in RARE_EVENTS ? RARE_EVENTS[n as RareEventId] : undefined;
     return rare ? { ...rare.letter, gift: { item: rare.keepsake } } : null;
   }
+  // The first constellation she traces (1.5's G4): Hazel's, with her star map.
+  if (id === FIRST_STARS) return { ...FIRST_STARS_LETTER, gift: { item: 'starMap' } };
   // A town project built (V1's R4): the mayor's thanks, signed by name once she has met him.
   if (key === 'project') {
     const project = n && n in PROJECTS ? PROJECTS[n as ProjectId] : undefined;

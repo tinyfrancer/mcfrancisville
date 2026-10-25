@@ -168,6 +168,12 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [emote('!')];
     case 'shelved':
       return [burst('confetti', head), burst('sparkle', head, 6, 18)];
+    // The sky sheet shows the stars (1.5's G4); a new one on her chart sparkles over her too.
+    case 'stargaze':
+    case 'starTapped':
+      return [];
+    case 'traced':
+      return event.first ? [burst('sparkle', head, 8, 20)] : [];
     case 'answered':
       return [burst('coin', head), pop({ candy: true }, event.candy, over)];
     case 'sold':

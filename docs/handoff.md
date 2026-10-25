@@ -29,9 +29,22 @@ Corner (November to February), Cosy Cabin and Midnight Observatory, the star win
 **1.4's `NOTES` row** was made by G1 and G2 at once and folded at G1's merge into four lines, two
 each, shinies first, G2's P.S.: **G3 adds the fifth**, the last.
 
-### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+### G4: the night sky (`claude/g4-night-sky`; decision 373; **save bumped to v57**)
 
-Not started; in the plan's order.
+**Landed** (PR #226, into `v1.4-dev`): a telescope by the castle hill's gate (and the brass
+telescope and Hazel's at home after dark) opening the Sky sheet on a clear night; fifteen
+constellations (`src/data/constellations.ts`, twelve by month and three for holidays), this
+month's and the two before findable, every one on a meteor shower's night; traced by taps in
+order, a wrong tap only twinkling; `Cabinet.stars` (save v57: step 56 gives an empty chart), the
+Cabinet's Sky tab, Hazel's first letter with her star map, two shelves, the month's constellation
+faint over the castle hill at night, Today, a `stars` small-talk topic, the calendar's mark.
+Decision 373 says what and why. Nothing half done. **The `1.5` NOTES row** is made, three lines
+(the notes' minimum) and a P.S.: G5–G7 add theirs and the review folds to five (or into 1.4's if
+1.4 isn't cut first). **G6 bumps next (v58).**
+
+### G3 ice fishing, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+
+G3 runs beside G4 (its own heading when it lands); the rest not started, in the plan's order.
 
 ## If you are starting cold after a long gap
 

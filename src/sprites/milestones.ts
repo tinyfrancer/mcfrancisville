@@ -1,4 +1,4 @@
-import type { CritterId, MilestonePiece, ShinyPiece } from '../types/ids';
+import type { CritterId, MilestonePiece, ShinyPiece, StarPiece } from '../types/ids';
 import { ACCENT_TWO, darkOf, fillOf, finish, GLASS, GLINT, lightOf, ROOF, TRIM } from './buildings';
 import { critterArt } from './critters';
 import { SHOWCASE_FURNITURE_ART } from './display';
@@ -7,6 +7,7 @@ import { frame, palette, slab, WOOD } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
+import { FRAMED_BAT, NIGHT_GLOBE } from './stars';
 
 // What finishing a shelf or a wing sends her (0.2's F2), at 32. The framed critters and the domes
 // are a frame or a dome with the critter itself inside, as she sees it out and about, so each is
@@ -151,4 +152,10 @@ export const MILESTONE_ART: Record<MilestonePiece, FurnitureArt> = {
 export const SHINY_PIECES_ART: Record<ShinyPiece, FurnitureArt> = {
   framedShiny: framed('lunaMoth', true),
   shinyDome: domed('orbPair', true),
+};
+
+/** What the star chart's shelves send her (1.5's G4): the Bat framed, and a little sky domed. */
+export const STAR_PIECES_ART: Record<StarPiece, FurnitureArt> = {
+  framedConstellation: FRAMED_BAT,
+  skyDome: domeOver(specimenOf(NIGHT_GLOBE.source, NIGHT_GLOBE.palette, NIGHT_GLOBE.glow)),
 };
