@@ -9111,3 +9111,63 @@ hand (a 16 from the 24's numbers can't drift from it, which is how the crawlies 
 drawn); a shape class by fixed aspect buckets in the test (a minnow sat on the line between
 "square" and "wide"; the ratio of ratios says the same without the cliff); more fish shapes per
 species (a family's shape in its own colours is the art style's rule, and the wrist was enough).
+
+## 363. The scenery: the bare trees kept to the woods, Whisperwood's creek curled round at the hedge, the frozen pond's ring kept (1.3's F4, 2026-10-25)
+
+_Session F4 of the 1.3 plan (decision 357), for V1.1's art notes (decision 356): the broken trees,
+the creek's east end and the frozen pond's ring. No save change, no map change, no tile's
+walkability moved. Personal touches parked (decision 177): every look is the warmest default;
+nothing was asked._
+
+- **Where a tree stands says which shapes it may take.** `parseMap` gives each tree a `grove`: a
+  wood's `edge` (its footprint in the edge or the line inside it, `EDGE_DEPTH` 2, the band A2's
+  edge test reads), anywhere else in a wood (`woods`), or within `GRAVES_REACH` (4 tiles) of a
+  gravestone (`graves`); a tree that's none of them is tended. A map says it's a wood with `woods`:
+  Whisperwood, Lantern Shore, the castle hill and the hidden clearing (the clearing's trees are the
+  wood round it). The town, the fairground and Boo Acres are tended. `lookOf` deals a tree's form
+  from the nine by its tile as before (`treeFormOf` in `sprites/props.ts`), keeps it if it's in
+  leaf (the three round, the conifer, the birch, the poplar) or may stand there (the edge: dead,
+  leaning, broken; the woods and the graves: dead), and otherwise deals again among the six in
+  leaf from the tile; a broken tree by the graves is the dead one, so the graveyard keeps its
+  spooky tree. Deterministic from the tile and the map, as before; no tree's colouring changed.
+- **Counted** (trees: dead, leaning, broken, before → after): the town 18: 3, 0, 3 → 1, 0, 0 (the
+  dead tree by the graveyard's east fence, where a broken one stood; her yard's, the castle road's,
+  the farm sign's, Cobweb Corner's and the pond's are in leaf); Whisperwood 184: 22, 15, 19 → 22, 6,
+  5; Lantern Shore 110: 9, 17, 11 → 9, 7, 6; the castle hill 146: 16, 20, 17 → 16, 9, 6; the hidden
+  clearing 95: 17, 10, 9 → 17, 3, 4; the fairground 16: 1, 0, 3 → 0; Boo Acres 12: 1, 3, 2 → 0. No
+  critter or crawly reads a tree's form (`habitatsOf` knows `tree` by prop id), Wes lurks by any
+  tree, and the spots are tiles, so nothing but the look moved.
+- **Whisperwood's creek curls round at the hedge.** The hedge on a place's edge was always taken
+  as the edge (off the map, so water beside it ran on), so the creek's east end ran into the hedge
+  and was cut square by it. Now an edge hedge is the edge only where water leaves through a gap in
+  it, a wet tile along that edge within two (`wetAround` in `sprites/banks.ts`): the creeks out to
+  the shore and in from the woods run on as before; where water meets the hedge unbroken, the
+  hedge is dry ground and the bank, with its stones and wobble and winter drift, curls round to an
+  end in the creek's last tile. Only Whisperwood's two end tiles draw differently (the whole
+  place's overview differs only in that box); Boo Acres' pond by the west hedge reads the same.
+- **The frozen pond's ring is kept**, looked at once more at Close on Christmas Eve's night
+  (smoke's `frozen-pond`): the open water is the fountain's basin and no wider, ringed with lit
+  plates, its jets and lamps going, so it reads as the fountain keeping its water open, not a bug.
+- **Looked over:** `npm run sprite -- 'place:*'` before and after, `'season:*:town'` and
+  `'season:*:whisperwood'`, the creek's end at 3× in autumn and winter, and smoke's `close-town`,
+  `close-town-side`, `creek`, `whisperwood`, `frozen-pond` and the seasons' screenshots. Nothing a
+  pixel or a row would fix turned up. **Logged** in the art notes: the creek meeting the dirt path
+  square at the footbridge's site (a bank there wants the track and the ice's field to agree), the
+  ghost daisies and meadow flowers green under winter's snow (gathered all year), and the dead
+  tree bare of snow in winter.
+- **Held by** `tests/sprites/treeForms.test.ts` (the broken and leaning trees only in an edge, the
+  dead only in the woods' and graves' groves, each tree the same every time; the town bare but
+  for the graveyard's dead tree, the fairground and Boo Acres in leaf, each wood keeping its dead
+  and its broken trees), `tests/sprites/ice.test.ts` (the creek's end banked against the hedge,
+  the creeks through the hedge's gaps running on), `seasons.test.ts`'s broken tree found in
+  Whisperwood's edge, and W1's overlays and arrivals snapshots unchanged (never `-u`). The suite,
+  smoke whole (622 of 622) and `smoke:offline` pass.
+
+**Rejected:** a tree prop of its own for the woods' bare trees (A2's reasons: a row in every system
+that knows trees); dealing the edge more broken trees to make up for the woods' interior (the note
+was "not too many"); letting a broken tree off the edge fall back to the dead one everywhere it
+may stand (the woods' dead trees would have doubled; only by the graves); the fairground's
+hedge as a wood's edge (a fair is tended); every tree by the graves dead (three would crowd the
+fence; one reads as the graveyard's); a reed clump at the creek's end (reeds stand in water, not
+ice, and the curl of bank alone closes it); a map change at the creek (the tiles stay, W1's
+snapshots hold them); ice over the fountain's tiles in winter (the ring reads as a reason).

@@ -73,17 +73,25 @@ export function wetAround(
   ty: number,
   wet: (id: TileId | undefined) => boolean,
 ): string {
-  // The hedge on a place's edge is the edge.
+  // The hedge on a place's edge is the edge where water runs out through a gap in it, so a creek
+  // leaving the place runs on. Where water meets it unbroken, it's dry ground, so the bank curls
+  // round to an end rather than stopping square against it (1.3's F4).
   const within = (x: number, y: number) => {
     const id = tileAt(x, y);
     if (id !== 'hedge') return id;
-    const edge = [
+    const runsOut = [
       [0, -1],
       [1, 0],
       [0, 1],
       [-1, 0],
-    ].some(([ex, ey]) => tileAt(x + ex!, y + ey!) === undefined);
-    return edge ? undefined : id;
+    ].some(([ex, ey]) => {
+      if (tileAt(x + ex!, y + ey!) !== undefined) return false;
+      for (let k = -RING; k <= RING; k++) {
+        if (wet(tileAt(x + ey! * k, y + ex! * k))) return true;
+      }
+      return false;
+    });
+    return runsOut ? undefined : id;
   };
   let out = '';
   for (let dy = -RING; dy <= RING; dy++) {

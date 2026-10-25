@@ -137,7 +137,11 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   hedge and a tile inside it, never a whole side of hedge with a row of trees behind it, and a
   rock or a stump sits in a gap here and there. Among them stand the edge's own trees, a tall
   thin poplar, a leaning one and an old broken one (`src/sprites/treeForms.ts`), so the edge reads
-  as a wood and not a wall of one round crown.
+  as a wood and not a wall of one round crown. **Bare trees belong to the woods** (1.3's F4): the
+  broken and leaning trees only in a wood's edge, the dead one in the woods and by the graves, so
+  the town's trees are in leaf but for the graveyard's spooky one.
+- **Water ends with a bank** (1.3's F4): where a creek leaves a place through a gap in the hedge it
+  runs on off the map, but where it meets the hedge unbroken its bank curls round to an end.
 - **Ice is drawn on the world, not the tile** (1.1's A3, `src/sprites/ice.ts`): soft patches of
   frosted, plain and clear ice from a slow noise, darker down the middle where it's thick over deep
   water, a frost along the bank that comes and goes, stones in the bank's lip, a few hairline
