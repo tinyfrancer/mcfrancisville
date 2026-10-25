@@ -9585,3 +9585,71 @@ chart in an evening, and no reason to look up next month); a score for the trace
 fail is the brief); the stars over every place (no horizon to put them on); a new legend
 character in the shared legend (full); an `opens` on a furniture row (a sheet only at night is a
 rule, not a row).
+
+## 374. A photo mode: a viewfinder over the town held still, four filters, six stickers, a caption, and everyone close by posing (2026-10-25, 1.5's G5)
+
+**Context:** the 1.4/1.5 plan's G5 (decision 367): a camera in the tray and on the quick bar, the
+world frozen to a viewfinder, filters, stickers from her bag, a caption, the shutter cropping the
+canvas and kept through the share sheet (decision 322's path), and neighbours posing. Never the
+save. Personal touches parked (decision 177): the words are the warmest plain defaults.
+
+**Decision:**
+
+- **The camera** is a slot on the quick bar outdoors, after her tools (`hud-quick-camera`), and a
+  button in the tray (`hud-camera-open`), indoors and out. **Always there, not only when her hands
+  are empty** as the plan put it: a slot that comes and goes moves her seeds under her finger.
+- **The viewfinder** (`src/hud/CameraSheet.ts`, `CameraApi` built in `src/wiring/apis/camera.ts`
+  by `main.ts`, as Settings' are) is a mode, not a sheet (nothing rises over the town, so it isn't
+  `openSheet`'s; the photo's card after it is): `data-camera` on the HUD hides the top bar and all
+  of the bottom but one strip, Done, Filters, Stickers, the shutter (bigger, in the middle),
+  Caption, and in or out, each a thumb wide. A drawer over the strip holds one of the filters,
+  the stickers or the caption field at a time; a line at the top says what she just did. Sideways
+  the strip runs the whole width along the bottom and the photo is wider (to half again).
+- **The town holds still**: lifting the camera sets `world.posing`, runs one step (so everyone
+  close turns and poses, and her pets sit), and the loop stops stepping the world while it's set.
+  The view keeps drawing every frame from its own clock, so the water glints, flames flicker and
+  frames move; only the world is frozen. Stepping at a crawl was rejected: someone walking by
+  would walk out of the photo, and a crawl is still a world that changes under the shutter.
+- **The frame** is a polaroid laid over the canvas (`render/viewfinder.ts`: `frameOf`, the photo
+  as big as fits with its white edge and deeper foot and a margin, square upright; the world
+  outside it dimmed). The canvas is at her pixels already (`fitPixelScale`'s backing size), so the
+  photo is cut pixel for pixel. **One finger pans the camera** (`FollowCamera.pan`, a look away
+  from her kept to the looks that move the view, so dragging back from an edge comes back at
+  once); **a pinch or the ± goes Close or Far** for the viewfinder alone (`lens` in `main.ts`,
+  never written to her Settings). Putting the camera down looks back at her, as close as she had it.
+- **Filters** (`src/data/photo.ts` rows, `src/render/filters.ts` the sums): plain; sepia (the old
+  photo's matrix, blacks lifted a touch); spooky (the light in green, a little of the colour kept,
+  the corners darkened); moonlit (cool blue, shadows lifted to navy, a seeded scatter of stars in
+  the top two-fifths, lit only where it's dark). **Worked a pixel at a time, not by compositing**
+  as the grade is: the photo is a few hundred pixels across, a test can hold what a pixel becomes,
+  and the live picture and the photo are one sum. Live, the frame's pixels are read back and
+  filtered about eight times a second (`REFILTER_MS`), put back between, since a read every frame
+  is what a phone feels.
+- **Stickers** (`src/systems/photo.ts`): every critter she has caught (the Cabinet's order, a shiny
+  after its plain), then the dolls, squishies and keepsakes in her bag; **six at most**
+  (`STICKER_LIMIT`; a seventh says six is plenty). Placed in the middle, dragged anywhere, and
+  dragged off the photo to take one off (it fades as it goes). Drawn on the photo over the filter,
+  as a sticker is on a print, at twice their 16-pixel icons (`bakeIcon`).
+- **The caption** is a text field in the drawer, one line of 32 letters (`captionOf`), shown on the
+  polaroid's foot in the page's font as she types, and written under the photo by `printOf`.
+- **The shutter**: the town drawn once clean, the photo cut, filtered and stickered
+  (`photoFrom`), a soft click-clack cue (`shutter`), the flash, and the party photo's card
+  (`PhotoCard`, now taking its words: "Snap!", "Cody would like a copy, please.") with **Keep it**
+  (the share sheet, decision 322, named for the day), **Another** (back to the viewfinder, stickers
+  and caption kept) and **Done** (the camera down). Nothing is kept in the game.
+- **Everyone poses**: a neighbour within three tiles (`POSE_TILES`) is held where they are, turned
+  to her, and stands in a new `pose` stance (`stanceOf` while `Neighbour.posing`, set by `notice`
+  from the flag `Neighbourhood.step` is handed): a hand up to the camera, the wave's arm held still
+  (one way or the other, each their own), smiling, or for a few laughing, eyes open. **A held
+  wave, not a peace sign**: at 32 pixels a hand is three, and two fingers don't read. Cody is a
+  neighbour, so he poses too. **Pets** stop wherever they are, mid-trot or mid-trick, asleep or
+  not, and sit looking at her (`Pet.sitForPhoto`, through `PetSurroundings.posing`). Putting the
+  camera down, they all carry on. `looksHeld` is unchanged: the pose draws the wave's layers.
+- **Notes**: the `1.5` row, made here (G4's became 1.4.1 and shipped), three lines and a P.S. (the
+  notes need three); G6 and G7 add theirs, and the review folds to five.
+
+**Rejected:** stepping the world at a crawl (people walk out of the photo); the frame drawn in the
+page (the polaroid is the town's, drawn at its pixels); compositing filters (untestable, and the
+live and kept pictures would be two sums); a peace sign (unreadable at the size); the slot only
+with empty hands (it moves the seeds); the viewfinder as an `openSheet` sheet (it covers nothing
+but the bars); keeping the photos in the save (the phone keeps pictures; the save is her town).

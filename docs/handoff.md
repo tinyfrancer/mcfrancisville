@@ -55,9 +55,22 @@ Decision 373 says what and why. Nothing half done. **The `1.5` NOTES row** is ma
 (the notes' minimum) and a P.S.: G5–G7 add theirs and the review folds to five (or into 1.4's if
 1.4 isn't cut first). **G6 bumps next (v58).**
 
-### G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+### G5: a photo mode (`claude/g5-photo`; decision 374; never the save)
 
-Not started; in the plan's order.
+**In progress** (draft PR into `v1.4-dev`): all of it built and checked, waiting on CI to merge.
+The camera (a quick-bar slot outdoors, a tray button everywhere) lifts the viewfinder
+(`src/hud/CameraSheet.ts`, `CameraApi` from `src/wiring/apis/camera.ts`, made in `main.ts`): the
+world held still while `world.posing` (one step first, so neighbours within three tiles pose and
+pets sit), the bars down to a strip, a polaroid frame on the canvas (`src/render/viewfinder.ts`),
+drag to pan (`FollowCamera.pan`), pinch or the ± for Close/Far, four filters
+(`src/render/filters.ts`, rows `src/data/photo.ts`), six stickers and a caption
+(`src/systems/photo.ts`), the shutter to the party photo's card (Keep it / Another / Done). The
+`1.5` NOTES row is made: three lines and a P.S.; **G6 and G7 add a line each**, the review folds
+to five. Next: CI green, merge, empty this heading to "Landed".
+
+### G6 the attic, G7 the pet, V1.5 the review
+
+G6 runs beside G5; G7 and the review after, in the plan's order.
 
 ## If you are starting cold after a long gap
 
