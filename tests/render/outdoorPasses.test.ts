@@ -66,6 +66,7 @@ describe('the passes outdoors', () => {
         'weather',
         'snack',
         'beds',
+        'critters',
         'lost',
         'pets',
         'neighbours',

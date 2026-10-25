@@ -13,6 +13,7 @@ import type { FestivalId, TownEventId } from './calendar';
 import { CRITTER_IDS, CRITTERS } from './critters';
 import { BEADS } from './gathering';
 import { FOSSIL_VALUES } from './fossils';
+import { SHINY_VALUES } from './shinies';
 import { RARE_KEEPSAKE_VALUES } from './rareEvents';
 import { FAIR_PRIZE_VALUES } from './fairPrizes';
 import { ORCHARD_VALUES } from './orchard';
@@ -202,6 +203,8 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   moonPieMini: 15,
   ...ORCHARD_VALUES,
   ...critterValues(),
+  // A shiny fetches twice its plain self (1.4's G1).
+  ...SHINY_VALUES,
   ...FOSSIL_VALUES,
   ...RARE_KEEPSAKE_VALUES,
   // Only ever won at the Hollow Fairground (V1's R6b).

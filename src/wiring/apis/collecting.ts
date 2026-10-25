@@ -12,6 +12,8 @@ export function collectingApis({ world, changed }: ApiWiring): Pick<SheetApis, '
     critter: (id) => ({
       caughtOn: world.cabinet.caughtOn(id),
       donated: world.cabinet.isDonated(id),
+      shinyOn: world.cabinet.shinyOn(id),
+      shinyShown: world.cabinet.isShinyShown(id),
       best: world.cabinet.bestOf(id),
       outNow: isAbout(
         id,
@@ -21,9 +23,9 @@ export function collectingApis({ world, changed }: ApiWiring): Pick<SheetApis, '
       ),
     }),
     inBag: (id) => world.bag.count(id),
-    donate(id) {
+    donate(id, shiny) {
       changed();
-      return world.collecting.donate(id);
+      return world.collecting.donate(id, shiny);
     },
     isNew: (id) => world.novelty.isNew('cabinet', id),
     seen: () => world.novelty.seen('cabinet'),

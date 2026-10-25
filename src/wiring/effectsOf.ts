@@ -1,5 +1,6 @@
 import { TILE_SIZE } from '../config/world';
 import { EGG_ITEM } from '../data/holidays';
+import { shinyOf } from '../data/shinies';
 import type { Ware } from '../data/shop';
 import type { Made } from '../data/recipes';
 import type { VisitGift } from '../data/visits';
@@ -196,7 +197,11 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
     case 'caught': {
       const water = event.water ? middle({ ...event.water, w: 1, h: 1 }) : null;
       const from = water ?? (box ? there : (at.float ?? source));
-      const shown: Effect[] = [pop({ item: event.critter }, 1, from)];
+      const shown: Effect[] = [
+        pop({ item: event.shiny ? shinyOf(event.critter) : event.critter }, 1, from),
+      ];
+      // A shiny comes up in a shower of sparkles (1.4's G1).
+      if (event.shiny) shown.push(burst('sparkle', from, 10, 18), burst('sparkle', head, 6, 14));
       // A fish comes up with a splash as big as it is, a whopper or a best with a fuss (V1's R6a).
       if (event.size !== undefined && water) {
         shown.push(burst('splash', water, 3 + Math.min(9, Math.floor(event.size / 2)), 4));

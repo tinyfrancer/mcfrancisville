@@ -18,6 +18,7 @@ import type { Stalls } from '../zones/Stalls';
 import { weatherOn } from '../../systems/weather';
 import type { MapZoneId } from '../../types/ids';
 import type { Calendar } from '../services/Calendar';
+import type { Collecting } from '../services/Collecting';
 import type { CandyTree } from '../services/CandyTree';
 import type { FirstDay } from '../services/FirstDay';
 import type { Fossils } from '../services/Fossils';
@@ -50,6 +51,8 @@ export interface UpNowParts {
   projects: Projects;
   /** The fair's games, for the day's free go (1.0.1). */
   activities: Activities;
+  /** Her net's critters, for a shiny about where she is (1.4's G1). */
+  collecting: Collecting;
 }
 
 /** What Today reads of the rare events, the passers-by and the peddlers (V1's R3). */
@@ -141,6 +144,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       ...outOfTheOrdinary(parts, day),
       project: underWay(parts.projects),
       freeGo: freeGoOf(parts.activities),
+      shiny: parts.collecting.shinyHere(),
     };
   });
 }

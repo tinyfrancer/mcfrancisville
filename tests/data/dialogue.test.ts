@@ -379,6 +379,8 @@ function scenesOn(day: string): TalkScene[] {
     { ...NOBODY, ...between, band: 'best' },
     // V1's P3b: the day after she met the mayor, which is all anyone talks about.
     { ...NOBODY, met: shiftDay(day, -1), clue: { id: 'unmasked', day: shiftDay(day, -1) } },
+    // 1.4's G1: a shiny caught today.
+    { ...NOBODY, caught: 'lunaMoth', shiny: 'lunaMoth' },
   ];
 }
 

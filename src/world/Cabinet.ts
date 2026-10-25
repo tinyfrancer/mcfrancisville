@@ -11,6 +11,10 @@ export interface CabinetSnapshot {
   donated: (CritterId | FossilId)[];
   /** The biggest of each fish she has landed, in quarters of a hand (V1's R6a, save v52). */
   best: Partial<Record<CritterId, number>>;
+  /** The day she first caught each critter in its shiny colours (1.4's G1, save v56). */
+  shinies: Partial<Record<CritterId, string>>;
+  /** The critters whose case at the museum shows a shiny (1.4's G1, save v56). */
+  shinyShown: CritterId[];
 }
 
 /**
@@ -22,6 +26,8 @@ export class Cabinet {
   private readonly firsts = new Map<CritterId, string>();
   private readonly shown = new Set<CritterId | FossilId>();
   private readonly biggest = new Map<CritterId, number>();
+  private readonly shone = new Map<CritterId, string>();
+  private readonly shownShiny = new Set<CritterId>();
 
   /** An id a later build added, that this one doesn't know, is left out. */
   constructor(saved: Partial<CabinetSnapshot> = {}) {
@@ -32,6 +38,32 @@ export class Cabinet {
     for (const [id, size] of Object.entries(saved.best ?? {})) {
       if (isCritter(id) && typeof size === 'number' && size > 0) this.biggest.set(id, size);
     }
+    for (const [id, day] of Object.entries(saved.shinies ?? {})) {
+      if (isCritter(id) && typeof day === 'string') this.shone.set(id, day);
+    }
+    for (const id of saved.shinyShown ?? []) if (isCritter(id)) this.shownShiny.add(id);
+  }
+
+  /** Notes a shiny caught (1.4's G1). True if it's the first shiny of its kind she's caught. */
+  shine(id: CritterId, day: string): boolean {
+    if (this.shone.has(id)) return false;
+    this.shone.set(id, day);
+    return true;
+  }
+
+  /** The day she first caught one in its shiny colours, or null if she never has. */
+  shinyOn(id: CritterId): string | null {
+    return this.shone.get(id) ?? null;
+  }
+
+  /** How many kinds she has caught a shiny of. */
+  get shinies(): number {
+    return this.shone.size;
+  }
+
+  /** Whether its case at the museum shows a shiny. */
+  isShinyShown(id: CritterId): boolean {
+    return this.shownShiny.has(id);
   }
 
   /**
@@ -66,8 +98,17 @@ export class Cabinet {
     return this.shown.has(id);
   }
 
-  /** Puts one on show. False if one is already. */
-  donate(id: CritterId | FossilId): boolean {
+  /**
+   * Puts one on show. False if one is already. A shiny goes in its case in place of the plain one
+   * (1.4's G1), so a case that has a plain one still takes a shiny, but never two.
+   */
+  donate(id: CritterId | FossilId, shiny = false): boolean {
+    if (shiny && isCritter(id)) {
+      if (this.shownShiny.has(id)) return false;
+      this.shownShiny.add(id);
+      this.shown.add(id);
+      return true;
+    }
     if (this.shown.has(id)) return false;
     this.shown.add(id);
     return true;
@@ -97,6 +138,10 @@ export class Cabinet {
       best: Object.fromEntries(
         CRITTER_IDS.filter((id) => this.biggest.has(id)).map((id) => [id, this.biggest.get(id)!]),
       ),
+      shinies: Object.fromEntries(
+        CRITTER_IDS.filter((id) => this.shone.has(id)).map((id) => [id, this.shone.get(id)!]),
+      ),
+      shinyShown: CRITTER_IDS.filter((id) => this.shownShiny.has(id)),
     };
   }
 }

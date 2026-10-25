@@ -23,6 +23,7 @@ export type Topic =
   | 'storm'
   | 'fog'
   | 'happening'
+  | 'shiny'
   | 'caught'
   | 'pet'
   | 'net'
@@ -57,6 +58,7 @@ export const TOPICS: readonly Topic[] = [
   'invite',
   'happening',
   'gift',
+  'shiny',
   'caught',
   'harvest',
   'donated',
@@ -457,6 +459,74 @@ const AROUND_HER: Record<
       'You caught {catch} today? Splendid, {name}! I shall have a certificate typed up. Mind the Ws.',
       '{catch}! Ahem. On behalf of the town, congratulations. And on behalf of me, ooh.',
       "{name}, you caught {catch}? Wrapunzel's museum will be thrilled. I'm thrilled. I've gone a bit pink.",
+    ],
+  },
+  // 1.4's G1: a shiny she caught today; `{catch}` is "a shiny luna moth".
+  shiny: {
+    cody: [
+      'Babe! You caught {catch}?! Show me. Oh, it sparkles. Oh, I might cry. I might already be crying.',
+      'Mi amor, {catch}! Out of all the critters in all the town, the shiny one came to you. Obviously.',
+      "You caught {catch} today? I'm framing it. I'm framing you. I'm framing the whole day.",
+    ],
+    agatha: [
+      "{name}, {catch}? The wrong colour on purpose. I've always respected that in a creature.",
+      "So you caught {catch}. I've seen one in forty years. You've had a single afternoon. Hmph. Well done.",
+      'Caught {catch}, did you? {name}, keep it out of the moonlight. It might get ideas. Good ideas.',
+    ],
+    maude: [
+      "{name}, you caught {catch}?! There's a footnote about those in chapter nine! A whole footnote!",
+      "{catch}! I'm adding a page to the book. A whole page. Possibly glitter.",
+      "Caught {catch} today, {name}? I've only ever read about them. May I look? Just a look.",
+    ],
+    rufus: [
+      "{name}!!! You caught {catch}!!! IT'S SHINY!!! I'm so excited my tail's gone wonky!!!",
+      'You caught {catch}?!?! It SPARKLES?!?! Can I howl at it?! I howled at it!! AWOO!!!',
+      '{catch}!!! {name}!!! I saw it twinkle from across the square!!! I thought it was a star!!!',
+    ],
+    wrapunzel: [
+      '{catch}, dear! Oh my. Oh my, oh my. The museum has a case with its name on it. Literally.',
+      "You caught {catch} today, my darling? I'll bake something with sprinkles. It's only right.",
+      "Caught {catch}! I've wrapped myself a fresh bandage for the occasion. It felt like that sort of day.",
+    ],
+    barty: [
+      '{name}, {catch}? In all my years down there, I never saw one. Not one. Lucky old you.',
+      "Caught {catch}, eh? My ribs are rattling, I'm that pleased. That's the good kind of rattle.",
+      'I hear you caught {catch} today. Shiny. Like my best bones on a Sunday. Well done, {name}.',
+    ],
+    ollie: [
+      "Stop the post! {name} caught {catch}! I'm telling every letterbox in town!",
+      "{catch}! On my round! Well, on your round. I'm counting it as on my round.",
+      "News, {name}! You caught {catch}! I've already told three people and a hedge.",
+    ],
+    nessa: [
+      '{name}, you caught {catch}? I saw one glitter by the water once. I never dared to look closer.',
+      "{catch}... it's like holding a little piece of a sunrise. Be gentle with it. I know you will.",
+      "You caught {catch} today. That's the prettiest thing I've heard all week, {name}.",
+    ],
+    gourdon: [
+      "{name}, {catch}? Bring me three and I'll carve it. Gold leaf and all. I've been saving some.",
+      'Caught {catch}, did you? Fine colours on that. Hard to paint. I like a challenge.',
+      "Heard you caught {catch}. That's a once in a long while, that is. Good hands, {name}.",
+    ],
+    hazel: [
+      "{catch}! The stars told me something lovely would happen to you today. They're rarely wrong.",
+      '{name}, you caught {catch}? Wishing on a falling star is nothing to that. Nothing at all.',
+      'Caught {catch} today? Your stars are positively glittering. So is it, by the sound of things.',
+    ],
+    boothoven: [
+      '{catch}! {name}, that calls for a key change. Up a whole tone! Brilliant, brilliant.',
+      'You caught {catch}? Then I shall compose it a little twinkling theme. High notes only.',
+      'Caught {catch} today, {name}? Bravissima! Encore! Well. Perhaps not encore. Once is a marvel.',
+    ],
+    scarah: [
+      "You caught {catch}? Cornelius has gone all fluffed up. He likes shiny things. He's a crow.",
+      "{name}, {catch}! Shinier than a polished apple. Shinier than two. Oh, I'm so pleased.",
+      "Caught {catch} today? Don't let Cornelius see it. He'll want it for his collection of spoons.",
+    ],
+    robBoo: [
+      "{name}, {catch}! I'm declaring a holiday. Well. A very short one. Just now. There, it's over.",
+      'You caught {catch}? On behalf of the town council, which is me, ooh. Ooh, ooh, ooh.',
+      "Caught {catch} today? I'll have it in the town records in my best typing. Mind the Ws.",
     ],
   },
   pet: {
