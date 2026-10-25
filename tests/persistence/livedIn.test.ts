@@ -139,6 +139,24 @@ describe('a lived-in save from her phone', () => {
   }
 });
 
+describe("1.2's town on her phone opening 1.4 (1.4's G1, save v56)", () => {
+  it('opens with no shinies caught or on show, and every critter it had still had', () => {
+    const old = JSON.parse(readFileSync(join(FIXTURES, LIVED_IN['1.2']), 'utf8'));
+    const migrated = migrateSave(structuredClone(old));
+    expect(migrated?.version).toBe(SAVE_VERSION);
+    expect(migrated?.cabinet.shinies).toEqual({});
+    expect(migrated?.cabinet.shinyShown).toEqual([]);
+    const world = new World({
+      clock: new FakeClock(new Date(old.lastPlayedAt)),
+      ...fromSave(migrated),
+    });
+    expect(world.cabinet.shinies).toBe(0);
+    expect(world.cabinet.found).toBe(Object.keys(old.cabinet.caught).length);
+    expect(world.milestones.progress('shinies').have).toBe(0);
+    expect(world.mailbox.letters.has('shelf:shinyFamilies')).toBe(false);
+  });
+});
+
 describe('a planter in a lived-in front room (1.1’s W2, save v55)', () => {
   it('comes through in the front room, with its crop growing and its sprinkler', () => {
     const old = JSON.parse(readFileSync(join(FIXTURES, LIVED_IN['1.0']), 'utf8'));

@@ -12,19 +12,15 @@ history.
 coordinating session: Opus sub-agents in worktrees, two at a time, from `v1.4-dev`). **1.3 is on
 her phone** (PR #219, merged 2026-10-25). Each session's heading says where it is.
 
-### G1: shiny morphs (`claude/g1-shinies`; decision 370; save v56) — PR #224
+### G1: shiny morphs (`claude/g1-shinies`; decision 370; **save bumped to v56**) — PR #224
 
-Nearly done. **Done:** the palettes (`SHINIES`, `shinePalette`, `SHINY_ART`), the dealing
-(`isShinyDeal`, `SHINY_ONE_IN`, the nine-month charm `isCharmed` in `Collecting.critters`), the
-glint (`drawShinyGlints`, the critters pass's `lit`), the items (`src/data/shinies.ts`,
-`lunaMothShiny`…, double value, sparkled icons), `Cabinet.shinies`/`shinyShown`, the museum, the
-shiny figurines, the two shelves, the Cabinet sheet, Today, small talk, toast, cue and pop, the
-tests, decision 370, `CLAUDE.md`, `docs/art_style.md`, the plan's status line, and the **1.4
-`NOTES` row** (three lines of G1's; G2 and G3 add one each, five at most). **Left, in order:**
-merge `origin/v1.4-dev`; the bump
-commit (`SAVE_VERSION` 56, a migration step 55 giving `cabinet.shinies: {}` and
-`shinyShown: []`, `isCabinetShape` checking them, a migrations test); push, CI green, merge PR
-#224 into `v1.4-dev`; empty this heading.
+Done, merging. Everything in decision 370 is in: the palettes, the dealing and its nine-month
+charm, the glint, the items, `Cabinet.shinies`/`shinyShown`, the museum, the shiny figurines, the
+two shelves, the Cabinet sheet, Today, small talk, toast, cue and pop, the tests, the 1.4 `NOTES`
+row (three lines of G1's; G2 and G3 add one each, five at most), the docs. The last commit merged
+`origin/v1.4-dev` and bumped `SAVE_VERSION` to 56 (step 55 gives a town `cabinet.shinies: {}` and
+`shinyShown: []`; `isCabinetShape` checks them). Left: CI green on PR #224, merge it into
+`v1.4-dev`, then empty this heading. **G4 bumps next (v57), after this has merged.**
 
 ### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
 
