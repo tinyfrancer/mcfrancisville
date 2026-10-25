@@ -277,6 +277,11 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
     return { ...state, cabinet: { ...cabinet, shinies: {}, shinyShown: [] } };
   },
+  // 1.5's G4: her star chart. There was no telescope before, so a town has traced nothing yet.
+  56: (state) => {
+    const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
+    return { ...state, cabinet: { ...cabinet, stars: {} } };
+  },
 };
 
 /**
