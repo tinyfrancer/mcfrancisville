@@ -100,7 +100,7 @@ export function inSeason(id: CritterId, day: string): boolean {
 
 /**
  * Whether a day is the day after a full moon or a new one, when a critter out of its time comes
- * visiting (V1's R5, decision 310; every fortnight since 1.2.1, decision 360). Not the full
+ * visiting (V1's R5, decision 310; every fortnight since 1.3, decision 360). Not the full
  * moon's own: that night is the moon-bound critters', and visitors crowding it kept the ghost bat
  * from being found within a year.
  */

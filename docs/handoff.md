@@ -53,10 +53,20 @@ the newer town" check opens on the real clock now); `lived-in-v55` is in W1's ov
 No save change (v55), `looksHeld` and every existing snapshot unchanged, smoke 622 of 622, perf
 within noise. No `NOTES` line.
 
-### F5 the touches, V1.3 the review
+### F5 the touches: dropped
 
-Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
-(below), recorded in `docs/personal_touches.md` by the coordinator as they come.
+Dropped at the user's word on 2026-10-25 ("we will hold on any more personal touches, want to
+focus on a fun game instead"). Decision 364 stays unused.
+
+### V1.3: the review and 1.3 (`claude/v13-review`; Opus; decision 366)
+
+Started 2026-10-25 from `v1.3-dev` at `5746d24`. Done: the `1.3` `NOTES` row (five lines and a
+P.S.) with the `1.2.1` row folded into it, `notesToShow('1.2')` → exactly the 1.3 card. Next, in
+order: open `lived-in-v55.json` in a 1.3 dev build as her phone will (Close, Far, sideways) and
+play a day or two by taps (a visiting day, the day after a new moon); the shakedown (smoke's
+screenshots, the creatures, the trees, the moon's words, Settings, `npm run perf` against 1.2's
+table); the docs (this file's cold-start section, "After 1.0", "Where it hurts", `CLAUDE.md`,
+the plan's status line, decision 366); merge into `v1.3-dev`; PR #219's title and body.
 
 ## After 1.0
 
