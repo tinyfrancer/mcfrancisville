@@ -24,12 +24,11 @@ change.
 
 ### F4: the scenery (`claude/f4-scenery`; Opus; decision 363)
 
-Done on the branch, PR open, merging once CI is green: the tree's bare and bent forms kept to
-where they stand (`grove` on a placed tree from `parseMap`, the rule `treeFormOf` in
-`sprites/props.ts`; the town 6 bare of 18 to 1, the graveyard's), Whisperwood's creek curled
-round at the hedge (`wetAround` in `sprites/banks.ts`), the frozen pond's ring looked at and
-kept, every place looked over, three small things logged in the art notes. No save change.
-For 1.3's notes: the town's trees have all their leaves back.
+F4 landed (PR #221, decision 363): the bare and bent tree forms kept to where they stand
+(`grove` from `parseMap`, `treeFormOf` in `sprites/props.ts`; the town 6 bare of 18 to 1, the
+graveyard's), Whisperwood's creek curled round at the hedge (`wetAround`), the frozen pond's ring
+kept, three small things logged in the art notes. No save change. For 1.3's notes: the town's
+trees have all their leaves back.
 
 ### F3 the creatures, F5 the touches, F6 the forwarders, V1.3 the review
 
