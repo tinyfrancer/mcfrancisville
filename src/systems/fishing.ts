@@ -1,5 +1,8 @@
-import type { Rarity } from '../data/critters';
+import { CRITTER_IDS, CRITTERS, isFish, type Rarity } from '../data/critters';
+import type { Weather } from '../data/weather';
+import type { CritterId } from '../types/ids';
 import { SLOW_SWEEP, type Grade } from './activities';
+import { isAbout, isMoonlit, isShinyDeal, isVisiting, weightOf, type OutCritter } from './critters';
 import { hashMixed, hashString } from './random';
 
 /*
@@ -170,4 +173,57 @@ export function bestReelAfter(reel: Reel, ms: number): number {
     candidates.push(k * reel.period + there, k * reel.period + reel.period - there);
   }
   return candidates.filter((t) => t >= ms).sort((a, b) => a - b)[0]!;
+}
+
+/*
+ * The ice hut's hole (1.4's G3, decision 372): a few fish swim under it each hour, dealt from the
+ * pond's (the town's) as the water's are, but apart from them. In winter, December to February,
+ * they're the winter fish whenever any is about; the rest of the year, the pond's ordinary fish.
+ */
+
+/** How many fish come under the hut's hole each hour, each a different kind. */
+export const HOLE_FISH = 2;
+
+/** The months the hut's hole is the winter fish's: December to February. */
+const WINTER_MONTHS: readonly number[] = [12, 1, 2];
+
+/** The fish whose season is the winter (1.4's G3's four). */
+export function isWinterFish(id: CritterId): boolean {
+  const season = CRITTERS[id].season;
+  return isFish(id) && season !== undefined && season[0] === 12 && season[1] === 2;
+}
+
+/** What a fish under the hut's hole is remembered by in `taken`, so it's gone for its hour. */
+export const holeKey = (hour: number, slot: number) => `iceHut:critter:${Math.floor(hour)}:${slot}`;
+
+/**
+ * The fish under the hut's hole at an hour of a day: the pond's fish about then (its hours, its
+ * season or a visit, its weather, its full moon), the winter fish alone in winter if any is about,
+ * weighted as the water's are and dealt from the day and the hour, so the same for anyone who
+ * looks. Their tiles are the hole's, which the caller gives them.
+ */
+export function fishInHole(
+  day: string,
+  hour: number,
+  weather: Weather,
+): Omit<OutCritter, 'tx' | 'ty'>[] {
+  const h = Math.floor(hour);
+  const about = CRITTER_IDS.filter(
+    (id) => isFish(id) && CRITTERS[id].where.includes('town') && isAbout(id, day, h, weather),
+  );
+  const winter = WINTER_MONTHS.includes(Number(day.slice(5, 7))) ? about.filter(isWinterFish) : [];
+  const pool = winter.length > 0 ? winter : about;
+  const moonlit = isMoonlit(day, h);
+  const weight = (id: CritterId) => weightOf(id, weather, moonlit, isVisiting(id, day, weather));
+  const seed = `iceHut:${day}`;
+  const out: Omit<OutCritter, 'tx' | 'ty'>[] = [];
+  for (let slot = 0; slot < HOLE_FISH && pool.length > 0; slot++) {
+    const total = pool.reduce((sum, id) => sum + weight(id), 0);
+    let pick = hashString(`${seed}@${h}#${slot}`) % total;
+    const at = pool.findIndex((id) => (pick -= weight(id)) < 0);
+    const critter = pool.splice(at, 1)[0]!;
+    const shiny = isShinyDeal(seed, h, slot, critter);
+    out.push({ slot, critter, ...(shiny ? { shiny: true } : {}) });
+  }
+  return out;
 }

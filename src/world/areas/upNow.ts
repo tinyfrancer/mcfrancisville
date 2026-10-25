@@ -1,4 +1,5 @@
 import { CRITTER_IDS } from '../../data/critters';
+import { isFrozen } from '../../systems/holidays';
 import { FIRST_DAY_IDS } from '../../data/firstDay';
 import { VILLAGER_IDS } from '../../data/villagers';
 import { ZONE_IDS, ZONES } from '../../data/zones';
@@ -145,6 +146,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       project: underWay(parts.projects),
       freeGo: freeGoOf(parts.activities),
       shiny: parts.collecting.shinyHere(),
+      iceFishing: isFrozen(day),
     };
   });
 }

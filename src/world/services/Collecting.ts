@@ -14,6 +14,8 @@ import {
   type OutCritter,
 } from '../../systems/critters';
 import { hashString } from '../../systems/random';
+import { fishInHole, holeKey } from '../../systems/fishing';
+import { weatherOn } from '../../systems/weather';
 import { isWhopper } from '../../systems/catchSize';
 import { DRIFTS_AN_HOUR, drifts, driftTo, HOP_MS, startles } from '../../systems/drift';
 import { walkable } from '../../systems/grid';
@@ -323,6 +325,26 @@ export class Collecting {
   /** One of this hour's critters where she is, by its key, if it's still out. */
   find(key: string): Critter | undefined {
     return this.critters().find((c) => c.key === key);
+  }
+
+  /**
+   * The fish under the ice hut's hole this hour (1.4's G3), at the hole's tile, less any she has
+   * caught: the pond's winter fish in winter, its ordinary ones the rest of the year. A kind long
+   * in her Cabinet with no shiny comes up shiny here as it does in the water.
+   */
+  holeFish(hole: Tile): Critter[] {
+    const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    const hour = Math.floor(hourOf(now));
+    const { cabinet, takings } = this.keeps;
+    return fishInHole(day, hour, weatherOn(day)).flatMap((c) => {
+      const key = holeKey(hour, c.slot);
+      if (!takings.isReady(key)) return [];
+      const charmed =
+        !c.shiny &&
+        isCharmed(cabinet.caughtOn(c.critter), cabinet.shinyOn(c.critter) !== null, day);
+      return [{ ...c, ...(charmed ? { shiny: true as const } : {}), ...hole, key }];
+    });
   }
 
   /**

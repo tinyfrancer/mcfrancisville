@@ -123,6 +123,8 @@ const ORDER = [
   'heard',
   'critters',
   'fishing',
+  'iceFishing',
+  'iceHut',
   'drifter',
   'fossils',
   'crawlies',

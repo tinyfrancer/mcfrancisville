@@ -38,6 +38,8 @@ export interface FixtureRow {
   plays?: Instrument;
   /** A bed of hers (0.3's F2): a raised bed in the greenhouse, tended as any bed is. */
   planter?: true;
+  /** A hole she fishes through (1.4's G3): walking up to it casts her line, as at the water. */
+  fishing?: true;
 }
 
 /** The greenhouse's own (0.3's F2, decision 242). */
@@ -69,6 +71,30 @@ const ROB_BOO_FIXTURES: Record<Extract<FixtureId, 'mayorsDesk'>, FixtureRow> = {
     size: { w: 3, h: 1 },
     says: 'A great desk piled with letters, a typewriter with a sticky W, and a rubber stamp worn smooth with use. Everything on it says APPROVED.',
   },
+};
+
+/** What she hears at the ice hut's hole once she has had this hour's fish from under it (1.4's G3). */
+export const HOLE_QUIET =
+  "Nothing's nibbling just now. Another fish or two will be along within the hour.";
+
+/** The ice hut's own (1.4's G3): its stove, its bench, and the hole she fishes through. */
+const ICE_HUT_FIXTURES: Record<
+  Extract<FixtureId, 'hutStove' | 'hutBench' | 'iceHole'>,
+  FixtureRow
+> = {
+  hutStove: {
+    name: 'Pot-bellied stove',
+    layer: 'floor',
+    size: { w: 1, h: 1 },
+    says: 'The little stove ticks and glows. Somebody has left a mug of cocoa warming on top. It might be for you.',
+  },
+  hutBench: {
+    name: 'Bench',
+    layer: 'floor',
+    size: { w: 2, h: 1 },
+    says: "A bench with a knitted cushion on it, still warm from the stove. Gourdon's flask is tucked underneath, labelled TESTING.",
+  },
+  iceHole: { name: 'Fishing hole', layer: 'floor', size: { w: 1, h: 1 }, fishing: true },
 };
 
 /**
@@ -265,6 +291,7 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
   ...GREENHOUSE_FIXTURES,
   ...SCARAH_FIXTURES,
   ...ROB_BOO_FIXTURES,
+  ...ICE_HUT_FIXTURES,
 };
 
 /**
@@ -416,6 +443,33 @@ const MAYORS_OFFICE: InteriorRow = {
     { id: 'candelabra', tx: 8, ty: 6, turn: 0 },
     { id: 'monstera', tx: 0, ty: 7, turn: 0 },
   ],
+};
+
+/**
+ * The ice hut on the pond's bank (1.4's G3), once it's built: a tiny room of boards, round windows
+ * onto the sky, the stove in the corner, a bench along the back, and the hole in the middle of its
+ * floor she fishes through, into the pond's winter fish in winter and its ordinary fish the rest of
+ * the year.
+ */
+const ICE_HUT: InteriorRow = {
+  building: 'iceHut',
+  width: 7,
+  floorRows: 4,
+  wallpaper: 'roundWindow',
+  flooring: 'oakBoards',
+  stands: [
+    { tx: 5, ty: 5 },
+    { tx: 1, ty: 4 },
+    { tx: 6, ty: 6 },
+  ],
+  welcome:
+    'The ice hut. Warm as toast, smelling of woodsmoke and cocoa, with a round hole in the floor and the pond waiting underneath.',
+  fixtures: [
+    { id: 'hutStove', tx: 0, ty: 3 },
+    { id: 'hutBench', tx: 5, ty: 3 },
+    { id: 'iceHole', tx: 3, ty: 4 },
+  ],
+  furniture: [{ id: 'stumpStool', tx: 1, ty: 5, turn: 0 }],
 };
 
 export const INTERIORS: Record<InteriorId, InteriorRow> = {
@@ -855,6 +909,7 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
   greenhouse: GREENHOUSE,
   scarahFarmhouse: SCARAH_FARMHOUSE,
   mayorsOffice: MAYORS_OFFICE,
+  iceHut: ICE_HUT,
 };
 
 export const INTERIOR_IDS = Object.keys(INTERIORS) as InteriorId[];

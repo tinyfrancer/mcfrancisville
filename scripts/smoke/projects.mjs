@@ -1,13 +1,17 @@
 /** The town's projects (V1's R4) on the noticeboard's Projects tab. */
 import {
   PHONE,
+  answerCody,
   check,
   closeSheets,
   framed,
+  goOut,
+  openOn,
   page,
   reloadGame,
   stepUntil,
   tapElement,
+  tapFixture,
   tapProp,
 } from './lib.mjs';
 
@@ -31,7 +35,7 @@ async function projects() {
   await framed('.hud-notice-sheet', { tabs: ['Notes', 'Projects'] });
   await tapElement('.hud-notice-sheet .hud-sheet-tab:text-is("Projects")');
   const cards = await page.locator('.hud-project').count();
-  check('the Projects tab offers every project to start', cards === 4, String(cards));
+  check('the Projects tab offers every project to start', cards === 5, String(cards));
   await tapElement('.hud-project >> nth=0 >> button:text-is("Start this one")');
   const started = await page.evaluate(() => window.world.projects.current);
   check('starting one makes it the one under way', started === 'bandstand', String(started));
@@ -111,5 +115,51 @@ async function projects() {
   });
 }
 
+/**
+ * 1.4's G3: the ice hut, built (by the dev handle) on the pond's bank in winter: in through its
+ * door, a little room with a stove, and a tap on the hole in its floor casts her line through it.
+ */
+async function iceHut() {
+  await openOn('2027-01-15', 17);
+  await answerCody();
+  await page.evaluate(() => {
+    window.world.projects.preview('iceHut', 'done');
+    window.view.step(40);
+  });
+  const standing = await page.evaluate(() => window.world.townZone.propAt(31, 38)?.id ?? null);
+  check('the ice hut stands on the pond bank, built', standing === 'iceHut', String(standing));
+  await page.evaluate(() => window.world.tapTile(30, 41));
+  await stepUntil(() => !window.world.player.moving, 'she walks down by the hut');
+  await page.evaluate(() => window.view.step(16, 30));
+  await page.screenshot({ path: '.smoke/ice-hut.png' });
+  // It stands on its site, not in the map, so it's tapped where it is.
+  await page.evaluate(() => window.world.tapTile(31, 38));
+  const went = await stepUntil(() => window.world.scene === 'iceHut', 'she goes into the ice hut');
+  await page.evaluate(() => window.view.step(40));
+  check('its door goes into the ice hut', went);
+  await page.screenshot({ path: '.smoke/ice-hut-inside.png' });
+  await tapFixture('iceHole');
+  await stepUntil(() => window.world.fishing.line !== null, 'she casts through the hole');
+  const line = await page.evaluate(() => ({
+    held: window.world.hands.held,
+    fish: window.world.fishing.line?.critter ?? null,
+  }));
+  check(
+    'a tap on the hole in its floor casts her rod through it, into a winter fish',
+    line.held === 'rod' &&
+      ['icicleSmelt', 'bobblePerch', 'auroraTrout', 'coldMoonSturgeon'].includes(line.fish ?? ''),
+    JSON.stringify(line),
+  );
+  await page.evaluate(() => window.view.step(16, 60));
+  await page.screenshot({ path: '.smoke/ice-hut-fishing.png' });
+  // A tap reels her line in first, as anywhere; then out through the mat.
+  await page.evaluate(() => window.world.tapTile(1, 6));
+  await goOut();
+  await page.evaluate(() => window.world.projects.preview('iceHut', undefined));
+}
+
 /** @type {import('./lib.mjs').Section[]} */
-export const sections = [['projects', projects]];
+export const sections = [
+  ['projects', projects],
+  ['iceHut', iceHut],
+];

@@ -15,7 +15,8 @@ import {
   type Reel,
 } from '../../systems/fishing';
 import type { Grade } from '../../systems/activities';
-import type { CritterId } from '../../types/ids';
+import type { CritterId, ZoneId } from '../../types/ids';
+import type { Tile } from '../../systems/pathfinding';
 import type { WorldContext } from '../context';
 import type { Critter, WorldEvent } from '../events';
 import type { Collecting } from './Collecting';
@@ -31,6 +32,8 @@ export interface FishingCues {
   eager(): boolean;
   /** Her phone asks for reduced motion, so the tension bar sweeps gentler (1.0.1). */
   slow(): boolean;
+  /** Where she is, so a line through the ice hut's hole comes in if she's gone (1.4's G3). */
+  scene(): ZoneId;
 }
 
 /** Her float in the water, over the fish she cast to. */
@@ -46,6 +49,8 @@ export interface Cast {
   at: number;
   /** Whether the fish were biting sooner for her as she cast. */
   eager: boolean;
+  /** Cast through the ice hut's hole (1.4's G3): where she was, the fish under it, not the water's. */
+  hole?: ZoneId;
 }
 
 /** A rare fish hooked (V1's R6a): its tension bar, and where the needle is on it. */
@@ -107,6 +112,25 @@ export class Fishing {
     return { ...cast, ...lineAt(Fishing.seed(cast), Fishing.nibbler(cast), now - cast.at) };
   }
 
+  /**
+   * She casts through the ice hut's hole (1.4's G3), to the first fish under it this hour; null if
+   * she has had them all, until the hour turns.
+   */
+  castInHole(hole: Tile): WorldEvent | null {
+    const fish = this.cues.collecting.holeFish(hole)[0];
+    if (!fish) return null;
+    const cast = this.castTo(fish);
+    this.cast = { ...this.cast!, hole: this.cues.scene() };
+    return cast;
+  }
+
+  /** The fish on her line, if it's still there: in the water where she is, or under the hole. */
+  private fishOf(cast: Cast): Critter | undefined {
+    if (!cast.hole) return this.cues.collecting.find(cast.key);
+    if (this.cues.scene() !== cast.hole) return undefined;
+    return this.cues.collecting.holeFish(cast).find((c) => c.key === cast.key);
+  }
+
   /** She casts to a fish from beside it. The first time ever, she's told what to wait for. */
   castTo(fish: Critter): WorldEvent {
     const { key, critter, tx, ty } = fish;
@@ -127,7 +151,7 @@ export class Fishing {
   step(): WorldEvent[] {
     const line = this.line;
     if (!line) return [];
-    if (this.cues.walking() || !this.cues.collecting.find(line.key)) {
+    if (this.cues.walking() || !this.fishOf(line)) {
       this.cast = null;
       this.hooked = null;
       return [];
@@ -170,7 +194,7 @@ export class Fishing {
     const line = this.line;
     const cast = this.cast;
     if (!line || !cast) return null;
-    const fish = this.cues.collecting.find(line.key);
+    const fish = this.fishOf(cast);
     const now = this.ctx.clock.now();
     const hooked = this.hooked;
     if (hooked && fish) {

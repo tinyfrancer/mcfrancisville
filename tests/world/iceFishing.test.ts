@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { isFish } from '../../src/data/critters';
+import { CRITTERS, isFish } from '../../src/data/critters';
+import { HOLE_QUIET } from '../../src/data/interiors';
 import { HOLE, holeOf, holePixel } from '../../src/render/fishing';
+import { isVisiting } from '../../src/systems/critters';
+import { fishInHole, isWinterFish } from '../../src/systems/fishing';
+import { weatherOn } from '../../src/systems/weather';
 import type { Critter, WorldEvent } from '../../src/world/World';
 import { harness, type Harness } from './harness';
 
@@ -87,6 +91,20 @@ describe('ice fishing', () => {
     expect(holeOf(h.world, 'town')).toBeNull();
   });
 
+  it("says so in Today while the pond's frozen, once a winter, with a tap out onto it", () => {
+    const h = harness();
+    h.clock.set(new Date(2027, 0, 5, 12));
+    const line = h.world.upNow.lines().find((l) => l.kind === 'iceFishing');
+    expect(line).toMatchObject({
+      key: 'iceFishing:2026',
+      go: { zone: 'town', tile: { tx: 23, ty: 43 } },
+    });
+    h.clock.set(new Date(2026, 11, 20, 12));
+    expect(h.world.upNow.lines().find((l) => l.kind === 'iceFishing')?.key).toBe('iceFishing:2026');
+    h.clock.set(new Date(2027, 1, 10, 12));
+    expect(h.world.upNow.lines().some((l) => l.kind === 'iceFishing')).toBe(false);
+  });
+
   it('draws no hole on open water', () => {
     const h = harness();
     const zone = h.world.zones.outdoor('town')!;
@@ -104,5 +122,124 @@ describe('ice fishing', () => {
     expect(holePixel(HOLE.rx + 6, 0)).toBeNull();
     const lip = Array.from({ length: 40 }, (_, i) => holePixel(i - 20, 5)).filter(Boolean);
     expect(lip.length).toBeGreaterThan(0);
+  });
+});
+
+/*
+ * The ice hut (1.4's G3): the fifth town project, on the pond's bank, and once built a room whose
+ * floor has a hole she fishes through, into the winter fish in winter and the pond's own the rest
+ * of the year.
+ */
+
+/** Into the built hut from her door, by a tap on it. */
+function intoTheHut(h: Harness): void {
+  expect(h.world.tapTile(31, 38)).toBe(true);
+  h.until(() => h.world.scene === 'iceHut', 'going into the ice hut');
+  h.until(() => !h.world.movement.walking, 'settling in');
+}
+
+/** Lands whatever bites on her line, on the tension bar if it's a rare one. */
+function landIt(h: Harness): WorldEvent[] {
+  wait(h, () => h.world.fishing.line?.state === 'bite', 'a bite');
+  h.world.tapTile(1, 6);
+  let events = h.tick(1);
+  if (h.world.fishing.line?.reeling) {
+    h.clock.set(h.world.fishing.bestTapAt()!);
+    h.world.tapTile(1, 6);
+    events = h.tick(1);
+  }
+  return events;
+}
+
+describe('the ice hut', () => {
+  it('stands on the pond bank once built, a door into a little room', () => {
+    const h = harness(undefined, { projects: { current: null, given: {}, built: ['iceHut'] } });
+    const town = h.world.zones.outdoor('town')!;
+    expect(town.propAt(31, 38)?.id).toBe('iceHut');
+    expect(town.canWalk(32, 39)).toBe(false);
+    intoTheHut(h);
+    expect(h.world.scene).toBe('iceHut');
+    // And back out onto its step.
+    h.world.tapTile(3, 6);
+    h.until(() => h.world.scene === 'town', 'going back out');
+    expect(h.world.movement.tile).toEqual({ tx: 32, ty: 40 });
+  });
+
+  it('is nothing on the bank till the town builds it', () => {
+    const h = harness();
+    expect(h.world.zones.outdoor('town')!.propAt(31, 38)).toBeUndefined();
+    expect(h.world.zones.outdoor('town')!.canWalk(31, 38)).toBe(true);
+  });
+
+  it('casts through the hole in its floor into the winter fish, any winter day', () => {
+    const h = harness(undefined, { projects: { current: null, given: {}, built: ['iceHut'] } });
+    // February: the pond's open again, and the hut's hole still has the winter fish.
+    h.clock.set(new Date(2027, 1, 10, 12, 5));
+    h.tick(1);
+    intoTheHut(h);
+    expect(h.world.tapTile(3, 4)).toBe(true);
+    const cast = h.until(() => h.world.fishing.line !== null, 'casting through the hole');
+    expect(cast).toContainEqual(expect.objectContaining({ kind: 'cast' }));
+    expect(h.world.hands.held).toBe('rod');
+    const fish = h.world.fishing.line!.critter;
+    expect(isWinterFish(fish), fish).toBe(true);
+    expect(landIt(h)).toContainEqual(expect.objectContaining({ kind: 'caught', critter: fish }));
+    // A second one under it this hour, and then nothing's nibbling till the hour turns.
+    h.world.tapTile(3, 4);
+    h.until(() => h.world.fishing.line !== null, 'casting again');
+    landIt(h);
+    h.world.movement.standAt({ tx: 2, ty: 5 }, 'up');
+    h.world.tapTile(3, 4);
+    const quiet = h.until(() => !h.world.movement.walking, 'walking up').concat(h.tick(2));
+    expect(quiet).toContainEqual(expect.objectContaining({ kind: 'arrived', says: HOLE_QUIET }));
+    expect(h.world.fishing.line).toBeNull();
+  });
+
+  it("has the pond's own fish under it the rest of the year", () => {
+    for (const day of ['2026-09-26', '2027-05-12', '2027-07-04']) {
+      for (const hour of [6, 12, 20, 2]) {
+        const fish = fishInHole(day, hour, weatherOn(day));
+        expect(fish.length, `${day} ${hour}`).toBeGreaterThan(0);
+        for (const f of fish) {
+          // A winter fish only visiting, out of its season, as it does in the water.
+          const visiting = isVisiting(f.critter, day, weatherOn(day));
+          expect(isWinterFish(f.critter) && !visiting, f.critter).toBe(false);
+          expect(CRITTERS[f.critter].where).toContain('town');
+        }
+      }
+    }
+  });
+
+  it('lets her line go if she leaves the hut', () => {
+    const h = harness(undefined, { projects: { current: null, given: {}, built: ['iceHut'] } });
+    intoTheHut(h);
+    h.world.tapTile(3, 4);
+    h.until(() => h.world.fishing.line !== null, 'casting through the hole');
+    h.world.travel.home();
+    h.tick(2);
+    expect(h.world.fishing.line).toBeNull();
+  });
+});
+
+describe("the ice hut in the town's overlays", () => {
+  it('changes where she can walk and what she walks up to only on the tiles it stands on', () => {
+    const others = ['bandstand', 'castleGarden', 'footbridge', 'greenhouse'] as const;
+    const before = harness(undefined, {
+      projects: { current: null, given: {}, built: [...others] },
+    });
+    const after = harness(undefined, {
+      projects: { current: null, given: {}, built: [...others, 'iceHut'] },
+    });
+    const a = before.world.zones.outdoor('town')!;
+    const b = after.world.zones.outdoor('town')!;
+    const changed: string[] = [];
+    for (let ty = -1; ty <= a.height; ty++) {
+      for (let tx = -1; tx <= a.width; tx++) {
+        const was = `${a.canWalk(tx, ty)}${a.propAt(tx, ty)?.id ?? ''}`;
+        const now = `${b.canWalk(tx, ty)}${b.propAt(tx, ty)?.id ?? ''}`;
+        if (was !== now) changed.push(`${tx},${ty}`);
+      }
+    }
+    expect(changed.sort()).toEqual(['31,38', '31,39', '32,38', '32,39']);
   });
 });

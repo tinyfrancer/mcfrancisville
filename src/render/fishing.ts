@@ -146,7 +146,7 @@ function rings(
  * The hole she fishes through on the ice (1.4's G3), round its middle in world pixels: flattened
  * as the rings are, `rx` across and `ry` deep, the lip of slush she drilled out round it.
  */
-export const HOLE = { rx: 8, ry: 4.5 } as const;
+export const HOLE = { rx: 10, ry: 5.5 } as const;
 
 /** The hole's colours: dark open water, deeper under the far edge, a wet rim, and slush. */
 const HOLE_COLOURS = {

@@ -8,6 +8,8 @@ import { LOTS, lotFor } from '../../src/systems/lots';
 import { covers } from '../../src/world/zones/Zone';
 import { parseMap, walkable } from '../../src/systems/grid';
 import { keepsakes } from '../../src/systems/interiors';
+import { PROJECT_IDS, PROJECTS } from '../../src/data/projects';
+import { piecesAt } from '../../src/systems/projects';
 import { findPath } from '../../src/systems/pathfinding';
 import type { InteriorId, MapZoneId } from '../../src/types/ids';
 import { boxOf, layerOf, RoomZone } from '../../src/world/zones/RoomZone';
@@ -23,9 +25,17 @@ describe('the insides of buildings', () => {
     const doors = map.doors.filter((d) => d.to === id);
     expect(doors).toHaveLength(1);
     expect(doors[0]!.prop).toBe(row.building);
-    // A newcomer's house stands on its lot once they've moved in (phase T).
+    // A newcomer's house stands on its lot once they've moved in (phase T), and the ice hut on
+    // its site once it's built (1.4's G3).
     const lot = lotFor(row.building);
-    const buildings = lot ? [lot.house] : map.props.filter((p) => p.id === row.building);
+    const project = PROJECT_IDS.find((p) =>
+      PROJECTS[p].stages.done.some((d) => d.prop === row.building),
+    );
+    const buildings = lot
+      ? [lot.house]
+      : project
+        ? piecesAt(project, 'done').filter((p) => p.id === row.building)
+        : map.props.filter((p) => p.id === row.building);
     expect(buildings).toHaveLength(1);
     expect(PROP_FOOTPRINT[row.building].door, id).toBeDefined();
     const step = doorStep(buildings[0]!);
@@ -91,7 +101,7 @@ describe('the insides of buildings', () => {
     );
     for (const id of Object.keys(FIXTURES) as (keyof typeof FIXTURES)[]) {
       const row = FIXTURES[id];
-      expect(row.opens ?? row.says ?? row.plays ?? row.planter, id).toBeDefined();
+      expect(row.opens ?? row.says ?? row.plays ?? row.planter ?? row.fishing, id).toBeDefined();
     }
   });
 

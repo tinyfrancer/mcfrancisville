@@ -8,6 +8,7 @@ import {
   framed,
   goInto,
   goOut,
+  openOn,
   page,
   playerTile,
   reloadGame,
@@ -531,6 +532,77 @@ async function fishing() {
 }
 
 /**
+ * 1.4's G3: in January the town's pond is frozen over, its fish dim shadows under the ice; a tap on
+ * one casts through a hole in it, and a tap on the bite lands it.
+ */
+async function iceFishing() {
+  await openOn('2027-01-15', 12);
+  await answerCody();
+  const fish = await page.evaluate(() =>
+    window.world.collecting.critters().filter((c) => window.world.townZone.isIce(c.tx, c.ty)),
+  );
+  check(
+    'in January the fish are under the frozen pond',
+    fish.length >= 1,
+    fish.map((c) => c.critter).join(', '),
+  );
+  const first = fish[0];
+  if (!first) return;
+  // Onto the ice near it, so its shadow is on screen for a real tap.
+  await page.evaluate((c) => {
+    const w = window.world;
+    for (let r = 2; r <= 4; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (w.canWalk(c.tx + dx, c.ty + dy) && w.tapTile(c.tx + dx, c.ty + dy)) return;
+        }
+      }
+    }
+  }, first);
+  await stepUntil(() => !window.world.player.moving, 'she skates over to it');
+  await page.evaluate(() => window.view.step(16, 30));
+  await page.screenshot({ path: '.smoke/ice-shadows.png' });
+  await tapTile(first.tx, first.ty);
+  await stepUntil(() => window.world.fishing.line !== null, 'she casts through the ice');
+  const cast = await page.evaluate(() => {
+    const line = window.world.fishing.line;
+    return {
+      held: window.world.hands.held,
+      onIce: !!line && window.world.townZone.isIce(line.tx, line.ty),
+    };
+  });
+  check(
+    'a tap on a shadow under the ice casts her rod through a hole in it',
+    cast.held === 'rod' && cast.onIce,
+    JSON.stringify(cast),
+  );
+  await page.evaluate(() => window.view.step(16, 60));
+  await page.screenshot({ path: '.smoke/ice-hole.png' });
+  let landed = false;
+  const me = await playerTile();
+  for (let tries = 0; tries < 4 && !landed; tries++) {
+    const wait = await page.evaluate(
+      () =>
+        (window.world.fishing.bestTapAt() ?? window.world.clock.now()) - window.world.clock.now(),
+    );
+    if (wait > 25) await page.waitForTimeout(wait - 25);
+    await page.waitForFunction(
+      () => ['bite', 'reel'].includes(window.world.fishing.line?.state ?? ''),
+      null,
+      { timeout: 20_000, polling: 10 },
+    );
+    await tapTile(me.tx, me.ty + 1);
+    await page.evaluate(() => window.view.step(16, 2));
+    landed = await page.evaluate((id) => window.world.cabinet.caughtOn(id) !== null, first.critter);
+    if (!landed && !(await page.evaluate(() => window.world.fishing.line))) {
+      await tapTile(first.tx, first.ty);
+      await stepUntil(() => window.world.fishing.line !== null, 'she casts again');
+    }
+  }
+  check('a tap on the bite lands it, through the ice', landed, first.critter);
+}
+
+/**
  * V1's R6a: a shy critter rushed at drifts a tile away with a hop, drawn on the way, and is
  * netted once she creeps up. Found by trying a few hours of a few days, by a dev build's ?day=.
  */
@@ -616,6 +688,7 @@ async function drifter() {
 export const sections = [
   ['critters', critters],
   ['fishing', fishing],
+  ['iceFishing', iceFishing],
   ['drifter', drifter],
   ['fossils', fossils],
   ['crawlies', crawlies],
