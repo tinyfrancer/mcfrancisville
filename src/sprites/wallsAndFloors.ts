@@ -677,6 +677,38 @@ export function windowArt(id: WindowPaperId, sky: WindowSky): WindowArt {
   return art;
 }
 
+/**
+ * The attic's round window (1.5's G6), the same porthole of a window as the round window paper's
+ * but in a plain wooden ring with four panes, hung low in the gable under the eaves: whatever
+ * paper she puts up, it's always there.
+ */
+const GABLE: WindowShape = {
+  width: 34,
+  height: 34,
+  foot: 84,
+  draw: (s, sky) => {
+    framed(s, { shape: 'round', x: 1, y: 1, w: 32, h: 32, frame: 3, panes: [2, 2] }, sky);
+  },
+};
+
+const GABLE_COLOURS = { wall: C.cream, roof: C.plum, trim: C.wood, door: C.berry } as const;
+
+/** The attic's round window as the sky through it looks (1.5's G6). */
+export function atticWindowArt(sky: WindowSky): WindowArt {
+  const key = `attic:${sky}`;
+  const made = drawn.get(key);
+  if (made) return made;
+  const s = new Sketch(GABLE.width, GABLE.height);
+  GABLE.draw(s, sky);
+  const art: WindowArt = {
+    source: finish(s),
+    palette: { ...palette(GABLE_COLOURS), [GLINT]: C.ghost, ...SKIES[sky] },
+    foot: GABLE.foot,
+  };
+  drawn.set(key, art);
+  return art;
+}
+
 // ---- Floors -------------------------------------------------------------------------------------
 
 /** Little round mint tiles in white grout, a white one here and there. */

@@ -281,9 +281,23 @@ const SAPLING_LINES: Record<'planted' | 'growing' | 'waiting', (days: number) =>
 
 /** What the workbench says as she makes something: what it was, and where it went. */
 export function madeToast(made: Made): Toast {
+  if ('room' in made && made.in === 'attic') {
+    return {
+      text: 'Your attic grew! More cozy nooks under the roof, and just as snug.',
+      special: true,
+      icon: 'house',
+    };
+  }
   if ('room' in made) {
     return {
       text: 'Your home grew! So much more room for everything.',
+      special: true,
+      icon: 'house',
+    };
+  }
+  if ('newRoom' in made && made.newRoom === 'attic') {
+    return {
+      text: 'An attic! Climb the new ladder in your back room. Mind your head on the eaves.',
       special: true,
       icon: 'house',
     };
@@ -391,6 +405,7 @@ const REFUSED: Record<Refusal, string> = {
   blocking: 'That would block the way. Leave a path to the door and the chest.',
   indoors: "That one likes it indoors, where it's cozy and dry. It can go in the house!",
   inTheWay: 'That would block the way round your yard. Leave a path for everyone!',
+  eaves: 'The eaves are too low for that. Try it further from the back, where the roof is higher.',
 };
 
 /** What the HUD says about a moment in town: a find, a bed tended, or a promise of later. */

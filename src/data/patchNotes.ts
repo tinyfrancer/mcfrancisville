@@ -232,6 +232,19 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Hazel has asked me to say: the stars come out after eight, and so should you. Wrap up warm.',
   },
+  {
+    version: '1.5',
+    lines: [
+      // 1.5's G6: the attic.
+      'Your workbench can build an attic now: a ladder up from the back room, to a snug little ' +
+        'room under the roof.',
+      'It has a round window that shows the sky, stars and all, and its own whitewashed planks. ' +
+        'It can grow once, too.',
+      'Mind the eaves at the back: the tall things will have to stand further forward. The ' +
+        'roof is very firm about this.',
+    ],
+    ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

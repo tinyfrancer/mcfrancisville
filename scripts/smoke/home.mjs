@@ -1,4 +1,4 @@
-/** Her home: decorating, the chest, display pieces, things on tables, the workbench, the back room, her yard, the stove and window wallpaper. */
+/** Her home: decorating, the chest, display pieces, things on tables, the workbench, the back room, her yard, the stove, window wallpaper and the attic. */
 import {
   FRAME_MS,
   PHONE,
@@ -817,6 +817,143 @@ async function winterSets() {
   await openOn(`${PLAIN_DAY}&weather=clear`, 12);
 }
 
+/**
+ * 1.5's G6, at ten at night: the attic made at the workbench by taps, climbed up to by a tap on
+ * the back room's ladder, a piece put down and a tall one kept off the back row by the eaves, the
+ * round window showing the night, upright and on its side, and back down the hatch.
+ */
+async function attic() {
+  await openOn(`${PLAIN_DAY}&weather=clear`, 22);
+  if (await page.evaluate(() => window.world.scene !== 'home')) {
+    await tapProp('homeHouse');
+    await stepUntil(() => window.world.scene === 'home', 'she goes in to build her attic');
+  }
+  await page.evaluate(() => {
+    window.world.home.rooms.build('back');
+    window.world.bag.add('wood', 60);
+    window.world.bag.add('stone', 10);
+    window.world.bag.add('glowGourd', 3);
+  });
+  await tapTile(5, 3);
+  await stepUntil(
+    () => document.querySelector('.hud-craft-sheet') !== null,
+    'walking up to the workbench opens it',
+  );
+  await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Home")');
+  await tapElement('.hud-craft-sheet button[aria-label="Make Attic"]');
+  const built = await page.evaluate(() => window.world.home.rooms.built);
+  check('the workbench builds her an attic', built.includes('attic'), JSON.stringify(built));
+  await tapElement('.hud-craft-sheet button:text-is("Done")');
+
+  // Through the arch, then a tap on the ladder up the back room's wall takes her up it.
+  const arch = await page.evaluate(
+    () => window.world.home.rooms.room.doorways[0] ?? { tx: 1, ty: 3 },
+  );
+  await tapTile(arch.tx, arch.ty - 1);
+  await stepUntil(() => window.world.home.rooms.here === 'back', 'she goes through the arch');
+  // Long enough for the iris between the rooms to open again.
+  await page.evaluate(() => window.view.step(40, 30));
+  await page.screenshot({ path: '.smoke/attic-ladder.png' });
+  const ladder = await page.evaluate(() =>
+    window.world.home.rooms.room.doorways.find((d) => d.ladder),
+  );
+  check('the back room has a ladder up', ladder !== undefined, JSON.stringify(ladder));
+  if (!ladder) return;
+  await tapTile(ladder.tx, 1);
+  await stepUntil(() => window.world.home.rooms.here === 'attic', 'a tap on the ladder climbs it');
+  const room = await page.evaluate(() => window.world.home.rooms.room);
+  check(
+    'she is up in her attic, under the eaves',
+    room.eaves && room.width === 7,
+    JSON.stringify({ eaves: room.eaves, width: room.width }),
+  );
+
+  // A cauldron put down by a tap; a grandfather clock won't go on the back row.
+  await page.evaluate(() => {
+    window.world.home.store('cauldron');
+    window.world.decorating.takeOut('cauldron');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(1, 4);
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  const placed = await page.evaluate(() => window.world.home.rooms.pieceAt(1, 4)?.id);
+  check('a tap puts a piece down in the attic', placed === 'cauldron', String(placed));
+  await page.evaluate(() => {
+    window.world.home.store('grandClock');
+    window.world.decorating.takeOut('grandClock');
+  });
+  await page.evaluate(() => window.view.step(40));
+  await tapTile(5, room.wallRows);
+  const clock = await page.evaluate(() =>
+    window.world.home.rooms.placed.find((p) => p.id === 'grandClock'),
+  );
+  const told = await stepUntil(
+    () => /eaves are too low/.test(document.querySelector('.hud-toast-shown')?.textContent ?? ''),
+    'the eaves are too low',
+  );
+  check(
+    'a tall piece stays off the back row, and she is told why',
+    told && clock !== undefined && clock.ty > room.wallRows,
+    JSON.stringify(clock),
+  );
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+
+  // The round window, in the middle of the wall, shows the night: deep and blue.
+  await page.evaluate(() => window.view.step(40, 4));
+  const glass = await page.evaluate(() => {
+    const at = window.world.home.rooms.room;
+    // The window's lower-left pane, below the stars and the moon and above the hills.
+    const x = Math.floor(at.width / 2) * 32 + 8 - window.view.cameraOrigin().x;
+    const y = 84 - 17 - 2 - window.view.cameraOrigin().y;
+    const el = /** @type {HTMLCanvasElement} */ (document.getElementById('game'));
+    const data = el.getContext('2d')?.getImageData(x, y, 4, 3).data ?? [];
+    const px = [];
+    for (let i = 0; i < data.length; i += 4) {
+      const [r = 0, g = 0, b = 0] = [data[i], data[i + 1], data[i + 2]];
+      px.push({ r, g, b, sum: r + g + b });
+    }
+    px.sort((a, b) => a.sum - b.sum);
+    return px[Math.floor(px.length / 2)] ?? { r: 0, g: 0, b: 0, sum: 0 };
+  });
+  check(
+    'at ten at night the round window shows the night sky',
+    glass.sum < 260 && glass.b > glass.r,
+    JSON.stringify(glass),
+  );
+  await page.screenshot({ path: '.smoke/attic-night.png' });
+  await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.screenshot({ path: '.smoke/attic-night-sideways.png' });
+  await page.setViewportSize(PHONE);
+  await page.evaluate(() => window.view.step(40, 4));
+
+  // Put away again, down the hatch onto the foot of the ladder, and out into town by day.
+  await page.evaluate(() => {
+    for (const p of [...window.world.home.rooms.placed]) window.world.home.rooms.putAway(p);
+  });
+  await clearMat();
+  const hatch = await page.evaluate(() => window.world.home.rooms.room.mat);
+  await tapTile(hatch.tx, hatch.ty);
+  await stepUntil(() => window.world.home.rooms.here === 'back', 'down the hatch');
+  const foot = await playerTile();
+  check(
+    'down the hatch, she stands at the foot of the ladder',
+    foot.tx === ladder.tx && foot.ty === ladder.ty,
+    JSON.stringify(foot),
+  );
+  for (const to of ['main', 'town']) {
+    await clearMat();
+    const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
+    await tapTile(mat.tx, mat.ty);
+    await stepUntil(
+      `window.world.scene === '${to}' || window.world.home.rooms.here === '${to}'`,
+      `back out to the ${to === 'main' ? 'front room' : 'town'}`,
+    );
+  }
+  await page.evaluate(() => window.view.saveNow());
+  await openOn(`${PLAIN_DAY}&weather=clear`, 12);
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['home', home],
@@ -829,4 +966,5 @@ export const sections = [
   ['cook', cook],
   ['windows', windows],
   ['winterSets', winterSets],
+  ['attic', attic],
 ];

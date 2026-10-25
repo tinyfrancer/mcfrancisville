@@ -102,6 +102,8 @@ const WAITING: Partial<Record<CantMake, string>> = {
 /** Why an extension has to wait: the one before it comes first. */
 function notYet(id: RecipeId): string {
   const made = RECIPES[id].makes;
+  if ('newRoom' in made) return 'Build the back room first, then this one.';
+  if ('room' in made && made.in === 'attic') return 'Build the attic first, then this one.';
   if (!('beds' in made)) return 'Build the roomy extension first, then this one.';
   const before = RECIPE_IDS.find((r) => {
     const m = RECIPES[r].makes;

@@ -55,7 +55,22 @@ Decision 373 says what and why. Nothing half done. **The `1.5` NOTES row** is ma
 (the notes' minimum) and a P.S.: G5–G7 add theirs and the review folds to five (or into 1.4's if
 1.4 isn't cut first). **G6 bumps next (v58).**
 
-### G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
+### G6: an attic (`claude/g6-attic`; decision 375; **save bumped to v58**)
+
+**Landed** (PR #230, into `v1.4-dev`): the attic, a third `ROOMS` row (7×5, one extension to 9×7,
+`through: { from: 'back', tx: 9 }`, `eaves`), up a ladder in the back room's wall
+(`Doorway.ladder`, `ladderArt` in `sprites/doorway.ts`) and down a hatch where its mat would be
+(`HATCH_ART`); a sloped ceiling and a round window showing the sky in `roomShell` (`eavesArt`,
+`atticWindowArt`); its own whitewashed planks (`atticPlanks`, a row's `first`); the eaves rule
+(`underEaves`, refusal `eaves`, `TALL` in `data/home.ts` held to the art by
+`tests/world/attic.test.ts`: a new tall piece fails it until listed); the recipes `attic` and
+`atticExtension` (`Made` `{ room, in }`, `Rooms.grow(id)`); the toasts; smoke's `attic` section.
+Save v58: step 57 is the identity (the rooms' record was open-ended; a missing attic is one not
+built). **The `1.5` NOTES row** was made by G6, three lines and a P.S.: G5 and G7 add theirs and
+the review folds to five. Decision 375 says what and why. Nothing half done. **G7 bumps next
+(v59) if a row needs it.**
+
+### G5 the photo mode, G7 the pet, V1.5 the review
 
 Not started; in the plan's order.
 

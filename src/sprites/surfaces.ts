@@ -92,6 +92,17 @@ const MOSS_PANELS = tile('a', (s) => {
   }
 });
 
+/** Whitewashed boards standing on end, eight pixels wide, a knot here and there. */
+const ATTIC_PLANKS = tile('a', (s) => {
+  const knots = [11, 26, 5, 19];
+  for (let col = 0; col < 4; col++) {
+    const x = SIZE + col * 8;
+    s.rect(x + 7, SIZE, 1, SIZE, 'b');
+    s.rect(x + 2, SIZE + ((knots[col]! + 9) % SIZE), 1, 5, 'b');
+    s.set(x + 4, SIZE + knots[col]!, 'c').set(x + 4, SIZE + knots[col]! + 1, 'b');
+  }
+});
+
 export const WALLPAPER_ART: Record<WallpaperId, SurfaceArt> = {
   plumStripes: { source: PLUM_STRIPES, palette: { a: C.plum, b: C.plumLight, c: C.dusk } },
   batDamask: { source: BAT_DAMASK, palette: { a: C.teal, b: C.tealShade } },
@@ -99,6 +110,7 @@ export const WALLPAPER_ART: Record<WallpaperId, SurfaceArt> = {
   ghostPolka: { source: GHOST_POLKA, palette: { a: C.lavender, b: C.ghost, k: C.plum } },
   moonlitBlue: { source: MOONLIT_BLUE, palette: { a: C.navy, b: C.candleBright, c: C.sky } },
   mossPanels: { source: MOSS_PANELS, palette: { a: C.moss, b: C.mossLight, c: C.mossDark } },
+  atticPlanks: { source: ATTIC_PLANKS, palette: { a: C.cream, b: C.creamShade, c: C.wood } },
   // The paper behind the windows of 0.3's S4 (their windows are `windowArt`).
   ...WINDOW_PAPER_ART,
 };
