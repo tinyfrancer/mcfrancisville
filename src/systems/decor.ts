@@ -1,5 +1,5 @@
 import { FURNITURE } from '../data/furniture';
-import type { Placed, Room } from '../data/home';
+import { TALL, type Placed, type Room } from '../data/home';
 import { isSmall, isSurface } from '../data/tabletop';
 import type { FurnitureId } from '../types/ids';
 import type { Tile } from './pathfinding';
@@ -8,9 +8,10 @@ import type { Tile } from './pathfinding';
  * Why a piece can't go somewhere: it doesn't fit (off its wall or floor, on the mat, a doorway or
  * the chest, or over another piece), she's standing there, or it would shut off part of the room;
  * or out in her yard (0.3's H5), it's a piece that stays indoors, or it would cut off somewhere in
- * town. (A planter stayed in the front room until 1.1's W2 gave its bed a room.)
+ * town; or in her attic (1.5's G6), the eaves are too low for it. (A planter stayed in the front
+ * room until 1.1's W2 gave its bed a room.)
  */
-export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'indoors' | 'inTheWay';
+export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'indoors' | 'inTheWay' | 'eaves';
 
 /** The tiles a piece covers, which for a long piece turned on its side are the other way round. */
 export function footprint(id: FurnitureId, turn: number): { w: number; h: number } {
@@ -119,9 +120,21 @@ export function refusal(
       }
     }
   }
+  if (underEaves(room, piece)) return 'eaves';
   if (layer !== 'floor') return null;
   if (standing && covers(piece, standing.tx, standing.ty)) return 'standing';
   return allReachable(room, [...others, piece]) ? null : 'blocking';
+}
+
+/**
+ * Whether a piece would be up against an attic's sloped ceiling (1.5's G6): hung on the top row of
+ * its wall, which is the ceiling, or a tall piece standing on its back row of floor, where the
+ * roof comes down lowest.
+ */
+export function underEaves(room: Room, piece: Placed): boolean {
+  if (!room.eaves) return false;
+  if (FURNITURE[piece.id].layer === 'wall') return piece.ty <= 0;
+  return FURNITURE[piece.id].layer === 'floor' && piece.ty === room.wallRows && TALL.has(piece.id);
 }
 
 /**

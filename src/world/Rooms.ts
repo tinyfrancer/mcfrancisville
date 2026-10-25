@@ -2,7 +2,7 @@ import { isDisplayPiece } from '../data/display';
 import { FURNITURE, turnCount } from '../data/furniture';
 import { ITEMS } from '../data/items';
 import {
-  MAX_ROOM_SIZE,
+  maxSizeOf,
   ROOM_IDS,
   roomOf,
   ROOMS,
@@ -147,7 +147,7 @@ export class Rooms implements Decorable {
 
   /**
    * Builds a room onto her home (0.3's H4), through a doorway in the back wall of the room it's
-   * through, papered and floored like that room. Anything in the doorway's way goes in the chest,
+   * through, papered and floored like that room, or as its row says first if she owns those. Anything in the doorway's way goes in the chest,
    * with what it had on show, and is handed back so a planter's bed can go too. Null if she has it
    * already, or hasn't the room it's through.
    */
@@ -155,11 +155,12 @@ export class Rooms implements Decorable {
     const from = ROOMS[id].through?.from;
     if (this.rooms.has(id) || !from || !this.rooms.has(from)) return null;
     const parent = this.rooms.get(from)!;
+    const first = ROOMS[id].first;
     this.rooms.set(id, {
       id,
       pieces: [],
-      papered: parent.papered,
-      laid: parent.laid,
+      papered: ownedOr(first?.wallpaper, this.owned.wallpapers, parent.papered),
+      laid: ownedOr(first?.flooring, this.owned.floorings, parent.laid),
       shape: roomOf(0, id, this.built),
     });
     return this.reshape(parent, parent.shape.size);
@@ -170,18 +171,30 @@ export class Rooms implements Decorable {
     return this.rooms.get('main')!.shape.size;
   }
 
-  /** Whether there's an extension left to build. */
+  /** How many extensions one of her rooms has had (1.5's G6); null if she hasn't built it. */
+  sizeOf(id: RoomId): number | null {
+    return this.rooms.get(id)?.shape.size ?? null;
+  }
+
+  /** Whether there's an extension left to build onto her front room. */
   get canGrow(): boolean {
-    return this.extensions < MAX_ROOM_SIZE;
+    return this.grows('main');
+  }
+
+  /** Whether there's an extension left to build onto a room she has. */
+  grows(id: RoomId): boolean {
+    const size = this.sizeOf(id);
+    return size !== null && size < maxSizeOf(id);
   }
 
   /**
-   * Builds the next extension: the front room grows wider and deeper, and everything stays where
-   * it was. False if it's as big as it gets.
+   * Builds a room's next extension (the front room's, or since 1.5's G6 the attic's): it grows
+   * wider and deeper, and everything stays where it was. False if it's as big as it gets.
    */
-  grow(): boolean {
-    if (!this.canGrow) return false;
-    this.reshape(this.rooms.get('main')!, this.extensions + 1);
+  grow(id: RoomId = 'main'): boolean {
+    if (!this.grows(id)) return false;
+    const state = this.rooms.get(id)!;
+    this.reshape(state, state.shape.size + 1);
     return true;
   }
 
@@ -384,7 +397,7 @@ export class Rooms implements Decorable {
   }
 }
 
-/** A wallpaper or flooring she owns, or the first she owns if not. */
-function ownedOr<Id extends string>(id: Id | undefined, owned: readonly Id[]): Id {
-  return id && owned.includes(id) ? id : owned[0]!;
+/** A wallpaper or flooring she owns, or `or` (the first she owns, unsaid) if not. */
+function ownedOr<Id extends string>(id: Id | undefined, owned: readonly Id[], or?: Id): Id {
+  return id && owned.includes(id) ? id : (or ?? owned[0]!);
 }

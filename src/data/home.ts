@@ -19,6 +19,11 @@ export interface Room {
   chest: { tx: number; ty: number } | null;
   /** The doorways in its back wall to the rooms she has built beyond it (0.3's H4). */
   doorways: Doorway[];
+  /**
+   * Whether it's up under the roof (1.5's G6): a sloped ceiling over the top row of its wall, a
+   * round window, and a hatch in its floor where the mat would be, down the ladder.
+   */
+  eaves: boolean;
 }
 
 /**
@@ -29,6 +34,8 @@ export interface Doorway {
   tx: number;
   ty: number;
   to: RoomId;
+  /** A ladder up to a room under the roof rather than an arch (1.5's G6). */
+  ladder?: true;
 }
 
 /** A room of her home as a row (0.3's H4): a third room is a row here and a recipe. */
@@ -40,6 +47,13 @@ export interface RoomRow {
   through?: { from: RoomId; tx: number };
   /** Whether the storage chest stands in it, in the corner. */
   chest?: true;
+  /** Up under the roof, reached by a ladder (1.5's G6): see `Room.eaves`. */
+  eaves?: true;
+  /**
+   * What it's papered and floored with when it's built, given to her with it (1.5's G6); the
+   * room it's through's, if not.
+   */
+  first?: { wallpaper: WallpaperId; flooring: FlooringId };
 }
 
 /**
@@ -63,12 +77,53 @@ export const ROOMS: Record<RoomId, RoomRow> = {
     sizes: [{ width: 11, floorRows: 8 }],
     through: { from: 'main', tx: 1 },
   },
+  // 1.5's G6: up a ladder against the back room's back wall, near its far corner, a little room
+  // under the roof, and one extension. Odd widths keep the hatch and the round window centred.
+  attic: {
+    name: 'Attic',
+    sizes: [
+      { width: 7, floorRows: 5 },
+      { width: 9, floorRows: 7 },
+    ],
+    through: { from: 'back', tx: 9 },
+    eaves: true,
+    first: { wallpaper: 'atticPlanks', flooring: 'oakBoards' },
+  },
 };
 
 export const ROOM_IDS = Object.keys(ROOMS) as RoomId[];
 
 /** The biggest her front room can grow. */
 export const MAX_ROOM_SIZE = ROOMS.main.sizes.length - 1;
+
+/** The biggest a room of hers can grow (1.5's G6: the attic has an extension of its own). */
+export function maxSizeOf(id: RoomId): number {
+  return ROOMS[id].sizes.length - 1;
+}
+
+/**
+ * How far above its footprint a standing piece may rise and still stand on an attic's back row,
+ * under the eaves (1.5's G6): a tile.
+ */
+export const EAVES_RISE = 32;
+
+/**
+ * The standing pieces whose picture rises more than `EAVES_RISE` above their footprint at any
+ * turn, worked out from their art (and held to it by `tests/world/attic.test.ts`): kept here, as
+ * the rules can't read a picture.
+ */
+export const TALL: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
+  'canopyBed',
+  'fernStand',
+  'grandClock',
+  'hatStand',
+  'lemonTree',
+  'libraryLadder',
+  'potionRack',
+  'suitOfArmour',
+  'tallBookcase',
+  'wardrobe',
+]);
 
 /** The storage chest, in the front room's corner, where every piece she isn't using waits. */
 export const CHEST = { tx: 0, ty: 3 } as const;
@@ -83,9 +138,13 @@ export function roomOf(size: number, id: RoomId = 'main', built: readonly RoomId
   const { width, floorRows } = row.sizes[at]!;
   const room = roomShaped(width, floorRows, at);
   room.chest = row.chest ? { ...CHEST } : null;
+  room.eaves = row.eaves === true;
   for (const to of built) {
     const through = ROOMS[to].through;
-    if (through?.from === id) room.doorways.push({ tx: through.tx, ty: room.wallRows, to });
+    if (through?.from !== id) continue;
+    const doorway: Doorway = { tx: through.tx, ty: room.wallRows, to };
+    if (ROOMS[to].eaves) doorway.ladder = true;
+    room.doorways.push(doorway);
   }
   return room;
 }
@@ -103,6 +162,7 @@ export function roomShaped(width: number, floorRows: number, size = 0): Room {
     mat: { tx: Math.floor(width / 2), ty: height - 1 },
     chest: null,
     doorways: [],
+    eaves: false,
   };
 }
 

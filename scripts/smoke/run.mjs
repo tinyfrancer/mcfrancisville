@@ -145,6 +145,7 @@ const ORDER = [
   'sets',
   'windows',
   'winterSets',
+  'attic',
   'fair',
   'plots',
   'booAcres',
