@@ -9023,6 +9023,95 @@ tiles); a `Clock` helper in `systems/clock.ts` (F1's files are near; the helper 
 own); dropping `Stalls`' own two caches to use `MinuteDay` (they cache more than the day, and a
 refactor of working code buys nothing she sees).
 
+## 362. The creatures looked at together: the bats, moths, fish, orbs and five crawlies redrawn, and the dogs given muzzles (2026-10-25, 1.3's F3)
+
+_Session F3 of the 1.3 plan, for decision 267 ("some creatures and scenery look funny") after
+L6's pass (decision 292). No save change; her look and every figure untouched (`looksHeld`
+unchanged). Personal touches parked (decision 177): every look is the warmest default, nothing
+was asked; the pets are hers, so they were changed least._
+
+**How they were judged.** L6's test, every creature at once: each critter's 16 and 24 (both
+frames) at 6×, its 24 at 3× (a phone at Close, 12 tiles across ~1,170 device pixels) on the
+ground it lives on by day and under a night tint, a fish's shadow on water at 3× as the pond draws
+it, and every pet frame at 6× and at 3× on the lawn by day and night; then smoke's critters, pets
+and museum screenshots at phone size. Asked of each: does the silhouette say what it is at 3×? is
+the face lost in the body? do its colours fight its ground? are the 16 and the 24 one creature?
+Where each is seen mattered: the bag, the Cabinet, the museum's nooks, the figurines and the world
+all show the 24 (`world[0]`); the 16 is only a small fish's shadow, the Dolly Parton day monarchs
+and the gallery. Of 70 critters, 41 ranked weak, most of them by family (the shape a family shares
+was the fault, not the colours), so 13 drawings fixed them; of six pets, two dogs' face-on frames.
+
+**Redrawn** (shapes in `src/sprites/critterLooks.ts` and `crawlies.ts`, each 16 from the 24's
+numbers, so the bag, Cabinet, museum, figurines and world agree; every critter kept its palette,
+its size and its name's look):
+
+- **The bats** (eight, and the bunny bat): spread, a flat bar; raised, two square flags, a bowtie.
+  Now each wing is a membrane from the shoulder out to a wrist and down three finger bones (`v`,
+  a step darker) to its tips, its trailing edge scalloped between them; a round body and pale
+  tummy, pointed ears pink inside, eyes and two white fangs. Raised, the wings lift into a V. At
+  16 the middle finger is left out, or the bones would be all the wing (a test caught it).
+- **The moths** (eleven): fore- and hindwing one rounded lump, the raised frame a heart. Now a
+  forewing swept to a rounded point with its spot and a rounder hindwing (`w`) under it, a seam
+  between them; head, thorax and tapering abdomen, eyes, feathery feelers. The owl-eye moth's
+  hindwing spots are eyes looking back (`owlEyed`), its name unread before. The mourning cloak's
+  margin keeps to the wings' far edges (it ran along the seam, and at 16 was most of the wing).
+- **The fish**: the minnow, koi and carp shared a lumpy body and a notched blob of a tail, and the
+  round fish's shadows were blobs. Every fish now narrows to a wrist before a forked tail
+  (`forkedTail`), with a fin on its back and under it, an eye and a smile; the koi has patches,
+  the carp is deep with a whisker, the minnow slim; the pumpkinseed, moonfish and snowglobe fish
+  and the pike likewise. That wrist is what makes a shadow a fish (a test holds it for every
+  redrawn fish, both sizes). The lantern fish, a plum blob with its eye lost, is an angler: a big
+  candle eye, a grin with two white teeth, a paler belly, its lure bobbing on a curled stalk.
+- **The orbs** (green, blue, the wisp, the sparkler): an octagon of dither with two specks for a
+  face (`docs/art_style.md`: never dither anything small). Now a round flat-toned glow with a
+  brighter heart and a gleam, a little flame of a tail that flicks between frames, two eyes and
+  a small "oh".
+- **The cricket and the grasshopper**: legs straight down at the corners and feelers like horns,
+  a little dog. Now low along the ground on short bent legs, the hind leg a drumstick thigh over
+  its back with the shin folded down to the ground, lifting to fiddle; feelers forward.
+- **The twig knight**: a long body on straight legs, a dachshund or a table. Its legs are thin as
+  twigs (never outlined, or they stand like fence posts), behind its body, bent up at the knee and
+  splayed long, the front pair forward, the back pair back; the salute lifts one to its helmet.
+- **The woolly bear and the glowworm**: a sausage with battlements and a pickle. Both are round
+  segments now (`beads`: each a little ball, a seam where the next overlaps it), on an arch that
+  rises as they inch, with little legs and a face; the bear's outline gives way to fuzz over its
+  back, in the colour of the band under it, and its black is lit enough to show its beads.
+- **Markings**: the skull beetle carries a little smiling skull (`skulled`), the reed frog's pale
+  stripe runs down its flanks to its legs (by its mouth it read as two tusks), and the zebra and
+  bold jumping spiders' faces are grey so their big eyes show (black on near-black before, the
+  spider rules kept: still round, fuzzy, stubby-legged). The beetle family's 16 is drawn from
+  the 24's numbers now, as the others are.
+- **Fibi and Dolly facing her** (sitting, Fibi's beg, Dolly's spin) had no muzzle and read as a
+  black cat and a bowling pin. Each has a soft grey muzzle (`u`, `muzzle` in `sprites/pets.ts`)
+  under the eyes with the nose on top, and the same grey on the snout side on, so the two views
+  agree. Black dogs stay black; the side views, the cats, Gary and the ghosts read and are as
+  they were.
+
+**Left as they were**, and why: the frogs and toads, the firefly, the mist newt and the Hercules
+beetle (L6's redraws, which read); the axolotl, jellyfish, crawdad, snails, boo slug, wiggle
+worm, roly-poly, bow spider, peacock jumper and the orb pair (they read at 3×); the beetles' shape
+(it reads; only its 16 and the skull changed); the catfish, fog eel and mud puppy, ranked fine-
+(the catfish a dark plank its whiskers save, the eel's fin dashes a little like a spine, the mud
+puppy's gills like a bow on its back) and left for a later eye; the frogs' 16s (the old box,
+seen only in the gallery); the monarch's veins (the new moth reads as a butterfly; the monarch's
+black margin would be a mark like the mourning cloak's, small, for later).
+
+**Held by** `tests/sprites/critters.test.ts`: every redrawn critter at 16 and 24 (the nooks and
+the bag as before), each 16 as wide for its height as its 24 within a quarter and two thirds its
+size within a pixel and a half, its keys a subset of the 24's and its main colour among the 24's
+three, every redrawn fish a wrist narrower than its tail and body, and the dogs' muzzles. Before
+and after side by side were rendered and looked at (the session's scratch); smoke's critters,
+pets and hud pass, and the whole run; `npm run perf` at Close within its noise (the bakes are the
+same sizes); `looksHeld` unchanged.
+
+**Rejected:** redrawing every critter (most read; the families were the fault); a fifth outline
+colour or thicker outlines for the dark creatures (the palette rule: outlines are a shape's own
+darkest tone); a lighter coat for Fibi and Dolly (they are hers, and black); drawing each 16 by
+hand (a 16 from the 24's numbers can't drift from it, which is how the crawlies were already
+drawn); a shape class by fixed aspect buckets in the test (a minnow sat on the line between
+"square" and "wide"; the ratio of ratios says the same without the cliff); more fish shapes per
+species (a family's shape in its own colours is the art style's rule, and the wrist was enough).
+
 ## 363. The scenery: the bare trees kept to the woods, Whisperwood's creek curled round at the hedge, the frozen pond's ring kept (1.3's F4, 2026-10-25)
 
 _Session F4 of the 1.3 plan (decision 357), for V1.1's art notes (decision 356): the broken trees,

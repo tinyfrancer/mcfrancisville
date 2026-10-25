@@ -22,6 +22,18 @@ F2 landed (PR #217, decision 361): `happeningsAt` kept for the hour (keyed by da
 `finale.test.ts`'s 30 s timeout gone; numbers in `docs/architecture.md` ("1.3's F2"). No save
 change.
 
+### F3: the creatures (`claude/f3-creatures`; Opus; decision 362)
+
+F3 landed (PR #220, decision 362): every creature looked at together at 6× and at 3× (a phone
+at Close) by day and night, 41 critters ranked weak (by family, in 13 drawings) and redrawn with
+Fibi's and Dolly's face-on frames; each redrawn 16 drawn from its 24's numbers and held by
+`tests/sprites/critters.test.ts`. No save change; `looksHeld` unchanged.
+
+**For 1.3's notes** (the review writes the row): "the creatures redrawn: the bats' wings on finger
+bones, the moths with fore- and hindwings, every fish with a tail you can see in its shadow, the
+orbs as little wisps, the crickets, grasshoppers, twig knight, woolly bear and glowworm, a skull
+on the skull beetle, and a grey muzzle on Fibi and Dolly when they look at you".
+
 ### F4: the scenery (`claude/f4-scenery`; Opus; decision 363)
 
 F4 landed (PR #221, decision 363): the bare and bent tree forms kept to where they stand
@@ -30,7 +42,7 @@ graveyard's), Whisperwood's creek curled round at the hedge (`wetAround`), the f
 kept, three small things logged in the art notes. No save change. For 1.3's notes: the town's
 trees have all their leaves back.
 
-### F3 the creatures, F5 the touches, F6 the forwarders, V1.3 the review
+### F5 the touches, F6 the forwarders, V1.3 the review
 
 Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
 (below), recorded in `docs/personal_touches.md` by the coordinator as they come.
@@ -1989,6 +2001,13 @@ phone, none of it clearly wrong:
 - **The slight and stout builds** read as slim and sturdy at 4× in the sprites (the mayor's sash is
   a band down his side from the side, Wes's trench narrow to the hem); whether they do at Close on
   her phone is hers to say.
+- **The creatures** (1.3's F3, decision 362): looked at together, every critter at 16 and 24 and
+  every pet frame, at phone size by day and night; the bats, moths, fish (and their shadows),
+  orbs, crickets, grasshopper, twig knight, woolly bear, glowworm and lantern fish redrawn, the
+  skull beetle, reed frog and dark jumpers marked, Fibi and Dolly given muzzles facing her. Left
+  for her eye: the catfish (a dark plank its whiskers save), the fog eel's fin dashes, the mud
+  puppy's gills like a bow, and the monarch, which could take a black margin like the mourning
+  cloak's.
 
 Struck since V1's review: ~~the lavender cobble carrying the town~~ (A1: the square in
 flagstones, the well on setts, two benches, the roads worn down the middle); ~~woods walls of one
