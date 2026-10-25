@@ -22,8 +22,8 @@ describe("Ollie with the post (V1's P4)", () => {
     const h = harness(undefined, NEARLY_FRIENDS);
     settle(h);
     expect(h.world.postRound.carrying).toBe(false);
-    h.world.neighbourhood.talk('maude');
-    h.world.neighbourhood.endTalk();
+    h.world.talk.talk('maude');
+    h.world.talk.endTalk();
     expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'maude' });
     expect(h.world.postRound.carrying).toBe(true);
     const ollie = h.world.neighbourhood.neighbour('ollie');
@@ -48,7 +48,7 @@ describe("Ollie with the post (V1's P4)", () => {
       player: { zone: 'library', tx: 4, ty: 7, facing: 'up' },
     });
     settle(h);
-    h.world.neighbourhood.talk('maude');
+    h.world.talk.talk('maude');
     h.tick(1);
     expect(h.world.postRound.carrying).toBe(false);
     expect(h.world.letters.unread).toBe(1);

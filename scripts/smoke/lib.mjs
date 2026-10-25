@@ -114,7 +114,7 @@ export const FRAME_MS = 40;
  */
 export async function clearMat() {
   await stepUntil(() => {
-    const m = window.world.home.room.mat;
+    const m = window.world.home.rooms.room.mat;
     return (
       !window.world.petCare.petAt(m.tx, m.ty) && !window.world.neighbourhood.villagerAt(m.tx, m.ty)
     );

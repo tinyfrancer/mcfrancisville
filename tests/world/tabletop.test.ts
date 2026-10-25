@@ -19,26 +19,28 @@ function atHome(placed: Placed[] = [TABLE, MUG]) {
   return h;
 }
 
-const piece = (world: World, id: string) => world.home.placed.find((p) => p.id === id)!;
+const piece = (world: World, id: string) => world.home.rooms.placed.find((p) => p.id === id)!;
 
 describe('things on tables (0.3’s H3)', () => {
   it('keeps a small piece on its surface through a save', () => {
     const home = new Home({ rooms: { main: { placed: [MUG, TABLE].map((p) => ({ ...p })) } } });
-    expect(home.placed).toHaveLength(2);
-    expect(home.surfaceUnder(home.placed.find((p) => p.id === 'skullMug')!)?.id).toBe('teaTable');
+    expect(home.rooms.placed).toHaveLength(2);
+    expect(home.rooms.surfaceUnder(home.rooms.placed.find((p) => p.id === 'skullMug')!)?.id).toBe(
+      'teaTable',
+    );
     const again = new Home(home.snapshot());
     expect(again.snapshot().rooms.main.placed).toEqual(home.snapshot().rooms.main.placed);
-    expect(again.pieceAt(6, 6)?.id).toBe('skullMug');
-    expect(again.pieceAt(5, 6)?.id).toBe('teaTable');
+    expect(again.rooms.pieceAt(6, 6)?.id).toBe('skullMug');
+    expect(again.rooms.pieceAt(5, 6)?.id).toBe('teaTable');
   });
 
   it('stands a small piece on the floor if its surface has gone, or in the chest if it can’t', () => {
     const floor = new Home({ rooms: { main: { placed: [{ ...MUG }] } } });
-    expect(floor.placed).toEqual([{ id: 'skullMug', tx: 6, ty: 6, turn: 0 }]);
+    expect(floor.rooms.placed).toEqual([{ id: 'skullMug', tx: 6, ty: 6, turn: 0 }]);
     const crowded = new Home({
       rooms: { main: { placed: [{ id: 'cauldron', tx: 6, ty: 6, turn: 0 }, { ...MUG }] } },
     });
-    expect(crowded.placed.map((p) => p.id)).toEqual(['cauldron']);
+    expect(crowded.rooms.placed.map((p) => p.id)).toEqual(['cauldron']);
     expect(crowded.stored).toEqual([{ id: 'skullMug', count: 1 }]);
   });
 
@@ -98,7 +100,7 @@ describe('things on tables (0.3’s H3)', () => {
     h.world.decorating.start(piece(h.world, 'teaTable'));
     expect(h.world.decorating.putAwaySelected()).toBe(true);
     expect(
-      h.world.home.placed.some((p) => ['teaTable', 'skullMug', 'bellJar'].includes(p.id)),
+      h.world.home.rooms.placed.some((p) => ['teaTable', 'skullMug', 'bellJar'].includes(p.id)),
     ).toBe(false);
     for (const id of ['teaTable', 'skullMug', 'bellJar']) {
       expect(

@@ -58,7 +58,7 @@ function holds(h: Harness, line: TodayLine): boolean {
     case 'notes':
       return w.noticeboard.notices().filter((n) => !n.done).length === line.open;
     case 'favour': {
-      const favour = w.neighbourhood.favour(line.who);
+      const favour = w.talk.favour(line.who);
       const zone = w.neighbourhood.whereIs(line.who)?.zone ?? null;
       return favour?.item === line.item && favour.count === line.count && zone === line.zone;
     }
@@ -160,7 +160,7 @@ describe("Today (V1's R2)", () => {
     expect(asking).toBeDefined();
     if (asking?.kind !== 'favour') return;
     h.world.bag.add(asking.item, asking.count);
-    expect(h.world.neighbourhood.doFavour(asking.who)).not.toBeNull();
+    expect(h.world.talk.doFavour(asking.who)).not.toBeNull();
     lines = expectTrue(h);
     expect(lines.some((l) => l.kind === 'favour' && l.who === asking.who)).toBe(false);
   });

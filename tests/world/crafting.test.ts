@@ -13,7 +13,7 @@ function goHome(h = harness()) {
 describe('the workbench', () => {
   it('stands in her home from the first day, and she arrives at it', () => {
     const h = goHome();
-    expect(h.world.home.pieceAt(4, 3)?.id).toBe('workbench');
+    expect(h.world.home.rooms.pieceAt(4, 3)?.id).toBe('workbench');
     h.world.tapTile(5, 3);
     const events = h.until(() => !h.world.player.moving, 'walking to the workbench');
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', piece: 'workbench' }));
@@ -74,10 +74,10 @@ describe('making things', () => {
     h.world.events.on('home', () => changed++);
     expect(h.world.workbench.craft('grandExtension')).toBeNull();
     expect(h.world.workbench.craft('roomyExtension')).toMatchObject({ made: { room: 1 } });
-    expect(h.world.home.room.size).toBe(1);
+    expect(h.world.home.rooms.room.size).toBe(1);
     expect(h.world.workbench.craft('roomyExtension')).toBeNull();
     expect(h.world.workbench.craft('grandExtension')).toMatchObject({ made: { room: 2 } });
-    expect(h.world.home.room.size).toBe(2);
+    expect(h.world.home.rooms.room.size).toBe(2);
     // All but her skates, which she always has (decision 211).
     expect(h.world.bag.contents).toEqual([{ id: 'iceSkates', count: 1 }]);
     expect(changed).toBe(2);

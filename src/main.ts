@@ -94,7 +94,7 @@ function startGame(): void {
   const transitions = new Transitions(canvas, { reduced });
   const ctx = canvas.getContext('2d');
   const leaving = () =>
-    transitions.leaving(`${world.scene}:${world.scene === 'home' ? world.home.here : ''}`);
+    transitions.leaving(`${world.scene}:${world.scene === 'home' ? world.home.rooms.here : ''}`);
   // A frame: the view, then over it any transition under way (only then), and where it drew her.
   // A frame drawn after she has gone somewhere, before its moment plays, keeps the one she left.
   const drawFrame = (now: number) => {
@@ -180,7 +180,7 @@ function startGame(): void {
   // The world is drawn in the room between the bars (0.2's U1), from a whole device pixel, as
   // close as she chose (decision 290); a room indoors is fitted to show it whole.
   const indoors = () =>
-    world.scene === 'home' ? world.home.room : world.zones.inside(world.scene)?.room;
+    world.scene === 'home' ? world.home.rooms.room : world.zones.inside(world.scene)?.room;
   const fitFor = () => {
     const inside = indoors();
     return `${closeness}:${inside ? `${inside.width}x${inside.height}` : 'out'}`;

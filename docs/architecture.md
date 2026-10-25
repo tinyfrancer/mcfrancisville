@@ -145,8 +145,9 @@ room's pieces, with what a display piece shows (`Placed.shows`, H2) and what sta
 she's in, which everything that reads "the room" reads; building a room, growing the front one,
 and the decorating moves. `Home` is what the rooms share: the storage chest's furniture and her
 things from her bag (`stored`, `items`, H1), and the papers and floors she owns, with its rooms
-as `home.rooms`; it still answers every read of the room she's in (`home.placed`, `home.room`,
-`home.pieceAt`…) through `Rooms`, so the views, sheets and tests read her home as they did.
+as `home.rooms`; whatever reads the room she's in reads it there (`home.rooms.placed`,
+`home.rooms.room`, `home.rooms.pieceAt`…), `Home` having no forwarding reads since 1.3's F6
+(decision 365).
 `Yard` keeps what stands on the grass round her house and puts what it takes out and away
 through `Home`'s chest (H5). `Rooms` and `Yard` are both `Decorable`, so `Decorator` works on
 whichever she's in, and both take the chest rather than owning one. A keeper doesn't
@@ -223,9 +224,9 @@ the World.
 their question and what she says back, the faces they say them with, the calls' and visits' first
 lines, gifts, favours, friendship growing (`thank`, `befriend`) and best friends' letters
 (`check`). `Neighbourhood` is who's where and the walking, and reads who she's talking to from
-`Talk`, so they wait for her; it answers the talk's reads too (`talk`, `reply`, `give`, `favour`,
-`doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`, one line each), for
-`src/render/` and the tests, while the wiring, the world and the areas call `world.talk`.
+`Talk`, so they wait for her; everything that asks of a talk (`talk`, `reply`, `give`, `favour`,
+`doFavour`, `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`) asks `world.talk`, the view
+and the tests too, `Neighbourhood` having no forwarding reads since 1.3's F6 (decision 365).
 `Talk`'s `scene` is the `TalkScene` (0.2's D2) that `build.ts` puts together at each
 talk from `Forecast`, `Hands`, `Collecting.caughtToday` and `PetCare`, for what a neighbour brings
 up (`systems/dialogue.ts`); it is read, never kept.
@@ -357,7 +358,8 @@ random bits, a 28-symbol Crockford code with two check symbols); `persistence/cl
 hashes it into the id the function files under and the AES-GCM key the town is sealed with;
 `persistence/cloud.ts` (`CloudSave`) is made by `keepTown` (`wiring/keeping.ts`), told each local write by the
 `AutoSaver`'s write, and flushed on `visibilitychange`, `pagehide` and `online`. It asks the
-cloud once (`check`) before anything goes up, against the loaded save's `updatedAt`, and a newer
+cloud once (`check`) before anything goes up, against the loaded save's `updatedAt` (stamped by
+the world's clock: the real one on her phone, a dev build's `?day=` the day it was played on), and a newer
 town is offered by `hud/CloudCard.ts` after the title (`offerCloud`), never swapped in. What goes
 up is the backup code sealed, so restoring runs the backup's migrations. Settings' Backup tab
 shows the code and its QR (`hud/qr.ts`, our own encoder) through `SaveApi.cloud`.
@@ -1176,14 +1178,12 @@ in below, and what was done is said once at the end, so the list is what's left.
    `Mounds` read the day through `MinuteDay` (`world/zones/MinuteDay.ts`), which works `dayKey`
    out once a minute as `Stalls` does; `canWalk` in town went from about 1.6 µs to 0.55 µs a call
    (the harness's measure, with its wrapper), a long A\* across town three times faster.
-4. **Forwarders kept so nothing else had to move.** `Home` still answers the room she's in
-   through twenty-seven one-line reads of `home.rooms` (W2, decision 341), and `Neighbourhood`
-   the talk's ten (`talk`, `reply`, `give`, `favour`, `doFavour`, `feel`, `feelingOf`,
-   `startTalk`, `endTalk`, `talkingTo`) through `world.talk` (W3, decision 342), so
-   `src/render/`, the sheets, `wiring/apis/` and the tests didn't move while lane A ran beside
-   them. A session that points those readers at `home.rooms` and `world.talk` can drop all
-   thirty-seven; nothing she sees changes, and the lived-in fixtures and the arrivals and overlays
-   snapshots are its proof.
+4. ~~**Forwarders kept so nothing else had to move.**~~ Done in 1.3's F6 (decision 365): `Home`'s
+   twenty-seven reads of `home.rooms` and `Neighbourhood`'s ten of `world.talk` are gone, and every
+   reader (the sheets, `wiring/apis/home.ts`, `render/HomeView.ts` and `render/villagers.ts`, the
+   services, the tests, and smoke's and perf's `window.world` reads) asks `home.rooms.<x>` and
+   `world.talk.<x>`. `Home` is the chest and the papers and floors she owns, with `rooms`.
+   The lived-in fixtures and the overlays and arrivals snapshots, unchanged, were the proof.
 5. **What a build doesn't reach.** The cast is cast (decision 355: Rufus, Gourdon and the Moon
    Pie Man stout; Barty, Scarah, Rob Boo and Wes slight; everyone else and Cody hers), but the
    passers-by (the wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default; a later look may
@@ -1197,15 +1197,13 @@ in below, and what was done is said once at the end, so the list is what's left.
    (555 kB) at S3: the builds, the ice and the paving. Precached once a version (decision 322), it
    costs a download per deploy, not a launch; one chunk stays the right shape for an installed app
    (decision 328) until it costs her a slow first launch on a new version.
-7. **Small things the review noticed and left.** The dev build's `?day=` doesn't reach the save's
-   stamps: `keepTown` (`wiring/keeping.ts`) stamps `updatedAt` and `lastPlayedAt` with
-   `Date.now()`, not the world's clock, so a town played under `?day=` is saved as played today
-   (production's clock is the real one, so her phone is right; V1.1 set the fixture's stamps by
-   hand to the day it was played). W1's overlays snapshot (`tests/world/overlays.test.ts`) holds
-   the lived-in saves up to 1.0's; 1.2's isn't in it (no tile of hers moved in 1.1 that the
-   others don't already hold). The bed card's buttons wait `SETTLE_MS` after the card shows, so a
-   tap on the card the moment it appears does nothing (on purpose, against a stray tap; the second
-   tap on the bed does the job at once).
+7. ~~**Small things the review noticed and left.**~~ Done in 1.3's F6 (decision 365), but the
+   last: `keepTown` stamps `updatedAt` and `lastPlayedAt` with the world's clock (`world.clock`),
+   so a town played under a dev build's `?day=` is saved as played then (on her phone the clock
+   is the real one, so nothing changes); `lived-in-v55` is in W1's overlays snapshot (its first
+   snapshot taken from the code as it then was). Still true: the bed card's buttons wait
+   `SETTLE_MS` after the card shows, so a tap on the card the moment it appears does nothing (on
+   purpose, against a stray tap; the second tap on the bed does the job at once).
 
 **Done in the 1.1 plan** (decisions 330–355), kept short; the decisions and the lanes' tables
 above hold the detail:
@@ -1229,3 +1227,5 @@ above hold the detail:
 - ~~Pets walking tile to tile~~ (W1: `Pet.walk` pulls its path with `stringPull`).
 - ~~`happeningsAt` filtered per neighbour per step; `canWalk` worked out the day key per call~~
   (1.3's F2, decision 361: 2 and 3 above, struck through).
+- ~~Forwarders on `Home` and `Neighbourhood`; `?day=` not reaching the save's stamps~~ (1.3's F6,
+  decision 365: 4 and 7 above, struck through).

@@ -105,8 +105,8 @@ export class Broom {
   private setOutStand(): void {
     const { home } = this.reads;
     home.store('broomStand');
-    const mat = home.room.mat;
-    home.takeOut('broomStand', { tx: mat.tx + 2, ty: mat.ty - 1 }, this.reads.standing());
+    const mat = home.rooms.room.mat;
+    home.rooms.takeOut('broomStand', { tx: mat.tx + 2, ty: mat.ty - 1 }, this.reads.standing());
     this.ctx.events.emit('home', home);
   }
 

@@ -19,10 +19,10 @@ function goHome(h = harness()) {
 describe('Home', () => {
   it('starts furnished, with her succulents in the chest and the first walls and floor', () => {
     const home = new Home();
-    expect(home.placed).toEqual(STARTER_HOME.rooms.main.placed);
+    expect(home.rooms.placed).toEqual(STARTER_HOME.rooms.main.placed);
     expect(home.stored).toEqual([{ id: 'succulents', count: 1 }]);
-    expect(home.wallpaper).toBe('plumStripes');
-    expect(home.flooring).toBe('oakBoards');
+    expect(home.rooms.wallpaper).toBe('plumStripes');
+    expect(home.rooms.flooring).toBe('oakBoards');
   });
 
   it('keeps a saved piece it no longer knows out, and one that no longer fits in the chest', () => {
@@ -38,7 +38,7 @@ describe('Home', () => {
       },
       stored: [{ id: 'cauldron', count: 2 }],
     });
-    expect(home.placed.map((p) => p.id)).toEqual(['batBed']);
+    expect(home.rooms.placed.map((p) => p.id)).toEqual(['batBed']);
     expect(home.stored).toEqual([{ id: 'cauldron', count: 3 }]);
   });
 
@@ -47,9 +47,9 @@ describe('Home', () => {
     const zone = new HomeZone(home);
     const before = zone.roamTiles();
     expect(zone.roamTiles()).toBe(before);
-    const piece = home.placed[0]!;
+    const piece = home.rooms.placed[0]!;
     const open = before.find((t) => t.tx !== piece.tx || t.ty !== piece.ty)!;
-    expect(home.move(piece, open.tx, open.ty, null)).toBeNull();
+    expect(home.rooms.move(piece, open.tx, open.ty, null)).toBeNull();
     const after = zone.roamTiles();
     expect(after).not.toBe(before);
     expect(after).toEqual(new HomeZone(new Home(home.snapshot())).roamTiles());
@@ -60,13 +60,13 @@ describe('Home', () => {
       rooms: { main: { wallpaper: 'batDamask' } },
       wallpapers: ['plumStripes'],
     });
-    expect(home.wallpaper).toBe('plumStripes');
-    expect(home.paper('batDamask')).toBe(false);
+    expect(home.rooms.wallpaper).toBe('plumStripes');
+    expect(home.rooms.paper('batDamask')).toBe(false);
     expect(home.giveWallpaper('batDamask')).toBe(true);
     expect(home.giveWallpaper('batDamask')).toBe(false);
-    expect(home.paper('batDamask')).toBe(true);
-    expect(home.lay('checkerboard')).toBe(false);
-    expect(home.giveFlooring('checkerboard') && home.lay('checkerboard')).toBe(true);
+    expect(home.rooms.paper('batDamask')).toBe(true);
+    expect(home.rooms.lay('checkerboard')).toBe(false);
+    expect(home.giveFlooring('checkerboard') && home.rooms.lay('checkerboard')).toBe(true);
     expect(home.snapshot().rooms.main).toMatchObject({
       wallpaper: 'batDamask',
       flooring: 'checkerboard',
@@ -78,12 +78,12 @@ describe('Home', () => {
       rooms: { main: { placed: [] } },
       stored: [{ id: 'cauldron', count: 1 }],
     });
-    const piece = home.takeOut('cauldron', { tx: 6, ty: 7 }, { tx: 6, ty: 7 })!;
+    const piece = home.rooms.takeOut('cauldron', { tx: 6, ty: 7 }, { tx: 6, ty: 7 })!;
     expect(piece.id).toBe('cauldron');
     expect(home.stored).toEqual([]);
-    expect(home.takeOut('cauldron', { tx: 6, ty: 7 }, null)).toBeNull();
-    home.putAway(piece);
-    expect(home.placed).toEqual([]);
+    expect(home.rooms.takeOut('cauldron', { tx: 6, ty: 7 }, null)).toBeNull();
+    home.rooms.putAway(piece);
+    expect(home.rooms.placed).toEqual([]);
     expect(home.stored).toEqual([{ id: 'cauldron', count: 1 }]);
   });
 
@@ -91,25 +91,25 @@ describe('Home', () => {
     const home = new Home({
       rooms: { main: { placed: [{ id: 'pumpkinChair', tx: 5, ty: 5, turn: 0 }] } },
     });
-    const chair = home.placed[0]!;
-    expect(home.move(chair, 8, 8, null)).toBeNull();
+    const chair = home.rooms.placed[0]!;
+    expect(home.rooms.move(chair, 8, 8, null)).toBeNull();
     expect(chair).toMatchObject({ tx: 8, ty: 8 });
-    expect(home.move(chair, 3, 1, null)).toBe('noRoom');
+    expect(home.rooms.move(chair, 3, 1, null)).toBe('noRoom');
     expect(chair).toMatchObject({ tx: 8, ty: 8 });
     for (const turn of [1, 2, 3, 0]) {
-      expect(home.turn(chair, null)).toBeNull();
+      expect(home.rooms.turn(chair, null)).toBeNull();
       expect(chair.turn).toBe(turn);
     }
   });
 
   it('tells what is at a tile from the top: a piece before the rug it stands on', () => {
     const home = new Home();
-    expect(home.pieceAt(3, 6)?.id).toBe('pumpkinChair');
-    expect(home.pieceAt(4, 7)?.id).toBe('moonRug');
-    expect(home.pieceAt(2, 1)?.id).toBe('ghostPortrait');
-    expect(home.canWalk(4, 7)).toBe(true);
-    expect(home.canWalk(3, 6)).toBe(false);
-    expect(home.canWalk(CHEST.tx, CHEST.ty)).toBe(false);
+    expect(home.rooms.pieceAt(3, 6)?.id).toBe('pumpkinChair');
+    expect(home.rooms.pieceAt(4, 7)?.id).toBe('moonRug');
+    expect(home.rooms.pieceAt(2, 1)?.id).toBe('ghostPortrait');
+    expect(home.rooms.canWalk(4, 7)).toBe(true);
+    expect(home.rooms.canWalk(3, 6)).toBe(false);
+    expect(home.rooms.canWalk(CHEST.tx, CHEST.ty)).toBe(false);
   });
 });
 
@@ -117,39 +117,49 @@ describe('a bigger house', () => {
   it('grows wider and deeper twice, and no further, with everything where it was', () => {
     const home = new Home();
     const before = home.snapshot().rooms.main.placed;
-    expect(home.room).toMatchObject({ size: 0, width: 13, height: 14, mat: { tx: 6, ty: 13 } });
-    expect(home.grow()).toBe(true);
-    expect(home.room).toMatchObject({ size: 1, width: 17, height: 16, mat: { tx: 8, ty: 15 } });
-    expect(home.grow()).toBe(true);
-    expect(home.room).toMatchObject({ size: 2, width: 21, height: 18 });
-    expect(home.canGrow).toBe(false);
-    expect(home.grow()).toBe(false);
+    expect(home.rooms.room).toMatchObject({
+      size: 0,
+      width: 13,
+      height: 14,
+      mat: { tx: 6, ty: 13 },
+    });
+    expect(home.rooms.grow()).toBe(true);
+    expect(home.rooms.room).toMatchObject({
+      size: 1,
+      width: 17,
+      height: 16,
+      mat: { tx: 8, ty: 15 },
+    });
+    expect(home.rooms.grow()).toBe(true);
+    expect(home.rooms.room).toMatchObject({ size: 2, width: 21, height: 18 });
+    expect(home.rooms.canGrow).toBe(false);
+    expect(home.rooms.grow()).toBe(false);
     expect(home.snapshot().rooms.main).toMatchObject({ placed: before, size: 2 });
-    expect(home.canWalk(6, 13)).toBe(true);
+    expect(home.rooms.canWalk(6, 13)).toBe(true);
   });
 
   it('is saved as big as she built it, and a size it does not know is the nearest it has', () => {
     const home = new Home();
-    home.grow();
-    expect(new Home(home.snapshot()).room.size).toBe(1);
+    home.rooms.grow();
+    expect(new Home(home.snapshot()).rooms.room.size).toBe(1);
     const sized = (size: number) => {
       const saved = home.snapshot();
       return new Home({ ...saved, rooms: { main: { ...saved.rooms.main, size } } });
     };
-    expect(sized(9).room.size).toBe(2);
-    expect(sized(1.5).room.size).toBe(0);
+    expect(sized(9).rooms.room.size).toBe(2);
+    expect(sized(1.5).rooms.room.size).toBe(0);
   });
 
   it('keeps a piece out on the new floor when it loads', () => {
     const far = { id: 'cauldron' as const, tx: 15, ty: 14, turn: 0 };
     const sized = (size: number) => new Home({ rooms: { main: { placed: [far], size } } });
-    expect(sized(1).placed).toEqual([far]);
+    expect(sized(1).rooms.placed).toEqual([far]);
     expect(sized(0).stored).toEqual([{ id: 'cauldron', count: 1 }]);
   });
 
   it('lets her walk the new floor, and out through the mat where it is now', () => {
     const h = goHome();
-    h.world.home.grow();
+    h.world.home.rooms.grow();
     expect(h.world.size).toEqual({ width: 17, height: 16 });
     h.world.tapTile(16, 15);
     h.until(() => !h.world.player.moving, 'walking into the new corner');
@@ -306,7 +316,7 @@ describe('decorating', () => {
     expect(h.world.tapTile(8, 3)).toBe(true);
     expect(h.world.decorating.state?.selected?.id).toBe('twoHeadedDuck');
     expect(h.world.tapTile(9, 8)).toBe(true);
-    expect(h.world.home.pieceAt(9, 8)?.id).toBe('twoHeadedDuck');
+    expect(h.world.home.rooms.pieceAt(9, 8)?.id).toBe('twoHeadedDuck');
     expect(h.world.tapTile(9, 8)).toBe(true);
     expect(h.world.decorating.state?.selected).toBeNull();
     h.tick(10);
@@ -318,7 +328,7 @@ describe('decorating', () => {
     h.world.decorating.start();
     h.world.tapTile(8, 3);
     h.world.tapTile(4, 7);
-    expect(h.world.home.pieceAt(4, 7)?.id).toBe('twoHeadedDuck');
+    expect(h.world.home.rooms.pieceAt(4, 7)?.id).toBe('twoHeadedDuck');
   });
 
   it('says why a piece will not go somewhere, and leaves it where it was', () => {
@@ -327,7 +337,7 @@ describe('decorating', () => {
     h.world.tapTile(8, 3);
     expect(h.world.tapTile(ROOM.mat.tx, ROOM.mat.ty)).toBe(false);
     expect(h.tick(1)).toContainEqual({ kind: 'refused', why: 'noRoom' });
-    expect(h.world.home.pieceAt(8, 3)?.id).toBe('twoHeadedDuck');
+    expect(h.world.home.rooms.pieceAt(8, 3)?.id).toBe('twoHeadedDuck');
   });
 
   it('turns and puts away the piece she has picked up', () => {
@@ -335,9 +345,9 @@ describe('decorating', () => {
     h.world.decorating.start();
     h.world.tapTile(3, 6);
     expect(h.world.decorating.turnSelected()).toBe(true);
-    expect(h.world.home.pieceAt(3, 6)?.turn).toBe(1);
+    expect(h.world.home.rooms.pieceAt(3, 6)?.turn).toBe(1);
     expect(h.world.decorating.putAwaySelected()).toBe(true);
-    expect(h.world.home.pieceAt(3, 6)?.id).toBe('moonRug');
+    expect(h.world.home.rooms.pieceAt(3, 6)?.id).toBe('moonRug');
     expect(h.world.home.stored).toContainEqual({ id: 'pumpkinChair', count: 1 });
     expect(h.world.decorating.state?.selected).toBeNull();
   });

@@ -14,6 +14,7 @@ const DOM = [
   'tests/errorNotes.test.ts',
   'tests/render/ground.test.ts',
   'tests/render/transition.test.ts',
+  'tests/wiring/keeping.test.ts',
   'tests/wiring/perf.test.ts',
 ];
 

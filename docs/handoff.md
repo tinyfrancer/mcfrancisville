@@ -42,7 +42,18 @@ graveyard's), Whisperwood's creek curled round at the hedge (`wetAround`), the f
 kept, three small things logged in the art notes. No save change. For 1.3's notes: the town's
 trees have all their leaves back.
 
-### F5 the touches, F6 the forwarders, V1.3 the review
+### F6: the forwarders and the small things (`claude/f6-forwarders`; Sonnet; decision 365)
+
+F6 landed (PR #222, decision 365): `Home`'s 27 and `Neighbourhood`'s 10 forwarders dropped, every
+reader (src, tests, and smoke's and perf's `window.world` reads in `scripts/`) on `home.rooms.<x>`
+and `world.talk.<x>`; `keepTown` stamps `updatedAt` and `lastPlayedAt` by the world's clock (a
+`?day=` town is saved as played then; `createdAt` stays real), and the cloud is given real time for
+a town played on a made-up clock and never asked about a newer one (smoke's "asks before taking
+the newer town" check opens on the real clock now); `lived-in-v55` is in W1's overlays snapshot.
+No save change (v55), `looksHeld` and every existing snapshot unchanged, smoke 622 of 622, perf
+within noise. No `NOTES` line.
+
+### F5 the touches, V1.3 the review
 
 Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
 (below), recorded in `docs/personal_touches.md` by the coordinator as they come.

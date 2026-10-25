@@ -50,7 +50,7 @@ function walkRound(place: MapZoneId, h: Harness): string[] {
       continue;
     }
     h.world.sitting.stand();
-    h.world.neighbourhood.endTalk();
+    h.world.talk.endTalk();
     h.world.petCare.endPet();
     h.world.movement.standAt(beside, 'down');
     const went = h.world.tapTile(prop.tx, prop.ty);

@@ -139,8 +139,8 @@ async function firstDay() {
         .filter((id) => id !== 'cody' && id !== 'robBoo')
         .slice(0, 3);
       for (const id of them) {
-        window.world.neighbourhood.talk(id);
-        window.world.neighbourhood.endTalk();
+        window.world.talk.talk(id);
+        window.world.talk.endTalk();
       }
     });
     await done('meet', 'meeting three neighbours is a step done');

@@ -85,7 +85,7 @@ describe('clues', () => {
     });
     h.tick(1);
     expect(h.world.casebook.foundOn('rumour')).toBeNull();
-    h.world.neighbourhood.talk('rufus');
+    h.world.talk.talk('rufus');
     expect(h.tick(1)).toContainEqual({ kind: 'clue', clue: 'rumour' });
     h.world.cabinet.record('greenOrb', '2026-09-26');
     expect(h.tick(1)).toContainEqual({ kind: 'clue', clue: 'visitorBook' });

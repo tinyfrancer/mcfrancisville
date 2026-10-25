@@ -7,6 +7,7 @@ import { cloudKey } from '../persistence/cloudKey';
 import { sealerFor } from '../persistence/cloudSeal';
 import { requestPersistence } from '../persistence/persist';
 import { markBackedUp } from '../safekeeping';
+import { systemClock } from '../systems/clock';
 import type { World } from '../world/World';
 
 /** How long the title waits for the cloud to say whether it has a newer town (V1's S2). */
@@ -37,9 +38,13 @@ export interface Keeping {
  */
 export function keepTown(world: World, loaded: SaveState | null, hud: () => Hud): Keeping {
   // What was loaded is kept so `createdAt` survives; the rest is rebuilt from the town each save.
+  // `updatedAt` and `lastPlayedAt` are stamped by the world's clock, which on her phone is the
+  // real one and under a dev build's `?day=` is the day it was played on (1.3's F6), so a town is
+  // saved as played then. `createdAt` stays the phone's, as the weekly nudge counts from it
+  // against the phone's own time.
   let save: SaveState = loaded ?? newSave(Date.now(), world.snapshot());
   const currentSave = (): SaveState => {
-    const now = Date.now();
+    const now = world.clock.now();
     save = {
       ...save,
       updatedAt: now,
@@ -48,7 +53,13 @@ export function keepTown(world: World, loaded: SaveState | null, hud: () => Hud)
     };
     return save;
   };
-  // Her town kept in the cloud too (V1's S2, decision 323), under a key this phone makes once.
+  // Her town kept in the cloud too (V1's S2, decision 323), under a key this phone makes once. The
+  // cloud orders towns by when they were kept, in real time: on her phone that is the stamps above
+  // (the world's clock is the real one), but a town played on a made-up day (a dev build's `?day=`
+  // or `?hour=`) goes up stamped now and is never asked about a newer one, as its own stamps are
+  // fiction and would sort it behind every real town.
+  const real = world.clock === systemClock;
+  const keptAt = (town: SaveState): SaveState => (real ? town : { ...town, updatedAt: Date.now() });
   const key = cloudKey();
   const sealer = key ? sealerFor(key.code) : Promise.resolve(null);
   // A newer town in the cloud is offered once she's past the title, never swapped in silently.
@@ -62,11 +73,11 @@ export function keepTown(world: World, loaded: SaveState | null, hud: () => Hud)
     backedUp: (at) => markBackedUp(at),
     onNewer: (at) => (pastTitle ? offerCloudTown(at) : (newerAt = at)),
   });
-  const checking = cloud.check(loaded?.updatedAt ?? 0);
+  const checking = cloud.check(real ? (loaded?.updatedAt ?? 0) : Date.now());
   const autosave = new AutoSaver(() => {
     const written = currentSave();
     saveService.save(written);
-    cloud.saved(written);
+    cloud.saved(keptAt(written));
   });
   // `pagehide` is the one iOS reliably fires as a Home Screen app is swiped away; a tab being
   // hidden is the last moment anything is guaranteed to run at all.

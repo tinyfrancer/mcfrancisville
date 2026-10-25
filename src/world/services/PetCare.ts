@@ -327,9 +327,12 @@ export class PetCare {
   restOf(id: PetId): RestSpot | null {
     const home = this.reads.home;
     if (!home) return null;
-    const layout = `${home.here}:${home.layout}`;
+    const layout = `${home.rooms.here}:${home.rooms.layout}`;
     if (this.rests?.layout !== layout) {
-      this.rests = { layout, spots: restSpots(home.placed, (tx, ty) => home.canWalk(tx, ty)) };
+      this.rests = {
+        layout,
+        spots: restSpots(home.rooms.placed, (tx, ty) => home.rooms.canWalk(tx, ty)),
+      };
     }
     return this.rests.spots.get(id) ?? null;
   }

@@ -162,7 +162,7 @@ export class Decorator {
     else {
       // A planter's bed goes with it, in the room she's in (the yard has none).
       if (!this.outside) {
-        const room = this.home.here;
+        const room = this.home.rooms.here;
         going.forEach((p, k) => {
           const to = { tx: p.tx, ty: p.ty };
           this.ctx.signals.emit('moved', { piece: p.id, room, from: from[k]!, to });
@@ -197,7 +197,7 @@ export class Decorator {
     for (const shown of place.putAway(piece)) this.giveBack(shown);
     for (const p of this.outside ? [] : going) {
       const from = { tx: p.tx, ty: p.ty };
-      this.ctx.signals.emit('moved', { piece: p.id, room: this.home.here, from, to: null });
+      this.ctx.signals.emit('moved', { piece: p.id, room: this.home.rooms.here, from, to: null });
     }
     this.select(null);
     this.changed();

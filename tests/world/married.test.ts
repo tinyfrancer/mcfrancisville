@@ -57,23 +57,23 @@ describe("Cody, married (V1's P5)", () => {
   it('asks how her day was of an evening, about what she did, and keeps her answer', () => {
     const h = at(anEveningAtHers());
     const day = dayKey(h.clock.now());
-    const plain = h.world.neighbourhood.talk('cody');
+    const plain = h.world.talk.talk('cody');
     expect(plain.asked).toBe(true);
     expect(plain.replies).toEqual([HER_DAY_SAYS.good, HER_DAY_SAYS.long, HER_DAY_SAYS.later]);
     expect(ASKS.map((l) => said(l, h))).toContain(plain.line);
-    h.world.neighbourhood.endTalk();
+    h.world.talk.endTalk();
     // His evening line changes with what she did today.
     h.world.ctx.signals.emit('harvested', { crop: 'pumpkin' });
-    const after = h.world.neighbourhood.talk('cody');
+    const after = h.world.talk.talk('cody');
     expect(after.asked).toBe(true);
     expect(after.line).not.toBe(plain.line);
     expect(after.line).toMatch(/pumpkin/i);
-    const back = h.world.neighbourhood.reply('cody', 1)!;
+    const back = h.world.talk.reply('cody', 1)!;
     expect(HER_DAY_BACKS.long.map((l) => said(l, h))).toContain(back.line);
     expect(h.world.lately.last.herDay).toEqual({ day, answer: 'long' });
     // Answered, he doesn't ask again tonight (his question about a night in, answered too).
     h.world.friends.update('cody', { answered: QUESTIONS.cody.answers[0]!.id });
-    expect(h.world.neighbourhood.talk('cody').asked).toBeUndefined();
+    expect(h.world.talk.talk('cody').asked).toBeUndefined();
     // And it's kept through a save.
     const again = new World({ clock: new FakeClock(h.clock.now()), ...fromSave(h.world.save()) });
     expect(again.lately.last.herDay).toEqual({ day, answer: 'long' });
@@ -81,11 +81,11 @@ describe("Cody, married (V1's P5)", () => {
 
   it("doesn't ask by day, and brings her answer up first the next day", () => {
     const h = at(anEveningAtHers());
-    h.world.neighbourhood.talk('cody');
-    h.world.neighbourhood.reply('cody', 0);
+    h.world.talk.talk('cody');
+    h.world.talk.reply('cody', 0);
     h.world.friends.update('cody', { answered: QUESTIONS.cody.answers[0]!.id });
     h.clock.advance(15 * 3_600_000);
-    const next = h.world.neighbourhood.talk('cody');
+    const next = h.world.talk.talk('cody');
     expect(next.asked).toBeUndefined();
     expect(YESTERDAY.good.map((l) => said(l, h))).toContain(next.line);
   });
@@ -116,13 +116,13 @@ describe("Cody, married (V1's P5)", () => {
       h.clock.advance(DAY_MS);
     }
     expect(h.world.visits.count).toBeGreaterThanOrEqual(3);
-    const hello = h.world.neighbourhood.talk('cody');
+    const hello = h.world.talk.talk('cody');
     expect(hello.waiting).toBe(true);
-    const scene = h.world.neighbourhood.talk('cody');
+    const scene = h.world.talk.talk('cody');
     expect(said(OUR_STORY[0]!.lines[0]!, h)).toBe(scene.line);
     expect(scene.more).toHaveLength(OUR_STORY[0]!.lines.length - 1);
     expect(h.world.lately.last.told).toEqual(['ice']);
-    expect(h.world.neighbourhood.talk('cody').line).not.toBe(scene.line);
+    expect(h.world.talk.talk('cody').line).not.toBe(scene.line);
   });
 
   it('does things together at hers at night, each once a night', () => {

@@ -40,10 +40,10 @@ describe('news', () => {
     h.clock.set(at);
     const who = event.news.who;
     expect(h.world.smallEvents.bubble(who)).toBe('!');
-    const chat = h.world.neighbourhood.talk(who);
+    const chat = h.world.talk.talk(who);
     expect(chat.line).toBe(fill(event.news.line, { name: h.world.name }));
     expect(h.world.smallEvents.bubble(who)).toBeNull();
-    expect(h.world.neighbourhood.talk(who).line).not.toBe(chat.line);
+    expect(h.world.talk.talk(who).line).not.toBe(chat.line);
   });
 });
 
@@ -56,8 +56,8 @@ describe('something lost', () => {
     expect(h.world.smallEvents.lying()).toEqual({ lost: event.lost, at: event.at });
     expect(h.world.smallEvents.bubble(owner)).toBe('?');
     // They ask after it, once, and say where.
-    expect(h.world.neighbourhood.talk(owner).line).toContain(event.where);
-    expect(h.world.neighbourhood.talk(owner).line).not.toContain(event.where);
+    expect(h.world.talk.talk(owner).line).toContain(event.where);
+    expect(h.world.talk.talk(owner).line).not.toContain(event.where);
 
     const events = walkTo(h, event.at.tx, event.at.ty);
     expect(events).toContainEqual({ kind: 'foundLost', lost: event.lost });
@@ -67,7 +67,7 @@ describe('something lost', () => {
 
     const candy = h.world.wallet.candy;
     const points = h.world.friends.of(owner).points;
-    const thanks = h.world.neighbourhood.talk(owner);
+    const thanks = h.world.talk.talk(owner);
     expect(thanks.candy).toBe(LOST_CANDY);
     expect(h.world.wallet.candy).toBe(candy + LOST_CANDY);
     expect(h.world.friends.of(owner).points).toBeGreaterThan(points);

@@ -84,14 +84,14 @@ async function neighbours() {
   await tapElement('.hud-talk-sheet button:text-is("Bye")');
   check(
     'saying bye lets them go on their way',
-    (await page.evaluate(() => window.world.neighbourhood.talkingTo)) === null,
+    (await page.evaluate(() => window.world.talk.talkingTo)) === null,
   );
 
   // A letter: as if Maude were nearly three hearts along, then a hello.
   await page.evaluate(() => {
     window.world.friends.update('maude', { points: 295 });
-    window.world.neighbourhood.talk('maude');
-    window.world.neighbourhood.endTalk();
+    window.world.talk.talk('maude');
+    window.world.talk.endTalk();
   });
   await page.evaluate(() => window.view.step(40));
   const mailbox = await propTile('mailbox');
@@ -154,8 +154,8 @@ async function neighbours() {
     const n = window.world.neighbourhood.neighboursIn(window.world.scene)[0];
     if (!n) return null;
     window.world.friends.update(n.id, { points: 350, moments: [2], answered: undefined });
-    window.world.neighbourhood.talk(n.id);
-    window.world.neighbourhood.endTalk();
+    window.world.talk.talk(n.id);
+    window.world.talk.endTalk();
     return { id: n.id, tile: n.tile };
   });
   if (!asker) check('someone is here to ask her something', false);
@@ -367,7 +367,7 @@ async function mystery() {
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in her front door');
   const board = await page.evaluate(
-    () => window.world.home.placed.find((p) => p.id === 'mysteryCorkboard') ?? null,
+    () => window.world.home.rooms.placed.find((p) => p.id === 'mysteryCorkboard') ?? null,
   );
   check('her corkboard is up at home', board !== null);
   if (!board) return;
@@ -401,7 +401,7 @@ async function mystery() {
     await tapElement('.hud-corkboard-sheet button:text-is("Done")');
   }
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
   await wesChat();

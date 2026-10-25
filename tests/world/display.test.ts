@@ -38,7 +38,7 @@ function walkUp(h: ReturnType<typeof atHome>, tx: number, ty: number) {
   return h.until(() => !h.world.player.moving, 'walking up to it');
 }
 
-const piece = (world: World, id: string) => world.home.placed.find((p) => p.id === id)!;
+const piece = (world: World, id: string) => world.home.rooms.placed.find((p) => p.id === id)!;
 
 describe('display pieces show one thing from her bag (0.3’s H2)', () => {
   it('opens on the piece she walks up to, and offers only what it takes', () => {
@@ -120,9 +120,9 @@ describe('display pieces show one thing from her bag (0.3’s H2)', () => {
         },
       },
     });
-    expect(home.placed.find((p) => p.id === 'budVase')?.shows).toBeUndefined();
-    expect(home.placed.find((p) => p.id === 'bellJar' && p.tx === 2)?.shows).toBe('rose');
-    expect(home.placed.find((p) => p.id === 'pumpkinChair')?.shows).toBeUndefined();
+    expect(home.rooms.placed.find((p) => p.id === 'budVase')?.shows).toBeUndefined();
+    expect(home.rooms.placed.find((p) => p.id === 'bellJar' && p.tx === 2)?.shows).toBe('rose');
+    expect(home.rooms.placed.find((p) => p.id === 'pumpkinChair')?.shows).toBeUndefined();
     // The second jar on the first's tile goes in the chest, and its squishy with it.
     expect(home.stored).toContainEqual({ id: 'bellJar', count: 1 });
     expect(home.items).toEqual([
