@@ -24,9 +24,11 @@ v54, decisions 325 and 327), was never merged: it grew into 1.2. **The 1.1 plan 
 complete** (`docs/v1.1_plan.md`, settled 2026-10-19, decision 328; its review, V1.1, decision
 356): four lanes from `v1.1-dev`, the sound (the silent switch silences the game, the crickets
 tamed), the refactors in "Where it hurts" and the art redesigns. **1.2 is the release PR #201**
-(`v1.1-dev` → `main`, "Release 1.2 (with 1.0.1 and 1.1)", save v53 → v55), the user's to merge;
-her phone is on 1.0 until then, and reads one card, `1.2`, folding 1.0.1 and 1.1. A session
-starting cold with nothing asked of it asks the user what they'd like next. `docs/v1.1_plan.md`,
+(`v1.1-dev` → `main`, "Release 1.2 (with 1.0.1 and 1.1)", save v53 → v55), **merged by the user
+on 2026-10-20: 1.2 is on her phone.** **The plan now is `docs/v1.3_plan.md`** (settled
+2026-10-24, decision 357), the last week of the user's subscription: visitors every fortnight
+(⬆ 1.2.1), her phone's frame, the creatures and the scenery, the personal touches, a review
+(⬆ 1.3), from `v1.3-dev`, the model fit to each session. `docs/v1.1_plan.md`,
 `docs/v1_plan.md` and the plans before them are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
@@ -71,7 +73,7 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.1-dev` is the integration branch after 1.0** (`v1-dev` was V1's, decision 266, and ended
+**`v1.3-dev` is the integration branch after 1.2** (`v1.1-dev` was 1.1's, `v1-dev` V1's, decision 266, and ended
 with 1.0; `v0.3-dev` was 0.3's, decision 212), made from `main` the day the release merged and
 added to `vercel.json`'s no-preview list (decision 265). While a
 plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as

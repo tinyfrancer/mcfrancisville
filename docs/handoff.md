@@ -6,7 +6,23 @@ progress" and "After 1.0" first; "Where things stand" further down is the long h
 
 ## In progress
 
-Nothing is in progress.
+**The 1.3 plan is running** (`docs/v1.3_plan.md`, decision 357; started 2026-10-24 by the
+coordinating session: the last week of the user's subscription, sub-agents in worktrees two at a
+time, Sonnet for rules and refactors, Opus for art). **1.2 is on her phone** (PR #201, merged by
+the user 2026-10-20). Each session's heading says where it is.
+
+### F1: visitors every fortnight (`claude/f1-fortnight`; Sonnet; decision 360)
+
+Not started.
+
+### F2: her phone's frame (`claude/f2-frame`; Sonnet; decision 361)
+
+Not started.
+
+### F3 the creatures, F4 the scenery, F5 the touches, F6 the forwarders, V1.3 the review
+
+Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
+(below), recorded in `docs/personal_touches.md` by the coordinator as they come.
 
 ## After 1.0
 

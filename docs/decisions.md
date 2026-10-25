@@ -8902,3 +8902,32 @@ dealing the broken trees to the woods only now (a look, not a bug, and the user'
 phone); filling the frozen pond's ring (the fountain plays on in winter; open water round it is
 the truth of it); dropping the forwarders here (a refactor in a review, with lane A's reasons for
 them gone only now); splitting the chunk (decision 328).
+
+## 357. The plan for 1.3, the last week: visitors every fortnight first, then her phone's frame, the creatures, the scenery and the personal touches, with the model fit to each session (2026-10-24)
+
+**Context:** 1.2 is on her phone (PR #201, 2026-10-20). The user's subscription ends in about a
+week, and they want it spent putting the game in a polished state for her, with sub-agents fit
+to each task. Her one complaint, in the user's words: "it takes too long to get the once a month
+full moon bugs. Maybe make 2 weeks the maximum in between."
+
+**Decision:** `docs/v1.3_plan.md`: seven sessions from `v1.3-dev` (made from `main` today, in
+`vercel.json`'s no-preview list), two at a time, F1 and F2 first.
+
+- **Visitors every fortnight** (F1): a critter out of its season or weather comes visiting the
+  day after the full moon and the day after the new moon, so none is more than about fifteen days
+  away, where R5 (decision 310) had the full moon alone and up to 29. The moon-bound critters
+  keep the full moon's own night. Cut as 1.2.1 the day it merges.
+- **What she'll notice comes before what she won't**: her phone's frame (F2), the creatures and
+  scenery she has said look funny (F3, F4), then the personal touches parked since decision 177
+  (F5), which the user answers in chat and a session puts in; the forwarders and the small
+  things (F6) only if time is left; a review last.
+- **The model fits the session**: a rule, a cache or a mechanical refactor is a Sonnet session
+  (F1, F2, F6); anything drawn or judged by eye is Opus (F3, F4, F5, the review).
+- **Every merge leaves `v1.3-dev` releasable**, so whatever has landed when the week runs out
+  ships as 1.3.
+
+**Rejected:** a new moon's own visiting day (the day after keeps R5's reason: the full moon's
+night stays the moon-bound critters'); visitors every week (the Cabinet is meant to be most of a
+year's work, decision 150; a fortnight answers the complaint without making it a month's); a new
+neighbour or place (a week isn't a release with a theme, decision 270); refactors first (they
+change nothing she sees).
