@@ -44,7 +44,7 @@ trees have all their leaves back.
 
 ### F6: the forwarders and the small things (`claude/f6-forwarders`; Sonnet; decision 365)
 
-F6 landed (PR #PRN, decision 365): `Home`'s 27 and `Neighbourhood`'s 10 forwarders dropped, every
+F6 landed (PR #222, decision 365): `Home`'s 27 and `Neighbourhood`'s 10 forwarders dropped, every
 reader (src, tests, and smoke's and perf's `window.world` reads in `scripts/`) on `home.rooms.<x>`
 and `world.talk.<x>`; `keepTown` stamps `updatedAt` and `lastPlayedAt` by the world's clock (a
 `?day=` town is saved as played then; `createdAt` stays real), and the cloud is given real time for
