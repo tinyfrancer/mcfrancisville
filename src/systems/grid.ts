@@ -1,4 +1,11 @@
-import { PROP_FOOTPRINT, type DoorSource, type MapSource } from '../data/maps';
+import {
+  EDGE_DEPTH,
+  GRAVES_REACH,
+  PROP_FOOTPRINT,
+  type DoorSource,
+  type Grove,
+  type MapSource,
+} from '../data/maps';
 import type { MapZoneId, PatchId, PropId, TileId, ZoneId } from '../types/ids';
 
 export interface PlacedProp {
@@ -15,6 +22,8 @@ export interface PlacedProp {
    * down, 8 left), so a run joins up and turns its corners (0.2's K1).
    */
   joins?: number;
+  /** A tree's: where it stands, which says which of its shapes it may take (1.3's F4). */
+  grove?: Grove;
 }
 
 /** The props that join up with their own kind, a fence going round a corner. */
@@ -146,6 +155,12 @@ export function parseMap(source: MapSource): TileMap {
       (at(0, 1) ? 4 : 0) |
       (p.tx > 0 && at(-1, 0) ? 8 : 0);
   }
+  const graves = props.filter((p) => p.id === 'gravestone');
+  for (const p of props) {
+    if (p.id !== 'tree') continue;
+    const grove = groveOf(p, width, height, source.woods ?? false, graves);
+    if (grove) p.grove = grove;
+  }
   const nameless = props.find((p) => p.id === 'signpost' && !p.sign);
   if (nameless) throw new Error(`the signpost at ${nameless.tx},${nameless.ty} names nowhere`);
   return {
@@ -167,6 +182,28 @@ export function parseMap(source: MapSource): TileMap {
     yard: source.yard ? { ...source.yard } : null,
     digSpots: (source.digSpots ?? []).map((t) => ({ ...t })),
   };
+}
+
+/** Where a tree stands (`Grove`), or nothing for one that's tended. */
+function groveOf(
+  tree: PlacedProp,
+  width: number,
+  height: number,
+  woods: boolean,
+  graves: readonly PlacedProp[],
+): Grove | undefined {
+  if (woods) {
+    const inEdge =
+      tree.tx < EDGE_DEPTH ||
+      tree.ty < EDGE_DEPTH ||
+      tree.tx + tree.w > width - EDGE_DEPTH ||
+      tree.ty + tree.h > height - EDGE_DEPTH;
+    return inEdge ? 'edge' : 'woods';
+  }
+  const near = graves.some(
+    (g) => Math.max(Math.abs(g.tx - tree.tx), Math.abs(g.ty - tree.ty)) <= GRAVES_REACH,
+  );
+  return near ? 'graves' : undefined;
 }
 
 export function walkable(map: TileMap, tx: number, ty: number): boolean {

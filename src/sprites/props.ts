@@ -1,7 +1,8 @@
 import { PROJECT_ART } from './projects';
 import { HOLIDAY_PROP_ART } from './holidays';
 import type { MapZoneId, PropId } from '../types/ids';
-import { formOf, variantOf } from './terrain';
+import { formOf, tileHash, variantOf } from './terrain';
+import type { Grove } from '../data/maps';
 import { FARM_SIGN, FARM_SIGN_PALETTE, HOSTA, HOSTA_LEAVES } from './garden';
 import {
   ACCENT,
@@ -129,7 +130,7 @@ import {
   STUMP,
 } from './clutter';
 import type { Palette, SpriteSource } from './sprite';
-import { MORE_TREE_FORMS } from './treeForms';
+import { BROKEN_FORM, DEAD_FORM, LEANING_FORM, MORE_TREE_FORMS } from './treeForms';
 import { flicker, type Frames } from './frames';
 import { candlelit, flame } from './motion';
 import { CANDY_TREE, CANDY_TREE_PALETTE, SAPLING_PALETTE, SAPLING_PLOT } from './nature';
@@ -732,6 +733,30 @@ export interface StandingProp {
   ty: number;
   sign?: { to: MapZoneId; way: 'left' | 'right' };
   joins?: number;
+  grove?: Grove;
+}
+
+/** The tree's forms in leaf: the three round ones, the conifer, the birch and the poplar. */
+const LEAFY: readonly number[] = [0, 1, 2, 3, 5, 6];
+
+/** The bare and bent forms a tree may take where it stands, besides those in leaf (1.3's F4). */
+const MAY_STAND: Record<Grove, ReadonlySet<number>> = {
+  edge: new Set([DEAD_FORM, LEANING_FORM, BROKEN_FORM]),
+  woods: new Set([DEAD_FORM]),
+  graves: new Set([DEAD_FORM]),
+};
+
+/**
+ * A tree's shape: dealt from all nine by its tile, as every prop's is, and then kept to where it
+ * stands, so the broken and leaning trees are in a wood's edge, the dead one in the woods and by
+ * the graves, and every other tree is in leaf.
+ */
+function treeFormOf(prop: StandingProp, count: number): number {
+  const dealt = formOf(prop.tx, prop.ty, count);
+  if (LEAFY.includes(dealt) || (prop.grove && MAY_STAND[prop.grove].has(dealt))) return dealt;
+  // By the graves a broken tree is a dead one, so the graveyard keeps its spooky tree.
+  if (prop.grove === 'graves' && dealt === BROKEN_FORM) return DEAD_FORM;
+  return LEAFY[tileHash(prop.tx + 211, prop.ty + 97) % LEAFY.length]!;
 }
 
 /**
@@ -763,7 +788,11 @@ export function lookOf(prop: StandingProp): {
     };
   }
   const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;
-  const f = art.forms ? formOf(prop.tx, prop.ty, art.forms.length) : 0;
+  const f = !art.forms
+    ? 0
+    : prop.id === 'tree'
+      ? treeFormOf(prop, art.forms.length)
+      : formOf(prop.tx, prop.ty, art.forms.length);
   return {
     source: art.forms?.[f] ?? art.source,
     palette: art.variants?.[v] ?? art.palette,
