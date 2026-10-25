@@ -14,10 +14,18 @@ import { fromSave, World, type WorldOptions } from '../../src/world/World';
  * what `MapZone` answered before its overlays were a list (1.1's W1, decision 340): for a new
  * town and each lived-in save from her phone, with every project built, on an ordinary
  * Saturday, a film night, Christmas Eve (the square's tree, the pond frozen) and a day in May.
- * The snapshot is a hash of each place's answers, taken from the code the list replaced.
+ * The snapshot is a hash of each place's answers, taken from the code the list replaced; 1.2's
+ * town (`lived-in-v55`) was added in 1.3's F6, its snapshot taken from the code as it then was.
  */
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../persistence/fixtures');
-const SAVES = ['lived-in-v27', 'lived-in-v31', 'lived-in-v34', 'lived-in-v43', 'lived-in-v53'];
+const SAVES = [
+  'lived-in-v27',
+  'lived-in-v31',
+  'lived-in-v34',
+  'lived-in-v43',
+  'lived-in-v53',
+  'lived-in-v55',
+];
 
 const PLACES = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
 
