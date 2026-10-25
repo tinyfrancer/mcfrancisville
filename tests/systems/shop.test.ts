@@ -122,6 +122,33 @@ describe('the day’s stock', () => {
     expect(YEAR.filter((day) => table(day) !== undefined)).toHaveLength(12);
   });
 
+  it("puts the winter wardrobe out from November to February, and only then (1.4's G2)", () => {
+    const shelf = (day: string, name: string) =>
+      stockOf('corner', day).find((s) => s.name === name);
+    for (const day of ['2026-10-31', '2027-03-01', '2027-07-15']) {
+      expect(shelf(day, 'Winter woollies'), day).toBeUndefined();
+      expect(shelf(day, "This week's snug look"), day).toBeUndefined();
+    }
+    for (const day of ['2026-11-01', '2026-12-24', '2027-01-15', '2027-02-28']) {
+      expect(shelf(day, 'Winter woollies')?.offers, day).toHaveLength(2);
+      const look = shelf(day, "This week's snug look")!.offers;
+      expect(look.length, day).toBeGreaterThanOrEqual(3);
+      for (const offer of look) expect(offer.price).toBe(priceOf(offer.ware));
+    }
+    // Every winter piece turns up on the shelf in one winter, and a snug look is the same all week.
+    const winter = YEAR.filter((day) => ['11', '12', '01', '02'].includes(day.slice(5, 7)));
+    const seen = new Set(
+      winter.flatMap((day) =>
+        shelf(day, 'Winter woollies')!.offers.map((o) => JSON.stringify(o.ware)),
+      ),
+    );
+    const woollies = SHOPS.corner.shelves.find((s) => s.name === 'Winter woollies')!.picks[0]!.from;
+    expect(woollies).toHaveLength(16);
+    for (const w of woollies) expect(seen, JSON.stringify(w)).toContain(JSON.stringify(w));
+    const weekOf = (day: string) => shelf(day, "This week's snug look")!.offers;
+    expect(weekOf('2026-11-03')).toEqual(weekOf('2026-11-08'));
+  });
+
   it('deals each shelf the number it asks for, a look whole, with nothing twice', () => {
     for (const shop of SHOP_IDS) {
       for (const day of YEAR.slice(0, 30)) {

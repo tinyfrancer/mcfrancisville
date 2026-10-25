@@ -20,7 +20,7 @@ export interface OutfitArt {
   /** Hung from a chain, centred under her chin. */
   pendant?: Grid;
   /** Over the piece's main colour: little flowers, checks, dots, or glitter for shoes. */
-  pattern?: 'floral' | 'gingham' | 'dots' | 'glitter' | 'patchwork' | 'stripes' | 'bats';
+  pattern?: 'floral' | 'gingham' | 'dots' | 'glitter' | 'patchwork' | 'stripes' | 'bats' | 'tartan';
   /** Colours of `x` and `y` in the art, when they aren't white and black. */
   accents?: { x?: string; y?: string };
 }
@@ -144,6 +144,25 @@ export const OUTFIT_ART: Record<OutfitId, OutfitArt> = {
   // A gingham patch on the crown and a scarlet band (0.3's F3).
   scarahHat: { accents: { x: C.rose, y: C.scarlet } },
   mayorHat: { accents: { x: C.gold } },
+  // The winter wardrobe (1.4's G2): wooden toggles, cream stripes and fringe, a snowflake on each
+  // mitten, a hat's band of snowflakes, white and scarlet hearts and diamonds on the jumper, tartan
+  // and its piping, a fluffy gown's lighter belt, the onesie's pale tummy, and pompoms.
+  duffelCoat: { accents: { x: C.wood, y: C.barkDark } },
+  pufferJacket: { accents: { x: C.silver } },
+  longScarf: { pattern: 'stripes', accents: { x: C.cream } },
+  mittens: { accents: { x: C.white, y: C.cream } },
+  snowflakeHat: { accents: { x: C.white, y: C.scarlet } },
+  earmuffs: { accents: { x: C.silver } },
+  cableTights: {},
+  snowBoots: { accents: { x: C.cream, y: C.inkFabric } },
+  fairIsleJumper: { accents: { x: C.white, y: C.scarlet } },
+  chunkyCardigan: { accents: { x: C.wood } },
+  pyjamaTop: { pattern: 'tartan', accents: { x: C.cream, y: C.inkFabric } },
+  pyjamaBottoms: { pattern: 'tartan', accents: { x: C.cream, y: C.inkFabric } },
+  dressingGown: { accents: { x: C.white } },
+  batOnesie: { accents: { x: C.cream, y: C.white } },
+  batHood: { accents: { x: C.roseLight, y: C.white } },
+  fluffySlippers: { accents: { x: C.white } },
 };
 
 const PATCHES = ['m', 'x', 'y', 'M'] as const;
@@ -171,6 +190,15 @@ export function withPattern(rows: string[], pattern: OutfitArt['pattern']): stri
           const col = (c + (r % 8 < 4 ? 0 : 3)) % 6;
           if (r % 4 === 1) return col === 0 || col === 2 ? 'x' : ch;
           return r % 4 === 2 && col === 1 ? 'x' : ch;
+        }
+        // A tartan (1.4's G2): bands of shade crossing, darker where they meet, and a fine light
+        // line down between every other pair, so piping in its accent still stands out.
+        if (pattern === 'tartan') {
+          const across = r % 4 === 1;
+          const down = c % 4 === 1;
+          if (across && down) return 'y';
+          if (across || down) return 'M';
+          return c % 8 === 3 ? 'L' : ch;
         }
         return ((r >> 1) + (c >> 1)) % 2 === 0 ? 'x' : ch;
       })

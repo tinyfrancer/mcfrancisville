@@ -794,6 +794,134 @@ export const OUTFITS: Record<OutfitId, OutfitRow> = {
     fabrics: ['ink'],
     fixed: true,
   },
+  // The winter wardrobe (1.4's G2), at Cobweb Corner from November: snow days and nights in.
+  duffelCoat: {
+    name: 'Duffel coat',
+    description:
+      'A thick wool coat to the knee, done up with wooden toggles, and a hood for when the snow comes sideways.',
+    slot: 'outer',
+    cut: 'duffel',
+    fabrics: ['navy', 'scarlet', 'moss', 'cream'],
+  },
+  pufferJacket: {
+    name: 'Puffer jacket',
+    description:
+      'A big squashy jacket quilted into fat little pillows, with a collar to hide your chin in. Like wearing a duvet.',
+    slot: 'outer',
+    cut: 'puffer',
+    fabrics: ['plum', 'blue', 'rose', 'ink'],
+  },
+  longScarf: {
+    name: 'Long striped scarf',
+    description:
+      'A very long knitted scarf, wound round twice with a tail left hanging, fringed at the ends. Worn over any coat.',
+    slot: 'necklace',
+    cut: 'scarf',
+    fabrics: ['scarlet', 'blue', 'moss', 'plum'],
+  },
+  mittens: {
+    name: 'Mittens',
+    description:
+      'Chunky knitted mittens with a snowflake on the back. Snowballs are much better in mittens.',
+    slot: 'gloves',
+    cut: 'mittens',
+    fabrics: ['scarlet', 'blue', 'cream', 'plum'],
+  },
+  snowflakeHat: {
+    name: 'Snowflake bobble hat',
+    description:
+      'A knitted hat with a band of snowflakes, flaps to keep your ears warm, plaited ties and a big bobble on top.',
+    slot: 'hat',
+    cut: 'earflapHat',
+    fabrics: ['cream', 'blue', 'scarlet', 'moss'],
+  },
+  earmuffs: {
+    name: 'Fluffy earmuffs',
+    description: 'Two fluffy pompoms on a band, one for each ear. Toasty, and very soft to squish.',
+    slot: 'hat',
+    cut: 'earmuffs',
+    fabrics: ['rose', 'cream', 'lavender', 'sky'],
+  },
+  cableTights: {
+    name: 'Cable-knit tights',
+    description:
+      'Thick knitted tights with cables up the legs, for wearing under a skirt when it snows.',
+    slot: 'tights',
+    cut: 'knitTights',
+    fabrics: ['cream', 'plum', 'scarlet', 'navy'],
+  },
+  snowBoots: {
+    name: 'Snow boots',
+    description:
+      'Chunky boots with grippy soles and a fluffy cuff at the top. Made for stomping through snowdrifts.',
+    slot: 'shoes',
+    cut: 'snowBoots',
+    fabrics: ['maroon', 'navy', 'plum', 'cream'],
+  },
+  fairIsleJumper: {
+    name: 'Fair Isle jumper',
+    description:
+      'A cosy knitted jumper with a band of little diamonds round the yoke and a row of dots by the hem.',
+    slot: 'top',
+    cut: 'jumper',
+    fabrics: ['cream', 'navy', 'scarlet', 'moss'],
+  },
+  chunkyCardigan: {
+    name: 'Chunky cardigan',
+    description:
+      'A long, slouchy cable-knit cardigan with big round buttons, worn open over anything. Practically a hug.',
+    slot: 'outer',
+    cut: 'chunkyCardigan',
+    fabrics: ['moss', 'cream', 'plum', 'rose'],
+  },
+  pyjamaTop: {
+    name: 'Flannel pyjama top',
+    description:
+      'A soft tartan flannel pyjama shirt with a little collar and piping round the edges. For nights in.',
+    slot: 'top',
+    cut: 'pyjamaTop',
+    fabrics: ['scarlet', 'navy', 'moss', 'plum'],
+  },
+  pyjamaBottoms: {
+    name: 'Flannel pyjama bottoms',
+    description:
+      'Baggy tartan flannel pyjama bottoms with a drawstring, to match the top. Nobody has to know you wore them all day.',
+    slot: 'bottom',
+    cut: 'pyjamaBottoms',
+    fabrics: ['scarlet', 'navy', 'moss', 'plum'],
+  },
+  dressingGown: {
+    name: 'Dressing gown',
+    description:
+      'A long, fluffy dressing gown with a shawl collar, deep pockets and a tie belt. For padding about with a hot cocoa.',
+    slot: 'outer',
+    cut: 'dressingGown',
+    fabrics: ['rose', 'lavender', 'navy', 'cream'],
+  },
+  batOnesie: {
+    name: 'Bat onesie',
+    description:
+      'A snuggly all-in-one with a pale tummy, little feet and tiny bat wings on the back. Upside-down napping optional.',
+    slot: 'top',
+    cut: 'onesie',
+    dress: true,
+    fabrics: ['ink', 'plum', 'lavender'],
+  },
+  batHood: {
+    name: 'Bat hood',
+    description: 'A snug hood with two pointy bat ears, to go with the onesie. Squeak.',
+    slot: 'hat',
+    cut: 'batHood',
+    fabrics: ['ink', 'plum', 'lavender'],
+  },
+  fluffySlippers: {
+    name: 'Fluffy slippers',
+    description:
+      'Big soft slippers with a fluffy pompom on each toe. The floors are cold, and your feet deserve this.',
+    slot: 'shoes',
+    cut: 'slippers',
+    fabrics: ['lavender', 'rose', 'cream', 'sky'],
+  },
 };
 
 /** Whether a piece offers her a choice of colours: it has more than one, and isn't fixed. */

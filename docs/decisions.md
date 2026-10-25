@@ -9369,7 +9369,8 @@ true)`), whether the plain was given first or not; the To donate tab lists shini
   (`Collecting.shinyToday`, `Around.shiny`); the `caught` moment's `shiny` and `firstShiny`, a
   toast of its own ("It's the wrong colour on purpose, and prettier for it."), the `shinyCatch`
   cue (the catch's chime and a quick glitter rising to B7) and a shower of sparkles.
-- **Notes**: 1.4's `NOTES` row, made here, the mayor's line on the shinies first.
+- **Notes**: 1.4's `NOTES` row, made here and G2's at once (they ran side by side), folded at the
+  merge into one: two lines each, the shinies first, G2's P.S.; one left for G3.
 
 **Rejected:** a `shiny: true` on a bag stack or a count beside the plain (every keeper and sheet
 would choose plain or shiny; the precedent is an id each); new grids (the brief, and the 16 is the
@@ -9378,3 +9379,65 @@ brief's rates without a charm (four or five years); raising the rare tiers' rate
 brief's "rarer up the tiers"); a per-catch counter for the charm (a new count in the save, where
 the first catch's day is already kept); a second nook in a case for the shiny (the cases are laid
 out for one of each, and in place is what she'd show off).
+
+## 371. A winter wardrobe of sixteen pieces, Cosy Cabin and Midnight Observatory (2026-10-25, 1.4's G2)
+
+_Session G2 of the 1.4 plan (`docs/v1.4_plan.md`). No save change. Personal touches parked
+(decision 177): the pieces, names, colours, words and prices are the warmest plain defaults._
+
+- **Sixteen pieces** (`src/data/outfits.ts`, cuts in a new `src/sprites/doll/winter.ts`, the
+  hats in `doll/hats.ts`, prints in `doll/prints.ts`), each painted on her regions and measured
+  from the body (`measureOf`), so each lands on any build: a duffel coat to the knee with toggles
+  and its hood behind, a quilted puffer a pixel out past her, a long striped scarf, mittens, a
+  snowflake bobble hat with ear flaps and plaits, fluffy earmuffs, cable-knit tights, snow boots
+  with a fluffy cuff, a Fair Isle jumper, a long chunky cardigan, tartan flannel pyjamas (top and
+  bottoms, a new `tartan` pattern, piped in cream), a dressing gown with a shawl collar and belt,
+  a bat onesie (a dress: feet, a pale tummy, little wings on its back) with a bat hood, and
+  fluffy slippers. Every one comes in a blue but the bat's two (ink, plum, lavender, as a bat is).
+- **Slots.** No new slot. **The scarf is the `necklace` slot**, drawn after `outer` and outlined
+  all round (`LYING_OVER` in `cuts.ts`), so it lies over any coat, its tails behind her arms;
+  she wears it or a pendant, as a person does. The rejected ways: a slot of its own (a rail, a
+  save field and a layer for one piece) and `outer` (then no scarf over the coat, which is the
+  point of one). The coats, the cardigan and the gown are `outer` and `JACKETS` (sleeves up with
+  her arms); the duffel and the gown hang over her legs (`HEMS`), so boots go under them; the
+  earflap hat and bat hood rise a few rows (`BOBBLE_ROOM`, `EAR_ROOM`) like the bobble beanie.
+- **A coat done up hides her top on raised arms.** In a pose with her arms up, the `over` layer
+  dressed her top again, so a band tee's print showed through a closed coat. `DONE_UP` (the
+  duffel, puffer and gown) now leaves the top out of that layer. No old look changes: no old
+  piece is `DONE_UP`.
+- **Her looks held.** `tests/sprites/looksHeld.test.ts` keeps every old hash over the pieces
+  there were (`BEFORE`), and holds the winter pieces in a describe of their own, so the snapshot
+  only gained lines. `npm run sprite -- 'doll:winter:*'` draws each winter look every way, posed,
+  sat and acting.
+- **Where they're sold:** Cobweb Corner, November to February only, by a `months` on a
+  `ShelfRow` (`stockOf` reads the day key's month): **Winter woollies**, two pieces a day from
+  the sixteen, and **This week's snug look**, one whole look a week (`everyWeek` with `sets`: a
+  snow day, nights in, a cosy afternoon, a bat at bedtime, out in the cold). Both shelves go
+  last on the counter, so every shelf before them deals as it always has. Prices 220–620,
+  within the economy test.
+- **Ollie's catalogue is unchanged.** The plan had the pyjamas and slippers there "once seen",
+  but clothes are kept once (decision 260): she never needs a second, and the catalogue lists
+  only what she has had. Seeing a thing on a shelf isn't kept anywhere, and keeping it would
+  touch the save; the woollies shelf brings each piece round within a winter instead.
+- **Two sets** (`SUITES` rows in `src/data/sets.ts`, `ThirdSuitePiece`, art in a new
+  `src/sprites/setsThree.ts`, 13 pieces, 300–880 Candy, in Gourdon's book and on the shelves as
+  the eight before): **Cosy cabin** (honey logs, red plaid, cream, moss, an iron stove): a log
+  stove whose fire `frames`, a braided rag rug, the not-a-bear rug (patchwork, buttons and a
+  stitched smile: plainly a rug), a rocking chair (a seat), a log cabin bed, a mug tree (`SMALL`)
+  and a twinkly garland on the wall whose bulbs twinkle by `frames` glows; **Midnight
+  observatory** (dark wood, navy, brass, plum velvet): a brass telescope that `plays`, a
+  celestial chart, a moon on a stand that glows after dark (`SMALL`), a velvet chaise (a seat), a
+  candle cluster that flickers (`SMALL`) and a constellation rug. A sixth piece, the rug, so the
+  set is a room like the others (six to eight each, held by `tests/data/sets.test.ts`).
+- **The telescope is an instrument of its own,** `telescope`, with one tune, the "Starlight
+  Lullaby" (`TUNES`, notes in `src/audio/pianos.ts`: a slow waltz of chimes), and its toast wears
+  the telescope glyph.
+- **A seventh window paper**, `starWindow` (`src/data/wallsAndFloors.ts`): tall round-topped brass
+  windows on navy with little gold stars; at dusk and night its glass shows twice the stars.
+- **1.4's `NOTES` row** is made here (G1 and G3 add theirs; five lines at most): three lines on
+  the woollies, the sets and the snug look, and a P.S. in mittens.
+
+**Rejected:** knitwear dithered (art_style: never dither anything small; knit is rows of its own
+tones instead); a bear rug with a bear's head (it had to be plainly a rug); the winter clothes in
+the year-round boutique (a dressing gown in July; the looks are their own weekly shelf in
+winter).

@@ -206,12 +206,15 @@ export const NOTES: readonly PatchNotes[] = [
       // 1.4's G1: the shinies.
       'Once in a while a critter is the wrong colour on purpose, and prettier for it. Look for ' +
         'a twinkle: a shiny one is about.',
-      "A shiny is worth twice as much, takes its case at the museum in the plain one's place, " +
-        'and three of one make Gourdon carve it in gold leaf.',
-      'The Cabinet marks every shiny you find. Wrapunzel is keeping two new shelves for them, ' +
-        'and she is very excited about both.',
+      "A shiny is worth twice as much, takes its museum case in the plain one's place, and " +
+        'Wrapunzel has two new shelves just for them.',
+      // 1.4's G2: the winter wardrobe and sets.
+      'Cobweb Corner has winter woollies from November, a snug look each week: duffel coats, ' +
+        'mittens, bobble hats and, I am told, a bat onesie.',
+      'Two new sets for long evenings: a Cosy Cabin with a crackling log stove, and a Midnight ' +
+        'Observatory whose telescope hums to the stars.',
     ],
-    ps: 'P.S. I have not typed for a whole week. I missed the W.',
+    ps: 'P.S. The typewriter keys are cold in the mornings now. I type in mittens. Please excuse the typos.',
   },
 ];
 

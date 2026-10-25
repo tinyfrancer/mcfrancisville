@@ -305,7 +305,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   front and side, over from behind, her hair tucked inside the cape's collar.
   Her shoes go on just under the first hem that hangs over her legs (`hangsOver`: skirts,
   dresses, the opera coat, a cape from behind), so a boot's shaft is under a skirt and over
-  trousers, a neighbour's too (`shoesUnderHems`; 0.3's A1, decision 220). The creator,
+  trousers, a neighbour's too (`shoesUnderHems`; 0.3's A1, decision 220). The winter wardrobe
+  (1.4's G2, decision 371) is `src/sprites/doll/winter.ts`: its scarf is the `necklace` slot,
+  outlined all round and drawn over any coat (`LYING_OVER`), a coat done up (`DONE_UP`) keeps her
+  top off her raised arms, and it's sold November to February (a shelf's `months`). The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`;
   a piece's close-up is framed to the pixels it changes on her (`closeUpOf`, `src/sprites/closeUp.ts`).
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
@@ -499,8 +502,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   chest with it, and is drawn raised to its top (`pieceSprite`'s `raised`).
   The furniture sets (0.3's S3 and S4, decisions 262–263) are rows in `src/data/sets.ts` (a set is
   a "suite" in code: `SuiteId`, `SUITES`, `SET_FURNITURE`; H2's `SetPiece` was taken), art in
-  `src/sprites/sets.ts` and `setsTwo.ts` (the watching portrait's three looks, `WATCHERS`); a new
-  set is a const and a `SUITES` row. Window wallpapers (`src/data/wallsAndFloors.ts`) hang a
+  `src/sprites/sets.ts`, `setsTwo.ts` (the watching portrait's three looks, `WATCHERS`) and
+  `setsThree.ts` (1.4's G2: Cosy Cabin, and Midnight Observatory, whose telescope `plays` the
+  `telescope`'s tune); a new set is a const and a `SUITES` row. Window wallpapers (`src/data/wallsAndFloors.ts`) hang a
   window every four tiles (`windowsAlong`) showing the sky at the hour and in the weather
   (`windowSky` in `src/systems/windowSky.ts`, art `src/sprites/wallsAndFloors.ts`), drawn into the
   room's shell by `roomShell` (`src/render/room.ts`).

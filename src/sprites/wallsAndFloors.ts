@@ -17,7 +17,7 @@ import {
 } from './buildings';
 import { palette } from './furnish';
 import { mix, PALETTE as C } from './palette';
-import { heart } from './sets';
+import { heart, star } from './sets';
 import { Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 import type { SurfaceArt } from './surfaces';
@@ -492,6 +492,33 @@ const IVY: WindowShape = {
   },
 };
 
+/**
+ * An observatory's window (1.4's G2): tall and round-topped in brass, three panes across and four
+ * down, a brass star on top, and at dusk and at night twice the stars in its sky.
+ */
+const STARRY: WindowShape = {
+  width: 34,
+  height: 60,
+  foot: 76,
+  draw: (s, sky) => {
+    const glass = framed(
+      s,
+      { shape: 'arch', x: 4, y: 5, w: 26, h: 50, frame: 2, panes: [3, 4] },
+      sky,
+    );
+    if (sky === 'night' || sky === 'dusk') {
+      for (let k = 0; k < 14; k++) {
+        const i = glass.x + ((k * 13 + 5) % glass.w);
+        const j = glass.y + ((k * 9 + 2) % Math.round(glass.h * 0.7));
+        if (glass.inside(i, j) && s.get(i, j) !== fillOf(TRIM)) s.set(i, j, STARS);
+      }
+    }
+    sill(s, 2, 55, 30);
+    star(s, 17, 2, fillOf(ACCENT_TWO), lightOf(ACCENT_TWO));
+    s.rect(16, 4, 3, 1, fillOf(ACCENT_TWO));
+  },
+};
+
 /** How each window wallpaper's paper is coloured, and its window. */
 interface WindowPaper {
   paper: SurfaceArt;
@@ -551,7 +578,24 @@ const WHITE_BRICK = tile('a', (s) => {
   }
 });
 
+/** Little gold stars, and smaller ones between, on a calm navy. */
+const NAVY_STARS = tile('a', (s) => {
+  halfDrop(6, 6, (x, y) => {
+    s.set(x, y - 1, 'b')
+      .set(x - 1, y, 'b')
+      .set(x + 1, y, 'b')
+      .set(x, y + 1, 'b');
+    s.set(x, y, 'c');
+  });
+  halfDrop(14, 2, (x, y) => s.set(x, y, 'b'));
+});
+
 const PAPERS: Record<WindowPaperId, WindowPaper> = {
+  starWindow: {
+    paper: { source: NAVY_STARS, palette: { a: C.navy, b: mix(C.navy, C.gold, 0.35), c: C.gold } },
+    window: STARRY,
+    colours: { wall: C.cream, roof: C.navy, trim: C.gold, door: C.berry, accentTwo: C.gold },
+  },
   archWindow: {
     paper: { source: CREAM_STRIPE, palette: { a: C.cream, b: C.creamShade, c: C.rose } },
     window: ARCH,

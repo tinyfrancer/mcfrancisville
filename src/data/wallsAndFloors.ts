@@ -15,6 +15,8 @@ export const WINDOW_WALLPAPERS: Record<WindowPaperId, SurfaceRow> = {
   gothicWindow: { name: 'Gothic windows on plum stone', price: 640 },
   laceWindow: { name: 'Lace-curtained windows on rose', price: 620 },
   ivyWindow: { name: 'Ivy windows on brick', price: 600 },
+  // Midnight Observatory's (1.4's G2): tall brass windows on a navy paper of little stars.
+  starWindow: { name: 'Observatory windows on stars', price: 640 },
 };
 
 /** The floorings: a bathroom's tiles, a garden room's terracotta, a starry carpet, parquet. */

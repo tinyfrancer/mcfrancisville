@@ -21,7 +21,7 @@ describe("what plays (0.2's G2)", () => {
       ...Object.values(FURNITURE).map((r) => r.plays),
       ...Object.values(FIXTURES).map((r) => r.plays),
     ].filter((p) => p !== undefined);
-    expect(new Set(plays)).toEqual(new Set(['piano', 'musicBox']));
+    expect(new Set(plays)).toEqual(new Set(['piano', 'musicBox', 'telescope']));
     for (const id of TUNE_IDS) expect(plays, id).toContain(TUNES[id].instrument);
     expect(tunesOf('piano')[0]).toBe('hushUpAndDance');
     expect(FIXTURES.grandPiano.plays).toBe('piano');

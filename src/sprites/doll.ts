@@ -13,7 +13,7 @@ import {
   type View,
   viewOf,
 } from './doll/body';
-import { BIBS, JACKETS, pieceRows } from './doll/cuts';
+import { BIBS, DONE_UP, JACKETS, pieceRows } from './doll/cuts';
 import { facePalette, faceRows, gaugeRows, type Mood } from './doll/face';
 import { HAIR, hairPalette, hairRows } from './doll/hair';
 import { TATTOO_PALETTE, tattooRows, wristPalette, wristRows } from './doll/ink';
@@ -128,6 +128,8 @@ const HEMS: readonly CutId[] = [
   'velvetDress',
   'wings',
   'operaCoat',
+  'duffel',
+  'dressingGown',
 ];
 
 export function hangsOver(cut: CutId, view: View): boolean {
@@ -290,7 +292,11 @@ export function dollLayers(
     if (w) add(onHead(pieceRows(w, view, still)), wornPalette(w));
   }
   if (over) {
-    dress(over, worn.filter(onRaisedArms));
+    const doneUp = worn.some((w) => DONE_UP.includes(OUTFITS[w.id].cut));
+    dress(
+      over,
+      worn.filter((w) => onRaisedArms(w) && !(doneUp && OUTFITS[w.id].slot === 'top')),
+    );
     bracelets(over);
   }
   const whole = raised(layers);

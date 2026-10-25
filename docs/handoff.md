@@ -12,19 +12,22 @@ history.
 coordinating session: Opus sub-agents in worktrees, two at a time, from `v1.4-dev`). **1.3 is on
 her phone** (PR #219, merged 2026-10-25). Each session's heading says where it is.
 
-### G1: shiny morphs (`claude/g1-shinies`; decision 370; **save bumped to v56**) — PR #224
+### G1: shiny morphs (`claude/g1-shinies`; decision 370; **save bumped to v56**)
 
-Done, merging. Everything in decision 370 is in: the palettes, the dealing and its nine-month
-charm, the glint, the items, `Cabinet.shinies`/`shinyShown`, the museum, the shiny figurines, the
-two shelves, the Cabinet sheet, Today, small talk, toast, cue and pop, the tests, the 1.4 `NOTES`
-row (three lines of G1's; G2 and G3 add one each, five at most), the docs. The last commit merged
-`origin/v1.4-dev` and bumped `SAVE_VERSION` to 56 (step 55 gives a town `cabinet.shinies: {}` and
-`shinyShown: []`; `isCabinetShape` checks them). Left: CI green on PR #224, merge it into
-`v1.4-dev`, then empty this heading. **G4 bumps next (v57), after this has merged.**
+**Landed** (PR #224, merged into `v1.4-dev`): every critter's shiny by palette swap, dealt per
+slot (1 in 12 to 1 in 40 by tier) with a nine-month charm, a glint over the light, its own item
+(`lunaMothShiny`), `Cabinet.shinies`/`shinyShown` (save v56), the museum, shiny figurines, two
+shelves, Today and small talk. Decision 370 says what and why. Nothing half done. **G4 bumps
+next (v57).**
 
 ### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
 
-Not started.
+**Landed** (PR #225, merged into `v1.4-dev`): sixteen winter pieces, the winter shelves at Cobweb
+Corner (November to February), Cosy Cabin and Midnight Observatory, the star window paper. Decision
+371 says what and why. Nothing half done.
+
+**1.4's `NOTES` row** was made by G1 and G2 at once and folded at G1's merge into four lines, two
+each, shinies first, G2's P.S.: **G3 adds the fifth**, the last.
 
 ### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
 
