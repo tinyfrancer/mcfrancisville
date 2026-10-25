@@ -31,20 +31,16 @@ each, shinies first, G2's P.S.: **G3 adds the fifth**, the last.
 
 ### G3: ice fishing (`claude/g3-ice-fishing`; decision 372; no save change)
 
-**In progress.** Done and pushed: (1) casting through the ice: while the town's pond is frozen
-over (`FROZEN`, 15 December to 15 January) its fish swim on under it (`Collecting.canBe`), a tap
-on one's dim shadow casts from beside it through a hole drawn on the ground under the float
-(`drawHole`, `holeOf` in `render/fishing.ts`, the fishing pass's new `ground` part), tests in
-`tests/world/iceFishing.test.ts`; (2) four winter fish (icicle smelt, bobble perch, aurora trout,
-cold moon sturgeon; December to February, the pond and the lake), their art, shines, sizes, the
-museum's tenth case (fish), `museum:74`, the rarity bound 11 → 12 months. **Next, in order:** (3)
-the ice hut, the fifth town project (`PROJECTS.iceHut`, on the pond's north-east bank at 31,38,
-2×2, stages in `sprites/projects.ts`, a door into `INTERIORS.iceHut` through `Sites`); (4) the
-hut's room: a stove that `frames`, a bench, a hole fixture (`FIXTURES.iceHole`, `fishing: true`)
-that casts into the pond's winter fish in winter, its ordinary fish out of it (`Collecting.holeFish`,
-two slots an hour, `iceHut:critter:<hour>:<slot>`), the line drawn in `RoomView`; (5) Today's
-`iceFishing` line on frozen days; (6) smoke in `critters` and `projects`; (7) 1.4's fifth notes
-line; (8) docs: CLAUDE.md, decision 372, the plan's status line. No save bump planned.
+**Landed** (PR #227, merged into `v1.4-dev`): the fish swim on under the frozen town pond (15
+December to 15 January), dim shadows, cast to through a hole drawn under the float; four winter
+fish (icicle smelt, bobble perch, aurora trout, cold moon sturgeon; December to February, the pond
+and the lake; a moon-bound critter with a season visits on every full moon out of it); the museum's
+tenth case (fish), `museum:74`; Gourdon's ice hut, the fifth project, on the pond's bank, and its
+room, whose floor's hole she fishes through (two fish an hour, the winter fish in winter); Today's
+line on frozen days; 1.4's fifth notes line. Decision 372 says what and why. Nothing half done.
+The lake was left unfrozen (it never froze; decision 372 says why). The rarity test's bound went
+11 → 12 months (9.1 average). One line in `hud/CabinetSheet.ts`'s `seasonOf` (G4's file) says a
+moon-bound critter with a season visits on the full moon. **1.4 is ready to cut** (G1–G3 in).
 
 ### G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
 

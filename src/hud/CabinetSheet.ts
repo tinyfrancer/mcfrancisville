@@ -129,7 +129,8 @@ function seasonOf(id: CritterId): string {
     const [from, to] = season.map((m) => MONTHS[m - 1]!);
     const months =
       (season[1] - season[0] + 12) % 12 === 1 ? `in ${from} and ${to}` : `from ${from} to ${to}`;
-    return `${months}${visits}`;
+    // A moon-bound one visits on the full moon itself (1.4's G3's sturgeon).
+    return moon ? `${months}, and on every full moon` : `${months}${visits}`;
   }
   if (weather && !moon) return `all year${visits} whatever the weather`;
   return 'all year';
