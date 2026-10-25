@@ -20,7 +20,7 @@ import type { Palette, SpriteSource } from './sprite';
  */
 
 /** Keys that are the pet itself, for its light and shade. */
-const BODY_KEYS = 'fmnkpl';
+const BODY_KEYS = 'fmnkplu';
 
 /**
  * Light from the top left on a pet's fur (`f` only, so markings and eyes keep their colours), an
@@ -80,6 +80,17 @@ function ear(s: Sketch, x: number, top: number, h: number, inside = true): void 
     s.rect(x - half, top + i, half * 2 + 1, 1, 'f');
   }
   if (inside && h >= 4) s.rect(x, top + 2, 1, h - 2, 'p');
+}
+
+/**
+ * A dog's muzzle facing her (1.3's F3): a soft grey snout (`u`) below its eyes, with its nose
+ * (`m`) on top, so a black dog facing her reads as a dog and not a cat. `cx` is the face's
+ * middle, between pixels.
+ */
+function muzzle(s: Sketch, cx: number, y: number): void {
+  s.ellipse(cx, y + 1.5, 3.2, 2.4, 'u');
+  s.rect(cx - 1, y, 2, 1, 'm').rect(cx - 1.5, y + 1, 3, 1, 'm');
+  s.set(cx - 0.5, y + 2, 'm');
 }
 
 /** An eye: a dark-ish iris two tall with a shine above. */
@@ -189,6 +200,8 @@ function shepherdSide(frame: 0 | 1): SpriteSource {
   ear(s, 27, 0, 5);
   ear(s, 31, 0, 5);
   eye(s, 30, 6);
+  // Her grey snout, as she has facing her.
+  s.rect(32, 9, 4, 3, 'u');
   s.set(36, 9, 'm').set(35, 9, 'm');
   s.set(33, 12, 'p').set(34, 12, 'p');
   neckwear(s, (x, y) => (x === 25 || x === 26) && y >= 6 && y <= 16, [
@@ -205,12 +218,11 @@ function shepherdSit(): SpriteSource {
   const s = new Sketch(24, 28);
   s.ellipse(12, 19, 8, 8, 'f');
   s.ellipse(12, 9, 6.5, 6, 'f');
-  s.ellipse(12, 13, 3.5, 2.5, 'f');
   ear(s, 7, 0, 6);
   ear(s, 17, 0, 6);
-  eye(s, 8, 8);
-  eye(s, 14, 8);
-  s.rect(11, 12, 2, 1, 'm');
+  eye(s, 8, 7);
+  eye(s, 14, 7);
+  muzzle(s, 12, 10);
   s.rect(11, 14, 2, 2, 'p');
   s.rect(7, 25, 4, 2, 'f').rect(13, 25, 4, 2, 'f');
   neckwear(s, (_x, y) => y === 15 || y === 16, [
@@ -249,6 +261,8 @@ function poodleSide(frame: 0 | 1): SpriteSource {
   s.ellipse(27, 2.5, 4, 2.5, 'f');
   s.rect(30, 6, 5, 3, 'f');
   eye(s, 28, 4);
+  // Her grey snout, as she has facing her.
+  s.rect(31, 6, 4, 3, 'u');
   s.set(35, 6, 'm');
   curls(s);
   s.ellipse(24, 8, 2.5, 4.5, 'm');
@@ -267,12 +281,11 @@ function poodleSit(): SpriteSource {
   s.ellipse(12, 21, 8, 8, 'f');
   s.ellipse(12, 9, 6, 6, 'f');
   s.ellipse(12, 3.5, 5, 3.5, 'f');
-  s.ellipse(12, 13, 3, 2.5, 'f');
   curls(s);
   s.ellipse(5, 11, 2.5, 5, 'm').ellipse(19, 11, 2.5, 5, 'm');
-  eye(s, 8, 8);
-  eye(s, 14, 8);
-  s.rect(11, 12, 2, 1, 'm');
+  eye(s, 8, 7);
+  eye(s, 14, 7);
+  muzzle(s, 12, 10);
   s.rect(6, 27, 4, 2, 'f').rect(14, 27, 4, 2, 'f');
   neckwear(s, (_x, y) => y === 16 || y === 17, [
     [11, 18],
@@ -565,12 +578,11 @@ function shepherdBeg(high: boolean): SpriteSource {
   const up = high ? 1 : 0;
   s.ellipse(12, 21, 6.5, 8, 'f');
   s.ellipse(12, 9 - up, 6.5, 6, 'f');
-  s.ellipse(12, 13 - up, 3.5, 2.5, 'f');
   ear(s, 7, 0 - up + 1, 6);
   ear(s, 17, 0 - up + 1, 6);
-  eye(s, 8, 8 - up);
-  eye(s, 14, 8 - up);
-  s.rect(11, 12 - up, 2, 1, 'm');
+  eye(s, 8, 7 - up);
+  eye(s, 14, 7 - up);
+  muzzle(s, 12, 10 - up);
   s.rect(11, 14 - up, 2, 2, 'p');
   // Paws up at her chest, tucked in.
   s.rect(7, 16 - up * 2, 3, 3, 'f').rect(14, 16 - up * 2, 3, 3, 'f');
@@ -590,12 +602,11 @@ function poodleSpin(): SpriteSource {
   s.ellipse(14, 21, 8, 8, 'f');
   s.ellipse(14, 9, 6, 6, 'f');
   s.ellipse(14, 3.5, 5, 3.5, 'f');
-  s.ellipse(14, 13, 3, 2.5, 'f');
   curls(s);
   s.ellipse(5, 8, 4, 2.5, 'm').ellipse(23, 8, 4, 2.5, 'm');
-  eye(s, 10, 8);
-  eye(s, 16, 8);
-  s.rect(13, 12, 2, 1, 'm');
+  eye(s, 10, 7);
+  eye(s, 16, 7);
+  muzzle(s, 14, 10);
   s.rect(9, 27, 4, 2, 'f').rect(15, 27, 4, 2, 'f');
   neckwear(s, (_x, y) => y === 16 || y === 17, [
     [13, 18],
@@ -756,6 +767,7 @@ function coat(colours: Record<string, string>): Palette {
     o: r[0],
     s: r[1],
     l: r[3],
+    u: r[3],
     m: C.inkFabric,
     e: C.ink,
     p: C.roseLight,
@@ -819,6 +831,7 @@ export const PET_ART: Record<PetId, PetArt> = {
       f: C.furBlack,
       s: C.furBlackShade,
       l: C.furBlackLight,
+      u: C.stoneDark,
       e: C.gold,
       p: C.roseLight,
     }),
@@ -828,7 +841,14 @@ export const PET_ART: Record<PetId, PetArt> = {
     sitFront: POODLE_SIT,
     sitBack: poodleBack(),
     trick: [poodleSpin()],
-    palette: coat({ f: C.furBlack, s: C.furBlackShade, l: C.dusk, e: C.gold, p: C.roseLight }),
+    palette: coat({
+      f: C.furBlack,
+      s: C.furBlackShade,
+      l: C.dusk,
+      u: C.stoneDark,
+      e: C.gold,
+      p: C.roseLight,
+    }),
   },
   gary: {
     side: [SNAIL_0, SNAIL_1],

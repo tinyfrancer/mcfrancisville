@@ -197,17 +197,25 @@ export function cloaked(source: SpriteSource): SpriteSource {
   const width = source.rows[0]!.length;
   const at = (x: number, y: number) => source.rows[y]?.[x] ?? '.';
   const wing = (key: string) => key === 'W' || key === 'w';
+  const SIDES = [
+    [0, -1],
+    [1, 0],
+    [0, 1],
+    [-1, 0],
+  ] as const;
+  const open = (x: number, y: number) => {
+    const key = at(x, y);
+    return key === '.' || key === CLEAR;
+  };
+  // Its margin is the wings' outside edge, not the seam between a forewing and a hindwing.
   const edge = (x: number, y: number) =>
-    [
-      [0, -1],
-      [1, 0],
-      [0, 1],
-      [-1, 0],
-    ].some(([dx, dy]) => {
-      const key = at(x + dx!, y + dy!);
-      return key === 'o' || key === '.' || key === CLEAR;
+    SIDES.some(([dx, dy]) => {
+      const [nx, ny] = [x + dx, y + dy];
+      const key = at(nx, ny);
+      return open(nx, ny) || (key === 'o' && SIDES.some(([ex, ey]) => open(nx + ex, ny + ey)));
     });
-  const outer = (x: number) => Math.abs(x + 0.5 - width / 2) > width / 8;
+  // The margin keeps to the wings' far edges, or a pixel's rim would be most of a small wing.
+  const outer = (x: number) => Math.abs(x + 0.5 - width / 2) > width / 4;
   const bordered = touched(source, (x, y, key) =>
     wing(key) && outer(x) && edge(x, y) ? 'p' : key,
   );
@@ -300,8 +308,10 @@ export function batShape(size: Size, up: boolean): SpriteSource {
     const r = len * 0.5;
     wing.ellipse((mx + nx * r * 0.42) * k, (my + ny * r * 0.42) * k, r * k, r * k, CLEAR);
   }
-  stroke(wing, shoulder, wrist, k, 'v');
-  for (const tip of tips) stroke(wing, wrist, tip, k, 'v');
+  // The arm is the wing's leading edge, its outline; at 16 the middle finger is left out too, or
+  // the bones would be all the wing.
+  for (const [i, tip] of tips.entries())
+    if (size === 24 || i !== 1) stroke(wing, wrist, tip, k, 'v');
   s.stamp(wing, 0, 0).stamp(wing, 0, 0, { flipX: true });
   // The ears, then the head and body over their roots.
   const ear = new Sketch(size, size);
@@ -523,6 +533,7 @@ export function fishShape(size: Size, flick: boolean, kind: FishKind): SpriteSou
     if (kind === 'carp') s.line(head + 2, 14, head + 3, 16, 'o');
   } else {
     s.set(at(head), at(11), 'e');
+    if (kind === 'carp') s.set(at(head) + 1, at(14), 'o').set(at(head) + 2, at(15), 'o');
   }
   return s.toSource();
 }
@@ -614,6 +625,23 @@ export function owlEyed(source: SpriteSource): SpriteSource {
   });
 }
 
+/**
+ * The skull beetle's own back (1.3's F3): a little smiling skull (`s`, its eyes and teeth `h`)
+ * on its shell in place of the family's spots, so its name reads. At 16 or at 24.
+ */
+export function skulled(source: SpriteSource): SpriteSource {
+  const big = source.rows.length === WORLD;
+  const skull = big
+    ? { x: 9, y: 10, rows: ['.ssss.', 'ssssss', 'shsshs', 'ssssss', '.shhs.', '..ss..'] }
+    : { x: 5, y: 9, rows: ['.ssss.', 'shsshs', 'ssssss', '.s..s.'] };
+  return touched(source, (x, y, key) => {
+    const row = skull.rows[y - skull.y];
+    const mark = row?.[x - skull.x];
+    if (mark && mark !== '.' && (key === 'W' || key === 'w' || key === 's')) return mark;
+    return key === 's' ? 'W' : key;
+  });
+}
+
 /** The tombstone toad's markings: a pale cross on its brow (`c`) and dark warts (`k`). */
 export function tombstoned(source: SpriteSource): SpriteSource {
   const cross = new Set(['12,11', '12,12', '12,13', '11,12', '13,12']);
@@ -625,20 +653,12 @@ export function tombstoned(source: SpriteSource): SpriteSource {
   });
 }
 
-/** The reed frog's own stripe, pale down each flank from behind its eye (`c`). */
+/**
+ * The reed frog's own stripe (`c`), pale along each flank, sloping out and down from under its
+ * head to its back legs (1.3's F3: it sat by its mouth and read as two tusks).
+ */
 export function striped(source: SpriteSource): SpriteSource {
-  const stripe = new Set([
-    '5,12',
-    '5,13',
-    '6,14',
-    '6,15',
-    '18,12',
-    '18,13',
-    '17,14',
-    '17,15',
-    '4,11',
-    '19,11',
-  ]);
+  const stripe = new Set(['5,14', '4,15', '3,16', '2,17', '18,14', '19,15', '20,16', '21,17']);
   return touched(source, (x, y, key) =>
     (key === 'g' || key === 's') && stripe.has(`${x},${y}`) ? 'c' : key,
   );

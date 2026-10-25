@@ -135,46 +135,112 @@ function worm(size: Size, inch: boolean, kind: 'glow' | 'wiggle'): SpriteSource 
 }
 
 /**
- * A woolly bear, side on: a row of fuzzy round segments, black at both ends and orange in the
- * middle (`k`, `r`), with fuzz (`f`, `F`) standing up along its back. It inches: the middle
- * humps up in the second frame.
+ * A body of round segments drawn tail first (1.3's F3), each a little ball lit from the top left
+ * in its own keys, with a seam (`d`) where the next one overlaps it, so a caterpillar or a larva
+ * reads as segments and not a tube. The seams left round the outside are trimmed, so the outline
+ * that follows is the only edge.
  */
-function woollyBear(size: Size, inch: boolean): SpriteSource {
-  const { k } = scale(size);
+function beads(
+  s: Sketch,
+  centres: readonly { x: number; y: number }[],
+  rx: number,
+  ry: number,
+  ramp: (i: number) => string,
+): void {
+  for (const [i, c] of centres.entries()) {
+    s.ellipse(c.x, c.y, rx * 1.3, ry + rx * 0.3, 'd');
+    s.sphere(c.x, c.y, rx, ry, ramp(i));
+  }
+  const open = (x: number, y: number) => {
+    const key = s.get(x, y);
+    return key === undefined || key === CLEAR;
+  };
+  const trim: [number, number][] = [];
+  for (let y = 0; y < s.height; y++) {
+    for (let x = 0; x < s.width; x++) {
+      if (s.get(x, y) !== 'd') continue;
+      if (open(x + 1, y) || open(x - 1, y) || open(x, y + 1) || open(x, y - 1)) trim.push([x, y]);
+    }
+  }
+  for (const [x, y] of trim) s.set(x, y, CLEAR);
+}
+
+/**
+ * A glowworm side on, its head to the right (1.3's F3): a larva of seven round segments
+ * (`b`, lit `B`) along a hump that rises as it inches, its last three its lantern (`t`, bright
+ * `T`), little legs under its front, and a round head with an eye and a smile.
+ */
+function glowworm(size: Size, inch: boolean): SpriteSource {
+  const { k, at } = scale(size);
   const s = new Sketch(size, size);
   const segments = 7;
-  const at: { x: number; y: number }[] = [];
-  for (let i = 0; i < segments; i++) {
-    const x = (3.5 + i * 2.5) * k;
-    const hump = -Math.sin((i / (segments - 1)) * Math.PI) * (inch ? 3.5 : 1);
-    at.push({ x, y: (17.5 + hump) * k });
-  }
+  const centres = Array.from({ length: segments }, (_, i) => ({
+    x: (3.5 + i * 2.5) * k,
+    y: (17 - Math.sin((i / (segments - 1)) * Math.PI) * (inch ? 4.5 : 2.5)) * k,
+  }));
+  for (const c of centres.slice(3)) s.rect(Math.round(c.x), at(19.5), 1, Math.max(1, at(1.5)), 'b');
+  beads(s, centres, 2.3 * k, 2.6 * k, (i) => (i < 3 ? 'tTT' : 'bbB'));
+  const last = centres[segments - 1]!;
+  const hx = last.x + 2.6 * k;
+  const hy = last.y + 0.5 * k;
+  s.ellipse(hx, hy, 2.8 * k, 2.6 * k, 'h');
+  s.outline((key) => (key === 't' || key === 'T' ? null : 'o'));
+  s.set(Math.round(hx), Math.round(hy - k), 'e');
+  if (size === 24) s.set(Math.round(hx) + 1, Math.round(hy) + 1, 'm');
+  return s.toSource();
+}
+
+/**
+ * A woolly bear, side on (1.3's F3): seven fuzzy round segments along an arch that rises as it
+ * inches, black at both ends and orange in the middle (`k`/`K`, `r`/`R`, a seam `d` between
+ * each), its fuzz (`f`, `F`) a few soft bristles standing out round its back, never outlined,
+ * stubby legs under it, and a round black head with a bright eye (`e`) and a blush (`c`).
+ */
+function woollyBear(size: Size, inch: boolean): SpriteSource {
+  const { k, at } = scale(size);
+  const s = new Sketch(size, size);
+  const segments = 7;
+  const centres = Array.from({ length: segments }, (_, i) => ({
+    x: (3.5 + i * 2.6) * k,
+    y: (17 - Math.sin((i / (segments - 1)) * Math.PI) * (inch ? 3.5 : 1.5)) * k,
+  }));
   const black = (i: number) => i < 2 || i >= segments - 2;
-  for (const [i, p] of at.entries()) {
-    s.ellipse(p.x, p.y, 2.2 * k, 2.6 * k, black(i) ? (i % 2 ? 'k' : 'K') : i % 2 ? 'r' : 'R');
-  }
-  // Fuzz stands up all along its back, in tufts.
-  for (let x = 0; x < size; x++) {
-    let top = -1;
-    for (let y = 0; y < size; y++) {
-      if (s.get(x, y) !== CLEAR) {
-        top = y;
-        break;
-      }
-    }
-    if (top < 0) continue;
-    const under = s.get(x, top)!;
-    const fuzz = under === 'r' || under === 'R' ? 'f' : 'F';
-    s.set(x, top - 1, fuzz);
-    if (size === 24 && x % 2 === 0) s.set(x, top - 2, fuzz);
-  }
-  const head = at[segments - 1]!;
+  for (const c of centres) s.rect(Math.round(c.x), Math.round(c.y + 2 * k), 1, at(2), 'K');
+  beads(s, centres, 2.4 * k, 2.8 * k, (i) => (black(i) ? 'KKkk' : 'RRRr'));
+  const head = centres[segments - 1]!;
   const hx = head.x + 2.8 * k;
   const hy = head.y + 0.5 * k;
-  s.ellipse(hx, hy, 2.3 * k, 2.3 * k, 'h');
+  s.ellipse(hx, hy, 2.5 * k, 2.5 * k, 'h');
+  // Soft all over: over its back the outline gives way to fuzz every other pixel, in the colour
+  // of the band under it, with a few hairs further out; only its belly keeps a firm edge.
+  const body = new Sketch(size, size).stamp(s, 0, 0);
+  s.outline(() => 'o');
+  const fuzzOf = (x: number, y: number) => {
+    const near = [body.get(x, y + 1), body.get(x - 1, y), body.get(x + 1, y), body.get(x, y - 1)];
+    return near.some((key) => key === 'r' || key === 'R') ? 'f' : 'F';
+  };
+  const below = (x: number, y: number) => body.filled(x, y - 1) && !body.filled(x, y + 1);
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      if (s.get(x, y) !== 'o' || below(x, y)) continue;
+      s.set(x, y, (x + y) % 2 === 0 ? fuzzOf(x, y) : CLEAR);
+    }
+  }
+  if (size === 24) {
+    for (let x = 1; x < size - 3; x += 3) {
+      let top = -1;
+      for (let y = 0; y < size; y++) {
+        if (body.filled(x, y)) {
+          top = y;
+          break;
+        }
+      }
+      if (top > 1) s.set(x, top - 2, fuzzOf(x, top));
+    }
+  }
   s.set(Math.round(hx), Math.round(hy - k), 'e');
   if (size === 24) s.set(Math.round(hx) + 1, Math.round(hy) + 1, 'c');
-  return outlined(s, 'fF');
+  return s.toSource();
 }
 
 /**
@@ -249,66 +315,91 @@ function bowSpider(size: Size): SpriteSource {
 }
 
 /**
- * A cricket or a grasshopper side on, facing right: a body (`b`) with folded wings along its back
- * (`w`), a round head with a big eye (`e`, glint `E`), antennae (`a`), and the big hind leg (`l`,
- * its stripe `L`) that sings: in the second frame it lifts to fiddle. A cricket is rounder and its
- * antennae sweep right back; a grasshopper is longer, with short ones.
+ * A cricket or a grasshopper side on, facing right (1.3's F3): a body low along the ground (`b`)
+ * with its folded wings along its back (`w`), a round head with a big eye (`e`, glint `E`) and
+ * antennae (`a`) reaching forward, four short front legs bent out under it, and the big hind leg
+ * that makes it a hopper: a thick drumstick of a thigh (`l`, its chevrons `L`) rising over its
+ * back and the shin folded down under it to the ground. In the second frame the leg lifts to
+ * fiddle. A cricket is rounder, with long feelers curling up; a grasshopper is longer, with
+ * short ones.
  */
 function hopper(size: Size, fiddle: boolean, kind: 'cricket' | 'grasshopper'): SpriteSource {
   const { k, at } = scale(size);
   const s = new Sketch(size, size);
   const long = kind === 'grasshopper';
-  s.ellipse(11.5 * k, 16 * k, (long ? 7.5 : 6) * k, 3 * k, 'b');
-  s.ellipse((long ? 10.5 : 11) * k, 14.5 * k, (long ? 6.5 : 5) * k, 1.6 * k, 'w');
-  s.ellipse(18.5 * k, 14.5 * k, 3 * k, 3 * k, 'b');
-  for (const x of [13, 16]) s.line(at(x), at(18), at(x + 1), at(21), 'l');
-  const lift = fiddle ? 2 : 0;
-  s.line(at(12), at(16), at(6), at(10) - lift, 'l').line(at(12), at(17), at(7), at(11) - lift, 'l');
-  s.line(at(6), at(10) - lift, at(4), at(20), 'l');
-  s.set(at(9), at(13) - lift, 'L');
-  if (size === 24) s.set(8, 12 - lift, 'L');
-  if (long) {
-    s.line(at(20), at(12), at(22), at(8), 'a');
-  } else {
-    s.line(at(19), at(12), at(15), at(5), 'a').line(at(15), at(5), at(8), at(3), 'a');
-    s.line(at(20), at(12), at(21), at(5), 'a');
+  for (const [x0, x1] of [
+    [13.5, 12],
+    [16, 17.5],
+  ] as const) {
+    s.line(at(x0), at(18), at(x1), at(20), 'l');
   }
-  s.set(at(19), at(14), 'e');
-  if (size === 24) s.set(19, 13, 'E').set(20, 14, 'e').set(19, 15, 'e');
-  return outlined(s, 'a');
+  s.ellipse(11.5 * k, 16.5 * k, (long ? 7.5 : 6) * k, (long ? 2.6 : 3) * k, 'b');
+  s.ellipse((long ? 10.5 : 11) * k, 15 * k, (long ? 6.5 : 5) * k, 1.6 * k, 'w');
+  s.ellipse(18.5 * k, 15 * k, 3 * k, 3 * k, 'b');
+  // The hind leg: thigh up and back over its rump, shin folded down to the ground under it.
+  const knee = fiddle ? { x: 3.5, y: 7.5 } : { x: 4, y: 10 };
+  const foot = fiddle ? { x: 2, y: 15 } : { x: 8.5, y: 20 };
+  const thigh = new Sketch(size, size);
+  for (let i = 0; i <= 8; i++) {
+    const f = i / 8;
+    const x = 11 + (knee.x - 11) * f;
+    const y = 16.5 + (knee.y - 16.5) * f;
+    thigh.ellipse(x * k, y * k, (1.9 - f * 0.9) * k, (1.9 - f * 0.9) * k, 'l');
+  }
+  s.stamp(thigh, 0, 0);
+  s.line(at(knee.x), at(knee.y), at(foot.x), at(foot.y), 'l');
+  for (const f of [0.35, 0.65]) {
+    s.set(at(11 + (knee.x - 11) * f), at(16.5 + (knee.y - 16.5) * f), 'L');
+  }
+  s.outline((key) => (key === 'a' ? null : 'o'));
+  if (long) {
+    s.line(at(20), at(12.5), at(23), at(8), 'a');
+  } else {
+    s.line(at(20), at(12.5), at(23), at(6), 'a');
+    s.line(at(19), at(12.5), at(21), at(5), 'a').line(at(21), at(5), at(23), at(2), 'a');
+  }
+  if (size === 24) s.rect(19, 13, 2, 2, 'e').set(19, 13, 'E');
+  else s.set(at(19.5), at(14), 'e');
+  return s.toSource();
 }
 
 /**
- * A twig knight: a stick insect side on (`b`, its joints `B`), long and thin, with a little
- * acorn-cap helmet (`h`) and a red plume (`p`). In the second frame it salutes with a front leg.
+ * A twig knight (1.3's F3): a stick insect side on, long and thin (`b`, its joints `B`), its six
+ * legs bent up at the knee and down to the ground as a stick insect's are, so it reads as an
+ * insect and not a little table; a small head with an eye, an acorn-cap helmet (`h`) with a red
+ * plume (`p`), and in the second frame a front leg lifted to its helmet in a salute.
  */
 function twigKnight(size: Size, salute: boolean): SpriteSource {
   const { k, at } = scale(size);
   const s = new Sketch(size, size);
-  for (const [x0, x1] of [
-    [7, 5],
-    [11, 11],
-    [15, 18],
-  ] as const) {
-    s.line(at(x0), at(14), at(x1), at(19), 'B');
-  }
-  for (const [x0, x1] of [
-    [6, 3],
-    [10, 8],
-  ] as const) {
-    s.line(at(x0), at(14), at(x1), at(20), 'b');
-  }
-  if (salute) s.line(at(16), at(13), at(17), at(7), 'b');
-  else s.line(at(16), at(14), at(19), at(20), 'b');
-  s.rect(at(2), at(13), at(16), Math.max(1, at(1.5)), 'b');
-  s.set(at(1), at(12), 'b');
+  s.rect(at(2), at(13), at(16), 1, 'b');
+  for (const x of [6, 10, 14]) s.set(at(x), at(13), 'B');
   s.ellipse(19.5 * k, 13.5 * k, 2.2 * k, 1.8 * k, 'b');
-  s.line(at(21), at(14), at(23), at(18), 'a');
-  s.rect(at(18), at(11), at(4), Math.max(1, at(1.5)), 'h');
-  s.line(at(19), at(10), at(18), at(7), 'p');
-  if (size === 24) s.set(17, 7, 'p');
-  s.set(at(21), at(13), 'e');
-  return outlined(s, 'a');
+  s.ellipse(19.5 * k, 11.5 * k, 2.4 * k, 1.3 * k, 'h');
+  s.line(at(19), at(10), at(17.5), at(6.5), 'p');
+  if (size === 24) s.set(16, 6, 'p').set(17, 5, 'p');
+  s.outline((key) => (key === 'a' ? null : 'o'));
+  // Its legs, thin as twigs (never outlined, or they'd stand like fence posts), behind its body:
+  // each up from its hip to a knee above its back and splayed out and down to the ground, the
+  // front pair reaching forward and the back pair back.
+  const legs = new Sketch(size, size);
+  const LEGS: readonly (readonly [number, number, number, number, number])[] = [
+    [5, 3, 8, 0, 20],
+    [8.5, 6.5, 8.5, 3.5, 20],
+    [12.5, 14.5, 8.5, 17.5, 20],
+    [16, 19, 8, 23, 20],
+  ];
+  for (const [i, [hx, kx, ky, fx, fy]] of LEGS.entries()) {
+    const [x1, y1, x2, y2] =
+      salute && i === LEGS.length - 1 ? [20, 9, 21.5, 6.5] : [kx, ky, fx, fy];
+    legs.line(at(hx), at(13), at(x1), at(y1), 'o').line(at(x1), at(y1), at(x2), at(y2), 'o');
+  }
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) if (legs.filled(x, y) && !s.filled(x, y)) s.set(x, y, 'o');
+  }
+  s.line(at(21), at(12.5), at(23.5), at(9), 'a');
+  s.set(at(20.5), at(13.5), 'e');
+  return s.toSource();
 }
 
 /**
@@ -442,12 +533,14 @@ export const CRAWLY_ART = {
     e: C.ink,
   }),
   glowworm: art(
-    (size, second) => worm(size, second, 'glow'),
+    glowworm,
     {
       '.': null,
       o: C.mossDark,
+      d: C.mossDark,
       b: C.moss,
       B: C.mossLight,
+      h: C.moss,
       t: C.fireflyGlow,
       T: mix(C.fireflyGlow, C.white, 0.4),
       e: C.ink,
@@ -458,11 +551,12 @@ export const CRAWLY_ART = {
   woollyBear: art(woollyBear, {
     '.': null,
     o: C.ink,
-    k: C.inkFabric,
-    K: C.inkFabricShade,
-    F: C.iron,
-    r: C.pumpkin,
-    R: C.pumpkinShade,
+    d: C.ink,
+    k: C.iron,
+    K: C.inkFabric,
+    F: C.stone,
+    r: C.pumpkinLight,
+    R: C.pumpkin,
     f: C.pumpkinLight,
     h: C.inkFabric,
     e: C.candle,

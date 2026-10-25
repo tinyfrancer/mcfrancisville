@@ -16,6 +16,7 @@ import {
   mothShape,
   newt,
   owlEyed,
+  skulled,
   roundFishShape,
   striped,
   tombstoned,
@@ -86,28 +87,6 @@ const ORB_PAIR_TURNED: SpriteSource = {
     '................',
     '................',
     '................',
-    '................',
-    '................',
-  ],
-};
-
-/** A beetle from above. `W`/`w` shell, `s` its pattern, `h` head. */
-const BEETLE: SpriteSource = {
-  rows: [
-    '................',
-    '................',
-    '................',
-    '.....o....o.....',
-    '......o..o......',
-    '.....oooooo.....',
-    '...o.ohhhho.o...',
-    '....oooooooo....',
-    '..o.oWwsswwo.o..',
-    '...owWwsswwwo...',
-    '..o.owwsswwo.o..',
-    '....owwsswwo....',
-    '.....owwwwo.....',
-    '......oooo......',
     '................',
     '................',
   ],
@@ -184,15 +163,22 @@ function orbPairWorld(turned: boolean): SpriteSource {
   return s.toSource();
 }
 
-/** A beetle from above: its head, its shell split down the middle, and little legs. */
-function beetleWorld(): SpriteSource {
-  const s = new Sketch(WORLD, WORLD);
-  for (const y of [11, 14, 17]) s.rect(4, y, 16, 1, 'o');
-  s.ellipse(12, 14, 6, 7, 'W');
-  s.ellipse(12, 6.5, 3.5, 2.5, 'h');
-  s.rect(12, 8, 1, 12, 'w').rect(11, 8, 1, 12, 'w');
-  s.ellipse(9, 12, 1.5, 1.5, 's').ellipse(15, 16, 1.5, 1.5, 's');
-  s.line(10, 4, 8, 2, 'o').line(13, 4, 15, 2, 'o');
+/**
+ * A beetle from above, 16 or 24 across (the 16 drawn from the 24's numbers since 1.3's F3): its
+ * head, its shell split down the middle, and little legs.
+ */
+function beetleShape(size: 16 | 24): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  for (const y of [11, 14, 17]) s.rect(at(4), at(y), size - 2 * at(4), 1, 'o');
+  s.ellipse(12 * k, 14 * k, 6 * k, 7 * k, 'W');
+  s.ellipse(12 * k, 6.5 * k, 3.5 * k, 2.5 * k, 'h');
+  s.rect(at(11), at(8), size === 24 ? 2 : 1, at(12), 'w');
+  if (size === 16) s.rect(8, at(8), 1, at(12), 'w');
+  s.ellipse(9 * k, 12 * k, 1.5 * k, 1.5 * k, 's').ellipse(15 * k, 16 * k, 1.5 * k, 1.5 * k, 's');
+  s.line(at(10), at(4), at(8), at(2), 'o');
+  s.line(size - 1 - at(10), at(4), size - 1 - at(8), at(2), 'o');
   return outlined(s, 'o');
 }
 
@@ -408,7 +394,8 @@ const FROG_WORLD = frogFace();
 const ORB_WORLD = orbShape(24, false);
 const ORB_SMALL = [orbShape(16, false), orbShape(16, true)] as const;
 const ORB_WORLDS = [ORB_WORLD, orbShape(24, true)] as const;
-const BEETLE_WORLD = beetleWorld();
+const BEETLE_WORLD = beetleShape(24);
+const BEETLE = beetleShape(16);
 
 export interface CritterArt {
   /**
@@ -776,7 +763,11 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     palette: PAIR,
     glow: { g: C.orbGreen, c: C.orbGreenLight, h: C.orbBlue, d: C.orbBlueLight },
   },
-  skullBeetle: beetle(C.stoneDark, C.iron, C.bone, C.ink),
+  skullBeetle: {
+    ...beetle(C.stoneDark, C.iron, C.bone, C.ink),
+    frames: [skulled(BEETLE), skulled(BEETLE)],
+    world: [skulled(BEETLE_WORLD), skulled(BEETLE_WORLD)],
+  },
   jewelBeetle: beetle(C.sky, C.blueFabric, C.white, C.navy),
   firefly: {
     frames: [FIREFLY, FIREFLY],
