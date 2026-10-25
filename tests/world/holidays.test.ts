@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { isFish } from '../../src/data/critters';
 import { DECOR } from '../../src/data/holidays';
 import { HOLIDAY_LINES } from '../../src/data/holidayLines';
 import { fill } from '../../src/systems/friendship';
@@ -51,7 +52,7 @@ describe('the decorations', () => {
 });
 
 describe('the pond in winter', () => {
-  it('freezes over for skating, with nothing to fish in it, and thaws again', () => {
+  it('freezes over for skating, only fish under the ice, and thaws again', () => {
     const h = harness();
     const pond = { tx: 22, ty: 42 };
     h.clock.set(new Date(2026, 11, 20, 12));
@@ -63,8 +64,9 @@ describe('the pond in winter', () => {
     expect(h.world.canWalk(25, 41)).toBe(false);
     for (const hour of [9, 13, 20]) {
       h.clock.set(new Date(2026, 11, 20, hour));
+      // The fish swim on under it, to fish for through a hole (1.4's G3); nothing else is out on it.
       for (const c of h.world.collecting.critters('town')) {
-        expect(h.world.townZone.isIce(c.tx, c.ty), c.critter).toBe(false);
+        if (!isFish(c.critter)) expect(h.world.townZone.isIce(c.tx, c.ty), c.critter).toBe(false);
       }
     }
     walkTo(h, pond.tx, pond.ty);

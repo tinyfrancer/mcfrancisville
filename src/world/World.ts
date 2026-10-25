@@ -136,7 +136,9 @@ export class World extends WorldParts {
     const visit: Visit = isFish(critter.critter)
       ? { kind: 'fish', fish: critter.key }
       : { kind: 'critter', critter: critter.key };
-    if (reach(here, critter) <= 1) return this.walkTo([here], visit);
+    // Skating right over a fish under the ice (1.4's G3), she steps off it to drill her hole.
+    const near = visit.kind === 'fish' ? reach(here, critter) === 1 : reach(here, critter) <= 1;
+    if (near) return this.walkTo([here], visit);
     return this.walkTo(this.around(critter), visit);
   }
 

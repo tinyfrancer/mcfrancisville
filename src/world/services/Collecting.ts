@@ -213,8 +213,12 @@ export class Collecting {
       if (!startles(c.critter, c, { her, walked })) continue;
       const taken = new Set(out.map((o) => `${o.tx},${o.ty}`));
       const zone = this.zone(place);
+      // A shy one hops off over the ground, never out onto the frozen pond.
       const free = (t: Tile) =>
-        this.canBe(place, t) && zone.canWalk(t.tx, t.ty) && !taken.has(`${t.tx},${t.ty}`);
+        this.canBe(place, t) &&
+        zone.canWalk(t.tx, t.ty) &&
+        !zone.isIce(t.tx, t.ty) &&
+        !taken.has(`${t.tx},${t.ty}`);
       const to = driftTo(c, her, free);
       if (!to) continue;
       this.fluttered.set(c.key, {
@@ -323,12 +327,13 @@ export class Collecting {
 
   /**
    * Where a critter may be today: open ground nothing is standing on, or water where it can be
-   * reached from open ground.
+   * reached from open ground. The pond frozen over is still the fish's water (1.4's G3): they
+   * swim on under the ice, and she fishes for them through a hole. Only fish are dealt onto
+   * water, so nothing else is ever under it.
    */
   private canBe(place: MapZoneId, t: Tile): boolean {
     const zone = this.zone(place);
-    // Nothing swims under the pond's ice in winter (phase U).
-    if (zone.isIce(t.tx, t.ty)) return false;
+    if (zone.isIce(t.tx, t.ty)) return true;
     if (zone.canWalk(t.tx, t.ty)) return true;
     if (walkable(zone.map, t.tx, t.ty)) return false;
     for (let y = t.ty - 1; y <= t.ty + 1; y++) {

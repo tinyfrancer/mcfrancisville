@@ -132,7 +132,10 @@ export class MapZone implements Zone {
     });
   }
 
-  /** Whether a tile is the pond's water, frozen over today (phase U): walked on, not fished. */
+  /**
+   * Whether a tile is the pond's water, frozen over today (phase U): walked on, and fished through
+   * a hole since 1.4's G3.
+   */
   isIce(tx: number, ty: number): boolean {
     if (this.water.size === 0 || tx < 0 || tx >= this.map.width) return false;
     return this.water.has(ty * this.map.width + tx) && this.decorations!.frozen;

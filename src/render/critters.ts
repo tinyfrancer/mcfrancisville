@@ -22,6 +22,9 @@ const CRITTER_LIGHT = { radius: 22, strength: 0.6 };
  */
 const SHADOW_ALPHA = 0.6;
 
+/** A fish's shadow under the pond's ice (1.4's G3): dimmer, as if seen through it. */
+const UNDER_ICE_ALPHA = 0.3;
+
 /** A fish's shadow: its shape in iron, with a rim the colour of the light on the water. */
 function shadowPalette(id: CritterId): Palette {
   return { ...silhouetteOf(id, PALETTE.iron), [RIM]: PALETTE.waterLight };
@@ -92,8 +95,11 @@ function settled(
   return { x: x + potter, y: y + 1 + hop, frame: wiggle, flip: phase % 2 === 0 };
 }
 
-/** A critter where it is this frame, with its little shadow, and what of it glows. */
-export function critterDrawable(c: Critter, nowMs: number): Drawable {
+/**
+ * A critter where it is this frame, with its little shadow, and what of it glows. A fish `underIce`
+ * is drawn dimmer (1.4's G3).
+ */
+export function critterDrawable(c: Critter, nowMs: number, underIce = false): Drawable {
   const art = critterArt(c.critter, c.shiny);
   const { x, y, frame, flip } = pose(c, nowMs);
   const row = CRITTERS[c.critter];
@@ -113,7 +119,7 @@ export function critterDrawable(c: Critter, nowMs: number): Drawable {
     sprite,
     x: small ? x + 4 : x,
     y: small ? y + 4 : y,
-    ...(fish ? { alpha: SHADOW_ALPHA } : {}),
+    ...(fish ? { alpha: underIce ? UNDER_ICE_ALPHA : SHADOW_ALPHA } : {}),
   };
   if (!fish) {
     const aloft = flies(c.critter);

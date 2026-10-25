@@ -122,7 +122,8 @@ export function crittersPass(world: World, zone: MapZone): Pass {
   let stood: Drawable[] = [];
   return {
     name: 'critters',
-    stand: ({ nowMs }) => (stood = critters().map((c) => critterDrawable(c, nowMs))),
+    stand: ({ nowMs }) =>
+      (stood = critters().map((c) => critterDrawable(c, nowMs, zone.isIce(c.tx, c.ty)))),
     wanted: () => stood,
     over(ctx, { cam }) {
       drawNet(ctx, world, cam);
