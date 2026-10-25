@@ -420,6 +420,11 @@ export type CritterId =
   | 'snowMoth'
   | 'frostBeetle'
   | 'snowglobeFish'
+  // Under the winter ice (1.4's G3).
+  | 'icicleSmelt'
+  | 'bobblePerch'
+  | 'auroraTrout'
+  | 'coldMoonSturgeon'
   // A critter for each big holiday but Halloween, out on its days and round each full moon (V1's R5).
   | 'lovebug'
   | 'luckyFrog'

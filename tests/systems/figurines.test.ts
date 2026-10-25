@@ -34,8 +34,8 @@ describe("Gourdon's figurines (0.3's C3)", () => {
     expect(FURNITURE.lunaMothShinyFigurine.name).toBe('Shiny luna moth figurine');
     expect(carvedFrom('lunaMothShinyFigurine')).toBe('lunaMothShiny');
     expect(carvedKindOf('lunaMothShiny')).toBe('critter');
-    // Nine squishies since the fairground's own (V1's R6b).
-    expect(FIGURINE_IDS).toHaveLength(70 + 9 + 8 + 12);
+    // Nine squishies since the fairground's own (V1's R6b), 74 critters since 1.4's G3.
+    expect(FIGURINE_IDS).toHaveLength(74 + 9 + 8 + 12);
     for (const thing of CARVABLE) {
       const id = figurineOf(thing);
       expect(FURNITURE[id].name, id).toBe(`${ITEMS[thing].name} figurine`);

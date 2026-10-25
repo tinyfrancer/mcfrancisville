@@ -702,6 +702,77 @@ export const CRITTERS: Record<CritterId, CritterRow> = {
       'A little lake jellyfish, no bigger than a teacup, that glows soft pink and lilac and drifts ' +
       'up under the lanterns late at night. It pulses, gently, like a heartbeat. It does not sting.',
   },
+  // Under the winter ice (1.4's G3, decision 372): the pond's and the lake's, December to
+  // February, fished through a hole while the pond is frozen over and from the ice hut all winter.
+  icicleSmelt: {
+    name: 'Icicle smelt',
+    family: 'fish',
+    from: 0,
+    to: 24,
+    habitat: 'pond',
+    where: ['town', 'lanternShore'],
+    shadow: 1,
+    rarity: 'common',
+    season: [12, 2],
+    wary: 0,
+    value: 30,
+    description:
+      'A slip of a fish, thin as an icicle and twice as sparkly. They go round and round under the ' +
+      'ice in little shoals, keeping each other company.',
+  },
+  bobblePerch: {
+    name: 'Bobble perch',
+    family: 'fish',
+    plural: 'bobble perch',
+    from: 7,
+    to: 19,
+    habitat: 'pond',
+    where: ['town', 'lanternShore'],
+    shadow: 2,
+    rarity: 'uncommon',
+    season: [12, 2],
+    wary: 0,
+    value: 75,
+    description:
+      'A plump stripy perch with a round white tuft on its back fin, like the bobble on a hat. It ' +
+      'wears it all winter and will not hear a word against it.',
+  },
+  auroraTrout: {
+    name: 'Aurora trout',
+    family: 'fish',
+    plural: 'aurora trout',
+    from: 17,
+    to: 5,
+    habitat: 'pond',
+    where: ['town', 'lanternShore'],
+    shadow: 2,
+    rarity: 'rare',
+    season: [12, 2],
+    wary: 1,
+    value: 240,
+    description:
+      'Its sides shimmer green and violet, like the northern lights came down for a swim. It only ' +
+      'bites after dark, when there is someone to show off to.',
+  },
+  coldMoonSturgeon: {
+    name: 'Cold moon sturgeon',
+    family: 'fish',
+    plural: 'cold moon sturgeon',
+    from: 18,
+    to: 5,
+    habitat: 'pond',
+    where: ['town', 'lanternShore'],
+    shadow: 3,
+    rarity: 'legendary',
+    season: [12, 2],
+    moon: true,
+    wary: 1,
+    value: 520,
+    description:
+      'Ancient, whiskery and frosted pale, with a row of little bony plates down its back like a ' +
+      'castle wall. It comes up under a winter full moon, looks at who is fishing, and now and then ' +
+      'approves.',
+  },
   // 0.3's C2: the creepy-crawlies, and more.
   ...CRAWLIES,
   ...MORE_CRITTERS,

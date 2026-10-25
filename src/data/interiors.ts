@@ -505,6 +505,8 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'museumCase', tx: 11, ty: 8, shows: 'frog' },
       { id: 'museumCase', tx: 14, ty: 8, shows: 'beetle' },
       { id: 'museumCase', tx: 17, ty: 8, shows: 'fish' },
+      // The tenth (1.4's G3): the fish outgrew theirs when the winter fish came, beside the fossils.
+      { id: 'museumCase', tx: 23, ty: 3, shows: 'fish' },
       // The eighth, the creepy-crawlies' (0.3's C2), below the fossils'.
       { id: 'museumCase', tx: 20, ty: 8, shows: 'crawly' },
       // The ninth (V1's R5): the crawlies outgrew theirs when the jumping spiders came.

@@ -155,7 +155,9 @@ export function isVisitDay(day: string): boolean {
  */
 export function isVisiting(id: CritterId, day: string, weather: Weather): boolean {
   const row = CRITTERS[id];
-  if (row.moon) return false;
+  // One that waits on the full moon and keeps a season (1.4's G3's sturgeon) visits on every full
+  // moon out of it, so it's never more than a month away either.
+  if (row.moon) return !inSeason(id, day) && likesWeather(id, weather) && isFullMoon(day);
   if (inSeason(id, day) && likesWeather(id, weather)) return false;
   return isVisitDay(day);
 }

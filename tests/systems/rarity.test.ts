@@ -24,6 +24,9 @@ import type { CritterId, FossilId, MapZoneId } from '../../src/types/ids';
  * most of a year. Done when a simulated year of play at an hour a day fills it in about ten months;
  * since visitors come every fortnight (1.3's F1, decision 360) it is seven and a half to ten, nine
  * on average, the last to come being the moon-bound legendaries, who still wait for a full moon.
+ * Since 1.4's G3's winter fish it is 7.6 to 11.4, 9.1 on average: starting in January, the cold
+ * moon sturgeon and the winter fish draw her to the pond and the lake on the winter's full moons,
+ * and the ghost bat at the castle, out on those nights alone, is the last she meets.
  */
 
 const PLACES = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined).map((id) => {
@@ -78,7 +81,7 @@ describe('filling the Curiosity Cabinet', () => {
       ).toEqual([]);
       const last = Math.max(...firsts.values());
       expect(last / MONTH, start).toBeGreaterThan(7);
-      expect(last / MONTH, start).toBeLessThan(11);
+      expect(last / MONTH, start).toBeLessThan(12);
     }
   });
 

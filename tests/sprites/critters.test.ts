@@ -41,6 +41,11 @@ const REDRAWN: readonly CritterId[] = [
   'snowglobeFish',
   'ghostPike',
   'lanternFish',
+  // Under the winter ice (1.4's G3), drawn the same way.
+  'icicleSmelt',
+  'bobblePerch',
+  'auroraTrout',
+  'coldMoonSturgeon',
   'greenOrb',
   'blueOrb',
   'wisp',
