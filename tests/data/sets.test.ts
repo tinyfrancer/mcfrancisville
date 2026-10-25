@@ -5,10 +5,12 @@ import { isSmall, isSurface, surfaceTop } from '../../src/data/tabletop';
 import { bookPages } from '../../src/systems/workshop';
 import { FURNITURE_ART } from '../../src/sprites/furniture';
 import { spriteSize } from '../../src/sprites/sprite';
+import { tunesOf } from '../../src/data/instruments';
+import { WINDOW_WALLPAPERS } from '../../src/data/wallsAndFloors';
 
 describe("the furniture sets (0.3's S3 and S4)", () => {
-  it('has eight sets of six to eight pieces, every piece in one set only', () => {
-    expect(Object.keys(SUITES)).toHaveLength(8);
+  it('has ten sets of six to eight pieces, every piece in one set only', () => {
+    expect(Object.keys(SUITES)).toHaveLength(10);
     const all = Object.values(SUITES).flatMap((s) => s.pieces);
     for (const suite of Object.values(SUITES)) {
       expect(suite.pieces.length, suite.name).toBeGreaterThanOrEqual(6);
@@ -55,6 +57,23 @@ describe("the furniture sets (0.3's S3 and S4)", () => {
   it('gives the music corner, the garden room and the lounge somewhere to sit', () => {
     for (const id of ['wickerChair', 'coffinSofa'] as const)
       expect(FURNITURE[id].seat, id).toBeDefined();
+  });
+
+  it("gives the winter sets (1.4's G2) a seat, small things, a fire, lights and a telescope that plays", () => {
+    expect(SUITES.cosyCabin.pieces).toHaveLength(7);
+    expect(SUITES.midnightObservatory.pieces).toHaveLength(6);
+    for (const id of ['rockingChair', 'velvetChaise'] as const) {
+      expect(FURNITURE[id].seat, id).toBeDefined();
+    }
+    for (const id of ['mugTree', 'lunarGlobe', 'candleCluster'] as const) {
+      expect(isSmall(id), id).toBe(true);
+    }
+    expect(FURNITURE_ART.logStove.frames?.period).toBeGreaterThan(0);
+    expect(FURNITURE_ART.candleCluster.frames?.glows).toHaveLength(2);
+    expect(FURNITURE_ART.twinkleLights.frames?.glows?.length).toBeGreaterThan(1);
+    expect(FURNITURE.brassTelescope.plays).toBe('telescope');
+    expect(tunesOf('telescope')).toEqual(['starlightLullaby']);
+    expect(WINDOW_WALLPAPERS.starWindow.price).toBeGreaterThan(0);
   });
 
   it("lines the kitchen's worktops up: the counter's, the sink's and the stove's", () => {

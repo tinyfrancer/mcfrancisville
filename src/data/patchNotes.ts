@@ -200,6 +200,18 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. I shall keep the typewriter oiled, just in case. The W still sticks. I have grown rather fond of it.',
   },
+  {
+    version: '1.4',
+    lines: [
+      'Cobweb Corner has winter woollies from November: duffel coats, mittens, bobble hats, ' +
+        'snow boots, tartan pyjamas and, I am told, a bat onesie.',
+      'Two new sets for long evenings: a Cosy Cabin with a crackling log stove, and a Midnight ' +
+        'Observatory whose telescope hums to the stars.',
+      'A whole snug look comes in each week of the winter, bobble to boots. I have bought three ' +
+        'scarves already. I regret nothing.',
+    ],
+    ps: 'P.S. The typewriter keys are cold in the mornings now. I type in mittens. Please excuse the typos.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

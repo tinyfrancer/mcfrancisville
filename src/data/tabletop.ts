@@ -37,6 +37,10 @@ export const SURFACES: Partial<Record<FurnitureId, number>> = {
  * plants and curios, and the new trinkets. Each is one tile, and goes on the floor as well.
  */
 export const SMALL: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
+  // The winter sets (1.4's G2): a mug tree, a little moon and three candles.
+  'mugTree',
+  'lunarGlobe',
+  'candleCluster',
   // Lamps and lanterns.
   'lunaMothLamp',
   'moonflowerLamp',

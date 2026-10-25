@@ -21,6 +21,7 @@ import type {
   FurnitureId,
   ItemId,
   MapZoneId,
+  FabricId,
   OutfitId,
   PetId,
   Pose,
@@ -906,6 +907,50 @@ export function catalogue(): Entry[] {
         ),
       ),
   });
+  // The winter wardrobe (1.4's G2), worn as whole looks: a strip each, walking every way, posed,
+  // sat, and every action facing us and side on.
+  // A piece is `id` or `id:fabric`.
+  const winterLooks: [string, string[], Partial<Look>][] = [
+    ['snowDay', ['duffelCoat', 'snowflakeHat', 'mittens', 'snowBoots', 'longScarf'], {}],
+    ['puffer', ['pufferJacket', 'earmuffs', 'cableTights', 'skaterSkirt', 'snowBoots'], {}],
+    ['jumper', ['fairIsleJumper', 'jeans', 'snowBoots:navy', 'mittens:blue'], {}],
+    [
+      'cardigan',
+      ['fairIsleJumper:navy', 'chunkyCardigan', 'longScarf:blue', 'leggings'],
+      { hairStyle: 'long' },
+    ],
+    ['pyjamas', ['pyjamaTop', 'pyjamaBottoms', 'fluffySlippers:lavender'], {}],
+    ['nightsIn', ['pyjamaTop:navy', 'pyjamaBottoms:navy', 'dressingGown', 'fluffySlippers'], {}],
+    ['bat', ['batOnesie', 'batHood', 'fluffySlippers:lavender'], { hairStyle: 'bunches' }],
+  ];
+  for (const [name, ids, look] of winterLooks) {
+    const bare = takeOff(DEFAULT_LOOK, 'necklace');
+    const on = ids.reduce(
+      (was, piece) => {
+        const [id, fabric] = piece.split(':') as [OutfitId, FabricId | undefined];
+        return wear(was, id, everything, fabric);
+      },
+      { ...bare, ...look },
+    );
+    entries.push({
+      name: `doll:winter:${name}`,
+      draw: () =>
+        beside([
+          ...FACINGS.flatMap((facing) =>
+            [0, 1, 2].map((frame) =>
+              rasterizeLayers(dollLayers(on, facing, frame), { flipX: facing === 'left' }),
+            ),
+          ),
+          ...POSES.map((pose) => rasterizeLayers(dollLayers(on, 'down', 0, pose))),
+          rasterizeLayers(dollLayers(on, 'down', 0, 'sit')),
+          ...ACTION_POSES.flatMap((pose) =>
+            (['down', 'right'] as const).map((facing) =>
+              rasterizeLayers(dollLayers(on, facing, ACTION_FRAMES[pose] - 1, pose)),
+            ),
+          ),
+        ]),
+    });
+  }
   return entries;
 }
 

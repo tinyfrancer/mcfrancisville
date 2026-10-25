@@ -45,6 +45,29 @@ import { FEELINGS } from '../../src/types/mood';
 const FACINGS: Facing[] = ['down', 'up', 'left', 'right'];
 const VIEWS: View[] = ['front', 'back', 'side'];
 const EVERYTHING = Object.keys(OUTFITS) as OutfitId[];
+/**
+ * The winter wardrobe (1.4's G2), held apart: every hash taken before it came is over the pieces
+ * there were then, so new pieces add hashes of their own and never move an old one.
+ */
+const WINTER: readonly OutfitId[] = [
+  'duffelCoat',
+  'pufferJacket',
+  'longScarf',
+  'mittens',
+  'snowflakeHat',
+  'earmuffs',
+  'cableTights',
+  'snowBoots',
+  'fairIsleJumper',
+  'chunkyCardigan',
+  'pyjamaTop',
+  'pyjamaBottoms',
+  'dressingGown',
+  'batOnesie',
+  'batHood',
+  'fluffySlippers',
+];
+const BEFORE = EVERYTHING.filter((id) => !WINTER.includes(id));
 const BRACELETS = Object.keys(BRACELET_BEADS) as BraceletId[];
 
 const hash = (thing: unknown) =>
@@ -114,7 +137,7 @@ describe("her looks, held as they were (1.1's A5a)", () => {
       const views: View[] = view === 'side' ? ['side'] : ['front', 'back'];
       const facings: Facing[] = view === 'side' ? ['left', 'right'] : ['down', 'up'];
       held[name] = hash([
-        views.map((v) => EVERYTHING.map((id) => pieceRows({ id, fabric: 'ink' }, v, body))),
+        views.map((v) => BEFORE.map((id) => pieceRows({ id, fabric: 'ink' }, v, body))),
         facings.map((f) => idsOf(HAIR_STYLES).map((s) => hairRows(HAIR[s], f, body))),
         facings.map((f) =>
           idsOf(TATTOOS).map((t) => [
@@ -130,7 +153,7 @@ describe("her looks, held as they were (1.1's A5a)", () => {
 
   it('draws every piece in every fabric, and in every pose and action, as it did', () => {
     const held: Record<string, string> = {};
-    for (const id of EVERYTHING) {
+    for (const id of BEFORE) {
       const [first, ...rest] = OUTFITS[id].fabrics;
       held[id] = hash([
         everyWay(wear(DEFAULT_LOOK, id, EVERYTHING, first), true),
@@ -166,15 +189,13 @@ describe("her looks, held as they were (1.1's A5a)", () => {
 
   it('dresses her in pieces together as it did: shoes under hems, backs over hair', () => {
     const held: Record<string, string> = {};
-    const hems = EVERYTHING.filter((id) => hangsOver(OUTFITS[id].cut, 'front'));
-    const shoes = EVERYTHING.filter((id) => OUTFITS[id].slot === 'shoes');
+    const hems = BEFORE.filter((id) => hangsOver(OUTFITS[id].cut, 'front'));
+    const shoes = BEFORE.filter((id) => OUTFITS[id].slot === 'shoes');
     for (const hem of hems) {
       const on = wear(DEFAULT_LOOK, hem, EVERYTHING);
       held[`hem:${hem}`] = hash(shoes.map((s) => everyWay(wear(on, s, EVERYTHING), true)));
     }
-    const backs = EVERYTHING.filter((id) =>
-      ['cape', 'batWings', 'wings'].includes(OUTFITS[id].cut),
-    );
+    const backs = BEFORE.filter((id) => ['cape', 'batWings', 'wings'].includes(OUTFITS[id].cut));
     for (const back of backs) {
       held[`back:${back}`] = hash(
         idsOf(HAIR_STYLES).map((hairStyle) =>
@@ -182,11 +203,60 @@ describe("her looks, held as they were (1.1's A5a)", () => {
         ),
       );
     }
-    const outers = EVERYTHING.filter((id) => OUTFITS[id].slot === 'outer');
-    const tops = EVERYTHING.filter((id) => OUTFITS[id].slot === 'top');
+    const outers = BEFORE.filter((id) => OUTFITS[id].slot === 'outer');
+    const tops = BEFORE.filter((id) => OUTFITS[id].slot === 'top');
     for (const outer of outers) {
       held[`outer:${outer}`] = hash(
         tops.map((top) =>
+          everyWay(wear(wear(DEFAULT_LOOK, top, EVERYTHING), outer, EVERYTHING), false),
+        ),
+      );
+    }
+    expect(held).toMatchSnapshot();
+  }, 120_000);
+});
+
+describe("the winter wardrobe, held as it was drawn (1.4's G2)", () => {
+  it('paints every winter piece onto each of her bodies, every way', () => {
+    const held: Record<string, string> = {};
+    for (const [name, body] of bodies()) {
+      const views: View[] =
+        name.startsWith('side') || name.includes(':side:') ? ['side'] : ['front', 'back'];
+      held[name] = hash(
+        views.map((v) => WINTER.map((id) => pieceRows({ id, fabric: 'ink' }, v, body))),
+      );
+    }
+    expect(held).toMatchSnapshot();
+  }, 60_000);
+
+  it('draws every winter piece in every fabric, pose and action', () => {
+    const held: Record<string, string> = {};
+    for (const id of WINTER) {
+      const [first, ...rest] = OUTFITS[id].fabrics;
+      held[id] = hash([
+        everyWay(wear(DEFAULT_LOOK, id, EVERYTHING, first), true),
+        ...rest.map((fabric) => everyWay(wear(DEFAULT_LOOK, id, EVERYTHING, fabric), false)),
+      ]);
+    }
+    expect(held).toMatchSnapshot();
+  }, 120_000);
+
+  it('dresses her in winter pieces with everything else: shoes under hems, coats over tops', () => {
+    const held: Record<string, string> = {};
+    const isNew = (...ids: OutfitId[]) => ids.some((id) => WINTER.includes(id));
+    const hems = EVERYTHING.filter((id) => hangsOver(OUTFITS[id].cut, 'front'));
+    const shoes = EVERYTHING.filter((id) => OUTFITS[id].slot === 'shoes');
+    for (const hem of hems) {
+      const on = wear(DEFAULT_LOOK, hem, EVERYTHING);
+      const pairs = shoes.filter((s) => isNew(hem, s));
+      held[`hem:${hem}`] = hash(pairs.map((s) => everyWay(wear(on, s, EVERYTHING), true)));
+    }
+    const outers = EVERYTHING.filter((id) => OUTFITS[id].slot === 'outer');
+    const tops = EVERYTHING.filter((id) => OUTFITS[id].slot === 'top');
+    for (const outer of outers) {
+      const under = tops.filter((top) => isNew(outer, top));
+      held[`outer:${outer}`] = hash(
+        under.map((top) =>
           everyWay(wear(wear(DEFAULT_LOOK, top, EVERYTHING), outer, EVERYTHING), false),
         ),
       );

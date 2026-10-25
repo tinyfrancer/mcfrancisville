@@ -7,12 +7,15 @@ import {
   clearMat,
   closeSheets,
   framed,
+  goInto,
+  goOut,
   openOn,
   page,
   playerTile,
   reloadGame,
   stepUntil,
   tapElement,
+  tapFixture,
   tapProp,
   tapTile,
   walkTo,
@@ -692,6 +695,128 @@ async function windows() {
   await page.evaluate(() => window.view.saveNow());
 }
 
+/**
+ * 1.4's G2, on a December evening: a winter woolly bought at Cobweb Corner, then the cabin's rocking
+ * chair and stove and the observatory's telescope put out at home by taps, sat in and played.
+ */
+async function winterSets() {
+  await openOn('2026-12-14&weather=clear', 19);
+  await page.evaluate(() => window.world.wallet.earn(5000));
+  if (await page.evaluate(() => window.world.scene !== 'town')) await goOut();
+  if (await goInto('shopHouse', 'cobwebCorner')) {
+    await tapFixture('shopCounter');
+    const woollies = '.hud-shop-sheet section:has(h3:text-is("Winter woollies"))';
+    const snug = `.hud-shop-sheet section:has(h3:text-is("This week's snug look"))`;
+    const two = await page.locator(`${woollies} .hud-price`).count();
+    const look = await page.locator(`${snug} .hud-price`).count();
+    check(
+      'in December Cobweb Corner has winter woollies, and a whole snug look for the week',
+      two === 2 && look >= 3,
+      `${two} ${look}`,
+    );
+    const owned = () => page.evaluate(() => window.world.wardrobe.owned.length);
+    const before = await owned();
+    const label =
+      (await page.locator(`${woollies} .hud-price >> nth=0`).getAttribute('aria-label')) ?? '';
+    await page.locator(woollies).scrollIntoViewIfNeeded();
+    await page.screenshot({ path: '.smoke/shop-woollies.png' });
+    await tapElement(`${woollies} .hud-price >> nth=0`);
+    check('a winter woolly is bought into her closet', (await owned()) === before + 1, label);
+    await tapElement('.hud-shop-sheet .hud-primary');
+    await goOut();
+  }
+
+  await tapProp('homeHouse');
+  if (!(await stepUntil(() => window.world.scene === 'home', 'she goes home with it'))) return;
+  const pieces = /** @type {const} */ ([
+    ['rockingChair', 'Rocking chair'],
+    ['logStove', 'Log stove'],
+    ['brassTelescope', 'Brass telescope'],
+  ]);
+  await page.evaluate((ids) => ids.forEach(([id]) => window.world.home.store(id)), pieces);
+  /** A clear tile in the middle of her room, with clear tiles in front of it to walk up to. */
+  const freeTile = () =>
+    page.evaluate(() => {
+      const rooms = window.world.home.rooms;
+      const { width, height, mat } = rooms.room;
+      /** @param {number} x @param {number} y */
+      const clear = (x, y) => !rooms.pieceAt(x, y) && !(x === mat.tx && y === mat.ty);
+      for (let ty = 4; ty < height - 3; ty++) {
+        for (let tx = 2; tx < width - 2; tx++) {
+          if (clear(tx, ty) && clear(tx, ty + 1) && clear(tx, ty + 2) && clear(tx + 1, ty + 1)) {
+            return { tx, ty };
+          }
+        }
+      }
+      return null;
+    });
+  /** @type {Record<string, { tx: number, ty: number } | null>} */
+  const at = {};
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.screenshot({ path: '.smoke/winter-home.png' });
+  await tapElement('.hud-decorate');
+  for (const [id, name] of pieces) {
+    await tapElement('.hud-decor-bar button:text-is("Storage")');
+    at[id] = await freeTile();
+    await tapElement(`.hud-storage-sheet button[aria-label="Put out ${name}"]`);
+    const spot = at[id];
+    // A tap moves the piece there, and a tap on it again puts it down.
+    if (spot) for (let i = 0; i < 2; i++) await tapTile(spot.tx, spot.ty);
+  }
+  await tapElement('.hud-decor-bar button:text-is("Done")');
+  const placed = await page.evaluate(
+    (ids) => ids.map(([id]) => window.world.home.rooms.placed.find((p) => p.id === id) ?? null),
+    pieces,
+  );
+  check(
+    'the cabin and observatory pieces are put out in her room by taps',
+    placed.every((p) => p !== null),
+    JSON.stringify(placed),
+  );
+  const chair = placed[0];
+  if (chair) {
+    await tapTile(chair.tx, chair.ty);
+    const sat = await stepUntil(
+      () => window.world.poses.pose() === 'sit',
+      'she sits in the rocking chair',
+    );
+    check('walking up to the rocking chair sits her in it', sat);
+    await page.evaluate(() => window.view.step(40, 4));
+    await page.screenshot({ path: '.smoke/winter-sets.png' });
+    // And on her phone on its side.
+    await page.setViewportSize({ width: PHONE.height, height: PHONE.width });
+    await page.evaluate(() => window.view.step(40, 4));
+    await page.screenshot({ path: '.smoke/winter-sets-sideways.png' });
+    await page.setViewportSize(PHONE);
+    await page.evaluate(() => window.view.step(40, 4));
+  }
+  const scope = placed[2];
+  if (scope) {
+    await tapTile(scope.tx, scope.ty + 2);
+    await stepUntil(() => !window.world.player.moving, 'she stands up and steps back');
+    await tapTile(scope.tx, scope.ty);
+    const played = await stepUntil(
+      () => /Starlight Lullaby/.test(document.querySelector('.hud-toast-shown')?.textContent ?? ''),
+      'the telescope plays its tune',
+    );
+    check('walking up to the telescope plays the Starlight Lullaby', played);
+  }
+  // Put away again, and back out into town on the day the sections after expect.
+  await page.evaluate((ids) => {
+    for (const [id] of ids) {
+      const p = window.world.home.rooms.placed.find((q) => q.id === id);
+      if (p) window.world.home.rooms.putAway(p);
+    }
+  }, pieces);
+  await clearMat();
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
+  await tapTile(mat.tx, mat.ty);
+  await stepUntil(() => window.world.scene === 'town', 'she goes back out');
+  await page.evaluate(() => window.view.saveNow());
+  await openOn(`${PLAIN_DAY}&weather=clear`, 12);
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['home', home],
@@ -703,4 +828,5 @@ export const sections = [
   ['yard', yard],
   ['cook', cook],
   ['windows', windows],
+  ['winterSets', winterSets],
 ];

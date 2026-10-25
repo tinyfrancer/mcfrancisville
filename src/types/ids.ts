@@ -588,7 +588,24 @@ export type CutId =
   | 'wraps'
   | 'horns'
   // A farmer's floppy straw hat (0.3's F3).
-  | 'farmHat';
+  | 'farmHat'
+  // The winter wardrobe (1.4's G2).
+  | 'duffel'
+  | 'puffer'
+  | 'scarf'
+  | 'mittens'
+  | 'earflapHat'
+  | 'earmuffs'
+  | 'knitTights'
+  | 'snowBoots'
+  | 'jumper'
+  | 'chunkyCardigan'
+  | 'pyjamaTop'
+  | 'pyjamaBottoms'
+  | 'dressingGown'
+  | 'onesie'
+  | 'batHood'
+  | 'slippers';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -686,7 +703,24 @@ export type OutfitId =
   // Scarah's straw hat, the twin of hers (0.3's F3).
   | 'scarahHat'
   // Rob Boo's top hat, the twin of his (V1's P3b).
-  | 'mayorHat';
+  | 'mayorHat'
+  // The winter wardrobe (1.4's G2).
+  | 'duffelCoat'
+  | 'pufferJacket'
+  | 'longScarf'
+  | 'mittens'
+  | 'snowflakeHat'
+  | 'earmuffs'
+  | 'cableTights'
+  | 'snowBoots'
+  | 'fairIsleJumper'
+  | 'chunkyCardigan'
+  | 'pyjamaTop'
+  | 'pyjamaBottoms'
+  | 'dressingGown'
+  | 'batOnesie'
+  | 'batHood'
+  | 'fluffySlippers';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
@@ -968,7 +1002,10 @@ export type SuiteId =
   | 'bathroom'
   | 'gardenRoom'
   | 'musicCorner'
-  | 'hauntedLounge';
+  | 'hauntedLounge'
+  // Part three, for the winter (1.4's G2).
+  | 'cosyCabin'
+  | 'midnightObservatory';
 
 /** The cosy kitchen's pieces (0.3's S3). */
 export type KitchenPiece =
@@ -1020,14 +1057,30 @@ export type MusicPiece =
 export type LoungePiece =
   'coffinSofa' | 'loungeCandelabra' | 'suitOfArmour' | 'eyePortrait' | 'grandClock' | 'clawTable';
 
+/** Cosy Cabin's pieces (1.4's G2). */
+export type CabinPiece =
+  'logStove' | 'knitRug' | 'bearRug' | 'rockingChair' | 'quiltBed' | 'mugTree' | 'twinkleLights';
+
+/** Midnight Observatory's pieces (1.4's G2). */
+export type ObservatoryPiece =
+  | 'brassTelescope'
+  | 'celestialChart'
+  | 'lunarGlobe'
+  | 'velvetChaise'
+  | 'candleCluster'
+  | 'constellationRug';
+
 /** A piece of the first four furniture sets (0.3's S3). */
 export type FirstSuitePiece = KitchenPiece | BedroomPiece | LibraryPiece | WitchPiece;
 
 /** A piece of the second four (0.3's S4). */
 export type SecondSuitePiece = BathroomPiece | GardenRoomPiece | MusicPiece | LoungePiece;
 
-/** A piece of a furniture set (0.3's S3 and S4). */
-export type SuitePiece = FirstSuitePiece | SecondSuitePiece;
+/** A piece of the two winter sets (1.4's G2). */
+export type ThirdSuitePiece = CabinPiece | ObservatoryPiece;
+
+/** A piece of a furniture set (0.3's S3 and S4, 1.4's G2). */
+export type SuitePiece = FirstSuitePiece | SecondSuitePiece | ThirdSuitePiece;
 
 /** A small thing made for a table (0.3's H3). */
 export type TrinketPiece =
@@ -1056,7 +1109,14 @@ export type WallpaperId =
 
 /** A wallpaper with windows in it that show the sky at the hour (0.3's S4). */
 export type WindowPaperId =
-  'archWindow' | 'roundWindow' | 'latticeWindow' | 'gothicWindow' | 'laceWindow' | 'ivyWindow';
+  | 'archWindow'
+  | 'roundWindow'
+  | 'latticeWindow'
+  | 'gothicWindow'
+  | 'laceWindow'
+  | 'ivyWindow'
+  // Midnight Observatory's (1.4's G2).
+  | 'starWindow';
 
 /** The bracelets she strings at her workbench, which she can wear (0.2's W1). */
 export type BraceletId = Extract<

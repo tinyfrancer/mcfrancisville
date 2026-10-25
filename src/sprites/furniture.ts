@@ -14,6 +14,7 @@ import { TABLETOP_ART } from './tabletop';
 import { YARD_ART } from './yard';
 import { SET_ART } from './sets';
 import { SET_TWO_ART } from './setsTwo';
+import { SET_THREE_ART } from './setsThree';
 import { NEWCOMER_PIECES_ART } from './newcomerPieces';
 import { BOOTHOVEN_PIECES_ART } from './boothoven';
 import { SCARAH_PIECES_ART } from './scarah';
@@ -60,6 +61,7 @@ export const FURNITURE_ART: Record<FurnitureId, FurnitureArt> = {
   ...YARD_ART,
   ...SET_ART,
   ...SET_TWO_ART,
+  ...SET_THREE_ART,
   ...TOUCHES_ART,
   ...NEWCOMER_PIECES_ART,
   ...BOOTHOVEN_PIECES_ART,

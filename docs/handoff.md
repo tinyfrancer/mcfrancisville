@@ -18,7 +18,10 @@ Not started.
 
 ### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
 
-Not started.
+**Landed** (PR #225, merged into `v1.4-dev`): sixteen winter pieces, the winter shelves at Cobweb
+Corner (November to February), Cosy Cabin and Midnight Observatory, the star window paper, and
+1.4's `NOTES` row with three lines (G1 and G3 add one each, five at most). Decision 371 says what
+and why. Nothing half done.
 
 ### G3 ice fishing, G4 the night sky, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
 
