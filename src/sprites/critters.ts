@@ -298,6 +298,123 @@ const CATFISH_WHISKERS: readonly (readonly [number, number])[][] = [
   ],
 ];
 
+// ---- 1.4's G3 (decision 372): the winter fish, drawn as F3 drew the fish -------------------------
+
+/** Paints `key` over a fish's body (`f`) wherever `where` says, and nowhere off it. */
+function onBody(s: Sketch, key: string, where: (x: number, y: number) => boolean): void {
+  for (let y = 0; y < s.height; y++) {
+    for (let x = 0; x < s.width; x++) if (s.get(x, y) === 'f' && where(x, y)) s.set(x, y, key);
+  }
+}
+
+/**
+ * The bobble perch, 16 or 24 across: a plump perch (`f`) with a pale belly (`b`), dark bars down
+ * its sides (`s`), orange fins (`p`) and a spiky back fin with a round white bobble (`w`) on top,
+ * like the bobble on a hat, a forked tail on a narrow wrist so its shadow reads.
+ */
+function perch(size: 16 | 24, flick: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  forkedTail(s, k, 6.5, 13, 5, flick, 'p');
+  // The spiky back fin, its spines standing up from a low web, and the bobble on its tallest.
+  s.rect(at(9), at(7.5), at(7), at(2), 'p');
+  for (const [x, top] of [
+    [9, 6],
+    [11, 4.5],
+    [13, 5.5],
+    [15, 6.5],
+  ] as const) {
+    s.rect(at(x), at(top), Math.max(1, at(1)), at(8) - at(top), 'p');
+  }
+  if (size === 24) {
+    s.rect(10, 1, 3, 4, 'w').rect(9, 2, 5, 2, 'w');
+  } else {
+    s.rect(7, 1, 2, 2, 'w');
+  }
+  s.ellipse(13 * k, 13 * k, 7.5 * k, 4.7 * k, 'f');
+  s.rect(at(12), at(17), Math.max(1, at(2)), Math.max(1, at(1.5)), 'p');
+  s.ellipse(14 * k, 15.6 * k, 5 * k, 1.6 * k, 'b');
+  const bars = [9.5, 12.5, 15.5].map(at);
+  onBody(s, 's', (x) => bars.some((b) => x >= b && x < b + Math.max(1, at(1.4))));
+  s.outline((key) => ('fbspw'.includes(key) ? 'o' : null));
+  if (size === 24) s.rect(17, 10, 2, 2, 'e').set(20, 14, 'o').set(19, 14, 'o');
+  else s.set(at(18), at(11), 'e');
+  return s.toSource();
+}
+
+/**
+ * The aurora trout, 16 or 24 across: long and lean (`f`), its belly pale (`b`), dark freckles
+ * (`k`), and along its side a band that shimmers in two colours (`a`, `A`), like the northern
+ * lights come down for a swim, which glows after dark.
+ */
+function trout(size: 16 | 24, flick: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  forkedTail(s, k, 5.5, 12, 5, flick);
+  s.rect(at(11), at(8), Math.max(1, at(3)), Math.max(1, at(1)), 'f');
+  s.rect(at(12), at(7), Math.max(1, at(1.5)), Math.max(1, at(1)), 'f');
+  s.ellipse(13.5 * k, 12 * k, 9 * k, 3.8 * k, 'f');
+  s.ellipse(14.5 * k, 14.4 * k, 6.5 * k, 1.3 * k, 'b');
+  const [top, low] = [at(11), at(12)];
+  const step = Math.max(1, at(2));
+  onBody(s, 'a', (x, y) => (y === top || y === low) && Math.floor(x / step) % 2 === 0);
+  onBody(s, 'A', (_x, y) => y === top || y === low);
+  for (const [x, y] of [
+    [9, 10],
+    [12, 9.5],
+    [15, 10],
+    [18, 10],
+  ] as const) {
+    if (s.get(at(x), at(y)) === 'f') s.set(at(x), at(y), 'k');
+  }
+  s.outline((key) => ('fbaAk'.includes(key) ? 'o' : null));
+  if (size === 24) s.rect(19, 10, 2, 2, 'e').set(22, 13, 'o');
+  else s.set(at(19), at(11), 'e');
+  return s.toSource();
+}
+
+/**
+ * The cold moon sturgeon, 16 or 24 across: long and ancient (`f`), frosted pale, its belly paler
+ * (`b`), a pointed snout with whiskers (`w`, not outlined) under it, a row of bony plates down its
+ * back and along its side (`p`, which glow faintly under the moon) and a tail whose top lobe
+ * sweeps up longer than the bottom, as a sturgeon's does.
+ */
+function sturgeon(size: 16 | 24, flick: boolean): SpriteSource {
+  const k = size / WORLD;
+  const at = (n: number) => Math.round(n * k);
+  const s = new Sketch(size, size);
+  // Its tail: the top lobe sweeping up and back, long; the bottom one short.
+  const lift = flick ? 1 : 0;
+  for (const [x0, y0, x1, y1] of [
+    [5, 11, 0, 6],
+    [5, 12, 1, 6],
+    [5, 12, 0, 7],
+    [5, 13, 2, 16],
+    [5, 12, 2, 15],
+  ] as const) {
+    s.line(at(x0), at(y0), at(x1), at(y1) - (y1 < 10 ? lift : 0), 'f');
+  }
+  s.ellipse(12.5 * k, 12.5 * k, 9 * k, 3.6 * k, 'f');
+  // The snout, tapering to a point past its face.
+  s.rect(at(20), at(12), Math.max(1, at(2.5)), Math.max(1, at(2)), 'f');
+  s.set(at(23) - (size === 24 ? 0 : 1), at(13), 'f');
+  s.ellipse(13 * k, 14.8 * k, 7 * k, 1.3 * k, 'b');
+  for (let x = 6; x <= 18; x += 3) {
+    s.set(at(x), at(8.6), 'p').set(at(x), at(8.6) + 1, 'p');
+    if (size === 24) s.set(x + 1, 9, 'p');
+    if (s.get(at(x + 1), at(12.5)) === 'f') s.set(at(x + 1), at(12.5), 'p');
+  }
+  s.outline((key) => (key === 'w' ? null : 'o'));
+  for (const x of size === 24 ? [19, 21] : [at(20)]) {
+    s.set(x, at(15), 'w').set(x, at(15) + 1, 'w');
+  }
+  if (size === 24) s.rect(17, 11, 2, 2, 'e');
+  else s.set(at(17), at(11), 'e');
+  return s.toSource();
+}
+
 /** A toadstool cap in its own keys (`c` cap, `C` lit, `S` spot), for a toad to wear. */
 function cap(s: Sketch, cx: number, y: number, r: number): void {
   const top = new Sketch(s.width, s.height);
@@ -1015,6 +1132,51 @@ export const CRITTER_ART: Record<CritterId, CritterArt> = {
     frames: [roundFishShape(16, false, 'spot'), roundFishShape(16, true, 'spot')],
     world: [roundFishShape(24, false, 'spot'), roundFishShape(24, true, 'spot')],
     palette: { '.': null, o: C.navy, f: C.sky, b: C.white, s: C.white, e: C.ink },
+  },
+  // Under the winter ice (1.4's G3).
+  icicleSmelt: fish(mix(C.sky, C.navy, 0.45), C.iceLight, C.sky, 'minnow'),
+  bobblePerch: {
+    frames: [perch(16, false), perch(16, true)],
+    world: [perch(24, false), perch(24, true)],
+    palette: {
+      '.': null,
+      o: C.hedgeDark,
+      f: mix(C.leaf, C.candle, 0.45),
+      b: C.cream,
+      s: C.mossDark,
+      p: C.pumpkin,
+      w: C.white,
+      e: C.ink,
+    },
+  },
+  auroraTrout: {
+    frames: [trout(16, false), trout(16, true)],
+    world: [trout(24, false), trout(24, true)],
+    palette: {
+      '.': null,
+      o: C.navy,
+      f: C.silver,
+      b: C.white,
+      a: C.mint,
+      A: C.lavender,
+      k: C.navyShade,
+      e: C.ink,
+    },
+    glow: { a: C.mint, A: C.lavender },
+  },
+  coldMoonSturgeon: {
+    frames: [sturgeon(16, false), sturgeon(16, true)],
+    world: [sturgeon(24, false), sturgeon(24, true)],
+    palette: {
+      '.': null,
+      o: C.stoneDark,
+      f: mix(C.silver, C.ice, 0.5),
+      b: C.iceLight,
+      p: C.white,
+      w: C.stoneLight,
+      e: C.ink,
+    },
+    glow: { p: C.iceLight },
   },
   // V1's R5: a critter for each big holiday, and three jumping spiders.
   ...HOLIDAY_ART,

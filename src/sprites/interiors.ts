@@ -25,7 +25,7 @@ import {
   type Colours,
   type Material,
 } from './buildings';
-import { PALETTE as C } from './palette';
+import { mix, PALETTE as C, ramp } from './palette';
 import type { PropLight } from './props';
 import { Sketch } from './sketch';
 import { flames } from './motion';
@@ -429,6 +429,7 @@ const BIG_CAULDRON = drawBigCauldron();
 export const INTERIOR_FRAMES = {
   bakeryOven: () => [0, 1, 2, 3].map((beat) => drawOven(beat)),
   bigCauldron: () => [0, 1, 2, 3].map((beat) => drawBigCauldron(beat)),
+  hutStove: () => [0, 1, 2, 3].map((beat) => drawHutStove(beat)),
 } as const;
 
 const POTTING_BENCH = (() => {
@@ -483,6 +484,77 @@ const PIPE_ORGAN = (() => {
 
 const WOOD = { wall: C.cream, roof: C.plum, trim: C.bark, door: C.berry } as const;
 
+// ---- The ice hut (1.4's G3) ---------------------------------------------------------------------
+
+/**
+ * Its pot-bellied stove: iron legs, a round belly with a little door glowing with fire (which
+ * flickers by `frames`), a mug of cocoa warming on top, and its pipe up the wall into the roof.
+ */
+function drawHutStove(beat: number | null = null): SpriteSource {
+  // The pipe runs up the wall to its top, three tiles over the stove's own.
+  const up = 48;
+  const s = new Sketch(32, 80 + up);
+  slab(s, 14, 0, 5, 40 + up, STONE);
+  s.rect(13, 0, 7, 2, darkOf(STONE));
+  s.rect(12, 34 + up, 9, 3, darkOf(STONE));
+  slab(s, 8, 38 + up, 17, 4, STONE);
+  s.ellipse(16.5, 55 + up, 11, 13, fillOf(STONE));
+  s.bevel(fillOf(STONE), lightOf(STONE), shadeOf(STONE));
+  s.rect(6, 58 + up, 21, 2, darkOf(STONE));
+  // The little door, and the fire inside it.
+  s.ellipse(16.5, 52 + up, 6, 5.5, darkOf(STONE)).ellipse(16.5, 52.5 + up, 4.8, 4.3, INK);
+  if (beat === null) s.ellipse(16.5, 54 + up, 4, 2.6, FIRE).set(16, 52 + up, FIRE_LIGHT);
+  else flames(s, 16.5, 54 + up, 4, 2.6, FIRE, FIRE_LIGHT, beat, new Set([INK]));
+  for (const x of [8, 23]) slab(s, x, 66 + up, 3, 12, STONE);
+  slab(s, 4, 76 + up, 25, 3, STONE);
+  // A mug of cocoa on top, steaming a little.
+  s.rect(21, 33 + up, 6, 5, fillOf(ACCENT)).rect(21, 33 + up, 6, 1, lightOf(ACCENT));
+  s.set(27, 35 + up, fillOf(ACCENT));
+  s.set(23, 31 + up, WHITE).set(24, 30 + up, WHITE);
+  return finish(s);
+}
+
+const HUT_STOVE = drawHutStove();
+
+/** Its bench: planks on stout legs, a knitted cushion, and Gourdon's flask tucked underneath. */
+const HUT_BENCH = (() => {
+  const s = new Sketch(64, 40);
+  slab(s, 0, 16, 64, 6, TRIM);
+  for (const x of [4, 56]) slab(s, x, 22, 5, 16, TRIM);
+  s.rect(14, 10, 26, 7, fillOf(ACCENT)).rect(14, 10, 26, 1, lightOf(ACCENT));
+  for (let x = 16; x < 40; x += 4) s.set(x, 13, shadeOf(ACCENT)).set(x + 1, 14, shadeOf(ACCENT));
+  s.rect(42, 13, 14, 4, fillOf(ACCENT_TWO)).rect(42, 13, 14, 1, lightOf(ACCENT_TWO));
+  slab(s, 28, 26, 7, 12, STONE);
+  s.rect(29, 24, 5, 2, darkOf(STONE));
+  return finish(s);
+})();
+
+/**
+ * The hole in the hut's floor: the boards sawn round, a rim of ice, and the pond's dark water under
+ * it with a glint, flat on the floor and never outlined.
+ */
+const ICE_HOLE = (() => {
+  const s = new Sketch(32, 32);
+  s.ellipse(16, 18, 14, 10, '6');
+  s.ellipse(16, 18, 12, 8.5, '5');
+  s.ellipse(16, 18.5, 10.5, 7, '4');
+  s.ellipse(16, 19, 9, 5.5, '2');
+  s.ellipse(15, 17.5, 7, 3, '1');
+  s.rect(19, 21, 3, 1, '3').set(11, 20, '3');
+  return s.toSource();
+})();
+
+/** The hole's colours: deep water, water, a glint, the ice rim, its light, the sawn boards' edge. */
+const ICE_HOLE_PALETTE: Palette = {
+  '.': null,
+  '1': ramp(C.water)[1],
+  '2': C.water,
+  '3': C.waterLight,
+  '4': mix(C.ice, C.water, 0.35),
+  '5': C.ice,
+  '6': ramp(C.wood)[1],
+};
+
 export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   ...NEWCOMER_FIXTURE_ART,
   ...BOOTHOVEN_FIXTURE_ART,
@@ -493,6 +565,18 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
   ...CATALOGUE_FIXTURE_ART,
   ...GREENHOUSE_FIXTURE_ART,
   hallPiano: HALL_PIANO_ART,
+  hutStove: {
+    source: HUT_STOVE,
+    palette: palette({ ...WOOD, stone: C.iron, accent: C.berryLight }),
+    glow: FIRE_LIT,
+    lights: [{ x: 16, y: 102, radius: 34 }],
+    frames: { sources: INTERIOR_FRAMES.hutStove, period: 760 },
+  },
+  hutBench: {
+    source: HUT_BENCH,
+    palette: palette({ ...WOOD, trim: C.wood, stone: C.silver, accent: C.berryLight }),
+  },
+  iceHole: { source: ICE_HOLE, palette: ICE_HOLE_PALETTE },
   shopCounter: {
     source: SHOP_COUNTER,
     palette: palette({

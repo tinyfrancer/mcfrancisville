@@ -9442,6 +9442,80 @@ tones instead); a bear rug with a bear's head (it had to be plainly a rug); the 
 the year-round boutique (a dressing gown in July; the looks are their own weekly shelf in
 winter).
 
+## 372. Ice fishing: the fish swim on under the frozen pond, four winter fish, and Gourdon's ice hut with a hole in its floor (2026-10-25, 1.4's G3)
+
+_Session G3 of the 1.4 plan (`docs/v1.4_plan.md`). No save change. Personal touches parked
+(decision 177): the names, words, colours and prices are the warmest plain defaults._
+
+- **The ice rule.** The town's pond is frozen over from 15 December to 15 January (`FROZEN`,
+  decision 126, kept as it is: their first date was ice skating, and Nessa's skating and the
+  pond's look are built on it). Until now nothing swam under it (`Collecting.canBe` refused a
+  frozen tile). Now a frozen tile of the pond is still a fish's water: the fish are dealt into it
+  as ever, drawn as their shadows at a lower alpha (0.3 against 0.6, `critterDrawable`'s
+  `underIce`) with no rings, and a tap on one walks her beside it (onto the ice on her skates, or
+  the bank; never onto the fish's own tile) and casts. The hole is drawn on the ground under the
+  float only while her line is in on ice (`holeOf`, `drawHole`, the fishing pass's new `ground`
+  part, the one change to `OUTDOOR_LAYERS`): dark water, the ice's thickness down its far side, a
+  wet rim and lumps of slush, the float's rings kept inside it. Open water is unchanged. Only fish
+  are dealt onto water, so nothing else is ever on the ice; a shy critter's drift keeps off it.
+- **The lake and the creek stay as they are.** The plan says the lake is ice in winter, but it never
+  was: only the town's pond has `Decorations` and freezes, and the lake's melt where the creek
+  meets it (decision 352) says the lake is open. Freezing it would re-lay Lantern Shore's ground
+  and walkability for a season; the winter fish swim in its open water instead. The creek is ice
+  all year but frozen to its bed: no fish are dealt there, as before.
+- **Four winter fish** (`CRITTERS` rows, `season: [12, 2]`, `where: ['town', 'lanternShore']`): the
+  **icicle smelt** (common, all day, a slim silver-blue minnow), the **bobble perch** (uncommon,
+  7 to 19, a striped perch with a white bobble on its back fin), the **aurora trout** (rare, 17 to
+  5, its side banded mint and lavender, glowing after dark) and the **cold moon sturgeon**
+  (legendary, 18 to 5, a winter full moon: frosted pale, bony plates down its back that glow, a
+  long upper tail lobe, whiskers). New shapes `perch`, `trout` and `sturgeon` in
+  `sprites/critters.ts`, drawn at 16 and 24 from the 24's numbers as F3 drew the fish (held by
+  `tests/sprites/critters.test.ts`'s redrawn list); a shine each (gold smelt, ruby-and-gold perch,
+  midnight trout with a gold band, gold sturgeon with pearl plates); sizes; values 30, 75, 240 and
+  520, in the tiers' bands.
+- **A moon-bound critter with a season visits on every full moon out of it** (`isVisiting`), so
+  the sturgeon is never more than a month away (decision 360's rule for the moon-bound). The only
+  such critter is the sturgeon; every other's dealing is unchanged.
+- **The museum** takes 74: the fish outgrew their case (twelve nooks), so a tenth case shows fish,
+  beside the fossils' at the top of the room (`crumbs`' fixtures, the same overflow V1's R5 gave
+  the crawlies). Wrapunzel's full-museum letter is `museum:74`; `museum:70` joins
+  `MUSEUM_FORMERLY_FULL`, so one already had still reads.
+- **The rarity test**: the Cabinet's fill is now 7.6 to 11.4 months, 9.1 on average (it was 7.5 to
+  10, about 9): a January start meets the cold moon sturgeon and the winter fish on the winter's
+  full moons, so the ghost bat at the castle comes last at 11.4; the bound is raised from 11 to 12
+  and said in the test. A shiny of everything is 20.4 to 23.6 months (unchanged bounds).
+- **The ice hut** (`PROJECTS.iceHut`, Gourdon's idea in its blurb and letter): on the pond's
+  north-east bank at 31,38, two tiles by two, its door on the right onto 32,40 by the water; 3800
+  Candy, 70 wood, 20 stone and 6 ghost peppers (for the stove). Posts, a frame of bare timber on
+  runners, and a raspberry shanty with cream trim, a plum gable, a stovepipe that smokes, a round
+  window lit after dark, a lamp, a fish on a board over the door, an auger and a bucket. Its door
+  is in the town's `doors` and found through `Sites` once built (`MapZone.building`). W1's
+  overlay snapshots don't build it, so they're unchanged; a test holds that building it changes
+  only its own four tiles.
+- **Inside** (`INTERIORS.iceHut`, 7 by 4): the round-window paper, oak boards, a pot-bellied stove
+  whose fire `frames` and whose pipe runs up the wall, a bench with a knitted cushion and
+  Gourdon's flask, a stump to sit on, and the hole (`FIXTURES.iceHole`, `fishing: true`). Walking
+  up to it casts (`World.fishHole`, `Fishing.castInHole`): **two fish an hour** come under it
+  (`fishInHole`, `HOLE_FISH`), dealt from the day and hour as the water's are, from the town's
+  fish about then, **the winter fish alone in winter** (December to February, "any winter day",
+  whether or not the pond's frozen) whenever one is about, and the pond's own the rest of the
+  year; shiny and charmed as in the water; kept in `Takings` as `iceHut:critter:<hour>:<slot>`.
+  Once she has had both, the hole says nothing's nibbling till the hour turns. Her rod comes in
+  with her there (`Hands`' `fishingIndoors`, a room with a fishing fixture), her line and the
+  tension bar are drawn in the room (`RoomView`), and the line comes in if she leaves.
+- **Told**: Today's `iceFishing` line on every frozen day ("The pond's frozen thick enough to
+  fish", a tap out onto the ice), its key once a winter so the dot comes once; the Cabinet's
+  winter season shows the four (they're winter's by their rows); a catch on ice or in the hut is
+  a `caught` like any. 1.4's notes' fifth and last line.
+
+**Rejected:** freezing the lake (above); fish under the creek's ice (a year-round ice fishery the
+plan didn't ask for, and every fish's dealing at two places would shift); a longer `FROZEN`
+(settled by the user's touch, and the hut gives all winter); the hut's hole as an `opens` sheet
+(fishing is the world's, not the HUD's; a `fishing` fixture flag the world reads, as `plays` is);
+an unlimited hole (two an hour keeps it a treat beside the pond's three or four); a new save field
+(the hut is a project in `Works`, its catches in `Takings`); the sturgeon with no season (the
+brief's four are winter's own).
+
 ## 373. The night sky: a telescope by the castle gate, fifteen constellations traced by taps, three months to find each, and a star chart (2026-10-25, 1.5's G4)
 
 **Context:** the 1.4/1.5 plan's G4 (decision 367): a telescope, a constellation a month to trace by

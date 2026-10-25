@@ -266,6 +266,13 @@ export const ZONES: Record<ZoneId, ZoneRow> = {
     icon: { item: 'sunflower' },
     unlock: { open: true },
   },
+  // The ice hut on the pond's bank (1.4's G3), once the town has built it.
+  iceHut: {
+    name: 'The ice hut',
+    blurb: 'A snug hut on the pond with a stove, a bench and a hole in the floor to fish through.',
+    icon: { item: 'icicleSmelt' },
+    unlock: { open: true },
+  },
   // The mayor's office in the town hall by the square (V1's P3b), Rob Boo's.
   mayorsOffice: {
     name: 'The town hall',

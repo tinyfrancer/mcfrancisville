@@ -11,8 +11,9 @@ import { composeLayers, LAYER_NAMES, type Pass } from '../../src/render/passes/p
 describe('the passes outdoors', () => {
   it('draw each layer in the order the view drew it before the split', () => {
     expect(OUTDOOR_LAYERS).toEqual({
-      // Glints and long grass, rain's splashes, the yard's dots, where she's walking to.
-      ground: ['life', 'weather', 'yard', 'target'],
+      // Glints and long grass, rain's splashes, the yard's dots, her hole in the ice (1.4's G3,
+      // the one part added since), where she's walking to.
+      ground: ['life', 'weather', 'yard', 'fishing', 'target'],
       stand: [
         'props',
         'moving',

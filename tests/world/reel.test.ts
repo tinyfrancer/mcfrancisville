@@ -32,6 +32,7 @@ function rodOver(critter: CritterId, slow = false) {
     hasFished: () => true,
     eager: () => false,
     slow: () => slow,
+    scene: () => 'town',
   });
   /** Steps the clock 16 ms at a time until `done`, gathering what the line does. */
   const wait = (done: () => boolean, budget = 30_000): WorldEvent[] => {

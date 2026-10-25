@@ -631,7 +631,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   or legendary one is reeled in on a tension bar (`REELS`; a tap out of time only slackens the
   line), each catch has a size (`src/data/fishSizes.ts`, `src/systems/catchSize.ts`) and the
   Cabinet keeps each fish's best (save v52); shy critters drift a tile from her as she rushes up
-  (`src/systems/drift.ts`, `Collecting.notice`). `src/world/Cabinet.ts` is the
+  (`src/systems/drift.ts`, `Collecting.notice`). While the town's pond is frozen over the fish
+  swim on under the ice, dim shadows, and a tap on one casts through a hole drawn under the float
+  (`drawHole`, `holeOf` in `src/render/fishing.ts`; 1.4's G3, decision 372), with four winter
+  fish in the pond and the lake December to February (the icicle smelt, bobble perch, aurora
+  trout and cold moon sturgeon, which as a moon-bound critter with a season visits on every full
+  moon out of it). `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters; the museum's
   cases, three tiles wide, show each donated critter's 24-pixel art in a `nooks` box. Art is
@@ -852,7 +857,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   recipe makes is worth a quarter more than its inputs, held by the economy test.
 - **Town projects** (V1's R4, decision 314): rows in `src/data/projects.ts` (a bandstand on the
   square, the castle garden, a footbridge over Whisperwood's creek, her greenhouse behind her
-  house), funded one at a time on the noticeboard's Projects tab (`src/hud/ProjectsPanel.ts`
+  house, and Gourdon's ice hut on the pond's bank, 1.4's G3, whose door goes into a room,
+  `INTERIORS.iceHut`, through `Sites`, and whose floor's hole, `FIXTURES.iceHole`, she fishes
+  through: two fish an hour, `fishInHole` in `src/systems/fishing.ts`, the winter fish in winter
+  and the pond's own the rest of the year), funded one at a time on the noticeboard's Projects tab (`src/hud/ProjectsPanel.ts`
   through `NoticeApi`) by `world.projects` (`Projects`, kept by `Works`, save v51); rules in
   `src/systems/projects.ts`. Each stands where it'll be in three stages (posts, frame, built) through
   `Sites` (`src/world/zones/`), art `src/sprites/projects.ts`; `world.projects.preview(id, stage)`

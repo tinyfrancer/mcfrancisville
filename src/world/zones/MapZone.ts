@@ -2,7 +2,7 @@ import { doorStep } from '../../data/maps';
 import { tileAt, walkable, type PlacedProp, type TileMap } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import { alongExit, exitAt, landingOf } from '../../systems/zones';
-import type { MapZoneId, TileId, ZoneId } from '../../types/ids';
+import type { MapZoneId, PropId, TileId, ZoneId } from '../../types/ids';
 import type { Decorations } from './Decorations';
 import { Gates } from './Gates';
 import type { Lots } from './Lots';
@@ -132,7 +132,10 @@ export class MapZone implements Zone {
     });
   }
 
-  /** Whether a tile is the pond's water, frozen over today (phase U): walked on, not fished. */
+  /**
+   * Whether a tile is the pond's water, frozen over today (phase U): walked on, and fished through
+   * a hole since 1.4's G3.
+   */
   isIce(tx: number, ty: number): boolean {
     if (this.water.size === 0 || tx < 0 || tx >= this.map.width) return false;
     return this.water.has(ty * this.map.width + tx) && this.decorations!.frozen;
@@ -167,8 +170,7 @@ export class MapZone implements Zone {
     const exit = from === null ? undefined : this.map.exits.find((e) => e.to === from);
     if (exit) return landingOf(exit, this, along);
     const door = from === null ? undefined : this.map.doors.find((d) => d.to === from);
-    const building =
-      door && (this.map.props.find((p) => p.id === door.prop) ?? this.lots?.house(door.prop));
+    const building = door && this.building(door.prop);
     if (building) return { tile: doorStep(building), facing: 'down' };
     return { tile: this.map.spawn, facing: 'down' };
   }
@@ -176,7 +178,16 @@ export class MapZone implements Zone {
   /** The building here whose door goes into `inside`, if one does (V1's R2). */
   buildingOf(inside: ZoneId): PlacedProp | undefined {
     const door = this.map.doors.find((d) => d.to === inside);
-    return door && (this.map.props.find((p) => p.id === door.prop) ?? this.lots?.house(door.prop));
+    return door && this.building(door.prop);
+  }
+
+  /** A building standing here: in the map, on a lot, or a project built (1.4's G3's ice hut). */
+  private building(id: PropId): PlacedProp | undefined {
+    return (
+      this.map.props.find((p) => p.id === id) ??
+      this.lots?.house(id) ??
+      this.sites?.props().find((p) => p.id === id)
+    );
   }
 
   doorAt(here: Tile, prop: PlacedProp | undefined): Crossing | null {

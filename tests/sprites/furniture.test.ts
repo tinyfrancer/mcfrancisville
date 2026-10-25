@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { TILE_SIZE } from '../../src/config/world';
 import { CRITTERS } from '../../src/data/critters';
-import { FIXTURES } from '../../src/data/interiors';
+import { FIXTURES, INTERIORS } from '../../src/data/interiors';
 import { FIXTURE_ART } from '../../src/sprites/interiors';
 import { FURNITURE } from '../../src/data/furniture';
 import { FURNITURE_ART, furnitureSprite } from '../../src/sprites/furniture';
@@ -81,14 +81,14 @@ describe('what stands in the town buildings', () => {
     for (const key of Object.keys(art.glow ?? {})) expect(keys.has(key), `${id} ${key}`).toBe(true);
   });
 
-  it('has a nook in each museum case for every critter of a family, on its glass', () => {
+  it('has a nook in the museum cases for every critter of a family, on its glass', () => {
     const nooks = FIXTURE_ART.museumCase.nooks!;
-    const biggest = Math.max(
-      ...['moth', 'bat', 'frog', 'orb', 'beetle', 'fish'].map(
-        (f) => Object.values(CRITTERS).filter((c) => c.family === f).length,
-      ),
-    );
-    expect(nooks.length).toBeGreaterThanOrEqual(biggest);
+    // A family that outgrows its case goes on in the next showing it (V1's R5; the fish, 1.4's G3).
+    for (const f of ['moth', 'bat', 'frog', 'orb', 'beetle', 'fish', 'crawly'] as const) {
+      const cases = INTERIORS.crumbs.fixtures.filter((c) => c.shows === f).length;
+      const family = Object.values(CRITTERS).filter((c) => c.family === f).length;
+      expect(nooks.length * cases, f).toBeGreaterThanOrEqual(family);
+    }
     const rows = FIXTURE_ART.museumCase.source.rows;
     for (const { x, y } of nooks) {
       for (const [dx, dy] of [

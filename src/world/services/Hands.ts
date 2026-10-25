@@ -16,13 +16,22 @@ export class Hands {
   private readonly ctx: WorldContext;
   private readonly bag: Bag;
   private readonly outdoors: () => boolean;
+  /** Whether she's somewhere indoors she fishes, the ice hut (1.4's G3), where her rod comes in. */
+  private readonly fishingIndoors: () => boolean;
   private holding: Held;
 
   /** A saved seed she has none of any more, or anything this build doesn't know, is her hands. */
-  constructor(ctx: WorldContext, bag: Bag, saved?: string, outdoors: () => boolean = () => true) {
+  constructor(
+    ctx: WorldContext,
+    bag: Bag,
+    saved?: string,
+    outdoors: () => boolean = () => true,
+    fishingIndoors: () => boolean = () => false,
+  ) {
     this.ctx = ctx;
     this.bag = bag;
     this.outdoors = outdoors;
+    this.fishingIndoors = fishingIndoors;
     this.holding = saved !== undefined && this.canHold(saved) ? saved : 'hands';
     ctx.events.on('bag', () => {
       if (!this.canHold(this.holding)) this.put('hands');
@@ -32,10 +41,11 @@ export class Hands {
   /**
    * What's in her hand where she is. Her net, can and rod are outdoor things, so she leaves them
    * by the door going in and picks them up again on the way out (1.0.1); a seed or a sprinkler
-   * stays in her hand, for the planters inside.
+   * stays in her hand, for the planters inside. Her rod comes into the ice hut (1.4's G3).
    */
   get held(): Held {
-    return isTool(this.holding) && !this.outdoors() ? 'hands' : this.holding;
+    if (!isTool(this.holding) || this.outdoors()) return this.holding;
+    return this.holding === 'rod' && this.fishingIndoors() ? 'rod' : 'hands';
   }
 
   /** The seed in her hand, if it's one. */

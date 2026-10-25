@@ -111,6 +111,9 @@ function holds(h: Harness, line: TodayLine): boolean {
       return w.collecting
         .critters(line.zone)
         .some((c) => c.shiny === true && c.critter === line.critter);
+    // 1.4's G3: the pond is ice, with something under it to fish for.
+    case 'iceFishing':
+      return w.townZone.isIce(23, 43);
     case 'freeGo':
       return (
         w.activities.freeGo() === line.id &&

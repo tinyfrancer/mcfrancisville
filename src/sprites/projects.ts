@@ -21,6 +21,11 @@ import {
   WALL,
   WHITE,
   WINDOWS_LIT,
+  door,
+  gableRoof,
+  wallLamp,
+  window,
+  type DoorRect,
 } from './buildings';
 import { slab } from './furnish';
 import { mix, PALETTE as C } from './palette';
@@ -347,6 +352,93 @@ function drawHerGreenhouse(): SpriteSource {
   return finish(s);
 }
 
+// ---- The ice hut (1.4's G3) ---------------------------------------------------------------------
+
+const HUT_W = 64;
+const HUT_H = 100;
+/** Where the hut's walls meet its roof, and its floor. */
+const HUT_EAVE = 34;
+const HUT_FLOOR = 94;
+
+/** The ice hut's own colours: raspberry boards, cream trim, a plum roof, an iron stovepipe. */
+const HUT_PALETTE: Palette = buildingPalette({
+  wall: C.berryLight,
+  roof: C.plum,
+  trim: C.cream,
+  door: C.wood,
+  stone: C.iron,
+  accent: C.pumpkin,
+  accentTwo: C.candle,
+  leaves: C.moss,
+});
+
+/** The runners it sits on, so it could be slid out onto the ice, and the floor along them. */
+function hutRunners(s: Sketch): void {
+  slab(s, 2, HUT_FLOOR, HUT_W - 4, 4, TRIM);
+  for (const x of [1, HUT_W - 7]) {
+    s.rect(x, HUT_FLOOR + 3, 6, 2, darkOf(TRIM)).set(x, HUT_FLOOR + 2, darkOf(TRIM));
+  }
+}
+
+/**
+ * The ice hut going up (1.4's G3): its runners and floor down, four bare studs and a ridge beam,
+ * the gable's rafters, and its stovepipe waiting on the boards.
+ */
+function drawIceHutFrame(): SpriteSource {
+  const s = new Sketch(HUT_W, HUT_H);
+  hutRunners(s);
+  for (const x of [5, 27, 36, HUT_W - 9]) slab(s, x, HUT_EAVE, 4, HUT_FLOOR - HUT_EAVE, TRIM);
+  slab(s, 3, HUT_EAVE - 3, HUT_W - 6, 4, TRIM);
+  s.line(4, HUT_EAVE - 3, 32, 10, fillOf(TRIM)).line(5, HUT_EAVE - 3, 32, 11, shadeOf(TRIM));
+  s.line(HUT_W - 5, HUT_EAVE - 3, 32, 10, fillOf(TRIM));
+  s.line(HUT_W - 6, HUT_EAVE - 3, 32, 11, shadeOf(TRIM));
+  s.rect(30, 8, 4, 4, fillOf(TRIM));
+  // The stovepipe, lying on the floor, and a plank or two.
+  s.rect(10, HUT_FLOOR - 4, 16, 4, fillOf(STONE)).rect(10, HUT_FLOOR - 4, 16, 1, lightOf(STONE));
+  slab(s, 40, HUT_FLOOR - 3, 18, 3, DOOR);
+  return finish(s);
+}
+
+/**
+ * The ice hut (1.4's G3), Gourdon's, on the pond's bank: a little raspberry shanty on runners, a
+ * plum gable with a stovepipe puffing on it, a round window lit after dark, its door on the right
+ * with a lamp beside it, and an auger and a bucket leaning by the wall.
+ */
+function drawIceHut(): { source: SpriteSource; door: DoorRect } {
+  const s = new Sketch(HUT_W, HUT_H);
+  // The stovepipe first, so the roof's edge stands in front of its foot.
+  s.rect(13, 2, 5, 22, fillOf(STONE)).rect(13, 2, 1, 22, lightOf(STONE));
+  s.rect(17, 2, 1, 22, shadeOf(STONE)).rect(11, 0, 9, 3, darkOf(STONE));
+  s.rect(12, 0, 7, 1, fillOf(STONE));
+  wall(s, 5, HUT_EAVE, HUT_W - 10, HUT_FLOOR - HUT_EAVE, 'boards', WALL, 4);
+  gableRoof(s, 32, 8, HUT_EAVE, HUT_W, 6, 'shingles', 'boards');
+  // Corner boards in the trim, so it reads as a little building and not a crate.
+  for (const x of [5, HUT_W - 8]) slab(s, x, HUT_EAVE, 3, HUT_FLOOR - HUT_EAVE, TRIM);
+  window(s, 10, 54, 14, 14, { shape: 'round', panes: [2, 2] });
+  const front = door(s, 44, HUT_FLOOR, 28, 52, { light: true, knob: 'left' });
+  wallLamp(s, 26, 44);
+  // A fish on a little board over the door, so it's plain what the hut is for.
+  slab(s, 37, HUT_EAVE + 1, 14, 6, TRIM);
+  s.rect(40, HUT_EAVE + 3, 6, 2, fillOf(ACCENT)).set(46, HUT_EAVE + 3, fillOf(ACCENT));
+  s.set(39, HUT_EAVE + 2, fillOf(ACCENT)).set(39, HUT_EAVE + 5, fillOf(ACCENT));
+  s.set(44, HUT_EAVE + 3, 'o');
+  hutRunners(s);
+  // The auger leaning on the wall, and a bucket by it.
+  s.line(4, HUT_FLOOR - 2, 9, HUT_FLOOR - 30, darkOf(STONE));
+  s.rect(6, HUT_FLOOR - 32, 7, 2, fillOf(DOOR));
+  s.rect(2, HUT_FLOOR - 9, 7, 8, fillOf(ACCENT_TWO)).rect(
+    2,
+    HUT_FLOOR - 9,
+    7,
+    1,
+    lightOf(ACCENT_TWO),
+  );
+  s.rect(8, HUT_FLOOR - 9, 1, 8, shadeOf(ACCENT_TWO));
+  return { source: finish(s), door: front };
+}
+
+const ICE_HUT = drawIceHut();
+
 // ---- The art --------------------------------------------------------------------------------------
 
 const FOOTBRIDGE = drawFootbridge();
@@ -372,6 +464,8 @@ export const PROJECT_ART: Record<
     | 'footbridge'
     | 'greenhouseFrame'
     | 'herGreenhouse'
+    | 'iceHutFrame'
+    | 'iceHut'
   >,
   PropArt
 > = {
@@ -407,6 +501,19 @@ export const PROJECT_ART: Record<
     lights: [{ x: 48, y: 34, radius: 40 }],
     noEaves: true,
     shadow: { w: 90, h: 10 },
+  },
+  iceHutFrame: { source: drawIceHutFrame(), palette: PROJECT_PALETTE, shadow: { w: 60, h: 8 } },
+  iceHut: {
+    source: ICE_HUT.source,
+    palette: HUT_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [
+      { x: 17, y: 61, radius: 26 },
+      { x: 28, y: 50, radius: 20 },
+    ],
+    door: ICE_HUT.door,
+    smoke: [{ x: 15, y: 0 }],
+    shadow: { w: 60, h: 8 },
   },
 };
 
@@ -451,4 +558,5 @@ export const PROJECT_PICTURES: Record<ProjectId, { source: SpriteSource; palette
   castleGarden: { source: gardenPicture(), palette: GARDEN_PALETTE },
   footbridge: { source: FOOTBRIDGE, palette: PROJECT_PALETTE },
   greenhouse: { source: greenhousePicture(), palette: PROJECT_PALETTE },
+  iceHut: { source: ICE_HUT.source, palette: HUT_PALETTE },
 };

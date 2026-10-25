@@ -160,6 +160,13 @@ export function todayWords(line: TodayLine): TodayWords {
         small: "It's a shiny one! Creep up and see what it is, before the hour's out.",
         glyph: 'sparkle',
       };
+    // 1.4's G3: the pond frozen over, to fish through.
+    case 'iceFishing':
+      return {
+        text: "The pond's frozen thick enough to fish",
+        small: 'Skate out to a shadow under the ice, and fish through a hole.',
+        glyph: { item: 'icicleSmelt' },
+      };
     // V1's R3: what's out of the ordinary today.
     case 'rare': {
       const row = RARE_EVENTS[line.id];

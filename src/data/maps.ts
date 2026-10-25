@@ -269,6 +269,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   footbridge: { w: 2, h: 2 },
   greenhouseFrame: { w: 3, h: 2 },
   herGreenhouse: { w: 3, h: 1 },
+  // The ice hut on the pond's bank (1.4's G3), whose door goes in once it's built.
+  iceHutFrame: { w: 2, h: 2 },
+  iceHut: { w: 2, h: 2, door: 1 },
 };
 
 /**
@@ -529,6 +532,8 @@ export const TOWN: MapSource = {
     { prop: 'boothovenHouse', to: 'boothovenParlour' },
     // Rob Boo's town hall (V1's P3b).
     { prop: 'townHall', to: 'mayorsOffice' },
+    // The ice hut (1.4's G3), once the town has built it on the pond's bank.
+    { prop: 'iceHut', to: 'iceHut' },
   ],
   // Ollie's, below Agatha's in the west meadow, Gourdon's pumpkin past the bakery, and
   // Boothoven's east of the square, beside the salon.

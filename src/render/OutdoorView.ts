@@ -86,7 +86,7 @@ export interface OutdoorViewOptions {
  * stands is sorted by its feet once, so where two stand level the one named first is drawn first.
  */
 export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
-  ground: ['life', 'weather', 'yard', 'target'],
+  ground: ['life', 'weather', 'yard', 'fishing', 'target'],
   stand: [
     'props',
     'moving',

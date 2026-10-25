@@ -103,9 +103,10 @@ describe('the critters', () => {
     }
   });
 
-  it('number between thirty and seventy-two, a luna moth, and green, blue and paired orbs', () => {
+  it('number between thirty and eighty, a luna moth, and green, blue and paired orbs', () => {
     expect(CRITTER_IDS.length).toBeGreaterThanOrEqual(30);
-    expect(CRITTER_IDS.length).toBeLessThanOrEqual(72);
+    // 74 since 1.4's G3's winter fish.
+    expect(CRITTER_IDS.length).toBeLessThanOrEqual(80);
     expect(CRITTERS.orbPair.rarity).toBe('legendary');
     expect(CRITTERS.orbPair.description).toMatch(/green/);
     expect(CRITTERS.orbPair.description).toMatch(/blue/);
@@ -379,7 +380,9 @@ describe("rarity and the seasons (0.2's F1)", () => {
       for (const h of [2, 12, 21]) {
         for (const place of PLACES) {
           for (const c of crittersOut(day, h, place.habitats, undefined, place.id)) {
-            expect(inSeason(c.critter, day) || isVisitDay(day), `${c.critter} ${day}`).toBe(true);
+            // One that waits on the full moon visits on it out of season (1.4's G3's sturgeon).
+            const visits = isVisitDay(day) || (CRITTERS[c.critter].moon && isFullMoon(day));
+            expect(inSeason(c.critter, day) || visits, `${c.critter} ${day}`).toBe(true);
           }
         }
       }

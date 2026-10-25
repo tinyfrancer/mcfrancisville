@@ -806,6 +806,11 @@ export const SHINIES: Record<CritterId, Shine> = {
   snowMoth: 'blush',
   frostBeetle: 'rose',
   snowglobeFish: 'rose',
+  // Under the winter ice (1.4's G3): warm where the plain are cold.
+  icicleSmelt: 'gold',
+  bobblePerch: { gem: 'ruby', accent: 'gold', keys: 'p', keep: 'w' },
+  auroraTrout: { gem: 'midnight', accent: 'gold', keys: 'aA' },
+  coldMoonSturgeon: { gem: 'gold', accent: 'pearl', keys: 'p' },
   confettiMoth: { gem: 'midnight', keep: 'pqr' },
   lovebug: 'mint',
   luckyFrog: { gem: 'gold', accent: 'emerald', keys: 'skK' },

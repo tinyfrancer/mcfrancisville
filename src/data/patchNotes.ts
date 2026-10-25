@@ -213,6 +213,9 @@ export const NOTES: readonly PatchNotes[] = [
         'mittens, bobble hats and, I am told, a bat onesie.',
       'Two new sets for long evenings: a Cosy Cabin with a crackling log stove, and a Midnight ' +
         'Observatory whose telescope hums to the stars.',
+      // 1.4's G3: ice fishing and the ice hut.
+      'When the pond freezes, the fish carry on underneath: fish through the ice for four ' +
+        'winter ones, or help Gourdon build his ice hut, stove and all.',
     ],
     ps: 'P.S. The typewriter keys are cold in the mornings now. I type in mittens. Please excuse the typos.',
   },

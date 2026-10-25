@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { INTERIOR_IDS, isInterior } from '../../src/data/interiors';
+import { PROJECT_IDS, PROJECTS } from '../../src/data/projects';
 import { BOO_ACRES_SPOTS, LANTERN_SHORE_SPOTS } from '../../src/data/maps';
 import { ITEMS } from '../../src/data/items';
 import { VILLAGERS } from '../../src/data/villagers';
@@ -231,12 +232,17 @@ describe('the places', () => {
     expect({ tx: west.tx, ty: west.ty, h: west.h }).toEqual({ tx: 0, ty: 14, h: 2 });
   });
 
-  it('has every door a building in its place: a prop it has, or a house on one of its lots', () => {
+  it('has every door a building in its place: a prop it has, a house on a lot, or a project', () => {
     for (const id of outdoors) {
       for (const door of mapOf(id).doors) {
         const standing = mapOf(id).props.some((p) => p.id === door.prop);
         const onLot = LOTS.some((l) => l.zone === id && l.house.id === door.prop);
-        expect(standing || onLot, door.prop).toBe(true);
+        // The ice hut's, once it's built (1.4's G3).
+        const built = PROJECT_IDS.some(
+          (p) =>
+            PROJECTS[p].zone === id && PROJECTS[p].stages.done.some((d) => d.prop === door.prop),
+        );
+        expect(standing || onLot || built, door.prop).toBe(true);
       }
     }
   });

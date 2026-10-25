@@ -20,6 +20,7 @@ import { bakeDoll } from './doll';
 import { DOLL_HEIGHT } from '../sprites/doll';
 import { Lighting } from './lighting';
 import { drawGlints } from './bloom';
+import { drawBite, drawLine } from './fishing';
 import { drawPetBubbles, petDrawable } from './pets';
 import { drawNeighbourBubbles, drawPuffs, neighbourDrawables } from './villagers';
 import { drawRoomFrame, INDOOR_SOFTEN, pieceShadow, pieceSprite, roomShell } from './room';
@@ -151,8 +152,9 @@ export class RoomView implements SceneView {
     }
     drawTarget(ctx, this.world, cam, nowMs);
 
+    const me = playerDrawable(this.world, nowMs);
     const drawables: Drawable[] = [
-      playerDrawable(this.world, nowMs),
+      me,
       ...this.world.petCare.here().map((p) => petDrawable(p, this.world, nowMs)),
       ...neighbourDrawables(this.world, this.zone.id, nowMs),
     ];
@@ -165,6 +167,9 @@ export class RoomView implements SceneView {
     }
     drawables.sort((a, b) => a.footY - b.footY);
     drawDrawables(ctx, drawables, cam);
+    // Her line down the ice hut's hole (1.4's G3).
+    const fishing = this.world.fishing.line?.hole === this.zone.id;
+    if (fishing) drawLine(ctx, this.world, me, cam, nowMs, true);
     drawPuffs(ctx, this.world, this.zone.id, cam, nowMs);
     // The glow from walls and rugs too, which are under everything else.
     const lit = sprites.filter((s) => s.glow && layerOf(s.thing) !== 'floor');
@@ -186,6 +191,7 @@ export class RoomView implements SceneView {
       this.sprites.flatMap((s) => s.lights),
       INDOOR_SOFTEN,
     );
+    if (fishing) drawBite(ctx, this.world, me, cam);
     drawRipeSparkles(ctx, this.world, this.zone.id, cam, nowMs, PLANTER_SOIL);
     drawBedLook(ctx, this.world, this.zone.id, cam, nowMs);
     drawPetBubbles(ctx, this.world.petCare.here(), this.world, cam, nowMs);

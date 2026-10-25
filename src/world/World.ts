@@ -1,6 +1,6 @@
 import { STARGAZERS } from '../data/constellations';
 import { FURNITURE } from '../data/furniture';
-import { FIXTURES } from '../data/interiors';
+import { FIXTURES, HOLE_QUIET } from '../data/interiors';
 import type { Placed } from '../data/home';
 import type { PasserId } from '../data/rareEvents';
 import { isFish } from '../data/critters';
@@ -137,8 +137,22 @@ export class World extends WorldParts {
     const visit: Visit = isFish(critter.critter)
       ? { kind: 'fish', fish: critter.key }
       : { kind: 'critter', critter: critter.key };
-    if (reach(here, critter) <= 1) return this.walkTo([here], visit);
+    // Skating right over a fish under the ice (1.4's G3), she steps off it to drill her hole.
+    const near = visit.kind === 'fish' ? reach(here, critter) === 1 : reach(here, critter) <= 1;
+    if (near) return this.walkTo([here], visit);
     return this.walkTo(this.around(critter), visit);
+  }
+
+  /**
+   * Walking up to the ice hut's hole (1.4's G3): her rod in hand, she casts through it to whatever's
+   * under it this hour, or hears that nothing's nibbling till the hour turns.
+   */
+  private fishHole(hole: Tile, arrived: Arrived): WorldEvent[] {
+    this.hands.use('rod');
+    const cast = this.fishing.castInHole({ tx: hole.tx, ty: hole.ty });
+    if (cast) return [cast];
+    arrived.says = HOLE_QUIET;
+    return [];
   }
 
   /** Where she is, and which way she faces, for the view to draw. */
@@ -446,6 +460,9 @@ export class World extends WorldParts {
       const plays =
         'fixture' in thing ? FIXTURES[thing.fixture.id].plays : FURNITURE[thing.piece.id].plays;
       const used = this.interiors.use(room.id, thing, arrived);
+      if ('fixture' in thing && FIXTURES[thing.fixture.id].fishing) {
+        return [...used, ...this.fishHole(thing.fixture, arrived)];
+      }
       return plays ? [...used, this.instruments.play(plays, room.id)] : used;
     },
     pet: (visit, here, arrived) => {

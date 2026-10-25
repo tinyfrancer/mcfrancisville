@@ -65,6 +65,8 @@ const GARDEN_AT = { tx: 6, ty: 24 };
 const BRIDGE_AT = { tx: 21, ty: 25 };
 /** Her greenhouse, at the top of her yard behind the house. */
 const GREENHOUSE_AT = { tx: 5, ty: 1 };
+/** The ice hut (1.4's G3), on the pond's north-east bank, its door on the water's side. */
+const ICE_HUT_AT = { tx: 31, ty: 38 };
 
 export const PROJECTS: Record<ProjectId, ProjectRow> = {
   bandstand: {
@@ -173,6 +175,28 @@ export const PROJECTS: Record<ProjectId, ProjectRow> = {
     letter:
       "Dear {name},\n\nYour greenhouse is finished! Gourdon fitted the last pane himself and then stood back and said nothing for a very long time, which I believe means he's proud. Three planters under glass, all yours: whatever you sow in them will think it's in season.\n\nGrow something wonderful.\n\nYour Mayor",
     built: 'Your greenhouse is finished! Its planters grow anything as if in season.',
+  },
+  iceHut: {
+    name: 'The ice hut',
+    blurb:
+      "Gourdon's idea: a snug little hut on the pond's bank, with a stove to warm your mittens by and a hole in its floor to fish through, all winter long and the rest of the year too.",
+    zone: 'town',
+    where: "on the pond's bank, by the fountain",
+    candy: 3800,
+    needs: [
+      { item: 'wood', count: 70 },
+      { item: 'stone', count: 20 },
+      { item: 'ghostPepper', count: 6 },
+    ],
+    stages: {
+      posts: corners(ICE_HUT_AT.tx, ICE_HUT_AT.ty, 2, 2),
+      frames: [{ prop: 'iceHutFrame', ...ICE_HUT_AT }],
+      done: [{ prop: 'iceHut', ...ICE_HUT_AT }],
+    },
+    picture: 'iceHut',
+    letter:
+      "Dear {name},\n\nThe ice hut is up! Gourdon lit its stove with one of your ghost peppers and it has been toasty ever since. He drilled the hole in the floor himself, then sat by it for an hour with a flask of cocoa, which he says was testing.\n\nIt's yours whenever you fancy a quiet fish. Do take a cushion.\n\nYour Mayor",
+    built: 'The ice hut is finished! Its stove is lit, and its hole is ready to fish through.',
   },
 };
 
