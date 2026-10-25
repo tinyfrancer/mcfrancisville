@@ -13,9 +13,7 @@ the user 2026-10-20). Each session's heading says where it is.
 
 ### F1: visitors every fortnight (`claude/f1-fortnight`; Sonnet; decision 360)
 
-Code, tests, the `1.2.1` notes row, decision 360, and `CLAUDE.md` are done and being pushed as a
-draft PR into `v1.3-dev`. Left: the whole suite and smoke green, merge `origin/v1.3-dev` in (F2
-may have landed), ready the PR and merge it, then the plan's status line. No save change.
+F1 landed (PR #218, decision 360). ⬆ 1.2.1 ready.
 
 ### F2: her phone's frame (`claude/f2-frame`; Sonnet; decision 361)
 
