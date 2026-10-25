@@ -546,6 +546,8 @@ const CLEAR_NIGHT = '2026-10-07';
  */
 async function stargazing() {
   await openOn(CLEAR_NIGHT, 22);
+  // A whole run's hud section has put the Cat on her chart already, which is a first of its own.
+  const charted = await page.evaluate(() => window.world.cabinet.stars);
   check('a clear night', (await page.evaluate(() => window.world.weather.today())) === 'clear');
   await page.evaluate(() => {
     window.world.atlas.find('castleHill');
@@ -602,8 +604,10 @@ async function stargazing() {
   const said = (await page.locator('.hud-sky-message').textContent()) ?? '';
   check('it lights up, and says so', /lights up/.test(said), said);
   check(
-    "and Hazel's letter comes with her star map",
-    await page.evaluate(() => window.world.mailbox.letters.has('stars:first')),
+    "and Hazel's letter comes with her star map, the first time",
+    (await page.evaluate(() => window.world.mailbox.letters.has('stars:first'))) ===
+      (charted === 0),
+    String(charted),
   );
   await page.screenshot({ path: '.smoke/sky-sheet.png' });
   await closeSheets();
