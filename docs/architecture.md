@@ -1132,6 +1132,36 @@ times a call in town: the decorations, the pond's ice, the mound), and a path ac
 third of what it was. The suite is 17% shorter, its world tests' steps (the settling cases in
 `finale.test.ts` run 0.15–0.7 s a case against 0.18–1.9 s, so their stated 30 s timeout is gone).
 
+**1.3, V1.3's review** (2026-10-25, decision 366): the 1.3 plan whole against 1.2 as it is on her
+phone, `v1.3-dev`'s head (with the review's notes row) served from one copy and `origin/main`
+(1.2, PR #201) from another, both measured with 1.3's `scripts/perf.mjs`, alternating, on a
+container to itself: two runs each at Close at 21:30, one each at noon and at Far by night and by
+day, as 1.2's table was. Draw means, ms (p50 at Close by night); updates, ms (Close, 21:30); heap,
+MB (Close, 21:30):
+
+| Scene         | Close 21:30, 1.3      | Close 21:30, 1.2      | Noon, 1.3 / 1.2 | Far 21:30, 1.3 / 1.2 | Far noon, 1.3 / 1.2 | Updates 1.3 / 1.2     | Heap 1.3 / 1.2        |
+| ------------- | --------------------- | --------------------- | --------------- | -------------------- | ------------------- | --------------------- | --------------------- |
+| Town          | 37.7–40 (25–28.5)     | 39.7–40.9 (26.2–30.6) | 22.4 / 25.3     | 70.5 / 62.8          | 30.8 / 30.5         | 0.93–0.98 / 1.29–1.32 | 30.4 / 30.2           |
+| Home          | 21.1–22 (11.9)        | 23.8–24.2 (14.3–14.6) | 5.2 / 7.3       | 22.5 / 22.1          | 5.7 / 7.1           | 0.83–0.96 / 1.22–1.24 | 31.1 / 30.9           |
+| Fairground    | 24.5–25.8 (16.8–17.1) | 28.8–29.5 (19.3–20.8) | 10 / 10.3       | 47.6 / 46.1          | 14.9 / 15.7         | 0.59–0.64 / 0.95–0.98 | 31.7–32.1 / 31.8–31.9 |
+| Whisperwood   | 28.6–29.5 (18.2–19.1) | 31.5–32.9 (21.3–21.4) | 11.3 / 12.5     | 58.2 / 58.3          | 17.6 / 20           | 0.67–0.7 / 1.04–1.15  | 32.3–32.7 / 32.2–32.8 |
+| Boo Acres     | 22.5–23.1 (13.8–14.7) | 24.8–28.9 (16.1–17.4) | 8.6 / 9         | 45 / 43.7            | 13.5 / 14.3         | 0.56–0.6 / 0.9–1.1    | 32.9–33 / 32.7–33.7   |
+| Her yard      | 34–36.5 (25.5–25.7)   | 40–43.6 (29.5–33.3)   | 23.4 / 26.3     | 66.9 / 67            | 29.1 / 29.8         | 0.7–0.74 / 1.26–1.4   | 33 / 32.9–33.4        |
+| Back room     | 26.3–27.8 (16.4–18.4) | 25.4–27.3 (16–18.1)   | 8.4 / 9.5       | 23.3 / 27.7          | 7.4 / 10.1          | 1.26–1.36 / 1.49–1.57 | 33.1–33.5 / 33–33.9   |
+| Lantern Shore | 28.4–29.7 (19.3)      | 30.4–31.5 (20.5–20.9) | 10.2 / 11.8     | 52.3 / 54.3          | 16.8 / 19           | 0.76–0.83 / 1.07–1.08 | 34–34.2 / 33.7–34.1   |
+
+F2's gains hold against her phone's build: every update at Close by night is a quarter to a half
+under 1.2's (the town 0.93–0.98 ms against 1.29–1.32, the yard 0.7–0.74 against 1.26–1.4; the back
+room least, its pets and pieces being most of its step), and so is every noon update. Draws at
+Close by night sit 1–4 ms under 1.2's almost everywhere (the yard 4–9), the back room crossing; at
+noon and at Far by day a little under or crossing. The one row over is the town at Far by night,
+70.5 against 62.8 in one run each, where 1.2's own table had Far's town swing by as much from 1.0
+(66.8 / 66.1) to here; the yard and the woods at Far, which draw as much, cross. No frame doubled.
+The heap is the same within half a megabyte everywhere: F3's creatures are baked at the sizes
+they were, and F4's trees are the same forms dealt elsewhere. Against 1.2's own table above (a
+different day's container), the town at Close by night is 37.7–40 here against 37.8–39.2 there,
+so the two days' machines were alike.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -1155,77 +1185,54 @@ costs a download per deploy, not a launch.
 
 ## Where it hurts
 
-Honest notes for whatever comes after 1.2, most pressing first, rewritten at V1.1's review
-(decision 356) after the 1.1 plan's four lanes. Of 1.0's list, the 1.1 plan did 2, 3, 5, 6, 10,
-11, 12, 13, 15 and 17 (1.0.1 did 4, 7, 8, 9 and 16); what each lane left for the review is folded
-in below, and what was done is said once at the end, so the list is what's left.
+Honest notes for whatever comes after 1.3, most pressing first, rewritten at V1.3's review
+(decision 366). The 1.3 plan did 1.2's 2, 3, 4 and 7 (F2 and F6); what was done is said once at the
+end, so the list is what's left. There is no plan after 1.3: a session that takes one of these up
+does it on a branch from `main`, as a PR the user merges.
 
-1. **Two things only her phone and Vercel can say** (as at 1.0; the user's, not a session's).
-   The cloud save's function (`api/save.ts`) has never run on Vercel: it's tested with a faked
-   store, and smoke fakes it with a route. The first deploy to `main` that carries it (1.0 did,
-   unlinked) is its test: the deployment's Functions tab should list `api/save`, then README's
+1. **Two things only her phone and Vercel can say** (as at 1.0 and 1.2; the user's, not a
+   session's). The cloud save's function (`api/save.ts`) has never run on Vercel: it's tested with
+   a faked store, and smoke fakes it with a route. The first deploy to `main` that carries it (1.0
+   did, unlinked) is its test: the deployment's Functions tab should list `api/save`, then README's
    `curl` should answer `{"save":null}` once the store is linked (README's "Cloud save"). If the
    build trips on TypeScript, the fallback is the same file as `api/save.js` with JSDoc types. And
    no frame has been timed on her iPhone: `?perf` (production too, `wiring/perf.ts`) is waiting,
    with the table under "On her iPhone" above.
-2. ~~**A world step works out the hour's happenings for every neighbour, every step.**~~ Done in
-   1.3's F2 (decision 361): `happeningsAt(hour, day)` keeps its last answer for the whole hour
-   of the day (rows begin and end on whole hours, held by a test) and for as long as the mayor's
-   story is told the same (`mayorTold()`), so a step filters the rows once an hour, not once per
-   neighbour per step. A town step at Close, 21:30, is 0.69–0.83 ms against 1.11–1.35, and a
-   world test's step under a third of what it was.
-3. ~~**`canWalk` works out the day key on every call.**~~ Done in 1.3's F2: `Decorations` and
-   `Mounds` read the day through `MinuteDay` (`world/zones/MinuteDay.ts`), which works `dayKey`
-   out once a minute as `Stalls` does; `canWalk` in town went from about 1.6 µs to 0.55 µs a call
-   (the harness's measure, with its wrapper), a long A\* across town three times faster.
-4. ~~**Forwarders kept so nothing else had to move.**~~ Done in 1.3's F6 (decision 365): `Home`'s
-   twenty-seven reads of `home.rooms` and `Neighbourhood`'s ten of `world.talk` are gone, and every
-   reader (the sheets, `wiring/apis/home.ts`, `render/HomeView.ts` and `render/villagers.ts`, the
-   services, the tests, and smoke's and perf's `window.world` reads) asks `home.rooms.<x>` and
-   `world.talk.<x>`. `Home` is the chest and the papers and floors she owns, with `rooms`.
-   The lived-in fixtures and the overlays and arrivals snapshots, unchanged, were the proof.
-5. **What a build doesn't reach.** The cast is cast (decision 355: Rufus, Gourdon and the Moon
-   Pie Man stout; Barty, Scarah, Rob Boo and Wes slight; everyone else and Cody hers), but the
-   passers-by (the wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default; a later look may
-   give one a build, a row there. What's at her middle on purpose: a
-   fly, the jackets' lapels and the ringmaster coat's buttons, the bow tie and the cravat from the
-   front (looked at on the slight mayor and the stout ones). Seen sideways, the mayor's sash is a
-   band down his side, as a sash would be.
-6. **Big data files and one big chunk.** `sprites/items.ts` 2,620 lines, `data/villagers.ts`
+2. **What a build doesn't reach.** The cast is cast (decision 355: Rufus, Gourdon and the Moon Pie
+   Man stout; Barty, Scarah, Rob Boo and Wes slight; everyone else and Cody hers), but the
+   passers-by (the wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default; a later look may give
+   one a build, a row there. What's at her middle on purpose: a fly, the jackets' lapels and the
+   ringmaster coat's buttons, the bow tie and the cravat from the front. Seen sideways, the mayor's
+   sash is a band down his side, as a sash would be.
+3. **Big data files and one big chunk.** `sprites/items.ts` 2,620 lines, `data/villagers.ts`
    1,680, `types/ids.ts` 1,345; fine as data, and a redraw should split by family as
-   `sprites/doll/` was. The build is one chunk, 1.84 MB (613 kB gzipped) at 1.2, against 1.66 MB
-   (555 kB) at S3: the builds, the ice and the paving. Precached once a version (decision 322), it
-   costs a download per deploy, not a launch; one chunk stays the right shape for an installed app
-   (decision 328) until it costs her a slow first launch on a new version.
-7. ~~**Small things the review noticed and left.**~~ Done in 1.3's F6 (decision 365), but the
-   last: `keepTown` stamps `updatedAt` and `lastPlayedAt` with the world's clock (`world.clock`),
-   so a town played under a dev build's `?day=` is saved as played then (on her phone the clock
-   is the real one, so nothing changes); `lived-in-v55` is in W1's overlays snapshot (its first
-   snapshot taken from the code as it then was). Still true: the bed card's buttons wait
-   `SETTLE_MS` after the card shows, so a tap on the card the moment it appears does nothing (on
-   purpose, against a stray tap; the second tap on the bed does the job at once).
+   `sprites/doll/` was. The build is one chunk, 1.84 MB (615 kB gzipped) at 1.3, as at
+   1.2 (613 kB), against 1.66 MB (555 kB) at S3. Precached once a version (decision 322), it costs a download
+   per deploy, not a launch; one chunk stays the right shape for an installed app (decision 328)
+   until it costs her a slow first launch on a new version.
+4. **Smoke on the real clock.** Most sections open on a named day (`openOn`, `PLAIN_DAY`), but a
+   whole run's first sections play on the container's real date and hour, so the town they meet
+   changes with the day: V1.3 met a neighbour calling on her stood on the yard section's tile (25
+   October; fixed by putting the talk away), and the two known flakes (`camera`'s top row with a
+   toast up, `interiors` at 19:00) are the same kind. Opening those sections on a named day would
+   end the kind; it would also stop smoke meeting the town as she does, which is why it hasn't.
+5. **The bed card's pause.** The bed card's buttons wait `SETTLE_MS` after the card shows, so a tap
+   on the card the moment it appears does nothing (on purpose, against a stray tap; the second tap
+   on the bed does the job at once).
+6. **The art notes** at the end of `docs/handoff.md` are the art's list: F4's three (the creek
+   meeting the dirt path square at the footbridge's site, the ghost daisies and meadow flowers green
+   under winter's snow, the dead tree bare of snow), F3's three left for her eye (the catfish, the
+   fog eel's fin, the mud puppy's gills, and the monarch's margin), the frozen pond's ring and the
+   builds at Close. None is clearly wrong; each is for her eye on her phone.
 
-**Done in the 1.1 plan** (decisions 330–355), kept short; the decisions and the lanes' tables
-above hold the detail:
-
-- ~~The suite and smoke slow, smoke one file~~ (T1, T2: smoke a file per area in
-  `scripts/smoke/`, 622 checks before and after, `npm run smoke -- town fair`; the suite two vitest
-  projects, 346 s to 121 s in the container).
-- ~~One body under every look~~ (A5a, A5b: `Build`s, `regular`, `stout`, `slight`, on every
-  villager row; `measureOf(body)` for every cut and touch; `sprites/doll/` by family; her looks
-  held to the pixel by `looksHeld`).
-- ~~Arriving a chain of `if`s; eight overlays asked where she can walk~~ (W1: `PropArrivals`, a
-  table by prop id; `Overlay`s, one list in `MapZone`; both held by snapshots from the old code).
-- ~~Her home's bed key without the room; `Home` holding four features~~ (W2: `Rooms`; a planter's
-  bed keyed by its room, save v55; the forwarders are 4 above).
-- ~~Big view, wiring and service files~~ (A4: `OutdoorView` in passes, 1,269 lines to 494,
-  `OUTDOOR_LAYERS`; W3: `Talk` out of `Neighbourhood`, the Apis by area in `wiring/apis/`,
-  `main.ts` the boot, the loop and the views).
-- ~~The areas' order mattering silently~~ (W3: `AREAS` in `world/areas/order.ts`, held by a test).
-- ~~The town's legend running out of characters~~ (W3: the rule noted at `LEGEND`, a place's own
-  legend for a place-only prop).
-- ~~Pets walking tile to tile~~ (W1: `Pet.walk` pulls its path with `stringPull`).
-- ~~`happeningsAt` filtered per neighbour per step; `canWalk` worked out the day key per call~~
-  (1.3's F2, decision 361: 2 and 3 above, struck through).
-- ~~Forwarders on `Home` and `Neighbourhood`; `?day=` not reaching the save's stamps~~ (1.3's F6,
-  decision 365: 4 and 7 above, struck through).
+**Done since 1.0** (decisions 325–365), kept short; the decisions and the tables above hold the
+detail. The 1.1 plan made smoke a file per area and the suite two vitest projects (T1, T2: 346 s
+to 121 s), gave the cast three bodies (A5a, A5b: `Build`s, `measureOf`, `looksHeld`), turned
+arriving into a table and the overlays into one list (W1, both held by snapshots), gave her rooms
+a keeper and a planter's bed its room (W2, save v55), drew `OutdoorView` in passes and split
+`Talk`, the Apis and `main.ts` (A4, W3), named the areas' order (`AREAS`), the legend's rule, and
+pulled the pets' paths taut. 1.0.1 fixed 1.0's small things (X1, X2). **1.3** kept `happeningsAt`
+for the hour and the day key by the minute (F2: a town step at Close a third to a half cheaper, a
+long A\* three times faster, the suite 17% shorter), dropped `Home`'s 27 and `Neighbourhood`'s 10
+forwarders and stamped the save by the world's clock (F6), and changed nothing else in the code's
+shape.

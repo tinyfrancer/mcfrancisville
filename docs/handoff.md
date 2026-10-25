@@ -1,77 +1,84 @@
 # Handoff: picking up the game cold
 
 Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
-V1's review (decision 324) for after 1.0, and by V1.1's (decision 356) for after 1.2. Read "In
-progress" and "After 1.0" first; "Where things stand" further down is the long history.
+V1's review (decision 324) for after 1.0, by V1.1's (decision 356) for after 1.2, and by V1.3's
+(decision 366) for after 1.3, the last plan for a while. Read "In progress", then "If you are
+starting cold after a long gap", then "After 1.0"; "Where things stand" further down is the long
+history.
 
 ## In progress
 
-**The 1.3 plan is running** (`docs/v1.3_plan.md`, decision 357; started 2026-10-24 by the
-coordinating session: the last week of the user's subscription, sub-agents in worktrees two at a
-time, Sonnet for rules and refactors, Opus for art). **1.2 is on her phone** (PR #201, merged by
-the user 2026-10-20). Each session's heading says where it is.
+Nothing is in progress.
 
-### F1: visitors every fortnight (`claude/f1-fortnight`; Sonnet; decision 360)
+## If you are starting cold after a long gap
 
-F1 landed (PR #218, decision 360). ⬆ 1.2.1 ready.
+Written at 1.3 (2026-10-25) for a session that may come months later and knows nothing.
 
-### F2: her phone's frame (`claude/f2-frame`; Sonnet; decision 361)
-
-F2 landed (PR #217, decision 361): `happeningsAt` kept for the hour (keyed by day, whole hour and
-`mayorTold()`), the day key by the minute in `Decorations` and `Mounds` (`world/zones/MinuteDay.ts`),
-`finale.test.ts`'s 30 s timeout gone; numbers in `docs/architecture.md` ("1.3's F2"). No save
-change.
-
-### F3: the creatures (`claude/f3-creatures`; Opus; decision 362)
-
-F3 landed (PR #220, decision 362): every creature looked at together at 6× and at 3× (a phone
-at Close) by day and night, 41 critters ranked weak (by family, in 13 drawings) and redrawn with
-Fibi's and Dolly's face-on frames; each redrawn 16 drawn from its 24's numbers and held by
-`tests/sprites/critters.test.ts`. No save change; `looksHeld` unchanged.
-
-**For 1.3's notes** (the review writes the row): "the creatures redrawn: the bats' wings on finger
-bones, the moths with fore- and hindwings, every fish with a tail you can see in its shadow, the
-orbs as little wisps, the crickets, grasshoppers, twig knight, woolly bear and glowworm, a skull
-on the skull beetle, and a grey muzzle on Fibi and Dolly when they look at you".
-
-### F4: the scenery (`claude/f4-scenery`; Opus; decision 363)
-
-F4 landed (PR #221, decision 363): the bare and bent tree forms kept to where they stand
-(`grove` from `parseMap`, `treeFormOf` in `sprites/props.ts`; the town 6 bare of 18 to 1, the
-graveyard's), Whisperwood's creek curled round at the hedge (`wetAround`), the frozen pond's ring
-kept, three small things logged in the art notes. No save change. For 1.3's notes: the town's
-trees have all their leaves back.
-
-### F6: the forwarders and the small things (`claude/f6-forwarders`; Sonnet; decision 365)
-
-F6 landed (PR #222, decision 365): `Home`'s 27 and `Neighbourhood`'s 10 forwarders dropped, every
-reader (src, tests, and smoke's and perf's `window.world` reads in `scripts/`) on `home.rooms.<x>`
-and `world.talk.<x>`; `keepTown` stamps `updatedAt` and `lastPlayedAt` by the world's clock (a
-`?day=` town is saved as played then; `createdAt` stays real), and the cloud is given real time for
-a town played on a made-up clock and never asked about a newer one (smoke's "asks before taking
-the newer town" check opens on the real clock now); `lived-in-v55` is in W1's overlays snapshot.
-No save change (v55), `looksHeld` and every existing snapshot unchanged, smoke 622 of 622, perf
-within noise. No `NOTES` line.
-
-### F5 the touches, V1.3 the review
-
-Not started; after F1 and F2. F5 waits on the user's answers to "Still to put to the user"
-(below), recorded in `docs/personal_touches.md` by the coordinator as they come.
+- **What the game is.** McFrancisVille is a cozy, spooky-cute pixel-art life sim the user (Cody)
+  made as a gift for his wife, played on her iPhone as a home-screen app: Animal Crossing and
+  Stardew Valley by way of The Nightmare Before Christmas. She dresses up, decorates, farms,
+  befriends monster neighbours and fills the Curiosity Cabinet; Cody is in it, married to her.
+  Cozy is the brief: nothing punishes, expires or is lost (decision 11). Questions go to the
+  user, never to her (decision 14). `CLAUDE.md` is the map of the code, `docs/architecture.md`
+  the layers and services, `docs/decisions.md` every fork argued (read it before re-opening one).
+- **Where it lives.** `tinyfrancer/mcfrancisville` on GitHub (public). Vercel deploys `main`, and
+  only `main`, to her phone: previews are off for `claude/**` and every dev branch
+  (`vercel.json`'s `deploymentEnabled`, the user's call), so **merging to `main` publishes**. Her
+  town is in her phone's `localStorage` (`mcfrancisville:save`, save v55 at 1.3), migrated forward
+  on load (`src/persistence/`); the installed app is a cached shell (`public/sw.js`), so a deploy
+  reaches her on the next open or the one after.
+- **How to run it.** `npm ci` (from the lockfile; "Environment notes" below), `npm run dev`, open
+  `http://localhost:5173/`. A dev build takes `?skiptitle`, `?day=2026-12-24&hour=21.5`,
+  `?weather=rain` and `?loop=manual` (smoke's hand crank); any build takes `?gallery` and `?perf`;
+  `npm run sprite -- 'critter:*' --sheet` renders art to `.sprites/`. Before a push, CLAUDE.md's
+  "Commands": lint, format:check, typecheck, test and build (about two minutes), then smoke
+  against a running dev server (about twenty; in a Claude Code cloud container
+  `CHROMIUM_PATH=/opt/pw-browsers/chromium`, `SMOKE_URL` for another port, never
+  `playwright install`) and `smoke:offline` against `npm run preview` (`PREVIEW_URL`). CI runs the
+  same on every push to a PR. Known flaky smoke checks: `camera`'s top row with a toast up, and
+  `interiors`' "she goes into codyManor" alone at 19:00; re-run the job.
+- **What is still the user's** (no session can do it): (1) **the cloud save's store** (README's
+  "Cloud save": Vercel → Storage → Upstash for Redis with the `KV` prefix, then redeploy, then
+  README's `curl` and Settings → Backup on her phone); until then Settings says the cloud isn't
+  set up and the one console error on her phone is its 503. (2) **Her phone's frame time**: the
+  deployed site with `?perf`, the table under "On her iPhone" in `docs/architecture.md`, still
+  empty. (3) **Her eye on the art notes** at the end of this file.
+- **How a plan was run** (0.3 to 1.3): a written plan (`docs/v*_plan.md`) cut into sessions of one
+  context window by the files each owns; an integration branch made from `main` (`v1.3-dev` was
+  the last) and added to `vercel.json`'s no-preview list that day; one coordinating session
+  starting each session as a sub-agent in a worktree of its own, two at a time; each a draft PR
+  into the integration branch, merged with a merge commit once green, with one decision appended
+  to `docs/decisions.md` (numbered, never edited; **the next is 367**, 364 unused); a review last,
+  which plays a real town by taps, folds the `NOTES` rows her phone never saw into one card, and
+  writes the release PR from the integration branch to `main` for the user to merge. "How 1.3 was
+  run" and "How 1.1 was run" below say what worked and what cost. A small fix needs none of it: a
+  branch from `main`, a PR, the checks, the user merges.
+- **What's logged.** "Where it hurts" in `docs/architecture.md` (most pressing first: the two
+  things only her phone and Vercel can say, the passers-by's build, the big data files and the one
+  chunk, the bed card's pause) and "Art notes for the final pass" at the end of this file (for her
+  eye, none clearly wrong). "Still to put to the user" holds the personal-touch questions, parked
+  (decision 177) and left there at the user's word of 2026-10-25.
+- **Before changing what she sees**: `docs/art_style.md` before drawing; a change to the save's
+  shape bumps `SAVE_VERSION` with a migration step, a test and `isSaveState`, and the lived-in
+  fixtures (`tests/persistence/fixtures/`, held by `livedIn.test.ts`) must lose nothing; a release
+  adds its own `NOTES` row in `src/data/patchNotes.ts` (her phone will have last seen `1.3`); a new
+  neighbour comes with a release, never over time (CLAUDE.md). **With nothing asked of it, a
+  session changes nothing and asks the user what they'd like next.**
 
 ## After 1.0
 
-**The 1.1 plan is complete, and 1.2 is the release PR #201** (`v1.1-dev` → `main`, "Release 1.2
-(with 1.0.1 and 1.1)"), **the user's to merge**; merging deploys to her phone. Her phone is on
-1.0 (PR #198, 2026-10-18) until then: 1.0.1 (X1, X2) and 1.1 (H1, H2) were cut as #201 and never
-merged, so everything since 1.0 goes at once. She reads one card, `1.2`, five lines folding
-1.0.1's and 1.1's (decision 356), and her save goes from v53 to v55 through step 53 (1.0.1's
-`kitchen.ate`, the identity) and step 54 (W2's planter beds given their room), held by
-`livedIn.test.ts`'s fixtures, 1.0's town and the same town played on in 1.2 (`lived-in-v55.json`).
-A session starting cold with nothing asked of it does nothing to the game and asks the user what
-they'd like next; "Where it hurts" in `docs/architecture.md` and the art notes below are what's
-logged, most pressing first.
+**The 1.3 plan is complete, and 1.3 is the release PR #219** (`v1.3-dev` → `main`, "Release 1.3
+(with 1.2.1)"), **the user's to merge**; merging deploys to her phone, and `main` after it is the
+game as it stands. Her phone is on 1.2 (PR #201, 2026-10-20) until then. 1.2.1 (F1's moon twice a
+month) was ready the day F1 merged but never cut, so it goes with 1.3: she reads one card, `1.3`,
+five lines folding 1.2.1's (decision 366), and her save stays v55 with no migration, held by
+`livedIn.test.ts`'s fixtures (1.2's town, `lived-in-v55.json`, the newest: 1.3 changed nothing
+in the save's shape). **No plan follows 1.3**; the user's subscription ended with it. A session
+starting cold with nothing asked of it does nothing to the game and asks the user what they'd like
+next.
 
-**The user's steps, after merging the release PR:**
+**The user's steps, after merging the release PR** (1 and 2 carried from 1.2; as far as the repo
+knows, neither is done):
 
 1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
    Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
@@ -83,21 +90,115 @@ logged, most pressing first.
 2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
    town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
    readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
-   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 and 1.2 are the tables just
-   above it.
-3. **The silent switch**: with the switch down the game should be quiet; Settings → Sound → **Play
-   on silent** on, it plays through, and off again, quiet at once (on iOS before 17 perhaps from
-   the next open; decision 330).
-4. **The crickets**: at night outdoors, whether they now sound like a place and not a tick, and
-   whether any bed is still too much (the **Ambience** switch is hers).
-5. **The builds and the woods**: whether Barty, Scarah, the mayor and Wes read as slim rather than
-   small, the mayor's sash and Wes's trench sit right, and Rufus, Gourdon and the Moon Pie Man as
-   big and cosy; whether the woods' edges read as a wood at Close and the broken trees aren't too
-   many (the art notes below).
+   iPhone" in `docs/architecture.md`. The container's numbers for 1.0, 1.2 and 1.3 are the tables
+   just above it.
+3. **The moon's visitors**: on the next day after a full or new moon (27 October 2026, then 10
+   November, 25 November…), Today should say critters are visiting out of season, and the
+   Cabinet's shadows "visiting today"; on other days the Cabinet says the next date.
+4. **The creatures and the trees**: whether the redrawn bats, moths, fish (and their shadows),
+   orbs and crawlies read on her phone, Fibi and Dolly with their muzzles, and the town leafy with
+   the graveyard's one dead tree (the art notes below).
+5. 1.2's checks, if they were never made: the silent switch and **Play on silent**, the crickets
+   and the **Ambience** switch, the slim and sturdy builds, the woods' edges (decision 356).
 
-**`v1.1-dev` is the integration branch until 1.2 merges.** A later plan makes its own from
-`main` once #201 has merged (as `v1.1-dev` was from 1.0's `main`), and adds it to `vercel.json`'s
+**`v1.3-dev` was the integration branch for 1.3** and ends with it (`v1.1-dev` was 1.1's, `v1-dev`
+V1's). A later plan makes its own from `main` once #219 has merged, and adds it to `vercel.json`'s
 no-preview list that day (decision 265).
+
+### 1.3, the last week (the 1.3 plan's sessions and its review, 2026-10-24/25)
+
+`docs/v1.3_plan.md` (decision 357): the last week of the user's subscription, spent on what she
+would notice, five sessions from `v1.3-dev` and the review, sub-agents of one coordinating session,
+two at a time, Sonnet for rules and refactors and Opus for art and the review. Each session's
+heading as it left it follows; the decisions hold the detail.
+
+#### F1: visitors every fortnight (`claude/f1-fortnight`, PR #218, decision 360; Sonnet)
+
+Landed. Her one complaint after 1.2 ("it takes too long to get the once a month full moon bugs"):
+a critter out of its season or weather now visits the day after the full moon **and** the day
+after the new moon (`isNewMoon` in `systems/calendar.ts`, `isVisitDay` in `systems/critters.ts`),
+14 or 15 days apart; the moon-bound critters keep the full moon's night. The Cabinet and Today say
+"the day after a full or new moon"; the rarity test's simulated year fills the Cabinet in 8.9
+months on average where it took 9.7. Its `1.2.1` `NOTES` row was folded into 1.3's by the review.
+
+#### F2: her phone's frame (`claude/f2-frame`, PR #217, decision 361; Sonnet)
+
+Landed. `happeningsAt` kept for the hour (keyed by day, whole hour and `mayorTold()`), the day key
+by the minute in `Decorations` and `Mounds` (`world/zones/MinuteDay.ts`), `finale.test.ts`'s 30 s
+timeout gone; a town step at Close a third to a half cheaper, a long A\* three times faster, the
+suite 17% shorter (`docs/architecture.md`, "1.3's F2"). No save change.
+
+#### F3: the creatures (`claude/f3-creatures`, PR #220, decision 362; Opus)
+
+Landed. Every creature looked at together at 6× and at 3× (a phone at Close) by day and night, 41
+critters ranked weak (by family, in 13 drawings) and redrawn: the bats' wings on finger bones, the
+moths with fore- and hindwings, every fish with a tail you can see in its shadow, the lantern fish
+an angler, the orbs as little wisps, the crickets, grasshoppers, twig knight, woolly bear and
+glowworm, a skull on the skull beetle; Fibi and Dolly given grey muzzles facing her. Each 16 drawn
+from its 24's numbers and held by `tests/sprites/critters.test.ts`. No save change; `looksHeld`
+unchanged.
+
+#### F4: the scenery (`claude/f4-scenery`, PR #221, decision 363; Opus)
+
+Landed. The bare and bent tree forms kept to where they stand (`grove` from `parseMap`,
+`treeFormOf` in `sprites/props.ts`: the broken and leaning trees in a wood's edge, the dead one in
+the woods and by the graves; the town's bare trees 6 of 18 to 1, the graveyard's), Whisperwood's
+creek curled round at the hedge (`wetAround`), the frozen pond's ring kept, three small things
+logged in the art notes. No save change.
+
+#### F5: the personal touches · dropped
+
+Dropped at the user's word on 2026-10-25 ("we will hold on any more personal touches, want to
+focus on a fun game instead"). It never ran; decision 364 is unused, and "Still to put to the
+user" stays parked as it was.
+
+#### F6: the forwarders and the small things (`claude/f6-forwarders`, PR #222, decision 365; Sonnet)
+
+Landed. `Home`'s 27 and `Neighbourhood`'s 10 forwarders dropped, every reader (src, tests, and
+smoke's and perf's `window.world` reads in `scripts/`) on `home.rooms.<x>` and `world.talk.<x>`;
+`keepTown` stamps `updatedAt` and `lastPlayedAt` by the world's clock (a `?day=` town is saved as
+played then; `createdAt` stays real), and the cloud is given real time for a town played on a
+made-up clock; `lived-in-v55` is in W1's overlays snapshot. No save change, every snapshot
+unchanged.
+
+#### V1.3: the review and 1.3 (`claude/v13-review`, PR #223, decision 366; Opus)
+
+**Landed.** The notes: her phone last saw 1.2, so F1's `1.2.1` row, which no phone saw, is folded
+into one `1.3` row of five lines and a P.S. (the moon's visitors twice a month; the Cabinet and
+Today saying which day; the creatures; the trees; a lighter town and the mayor's last typed note
+for a while), and a phone that saw 1.2 reads exactly that card. The lived-in town: 1.2's
+(`lived-in-v55.json`) opened in a 1.3 dev build as her phone will, at Close, Far and sideways (one
+card, Cody's hello, no error notes, the unlinked cloud's 503 alone), then played on by taps on 12
+October (the day after the new moon: 25 critters visiting, a tree shaken, Ollie talked to, a skull
+beetle and a velvet bat netted) and 13 October (Today, the Cabinet's next dates, home and the back
+room's pumpkin planter); the save's shape unchanged, so no new fixture. The driver was a scratch
+script on smoke's `lib.mjs` helpers in a context of its own on a dev server of its own (decision
+324's method). **Fixed**: smoke's `yard` section, which met a neighbour calling on her on the real
+clock. **Perf**: 1.3 against 1.2 side by side, every update a quarter to a half lower, draws a
+little under, the heap the same (`docs/architecture.md`, "1.3, V1.3's review"). **Logged**:
+smoke's real-clock sections ("Where it hurts" 4); nothing new for the art notes. The docs: this
+file's top, "Where it hurts", `CLAUDE.md`, the plan's status line, decision 366.
+
+### How 1.3 was run, for whoever plans next
+
+A week's plan, sized to the subscription left: the user's one complaint first (F1, the moon), the
+cost on her phone next (F2), then the art she had said looked funny (F3, F4), the personal touches
+if the user answered (F5, dropped), the refactor's leftovers if time allowed (F6), and the review.
+Run as 1.1 was (one coordinating session, a sub-agent a session in a worktree, two at a time, the
+whole suite and smoke on a port of its own before each push, a draft PR through `gh api`, merged
+by the session once green), with two things new: **the model fit to the session** (Sonnet for a
+rule, a cache or a mechanical refactor; Opus for anything judged by eye), which held: every Sonnet
+session landed clean, and the eye-work got the stronger model; and **every merge left
+`v1.3-dev` releasable**, so the week could end at any session. What worked: the complaint fixed on
+day one; F2's measure-first method (a harness timing `canWalk` and a world step before and after)
+made a cache's worth plain; F3 judging creatures at the phone's real size, by family, so 13
+drawings fixed 41; F6's forwarders given a session of their own straight after the lanes that
+made them, as 1.1's notes asked. What cost: 1.2.1 was ready the first day but never cut, so it
+went with 1.3 as one card again (the third release in a row to fold), and smoke runs on the real
+clock in places, so a neighbour visiting her on the day broke a section for the first time
+(V1.3 fixed it). Worth keeping: the complaint first, the model by the task, snapshots before a
+refactor, the notes written once by the review. Worth changing: if a patch is meant to reach her
+mid-plan, the user cuts it that day; and smoke's real-clock sections could open on a named day.
 
 ### 1.1 and 1.2 (the 1.1 plan's lanes and its review, 2026-10-19/20)
 
@@ -1760,6 +1861,10 @@ lastWatered: null })` for each of `world.map.beds`.
 
 ## Starting cold
 
+The v0.1 plan's steps, kept as history (a draft PR runs CI now, decision 139, and personal touches
+are parked, decision 177); after a long gap, read "If you are starting cold after a long gap" at
+the top instead.
+
 1. Check "In progress" at the top of this file and `git status`: if either shows unfinished
    work, resume that first. Then read `CLAUDE.md`, the status line and your phase in `docs/v0.1_plan.md`, then
    `docs/decisions.md` (short, and it holds every fork already argued).
@@ -1803,6 +1908,10 @@ npm run build`, then `npm run dev` in one shell and `npm run smoke` in another. 
 **Parked (decision 177, 2026-10-01).** The user wants a working game for her first, and the
 easter eggs after. Keep these; don't put them to the user again until they ask, and add no new
 ones. Each has a default in the game already.
+
+**Still parked at 1.3.** The 1.3 plan offered them again (F5); on 2026-10-25 the user said "we
+will hold on any more personal touches, want to focus on a fun game instead", so F5 never ran
+(decision 366). Leave them here, unasked, until the user takes them up.
 
 Asked on 2026-10-01, after 0.2's release, for W3 (cooler clothes to buy):
 
@@ -1991,8 +2100,10 @@ again (decision 324), 1.0.1 and the 1.1 plan's lane A struck all of it, and **V1
 (decision 356) looked again at `npm run sprite -- 'place:*'` and the cast's figures, smoke's
 screenshots and its own four days of play at phone size, by day and at night. **1.3's F4**
 (decision 363) struck the trees and the creek, looked over every place whole in each season and
-smoke's screenshots at Close both ways, and added three. What's left is for the user's eye on her
-phone, none of it clearly wrong:
+smoke's screenshots at Close both ways, and added three. **1.3's review** (decision 366) looked at
+the redrawn creatures in the world, the bag, the Cabinet and the museum at phone size, the town's
+trees by day and night, and smoke's screenshots, and found nothing to add or strike. What's left
+is for the user's eye on her phone, none of it clearly wrong:
 
 - **The frozen pond's ring** (A3 kept it, V1.1 and 1.3's F4 too): in winter the town pond is ice
   with a ring of plates and open water round the fountain, which plays on. Looked at again at

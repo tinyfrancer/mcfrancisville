@@ -5,6 +5,7 @@ import {
   PLAIN_DAY,
   check,
   clearMat,
+  closeSheets,
   framed,
   openOn,
   page,
@@ -445,6 +446,9 @@ async function backRoom() {
 async function yard() {
   await page.evaluate(() => window.world.home.store('gardenBench'));
   await walkTo({ tx: 4, ty: 11 });
+  // On the real clock a neighbour may be calling on her, stood on that very tile: she walks up
+  // and says hello (1.3's V1.3 met Hazel there on 25 October), so the talk is put away first.
+  await closeSheets();
   await tapElement('.hud-decorate-yard');
   const outdoors = await page.evaluate(() => window.world.decorating.outdoors);
   check('the tray’s Decorate starts decorating her yard', outdoors);
