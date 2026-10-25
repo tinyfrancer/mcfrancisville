@@ -35,6 +35,7 @@ import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
 import { openBarn, type BarnApi } from './BarnSheet';
 import { openFair, type FairApi } from './FairSheet';
+import { openSky, type SkyApi } from './SkySheet';
 import type { ActivityId } from '../data/activities';
 import { openNeighbours, type NeighboursApi } from './NeighboursSheet';
 import { openGreeting, openTalk, type GreetingCard, type TalkApi } from './TalkSheet';
@@ -80,6 +81,8 @@ export interface HudOptions {
   stall: StallApi;
   barn: BarnApi;
   fair: FairApi;
+  /** The night sky through a telescope (1.5's G4). */
+  sky: SkyApi;
   quick: QuickApi;
   broom: BroomApi;
   rod: RodApi;
@@ -138,6 +141,8 @@ export interface Hud {
   openBarn(): void;
   /** Opens a stall at the fairground, or the fortune table, unless a sheet is already up (0.2's M2). */
   openFair(id: ActivityId): void;
+  /** Opens the night sky through a telescope, unless a sheet is already up (1.5's G4). */
+  openSky(): void;
   /** Sees to a pet, unless a sheet is already up; false if one was. */
   openPet(id: PetId): boolean;
   /** A neighbour says one thing, and she answers, over whatever sheet is up. */
@@ -450,6 +455,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openFair(id) {
       if (!sheetOpen(hud)) openFair(hud, options.fair, id);
+    },
+    openSky() {
+      if (!sheetOpen(hud)) openSky(hud, options.sky);
     },
     openPet(id) {
       if (sheetOpen(hud)) return false;

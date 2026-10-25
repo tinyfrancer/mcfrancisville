@@ -61,6 +61,8 @@ describe('the passes outdoors', () => {
         'yard',
       ],
       lit: [
+        // 1.5's G4: the month's constellation over the castle hill, behind everything else lit.
+        'stars',
         'holidays',
         'fountain',
         'weather',

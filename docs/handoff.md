@@ -40,10 +40,12 @@ the `telescope` prop by the castle hill's gate (`I` in `CASTLE_LEGEND`, tile 11,
 overlays and arrivals snapshots retaken for that tile alone), the brass telescope and Hazel's
 telescope at home opening the sky at night (`STARGAZERS`), Hazel's first letter with her star
 map (`stars:first`), two shelves (`halfTheSky`, `wholeSky`) and their pieces, cues and toasts.
-Next: the Sky sheet (`src/hud/SkySheet.ts`, `SkyApi`, drawn by `src/render/stargazing.ts`), the
-Cabinet's Sky tab, the world's sky pass over the castle hill, Today's line, Hazel's and Agatha's
-small talk, the calendar's mark, smoke, the `1.5` notes row, the docs and decision 373, then
-merge `origin/v1.4-dev` and bump the save (v57) last.
+Also done: the Sky sheet (`src/hud/SkySheet.ts`, `SkyApi` in `src/wiring/apis/sky.ts`, drawn by
+`src/render/stargazing.ts`), the Cabinet's Sky tab (the chart), the month's constellation faint
+over the castle hill at night once traced (`starsPass`, `STARRY` in `src/data/sky.ts`), Today's
+clear-night line, a `stars` small-talk topic (every neighbour, three lines), the calendar Month
+tab's mark, smoke `stargazing` (places) and `starChart` (hud). Next: the `1.5` notes row, the
+docs and decision 373, then merge `origin/v1.4-dev` and bump the save (v57) last.
 
 ### G3 ice fishing, G5 the photo mode, G6 the attic, G7 the pet, V1.5 the review
 

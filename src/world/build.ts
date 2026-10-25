@@ -450,6 +450,7 @@ export abstract class WorldParts {
       projects: this.projects,
       activities: this.activities,
       collecting: this.collecting,
+      stargazing: this.stargazing,
     });
     areaMade('upNow');
   }
@@ -467,6 +468,7 @@ export abstract class WorldParts {
       holding: this.hands.held,
       caught: this.collecting.caughtToday(),
       shiny: this.collecting.shinyToday(),
+      stars: this.cabinet.newestStar,
       pet: beside ? this.pets.nameOf(walker) : null,
       wearing: Object.values(this.wardrobe.look.outfit).map((worn) => worn.id),
       ...this.lately.last,

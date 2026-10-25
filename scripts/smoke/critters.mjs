@@ -103,7 +103,7 @@ async function critters() {
   );
 
   await tapElement('.hud-cabinet');
-  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Shelves'] });
+  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Sky', 'Shelves'] });
   const cases = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),

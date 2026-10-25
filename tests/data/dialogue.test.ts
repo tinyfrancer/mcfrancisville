@@ -41,6 +41,7 @@ import { ACCESSORIES } from '../../src/data/pets';
 import type { Ware } from '../../src/data/shop';
 import { LOST, NEWS } from '../../src/data/smallEvents';
 import { SMALL_TALK } from '../../src/data/smallTalk';
+import { CONSTELLATIONS } from '../../src/data/constellations';
 import { BEST_CALLS, BEST_LETTERS } from '../../src/data/bestFriends';
 import { HEART_MOMENTS } from '../../src/data/heartMoments';
 import { QUESTIONS } from '../../src/data/questions';
@@ -108,6 +109,7 @@ function render(line: string, name: string): string {
     .replaceAll('{where}', 'by the willow')
     .replaceAll('{critter}', 'candle moth')
     .replaceAll('{catch}', 'an owl-eye moth')
+    .replaceAll('{stars}', 'the Bat')
     .replaceAll('{pet}', 'Fibi')
     .replaceAll('{happening}', 'the moon howl')
     .replaceAll('{place}', 'up at the lookout')
@@ -310,6 +312,8 @@ const SAID_AS: Record<string, readonly string[]> = {
   away: [...new Set(Array.from({ length: 60 }, (_, i) => awayOf(i + 3)!))],
   here: [...new Set(Array.from({ length: 800 }, (_, i) => hereOf(i + 3)!))],
   catch: Object.values(CRITTERS).map((row) => aThing(row.name)),
+  // 1.5's G4: every constellation, as it's said.
+  stars: Object.values(CONSTELLATIONS).map((row) => row.name),
   pet: ['Fibi', 'Mr Bojangles'],
   happening: ['book club', "the New Year's dip"],
   place: ['at the farm gate', 'up at the lookout'],
@@ -381,6 +385,8 @@ function scenesOn(day: string): TalkScene[] {
     { ...NOBODY, met: shiftDay(day, -1), clue: { id: 'unmasked', day: shiftDay(day, -1) } },
     // 1.4's G1: a shiny caught today.
     { ...NOBODY, caught: 'lunaMoth', shiny: 'lunaMoth' },
+    // 1.5's G4: a constellation traced yesterday.
+    { ...NOBODY, stars: { id: 'bat', day: shiftDay(day, -1) } },
   ];
 }
 

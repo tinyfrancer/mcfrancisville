@@ -18,6 +18,12 @@ export const SKY: Record<MapZoneId, readonly Flyer[]> = {
   booAcres: ['crow', 'crow', 'crow', 'crow', 'bat'],
 };
 
+/**
+ * Where the month's constellation hangs faint in the night once she has traced it (1.5's G4):
+ * over the castle hill, where the telescope is; the rest of the world's sky is left to the moon.
+ */
+export const STARRY: readonly MapZoneId[] = ['castleHill'];
+
 /** When each is out, by the hour: crows from dawn to the golden hour, bats from dusk till late. */
 export const FLYER_HOURS: Record<Flyer, { from: number; to: number }> = {
   crow: { from: 6.5, to: 18.5 },
