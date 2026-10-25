@@ -14,7 +14,7 @@ import { stopsIn } from './schedules';
 import { hashString } from './random';
 import { tileAt, walkable, type TileMap } from './grid';
 import { weatherOn } from './weather';
-import { isFullMoon, shiftDay } from './calendar';
+import { isFullMoon, isNewMoon, shiftDay } from './calendar';
 import { decorOn } from './holidays';
 import { WINDOW_FROM } from './clock';
 import { FULL_MOON_WEIGHT } from '../data/calendar';
@@ -99,18 +99,20 @@ export function inSeason(id: CritterId, day: string): boolean {
 }
 
 /**
- * Whether a day is the day after a full moon, when a critter out of its time comes visiting (V1's
- * R5, decision 310). Not the full moon's own: that night is the moon-bound critters', and visitors
- * crowding it kept the ghost bat from being found within a year.
+ * Whether a day is the day after a full moon or a new one, when a critter out of its time comes
+ * visiting (V1's R5, decision 310; every fortnight since 1.3, decision 360). Not the full
+ * moon's own: that night is the moon-bound critters', and visitors crowding it kept the ghost bat
+ * from being found within a year.
  */
 export function isVisitDay(day: string): boolean {
-  return isFullMoon(shiftDay(day, -1));
+  const before = shiftDay(day, -1);
+  return isFullMoon(before) || isNewMoon(before);
 }
 
 /**
  * Whether a critter is visiting on a day (V1's R5, decision 310): out of its season, off its
- * holiday or in the wrong weather, but the day after a full moon, so none is ever more than a
- * month away. One that waits on the full moon has its night already, and one with no season, holiday
+ * holiday or in the wrong weather, but the day after a full or new moon, so none is ever more
+ * than about fifteen days away. One that waits on the full moon has its night already, and one with no season, holiday
  * or weather is about anyway.
  */
 export function isVisiting(id: CritterId, day: string, weather: Weather): boolean {

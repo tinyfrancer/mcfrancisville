@@ -1,23 +1,15 @@
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
-import {
-  STARTER_HOME,
-  type HomeInput,
-  type HomeSnapshot,
-  type Placed,
-  type Room,
-} from '../data/home';
-import type { Refusal } from '../systems/decor';
-import type { Tile } from '../systems/pathfinding';
-import type { FlooringId, FurnitureId, ItemId, RoomId, WallpaperId } from '../types/ids';
+import { STARTER_HOME, type HomeInput, type HomeSnapshot } from '../data/home';
+import type { FlooringId, FurnitureId, ItemId, WallpaperId } from '../types/ids';
 import { Rooms } from './Rooms';
 
 /**
  * Her home: the storage chest, which every room and her yard share (pieces, and since 0.3's H1
  * things from her bag, which `world.chest` moves in and out), the wallpapers and floorings she
  * owns, and her rooms, kept by `Rooms` (1.1's W2). Nothing she owns is ever lost: a piece put away
- * goes in the chest. Whatever reads "the room" reads the one she's in, through `rooms` or the
- * reads below, which stay so the views and sheets read her home as they always have.
+ * goes in the chest. Whatever reads "the room" reads the one she's in, through `home.rooms`
+ * (1.3's F6 dropped the one-line reads this class once kept for it).
  */
 export class Home {
   private readonly chest: { id: FurnitureId; count: number }[] = [];
@@ -105,116 +97,6 @@ export class Home {
     if (this.floorings.includes(id)) return false;
     this.floorings.push(id);
     return true;
-  }
-
-  // Her rooms, as the views, sheets and services have always read her home: see `Rooms`.
-
-  get room(): Room {
-    return this.rooms.room;
-  }
-
-  get here(): RoomId {
-    return this.rooms.here;
-  }
-
-  get built(): RoomId[] {
-    return this.rooms.built;
-  }
-
-  has(id: RoomId): boolean {
-    return this.rooms.has(id);
-  }
-
-  enter(id: RoomId): boolean {
-    return this.rooms.enter(id);
-  }
-
-  build(id: RoomId): Placed[] | null {
-    return this.rooms.build(id);
-  }
-
-  get extensions(): number {
-    return this.rooms.extensions;
-  }
-
-  get canGrow(): boolean {
-    return this.rooms.canGrow;
-  }
-
-  grow(): boolean {
-    return this.rooms.grow();
-  }
-
-  get layout(): number {
-    return this.rooms.layout;
-  }
-
-  get placed(): readonly Placed[] {
-    return this.rooms.placed;
-  }
-
-  placedIn(id: RoomId): readonly Placed[] {
-    return this.rooms.placedIn(id);
-  }
-
-  get everyPiece(): Placed[] {
-    return this.rooms.everyPiece;
-  }
-
-  get wallpaper(): WallpaperId {
-    return this.rooms.wallpaper;
-  }
-
-  get flooring(): FlooringId {
-    return this.rooms.flooring;
-  }
-
-  pieceAt(tx: number, ty: number): Placed | undefined {
-    return this.rooms.pieceAt(tx, ty);
-  }
-
-  surfaceUnder(piece: Placed): Placed | undefined {
-    return this.rooms.surfaceUnder(piece);
-  }
-
-  ridersOf(piece: Placed): Placed[] {
-    return this.rooms.ridersOf(piece);
-  }
-
-  canWalk(tx: number, ty: number): boolean {
-    return this.rooms.canWalk(tx, ty);
-  }
-
-  takeOut(id: FurnitureId, near: Tile, standing: Tile | null): Placed | null {
-    return this.rooms.takeOut(id, near, standing);
-  }
-
-  move(piece: Placed, tx: number, ty: number, standing: Tile | null): Refusal | null {
-    return this.rooms.move(piece, tx, ty, standing);
-  }
-
-  turn(piece: Placed, standing: Tile | null): Refusal | null {
-    return this.rooms.turn(piece, standing);
-  }
-
-  putAway(piece: Placed): ItemId[] {
-    return this.rooms.putAway(piece);
-  }
-
-  showIn(piece: Placed, id: ItemId | null): ItemId | null {
-    return this.rooms.showIn(piece, id);
-  }
-
-  onShow(id: ItemId): number {
-    return this.rooms.onShow(id);
-  }
-
-  paper(id: WallpaperId): boolean {
-    return this.rooms.paper(id);
-  }
-
-  lay(id: FlooringId): boolean {
-    return this.rooms.lay(id);
   }
 
   snapshot(): HomeSnapshot {

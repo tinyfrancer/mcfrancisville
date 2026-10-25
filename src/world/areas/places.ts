@@ -27,7 +27,7 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
   const stalls = new Stalls(ctx.clock, s.map);
   const lotsIn = (zone: MapZoneId) => new Lots(zone);
   const hers = (piece: FurnitureId) =>
-    home.everyPiece.some((p) => p.id === piece) ||
+    home.rooms.everyPiece.some((p) => p.id === piece) ||
     home.stored.some((st) => st.id === piece) ||
     s.yard.placed.some((p) => p.id === piece);
   // The square's holiday pieces stand in the town's own map, not a test's small one; and so do

@@ -78,8 +78,8 @@ describe('film night (0.2 J3)', () => {
     expect(cody.tile.ty).toBeGreaterThan(28);
     expect(cody.facing).toBe('up');
     h.world.tapTile(cody.tile.tx, cody.tile.ty);
-    h.until(() => h.world.neighbourhood.talkingTo === 'cody', 'walking up to Cody', 120_000);
-    h.world.neighbourhood.talk('cody');
+    h.until(() => h.world.talk.talkingTo === 'cody', 'walking up to Cody', 120_000);
+    h.world.talk.talk('cody');
     expect(h.world.bag.count('popcorn')).toBe(1);
   });
 });

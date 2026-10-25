@@ -42,12 +42,12 @@ describe('bracelets on her wrist', () => {
     expect(world.shops.sell('loveBracelet', 2)).toBeNull();
     expect(world.shops.sell('loveBracelet')).not.toBeNull();
     expect(world.bag.spares.find((s) => s.id === 'loveBracelet')).toBeUndefined();
-    expect(world.neighbourhood.give('cody', 'loveBracelet')).toBeNull();
+    expect(world.talk.give('cody', 'loveBracelet')).toBeNull();
     expect(world.bag.count('loveBracelet')).toBe(1);
 
     expect(world.wardrobe.takeOffBracelet('loveBracelet')).toBe(true);
     expect(world.wardrobe.look.wrist).toEqual([]);
-    expect(world.neighbourhood.give('cody', 'loveBracelet')).not.toBeNull();
+    expect(world.talk.give('cody', 'loveBracelet')).not.toBeNull();
     expect(world.bag.count('loveBracelet')).toBe(0);
   });
 
@@ -69,7 +69,7 @@ describe('bracelets on her wrist', () => {
 
   it('is worn by a neighbour she gives one to, and saved', () => {
     const { world, clock } = withBracelets([{ id: 'friendshipBracelet', count: 1 }]);
-    expect(world.neighbourhood.give('cody', 'friendshipBracelet')?.declined).toBe(false);
+    expect(world.talk.give('cody', 'friendshipBracelet')?.declined).toBe(false);
     expect(world.friends.of('cody').wears).toBe('friendshipBracelet');
     const again = new World({ ...fromSave(world.save()), clock });
     expect(again.friends.of('cody').wears).toBe('friendshipBracelet');

@@ -5,6 +5,7 @@ import {
   PLAIN_DAY,
   check,
   clearMat,
+  closeSheets,
   framed,
   openOn,
   page,
@@ -38,7 +39,7 @@ async function home() {
   await tapTile(9, 9);
   await tapElement('.hud-decor-bar button:text-is("↻ Turn")');
   await page.evaluate(() => window.view.step(40));
-  const moved = await page.evaluate(() => window.world.home.pieceAt(9, 9));
+  const moved = await page.evaluate(() => window.world.home.rooms.pieceAt(9, 9));
   check(
     'the next tap puts it down there, and Turn turns it',
     moved?.id === 'twoHeadedDuck' && moved.turn === 1,
@@ -146,7 +147,7 @@ async function chest() {
     JSON.stringify(kept),
   );
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
@@ -161,7 +162,7 @@ async function display() {
     window.world.home.store('bellJar');
     window.world.decorating.takeOut('bellJar');
     window.world.decorating.stop();
-    let placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+    let placed = window.world.home.rooms.placed.find((p) => p.id === 'bellJar');
     // A neighbour visiting may stand where it came out (Nessa, some afternoons), and a tap there
     // is a hello: it goes on the nearest tile with nobody on it.
     const busy = (/** @type {{ tx: number, ty: number }} */ t) =>
@@ -173,8 +174,8 @@ async function display() {
         for (let dx = -r; dx <= r && placed && busy(placed); dx++) {
           const to = { tx: me.tx + dx, ty: me.ty + dy };
           if (busy(to)) continue;
-          window.world.home.move(placed, to.tx, to.ty, me);
-          placed = window.world.home.placed.find((p) => p.id === 'bellJar');
+          window.world.home.rooms.move(placed, to.tx, to.ty, me);
+          placed = window.world.home.rooms.placed.find((p) => p.id === 'bellJar');
         }
       }
     }
@@ -205,7 +206,7 @@ async function display() {
   await tapElement('.hud-display-sheet .hud-slot[aria-label^="Luna moth,"]');
   await tapElement('.hud-display-sheet .hud-show-it');
   const shown = await page.evaluate(() => ({
-    shows: window.world.home.placed.find((p) => p.id === 'bellJar')?.shows,
+    shows: window.world.home.rooms.placed.find((p) => p.id === 'bellJar')?.shows,
     bag: window.world.bag.count('lunaMoth'),
   }));
   check(
@@ -216,7 +217,7 @@ async function display() {
   await page.screenshot({ path: '.smoke/display-jar.png' });
   await tapElement('.hud-display-sheet .hud-take-out');
   const back = await page.evaluate(() => ({
-    shows: window.world.home.placed.find((p) => p.id === 'bellJar')?.shows ?? null,
+    shows: window.world.home.rooms.placed.find((p) => p.id === 'bellJar')?.shows ?? null,
     bag: window.world.bag.count('lunaMoth'),
   }));
   check(
@@ -230,11 +231,11 @@ async function display() {
   // As she was, for the sections after: the museum wants her own catch, and the room its floor.
   await page.evaluate(() => {
     window.world.bag.remove('lunaMoth', 1);
-    const jar = window.world.home.placed.find((p) => p.id === 'bellJar');
-    if (jar) window.world.home.putAway(jar);
+    const jar = window.world.home.rooms.placed.find((p) => p.id === 'bellJar');
+    if (jar) window.world.home.rooms.putAway(jar);
   });
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
@@ -251,12 +252,12 @@ async function tabletop() {
   });
   await page.evaluate(() => window.view.step(40));
   await tapTile(8, 9);
-  const table = await page.evaluate(() => window.world.home.pieceAt(8, 9)?.id);
+  const table = await page.evaluate(() => window.world.home.rooms.pieceAt(8, 9)?.id);
   check('a tap while decorating puts the side table down', table === 'sideTable', String(table));
   await page.evaluate(() => window.world.decorating.takeOut('skullMug'));
   await page.evaluate(() => window.view.step(40));
   await tapTile(8, 9);
-  const mug = await page.evaluate(() => window.world.home.pieceAt(8, 9));
+  const mug = await page.evaluate(() => window.world.home.rooms.pieceAt(8, 9));
   check(
     'a tap on the table with the mug picked up stands the mug on it',
     mug?.id === 'skullMug' && mug.on === true,
@@ -274,7 +275,7 @@ async function tabletop() {
   );
   await tapTile(4, 10);
   const moved = await page.evaluate(() =>
-    window.world.home.placed.filter((p) => p.id === 'sideTable' || p.id === 'skullMug'),
+    window.world.home.rooms.placed.filter((p) => p.id === 'sideTable' || p.id === 'skullMug'),
   );
   check(
     'the table moves, and the mug goes with it',
@@ -287,7 +288,7 @@ async function tabletop() {
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
-  const kept = await page.evaluate(() => window.world.home.pieceAt(4, 10));
+  const kept = await page.evaluate(() => window.world.home.rooms.pieceAt(4, 10));
   check(
     'after a reload the mug is still on its table',
     kept?.id === 'skullMug' && kept.on === true,
@@ -295,7 +296,7 @@ async function tabletop() {
   );
   // Putting the table away puts the mug away with it, for the sections after.
   await page.evaluate(() => {
-    const t = window.world.home.placed.find((p) => p.id === 'sideTable');
+    const t = window.world.home.rooms.placed.find((p) => p.id === 'sideTable');
     window.world.decorating.start(t ?? null);
   });
   await tapElement('.hud-decor-bar button:text-is("Put away")');
@@ -305,7 +306,7 @@ async function tabletop() {
   check('the table goes in the chest with the mug', away);
   await tapElement('.hud-decor-bar button:text-is("Done")');
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
@@ -335,7 +336,7 @@ async function craft() {
   await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Home")');
   await page.screenshot({ path: '.smoke/workbench-home.png' });
   await tapElement('.hud-craft-sheet button[aria-label="Make Roomy extension"]');
-  const size = await page.evaluate(() => window.world.home.room.size);
+  const size = await page.evaluate(() => window.world.home.rooms.room.size);
   check('the roomy extension builds her house bigger', size === 1, String(size));
   await tapElement('.hud-craft-sheet button:text-is("Done")');
   await page.evaluate(() => window.view.step(40));
@@ -343,10 +344,10 @@ async function craft() {
 
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
-  const after = await page.evaluate(() => window.world.home.room.size);
+  const after = await page.evaluate(() => window.world.home.rooms.room.size);
   check('after a reload her house is still the bigger size', after === 1, String(after));
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her new front door');
 }
@@ -369,19 +370,24 @@ async function backRoom() {
   );
   await tapElement('.hud-craft-sheet .hud-tabs button:text-is("Home")');
   await tapElement('.hud-craft-sheet button[aria-label="Make Back room"]');
-  const built = await page.evaluate(() => window.world.home.built);
+  const built = await page.evaluate(() => window.world.home.rooms.built);
   check('the workbench builds her a back room', built.includes('back'), JSON.stringify(built));
   await tapElement('.hud-craft-sheet button:text-is("Done")');
   await page.evaluate(() => window.view.step(40));
   await page.screenshot({ path: '.smoke/back-doorway.png' });
 
   // A tap on the arch walks her onto the doorway under it, and through.
-  const way = await page.evaluate(() => window.world.home.room.doorways[0] ?? { tx: 1, ty: 3 });
+  const way = await page.evaluate(
+    () => window.world.home.rooms.room.doorways[0] ?? { tx: 1, ty: 3 },
+  );
   await tapTile(way.tx, way.ty - 1);
-  await stepUntil(() => window.world.home.here === 'back', 'a tap on the arch takes her through');
+  await stepUntil(
+    () => window.world.home.rooms.here === 'back',
+    'a tap on the arch takes her through',
+  );
   const inside = await page.evaluate(() => ({
     scene: window.world.scene,
-    width: window.world.home.room.width,
+    width: window.world.home.rooms.room.width,
   }));
   check(
     'she is in her back room, at home still',
@@ -395,7 +401,7 @@ async function backRoom() {
   });
   await page.evaluate(() => window.view.step(40));
   await tapTile(3, 5);
-  const placed = await page.evaluate(() => window.world.home.pieceAt(3, 5)?.id);
+  const placed = await page.evaluate(() => window.world.home.rooms.pieceAt(3, 5)?.id);
   check('a tap puts a piece down in the back room', placed === 'cauldron', String(placed));
   await tapElement('.hud-decor-bar button:text-is("Done")');
   await page.evaluate(() => window.view.step(40));
@@ -404,8 +410,8 @@ async function backRoom() {
   await page.evaluate(() => window.view.saveNow());
   await reloadGame();
   const after = await page.evaluate(() => ({
-    here: window.world.home.here,
-    piece: window.world.home.pieceAt(3, 5)?.id,
+    here: window.world.home.rooms.here,
+    piece: window.world.home.rooms.pieceAt(3, 5)?.id,
   }));
   check(
     'after a reload she is in her back room, with the cauldron where she put it',
@@ -415,9 +421,12 @@ async function backRoom() {
 
   // Its mat goes back through to the front room, onto the doorway, and that mat out.
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
-  await stepUntil(() => window.world.home.here === 'main', 'the back room mat takes her back');
+  await stepUntil(
+    () => window.world.home.rooms.here === 'main',
+    'the back room mat takes her back',
+  );
   const front = await playerTile();
   check(
     'back through, she stands in the doorway',
@@ -425,7 +434,7 @@ async function backRoom() {
     JSON.stringify(front),
   );
   await clearMat();
-  const door = await page.evaluate(() => window.world.home.room.mat);
+  const door = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(door.tx, door.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes out of her front door');
 }
@@ -437,6 +446,9 @@ async function backRoom() {
 async function yard() {
   await page.evaluate(() => window.world.home.store('gardenBench'));
   await walkTo({ tx: 4, ty: 11 });
+  // On the real clock a neighbour may be calling on her, stood on that very tile: she walks up
+  // and says hello (1.3's V1.3 met Hazel there on 25 October), so the talk is put away first.
+  await closeSheets();
   await tapElement('.hud-decorate-yard');
   const outdoors = await page.evaluate(() => window.world.decorating.outdoors);
   check('the tray’s Decorate starts decorating her yard', outdoors);
@@ -492,7 +504,9 @@ async function cook() {
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes in to her stove');
   await page.evaluate(() => window.world.bag.add('pumpkin', 2));
-  const stove = await page.evaluate(() => window.world.home.placed.find((p) => p.id === 'stove'));
+  const stove = await page.evaluate(() =>
+    window.world.home.rooms.placed.find((p) => p.id === 'stove'),
+  );
   if (!stove) throw new Error('her stove is not in her home');
   await tapTile(stove.tx, stove.ty);
   await stepUntil(
@@ -548,7 +562,7 @@ async function cook() {
   await page.setViewportSize(PHONE);
   await page.waitForTimeout(300);
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
 }
@@ -615,7 +629,7 @@ async function windows() {
     }
     await page.evaluate(() => window.view.step(40, 4));
     return page.evaluate(() => {
-      const room = window.world.home.room;
+      const room = window.world.home.rooms.room;
       const tx = Math.floor(room.width / 2);
       // Her arched window's left pane, a little under the top of its arch.
       const x = tx * 32 + 9 - window.view.cameraOrigin().x;
@@ -637,13 +651,13 @@ async function windows() {
     await tapProp('homeHouse');
     await stepUntil(() => window.world.scene === 'home', 'she goes home to hang windows');
   }
-  const was = await page.evaluate(() => window.world.home.wallpaper);
+  const was = await page.evaluate(() => window.world.home.rooms.wallpaper);
   await page.evaluate(() => window.world.home.giveWallpaper('archWindow'));
   // Nothing hangs or stands in front of the middle of the wall, for the look at the glass.
   await page.evaluate(() => {
-    const tx = Math.floor(window.world.home.room.width / 2);
-    for (const p of [...window.world.home.placed]) {
-      if (p.ty <= 4 && p.tx <= tx && p.tx + 2 > tx) window.world.home.putAway(p);
+    const tx = Math.floor(window.world.home.rooms.room.width / 2);
+    for (const p of [...window.world.home.rooms.placed]) {
+      if (p.ty <= 4 && p.tx <= tx && p.tx + 2 > tx) window.world.home.rooms.putAway(p);
     }
   });
   await tapElement('.hud-decorate');
@@ -651,7 +665,7 @@ async function windows() {
   await tapElement('.hud-surfaces-sheet button[aria-label="Arched windows on cream"]');
   await tapElement('.hud-surfaces-sheet .hud-done');
   await tapElement('.hud-decor-bar button:text-is("Done")');
-  const hung = await page.evaluate(() => window.world.home.wallpaper);
+  const hung = await page.evaluate(() => window.world.home.rooms.wallpaper);
   check('a wallpaper with windows is hung by taps', hung === 'archWindow', String(hung));
   await page.evaluate(() => window.view.step(40, 4));
   await page.screenshot({ path: '.smoke/windows-night.png' });
@@ -669,10 +683,10 @@ async function windows() {
     day.sum > 300 && day.b > day.r,
     JSON.stringify(day),
   );
-  await page.evaluate((id) => window.world.home.paper(id), was);
+  await page.evaluate((id) => window.world.home.rooms.paper(id), was);
   // Back out into town, as the sections after expect her.
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
   await page.evaluate(() => window.view.saveNow());

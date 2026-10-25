@@ -8902,3 +8902,387 @@ dealing the broken trees to the woods only now (a look, not a bug, and the user'
 phone); filling the frozen pond's ring (the fountain plays on in winter; open water round it is
 the truth of it); dropping the forwarders here (a refactor in a review, with lane A's reasons for
 them gone only now); splitting the chunk (decision 328).
+
+## 357. The plan for 1.3, the last week: visitors every fortnight first, then her phone's frame, the creatures, the scenery and the personal touches, with the model fit to each session (2026-10-24)
+
+**Context:** 1.2 is on her phone (PR #201, 2026-10-20). The user's subscription ends in about a
+week, and they want it spent putting the game in a polished state for her, with sub-agents fit
+to each task. Her one complaint, in the user's words: "it takes too long to get the once a month
+full moon bugs. Maybe make 2 weeks the maximum in between."
+
+**Decision:** `docs/v1.3_plan.md`: seven sessions from `v1.3-dev` (made from `main` today, in
+`vercel.json`'s no-preview list), two at a time, F1 and F2 first.
+
+- **Visitors every fortnight** (F1): a critter out of its season or weather comes visiting the
+  day after the full moon and the day after the new moon, so none is more than about fifteen days
+  away, where R5 (decision 310) had the full moon alone and up to 29. The moon-bound critters
+  keep the full moon's own night. Cut as 1.2.1 the day it merges.
+- **What she'll notice comes before what she won't**: her phone's frame (F2), the creatures and
+  scenery she has said look funny (F3, F4), then the personal touches parked since decision 177
+  (F5), which the user answers in chat and a session puts in; the forwarders and the small
+  things (F6) only if time is left; a review last.
+- **The model fits the session**: a rule, a cache or a mechanical refactor is a Sonnet session
+  (F1, F2, F6); anything drawn or judged by eye is Opus (F3, F4, F5, the review).
+- **Every merge leaves `v1.3-dev` releasable**, so whatever has landed when the week runs out
+  ships as 1.3.
+
+**Rejected:** a new moon's own visiting day (the day after keeps R5's reason: the full moon's
+night stays the moon-bound critters'); visitors every week (the Cabinet is meant to be most of a
+year's work, decision 150; a fortnight answers the complaint without making it a month's); a new
+neighbour or place (a week isn't a release with a theme, decision 270); refactors first (they
+change nothing she sees).
+
+## 360. Visitors every fortnight: a critter out of its time comes the day after the full moon and the day after the new one (1.3's F1, 2026-10-24)
+
+**Context:** her one complaint after 1.2, in the user's words: "it takes too long to get the once a
+month full moon bugs. Maybe make 2 weeks the maximum in between." R5 (decision 310) had a critter
+out of its season, its holiday or its weather come visiting the day after each full moon, so the
+wait was up to 29 days.
+
+**Decision:** `isVisitDay` is true the day after a full moon **and** the day after a new moon
+(`isNewMoon` in `systems/calendar.ts`, beside `isFullMoon`: the day whose noon, UTC, is within
+half a day of the moon's age being 0 or `SYNODIC_DAYS`). Visits fall 14 or 15 days apart (never
+fewer than 13 or more than 16, held over two simulated years), so a critter that isn't a
+moon-bound one is never more than about a fortnight away, and the rarity test now holds that. The
+moon-bound critters (`moon` on the row: the blue moonfish, the ghost bat) keep the full moon's own
+night, unchanged. `nextChance`, which walks forward day by day, found the nearer day on its own;
+the Cabinet's hint now says "the day after each full or new moon", Today's two lines say "the day
+after a full or new moon", and no small talk or memory line promised the full moon alone.
+Her notes: a `1.2.1` `NOTES` row of three lines (a phone that saw `1.2` reads exactly that card).
+
+**The numbers:** the rarity test's simulated year (an hour a day, from the first of each of twelve
+months) filled the Cabinet in **9.1 to 10.2 months, 9.7 on average** before, and **7.4 to 10.2,
+8.9 on average** now. Seven of the twelve starts (January, February, March, May, July, August,
+September) don't move at all: the last to come there is a moon-bound legendary, whose wait is the
+same. The other five gain 1.0 to 2.5 months (October 10.1 to 7.6, November 9.1 to 7.4, December
+10.2 to 9.1, April 10.1 to 8.3, June 10.0 to 8.1). Decision 150 still holds (most of a year's
+work: the test's window is now over 7 and under 11 months, where it was over 8.5), and the floor
+this session was set to stop at, about 7 months, is not crossed. Every start still finds every
+critter, and the first month's find is as before (the "about a third still to find" test passes unchanged).
+
+**Rejected:** a visit on the new moon's own day (R5's reason holds: the full moon's night is the
+moon-bound critters', and the new moon is dark; the day after is warm and keeps the rule one
+sentence); visitors every week (decision 357: a fortnight answers the complaint without making
+the Cabinet a quarter's work); retuning `VISIT_WEIGHT` or any critter row to win back the months
+(the user asked for the fortnight, and the Cabinet is still most of a year); a Cabinet word for
+"the moon's turn" (it reads vaguer than "full or new moon", which she can see in the sky and on
+the calendar).
+
+## 361. Her phone's frame: happenings kept for the hour, the day key kept by the minute (2026-10-25, 1.3's F2)
+
+**Context:** "Where it hurts" 2 and 3 (decision 336's T2 had named `happeningsAt` as the cost left in
+`src/`; decision 340's W1 had found most of `canWalk`'s microsecond in `dayKey`). A world step
+filtered every happening row for every neighbour (`whereabouts`, `happeningOf`) and `Decorations`
+and `Mounds` each built a `Date` and a padded string on every `canWalk`, the pond's ice asking
+`Decorations` again.
+
+**Decision:**
+
+- **`happeningsAt(hour, day)` keeps its last answer**, one entry, keyed `${day}:${floor(hour of
+night)}` plus `mayorTold()`, a counter `systems/mayor.ts` bumps when `knowMayor` is told
+  something new. The hour, not the second: every row's `from` and `until` is a whole hour, so the
+  filter cannot change inside one, and a test holds it (a row on the half hour fails that test and
+  the key moves to the half hour). Past midnight is the night before's, as `hourOfNight` already
+  has it. It returns a `readonly` array shared by every caller (none wrote to it).
+- **Why the mayor is in the key:** `happensOn` already keeps what the day key alone decides, but
+  the mayor's hello (`unmasking`) and his birthday read whether she has met him (`inTown`,
+  `unmaskingOn`), which a clue pinned while she plays changes inside the hour. Nothing else
+  `happeningsAt` reads is module state (the rows, the calendar, the weather, birthdays are the day
+  key's). `venueOf`, which reads the fairground's gate and the bandstand, is not in `happeningsAt`
+  and is not kept. `tests/setup.ts` needs no new line: it already calls `knowMayor(null, null)`,
+  and the counter moves only when the story does, so a memo from the file before is good or
+  dropped, never wrong.
+- **The day key by the minute** in `Decorations` and `Mounds`, through a small `MinuteDay`
+  (`world/zones/MinuteDay.ts`) that reads `dayKey(now)` when `Math.floor(now / 60_000)` has
+  changed, as `Stalls` keeps its stands (compared with `!==`, not "later", so a clock set back is
+  read afresh). The 5am turn needs no rule of its own: 5:00 is a minute boundary in every zone and
+  across a clock change, so the day cannot turn between two reads in one minute. Held by a test
+  that steps a fake clock through the last two minutes of the old day and across 5:00 for the
+  square's piece, the pond and the mound, and by one that checks `MinuteDay` against `dayKey`
+  at the edges of every day of a year. `Decorations` also hands back one shared answer when none
+  of hers is out, where it built an object a call.
+- **`finale.test.ts`'s 30 s timeout is gone** with its comment: the settling cases run 0.15–0.7 s
+  where they ran 0.18–1.9 s.
+- **Measured** (architecture.md's "1.3's F2"): 400 A\* paths across town 1,057–1,094 ms on
+  `v1.3-dev` against 349–378 ms; `canWalk` 1,579–1,633 ns a call (the harness's measure) against
+  521–565; a world step 220–228 µs against 66–67; `npm run perf` at Close, 21:30, the town's update
+  1.11–1.35 ms against 0.69–0.83 and the other scenes' down by a third to a half, the draws
+  within each other's spread or a little under; `npm run test` 147.7–152.2 s against 122.9–125.8.
+  The suite, the lived-in fixtures and W1's overlays and arrivals snapshots are unchanged (never
+  `-u`), smoke 622 of 622.
+- **Found on the way:** smoke's `neighbours` check "Wes says hello, and stays" failed from 24
+  October on, on `v1.3-dev` alike (Wes's first words are the story's last chapter once it's due);
+  F1's PR fixed the check the same day, so F2 carries no change to smoke.
+
+**Rejected:** a `Map` of many hours (the step asks one hour at a time; one entry is enough and
+nothing grows); keying on the exact hour (it moves every second, a hundred steps of misses a
+time against one a whole hour); caching in `whereabouts` or `Neighbourhood` (every other caller
+of `happeningOf` gains from the memo where they are, and `happeningsOn` and `happensOn` already
+keep the day's); a minute-keyed memo of `canWalk` itself (the overlays are the cost, not the
+tiles); a `Clock` helper in `systems/clock.ts` (F1's files are near; the helper is the zones'
+own); dropping `Stalls`' own two caches to use `MinuteDay` (they cache more than the day, and a
+refactor of working code buys nothing she sees).
+
+## 362. The creatures looked at together: the bats, moths, fish, orbs and five crawlies redrawn, and the dogs given muzzles (2026-10-25, 1.3's F3)
+
+_Session F3 of the 1.3 plan, for decision 267 ("some creatures and scenery look funny") after
+L6's pass (decision 292). No save change; her look and every figure untouched (`looksHeld`
+unchanged). Personal touches parked (decision 177): every look is the warmest default, nothing
+was asked; the pets are hers, so they were changed least._
+
+**How they were judged.** L6's test, every creature at once: each critter's 16 and 24 (both
+frames) at 6×, its 24 at 3× (a phone at Close, 12 tiles across ~1,170 device pixels) on the
+ground it lives on by day and under a night tint, a fish's shadow on water at 3× as the pond draws
+it, and every pet frame at 6× and at 3× on the lawn by day and night; then smoke's critters, pets
+and museum screenshots at phone size. Asked of each: does the silhouette say what it is at 3×? is
+the face lost in the body? do its colours fight its ground? are the 16 and the 24 one creature?
+Where each is seen mattered: the bag, the Cabinet, the museum's nooks, the figurines and the world
+all show the 24 (`world[0]`); the 16 is only a small fish's shadow, the Dolly Parton day monarchs
+and the gallery. Of 70 critters, 41 ranked weak, most of them by family (the shape a family shares
+was the fault, not the colours), so 13 drawings fixed them; of six pets, two dogs' face-on frames.
+
+**Redrawn** (shapes in `src/sprites/critterLooks.ts` and `crawlies.ts`, each 16 from the 24's
+numbers, so the bag, Cabinet, museum, figurines and world agree; every critter kept its palette,
+its size and its name's look):
+
+- **The bats** (eight, and the bunny bat): spread, a flat bar; raised, two square flags, a bowtie.
+  Now each wing is a membrane from the shoulder out to a wrist and down three finger bones (`v`,
+  a step darker) to its tips, its trailing edge scalloped between them; a round body and pale
+  tummy, pointed ears pink inside, eyes and two white fangs. Raised, the wings lift into a V. At
+  16 the middle finger is left out, or the bones would be all the wing (a test caught it).
+- **The moths** (eleven): fore- and hindwing one rounded lump, the raised frame a heart. Now a
+  forewing swept to a rounded point with its spot and a rounder hindwing (`w`) under it, a seam
+  between them; head, thorax and tapering abdomen, eyes, feathery feelers. The owl-eye moth's
+  hindwing spots are eyes looking back (`owlEyed`), its name unread before. The mourning cloak's
+  margin keeps to the wings' far edges (it ran along the seam, and at 16 was most of the wing).
+- **The fish**: the minnow, koi and carp shared a lumpy body and a notched blob of a tail, and the
+  round fish's shadows were blobs. Every fish now narrows to a wrist before a forked tail
+  (`forkedTail`), with a fin on its back and under it, an eye and a smile; the koi has patches,
+  the carp is deep with a whisker, the minnow slim; the pumpkinseed, moonfish and snowglobe fish
+  and the pike likewise. That wrist is what makes a shadow a fish (a test holds it for every
+  redrawn fish, both sizes). The lantern fish, a plum blob with its eye lost, is an angler: a big
+  candle eye, a grin with two white teeth, a paler belly, its lure bobbing on a curled stalk.
+- **The orbs** (green, blue, the wisp, the sparkler): an octagon of dither with two specks for a
+  face (`docs/art_style.md`: never dither anything small). Now a round flat-toned glow with a
+  brighter heart and a gleam, a little flame of a tail that flicks between frames, two eyes and
+  a small "oh".
+- **The cricket and the grasshopper**: legs straight down at the corners and feelers like horns,
+  a little dog. Now low along the ground on short bent legs, the hind leg a drumstick thigh over
+  its back with the shin folded down to the ground, lifting to fiddle; feelers forward.
+- **The twig knight**: a long body on straight legs, a dachshund or a table. Its legs are thin as
+  twigs (never outlined, or they stand like fence posts), behind its body, bent up at the knee and
+  splayed long, the front pair forward, the back pair back; the salute lifts one to its helmet.
+- **The woolly bear and the glowworm**: a sausage with battlements and a pickle. Both are round
+  segments now (`beads`: each a little ball, a seam where the next overlaps it), on an arch that
+  rises as they inch, with little legs and a face; the bear's outline gives way to fuzz over its
+  back, in the colour of the band under it, and its black is lit enough to show its beads.
+- **Markings**: the skull beetle carries a little smiling skull (`skulled`), the reed frog's pale
+  stripe runs down its flanks to its legs (by its mouth it read as two tusks), and the zebra and
+  bold jumping spiders' faces are grey so their big eyes show (black on near-black before, the
+  spider rules kept: still round, fuzzy, stubby-legged). The beetle family's 16 is drawn from
+  the 24's numbers now, as the others are.
+- **Fibi and Dolly facing her** (sitting, Fibi's beg, Dolly's spin) had no muzzle and read as a
+  black cat and a bowling pin. Each has a soft grey muzzle (`u`, `muzzle` in `sprites/pets.ts`)
+  under the eyes with the nose on top, and the same grey on the snout side on, so the two views
+  agree. Black dogs stay black; the side views, the cats, Gary and the ghosts read and are as
+  they were.
+
+**Left as they were**, and why: the frogs and toads, the firefly, the mist newt and the Hercules
+beetle (L6's redraws, which read); the axolotl, jellyfish, crawdad, snails, boo slug, wiggle
+worm, roly-poly, bow spider, peacock jumper and the orb pair (they read at 3×); the beetles' shape
+(it reads; only its 16 and the skull changed); the catfish, fog eel and mud puppy, ranked fine-
+(the catfish a dark plank its whiskers save, the eel's fin dashes a little like a spine, the mud
+puppy's gills like a bow on its back) and left for a later eye; the frogs' 16s (the old box,
+seen only in the gallery); the monarch's veins (the new moth reads as a butterfly; the monarch's
+black margin would be a mark like the mourning cloak's, small, for later).
+
+**Held by** `tests/sprites/critters.test.ts`: every redrawn critter at 16 and 24 (the nooks and
+the bag as before), each 16 as wide for its height as its 24 within a quarter and two thirds its
+size within a pixel and a half, its keys a subset of the 24's and its main colour among the 24's
+three, every redrawn fish a wrist narrower than its tail and body, and the dogs' muzzles. Before
+and after side by side were rendered and looked at (the session's scratch); smoke's critters,
+pets and hud pass, and the whole run; `npm run perf` at Close within its noise (the bakes are the
+same sizes); `looksHeld` unchanged.
+
+**Rejected:** redrawing every critter (most read; the families were the fault); a fifth outline
+colour or thicker outlines for the dark creatures (the palette rule: outlines are a shape's own
+darkest tone); a lighter coat for Fibi and Dolly (they are hers, and black); drawing each 16 by
+hand (a 16 from the 24's numbers can't drift from it, which is how the crawlies were already
+drawn); a shape class by fixed aspect buckets in the test (a minnow sat on the line between
+"square" and "wide"; the ratio of ratios says the same without the cliff); more fish shapes per
+species (a family's shape in its own colours is the art style's rule, and the wrist was enough).
+
+## 363. The scenery: the bare trees kept to the woods, Whisperwood's creek curled round at the hedge, the frozen pond's ring kept (1.3's F4, 2026-10-25)
+
+_Session F4 of the 1.3 plan (decision 357), for V1.1's art notes (decision 356): the broken trees,
+the creek's east end and the frozen pond's ring. No save change, no map change, no tile's
+walkability moved. Personal touches parked (decision 177): every look is the warmest default;
+nothing was asked._
+
+- **Where a tree stands says which shapes it may take.** `parseMap` gives each tree a `grove`: a
+  wood's `edge` (its footprint in the edge or the line inside it, `EDGE_DEPTH` 2, the band A2's
+  edge test reads), anywhere else in a wood (`woods`), or within `GRAVES_REACH` (4 tiles) of a
+  gravestone (`graves`); a tree that's none of them is tended. A map says it's a wood with `woods`:
+  Whisperwood, Lantern Shore, the castle hill and the hidden clearing (the clearing's trees are the
+  wood round it). The town, the fairground and Boo Acres are tended. `lookOf` deals a tree's form
+  from the nine by its tile as before (`treeFormOf` in `sprites/props.ts`), keeps it if it's in
+  leaf (the three round, the conifer, the birch, the poplar) or may stand there (the edge: dead,
+  leaning, broken; the woods and the graves: dead), and otherwise deals again among the six in
+  leaf from the tile; a broken tree by the graves is the dead one, so the graveyard keeps its
+  spooky tree. Deterministic from the tile and the map, as before; no tree's colouring changed.
+- **Counted** (trees: dead, leaning, broken, before → after): the town 18: 3, 0, 3 → 1, 0, 0 (the
+  dead tree by the graveyard's east fence, where a broken one stood; her yard's, the castle road's,
+  the farm sign's, Cobweb Corner's and the pond's are in leaf); Whisperwood 184: 22, 15, 19 → 22, 6,
+  5; Lantern Shore 110: 9, 17, 11 → 9, 7, 6; the castle hill 146: 16, 20, 17 → 16, 9, 6; the hidden
+  clearing 95: 17, 10, 9 → 17, 3, 4; the fairground 16: 1, 0, 3 → 0; Boo Acres 12: 1, 3, 2 → 0. No
+  critter or crawly reads a tree's form (`habitatsOf` knows `tree` by prop id), Wes lurks by any
+  tree, and the spots are tiles, so nothing but the look moved.
+- **Whisperwood's creek curls round at the hedge.** The hedge on a place's edge was always taken
+  as the edge (off the map, so water beside it ran on), so the creek's east end ran into the hedge
+  and was cut square by it. Now an edge hedge is the edge only where water leaves through a gap in
+  it, a wet tile along that edge within two (`wetAround` in `sprites/banks.ts`): the creeks out to
+  the shore and in from the woods run on as before; where water meets the hedge unbroken, the
+  hedge is dry ground and the bank, with its stones and wobble and winter drift, curls round to an
+  end in the creek's last tile. Only Whisperwood's two end tiles draw differently (the whole
+  place's overview differs only in that box); Boo Acres' pond by the west hedge reads the same.
+- **The frozen pond's ring is kept**, looked at once more at Close on Christmas Eve's night
+  (smoke's `frozen-pond`): the open water is the fountain's basin and no wider, ringed with lit
+  plates, its jets and lamps going, so it reads as the fountain keeping its water open, not a bug.
+- **Looked over:** `npm run sprite -- 'place:*'` before and after, `'season:*:town'` and
+  `'season:*:whisperwood'`, the creek's end at 3× in autumn and winter, and smoke's `close-town`,
+  `close-town-side`, `creek`, `whisperwood`, `frozen-pond` and the seasons' screenshots. Nothing a
+  pixel or a row would fix turned up. **Logged** in the art notes: the creek meeting the dirt path
+  square at the footbridge's site (a bank there wants the track and the ice's field to agree), the
+  ghost daisies and meadow flowers green under winter's snow (gathered all year), and the dead
+  tree bare of snow in winter.
+- **Held by** `tests/sprites/treeForms.test.ts` (the broken and leaning trees only in an edge, the
+  dead only in the woods' and graves' groves, each tree the same every time; the town bare but
+  for the graveyard's dead tree, the fairground and Boo Acres in leaf, each wood keeping its dead
+  and its broken trees), `tests/sprites/ice.test.ts` (the creek's end banked against the hedge,
+  the creeks through the hedge's gaps running on), `seasons.test.ts`'s broken tree found in
+  Whisperwood's edge, and W1's overlays and arrivals snapshots unchanged (never `-u`). The suite,
+  smoke whole (622 of 622) and `smoke:offline` pass.
+
+**Rejected:** a tree prop of its own for the woods' bare trees (A2's reasons: a row in every system
+that knows trees); dealing the edge more broken trees to make up for the woods' interior (the note
+was "not too many"); letting a broken tree off the edge fall back to the dead one everywhere it
+may stand (the woods' dead trees would have doubled; only by the graves); the fairground's
+hedge as a wood's edge (a fair is tended); every tree by the graves dead (three would crowd the
+fence; one reads as the graveyard's); a reed clump at the creek's end (reeds stand in water, not
+ice, and the curl of bank alone closes it); a map change at the creek (the tiles stay, W1's
+snapshots hold them); ice over the fountain's tiles in winter (the ring reads as a reason).
+
+## 365. The forwarders dropped, the save stamped by the world's clock, 1.2's town in the overlays snapshot (1.3's F6, 2026-10-25)
+
+_Session F6 of the 1.3 plan (decision 357), for V1.1's "Where it hurts" 4 and 7 (decision 356).
+A refactor: nothing she sees changes, no save change (still v55), `looksHeld` unchanged,
+`src/sprites/` untouched. 364 is F5's, the touches; the gap is left for it._
+
+- **`Home`'s twenty-seven forwarders are gone** (W2's, decision 341: `room`, `here`, `built`,
+  `has`, `enter`, `build`, `extensions`, `canGrow`, `grow`, `layout`, `placed`, `placedIn`,
+  `everyPiece`, `wallpaper`, `flooring`, `pieceAt`, `surfaceUnder`, `ridersOf`, `canWalk`,
+  `takeOut`, `move`, `turn`, `putAway`, `showIn`, `onShow`, `paper`, `lay`), and every reader
+  asks `home.rooms.<x>`: the sheets' Api (`wiring/apis/home.ts`), `HomeView`, `main.ts`, the
+  services (`Decorator`, `Display`, `Broom`, `PetCare`, `Workbench`, `Belongings`), the areas, the
+  world and 12 test files. `Home` is the chest, the papers and floors she owns, and `rooms`.
+  **`Neighbourhood`'s ten** (W3's, decision 342: `talk`, `reply`, `give`, `favour`, `doFavour`,
+  `feel`, `feelingOf`, `startTalk`, `endTalk`, `talkingTo`) are gone, readers on `world.talk` (the
+  view's two reads in `render/villagers.ts` and 22 test files). The compiler found every reader
+  (delete, then `tsc`); the readers it can't see, smoke's and perf's `window.world.home.*` and
+  `window.world.neighbourhood.*` in `scripts/`, were found by grep and moved with them.
+- **`keepTown` stamps `updatedAt` and `lastPlayedAt` with `world.clock.now()`**, so a town played
+  under a dev build's `?day=` is saved as played then. On her phone the clock is `systemClock`, so
+  the stamps are the same `Date.now()` as ever. `createdAt` stays the phone's own time: the weekly
+  nudge counts from it against `Date.now()`, and a made-up creation day made it fire every time.
+  `tests/wiring/keeping.test.ts` (a DOM file) holds the stamps by a fake clock moving.
+- **The cloud keeps real time.** It orders towns by `updatedAt` (`savedAt` up, `check(opened)`
+  down), so a town stamped on a past `?day=` would sort behind every real one and be offered
+  "a newer town in the cloud" on each load (smoke found it: the whole run's fake cloud holds a
+  real-time town from its first page). `keepTown` therefore hands the cloud the phone's real time
+  for a town played on a made-up clock (`world.clock !== systemClock`: `?day=` or `?hour=`) and
+  asks it nothing, as its own stamps are fiction; with the real clock, which is every phone's
+  and every real session, nothing differs from before. The dev server has no `api/save`, so this
+  only shows in smoke's fake cloud: its "opened behind the cloud, it asks before taking the newer
+  town" check opens on the real clock now (`?day=` pages are never asked). **Rejected:** a
+  phone-side real stamp beside the save (more machinery on her phone's save path for a dev-only
+  case); leaving the cloud on the fiction (the offer card over every smoke section after the first
+  real-time page); moving `settings.ts`'s restore onto the world's clock (a restore is the
+  phone's own act, real time, as the cloud's).
+- **1.2's lived-in town is in W1's overlays snapshot** (`lived-in-v55` added to `SAVES`): its first
+  snapshot taken from the code as it stands, the one addition; the existing snapshots, and the
+  arrivals', are byte for byte what they were (never `-u`).
+- **Held by** the suite (2,719 tests), the lived-in fixtures, the overlays and arrivals snapshots,
+  `looksHeld`, smoke whole (622 of 622) and `smoke:offline` (10 of 10). `npm run perf` at Close,
+  21:30, three runs each alternating, `v1.3-dev` and F6 each served from a copy of its own, means
+  in ms (base | F6): town update 0.84-0.89 | 0.74-0.86, draw 35.4-37.1 | 33.7-36.1; home update
+  0.72-0.84 | 0.69-0.84, draw 19.8-20.5 | 18.6-20.4; yard draw 34.2-35.7 | 32.6-37.9; back room
+  update 1.10-1.17 | 1.10-1.25, draw 23.4-24.4 | 23.4-25.4. Every row within the other's spread:
+  noise, as a one-line forward is not what a frame costs.
+
+## 366. 1.3: the review after the last week, one card folding 1.2.1, 1.2's town opened as her phone will, F5 dropped, and the docs written for whoever comes after (2026-10-25, 1.3's V1.3)
+
+_Session V1.3 of the 1.3 plan (decision 357), the last session of the last plan: the review after
+F1, F2, F3, F4 and F6 (decisions 360–363, 365), and the release PR #219 (`v1.3-dev` → `main`)
+brought up to 1.3 for the user to merge. No save change (still v55). 364 stays unused._
+
+- **F5 is dropped**, at the user's word on 2026-10-25: "we will hold on any more personal
+  touches, want to focus on a fun game instead". It never ran, nothing was asked, and the parked
+  questions stay in the handoff's "Still to put to the user" as decision 177 left them.
+- **One card for her, `1.3`.** Her phone is on 1.2 (`main` at PR #201). F1's `1.2.1` row was
+  ready to cut the day F1 merged, but no patch went out, so no phone saw it. By decision 324's rule
+  it is folded into one `1.3` row of five lines in the mayor's voice: the moon's visitors twice a
+  month ("Only a fussy full-moon few still wait the month", since the moon-bound critters keep the
+  full moon's night); the Cabinet and Today saying which day; the creatures redrawn (F3: bats'
+  wings, moths' two pairs, fish tails in their shadows, wispy orbs, Fibi's and Dolly's muzzles);
+  the town's trees in leaf (F4); and a lighter town on her phone (F2), with the mayor's last typed
+  note for a while, warm and without goodbye ("we'll all be right here every day, just as you left
+  us"). P.S. "I shall keep the typewriter oiled, just in case. The W still sticks. I have grown
+  rather fond of it." `notesToShow('1.2')` is exactly that card (`tests/systems/patchNotes.test.ts`);
+  the `1.2` row stays as shipped. F6 gets no line.
+- **1.2's town, opened as her phone will.** `lived-in-v55.json` in a 1.3 dev build with notes last
+  seen `1.2`, at Close, Far and sideways: the title, one card (`What's new in 1.3`, five lines,
+  scrolling to its P.S. upright and in the sheet's right column sideways), then Cody's hello ("7
+  days!" and a visit's gift), save v55 with no migration, no error notes; the one console error is
+  the unlinked cloud's 503, as on her phone today. Then played on by taps with a scratch driver on
+  smoke's helpers (decision 324's method): 12 October, the day after the new moon, Today said "25
+  critters are visiting out of season" and the Cabinet's shadows said "the day after each full or
+  new moon" and "Out now!"; a tree shaken, Ollie talked to, a skull beetle netted by day and a
+  velvet bat by night, the bag and the Cabinet looked at with the new art; 13 October, Today and
+  the Cabinet again ("next tomorrow" the night before, as it should), a talk, home, the back room's
+  planter still growing its pumpkin. The save afterwards has the same shape as before (only ids
+  moved: two critters caught, the window's takings), so **no new fixture**: `lived-in-v55.json`
+  stays the newest, and the release changes nothing in the save.
+- **The shakedown** looked at the redrawn creatures in the world (the velvet bat over her net at
+  night), the bag, the Cabinet's shadows and the museum at phone size, every critter on one sheet
+  (`npm run sprite -- 'critter:*' --sheet`), the town's trees by day and night (in leaf, the
+  graveyard's one dead tree), the fish shadows on the pond, Settings, Today's and the Cabinet's
+  moon wording, and smoke's whole run. **Fixed**: smoke's `yard` section, which walks to her yard's
+  tile (4, 11) and taps Decorate, met Hazel calling on her stood on that tile on the real clock (25
+  October, late morning), said hello, and the talk sheet hid the tray; the section now puts the
+  talk away first. Smoke 622 of 622, `smoke:offline` 10 of 10. **Logged, not fixed**: smoke's
+  real-clock sections as a kind ("Where it hurts" 4, new); nothing new in the art notes; F3's and
+  F4's leftovers as they left them.
+- **Perf**: 1.3 against 1.2 served side by side (`origin/main` extracted to a copy of its own, 1.3's
+  `scripts/perf.mjs` for both), alternating: two runs each at Close by night, one each at noon
+  and at Far by night and by day. Every update is a quarter to a half under 1.2's (the town
+  0.93–0.98 ms against 1.29–1.32), so F2's gains hold on her phone's build; draws at Close by
+  night 1–4 ms under almost everywhere, the back room crossing; the town at Far by night the one
+  row over (70.5 against 62.8, a run each, within the swing Far's town has shown before); no
+  frame doubled; the heap the same within half a megabyte. The table is in
+  `docs/architecture.md`, "1.3, V1.3's review".
+- **Docs, for a session a year from now**: the handoff's new "If you are starting cold after a
+  long gap" (what the game is, where it's deployed, how to run and check it, the user's own steps,
+  how a plan was run, what's logged, what to do before changing what she sees); "After 1.0" says
+  1.3 is #219 and `main` after it is the game as it stands, with the user's steps; the 1.3 plan's
+  sessions recorded under "1.3, the last week", and "How 1.3 was run"; "Still to put to the user"
+  parked with the user's word of 2026-10-25; "In progress" empty. `docs/architecture.md`'s "Where
+  it hurts" rewritten for after 1.3 (six items, the done list one paragraph) with 1.3's perf
+  table; `CLAUDE.md`'s "Project" (the 1.3 plan complete, 1.3 the release, no plan after) and the
+  integration-branch paragraph (`v1.3-dev` ends with 1.3, the next is made from `main`).
+
+**Rejected:** two cards at one opening (`1.2.1` and `1.3`) of a release she gets at once; a new
+fixture with the same shape as 1.2's (a fixture holds a release's save shape; 1.3 has none of its
+own); saying goodbye in the card (the town goes on and nothing expires, decision 11; the mayor
+only stops typing); opening smoke's real-clock sections on a named day here (a change to how a
+whole run meets the town, for a later session that wants it); running F5 with the defaults (the
+user said hold).

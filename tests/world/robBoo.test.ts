@@ -133,7 +133,7 @@ describe("Rob Boo, the mayor (V1's P3b)", () => {
     // Once only, and the town stays the evening.
     expect(h.tick(10).some((e) => e.kind === 'unmasked')).toBe(false);
     expect(h.world.neighbourhood.happeningIn('castleHall')).toBe('unmasking');
-    const hello = h.world.neighbourhood.talk('robBoo').line;
+    const hello = h.world.talk.talk('robBoo').line;
     expect(hello).toContain('Em');
   });
 
@@ -155,7 +155,7 @@ describe("Rob Boo, the mayor (V1's P3b)", () => {
     expect(rob.tile).toEqual(TOWN_SPOTS.townHallSteps);
     // The day's first talk: the town is still all about the mayor (V1's P3b's topic), or his own
     // lines, every one with her name filled in.
-    const said = world.neighbourhood.talk('robBoo').line;
+    const said = world.talk.talk('robBoo').line;
     const own = [
       ...VILLAGERS.robBoo.lines.hello,
       ...Object.values(VILLAGERS.robBoo.lines.windows),

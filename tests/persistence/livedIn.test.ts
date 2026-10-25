@@ -146,7 +146,7 @@ describe('a planter in a lived-in front room (1.1’s W2, save v55)', () => {
     // Where a planter fits in 1.0's front room, as the decorator would set one down.
     const probe = new World({ clock, ...fromSave(migrateSave(structuredClone(old))) });
     probe.home.store('planterBox');
-    const at = probe.home.takeOut('planterBox', { tx: 6, ty: 6 }, null)!;
+    const at = probe.home.rooms.takeOut('planterBox', { tx: 6, ty: 6 }, null)!;
     expect(at).not.toBeNull();
     // As 1.0's code saved a planter: its bed and sprinkler at home, with no room.
     const day = 24 * 60 * 60 * 1000;

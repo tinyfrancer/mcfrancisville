@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { PROP_ART } from '../../src/sprites/props';
+import { ZONES } from '../../src/data/zones';
+import { lookOf, PROP_ART } from '../../src/sprites/props';
 import { rasterize, spriteSize, type Raster } from '../../src/sprites/sprite';
+import { BROKEN_FORM, DEAD_FORM, LEANING_FORM } from '../../src/sprites/treeForms';
+import { parseMap } from '../../src/systems/grid';
 
 /** How wide the opaque part of a sprite is at its widest row. */
 function widest(r: Raster): number {
@@ -35,6 +38,36 @@ describe('the trees (V1 L2)', () => {
       }
     }
     expect(seen.size).toBe(forms.length * tree.variants!.length);
+  });
+
+  // 1.3's F4 (decision 363): A2 dealt the nine to every tree, a third of the town's bare.
+  it('stand bare only in the woods and by the graves, broken and leaning only in a wood’s edge', () => {
+    const counts: Partial<Record<string, number[]>> = {};
+    for (const [id, zone] of Object.entries(ZONES)) {
+      if (!zone.map) continue;
+      const map = parseMap(zone.map);
+      const tally = new Array<number>(9).fill(0);
+      for (const p of map.props.filter((q) => q.id === 'tree')) {
+        const form = lookOf(p).form;
+        tally[form]!++;
+        const at = `${id} ${p.tx},${p.ty}`;
+        if (form === BROKEN_FORM || form === LEANING_FORM) expect(p.grove, at).toBe('edge');
+        if (form === DEAD_FORM) expect(['edge', 'woods', 'graves'], at).toContain(p.grove);
+        // The same tree every time, from its tile.
+        expect(lookOf({ ...p }).key, at).toBe(lookOf(p).key);
+      }
+      counts[id] = tally;
+    }
+    // The town in leaf but the graveyard's tree; the woods keep their bare trees, edged with broken.
+    const bare = (id: string) =>
+      [DEAD_FORM, LEANING_FORM, BROKEN_FORM].reduce((n, f) => n + counts[id]![f]!, 0);
+    expect(bare('town')).toBe(1);
+    expect(counts.town![DEAD_FORM]).toBe(1);
+    expect(bare('fairground') + bare('booAcres')).toBe(0);
+    for (const id of ['whisperwood', 'lanternShore', 'castleHill', 'hiddenClearing']) {
+      expect(counts[id]![DEAD_FORM], id).toBeGreaterThan(5);
+      expect(counts[id]![BROKEN_FORM], id).toBeGreaterThan(2);
+    }
   });
 
   it('grow Whisperwood’s old trees well over half as wide again as the town’s', () => {

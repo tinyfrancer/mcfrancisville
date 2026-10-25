@@ -106,7 +106,25 @@ export interface MapSource {
    * clear of every habitat, spot and way in, so a mound standing there cuts nothing off.
    */
   digSpots?: readonly { tx: number; ty: number }[];
+  /**
+   * A wood (1.3's F4): its trees may stand bare, the dead tree anywhere in it and the broken and
+   * leaning ones only in its edge. Anywhere else a tree is in leaf, but by the graves (`Grove`).
+   */
+  woods?: boolean;
 }
+
+/**
+ * Where a tree stands, which says which of its shapes it may take (1.3's F4): in a wood's edge
+ * (the edge and the line inside it, as the places' edges test reads it), anywhere else in a wood,
+ * or within a few tiles of a gravestone. A tree that's none of them is tended, and in leaf.
+ */
+export type Grove = 'edge' | 'woods' | 'graves';
+
+/** How near a gravestone a tree stands in the graveyard's reach. */
+export const GRAVES_REACH = 4;
+
+/** How deep a wood's edge is: the edge and the line inside it. */
+export const EDGE_DEPTH = 2;
 
 /**
  * How many tiles a prop stands on. A multi-tile prop is written as a block of its letter. A
@@ -615,6 +633,7 @@ export const WHISPERWOOD_SPOTS = {
 
 export const WHISPERWOOD: MapSource = {
   legend: WILD_LEGEND,
+  woods: true,
   spots: WHISPERWOOD_SPOTS,
   spawn: { tx: 1, ty: 17 },
   // Where the day's mound may be (0.3's C1).
@@ -701,6 +720,7 @@ export const LANTERN_SHORE_SPOTS = {
 
 export const LANTERN_SHORE: MapSource = {
   legend: WILD_LEGEND,
+  woods: true,
   spots: LANTERN_SHORE_SPOTS,
   spawn: { tx: 14, ty: 6 },
   // Where the day's mound may be (0.3's C1).
@@ -767,6 +787,7 @@ export const LANTERN_SHORE: MapSource = {
  */
 export const HIDDEN_CLEARING: MapSource = {
   legend: WILD_LEGEND,
+  woods: true,
   spawn: { tx: 9, ty: 21 },
   // Where the day's mound may be (0.3's C1).
   digSpots: [
@@ -813,6 +834,7 @@ export const HIDDEN_CLEARING: MapSource = {
  */
 export const CASTLE_HILL: MapSource = {
   legend: CASTLE_LEGEND,
+  woods: true,
   spawn: { tx: 13, ty: 9 },
   // Where the day's mound may be (0.3's C1).
   digSpots: [

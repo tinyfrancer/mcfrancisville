@@ -85,7 +85,7 @@ describe('villagers', () => {
     const h = harness();
     const events = walkUpTo(h, 'rufus');
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', villager: 'rufus' }));
-    expect(h.world.neighbourhood.talkingTo).toBe('rufus');
+    expect(h.world.talk.talkingTo).toBe('rufus');
     const r = h.world.neighbourhood.neighbour('rufus').tile;
     const me = tileOf(h.world.player.x, h.world.player.y);
     expect(Math.max(Math.abs(r.tx - me.tx), Math.abs(r.ty - me.ty))).toBeLessThanOrEqual(1);
@@ -98,7 +98,7 @@ describe('villagers', () => {
     h.clock.set(new Date(2026, 8, 26, 16, 5));
     h.tick(200);
     expect(h.world.neighbourhood.neighbour('barty').tile).toEqual(where);
-    h.world.neighbourhood.endTalk();
+    h.world.talk.endTalk();
     h.tick(2);
     expect(h.world.neighbourhood.neighbour('barty').moving).toBe(true);
   });
@@ -114,21 +114,21 @@ describe('villagers', () => {
 describe('talking', () => {
   it('counts once a day, and says something new each time', () => {
     const { world, clock } = harness();
-    const first = world.neighbourhood.talk('maude');
-    const second = world.neighbourhood.talk('maude');
+    const first = world.talk.talk('maude');
+    const second = world.talk.talk('maude');
     expect(first.bonus).toBe(true);
     expect(second.bonus).toBe(false);
     expect(second.line).not.toBe(first.line);
     expect(world.friends.of('maude').points).toBe(10);
     clock.advance(24 * 3_600_000);
-    expect(world.neighbourhood.talk('maude').bonus).toBe(true);
+    expect(world.talk.talk('maude').bonus).toBe(true);
     expect(world.friends.of('maude').points).toBe(20);
   });
 
   it('says something different every talk of the day, until it has said everything', () => {
     const { world } = harness();
     for (const id of ['maude', 'cody', 'hazel'] as const) {
-      const said = Array.from({ length: 9 }, () => world.neighbourhood.talk(id))
+      const said = Array.from({ length: 9 }, () => world.talk.talk(id))
         .filter((t) => !t.puff)
         .map((t) => t.line);
       expect(new Set(said).size, id).toBe(said.length);
@@ -150,7 +150,7 @@ describe('talking', () => {
     h.clock.set(day);
     h.world.hands.hold('can');
     const storm = stormOn(dayKey(day.getTime()));
-    const talk = () => h.world.neighbourhood.talk('barty').line;
+    const talk = () => h.world.talk.talk('barty').line;
     const said = (lines: readonly string[]) => lines.map((line) => fill(line, { name: 'friend' }));
     const heard = Array.from({ length: 8 }, talk);
     const sky = said(storm ? SMALL_TALK.storm.barty : SMALL_TALK.rain.barty);
@@ -165,17 +165,17 @@ describe('talking', () => {
     const { world } = harness(undefined, {
       closet: { look: { ...DEFAULT_LOOK, name: 'Em' } },
     });
-    const said = Array.from({ length: 8 }, () => world.neighbourhood.talk('maude').line).join(' ');
+    const said = Array.from({ length: 8 }, () => world.talk.talk('maude').line).join(' ');
     expect(said).not.toContain('{name}');
     expect(said).toContain('Em');
-    const cody = Array.from({ length: 12 }, () => world.neighbourhood.talk('cody').line).join(' ');
+    const cody = Array.from({ length: 12 }, () => world.talk.talk('cody').line).join(' ');
     expect(cody).toMatch(/babe/);
     expect(cody).toMatch(/honey bunny|mi amor|booby/);
   });
 
   it('now and then catches Cody letting one go', () => {
     const { world } = harness();
-    const talks = Array.from({ length: 24 }, () => world.neighbourhood.talk('cody'));
+    const talks = Array.from({ length: 24 }, () => world.talk.talk('cody'));
     expect(talks[0]!.puff).toBe(false);
     const puffs = talks.filter((t) => t.puff);
     expect(puffs.length).toBeGreaterThan(0);
@@ -186,7 +186,7 @@ describe('talking', () => {
     const { world } = harness();
     let all = 0;
     for (const id of ['maude', 'rufus', 'wrapunzel', 'agatha', 'barty'] as const) {
-      const talks = Array.from({ length: 60 }, () => world.neighbourhood.talk(id));
+      const talks = Array.from({ length: 60 }, () => world.talk.talk(id));
       const puffs = talks.filter((t) => t.puff);
       all += puffs.length;
       expect(talks[0]!.puff, id).toBe(false);
@@ -200,7 +200,7 @@ describe('talking', () => {
     const h = harness();
     const n = h.world.neighbourhood.neighbour('cody');
     let talks = 0;
-    while (!h.world.neighbourhood.talk('cody').puff) talks++;
+    while (!h.world.talk.talk('cody').puff) talks++;
     expect(talks).toBeLessThan(40);
     expect(h.world.neighbourhood.puffing(n.zone).map((p) => p.id)).toContain('cody');
     h.clock.advance(PUFF_MS * 3);
@@ -213,7 +213,7 @@ describe('talking', () => {
 describe('gifts', () => {
   it('take it from her bag, and a loved one counts for most', () => {
     const { world } = harness(undefined, { finds: { bag: [{ id: 'burritoBowl', count: 2 }] } });
-    const given = world.neighbourhood.give('cody', 'burritoBowl');
+    const given = world.talk.give('cody', 'burritoBowl');
     expect(given).toEqual({
       declined: false,
       reaction: 'loved',
@@ -229,16 +229,16 @@ describe('gifts', () => {
 
   it('are one a day: a second is turned down, and stays in her bag', () => {
     const { world, clock } = harness(undefined, { finds: { bag: [{ id: 'stone', count: 5 }] } });
-    world.neighbourhood.give('agatha', 'stone');
-    const again = world.neighbourhood.give('agatha', 'stone');
+    world.talk.give('agatha', 'stone');
+    const again = world.talk.give('agatha', 'stone');
     expect(again?.declined).toBe(true);
     expect(world.bag.count('stone')).toBe(4);
     clock.advance(24 * 3_600_000);
-    expect(world.neighbourhood.give('agatha', 'stone')?.declined).toBe(false);
+    expect(world.talk.give('agatha', 'stone')?.declined).toBe(false);
   });
 
   it("can't be something she hasn't got", () => {
-    expect(harness().world.neighbourhood.give('rufus', 'blueRose')).toBeNull();
+    expect(harness().world.talk.give('rufus', 'blueRose')).toBeNull();
   });
 });
 
@@ -248,7 +248,7 @@ describe('mail', () => {
       friends: { friends: { maude: { points: 295, talked: null, gifted: null, favour: null } } },
     });
     h.tick(1);
-    h.world.neighbourhood.talk('maude');
+    h.world.talk.talk('maude');
     expect(h.tick(1)).toContainEqual({ kind: 'mail', from: 'maude' });
     expect(h.world.letters.unread).toBe(1);
     expect(h.world.workbench.knows('moonflowerLamp')).toBe(false);
@@ -267,7 +267,7 @@ describe('mail', () => {
       finds: { bag: [{ id: 'loveBracelet', count: 3 }] },
       friends: { friends: { cody: { points: 990, talked: null, gifted: null, favour: null } } },
     });
-    world.neighbourhood.give('cody', 'loveBracelet');
+    world.talk.give('cody', 'loveBracelet');
     expect(world.mailbox.view().map((m) => m.id)).toEqual(['cody:10']);
     expect(world.friends.of('cody').points).toBe(1000);
     clock.advance(ROCK_MS);
@@ -313,23 +313,23 @@ describe('favours', () => {
 
   it('take what they asked for, and give thanks, Candy and friendship', () => {
     const h = favourDay('barty');
-    const favour = h.world.neighbourhood.favour('barty')!;
+    const favour = h.world.talk.favour('barty')!;
     h.world.bag.add(favour.item, favour.count);
     const before = h.world.wallet.candy;
-    const done = h.world.neighbourhood.doFavour('barty');
+    const done = h.world.talk.doFavour('barty');
     expect(done?.candy).toBeGreaterThan(0);
     expect(h.world.wallet.candy).toBe(before + done!.candy);
     expect(h.world.friends.of('barty').points).toBe(40);
-    expect(h.world.neighbourhood.favour('barty')).toBeNull();
-    expect(h.world.neighbourhood.doFavour('barty')).toBeNull();
+    expect(h.world.talk.favour('barty')).toBeNull();
+    expect(h.world.talk.doFavour('barty')).toBeNull();
   });
 
   it("can't be done without enough of what they asked for", () => {
     const h = favourDay('maude');
-    const favour = h.world.neighbourhood.favour('maude')!;
+    const favour = h.world.talk.favour('maude')!;
     h.world.bag.remove(favour.item, h.world.bag.count(favour.item));
-    expect(h.world.neighbourhood.doFavour('maude')).toBeNull();
-    expect(h.world.neighbourhood.favour('maude')).toEqual(favour);
+    expect(h.world.talk.doFavour('maude')).toBeNull();
+    expect(h.world.talk.favour('maude')).toEqual(favour);
   });
 });
 
@@ -394,7 +394,7 @@ describe('neighbours with lives', () => {
     expect(h.world.neighbourhood.neighboursIn('cobwebCorner').map((n) => n.id)).toEqual(['cody']);
     const events = walkUpTo(h, 'cody');
     expect(events).toContainEqual(expect.objectContaining({ kind: 'arrived', villager: 'cody' }));
-    expect(h.world.neighbourhood.talkingTo).toBe('cody');
+    expect(h.world.talk.talkingTo).toBe('cody');
   });
 
   it('visit each other, standing beside their host and turned to them', () => {
@@ -427,12 +427,12 @@ describe('neighbours with lives', () => {
     const mat = h.world.zones.home.entry().tile;
     expect(Math.max(Math.abs(guest.tile.tx - mat.tx), Math.abs(guest.tile.ty - mat.ty))).toBe(1);
     walkUpTo(h, id);
-    expect(h.world.neighbourhood.talkingTo).toBe(id);
+    expect(h.world.talk.talkingTo).toBe(id);
     const dropsBy = fill(VILLAGERS[id].dropsBy, { name: h.world.name });
-    expect(h.world.neighbourhood.talk(id).line).toBe(dropsBy);
-    expect(h.world.neighbourhood.talk(id).line).not.toBe(dropsBy);
+    expect(h.world.talk.talk(id).line).toBe(dropsBy);
+    expect(h.world.talk.talk(id).line).not.toBe(dropsBy);
     // And off home again once the visit is over.
-    h.world.neighbourhood.endTalk();
+    h.world.talk.endTalk();
     h.clock.set(new Date(at.getFullYear(), at.getMonth(), at.getDate(), visit.until, 1));
     h.until(() => guest.zone !== 'home', 'them to go home', 120_000);
   });
@@ -448,11 +448,11 @@ describe('neighbours with lives', () => {
     expect(inside).toEqual(expect.arrayContaining(['wrapunzel', 'rufus']));
     walkUpTo(h, 'wrapunzel');
     const cookies = h.world.bag.count('batWingCookie');
-    const first = h.world.neighbourhood.talk('wrapunzel');
+    const first = h.world.talk.talk('wrapunzel');
     expect(first.line).toContain('midnight bake');
     expect(first.gift).toBe('batWingCookie');
     expect(h.world.bag.count('batWingCookie')).toBe(cookies + 1);
-    const again = h.world.neighbourhood.talk('wrapunzel');
+    const again = h.world.talk.talk('wrapunzel');
     expect(again.gift).toBeUndefined();
     expect(again.line).not.toContain('midnight bake');
     expect(h.world.bag.count('batWingCookie')).toBe(cookies + 1);

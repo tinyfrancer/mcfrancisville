@@ -24,13 +24,20 @@ v54, decisions 325 and 327), was never merged: it grew into 1.2. **The 1.1 plan 
 complete** (`docs/v1.1_plan.md`, settled 2026-10-19, decision 328; its review, V1.1, decision
 356): four lanes from `v1.1-dev`, the sound (the silent switch silences the game, the crickets
 tamed), the refactors in "Where it hurts" and the art redesigns. **1.2 is the release PR #201**
-(`v1.1-dev` → `main`, "Release 1.2 (with 1.0.1 and 1.1)", save v53 → v55), the user's to merge;
-her phone is on 1.0 until then, and reads one card, `1.2`, folding 1.0.1 and 1.1. A session
-starting cold with nothing asked of it asks the user what they'd like next. `docs/v1.1_plan.md`,
-`docs/v1_plan.md` and the plans before them are complete.
+(`v1.1-dev` → `main`, "Release 1.2 (with 1.0.1 and 1.1)", save v53 → v55), **merged by the user
+on 2026-10-20: 1.2 is on her phone.** **The 1.3 plan is complete** (`docs/v1.3_plan.md`,
+settled 2026-10-24, decision 357; its review, V1.3, decision 366), the last week of the user's
+subscription: visitors every fortnight, her phone's frame, the creatures and the scenery, the
+forwarders, from `v1.3-dev`, the model fit to each session (the personal touches, F5, dropped at
+the user's word). **1.3 is the release PR #219** (`v1.3-dev` → `main`, "Release 1.3 (with
+1.2.1)", save v55 unchanged), the user's to merge; `main` after it is the game as it stands.
+**There is no plan after 1.3**: `docs/v1.3_plan.md`, `docs/v1.1_plan.md`, `docs/v1_plan.md` and
+the plans before them are complete, and a session with nothing asked of it changes nothing and
+asks the user what they'd like next.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
-**A session starting cold reads `docs/handoff.md` first.** Forks that closed off a real alternative
+**A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
+after a long gap" before anything else. Forks that closed off a real alternative
 go in **`docs/decisions.md`**: appended, numbered, never edited. Read it before re-opening a
 settled question. `docs/personal_touches.md` holds the real-life details only the user can supply.
 
@@ -71,10 +78,10 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.1-dev` is the integration branch after 1.0** (`v1-dev` was V1's, decision 266, and ended
-with 1.0; `v0.3-dev` was 0.3's, decision 212), made from `main` the day the release merged and
-added to `vercel.json`'s no-preview list (decision 265). While a
-plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
+**`v1.3-dev` was the integration branch for 1.3** and ends with it (`v1.1-dev` was 1.1's,
+`v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212). **The next plan makes its own from
+`main`** once the release PR #219 has merged, and adds it to `vercel.json`'s no-preview list that
+day (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
@@ -188,7 +195,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   world's grid inside a kerb, the well on setts that the flagstones ring a tile out
   (`src/sprites/paving.ts`; cobbles, flagstones and setts run on into each other, `PAVED`); trees,
   the willow, the rose bush, rocks and flowers are `src/sprites/nature.ts` (leaves painted by `paintCrown`; a prop can
-  take `forms` as well as `variants`; the tree's conifer, dead tree and birch, and the woods' edge's poplar, leaning tree and broken tree, are `src/sprites/treeForms.ts`), the fountain `src/sprites/park.ts`. Buildings are built
+  take `forms` as well as `variants`; the tree's conifer, dead tree and birch, and the woods' edge's poplar, leaning tree and broken tree, are `src/sprites/treeForms.ts`; the broken and leaning trees stand only in a wood's edge and the dead one only in the woods and by the graves, the rest in leaf, kept to where each stands by `grove` from `parseMap` and `treeFormOf` in `src/sprites/props.ts`, a map's `woods` saying which places are woods, 1.3's F4), the fountain `src/sprites/park.ts`. Buildings are built
   from the kit in `src/sprites/buildings.ts` (walls, roofs, windows, doors, awnings, signs, all in
   shared keys, decision 95): her house, Skelly and her pots in `houses.ts`, the shops, the pop-up
   and the cart in `shops.ts`, the neighbours' houses in `neighbourHouses.ts`. Water smooths a
@@ -465,8 +472,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   is rooms (0.3's H4, decision 233): `ROOMS` rows in `src/data/home.ts`, kept by `Rooms` since
   1.1's W2 (decision 341: each room's pieces with what they show and what stands on what, walls,
   floor and size, `home.rooms`), `Home` keeping what they share (the chest, the papers and
-  floors she owns) and answering the room's reads through `Rooms`, and everything that reads "the
-  room" reading the one she's in (`home.here`). They're all the one place, `home`: a doorway in
+  floors she owns), with no reads of the room of its own (1.3's F6, decision 365), and everything
+  that reads "the room" reading the one she's in through `home.rooms` (`home.rooms.here`,
+  `home.rooms.placed`). They're all the one place, `home`: a doorway in
   a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
   within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe. A
   planter stands in any room, its bed keyed by its room (`Plot.room`, save v55).
@@ -486,7 +494,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   dresser, the counter, the low shelf, the curiosity cabinet: how high each top is) and `SMALL`
   (lamps, vases, jars, cakes, curios and the trinkets, art in `src/sprites/tabletop.ts`). A small
   piece on a surface's tile is `on` (`Placed.on`, one to a tile; `surfaceAt`, `riderAt`,
-  `ridersOf` in `systems/decor.ts`), rides along when `Home.move` moves its surface, goes in the
+  `ridersOf` in `systems/decor.ts`), rides along when `Rooms.move` moves its surface, goes in the
   chest with it, and is drawn raised to its top (`pieceSprite`'s `raised`).
   The furniture sets (0.3's S3 and S4, decisions 262–263) are rows in `src/data/sets.ts` (a set is
   a "suite" in code: `SuiteId`, `SUITES`, `SET_FURNITURE`; H2's `SetPiece` was taken), art in
@@ -530,7 +538,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   and her birthday party; `Neighbourhood` walks only those where she is (decision 92), through
   doors and mats, and they're drawn in every view by `neighbourDrawables` (`src/render/villagers.ts`).
   Their happenings (the book club, the midnight bake…) are rows in `src/data/happenings.ts`,
-  worked out in `src/systems/happenings.ts`; the window's small event (news, or something lost
+  worked out in `src/systems/happenings.ts` (`happeningsAt` kept for the whole hour and the day, and
+  for as long as `mayorTold()` says the mayor's story is told the same; 1.3's F2, decision 361; a
+  new row begins and ends on a whole hour, held by a test); the window's small event (news, or something lost
   to hand back) is `world.smallEvents` (`SmallEvents`, rows in `src/data/smallEvents.ts`, the
   errand she carries in save v24); anyone may let one go on a talk (`puffs` on a villager row,
   `puffsOnTalk`), and `fill` puts her name into a line, a capital where it starts a sentence
@@ -555,8 +565,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   Special days are in `src/data/specialDays.ts` (21 September, their song day, plays its own tune in town; 25 September, Dolly Parton day, fills every place with monarchs, `monarchsOn`), the rules in `src/systems/friendship.ts`, friendships and mail in `src/world/Friends.ts`, and each
   villager's walk in `src/world/Neighbour.ts`. `world.neighbourhood` is who's where and the
   walking, and `world.talk` (`Talk`, `src/world/services/Talk.ts`, 1.1's W3) the talk: `talk`,
-  `reply`, `give`, `favour`/`doFavour`, the faces, friendships and best friends' letters (the
-  neighbourhood answers the same reads, a line each, for the view and the tests); `world.mailbox`
+  `reply`, `give`, `favour`/`doFavour`, the faces, friendships and best friends' letters (asked
+  of `world.talk` by the view and the tests too, `Neighbourhood` having no forwarders since
+  1.3's F6, decision 365); `world.mailbox`
   the letters; tapping a villager walks up to them and arrives with `villager`. Their art is
   `src/sprites/villagers.ts`, built from the doll's parts with touches of their own on top
   (`Touch`: Rufus's ears and tail, Barty's bones, Wrapunzel's wraps, decision 154), on the body
@@ -600,10 +611,12 @@ what each owns, and where it hurts. Update it when a seam moves.
   critters dealt from the day key (decision 102). Rarity is four tiers, 12:5:2:1, with a
   legendary one waiting for its hours, weather or full moon, and `isAbout` is the one test of
   whether a critter could be out (0.2's F1, decision 150); since V1's R5 (decision 310) every
-  critter comes out the day after each full moon when out of its season or weather (`comesOut`,
-  `isVisiting`), never more than 29 days away, and the Cabinet says when (`nextChance`); seven
+  critter comes out the day after a full moon, and since 1.3's F1 (decision 360) the day after a
+  new one too (`isVisitDay`, `isNewMoon`), when out of its season or weather (`comesOut`,
+  `isVisiting`), never more than about a fortnight away (a moon-bound one keeps the full moon's
+  night), and the Cabinet says when (`nextChance`); seven
   holiday critters and three jumping spiders stay all year. `tests/systems/rarity.test.ts` holds
-  a simulated year filling the Cabinet in about ten months: rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
+  a simulated year filling the Cabinet in about nine months (seven and a half to ten): rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
   too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
   tapping one walks her to the bank and casts her rod (`world.fishing`,
@@ -850,7 +863,8 @@ its files sharing their modules (`isolate: false`). A test outside `tests/hud/` 
 `document` or `window` is named in `DOM`; a module-level `let` in `src/` that a world sets from
 outside (as `knowFairground` does) is put back in `tests/setup.ts`, or a file finds it as the one
 before left it. A world test is slow by its steps, not its building (about 50 ms): one that
-settles the town for long takes a stated timeout saying why, as `finale.test.ts` does. Smoke
+settles the town for long takes a stated timeout saying why (`finale.test.ts` needed none after
+1.3's F2). Smoke
 (`scripts/smoke/`, a file per area) covers only what needs a real browser: booting, real touch, layout at phone
 size, and the save surviving a reload. For anything visual, look at `.smoke/*.png` and the
 sprites (`npm run sprite`); with previews off, the real iPhone sees it once it reaches `main`.

@@ -3,7 +3,7 @@ import { doorStep } from '../../data/maps';
 import { PROP_SEATS } from '../../data/seats';
 import { WORKS } from '../../data/work';
 import { HAPPENING_IDS, HAPPENINGS } from '../../data/happenings';
-import { VILLAGER_IDS, type Favour, type StopLife } from '../../data/villagers';
+import { VILLAGER_IDS, type StopLife } from '../../data/villagers';
 import { dayKey, hourOf } from '../../systems/clock';
 import { puffingAt, specialDayOf } from '../../systems/friendship';
 import { callNow } from '../../systems/calls';
@@ -11,7 +11,6 @@ import { HUSBAND } from '../../data/cody';
 import { atHers, isHusband } from '../../systems/cody';
 import { footprint } from '../../systems/decor';
 import { inTown } from '../../systems/mayor';
-import type { Feeling } from '../../types/mood';
 import type { Tile } from '../../systems/pathfinding';
 import { happeningOf, happeningsAt, venueOf } from '../../systems/happenings';
 import {
@@ -32,9 +31,8 @@ import {
   type Whereabouts,
 } from '../../systems/schedules';
 import { nextZoneToward } from '../../systems/zones';
-import type { HappeningId, ItemId, VillagerId, WorkId, ZoneId } from '../../types/ids';
+import type { HappeningId, VillagerId, WorkId, ZoneId } from '../../types/ids';
 import type { WorldContext } from '../context';
-import type { Chat, GiftResult } from '../events';
 import type { Friends } from '../Friends';
 import { tileOf } from '../Movement';
 import { Neighbour } from '../Neighbour';
@@ -549,48 +547,6 @@ export class Neighbourhood {
     const now = this.ctx.clock.now();
     const puffed = this.keeps.talk.puffedNow(now);
     return this.neighboursIn(zone).filter((n) => puffed === n.id || puffingAt(n.id, now));
-  }
-
-  // What the view and the tests ask of a talk here, answered by `Talk` (1.1's W3).
-
-  get talkingTo(): VillagerId | null {
-    return this.keeps.talk.talkingTo;
-  }
-
-  startTalk(id: VillagerId): void {
-    this.keeps.talk.startTalk(id);
-  }
-
-  endTalk(): void {
-    this.keeps.talk.endTalk();
-  }
-
-  talk(id: VillagerId): Chat {
-    return this.keeps.talk.talk(id);
-  }
-
-  reply(id: VillagerId, k: number): Chat | null {
-    return this.keeps.talk.reply(id, k);
-  }
-
-  give(id: VillagerId, item: ItemId): GiftResult | null {
-    return this.keeps.talk.give(id, item);
-  }
-
-  favour(id: VillagerId): Favour | null {
-    return this.keeps.talk.favour(id);
-  }
-
-  doFavour(id: VillagerId): { line: string; candy: number; feels: Feeling | null } | null {
-    return this.keeps.talk.doFavour(id);
-  }
-
-  feel(id: VillagerId, feel: Feeling | null): void {
-    this.keeps.talk.feel(id, feel);
-  }
-
-  feelingOf(id: VillagerId): Feeling | null {
-    return this.keeps.talk.feelingOf(id);
   }
 }
 

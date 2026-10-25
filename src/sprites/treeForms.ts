@@ -343,6 +343,12 @@ function drawBroken(): SpriteSource {
  * The conifer, the dead tree and the birch, after the town tree's three, then the woods' edge
  * trees: the poplar, the leaning tree and the broken one.
  */
+/** Where the bare and bent ones fall among the tree's nine forms (the town tree's three first). */
+export const CONIFER_FORM = 3;
+export const DEAD_FORM = 4;
+export const LEANING_FORM = 7;
+export const BROKEN_FORM = 8;
+
 export const MORE_TREE_FORMS: readonly SpriteSource[] = [
   drawConifer(),
   drawDeadTree(),

@@ -39,13 +39,13 @@ export function homeApis({
     putAway: () => world.decorating.putAwaySelected(),
     wallpapers: () => world.home.wallpapers,
     floorings: () => world.home.floorings,
-    wallpaper: () => world.home.wallpaper,
-    flooring: () => world.home.flooring,
+    wallpaper: () => world.home.rooms.wallpaper,
+    flooring: () => world.home.rooms.flooring,
     paper(id) {
-      if (world.home.paper(id)) changed();
+      if (world.home.rooms.paper(id)) changed();
     },
     lay(id) {
-      if (world.home.lay(id)) changed();
+      if (world.home.rooms.lay(id)) changed();
     },
     isNew: (id) => world.novelty.isNew('storage', id),
     seen: () => world.novelty.seen('storage'),

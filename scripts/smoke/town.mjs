@@ -492,7 +492,7 @@ async function closer() {
   /** How much of her room shows across, and whether the canvas starts on a whole pixel. */
   const room = async () => {
     const shown = await fit();
-    const wide = await page.evaluate(() => window.world.home.room.width);
+    const wide = await page.evaluate(() => window.world.home.rooms.room.width);
     const shows = shown.width / TILE;
     return { ...shown, room: wide, shows, fills: Math.min(wide, shows) / shows };
   };
@@ -516,7 +516,7 @@ async function closer() {
     closeHome.scale >= 3 && closeHome.fills >= 0.85,
     JSON.stringify(closeHome),
   );
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await tapTile(mat.tx, mat.ty);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
   const out = await fit();

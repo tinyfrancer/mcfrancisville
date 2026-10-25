@@ -1,8 +1,9 @@
-import { dayKey, type Clock } from '../../systems/clock';
+import type { Clock } from '../../systems/clock';
 import { moundSpot } from '../../systems/fossils';
 import type { PlacedProp } from '../../systems/grid';
 import type { Tile } from '../../systems/pathfinding';
 import type { MapZoneId } from '../../types/ids';
+import { MinuteDay } from './MinuteDay';
 import type { Overlay } from './Overlay';
 import { covers } from './Zone';
 
@@ -13,18 +14,18 @@ import { covers } from './Zone';
 export class Mounds implements Overlay {
   private readonly zone: MapZoneId;
   private readonly spots: readonly Tile[];
-  private readonly clock: Clock;
+  private readonly day: MinuteDay;
   private cache: { day: string; prop: PlacedProp | null } | null = null;
 
   constructor(zone: MapZoneId, spots: readonly Tile[], clock: Clock) {
     this.zone = zone;
     this.spots = spots;
-    this.clock = clock;
+    this.day = new MinuteDay(() => clock.now());
   }
 
   /** Today's mound, or null in a place with nowhere to dig. */
   today(): PlacedProp | null {
-    const day = dayKey(this.clock.now());
+    const day = this.day.get();
     if (this.cache?.day !== day) {
       const at = moundSpot(this.zone, this.spots, day);
       this.cache = { day, prop: at && { id: 'mound', tx: at.tx, ty: at.ty, w: 1, h: 1 } };

@@ -4,7 +4,7 @@
  * busy, like their letters in `mystery.ts`. Oldest first, and only ever added to: the last row is
  * the version on her phone, and a release to `main` adds its row (or finishes the newest one).
  * A row her phone never saw may be folded into the next one (1.0 holds 0.6 to 0.9, decision 324;
- * 1.2 holds 1.0.1 and 1.1, decision 356),
+ * 1.2 holds 1.0.1 and 1.1, decision 356; 1.3 holds 1.2.1, decision 366),
  * so she reads one card; a row she has seen is never changed (but for L5's emoji, put in words,
  * decision 295).
  */
@@ -183,6 +183,22 @@ export const NOTES: readonly PatchNotes[] = [
         "moves things, October has surprises, and winter's pumpkins are snow lanterns.",
     ],
     ps: 'P.S. Typed very quietly, in case your phone is on silent. The W still sticks.',
+  },
+  {
+    version: '1.3',
+    lines: [
+      "The moon sends visitors twice a month now, the day after it's full and the day after " +
+        "it's new. Only a fussy full-moon few still wait the month.",
+      'The Cabinet and Today say which day is next, so nobody has to ask the moon. It was ' +
+        'getting tired of being asked, and it is very far up.',
+      'Bats have proper wings, moths two pairs, fish have tails you can see in their shadows, ' +
+        'orbs are little wisps, and Fibi and Dolly have soft grey muzzles.',
+      "The town's trees have all their leaves back. The bare and crooked ones moved out to the " +
+        "woods' edges, which suits them, and one stayed by the graves.",
+      'The town runs a little lighter on your phone. This is my last typed note for a while, ' +
+        "but we'll all be right here every day, just as you left us.",
+    ],
+    ps: 'P.S. I shall keep the typewriter oiled, just in case. The W still sticks. I have grown rather fond of it.',
   },
 ];
 

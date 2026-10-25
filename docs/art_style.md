@@ -137,7 +137,11 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   hedge and a tile inside it, never a whole side of hedge with a row of trees behind it, and a
   rock or a stump sits in a gap here and there. Among them stand the edge's own trees, a tall
   thin poplar, a leaning one and an old broken one (`src/sprites/treeForms.ts`), so the edge reads
-  as a wood and not a wall of one round crown.
+  as a wood and not a wall of one round crown. **Bare trees belong to the woods** (1.3's F4): the
+  broken and leaning trees only in a wood's edge, the dead one in the woods and by the graves, so
+  the town's trees are in leaf but for the graveyard's spooky one.
+- **Water ends with a bank** (1.3's F4): where a creek leaves a place through a gap in the hedge it
+  runs on off the map, but where it meets the hedge unbroken its bank curls round to an end.
 - **Ice is drawn on the world, not the tile** (1.1's A3, `src/sprites/ice.ts`): soft patches of
   frosted, plain and clear ice from a slow noise, darker down the middle where it's thick over deep
   water, a frost along the bank that comes and goes, stones in the bank's lip, a few hairline
@@ -285,6 +289,13 @@ She finds spiders frightening, and they are still in the game, drawn gently
   numbers (0.3's C2: a shape worked out from a size, `src/sprites/crawlies.ts`), lit from the
   top left and softly outlined. A new critter in a family is the family's shape in its own
   colours (the long-eared bat is the bat with tall ears), not a new drawing.
+- **Each 16 is the 24 drawn small** (1.3's F3, decision 362): a shape is worked out from the
+  24's numbers at either size, never drawn twice by hand, so the bag, the Cabinet, the museum,
+  a small fish's shadow and the world show one creature. What a family must have to read at 3×
+  on a phone: a bat's wing is a membrane on finger bones with a scalloped edge; a moth has a
+  forewing and a hindwing with a seam between; a fish narrows to a wrist before its forked tail
+  (that wrist is all that makes its shadow a fish); an orb is flat tones, never dithered; an
+  insect stands low on bent legs, and a thin leg isn't outlined, or it stands like a fence post.
 - **The creepy-crawlies keep to the ground and are friendly at a glance:** a snail side on with
   eye stalks and a smile, its shell a pumpkin's ribs or a golden spiral; a woolly bear in soft
   bands; a slug under a little ghost sheet; a glowworm whose tail glows; a cricket, a grasshopper,

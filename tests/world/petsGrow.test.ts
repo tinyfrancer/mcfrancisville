@@ -35,7 +35,7 @@ function goHome(h: Harness): void {
 }
 
 function goOut(h: Harness): void {
-  const mat = h.world.home.room.mat;
+  const mat = h.world.home.rooms.room.mat;
   h.world.tapTile(mat.tx, mat.ty);
   h.until(() => h.world.scene === 'town', 'going out');
 }

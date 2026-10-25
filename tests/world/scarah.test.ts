@@ -52,8 +52,8 @@ describe("Scarah (0.3's F3)", () => {
   it('sends a packet of every seed there is at three hearts, once, into her bag', () => {
     const h = harness();
     h.world.friends.update('scarah', { points: 295 });
-    h.world.neighbourhood.talk('scarah');
-    h.world.neighbourhood.endTalk();
+    h.world.talk.talk('scarah');
+    h.world.talk.endTalk();
     const before = EVERY_SEED.map((id) => h.world.bag.count(id));
     expect(h.world.mailbox.open('scarah:3')).toBe(true);
     expect(EVERY_SEED.map((id) => h.world.bag.count(id))).toEqual(before.map((n) => n + 1));

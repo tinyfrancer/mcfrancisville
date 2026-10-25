@@ -50,7 +50,7 @@ export function her(s: Shared, parts: HerParts): Her {
       bag: () => [...bag.contents, ...home.items].map((st) => st.id),
       closet: () => wardrobe.owned,
       storage: () => [
-        ...home.everyPiece.map((p) => p.id),
+        ...home.rooms.everyPiece.map((p) => p.id),
         ...home.stored.map((st) => st.id),
         ...s.yard.placed.map((p) => p.id),
       ],

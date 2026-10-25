@@ -34,7 +34,7 @@ export class Display {
   owned(id: ItemId): number {
     const { bag, home } = this.keeps;
     const kept = home.items.find((s) => s.id === id)?.count ?? 0;
-    return bag.count(id) + kept + home.onShow(id);
+    return bag.count(id) + kept + home.rooms.onShow(id);
   }
 
   /** What a placed piece shows, for drawing it: its set as she has it, or what's on show in it. */
@@ -51,7 +51,8 @@ export class Display {
   /** The display piece she last walked up to, while she's home and it's still out. */
   get piece(): Placed | null {
     const piece = this.visiting;
-    if (!piece || !this.keeps.atHome() || !this.keeps.home.placed.includes(piece)) return null;
+    if (!piece || !this.keeps.atHome() || !this.keeps.home.rooms.placed.includes(piece))
+      return null;
     return piece;
   }
 
@@ -72,7 +73,7 @@ export class Display {
     if (!piece || !this.offers().some((s) => s.id === id)) return false;
     const { bag, home } = this.keeps;
     if (!bag.remove(id, 1)) return false;
-    const was = home.showIn(piece, id);
+    const was = home.rooms.showIn(piece, id);
     if (was) bag.add(was, 1);
     this.changed();
     return true;
@@ -82,7 +83,7 @@ export class Display {
   empty(): boolean {
     const piece = this.piece;
     if (!piece?.shows) return false;
-    const was = this.keeps.home.showIn(piece, null);
+    const was = this.keeps.home.rooms.showIn(piece, null);
     if (!was) return false;
     this.keeps.bag.add(was, 1);
     this.changed();

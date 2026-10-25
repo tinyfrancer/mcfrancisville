@@ -58,7 +58,7 @@ function doAll(h: Harness, except: string[] = []): WorldEvent[] {
     step();
   }
   if (!except.includes('meet')) {
-    for (const id of neighbours.slice(0, MEET_NEIGHBOURS)) h.world.neighbourhood.talk(id);
+    for (const id of neighbours.slice(0, MEET_NEIGHBOURS)) h.world.talk.talk(id);
     step();
   }
   if (!except.includes('eat')) {
@@ -104,15 +104,15 @@ describe("her first day (V1's R1)", () => {
 
   it('counts the neighbours she has talked to, not her husband', () => {
     const h = newTown();
-    h.world.neighbourhood.talk('cody');
+    h.world.talk.talk('cody');
     h.tick(1);
     const meet = () => h.world.firstDay.steps().find((s) => s.id === 'meet')!;
     expect(meet()).toMatchObject({ have: 0, need: MEET_NEIGHBOURS, done: false });
-    h.world.neighbourhood.talk(neighbours[0]!);
-    h.world.neighbourhood.talk(neighbours[1]!);
+    h.world.talk.talk(neighbours[0]!);
+    h.world.talk.talk(neighbours[1]!);
     expect(told(h.tick(1))).toEqual([]);
     expect(meet()).toMatchObject({ have: 2, done: false });
-    h.world.neighbourhood.talk(neighbours[2]!);
+    h.world.talk.talk(neighbours[2]!);
     expect(told(h.tick(1))).toEqual(['meet']);
     expect(meet()).toMatchObject({ have: MEET_NEIGHBOURS, done: true });
   });

@@ -40,15 +40,7 @@ function halloween(hour: number, look: Look = { ...DEFAULT_LOOK, name: 'Em' }) {
   return h;
 }
 
-/**
- * Settling the town on Halloween is thousands of steps of the world, and each step works out
- * every neighbour's whereabouts afresh, filtering the hour's happenings for each
- * (`happeningsAt` through `whereabouts`): 1 to 3 s a case in the container, and past vitest's
- * 5 s on a busy CI runner (1.1's T2, decision 336).
- */
-const SETTLING = { timeout: 30_000 };
-
-describe('the costume contest (0.2 J4)', SETTLING, () => {
+describe('the costume contest (0.2 J4)', () => {
   it('lines the town up before the stage on the 31st, facing her, the judge', () => {
     const h = halloween(18);
     const rufus = h.world.neighbourhood.neighbour('rufus');
@@ -82,7 +74,7 @@ describe('the costume contest (0.2 J4)', SETTLING, () => {
   });
 });
 
-describe('the party (0.2 J4)', SETTLING, () => {
+describe('the party (0.2 J4)', () => {
   it("puts out the chili and the pumpkins before the stage, and hers only if she's carved it", () => {
     const h = halloween(21);
     const set = () =>
@@ -105,10 +97,10 @@ describe('the party (0.2 J4)', SETTLING, () => {
     // Her husband asks his question from the first day (V1's P5); she has answered it.
     h.world.friends.update('cody', { answered: QUESTIONS.cody.answers[0]!.id });
     h.world.tapTile(cody.tile.tx, cody.tile.ty);
-    h.until(() => h.world.neighbourhood.talkingTo === 'cody', 'walking up to Cody', 120_000);
+    h.until(() => h.world.talk.talkingTo === 'cody', 'walking up to Cody', 120_000);
     // His Halloween line and treat come first; the party's, and his chili, after.
-    h.world.neighbourhood.talk('cody');
-    expect(h.world.neighbourhood.talk('cody').line).toMatch(/chili/);
+    h.world.talk.talk('cody');
+    expect(h.world.talk.talk('cody').line).toMatch(/chili/);
     expect(h.world.bag.count('whiteChickenChili')).toBe(1);
     expect(h.world.finale.canPhoto('cody')).toBe(true);
     expect(h.world.finale.photo()).toEqual({
@@ -141,7 +133,7 @@ describe("Cody's letter the morning after (0.2 J4)", () => {
   });
 });
 
-describe('the finale at the fairground (0.2 M3)', SETTLING, () => {
+describe('the finale at the fairground (0.2 M3)', () => {
   /** Halloween at an hour, the fairground open and her there. */
   function atTheFair(hour: number) {
     const h = harness(TOWN, {

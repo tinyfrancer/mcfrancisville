@@ -97,14 +97,14 @@ async function sound() {
     w.home.store('recordPlayer');
     w.decorating.takeOut('recordPlayer');
     w.decorating.stop();
-    return w.home.placed.find((p) => p.id === 'recordPlayer') ?? null;
+    return w.home.rooms.placed.find((p) => p.id === 'recordPlayer') ?? null;
   });
   check('a record player can be set out at home', player !== null);
   if (!player) return;
   // The pets potter about the room by the clock, and a tap on a pet reaches the pet, so wait
   // for the tile to be clear of them; otherwise, now and then, she'd be off to pat one instead.
   await stepUntil(() => {
-    const at = window.world.home.placed.find((p) => p.id === 'recordPlayer');
+    const at = window.world.home.rooms.placed.find((p) => p.id === 'recordPlayer');
     return !at || !window.world.petCare.petAt(at.tx, at.ty);
   }, 'no pet is sitting on the record player');
   await page.evaluate((p) => window.world.tapTile(p.tx, p.ty), player);
@@ -124,12 +124,12 @@ async function sound() {
     w.home.store('piano');
     w.decorating.takeOut('piano');
     w.decorating.stop();
-    return w.home.placed.find((p) => p.id === 'piano') ?? null;
+    return w.home.rooms.placed.find((p) => p.id === 'piano') ?? null;
   });
   check('a piano can be set out at home', piano !== null);
   if (piano) {
     await stepUntil(() => {
-      const at = window.world.home.placed.find((p) => p.id === 'piano');
+      const at = window.world.home.rooms.placed.find((p) => p.id === 'piano');
       return !at || !window.world.petCare.petAt(at.tx, at.ty);
     }, 'no pet is sitting at the piano');
     await page.evaluate((p) => window.world.tapTile(p.tx, p.ty), piano);
@@ -138,13 +138,13 @@ async function sound() {
     // Put away again, so it stands in nobody's way later on.
     await page.evaluate(() => {
       const w = window.world;
-      w.decorating.start(w.home.placed.find((p) => p.id === 'piano'));
+      w.decorating.start(w.home.rooms.placed.find((p) => p.id === 'piano'));
       w.decorating.putAwaySelected();
       w.decorating.stop();
     });
   }
   await clearMat();
-  const mat = await page.evaluate(() => window.world.home.room.mat);
+  const mat = await page.evaluate(() => window.world.home.rooms.room.mat);
   await page.evaluate((m) => window.world.tapTile(m.tx, m.ty), mat);
   await stepUntil(() => window.world.scene === 'town', 'she goes back out');
   check('going out takes the record off', !(await page.evaluate(() => window.sound.recordPlaying)));

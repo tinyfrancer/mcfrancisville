@@ -37,8 +37,8 @@ describe('her broom comes by Agatha', () => {
     expect(h.world.broom.has).toBe(false);
     withBroom(h);
     expect(h.world.broom.has).toBe(true);
-    const stand = h.world.home.placed.find((p) => p.id === 'broomStand');
-    const mat = h.world.home.room.mat;
+    const stand = h.world.home.rooms.placed.find((p) => p.id === 'broomStand');
+    const mat = h.world.home.rooms.room.mat;
     expect(stand).toBeDefined();
     expect(Math.abs(stand!.tx - mat.tx) + Math.abs(stand!.ty - mat.ty)).toBeLessThanOrEqual(4);
   });
@@ -56,7 +56,7 @@ describe('flying home, and back', () => {
     expect(h.world.broom.flyHome()).toBe(true);
     const home = h.tick(1);
     expect(h.world.scene).toBe('home');
-    expect(h.world.movement.tile).toEqual(h.world.home.room.mat);
+    expect(h.world.movement.tile).toEqual(h.world.home.rooms.room.mat);
     const [flew] = flights(home);
     expect(flew).toMatchObject({ to: 'home' });
     expect(BROOM_CALLS.map((c) => c.line)).toContain(flew!.call);

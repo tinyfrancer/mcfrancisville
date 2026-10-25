@@ -241,7 +241,7 @@ export class World extends WorldParts {
     const prop = this.zone.propAt(tx, ty);
     const piece =
       this.scene === 'home'
-        ? this.home.pieceAt(tx, ty)
+        ? this.home.rooms.pieceAt(tx, ty)
         : this.scene === 'town'
           ? this.yard.pieceAt(tx, ty)
           : undefined;
@@ -288,7 +288,7 @@ export class World extends WorldParts {
   tendBed(bed: Plot, job: BedJob): boolean {
     if (placeOf(bed) !== this.scene || !this.farm.isBed(bed) || this.decorating.state) return false;
     // A planter's bed in another of her rooms (1.1's W2) is through a doorway, not walked up to.
-    if (bed.room && bed.room !== this.home.here) return false;
+    if (bed.room && bed.room !== this.home.rooms.here) return false;
     this.garden.lookAt(null);
     this.poses.stir();
     this.recordPlayer.stop();
