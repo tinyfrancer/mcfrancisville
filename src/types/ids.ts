@@ -144,7 +144,10 @@ export type PropId =
   | 'bridgeFrame'
   | 'footbridge'
   | 'greenhouseFrame'
-  | 'herGreenhouse';
+  | 'herGreenhouse'
+  // The ice hut on the pond's bank (1.4's G3), and its frame.
+  | 'iceHutFrame'
+  | 'iceHut';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -1247,7 +1250,9 @@ export type InteriorId =
   // Scarah's farmhouse at Boo Acres (0.3's F3).
   | 'scarahFarmhouse'
   // The mayor's office in the town hall (V1's P3b), Rob Boo's.
-  | 'mayorsOffice';
+  | 'mayorsOffice'
+  // The ice hut on the pond's bank (1.4's G3), once it's built.
+  | 'iceHut';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -1367,7 +1372,11 @@ export type FixtureId =
   // Scarah's (0.3's F3): a wall of seed drawers in her farmhouse.
   | 'seedDrawers'
   // Rob Boo's desk in the town hall (V1's P3b).
-  | 'mayorsDesk';
+  | 'mayorsDesk'
+  // The ice hut's (1.4's G3): its pot-bellied stove, its bench, and the hole in its floor.
+  | 'hutStove'
+  | 'hutBench'
+  | 'iceHole';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -1423,4 +1432,4 @@ export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';
 export type FirstDayStepId = 'shake' | 'plant' | 'stall' | 'notice' | 'meet' | 'eat';
 
 /** The town's projects (V1's R4), funded over weeks at the noticeboard. */
-export type ProjectId = 'bandstand' | 'castleGarden' | 'footbridge' | 'greenhouse';
+export type ProjectId = 'bandstand' | 'castleGarden' | 'footbridge' | 'greenhouse' | 'iceHut';
