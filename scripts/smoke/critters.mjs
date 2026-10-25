@@ -140,7 +140,7 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    cases.cases === 70 && cases.thumb && cases.onScreen,
+    cases.cases === 74 && cases.thumb && cases.onScreen,
     JSON.stringify(cases),
   );
   check(
@@ -153,7 +153,7 @@ async function critters() {
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
   check(
     'it counts what she has found',
-    cases.found.startsWith(`${found} of 70 found`),
+    cases.found.startsWith(`${found} of 74 found`),
     cases.found,
   );
   await page.screenshot({ path: '.smoke/cabinet.png' });
