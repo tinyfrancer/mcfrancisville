@@ -9218,3 +9218,71 @@ A refactor: nothing she sees changes, no save change (still v55), `looksHeld` un
   0.72-0.84 | 0.69-0.84, draw 19.8-20.5 | 18.6-20.4; yard draw 34.2-35.7 | 32.6-37.9; back room
   update 1.10-1.17 | 1.10-1.25, draw 23.4-24.4 | 23.4-25.4. Every row within the other's spread:
   noise, as a one-line forward is not what a frame costs.
+
+## 366. 1.3: the review after the last week, one card folding 1.2.1, 1.2's town opened as her phone will, F5 dropped, and the docs written for whoever comes after (2026-10-25, 1.3's V1.3)
+
+_Session V1.3 of the 1.3 plan (decision 357), the last session of the last plan: the review after
+F1, F2, F3, F4 and F6 (decisions 360–363, 365), and the release PR #219 (`v1.3-dev` → `main`)
+brought up to 1.3 for the user to merge. No save change (still v55). 364 stays unused._
+
+- **F5 is dropped**, at the user's word on 2026-10-25: "we will hold on any more personal
+  touches, want to focus on a fun game instead". It never ran, nothing was asked, and the parked
+  questions stay in the handoff's "Still to put to the user" as decision 177 left them.
+- **One card for her, `1.3`.** Her phone is on 1.2 (`main` at PR #201). F1's `1.2.1` row was
+  ready to cut the day F1 merged, but no patch went out, so no phone saw it. By decision 324's rule
+  it is folded into one `1.3` row of five lines in the mayor's voice: the moon's visitors twice a
+  month ("Only a fussy full-moon few still wait the month", since the moon-bound critters keep the
+  full moon's night); the Cabinet and Today saying which day; the creatures redrawn (F3: bats'
+  wings, moths' two pairs, fish tails in their shadows, wispy orbs, Fibi's and Dolly's muzzles);
+  the town's trees in leaf (F4); and a lighter town on her phone (F2), with the mayor's last typed
+  note for a while, warm and without goodbye ("we'll all be right here every day, just as you left
+  us"). P.S. "I shall keep the typewriter oiled, just in case. The W still sticks. I have grown
+  rather fond of it." `notesToShow('1.2')` is exactly that card (`tests/systems/patchNotes.test.ts`);
+  the `1.2` row stays as shipped. F6 gets no line.
+- **1.2's town, opened as her phone will.** `lived-in-v55.json` in a 1.3 dev build with notes last
+  seen `1.2`, at Close, Far and sideways: the title, one card (`What's new in 1.3`, five lines,
+  scrolling to its P.S. upright and in the sheet's right column sideways), then Cody's hello ("7
+  days!" and a visit's gift), save v55 with no migration, no error notes; the one console error is
+  the unlinked cloud's 503, as on her phone today. Then played on by taps with a scratch driver on
+  smoke's helpers (decision 324's method): 12 October, the day after the new moon, Today said "25
+  critters are visiting out of season" and the Cabinet's shadows said "the day after each full or
+  new moon" and "Out now!"; a tree shaken, Ollie talked to, a skull beetle netted by day and a
+  velvet bat by night, the bag and the Cabinet looked at with the new art; 13 October, Today and
+  the Cabinet again ("next tomorrow" the night before, as it should), a talk, home, the back room's
+  planter still growing its pumpkin. The save afterwards has the same shape as before (only ids
+  moved: two critters caught, the window's takings), so **no new fixture**: `lived-in-v55.json`
+  stays the newest, and the release changes nothing in the save.
+- **The shakedown** looked at the redrawn creatures in the world (the velvet bat over her net at
+  night), the bag, the Cabinet's shadows and the museum at phone size, every critter on one sheet
+  (`npm run sprite -- 'critter:*' --sheet`), the town's trees by day and night (in leaf, the
+  graveyard's one dead tree), the fish shadows on the pond, Settings, Today's and the Cabinet's
+  moon wording, and smoke's whole run. **Fixed**: smoke's `yard` section, which walks to her yard's
+  tile (4, 11) and taps Decorate, met Hazel calling on her stood on that tile on the real clock (25
+  October, late morning), said hello, and the talk sheet hid the tray; the section now puts the
+  talk away first. Smoke 622 of 622, `smoke:offline` 10 of 10. **Logged, not fixed**: smoke's
+  real-clock sections as a kind ("Where it hurts" 4, new); nothing new in the art notes; F3's and
+  F4's leftovers as they left them.
+- **Perf**: 1.3 against 1.2 served side by side (`origin/main` extracted to a copy of its own, 1.3's
+  `scripts/perf.mjs` for both), alternating: two runs each at Close by night, one each at noon
+  and at Far by night and by day. Every update is a quarter to a half under 1.2's (the town
+  0.93–0.98 ms against 1.29–1.32), so F2's gains hold on her phone's build; draws at Close by
+  night 1–4 ms under almost everywhere, the back room crossing; the town at Far by night the one
+  row over (70.5 against 62.8, a run each, within the swing Far's town has shown before); no
+  frame doubled; the heap the same within half a megabyte. The table is in
+  `docs/architecture.md`, "1.3, V1.3's review".
+- **Docs, for a session a year from now**: the handoff's new "If you are starting cold after a
+  long gap" (what the game is, where it's deployed, how to run and check it, the user's own steps,
+  how a plan was run, what's logged, what to do before changing what she sees); "After 1.0" says
+  1.3 is #219 and `main` after it is the game as it stands, with the user's steps; the 1.3 plan's
+  sessions recorded under "1.3, the last week", and "How 1.3 was run"; "Still to put to the user"
+  parked with the user's word of 2026-10-25; "In progress" empty. `docs/architecture.md`'s "Where
+  it hurts" rewritten for after 1.3 (six items, the done list one paragraph) with 1.3's perf
+  table; `CLAUDE.md`'s "Project" (the 1.3 plan complete, 1.3 the release, no plan after) and the
+  integration-branch paragraph (`v1.3-dev` ends with 1.3, the next is made from `main`).
+
+**Rejected:** two cards at one opening (`1.2.1` and `1.3`) of a release she gets at once; a new
+fixture with the same shape as 1.2's (a fixture holds a release's save shape; 1.3 has none of its
+own); saying goodbye in the card (the town goes on and nothing expires, decision 11; the mayor
+only stops typing); opening smoke's real-clock sections on a named day here (a change to how a
+whole run meets the town, for a later session that wants it); running F5 with the defaults (the
+user said hold).

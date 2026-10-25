@@ -1132,6 +1132,36 @@ times a call in town: the decorations, the pond's ice, the mound), and a path ac
 third of what it was. The suite is 17% shorter, its world tests' steps (the settling cases in
 `finale.test.ts` run 0.15–0.7 s a case against 0.18–1.9 s, so their stated 30 s timeout is gone).
 
+**1.3, V1.3's review** (2026-10-25, decision 366): the 1.3 plan whole against 1.2 as it is on her
+phone, `v1.3-dev`'s head (with the review's notes row) served from one copy and `origin/main`
+(1.2, PR #201) from another, both measured with 1.3's `scripts/perf.mjs`, alternating, on a
+container to itself: two runs each at Close at 21:30, one each at noon and at Far by night and by
+day, as 1.2's table was. Draw means, ms (p50 at Close by night); updates, ms (Close, 21:30); heap,
+MB (Close, 21:30):
+
+| Scene         | Close 21:30, 1.3      | Close 21:30, 1.2      | Noon, 1.3 / 1.2 | Far 21:30, 1.3 / 1.2 | Far noon, 1.3 / 1.2 | Updates 1.3 / 1.2     | Heap 1.3 / 1.2        |
+| ------------- | --------------------- | --------------------- | --------------- | -------------------- | ------------------- | --------------------- | --------------------- |
+| Town          | 37.7–40 (25–28.5)     | 39.7–40.9 (26.2–30.6) | 22.4 / 25.3     | 70.5 / 62.8          | 30.8 / 30.5         | 0.93–0.98 / 1.29–1.32 | 30.4 / 30.2           |
+| Home          | 21.1–22 (11.9)        | 23.8–24.2 (14.3–14.6) | 5.2 / 7.3       | 22.5 / 22.1          | 5.7 / 7.1           | 0.83–0.96 / 1.22–1.24 | 31.1 / 30.9           |
+| Fairground    | 24.5–25.8 (16.8–17.1) | 28.8–29.5 (19.3–20.8) | 10 / 10.3       | 47.6 / 46.1          | 14.9 / 15.7         | 0.59–0.64 / 0.95–0.98 | 31.7–32.1 / 31.8–31.9 |
+| Whisperwood   | 28.6–29.5 (18.2–19.1) | 31.5–32.9 (21.3–21.4) | 11.3 / 12.5     | 58.2 / 58.3          | 17.6 / 20           | 0.67–0.7 / 1.04–1.15  | 32.3–32.7 / 32.2–32.8 |
+| Boo Acres     | 22.5–23.1 (13.8–14.7) | 24.8–28.9 (16.1–17.4) | 8.6 / 9         | 45 / 43.7            | 13.5 / 14.3         | 0.56–0.6 / 0.9–1.1    | 32.9–33 / 32.7–33.7   |
+| Her yard      | 34–36.5 (25.5–25.7)   | 40–43.6 (29.5–33.3)   | 23.4 / 26.3     | 66.9 / 67            | 29.1 / 29.8         | 0.7–0.74 / 1.26–1.4   | 33 / 32.9–33.4        |
+| Back room     | 26.3–27.8 (16.4–18.4) | 25.4–27.3 (16–18.1)   | 8.4 / 9.5       | 23.3 / 27.7          | 7.4 / 10.1          | 1.26–1.36 / 1.49–1.57 | 33.1–33.5 / 33–33.9   |
+| Lantern Shore | 28.4–29.7 (19.3)      | 30.4–31.5 (20.5–20.9) | 10.2 / 11.8     | 52.3 / 54.3          | 16.8 / 19           | 0.76–0.83 / 1.07–1.08 | 34–34.2 / 33.7–34.1   |
+
+F2's gains hold against her phone's build: every update at Close by night is a quarter to a half
+under 1.2's (the town 0.93–0.98 ms against 1.29–1.32, the yard 0.7–0.74 against 1.26–1.4; the back
+room least, its pets and pieces being most of its step), and so is every noon update. Draws at
+Close by night sit 1–4 ms under 1.2's almost everywhere (the yard 4–9), the back room crossing; at
+noon and at Far by day a little under or crossing. The one row over is the town at Far by night,
+70.5 against 62.8 in one run each, where 1.2's own table had Far's town swing by as much from 1.0
+(66.8 / 66.1) to here; the yard and the woods at Far, which draw as much, cross. No frame doubled.
+The heap is the same within half a megabyte everywhere: F3's creatures are baked at the sizes
+they were, and F4's trees are the same forms dealt elsewhere. Against 1.2's own table above (a
+different day's container), the town at Close by night is 37.7–40 here against 37.8–39.2 there,
+so the two days' machines were alike.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,

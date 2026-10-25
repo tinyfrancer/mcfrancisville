@@ -8,18 +8,7 @@ history.
 
 ## In progress
 
-### V1.3: the review and 1.3 (`claude/v13-review`; Opus; decision 366)
-
-Started 2026-10-25 from `v1.3-dev` at `5746d24`. Done: the `1.3` `NOTES` row (five lines and a
-P.S.) with the `1.2.1` row folded into it, `notesToShow('1.2')` → exactly the 1.3 card; 1.2's
-town opened as her phone will at Close, Far and sideways (one card, Cody's hello, no error notes,
-the unlinked cloud's 503 alone) and played on by taps on 12 October (the day after the new moon,
-25 critters visiting; a skull beetle and a velvet bat netted) and 13 October (Today, the Cabinet,
-talks, the back room's planter): the save's shape unchanged, so no new fixture; smoke's `yard`
-section puts away a visitor's talk before Decorate (on the real clock Hazel stood on its tile),
-smoke 622 of 622, offline 10 of 10. Next, in order: `npm run perf` against 1.2 (origin/main
-extracted to the scratchpad, served beside); the docs (this file's cold-start section, "After 1.0", "Where it hurts", `CLAUDE.md`,
-the plan's status line, decision 366); merge into `v1.3-dev`; PR #219's title and body.
+Nothing is in progress.
 
 ## If you are starting cold after a long gap
 
@@ -174,7 +163,21 @@ unchanged.
 
 #### V1.3: the review and 1.3 (`claude/v13-review`, PR #223, decision 366; Opus)
 
-@@V13@@
+**Landed.** The notes: her phone last saw 1.2, so F1's `1.2.1` row, which no phone saw, is folded
+into one `1.3` row of five lines and a P.S. (the moon's visitors twice a month; the Cabinet and
+Today saying which day; the creatures; the trees; a lighter town and the mayor's last typed note
+for a while), and a phone that saw 1.2 reads exactly that card. The lived-in town: 1.2's
+(`lived-in-v55.json`) opened in a 1.3 dev build as her phone will, at Close, Far and sideways (one
+card, Cody's hello, no error notes, the unlinked cloud's 503 alone), then played on by taps on 12
+October (the day after the new moon: 25 critters visiting, a tree shaken, Ollie talked to, a skull
+beetle and a velvet bat netted) and 13 October (Today, the Cabinet's next dates, home and the back
+room's pumpkin planter); the save's shape unchanged, so no new fixture. The driver was a scratch
+script on smoke's `lib.mjs` helpers in a context of its own on a dev server of its own (decision
+324's method). **Fixed**: smoke's `yard` section, which met a neighbour calling on her on the real
+clock. **Perf**: 1.3 against 1.2 side by side, every update a quarter to a half lower, draws a
+little under, the heap the same (`docs/architecture.md`, "1.3, V1.3's review"). **Logged**:
+smoke's real-clock sections ("Where it hurts" 4); nothing new for the art notes. The docs: this
+file's top, "Where it hurts", `CLAUDE.md`, the plan's status line, decision 366.
 
 ### How 1.3 was run, for whoever plans next
 
