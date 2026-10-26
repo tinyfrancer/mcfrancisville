@@ -149,6 +149,7 @@ const ORDER = [
   'winterSets',
   'attic',
   'fair',
+  'bigWheel',
   'plots',
   'booAcres',
   'whatGrows',

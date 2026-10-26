@@ -324,6 +324,8 @@ export type ItemId =
   | RareKeepsakeId
   // Hazel's star map, the first time she traces a constellation (1.5's G4).
   | 'starMap'
+  // A ticket stub from her first ride on the big wheel (1.6's X2).
+  | 'ticketStub'
   | DishId
   | FruitId
   | CritterId

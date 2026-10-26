@@ -262,6 +262,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   `render/fairGames.ts` from `sprites/fairGames.ts`, drawn with the same reads. The duck pond and the
   strength bell are stalls `9` and `0`; the day's first go at one stall is free (`freeGoOn`,
   `fortune:freeGo` in `Takings`), and the lucky duck squish is only won there (`data/fairPrizes.ts`).
+  A ride on the big wheel (1.6's X2, decision 381) is a fifth row (`bigWheel`, `does: { ride }`):
+  once round on the sheet's stage (`render/fairRide.ts`, art `sprites/fairRide.ts`, rules
+  `systems/fairRide.ts`, `world.activities.board`/`land`), with her husband or her closest
+  neighbour at the fair, the day's first ride free (`fortune:ride`), a ticket stub the first time.
   The calendar comes there with the gate open, as it is from the start (0.2's M3, decision 202): a happening row's `fair`
   (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
   `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,

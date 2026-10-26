@@ -251,6 +251,16 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
   },
+  {
+    version: '1.6',
+    lines: [
+      // 1.6's X2: a ride on the big wheel.
+      'You can ride the big wheel at the fair now: once round, nice and slow, with a stop at the very top.',
+      'The view from the top is the whole town. I am told the town looks back.',
+      'Your first ride each day is free, and anyone you know at the fair will hop in beside you.',
+    ],
+    ps: 'P.S. Your very first ride comes with a ticket stub. I kept mine. It is in a drawer, with my nerves.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

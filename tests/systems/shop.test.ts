@@ -327,6 +327,8 @@ describe('selling', () => {
       'finderRosette',
       // Hazel's star map (1.5's G4).
       'starMap',
+      // The big wheel's ticket stub (1.6's X2).
+      'ticketStub',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));
