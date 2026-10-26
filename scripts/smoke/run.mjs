@@ -136,6 +136,7 @@ const ORDER = [
   'places',
   'seeThrough',
   'effects',
+  'delights',
   'faces',
   'verbs',
   'alive',
