@@ -15,7 +15,8 @@ import { fromSave, World, type WorldOptions } from '../../src/world/World';
  * town and each lived-in save from her phone, with every project built, on an ordinary
  * Saturday, a film night, Christmas Eve (the square's tree, the pond frozen) and a day in May.
  * The snapshot is a hash of each place's answers, taken from the code the list replaced; 1.2's
- * town (`lived-in-v55`) was added in 1.3's F6, its snapshot taken from the code as it then was.
+ * town (`lived-in-v55`) was added in 1.3's F6, its snapshot taken from the code as it then was,
+ * and 1.5's (`lived-in-v58`) in V1.5's review, the same way.
  */
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../persistence/fixtures');
 const SAVES = [
@@ -25,6 +26,7 @@ const SAVES = [
   'lived-in-v43',
   'lived-in-v53',
   'lived-in-v55',
+  'lived-in-v58',
 ];
 
 const PLACES = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);

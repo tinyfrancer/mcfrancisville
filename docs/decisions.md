@@ -9799,3 +9799,78 @@ any pet could wear (each pet's ears and tail are elsewhere: twelve more drawings
 who never asked); a lantern lit by day too (a possum's lantern is for the dark); foraging by day
 or more than once a night (the economy, and he's asleep); his bubble or a new effect for playing
 dead (the pose says it; a pat's hearts already show).
+
+## 377. 1.5: the review after the 1.4 plan, its card kept as written, 1.2's town opened as her phone will and played on to January, the shakedown logged (2026-10-25, 1.5's V1.5)
+
+_Session V1.5 of the 1.4 plan (decision 367), the last: the review after G5, G6 and G7 (decisions
+374–376; G1–G4 went to her phone as 1.4, PR #231), and the release PR #234 (`v1.4-dev` →
+`main`, "Release 1.5"), for the coordinator to merge. No save change (still v58). 368 and 369 stay
+unused._
+
+- **One card for her, `1.5`, as G5–G7 wrote it.** Her phone last saw `1.4.1` (PR #231 shipped
+  `1.4` and `1.4.1`), so `notesToShow('1.4.1')` is the `1.5` row alone. Its five lines (the camera,
+  everyone posing and the pets sitting; Cody wanting a copy of every photo; the attic up a ladder
+  from the back room; its round window and the eaves; Pickle, who plays dead at compliments,
+  sleeps by day and forages by night) and the mayor's P.S. about his attic of typewriter ribbons
+  read as one card in his voice, in the order she'll meet them, so nothing was refolded or
+  reworded: a review that rewrites lines which already flow only spends the sessions' care. The
+  test now holds five lines with Pickle's last; `1.4` and `1.4.1` stay as shipped.
+- **1.2's town, opened as her phone will.** `lived-in-v55.json` in a 1.5 dev build with notes
+  last seen `1.4.1` and the dedication seen, at Close, Far and sideways, from a page of the site
+  that isn't the game (the manifest), so no new town is booted and saved over hers on the way:
+  the title, one card ("What's new in 1.5", its P.S. reached by scrolling, in the sheet's right
+  column sideways), Cody's hello ("It's been 2 weeks, mi amor"), save v58 through steps 55–57, no
+  error notes; the one console error is the unlinked cloud's 503, as on her phone.
+- **Played on by taps** with a scratch driver on smoke's `lib.mjs` in a persistent browser profile
+  of its own on a dev server of its own (decision 324's method): 25 October at night on the real
+  clock (Pickle patted and playing dead, his trick to hanging by his tail; the attic made at the
+  workbench and climbed by the ladder, the round window full of stars; a photo by the well with
+  Pickle sat beside her, the moonlit filter, a ghost minnow sticker and "Pickle says hi"; the Bat
+  traced at the castle's telescope, Hazel's letter); 26 October (a shiny tombstone toad in the
+  graveyard in a thunderstorm, Today's "Something glittered in the graveyard", netted, the
+  Cabinet's sparkle and "1 of 74 shinies"); 5 and 6 November (the bat onesie, its hood and fluffy
+  slippers from the week's snug look, worn from the closet's rails; Gourdon's log stove and
+  rocking chair ordered from his book, Ollie's letters the next evening, set out in her front room
+  and sat in by night); 10 January (an icicle smelt landed through the frozen pond). The Candy
+  (her town had 142), the attic's wood, stone and glow gourds and Pickle's fondness for his trick
+  were given by the dev handle and said so; everything else was tapped. **Kept as
+  `lived-in-v58.json`**, 1.5's lived-in town, held by `livedIn.test.ts` (nothing lost opening it
+  again) and added to the overlays snapshot's saves (its first snapshot only, as F6 did), since
+  1.5 changes the save's shape (G6's v58).
+- **The shakedown**, with its own eyes at phone size and smoke's screenshots: the shinies' glint
+  and palettes in the world and the Cabinet; the winter looks on her; Cosy Cabin and Midnight
+  Observatory in a room at night; the frozen pond's hole and the ice hut outside and in; the Sky
+  sheet and the chart; the camera upright and sideways; the attic's ceiling and window; Pickle's
+  frames. **Fixed: nothing**; nothing found was a pixel or a line. **Judged and kept**: the
+  framed Bat (G4's flag that it reads as a zig-zag: it is the Bat's stars and lines, as she traced
+  them, and redrawing it as a bat would mean moving the stars the trace is played on) and
+  Pickle's branch over her legs (G7's flag: hanging on the tile below her he's nearer the camera,
+  so the branch is in front of her shins; a sort-order tweak would put it behind her, which is
+  wrong). **Logged**: a tap on a fish with a seed in her hand casts from the seed packet with no
+  rod drawn (decision 110's "unless she's holding a seed", older than the rod; "Where it hurts"
+  3, a line and a decision to mend); the camera's drawer covering the polaroid's foot sideways
+  ("Where it hurts" 4, a layout to mend); the shiny glint's size and the dim fish under the ice
+  (the art notes, for her eye). Smoke 673 of 673, `smoke:offline` 10 of 10.
+- **Perf**: 1.5 against 1.4 on her phone (`origin/main` served from a copy of its own, 1.5's
+  `scripts/perf.mjs` for both), alternating, three runs each at Close by night and at noon: every
+  draw and update crosses 1.4's runs or sits under, the back room's update 0.1 ms over (Pickle, a
+  seventh pet about her rooms), the heap up 0.3 MB at most; the camera up costs about what the held
+  world saves (30–36 ms a whole frame under the four filters, 33.6–36 with it down); the build one
+  chunk, 1,963.9 kB (660.7 kB gzipped) against 1.84 MB (615 kB) at 1.3. The table is in
+  `docs/architecture.md`, "1.5, V1.5's review".
+- **Docs, for whoever comes after**: the handoff's cold-start section brought to 1.5 (save v58,
+  the next decision 378, where new content goes: a critter, a piece, clothing, a set, a
+  constellation, a pet, a project, a room), "After 1.0" saying 1.5 is the release PR with the
+  user's steps, the 1.4 plan's sessions recorded under "1.4 and 1.5, the week after" with "How
+  1.4 and 1.5 were run", "Still to put to the user" kept parked, "In progress" empty;
+  `docs/architecture.md`'s "Where it hurts" rewritten for after 1.5 (eight items, the done list
+  one paragraph) and a 1.5 perf table; `CLAUDE.md`'s "Project" (the 1.4 plan complete, 1.4 on her
+  phone, 1.5 the release, no plan after) and the integration-branch paragraph (`v1.4-dev` ends
+  with 1.5, the next made from `main`), its bullets checked for the new seams; the plan's line.
+
+**Rejected:** rewording a card whose lines already flow; folding `1.4.1` into anything (her phone
+has read it); a fixture without the attic or Pickle in it (a fixture holds a release's save
+shape, and 1.5's is the attic's); mending the rod with a seed in hand here (it re-opens decision
+110, which a review shouldn't do in passing); moving the camera's drawer here (a layout change
+smoke would need to measure again, for a case she meets only sideways with a drawer open);
+redrawing the framed Bat or reordering Pickle's branch (above).

@@ -1165,6 +1165,36 @@ they were, and F4's trees are the same forms dealt elsewhere. Against 1.2's own 
 different day's container), the town at Close by night is 37.7–40 here against 37.8–39.2 there,
 so the two days' machines were alike.
 
+**1.5, V1.5's review** (2026-10-25, decision 377): the 1.4 plan's second half (1.5: the photo
+mode, the attic, Pickle) against 1.4 as it is on her phone, `v1.4-dev`'s head served from the
+worktree and `origin/main` (1.4, PR #231) from a copy of its own, both measured with 1.5's
+`scripts/perf.mjs` (a new town; Pickle is at home in 1.5's), alternating, three runs each at Close
+at 21:30 and three at noon. Draw means, ms (p50 at 21:30); updates, ms (21:30); heap, MB (21:30):
+
+| Scene         | Close 21:30, 1.5      | Close 21:30, 1.4      | Noon, 1.5 / 1.4     | Updates 1.5 / 1.4     | Heap 1.5 / 1.4        |
+| ------------- | --------------------- | --------------------- | ------------------- | --------------------- | --------------------- |
+| Town          | 34.8–36.6 (23.7–24.5) | 33.2–35.7 (22.9–24.7) | 21.4–24.5 / 21.6–23 | 0.79–0.84 / 0.7–0.9   | 32.1–32.5 / 31.7–31.8 |
+| Home          | 20.1–20.4 (11.1–11.5) | 20–20.5 (11.3–11.4)   | 5.7–6.5 / 5.4–6.1   | 0.73–0.82 / 0.78–0.85 | 32.7–33 / 32.4–32.5   |
+| Fairground    | 21.9–22.5 (14.8–15.3) | 23.2–24.8 (15.4–16.6) | 8.1–8.5 / 6.5–8.8   | 0.49–0.57 / 0.55–0.61 | 33.8–33.9 / 33–33.7   |
+| Whisperwood   | 26.9–27.8 (18.1–18.4) | 27.1–29.2 (17.7–19)   | 9.6–10.9 / 10–10.6  | 0.57–0.66 / 0.58–0.72 | 34.1–35 / 33.7–34.2   |
+| Boo Acres     | 20.3–20.9 (13.1–13.2) | 21.1–21.5 (13.3–13.6) | 7–7.5 / 7–8         | 0.5–0.53 / 0.55–0.57  | 34.7–34.8 / 34.2–34.6 |
+| Her yard      | 32.6–33.5 (24.2–24.8) | 33.7–35.7 (25–27.1)   | 19.4–20.8 / 20–22.1 | 0.65–0.72 / 0.71–0.8  | 34.7–35 / 34.4–34.5   |
+| Back room     | 22–22.9 (13.6–14.6)   | 22.1–23.4 (14.4–14.7) | 7.6–8.6 / 7.4–7.5   | 1.05–1.13 / 0.96–1.02 | 34.9–35.2 / 34.8–34.9 |
+| Lantern Shore | 24.7–25.8 (16.9–17.5) | 26.2–28.4 (17.5–19)   | 9.9–10.2 / 9.6–10.2 | 0.57–0.66 / 0.67–0.72 | 35.6–35.9 / 35.5–35.6 |
+
+Every draw and update crosses 1.4's runs or sits a millisecond or two under, by night and at noon;
+no frame doubled. The one row a shade over is the back room's update, 0.1 ms, which is Pickle: a
+seventh pet pottering about her rooms (his steps are the pets' own, `Pet`). The heap is up 0.3 MB
+at most, his frames baked three times over (bare, the bow, the lantern). G4's stars are drawn only
+on the castle hill on a clear night and G1's glints only over a shiny, neither on perf's walk.
+**The camera up** (a scratch timer, not kept, of a whole cranked frame, `view.step(16)`, standing
+in town at 21:30, 300 frames, two runs each, 4× throttle): 33.6–36 ms a frame with it
+down, 30–36 under each filter with it up (plain 33.2–34.4, sepia 30–32.1, spooky 33.4–34.5,
+moonlit 31.6–36.4): the filters' read-back eight times a second costs about what the world's step
+saved by being held still. Against 1.3's table above, the town at Close by night is 34.8–36.6 here
+against 37.7–40 there, so this container was a little quicker that day. **The build** is one
+chunk, 1,963.9 kB (660.7 kB gzipped), against 1.84 MB (615 kB) at 1.3.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -1188,12 +1218,13 @@ costs a download per deploy, not a launch.
 
 ## Where it hurts
 
-Honest notes for whatever comes after 1.3, most pressing first, rewritten at V1.3's review
-(decision 366). The 1.3 plan did 1.2's 2, 3, 4 and 7 (F2 and F6); what was done is said once at the
-end, so the list is what's left. There is no plan after 1.3: a session that takes one of these up
-does it on a branch from `main`, as a PR the user merges.
+Honest notes for whatever comes after 1.5, most pressing first, rewritten at V1.5's review
+(decision 377). The 1.4 plan was content, not repair: it did none of 1.3's list and added the
+rough edges of its own new systems (3 and 4 below). What was done is said once at the end, so the
+list is what's left. There is no plan after 1.5: a session that takes one of these up does it on
+a branch from `main`, as a PR the user merges.
 
-1. **Two things only her phone and Vercel can say** (as at 1.0 and 1.2; the user's, not a
+1. **Two things only her phone and Vercel can say** (as at 1.0, 1.2 and 1.3; the user's, not a
    session's). The cloud save's function (`api/save.ts`) has never run on Vercel: it's tested with
    a faked store, and smoke fakes it with a route. The first deploy to `main` that carries it (1.0
    did, unlinked) is its test: the deployment's Functions tab should list `api/save`, then README's
@@ -1201,34 +1232,51 @@ does it on a branch from `main`, as a PR the user merges.
    build trips on TypeScript, the fallback is the same file as `api/save.js` with JSDoc types. And
    no frame has been timed on her iPhone: `?perf` (production too, `wiring/perf.ts`) is waiting,
    with the table under "On her iPhone" above.
-2. **What a build doesn't reach.** The cast is cast (decision 355: Rufus, Gourdon and the Moon Pie
-   Man stout; Barty, Scarah, Rob Boo and Wes slight; everyone else and Cody hers), but the
-   passers-by (the wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default; a later look may give
-   one a build, a row there. What's at her middle on purpose: a fly, the jackets' lapels and the
-   ringmaster coat's buttons, the bow tie and the cravat from the front. Seen sideways, the mayor's
-   sash is a band down his side, as a sash would be.
-3. **Big data files and one big chunk.** `sprites/items.ts` 2,620 lines, `data/villagers.ts`
-   1,680, `types/ids.ts` 1,345; fine as data, and a redraw should split by family as
-   `sprites/doll/` was. The build is one chunk, 1.84 MB (615 kB gzipped) at 1.3, as at
-   1.2 (613 kB), against 1.66 MB (555 kB) at S3. Precached once a version (decision 322), it costs a download
+2. **One chunk, growing with the content.** The build is one chunk, 1.96 MB (661 kB gzipped) at
+   1.5, against 1.84 MB (615 kB) at 1.3 and 1.66 MB (555 kB) at S3: the week's rows and art are
+   about 120 kB of it (46 kB gzipped). Precached once a version (decision 322), it costs a download
    per deploy, not a launch; one chunk stays the right shape for an installed app (decision 328)
-   until it costs her a slow first launch on a new version.
-4. **Smoke on the real clock.** Most sections open on a named day (`openOn`, `PLAIN_DAY`), but a
+   until it costs her a slow first launch on a new version. The big files are data, fine as data:
+   `sprites/items.ts` 2,637 lines, `data/villagers.ts` 1,678, `sprites/pets.ts` 1,519 (Pickle's
+   frames are drawn three times over, bare, in his bow and with his lantern, since his helpers are
+   private to the file), `types/ids.ts` 1,477; a redraw should split by family as `sprites/doll/`
+   was.
+3. **A tool used with a seed in her hand.** Decision 110's rule, that what she holds follows what
+   she does "unless she's holding a seed", is older than the rod: a tap on a fish with a seed in
+   hand casts and lands it, but the rod is never taken up, so the line is drawn from the seed
+   packet (`drawLine` starts at whatever's `held`), on open water and through the ice alike. Her
+   1.2 town held pumpkin seeds, so she'll meet it. The mend is a line in `World`'s `fish` arrival
+   (the rod taken up whatever she holds, the seed back in her hand after) and a decision
+   re-opening 110 for the rod alone; the net with a seed in hand has no line, so it only shows no
+   net.
+4. **The new systems' rough edges** (1.4 and 1.5). The camera's drawer (filters, stickers, the
+   caption) sits over the strip the whole width, so on a phone on its side it covers the lower
+   third of the polaroid, and the caption she types is printed on the foot it hides; upright it
+   clears the photo. A drawer in the gutter beside the polaroid sideways would mend it
+   (`hud/cameraStyles.ts`). The attic's eaves rule reads `TALL` (`data/home.ts`), a list held to
+   the art by `tests/world/attic.test.ts`, so a new tall piece fails that test until it's listed
+   (on purpose: `systems/` can't read a picture). The lake never freezes (decision 372), so ice
+   fishing is the town pond's, 15 December to 15 January, and the hut's the rest of the winter.
+   Shinies are charmed after nine months (decision 370), so the shinies' shelf is most of a second
+   year; the rarity test holds it.
+5. **Smoke on the real clock.** Most sections open on a named day (`openOn`, `PLAIN_DAY`), but a
    whole run's first sections play on the container's real date and hour, so the town they meet
-   changes with the day: V1.3 met a neighbour calling on her stood on the yard section's tile (25
-   October; fixed by putting the talk away), and the two known flakes (`camera`'s top row with a
-   toast up, `interiors` at 19:00) are the same kind. Opening those sections on a named day would
-   end the kind; it would also stop smoke meeting the town as she does, which is why it hasn't.
-5. **The bed card's pause.** The bed card's buttons wait `SETTLE_MS` after the card shows, so a tap
+   changes with the day (V1.3 met a neighbour on the yard section's tile; the two known flakes,
+   `camera`'s top row with a toast up and `interiors` at 19:00, are the same kind). Opening those
+   sections on a named day would end the kind; it would also stop smoke meeting the town as she
+   does, which is why it hasn't. A whole run is 673 checks and about twenty-five minutes now.
+6. **What a build doesn't reach.** The cast is cast (decision 355), but the passers-by (the
+   wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default; a later look may give one a build, a
+   row there.
+7. **The bed card's pause.** The bed card's buttons wait `SETTLE_MS` after the card shows, so a tap
    on the card the moment it appears does nothing (on purpose, against a stray tap; the second tap
    on the bed does the job at once).
-6. **The art notes** at the end of `docs/handoff.md` are the art's list: F4's three (the creek
-   meeting the dirt path square at the footbridge's site, the ghost daisies and meadow flowers green
-   under winter's snow, the dead tree bare of snow), F3's three left for her eye (the catfish, the
-   fog eel's fin, the mud puppy's gills, and the monarch's margin), the frozen pond's ring and the
-   builds at Close. None is clearly wrong; each is for her eye on her phone.
+8. **The art notes** at the end of `docs/handoff.md` are the art's list: 1.5's five (the shiny
+   glint's size, the framed Bat and Pickle's branch, both kept, the dim fish under the ice, a seed
+   for a rod), F4's three, F3's left for her eye, the frozen pond's ring and the builds at Close.
+   None is clearly wrong; each is for her eye on her phone.
 
-**Done since 1.0** (decisions 325–365), kept short; the decisions and the tables above hold the
+**Done since 1.0** (decisions 325–377), kept short; the decisions and the tables above hold the
 detail. The 1.1 plan made smoke a file per area and the suite two vitest projects (T1, T2: 346 s
 to 121 s), gave the cast three bodies (A5a, A5b: `Build`s, `measureOf`, `looksHeld`), turned
 arriving into a table and the overlays into one list (W1, both held by snapshots), gave her rooms
@@ -1237,5 +1285,6 @@ a keeper and a planter's bed its room (W2, save v55), drew `OutdoorView` in pass
 pulled the pets' paths taut. 1.0.1 fixed 1.0's small things (X1, X2). **1.3** kept `happeningsAt`
 for the hour and the day key by the minute (F2: a town step at Close a third to a half cheaper, a
 long A\* three times faster, the suite 17% shorter), dropped `Home`'s 27 and `Neighbourhood`'s 10
-forwarders and stamped the save by the world's clock (F6), and changed nothing else in the code's
-shape.
+forwarders and stamped the save by the world's clock (F6). **1.4 and 1.5** added content on those
+seams and changed nothing in the code's shape: shinies (save v56), the winter wardrobe and sets,
+ice fishing and the ice hut, the night sky (v57), the photo mode, the attic (v58) and Pickle.

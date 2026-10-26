@@ -78,14 +78,15 @@ describe("the mayor's notes", () => {
     expect(sky.lines).toHaveLength(3);
   });
 
-  it('shows a phone that saw 1.4.1 the 1.5 card: the camera, then the attic; G7 adds one', () => {
-    // 1.5's G5 and G6 made the row at once (decisions 374, 375), folded to two lines each, so
-    // G7's line still fits; the review folds it to five.
+  it('shows a phone that saw 1.4.1 the 1.5 card: the camera, the attic, then Pickle', () => {
+    // 1.5's G5 and G6 made the row at once (decisions 374, 375), two lines each, and G7 added
+    // Pickle's (376); the review read it through as one card and kept it (decision 377).
     expect(newest.version).toBe('1.5');
     expect(notesToShow('1.4.1', true)).toEqual([newest]);
     expect(newest.lines[0]).toMatch(/You have a camera now/);
     expect(newest.lines.join(' ')).toMatch(/build an attic now/);
-    expect(newest.lines.length).toBeLessThanOrEqual(5);
+    expect(newest.lines[4]).toMatch(/^Pickle has moved in with you/);
+    expect(newest.lines).toHaveLength(5);
   });
 
   it('shows the newest to a phone that last saw a version these notes no longer know', () => {
