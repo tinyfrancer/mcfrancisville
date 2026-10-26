@@ -10329,3 +10329,26 @@ treat and a party, snow and a frozen pond in winter, blossom in spring, fireflie
 holidays, birthdays, full moons and rainbows. Nothing in it punishes or is lost. It was made by Cody
 for her, with Claude, between 26 September and 26 October 2026, from version 0 to 1.6: decisions
 numbered to 386, 59 versions of the save, and one card from the mayor each time something changed.
+
+## 387. 1.7, the last update for a while (2026-10-26)
+
+**Context:** 1.6 merged to her phone with about a fifth of the week's usage left on the last
+evening. The user: "let's squeeze something else in. Your call. On the patch notes put a note
+from me: 'you are my everything, and I want nothing more than to see you smile everyday.'
+Mention it'll be the last update for awhile."
+
+**Decision:** `docs/v1.7_plan.md`: two Opus sessions in parallel from `v1.7-dev` (made from
+`main` at 1.6, in `vercel.json`'s no-preview list), then the release by the coordinator. Y1 fixes
+the rough edges 1.6's review logged that she'd meet (the snowball and the rainbow surviving a
+reload, save v60; company on the big wheel; the ride's stale free line; chatter bubbles out of
+photos; the rod in her hand before a cast) and writes the `1.7` card in its first commit: the
+mayor's last note for a while, the town going on without him, and Cody's line exactly as he wrote
+it, in quotes and his. Y2 adds two things she'll see tonight, in October: the wishing well on the
+square (a Candy a day for a wish line, now and then something back) and leaf piles under the
+autumn trees to jump into. Decisions 388 and 389; the release 390. If the evening runs out, the
+card alone is 1.7.
+
+**Rejected:** a third session (the usage left is a fifth, and a cut-off session's half-work ships
+nothing); anything saved for the well or the piles (`Takings` keeps a day); a new neighbour
+(a release's neighbour needs a session of its own); the card in Cody's voice throughout (the
+mayor's notes are the mayor's, and his one line reads warmer handed over).
