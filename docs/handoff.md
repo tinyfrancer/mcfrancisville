@@ -18,14 +18,8 @@ Not started.
 
 ### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
 
-**Done, in review.** The ride is drawn on the Fair sheet's stage (decision 381, option b): a
-fifth `ACTIVITIES` row (`bigWheel` on `ferrisWheel`), the rules `systems/fairRide.ts`, the
-service `world.activities` (`board`/`riding`/`land`/`getOff`, `fortune:ride` in `Takings`), the
-art `sprites/fairRide.ts`, the stage `render/fairRide.ts`, the page `openRide` in
-`hud/FairSheet.ts`, the ticket stub (`ticketStub`, a keepsake), the `rode` moment and cue,
-Today's `bigWheel` line, the `1.6` NOTES row (made here, three lines), tests
-(`tests/systems/fairRide.test.ts`, `tests/world/fairRide.test.ts`, today's) and smoke's
-`bigWheel` section in `fair.mjs`. No save change. Next: CI green, merge into `v1.6-dev`.
+Landed (PR #235): the ride drawn on the Fair sheet's stage, the day's first free, a ticket stub
+the first time; the `1.6` NOTES row made with three lines. No save change. Nothing left open.
 
 ### X3 chickens, X4 snow and puddles, X5 small delights, X6 the skeleton and a kite, V1.6 the review
 
