@@ -18,7 +18,8 @@ Not started.
 
 ### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
 
-Not started.
+Landed (PR #235): the ride drawn on the Fair sheet's stage, the day's first free, a ticket stub
+the first time; the `1.6` NOTES row made with three lines. No save change. Nothing left open.
 
 ### X3 chickens, X4 snow and puddles, X5 small delights, X6 the skeleton and a kite, V1.6 the review
 

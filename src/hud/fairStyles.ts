@@ -24,4 +24,6 @@ export const FAIR_CSS = `
   user-select: none;
 }
 .hud-fair-prize { width: 100%; }
+.hud-ride-stage { cursor: default; }
+.hud-ride-line { font-style: italic; }
 `;

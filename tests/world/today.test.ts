@@ -13,7 +13,8 @@ import { PASSERS } from '../../src/data/rareEvents';
 import { passersOn, rareEventOn } from '../../src/systems/rareEvents';
 import { canGoToday, goToday } from '../../src/wiring/todayGo';
 import type { World } from '../../src/world/World';
-import { FREE_GO_KEY } from '../../src/world/services/Activities';
+import { FREE_GO_KEY, FREE_RIDE_KEY } from '../../src/world/services/Activities';
+import { isFairDay } from '../../src/systems/fairRide';
 import { harness, type Harness } from './harness';
 
 const HOUR = 3_600_000;
@@ -119,6 +120,11 @@ function holds(h: Harness, line: TodayLine): boolean {
         w.activities.freeGo() === line.id &&
         w.activities.freeToday(line.id) &&
         w.activities.isOpen(line.id) === line.open
+      );
+    // 1.6's X2: a fair day, the day's free ride still to be had.
+    case 'bigWheel':
+      return (
+        isFairDay(day) && w.activities.freeRide() && w.activities.isOpen('bigWheel') === line.open
       );
     // 1.5's G4.
     case 'stars':
@@ -267,6 +273,34 @@ describe("Today (V1's R2)", () => {
     expect(arrived.concat(h.tick(1))).toContainEqual(expect.objectContaining({ at: prop }));
     h.world.takings.take(FREE_GO_KEY);
     expect(h.world.upNow.lines().some((l) => l.kind === 'freeGo')).toBe(false);
+  });
+});
+
+describe('the big wheel (1.6 X2)', () => {
+  it('says the wheel is turning on a fair day, takes her to it, and goes once she has ridden', () => {
+    const h = harness(TOWN);
+    // A Saturday in September, out of the festival.
+    h.clock.set(new Date(2026, 8, 19, 15));
+    h.tick(1);
+    const line = expectTrue(h).find((l) => l.kind === 'bigWheel')!;
+    expect(line).toMatchObject({ open: true, go: { zone: 'fairground', prop: 'ferrisWheel' } });
+    h.world.atlas.find('fairground');
+    expect(goToday(h.world, line.go!)).toBe(true);
+    expect(h.world.scene).toBe('fairground');
+    const arrived = h.until(() => !h.world.player.moving, 'walking to the wheel');
+    expect(arrived.concat(h.tick(1))).toContainEqual(
+      expect.objectContaining({ at: 'ferrisWheel' }),
+    );
+    h.world.takings.take(FREE_RIDE_KEY);
+    expect(h.world.upNow.lines().some((l) => l.kind === 'bigWheel')).toBe(false);
+  });
+
+  it('says nothing of it on an ordinary weekday', () => {
+    const h = harness(TOWN);
+    // A Wednesday in September.
+    h.clock.set(new Date(2026, 8, 16, 15));
+    h.tick(1);
+    expect(h.world.upNow.lines().some((l) => l.kind === 'bigWheel')).toBe(false);
   });
 });
 

@@ -5,6 +5,7 @@ import { ORCHARD_ITEMS } from './orchard';
 import { RARE_KEEPSAKES } from './rareEvents';
 import { FAIR_PRIZE_ITEMS } from './fairPrizes';
 import { STAR_ITEMS } from './constellations';
+import { TICKET_ITEMS } from './fairRide';
 import { SHINY_ITEMS } from './shinies';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
@@ -877,6 +878,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
   ...SHINY_ITEMS,
   // Hazel's star map, the first time she traces a constellation (1.5's G4).
   ...STAR_ITEMS,
+  // A ticket stub from her first ride on the big wheel (1.6's X2).
+  ...TICKET_ITEMS,
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

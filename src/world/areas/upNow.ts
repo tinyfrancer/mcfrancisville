@@ -161,6 +161,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       ...outOfTheOrdinary(parts, day),
       project: underWay(parts.projects),
       freeGo: freeGoOf(parts.activities),
+      bigWheel: parts.activities.wheelToday(),
       shiny: parts.collecting.shinyHere(),
       iceFishing: isFrozen(day),
       stars: starsTonight(parts.stargazing),
