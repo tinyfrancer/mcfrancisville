@@ -13,7 +13,8 @@ import {
 } from '../systems/decor';
 import type { Tile } from '../systems/pathfinding';
 import { inBox, standsOn, yardFit, yardRefusal, type Kept, type YardGround } from '../systems/yard';
-import type { FurnitureId, ItemId } from '../types/ids';
+import { isSnowman } from '../systems/snow';
+import type { FurnitureId, ItemId, SnowmanId } from '../types/ids';
 import type { Home } from './Home';
 import type { Overlay } from './zones/Overlay';
 
@@ -28,8 +29,13 @@ export class Yard implements Overlay {
   private readonly home: Home;
   private readonly pieces: Placed[] = [];
   private changes = 0;
-  /** Lawn kept for a project going up there (V1's R4), where nothing of hers may stand. */
+  /** Lawn kept for a project going up there (V1's R4), or under her snowball, where nothing may stand. */
   private readonly kept: Kept;
+  /**
+   * The snowball she's rolling (1.6's X4): where, and how big. Not saved: it's the moment's play,
+   * and only the snowman it becomes is a piece of hers.
+   */
+  private ball: { tx: number; ty: number; size: number } | null = null;
 
   constructor(
     ground: YardGround | null,
@@ -39,7 +45,7 @@ export class Yard implements Overlay {
   ) {
     this.ground = ground;
     this.home = home;
-    this.kept = kept;
+    this.kept = (tx, ty) => kept(tx, ty) || (this.ball?.tx === tx && this.ball.ty === ty);
     const placed = Array.isArray(saved?.placed) ? saved.placed : [];
     // The surfaces first, so what stands on them has them to stand on (0.3's H3).
     for (const p of [...placed.filter((p) => !p.on), ...placed.filter((p) => p.on)]) {
@@ -47,7 +53,7 @@ export class Yard implements Overlay {
       const turn = Number.isInteger(p.turn) ? Math.abs(p.turn) % turnCount(p.id) : 0;
       const piece: Placed = { id: p.id, tx: p.tx, ty: p.ty, turn };
       if (p.on === true) piece.on = true;
-      if (ground && yardRefusal(ground, this.pieces, piece, null, kept) === null) {
+      if (ground && yardRefusal(ground, this.pieces, piece, null, this.kept) === null) {
         this.pieces.push(piece);
       } else home.store(p.id);
     }
@@ -88,9 +94,76 @@ export class Yard implements Overlay {
     return riderAt(here, tx, ty) ?? here.find((p) => !p.on);
   }
 
-  /** Whether a piece of hers stands on a tile, which nobody walks through. */
+  /** Whether a piece of hers, or the snowball she's rolling, stands on a tile: nobody walks through. */
   blocks(tx: number, ty: number): boolean {
+    if (this.ball?.tx === tx && this.ball.ty === ty) return true;
     return this.pieces.length > 0 && standsOn(this.pieces, tx, ty);
+  }
+
+  /** The snowball she's rolling (1.6's X4), and how big (1 or 2), or null. */
+  get snowball(): Readonly<{ tx: number; ty: number; size: number }> | null {
+    return this.ball;
+  }
+
+  /**
+   * Starts a snowball on a tile of her lawn where a snowman could stand when it's done (as any
+   * piece is refused, `standing` being her tile): true if it's rolling. One at a time; a new one
+   * leaves the last where it lay, melted away.
+   */
+  rollSnowball(at: Tile, standing: Tile | null): boolean {
+    if (!this.ground) return false;
+    this.ball = null;
+    const piece: Placed = { id: 'snowmanTopHat', tx: at.tx, ty: at.ty, turn: 0 };
+    if (yardRefusal(this.ground, this.pieces, piece, standing, this.kept) !== null) return false;
+    this.ball = { tx: at.tx, ty: at.ty, size: 1 };
+    this.changes++;
+    return true;
+  }
+
+  /** The snowball rolled bigger: its size now. */
+  growSnowball(): number {
+    if (!this.ball) return 0;
+    this.ball.size += 1;
+    this.changes++;
+    return this.ball.size;
+  }
+
+  /**
+   * The snowball stood up as a snowman where it lay, a piece of hers like any (saved, solid,
+   * movable, put away in the chest). Null, the snowball left as it was, if he wouldn't fit.
+   */
+  standSnowman(id: SnowmanId, standing: Tile | null): Placed | null {
+    const ball = this.ball;
+    if (!ball || !this.ground) return null;
+    this.ball = null;
+    const piece: Placed = { id, tx: ball.tx, ty: ball.ty, turn: 0 };
+    if (yardRefusal(this.ground, this.pieces, piece, standing, this.kept) !== null) {
+      this.ball = ball;
+      return null;
+    }
+    this.pieces.push(piece);
+    this.changes++;
+    return piece;
+  }
+
+  /**
+   * The thaw (1.6's X4): every snowman out here, and any in the storage chest, gone in, and the
+   * snowball with them. How many snowmen there were, for a keepsake each.
+   */
+  thaw(): number {
+    let count = 0;
+    for (const p of [...this.pieces]) {
+      if (!isSnowman(p.id)) continue;
+      this.pieces.splice(this.pieces.indexOf(p), 1);
+      count++;
+    }
+    for (const s of [...this.home.stored]) {
+      if (!isSnowman(s.id)) continue;
+      for (let i = 0; i < s.count; i++) if (this.home.unstore(s.id)) count++;
+    }
+    if (count > 0 || this.ball) this.changes++;
+    this.ball = null;
+    return count;
   }
 
   surfaceUnder(piece: Placed): Placed | undefined {

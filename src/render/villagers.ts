@@ -112,6 +112,7 @@ export function neighbourDrawables(
   nowMs: number,
   except?: Figure,
 ): Drawable[] {
+  const fighting = world.neighbourhood.snowballing(zone);
   return world.neighbourhood
     .neighboursIn(zone)
     .filter((n) => n.id !== except)
@@ -121,7 +122,11 @@ export function neighbourDrawables(
       // Standing, they breathe, blink, wave, sit and work (V1's E3).
       const life = stanceOf({ ...n, seated: n.seat !== null }, nowMs) ?? {};
       // And how they feel about what they're telling her, the face on their bust (V1's L7).
-      const feel = world.talk.feelingOf(n.id);
+      // Or laughing in the snow (1.6's X4): a snowball fight, or one of hers just landed.
+      const feel =
+        world.talk.feelingOf(n.id) ??
+        world.snow.feelingOf(n.id) ??
+        (fighting.has(n.id) ? 'laugh' : null);
       const stance: Stance = feel ? { ...life, feel } : life;
       const costume = world.finale.costumeOf(n.id);
       const sprite = bakeFigure(n.id, n.facing, frame, costume, wears, stance);

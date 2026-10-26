@@ -56,6 +56,11 @@ const burst = (
   ...(count !== undefined && { count }),
   ...(spread !== undefined && { spread }),
 });
+/** The middle of a tile, in world pixels. */
+const tileMiddle = (t: { tx: number; ty: number }): Point => ({
+  x: t.tx * TILE_SIZE + TILE_SIZE / 2,
+  y: t.ty * TILE_SIZE + TILE_SIZE / 2,
+});
 const pop = (icon: PopIcon, count: number, from: Anchor, delayMs?: number): Effect => ({
   kind: 'pop',
   icon,
@@ -290,6 +295,29 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
         : [pop({ item: event.item }, 1, over)];
     case 'readFortune':
       return [burst('sparkle', head, 6, 18), emote('♪')];
+    // Snow days (1.6's X4): a puff where the snowball rolls, a flourish for the snowman.
+    case 'snowball':
+      return [burst('snow', tileMiddle(event), event.did === 'rolled' ? 6 : 9, 8)];
+    case 'snowman': {
+      const mid = tileMiddle(event);
+      return [
+        burst('snow', mid, 10, 12),
+        burst('sparkle', { x: mid.x, y: mid.y - 24 }, 5, 14),
+        emote('♪'),
+      ];
+    }
+    case 'threw': {
+      const from: Anchor = event.by === 'her' ? over : { villager: event.by };
+      const at = event.at;
+      const to: Anchor = 'tx' in at ? tileMiddle(at) : at;
+      return [{ kind: 'throw', from, to }];
+    }
+    case 'thawed':
+      return [pop({ item: 'meltlessSnowman' }, event.count, over)];
+    case 'rainbow':
+      return event.first ? [emote('!'), pop({ item: 'rainbowJar' }, 1, over)] : [emote('!')];
+    case 'snowHint':
+      return [];
     // Back down off the big wheel (1.6's X2), humming, with her ticket stub the first time.
     case 'rode':
       return event.first ? [emote('♪'), pop({ item: 'ticketStub' }, 1, over)] : [emote('♪')];

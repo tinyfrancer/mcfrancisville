@@ -1,6 +1,7 @@
 import type { FurnitureId, YardPiece } from '../types/ids';
 import type { FurnitureRow } from './furniture';
 import type { Placed } from './home';
+import { SNOWMAN_IDS } from './snow';
 
 /*
  * Her yard (0.3's H5): the grass round her house, decorated as her rooms are, with pieces made to
@@ -128,6 +129,8 @@ export const OUTDOOR: ReadonlySet<FurnitureId> = new Set<FurnitureId>([
   'pumpkinStool',
   // Scarah's straw friend (0.3's F3), made at the workbench.
   'strawFriend',
+  // A snowman she rolled there in winter (1.6's X4), who never comes indoors.
+  ...SNOWMAN_IDS,
 ]);
 
 export function isOutdoor(id: FurnitureId): boolean {

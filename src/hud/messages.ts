@@ -1,6 +1,16 @@
 import { PROJECTS, type ProjectStage } from '../data/projects';
 import { FORAGE_LINES, GREW_LINES } from '../data/affection';
 import { DECOR } from '../data/holidays';
+import {
+  BUILT,
+  GREW,
+  MELTS,
+  RAINBOW_AGAIN,
+  RAINBOW_FIRST,
+  ROLLED,
+  SNOW_HINT,
+  thawLine,
+} from '../data/snow';
 import { CRITTERS } from '../data/critters';
 import { shinyName, shinyOf } from '../data/shinies';
 import { CROPS } from '../data/crops';
@@ -405,6 +415,7 @@ const REFUSED: Record<Refusal, string> = {
   blocking: 'That would block the way. Leave a path to the door and the chest.',
   indoors: "That one likes it indoors, where it's cozy and dry. It can go in the house!",
   inTheWay: 'That would block the way round your yard. Leave a path for everyone!',
+  melts: MELTS,
   eaves: 'The eaves are too low for that. Try it further from the back, where the roof is higher.',
 };
 
@@ -561,6 +572,19 @@ export function eventToast(event: WorldEvent): Toast | null {
         text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)}, and a thank-you!`,
         icon: 'pin',
       };
+    // Snow days and the rainbow (1.6's X4).
+    case 'snowHint':
+      return { text: SNOW_HINT, icon: { item: 'meltlessSnowman' } };
+    case 'snowball':
+      return { text: event.did === 'rolled' ? ROLLED : GREW };
+    case 'snowman':
+      return { text: BUILT[event.snowman], special: true, icon: { item: 'meltlessSnowman' } };
+    case 'thawed':
+      return { text: thawLine(event.count), special: true, icon: { item: 'meltlessSnowman' } };
+    case 'rainbow':
+      return event.first
+        ? { text: RAINBOW_FIRST, special: true, icon: { item: 'rainbowJar' } }
+        : { text: RAINBOW_AGAIN, icon: { item: 'rainbowJar' } };
     case 'weather':
       if (event.storm) {
         return {
