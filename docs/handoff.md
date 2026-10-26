@@ -27,7 +27,7 @@ the first time; the `1.6` NOTES row made with three lines. No save change. Nothi
 
 ### X4: snow days, puddles and a rainbow (`claude/x4-snow`; decision 383)
 
-Done, its PR into `v1.6-dev` open: snowmen rolled in her yard by a tap on herself (three hats,
+Done (PR #237 into `v1.6-dev`): snowmen rolled in her yard by a tap on herself (three hats,
 yard pieces, never indoors), the thaw sweeping them into her bag as `meltlessSnowman` keepsakes,
 snowballs thrown out of the yard and thrown back by a neighbour, snowball fights in neighbours'
 chatter in the snow, footprints in snow and splashes in rainy-day puddles (hers, neighbours',
