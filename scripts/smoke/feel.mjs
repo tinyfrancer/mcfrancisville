@@ -566,6 +566,9 @@ async function delights() {
   await page.evaluate((ms) => window.view.step(ms, 30), FRAME_MS);
   await page.screenshot({ path: '.smoke/delights-home.png' });
   await closeSheets();
+  // Back out to town, where the sections after expect to find her.
+  await page.evaluate(() => window.world.travel.back());
+  await stepUntil(() => window.world.scene === 'town', 'she flies back to town');
 }
 
 /** @type {import('./lib.mjs').Section[]} */
