@@ -9,8 +9,10 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fountainPass } from './fountain';
+import { hensPass } from './hens';
 import { Ground } from './ground';
 import { fishingPass } from './fishing';
+import { kitePass } from './passes/kite';
 import { Lighting } from './lighting';
 import { rimLit, underMoon } from './moonlight';
 import { WEATHER_LOOK } from './weather';
@@ -86,7 +88,7 @@ export interface OutdoorViewOptions {
  * stands is sorted by its feet once, so where two stand level the one named first is drawn first.
  */
 export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
-  ground: ['life', 'weather', 'yard', 'fishing', 'target'],
+  ground: ['life', 'effects', 'weather', 'yard', 'fishing', 'target'],
   stand: [
     'props',
     'moving',
@@ -116,11 +118,24 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'wes',
     'critters',
     'pets',
+    // The hens at Boo Acres and their run's front fence (1.6's X3).
+    'hens',
     'bone',
     'her',
   ],
   wanted: ['givers', 'snack', 'mounds', 'holidays', 'neighbours', 'critters', 'pets', 'bone'],
-  over: ['yard', 'holidays', 'beds', 'life', 'neighbours', 'critters', 'fishing', 'weather'],
+  over: [
+    'yard',
+    'holidays',
+    'beds',
+    'life',
+    'neighbours',
+    'critters',
+    'fishing',
+    // Her kite up on the wind (1.6's X6), under the rain.
+    'kite',
+    'weather',
+  ],
   lights: [
     'props',
     'fountain',
@@ -251,11 +266,13 @@ export class OutdoorView implements SceneView {
         wesPass(world),
         crittersPass(world, zone),
         petsPass(world),
+        hensPass(world, zone),
         bonePass(world, zone),
         herPass,
         fountainPass(b.fountains, options.fountainBeat ?? (() => null)),
         lostPass(world, zone),
         fishingPass(world, zone.id),
+        kitePass(world, zone),
         effectsPass(world, zone.id, options.effects ?? null),
       ],
       OUTDOOR_LAYERS,

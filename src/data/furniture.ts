@@ -9,6 +9,7 @@ import { STAR_FURNITURE } from './constellations';
 import { CARVED_GOURDON, FIGURINE_FURNITURE } from './figurines';
 import { TABLETOP_FURNITURE } from './tabletop';
 import { YARD_FURNITURE } from './yard';
+import { SNOWMEN } from './snow';
 import { SET_FURNITURE } from './sets';
 import { SET_FLOORINGS, WINDOW_WALLPAPERS } from './wallsAndFloors';
 import { SCARAH_FURNITURE } from './scarah';
@@ -576,6 +577,8 @@ export const FURNITURE: Record<FurnitureId, FurnitureRow> = {
   ...DISPLAY_FURNITURE,
   ...TABLETOP_FURNITURE,
   ...YARD_FURNITURE,
+  // Rolled in her yard in winter (1.6's X4).
+  ...SNOWMEN,
   ...SET_FURNITURE,
   ...SCARAH_FURNITURE,
   ...ROB_BOO_FURNITURE,

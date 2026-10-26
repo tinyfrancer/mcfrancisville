@@ -14,7 +14,9 @@ It is a static site (TypeScript + Vite, Canvas 2D, and a backend, a tiny one: `a
 in `localStorage`, and go up sealed to the cloud save beside it (`src/persistence/cloud.ts`; the
 store is the user's to link, README's "Cloud save").
 
-**The current plan is `docs/v1_plan.md`** (settled 2026-10-06, decisions 266–275, after
+**There is no plan now; the last was `docs/v1.6_plan.md`, and 1.6 the last release** (the end
+of this paragraph). The releases, oldest first: **the V1 plan was `docs/v1_plan.md`** (settled
+2026-10-06, decisions 266–275, after
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
 word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
@@ -37,10 +39,16 @@ decision 377): content from `v1.4-dev`, every session Opus. **1.4 is on her phon
 2026-10-25: shinies, a winter wardrobe and two sets, ice fishing and the night sky, save v57, the
 cards `1.4` and `1.4.1`). **1.5 is the release PR #234** (`v1.4-dev` → `main`, "Release 1.5":
 the photo mode, the attic and Pickle the possum, save v57 → v58), the coordinator's to merge at
-the user's word; `main` after it is the game as it stands. **There is no plan after 1.5**:
-`docs/v1.4_plan.md`, `docs/v1.3_plan.md`, `docs/v1.1_plan.md`, `docs/v1_plan.md` and the plans
-before them are complete, and a session starting cold with nothing asked of it changes nothing
-and asks the user what they'd like next.
+the user's word; `main` after it is the game as it stands. **1.5 was merged by the coordinator
+on 2026-10-26: it is on her phone.** **The 1.6 plan is complete** (`docs/v1.6_plan.md`,
+settled 2026-10-26, decision 378; its review, V1.6, decision 386), the last day of the user's
+subscription: the festival's lights fixed and the 31st rehearsed, a ride on the big wheel,
+chickens at Boo Acres, snow and puddles, small delights, the museum's skeleton and a kite, from
+`v1.6-dev`, every session Opus. **1.6 is the release PR "Release 1.6"** (`v1.6-dev` → `main`,
+save v58 → v59), the coordinator's to merge at the user's word; `main` after it is the game as it
+stands. **There is no plan after 1.6**: `docs/v1.6_plan.md` and every plan before it are
+complete, and a session starting cold with nothing asked of it changes nothing, reads the
+handoff's cold-start section and asks the user what they'd like next.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
@@ -85,16 +93,19 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.4-dev` was the integration branch for 1.4 and 1.5** and ends with 1.5 (`v1.3-dev` was
-1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212). **The next
-plan makes its own from `main`** once the release PR #234 has merged, and adds it to
-`vercel.json`'s no-preview list that day (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
-soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
+**`v1.6-dev` was the integration branch for 1.6** and ends with it (`v1.4-dev` was 1.4 and
+1.5's, `v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision
+212). **The next plan makes its own from `main`** once the release PR has merged, and adds it to
+`vercel.json`'s no-preview list that day (decision 265). While a plan runs, each session
+branches from its branch, its PR targets it, and it is merged with a merge commit as soon as it is
+green. With no plan running, a small fix branches from `main` and its PR targets `main`, the
+user's to merge. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
 0.6–0.9, decision 324). A session that changes the save bumps `SAVE_VERSION` only in its last
 commit, after merging the latest integration branch, and says so in its handoff heading; save-bumping PRs
-merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
+merge one at a time. Vercel previews stay off for every `claude/**` branch, the dev branches and
+`release-*` (a release PR's head), by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
 
@@ -248,7 +259,8 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The Hollow Fairground** (0.2's M1, decision 200) is through a `gate` at the town's south-east,
   open from the first day: `FAIRGROUND` in `maps.ts` (its own `FAIR_LEGEND`,
   `FAIRGROUND_SPOTS` at the stage and each stall), art in `src/sprites/fairground.ts` (the stage,
-  four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart),
+  four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart:
+  `joins` from `parseMap` and a half swag a side, `LIGHT_POLE_JOINS`, 1.6's X1, decision 380),
   and the fortune tent a room (`INTERIORS.fortuneTent`, Agatha's on weekend afternoons).
   What there is to do there (0.2's M2, decision 201) is `ACTIVITIES` (`src/data/activities.ts`:
   a stall's prop or a fixture, a cost, `hours`, and a game of taps, a fortune or snacks), worked
@@ -261,6 +273,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   `render/fairGames.ts` from `sprites/fairGames.ts`, drawn with the same reads. The duck pond and the
   strength bell are stalls `9` and `0`; the day's first go at one stall is free (`freeGoOn`,
   `fortune:freeGo` in `Takings`), and the lucky duck squish is only won there (`data/fairPrizes.ts`).
+  A ride on the big wheel (1.6's X2, decision 381) is a fifth row (`bigWheel`, `does: { ride }`):
+  once round on the sheet's stage (`render/fairRide.ts`, art `sprites/fairRide.ts`, rules
+  `systems/fairRide.ts`, `world.activities.board`/`land`), with her husband or her closest
+  neighbour at the fair, the day's first ride free (`fortune:ride`), a ticket stub the first time.
   The calendar comes there with the gate open, as it is from the start (0.2's M3, decision 202): a happening row's `fair`
   (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
   `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,
@@ -282,7 +298,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   and the barn's wall (`world.barn`, `src/hud/BarnSheet.ts` through `BarnApi`) stands her
   sprinklers in a whole field at once (`fieldsOf`, `sprinklersFor` in `src/systems/barn.ts`).
   Scarah's farmhouse is `scarahFarmhouse` through the farmhouse's door (0.3's F3). Boo Acres is
-  the creepy-crawlies' home (below).
+  the creepy-crawlies' home (below). **The hens** (1.6's X3, decision 382, save v59): the
+  `coop` by the barn (`0` in `FARM_LEGEND`, art in `sprites/farm.ts`, its run's front fence
+  `COOP_FRONT` drawn over them), Henrietta, Peck, Omelette and Reginald the rooster
+  (`src/data/hens.ts`, art `src/sprites/hens.ts`), where each potters in the run worked out from
+  the clock alone (`henAt` in `src/systems/hens.ts`, inside `RUN_FLOOR`, out from six to seven,
+  drawn by the `hens` pass in `src/render/hens.ts`); `world.henhouse` (`Henhouse`, the `passive`
+  area) is fed once a day from her bag (any crop or seed but an egg) for an egg from each hen by
+  five the next morning, from the stored day she fed them (`eggsWaiting`), collected on
+  `src/hud/CoopCard.ts` (`CoopApi`) as she walks up; Reginald crows at six if she's there (`crow`).
+  The `egg` is a crop never taken as "any crop"; it goes into the custard tart and the frittata
+  at the stove (known from the start) and Wrapunzel's meringue ghosts (`MERINGUE_BAKE`, baked
+  instead of the day's when she brings eggs). Today says when eggs are waiting.
 - **Her broom** (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
@@ -391,7 +418,19 @@ what each owns, and where it hurts. Update it when a seam moves.
   the world: pops of what she got, particles and emotes, pushed from the moments by
   `src/wiring/effectsOf.ts` (the world never names an effect). A tap shows a ring and brackets
   round what she set off toward (`feelTap` in `src/wiring/taps.ts`, `World.aim`), a shrug where
-  she can't go, and places pass through an iris (`src/render/transition.ts`).
+  she can't go, and places pass through an iris (`src/render/transition.ts`). **Small delights**
+  (1.6's X5, decision 384), each a short rule (`src/systems/delights.ts`) and a moment, nothing
+  saved: `world.delights` (`Delights`, the outdoors area) lands a butterfly or moth about there on
+  her hat after eight seconds still outdoors, not in the rain, once a minute (`landed`, drawn by
+  `Effects`' `perch` from the critter's own art until a `flit` as she moves), gathers fireflies
+  round her on summer nights on grass (`fireflies()`, `Effects.fireflies`, set each step in
+  `main.ts`), has the crow on a scarecrow caw within two tiles by day once a window (`cawed`,
+  `caw:` in `Takings`, lifted in `perchDrawables`), and sneezes her in spring's meadow and long
+  grass once a window (`Movement.hold`, the `sneeze` verb, a shrug and a crouch, `BLESS_YOU` in
+  `src/data/delights.ts` from a neighbour within four tiles); her pets at home trot over and round
+  her as she comes in (`Pet.comeOver('greet')`, a `greeted` moment and a cue per pet), and Fibi
+  brings her something once a day at home, never an item (`comeOver('gift')`, `PET_GIFTS` in
+  `src/data/petGifts.ts`, `gift:fibi` in `Takings`, a `petGift` pop of `GIFT_ART`).
 - **The seasons** (V1's L4, decision 294): `seasonOf(day)` (`src/systems/seasons.ts`) by the
   month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
   (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
@@ -400,6 +439,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   tracks and the roofs and the rain falls as snow, the jack-o'-lanterns are snow lanterns (a
   prop's other shape for a season is `RESHAPED`, 1.0.1's X2, decision 327), and Nessa skates on
   the frozen pond (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
+  **Snow days** (1.6's X4, decision 383): on lying snow (`snowyOn` in `src/systems/snow.ts`) a tap
+  on herself, hands empty, rolls a snowball beside her in her yard (`Yard`'s unsaved `ball`), a
+  tap on it rolls it bigger and the next stands a snowman, a yard piece (`SnowmanId`, rows
+  `src/data/snow.ts`, art `src/sprites/snowman.ts`, his hat by his tile, `hatOf`; never indoors,
+  refusal `melts`); out of her yard she throws one (`world.snow`, `Snow`), at a neighbour within
+  four tiles, who laughs and throws one back; at the thaw her snowmen come in as `meltlessSnowman`
+  keepsakes. Two neighbours chatting in the snow throw snowballs now and then (`chatOn`'s snowy
+  beats, `Neighbourhood.snowballing`), and steps in snow leave footprints (`Effects.print`, the
+  effects pass's `ground` part, from `src/wiring/underfoot.ts`'s `Trails`).
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are
@@ -416,7 +464,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   dress for the month or the holiday (`data/geese.ts`, `gooseOn` in `systems/holidays.ts`, art
   `src/sprites/geese.ts`). About a third of rainy days are thunderstorms (`stormOn`, `lastFlash`
   in `systems/weather.ts`): `drawFlash` in `src/render/weather.ts`, and a `thunder` moment's
-  rumble from `world.weather`.
+  rumble from `world.weather`. On a rainy day she and her pets splash through the puddles
+  (`underfootOn`, a `puddle` footstep), and on a clear day after a rainy one a rainbow arcs over
+  the view the first ten minutes she's out (`Forecast.rainbow`, `rainbowDay`, `render/rainbow.ts`
+  in the weather pass; a Today line, a `rainbowJar` the first time; `?rainbow` in a dev build;
+  1.6's X4, decision 383).
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
   and `src/world/Farm.ts` holds which beds are tilled, what's in them and her sprinklers (save
@@ -683,6 +735,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   dug once a day by walking up to it (`world.fossils`, `mound:<zone>` in `Takings`). A fossil she
   has had is found (`collected`); the Cabinet's Fossils tab shows them, the museum's seventh case
   holds the donated (`cabinet.donated`, save v43), and `fossilWing` and `fossils` are shelves.
+  With every one on show (`Cabinet.assembled`, nothing saved), Gerald stands in the museum's
+  middle (1.6's X6, decision 385): the `skeleton` fixture, `when: 'assembled'` on its
+  `PlacedFixture`, which `RoomZone` (built with a `standing` predicate; `everything` and `things`)
+  and `RoomView` leave out till then; his plaque is its `says`, and `Fossils.check` posts
+  Wrapunzel's `museum:gerald` letter once.
 - **The night sky** (1.5's G4, decision 373): fifteen constellations in
   `src/data/constellations.ts` (twelve by month, three while a holiday's decorations are up),
   their rules in `src/systems/stars.ts` (`skyOf`: open after 8pm on a clear day; `findableOn`:
@@ -729,6 +786,16 @@ what each owns, and where it hurts. Update it when a seam moves.
   `tailLantern`, accessories `for` him alone (`fitsPet`; `PetArt.dressed`, picked by
   `petSource`'s accessory), the lantern's glass glowing after dark (`LANTERN_GLOW`); the
   `tinyScarf` is painted on any pet's neck.
+- **Kites** (1.6's X6, decision 385): three items of kind `kite` (`src/data/kites.ts`, a `Kites`
+  shelf at Cobweb Corner, icons, folded `KITE_HELD` and flying `KITE_ALOFT` art in
+  `src/sprites/kite.ts`), held from the quick bar (`hands.kite`). The wind is `windyOn(day, zone)`
+  (`src/systems/kite.ts`: dealt from the day key, clear days only, the castle hill windier), at the
+  tiles round each place's `KITE_FIELDS` spot (the pier's `pierEnd`, the castle hill's `lookout`).
+  With one in hand a tap there walks her up and lifts it, a tap on herself tries it where she is
+  (`world.kite`, `Kite`: `fly`, `bringIn`, `check`; a flight isn't saved); while it's up she holds
+  `holdUp` (the `holding` pose cue), any tap winds it in, and the `kite` pass
+  (`src/render/passes/kite.ts`, in `over`) draws it climbing, bobbing, its tail and string. The
+  first flight gives `skyOnAString`; Today says a windy day; the ambience takes `breezy`.
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
@@ -809,7 +876,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   puts out a Halloween shelf of costumes (a shelf may be `on` a festival); the neighbours dress up
   a few more each week (`src/data/costumes.ts`, `src/systems/costumes.ts`, `COSTUMES` in
   `src/sprites/villagers.ts`); lights hang under every building's eaves, found from its roof keys
-  (`eaveLights` in `src/sprites/holidays.ts`); and it has a tune of its own (`musicFor` in
+  (`eaveLights` in `src/sprites/holidays.ts`: one string hugging the roof's edge, on round a gable
+  up to `EAVE_STEEPEST` and a corner up to `EAVE_CORNER`, 1.6's X1, decision 380, held by
+  `tests/sprites/eaveLights.test.ts`; a building with no door, the barn and the coop, has none);
+  and it has a tune of its own (`musicFor` in
   `src/audio/cues.ts`). Its middle weeks are J3's (decision 156): the pumpkin patch on her farm
   (`pumpkinPatch`, `i` in the map) grows by the festival's day (`src/systems/pumpkinPatch.ts`,
   rows in `src/data/pumpkinPatch.ts`, art in `src/sprites/pumpkinPatch.ts`) and gives a patch

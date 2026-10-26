@@ -110,7 +110,7 @@ describe('cantMake', () => {
 describe('cooking', () => {
   const bag = (items: Partial<Record<ItemId, number>>) => (item: ItemId) => items[item] ?? 0;
 
-  it('makes every dish at the stove, and knows six from the start', () => {
+  it('makes every dish at the stove, and knows eight from the start', () => {
     const stove = RECIPE_IDS.filter((id) => stationOf(id) === 'stove');
     expect(stove.length).toBeGreaterThanOrEqual(8);
     expect(STARTER_RECIPES.filter((id) => stationOf(id) === 'stove')).toEqual([
@@ -121,6 +121,9 @@ describe('cooking', () => {
       // Hers (0.2's N2).
       'spaghetti',
       'chipsAndGuac',
+      // The hens' (1.6's X3), so the first eggs have somewhere to go.
+      'custardTart',
+      'frittata',
     ]);
     for (const id of RECIPE_IDS) {
       if (stationOf(id) === 'bench') {

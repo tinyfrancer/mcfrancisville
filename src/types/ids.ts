@@ -149,7 +149,9 @@ export type PropId =
   | 'herGreenhouse'
   // The ice hut on the pond's bank (1.4's G3), and its frame.
   | 'iceHutFrame'
-  | 'iceHut';
+  | 'iceHut'
+  // The henhouse by Scarah's barn, its run fenced in (1.6's X3).
+  | 'coop';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -177,7 +179,10 @@ export type DishId =
   | 'applePie'
   | 'plumCrumble'
   | 'hotCider'
-  | 'persimmonPudding';
+  | 'persimmonPudding'
+  // From the hens at Boo Acres (1.6's X3).
+  | 'custardTart'
+  | 'frittata';
 
 /** What Boo Acres' orchard gives (0.3's F2): a fruit for each kind of tree, once a window. */
 export type FruitId = 'apple' | 'pear' | 'plum' | 'persimmon';
@@ -324,6 +329,16 @@ export type ItemId =
   | RareKeepsakeId
   // Hazel's star map, the first time she traces a constellation (1.5's G4).
   | 'starMap'
+  // A ticket stub from her first ride on the big wheel (1.6's X2).
+  | 'ticketStub'
+  // The hens' eggs at Boo Acres, and the meringue ghosts baked from them with Wrapunzel (1.6's X3).
+  | 'egg'
+  | 'meringueGhost'
+  // A snowman swept in at the thaw, and the first rainbow after rain (1.6's X4).
+  | SnowKeepsakeId
+  // Three kites from Cobweb Corner, and the keepsake of her first flight (1.6's X6).
+  | KiteId
+  | 'skyOnAString'
   | DishId
   | FruitId
   | CritterId
@@ -985,7 +1000,18 @@ export type FurnitureId =
   | FigurineId
   | 'carvedGourdon'
   // Cody's keepsake for her first day (V1's R1).
-  | 'welcomeSampler';
+  | 'welcomeSampler'
+  // A snowman she rolled in her yard (1.6's X4), standing till the thaw.
+  | SnowmanId;
+
+/** A snowman she rolls in her yard (1.6's X4): one a hat, dealt by the tile it stands on. */
+export type SnowmanId = 'snowmanTopHat' | 'snowmanBobble' | 'snowmanWitch';
+
+/** The keepsakes of 1.6's X4: a snowman that didn't melt, and a jar of the first rainbow. */
+export type SnowKeepsakeId = 'meltlessSnowman' | 'rainbowJar';
+
+/** The kites she flies from the pier's end and the castle lookout (1.6's X6). */
+export type KiteId = 'batKite' | 'ghostKite' | 'mothKite';
 
 /** The squishies she collects (0.2's F2), kept apart for the figurines (0.3's C3). */
 export type SquishyId =
@@ -1381,6 +1407,8 @@ export type FixtureId =
   | 'bakeryCounter'
   | 'bakeryOven'
   | 'museumCase'
+  // Gerald, every fossil donated stood up in the museum's hall (1.6's X6).
+  | 'skeleton'
   | 'libraryShelf'
   | 'flowerBuckets'
   | 'bigCauldron'

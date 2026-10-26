@@ -1,13 +1,21 @@
 import type { Weather } from '../../data/weather';
-import { dayKey } from '../../systems/clock';
+import { dayKey, hourOf } from '../../systems/clock';
+import { rainbowAt, rainbowDay, rainbowHour } from '../../systems/snow';
 import { lastFlash, RUMBLE_AFTER_MS, stormOn, weatherOn } from '../../systems/weather';
 import type { MapZoneId } from '../../types/ids';
+import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
+
+const RAINBOW_JAR = 'rainbowJar';
+/** How far into its time `showRainbow` puts a rainbow: past its coming in. */
+const SHOWN_UP_MS = 60_000;
 
 /**
  * Today's weather (phase L), the same in every place, and a word about it the first time she
  * steps outdoors on a rainy or foggy day. What's told is kept only while the game is open: a
- * word again after a reload is a hello, not a nag.
+ * word again after a reload is a hello, not a nag. After a rainy day, the first ten minutes she's
+ * out under the sun there's a rainbow (1.6's X4, decision 383): from when she was first outdoors that
+ * day while the game has been open, so a reload brings it back for another ten, which is no harm.
  */
 export class Forecast {
   private readonly ctx: WorldContext;
@@ -17,10 +25,41 @@ export class Forecast {
   private told = '';
   /** The flash whose rumble has been heard. */
   private rumbled: number | null = null;
+  /** Where her rainbow's jar goes, the first time; none in a test that doesn't give one. */
+  private readonly bag: Bag | null;
+  /** When she was first out under today's rainbow, if there is one. */
+  private rainbowFrom: { day: string; at: number } | null = null;
 
-  constructor(ctx: WorldContext, outside: () => MapZoneId | null) {
+  constructor(ctx: WorldContext, outside: () => MapZoneId | null, bag: Bag | null = null) {
     this.ctx = ctx;
     this.outside = outside;
+    this.bag = bag;
+  }
+
+  /** How far through its ten minutes today's rainbow is (0 to 1), or null with none up now. */
+  rainbow(): number | null {
+    const now = this.ctx.clock.now();
+    const from = this.rainbowFrom;
+    if (!from || from.day !== dayKey(now)) return null;
+    return rainbowAt(now - from.at);
+  }
+
+  /** A rainbow up now, wherever she is, for a dev build's `?rainbow` and the smoke check. */
+  showRainbow(): void {
+    const now = this.ctx.clock.now();
+    // Already come in, so it's seen at once.
+    this.rainbowFrom = { day: dayKey(now), at: now - SHOWN_UP_MS };
+    this.ctx.moments.push(this.rainbowSeen());
+  }
+
+  /** The rainbow seen: the first time ever, a little of it in a jar for her bag. */
+  private rainbowSeen(): { kind: 'rainbow'; first: boolean } {
+    const first = this.bag !== null && this.bag.count(RAINBOW_JAR) === 0;
+    if (first) {
+      this.bag!.add(RAINBOW_JAR, 1);
+      this.ctx.events.emit('bag', this.bag!.contents);
+    }
+    return { kind: 'rainbow', first };
   }
 
   today(): Weather {
@@ -54,7 +93,13 @@ export class Forecast {
       }
       if (since >= RUMBLE_AFTER_MS) this.rumbled = flash;
     }
-    if (this.told === day || this.outside() === null) return;
+    if (this.outside() === null) return;
+    const sunUp = rainbowHour(hourOf(now));
+    if (this.rainbowFrom?.day !== day && sunUp && rainbowDay(day)) {
+      this.rainbowFrom = { day, at: now };
+      this.ctx.moments.push(this.rainbowSeen());
+    }
+    if (this.told === day) return;
     this.told = day;
     const weather = weatherOn(day);
     if (weather !== 'clear') {

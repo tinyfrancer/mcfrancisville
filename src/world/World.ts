@@ -11,6 +11,7 @@ import { findPath, type Tile } from '../systems/pathfinding';
 import { sayTo } from '../systems/friendship';
 import type { BedJob } from '../systems/beds';
 import { banksOf, iceBeside } from '../systems/ice';
+import { atKiteSpot } from '../systems/kite';
 import { facingToward } from '../systems/facing';
 import type { PetId, VillagerId } from '../types/ids';
 import { bedKey, placeOf, type Plot } from './Farm';
@@ -60,7 +61,11 @@ type Visit =
   | { kind: 'ice'; toward: Tile }
   | { kind: 'wes'; at: Tile }
   /** Someone passing through (V1's R3): the wayfarer, or a visitor staying the week. */
-  | { kind: 'passer'; who: PasserId; at: Tile };
+  | { kind: 'passer'; who: PasserId; at: Tile }
+  /** The snowball she's rolling in her yard (1.6's X4). */
+  | { kind: 'snowball'; at: Tile }
+  /** Where a kite goes up, with one in her hand (1.6's X6). */
+  | { kind: 'kite'; at: Tile };
 
 /**
  * What a tap has set her off toward, for the view to outline for a beat (V1's E4, decision 283):
@@ -222,6 +227,8 @@ export class World extends WorldParts {
         return null;
       case 'wes':
       case 'passer':
+      case 'snowball':
+      case 'kite':
         return tile(visit.at);
     }
   }
@@ -234,6 +241,12 @@ export class World extends WorldParts {
     const reeled = this.fishing.reel();
     if (reeled) {
       this.ctx.moments.push(reeled);
+      return true;
+    }
+    // With her kite up, a tap anywhere winds it in (1.6's X6).
+    const wound = this.kite.bringIn();
+    if (wound) {
+      this.ctx.moments.push(wound);
       return true;
     }
     if (this.decorating.state) return this.decorating.tap(tx, ty);
@@ -258,6 +271,10 @@ export class World extends WorldParts {
     if (critter) return this.stalk(critter);
     const pet = this.petCare.petAt(tx, ty);
     if (pet) return this.approach(pet);
+    const kited = this.withKite(tx, ty);
+    if (kited !== null) return kited;
+    const played = this.inTheSnow(tx, ty);
+    if (played !== null) return played;
     const prop = this.zone.propAt(tx, ty);
     const piece =
       this.scene === 'home'
@@ -285,6 +302,45 @@ export class World extends WorldParts {
     } else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { kind: 'piece', piece };
     else if (thing && worthVisiting(thing)) visit = { kind: 'thing', thing };
     return this.walkTo(goals, visit) || this.toTheIce(goals);
+  }
+
+  /**
+   * With a kite in her hand (1.6's X6): a tap on herself tries it where she stands, and a tap where
+   * one goes up walks her there to fly it. Null for any other tap, to be what it would be.
+   */
+  private withKite(tx: number, ty: number): boolean | null {
+    if (!this.hands.kite) return null;
+    const here = this.movement.tile;
+    if (tx === here.tx && ty === here.ty && !this.player.moving) {
+      const tried = this.kite.fly(here);
+      if (tried) this.ctx.moments.push(tried);
+      return tried !== null;
+    }
+    const outdoors = this.zones.outdoor(this.scene);
+    const at = { tx, ty };
+    if (!outdoors || !atKiteSpot(outdoors.id, at) || !this.canWalk(tx, ty)) return null;
+    return this.walkTo([at], { kind: 'kite', at });
+  }
+
+  /**
+   * Snow days (1.6's X4): a tap on her snowball walks up to roll it on; a tap on herself in the
+   * snow, her hands empty, rolls one beside her in her yard or throws one anywhere else. Null for
+   * a tap that's neither, to be what it would be any other day.
+   */
+  private inTheSnow(tx: number, ty: number): boolean | null {
+    if (this.snow.snowballAt(tx, ty)) {
+      const at = { tx, ty };
+      const here = this.movement.tile;
+      const goals = reach(here, at) === 1 ? [here] : this.zone.standBeside(tx, ty);
+      return this.walkTo(goals, { kind: 'snowball', at });
+    }
+    const here = this.movement.tile;
+    if (tx !== here.tx || ty !== here.ty || this.player.moving) return null;
+    if (this.hands.held !== 'hands') return null;
+    const played = this.snow.play(here, this.player.facing);
+    if (!played) return null;
+    for (const e of played) this.ctx.moments.push(e);
+    return true;
   }
 
   /**
@@ -328,6 +384,8 @@ export class World extends WorldParts {
     this.poses.stir();
     const reeled = this.fishing.reel();
     if (reeled) this.ctx.moments.push(reeled);
+    const wound = this.kite.bringIn();
+    if (wound) this.ctx.moments.push(wound);
     this.garden.lookAt(null);
     this.recordPlayer.stop();
     this.talk.endTalk();
@@ -363,12 +421,16 @@ export class World extends WorldParts {
     this.marriage.check();
     this.deliveries.check();
     this.weather.check();
+    this.snow.check();
+    this.kite.check();
     this.holidays.check();
     this.calendar.check();
     this.visits.check();
     this.broom.check();
     this.milestones.check();
+    this.fossils.check();
     this.stall.check();
+    this.henhouse.check();
     this.decorating.check();
     // Last, and only on a step with nothing else to say, so a letter's toast doesn't take its line.
     this.rareEvents.check();
@@ -385,6 +447,7 @@ export class World extends WorldParts {
       this.neighbourhood.neighboursIn(this.scene).map((n) => n.tile),
       this.posing,
     );
+    this.delights.step(deltaMs);
     const events = this.ctx.moments.drain();
     events.push(...this.fishing.step());
     const walked = this.player.moving ? walkedTiles(this.player) : null;
@@ -530,6 +593,16 @@ export class World extends WorldParts {
       arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
       this.face(here, arrived.toward);
       return [arrived, this.rareEvents.meet(who)];
+    },
+    kite: (_visit, here, arrived) => {
+      const tried = this.kite.fly(here);
+      return tried ? [arrived, tried] : [arrived];
+    },
+    snowball: ({ at }, here, arrived) => {
+      if (reach(here, at) !== 1 || !this.snow.snowballAt(at.tx, at.ty)) return [arrived];
+      arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
+      this.face(here, arrived.toward);
+      return [arrived, ...this.snow.roll(here)];
     },
     ice: ({ toward }, here, arrived) => {
       const ice = iceBeside(here, toward, this.slipsOn);

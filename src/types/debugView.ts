@@ -39,15 +39,20 @@ export interface DebugView {
    */
   effects(): {
     shown: {
-      kind: 'pop' | 'burst' | 'emote' | 'ring' | 'outline';
+      kind: 'pop' | 'burst' | 'emote' | 'ring' | 'outline' | 'throw' | 'perch' | 'flit';
       zone: ZoneId;
       age: number;
-      icon?: { item: ItemId } | { candy: true } | { parcel: true };
+      icon?: { item: ItemId } | { candy: true } | { parcel: true } | { gift: string };
       count?: number;
       emote?: string;
       over?: { x: number; y: number } | { her: true } | { villager: VillagerId };
     }[];
     particles: number;
+    /** Footprints in the snow where she is (1.6's X4). */
+    footprints: number;
+    /** The butterfly or moth on her hat, and how many fireflies are round her (1.6's X5). */
+    perched: string | null;
+    fireflies: number;
   };
   /**
    * Her neighbours where she is (V1's E3), and how each is drawn this instant: walking, or the
@@ -74,4 +79,8 @@ export interface DebugView {
    * as baked: the average of its first grass tiles, 0 to 255 a channel. Null indoors.
    */
   season(): { season: string; look: string; lawn: number[] } | null;
+  /** How far through its ten minutes a rainbow is (1.6's X4), or null with none up. */
+  rainbow(): number | null;
+  /** The last caw from the crow on a scarecrow where she is (1.6's X5), on the clock. */
+  cawed(): { place: string; tile: { tx: number; ty: number }; at: number } | null;
 }

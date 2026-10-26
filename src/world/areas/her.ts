@@ -4,6 +4,7 @@ import type { Collecting } from '../services/Collecting';
 import type { Decorator } from '../services/Decorator';
 import type { Fishing } from '../services/Fishing';
 import { Hands } from '../services/Hands';
+import { Kite } from '../services/Kite';
 import type { Mailbox } from '../services/Mailbox';
 import { Milestones } from '../services/Milestones';
 import type { Talk } from '../services/Talk';
@@ -22,6 +23,8 @@ export interface Her {
   milestones: Milestones;
   sitting: Sitting;
   poses: Poses;
+  /** Her kite up on the wind (1.6's X6). */
+  kite: Kite;
 }
 
 /** The workbench and mailbox, and what keeps her from idling: talking, patting, and the rest. */
@@ -75,9 +78,17 @@ export function her(s: Shared, parts: HerParts): Her {
     options.collected,
   );
   const sitting = new Sitting(s.town.scene);
+  const kite = new Kite(ctx, {
+    bag,
+    hands,
+    scene: s.town.scene,
+    tile: () => s.movement().tile,
+  });
   const poses = new Poses(ctx, {
     moving: () => s.movement().player.moving,
     seated: () => sitting.seat !== null,
+    // Holding her kite's string up while it flies (1.6's X6).
+    holding: () => (kite.flying ? 'holdUp' : null),
     busy: () =>
       parts.talk.talkingTo !== null ||
       parts.petCare.pettingNow !== null ||
@@ -86,5 +97,5 @@ export function her(s: Shared, parts: HerParts): Her {
       parts.fishing.line !== null,
     swinging: () => parts.collecting.netSwing(),
   });
-  return { hands, novelty, milestones, sitting, poses };
+  return { hands, novelty, milestones, sitting, poses, kite };
 }

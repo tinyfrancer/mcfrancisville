@@ -251,6 +251,27 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
   },
+  {
+    version: '1.6',
+    lines: [
+      // 1.6's X1 (the lights, and their photo on the 31st) and X2 (the big wheel), folded by its
+      // review with X3–X6's lines into one card (decision 386).
+      "The festival's lights are strung properly now: I had a word with the bats who hung " +
+        'them. And on the 31st, you and Cody will face the camera. Say "boo"!',
+      'Ride the big wheel at the fair: once round, slow, with a stop at the top. The first ride ' +
+        'each day is free, and the view is the whole town. It looks back.',
+      // X3: the hens.
+      'Chickens at Boo Acres! Feed Henrietta, Peck and Omelette once a day for eggs by morning. ' +
+        'Reginald crows at six; Scarah has asked him to consider seven.',
+      // X4: snow, and the rainbow.
+      'In the snow, tap yourself in your yard to roll a snowman, or throw a snowball anywhere ' +
+        'else. I have been hit four times. After rain, look for a rainbow.',
+      // X6 (Gerald, the kites) and X5 (the small delights).
+      'Give Wrapunzel every fossil and meet Gerald. Fly a kite from the pier on a breezy day. ' +
+        'And stand still a while: a butterfly may land on your hat.',
+    ],
+    ps: 'P.S. This is my last typed note for a good long while: the typewriter is having a rest. The town is not. It will keep the lamps lit and the kettle warm for you.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

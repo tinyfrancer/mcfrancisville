@@ -16,6 +16,10 @@ import { FOSSIL_VALUES } from './fossils';
 import { SHINY_VALUES } from './shinies';
 import { RARE_KEEPSAKE_VALUES } from './rareEvents';
 import { STAR_VALUES } from './constellations';
+import { TICKET_VALUES } from './fairRide';
+import { HEN_VALUES } from './hens';
+import { SNOW_VALUES } from './snow';
+import { KITE_IDS, KITE_VALUES } from './kites';
 import { FAIR_PRIZE_VALUES } from './fairPrizes';
 import { ORCHARD_VALUES } from './orchard';
 import { DISPLAY_WARES } from './display';
@@ -209,6 +213,10 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   ...FOSSIL_VALUES,
   ...RARE_KEEPSAKE_VALUES,
   ...STAR_VALUES,
+  ...TICKET_VALUES,
+  ...HEN_VALUES,
+  ...SNOW_VALUES,
+  ...KITE_VALUES,
   // Only ever won at the Hollow Fairground (V1's R6b).
   ...FAIR_PRIZE_VALUES,
 };
@@ -718,6 +726,8 @@ export const SHOPS: Record<ShopId, ShopRow> = {
         everyWeek: true,
         months: WINTER_MONTHS,
       },
+      // Kites (1.6's X6), all three every day, last so the shelves before deal as they did.
+      { name: 'Kites', picks: [{ from: items(...KITE_IDS), count: KITE_IDS.length }] },
     ],
   },
   // Market day's stall at the fairground (0.2's M3): Cobweb Corner's market table, carried out to

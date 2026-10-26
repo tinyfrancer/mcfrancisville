@@ -771,15 +771,30 @@ export const EAVE_LIGHTS: Partial<Record<DecorId, readonly string[]>> = {
 
 /** Every building's roof is painted in the kit's roof keys (`ROOF` in `buildings.ts`). */
 const ROOF_KEYS = 'nmrRL';
-/** The shortest run of eave worth stringing, and how far apart the bulbs hang. */
-const EAVE_MIN = 12;
+/** The shortest run of eave worth stringing, and how far apart the bulbs hang along it. */
+export const EAVE_MIN = 12;
 const BULB_EVERY = 6;
+/**
+ * The steepest a roof's edge falls from one column to the next and still be a gable's slope the
+ * string follows (1.6's X1): the steepest gable in town falls three. A step up to `EAVE_CORNER`
+ * is where an eave's tip past the wall meets the eave over it, which the string goes round.
+ */
+const EAVE_STEEPEST = 3;
+const EAVE_CORNER = 6;
+/** Where along each six pixels of a level stretch the string dips a pixel, between its clips. */
+const DIPS = new Set([2, 3, 4]);
 
 /**
  * A string of lights under a building's eaves, the size of its sprite: found from its own pixels,
- * as the bottom edge of its roof wherever that runs level (or near enough) for a stretch, so a
- * new building is lit with nothing to measure, above `door`, the top of its door. Bulbs are `0`,
- * `1`… by colour, the string `s`.
+ * as the bottom edge of its roof wherever that runs on for a stretch, above `door`, the top of its
+ * door, so a new building is lit with nothing to measure. Bulbs are `0`, `1`… by colour, the
+ * string `s`.
+ *
+ * The string is one line of pixels hugging the roof's edge from outside (1.6's X1): along a level
+ * eave it's clipped under the edge every six pixels and dips a pixel between, so it reads apart
+ * from the roof's outline, and it follows a gable up and down as a staircase, round where the
+ * eave meets the gable, unbroken. Each bulb hangs from the string where it dips, or from it on a
+ * slope, so every bulb is on the string.
  */
 export function eaveLights(building: SpriteSource, colours: number, door: number): SpriteSource {
   const rows = building.rows;
@@ -790,29 +805,68 @@ export function eaveLights(building: SpriteSource, colours: number, door: number
     return null;
   });
   const out = rows.map(() => Array.from({ length: width }, () => CLEAR));
+  const put = (x: number, y: number, key: string) => {
+    if (y >= 0 && y < door && x >= 0 && x < width) out[y]![x] = key;
+  };
   const string = (from: number, to: number) => {
-    let bulb = 0;
+    // The path along the edge, just under it, each pixel touching the one before.
+    const path: { x: number; y: number }[] = [];
     for (let c = from; c <= to; c++) {
       const y = eave[c]! + 1;
-      if (y >= rows.length) continue;
-      out[y]![c] = 's';
-      if ((c - from) % BULB_EVERY !== 2 || y + 3 >= rows.length || c + 1 > to) continue;
+      const before = c > from ? eave[c - 1]! + 1 : y;
+      // Down a slope, the string drops down the column before; up one, it climbs this column.
+      if (y > before) for (let r = before + 1; r < y; r++) path.push({ x: c - 1, y: r });
+      if (y < before) for (let r = before; r > y; r--) path.push({ x: c, y: r });
+      path.push({ x: c, y });
+    }
+    let bulb = 0;
+    path.forEach((p, i) => {
+      const prev = path[i - 1];
+      const next = path[i + 1];
+      const level = !!prev && !!next && prev.y === p.y && next.y === p.y;
+      const y = level && DIPS.has(i % BULB_EVERY) ? p.y + 1 : p.y;
+      put(p.x, y, 's');
+      if (i % BULB_EVERY !== BULB_EVERY / 2 || !next || y + 3 >= door) return;
       const key = String(bulb++ % colours);
       for (const dy of [1, 2, 3]) {
-        out[y + dy]![c] = key;
-        if (dy < 3) out[y + dy]![c + 1] = key;
+        put(p.x, y + dy, key);
+        if (dy < 3) put(p.x + 1, y + dy, key);
       }
-    }
+    });
   };
+  // Stretches of edge that run on, a gable's slope and all; then which of them a string joins.
+  const pieces: { from: number; to: number; open: boolean; corner: boolean }[] = [];
   let start = 0;
   for (let c = 1; c <= width; c++) {
     const here = eave[c] ?? null;
     const before = eave[c - 1] ?? null;
-    // A run follows a roof's edge down a gable's slope too, but not up a wall.
-    if (c < width && here !== null && before !== null && Math.abs(here - before) <= 1) continue;
-    if (before !== null && c - start >= EAVE_MIN) string(start, c - 1);
+    const step = here !== null && before !== null ? Math.abs(here - before) : Infinity;
+    if (c < width && step <= EAVE_STEEPEST) continue;
+    if (before !== null) {
+      const last = pieces[pieces.length - 1];
+      const open = !last || last.to !== start - 1 || !last.corner;
+      pieces.push({ from: start, to: c - 1, open, corner: step <= EAVE_CORNER });
+    }
     start = c;
   }
+  // A short stretch between two steps (a crenel, a dormer's cheek) isn't strung; at the end of
+  // an edge (the tip of an eave past the wall's corner) it is, round the corner to the eave.
+  const kept = pieces.map((p, i) => {
+    if (p.to - p.from + 1 >= EAVE_MIN) return true;
+    const joinsBefore = !p.open && i > 0;
+    const joinsAfter = p.corner && i + 1 < pieces.length;
+    return joinsBefore !== joinsAfter;
+  });
+  let run: { from: number; to: number } | null = null;
+  pieces.forEach((p, i) => {
+    if (kept[i] && run && !p.open && kept[i - 1]) run.to = p.to;
+    else {
+      if (run && run.to - run.from + 1 >= EAVE_MIN) string(run.from, run.to);
+      run = kept[i] ? { from: p.from, to: p.to } : null;
+    }
+  });
+  const last = run as { from: number; to: number } | null;
+  if (last && last.to - last.from + 1 >= EAVE_MIN) string(last.from, last.to);
   return { rows: out.map((row) => row.join('')) };
 }
 
@@ -821,7 +875,7 @@ export function eaveLightsPalettes(colours: readonly string[]): {
   palette: Palette;
   glow: Palette;
 } {
-  const palette: Record<string, string | null> = { [CLEAR]: null, s: C.iron };
+  const palette: Record<string, string | null> = { [CLEAR]: null, s: C.stoneDark };
   const glow: Record<string, string | null> = {};
   colours.forEach((colour, i) => {
     palette[String(i)] = colour;

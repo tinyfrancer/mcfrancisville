@@ -1,3 +1,4 @@
+import { VILLAGER_IDS } from '../../data/villagers';
 import { Activities } from '../services/Activities';
 import type { Forecast } from '../services/Forecast';
 import type { Shared } from './shared';
@@ -17,6 +18,10 @@ export function fairground(s: Shared, weather: Forecast): Fairground {
       weather: () => weather.today(),
       agathaAt: () => town.zoneOf('agatha'),
       caught: (id) => cabinet.caughtOn(id) !== null,
+      // The big wheel's company (1.6's X2): anyone at the fair, or in Agatha's tent at it.
+      atFair: () =>
+        VILLAGER_IDS.filter((id) => ['fairground', 'fortuneTent'].includes(town.zoneOf(id))),
+      hearts: town.hearts,
     },
   );
   return { activities };

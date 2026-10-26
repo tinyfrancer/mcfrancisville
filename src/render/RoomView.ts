@@ -91,8 +91,8 @@ export class RoomView implements SceneView {
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('no 2d context');
     this.ctx = ctx;
-    // Nothing in a building moves, so each thing is placed once.
-    this.sprites = zone.things.map((t) => thingSprite(t));
+    // Nothing in a building moves, so each thing is placed once, whether it's there yet or not.
+    this.sprites = zone.everything.map((t) => thingSprite(t));
   }
 
   /** The photo mode's viewfinder looking away from her (1.5's G5), or back at her with null. */
@@ -147,7 +147,7 @@ export class RoomView implements SceneView {
     drawRoomFrame(ctx, room, cam);
     ctx.drawImage(roomShell(room, row.wallpaper, row.flooring), -cam.x, -cam.y);
 
-    const sprites = this.sprites.map((s) => animated(s, nowMs));
+    const sprites = this.there().map((s) => animated(s, nowMs));
     for (const layer of ['wall', 'rug'] as const) {
       for (const s of sprites) {
         if (layerOf(s.thing) !== layer) continue;
@@ -193,7 +193,7 @@ export class RoomView implements SceneView {
       cam,
       this.daylight(),
       [...underneath, ...drawables],
-      this.sprites.flatMap((s) => s.lights),
+      this.there().flatMap((s) => s.lights),
       INDOOR_SOFTEN,
     );
     if (fishing) drawBite(ctx, this.world, me, cam);
@@ -204,6 +204,11 @@ export class RoomView implements SceneView {
     if (this.effects)
       drawGlints(ctx, this.effects.glints(this.zone.id), cam, this.daylight().lamps);
     this.effects?.draw(ctx, this.zone.id, cam, resolverFor(this.world));
+  }
+
+  /** What stands in the room now: Gerald only once he's assembled (1.6's X6). */
+  private there(): readonly ThingSprite[] {
+    return this.sprites.filter((s) => this.zone.isThere(s.thing));
   }
 
   /** What grows in a raised bed (0.3's F2), standing in its soil as in a planter at home. */
@@ -282,7 +287,7 @@ export class RoomView implements SceneView {
 
   /** The frontmost standing thing whose picture has a pixel at `at`. */
   private standingAt(at: Point): RoomThing | null {
-    const standing = this.sprites
+    const standing = this.there()
       .filter((s) => layerOf(s.thing) === 'floor')
       .sort((a, b) => b.footY - a.footY);
     for (const s of standing) {

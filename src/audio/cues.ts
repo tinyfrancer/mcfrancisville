@@ -1,4 +1,5 @@
 import type { Figure } from '../sprites/villagers';
+import type { PetId } from '../types/ids';
 import { ZONES } from '../data/zones';
 import { hashString } from '../systems/random';
 import type { WorldEvent } from '../world/World';
@@ -111,9 +112,84 @@ export const CUES = {
     { wave: 'hat', notes: line('C4:.06 -:.08 C4:.1'), gain: 0.16 },
     chime('-:.28 E6:.1 B6:.4', 0.07),
   ),
+  // Reginald at six (1.6's X3): cock-a-doodle-doo, three quick notes up and a long one let go,
+  // a little reedy, from across the farmyard.
+  crow: cue({
+    wave: 'triangle',
+    notes: line('G4:.12 C5:.12 E5:.14 -:.06 G5:.3 A5:.5 F5:.6'),
+    gain: 0.16,
+    attack: 0.02,
+    release: 0.2,
+    chorus: 14,
+    pan: 0.3,
+  }),
+  // The eggs collected: a soft cluck-cluck, and a little chime for each being warm.
+  clucks: cue(
+    pluck('D4:.12 -:.06 D4:.12 -:.2 F4:.25', 0.12, 'sine'),
+    chime('-:.5 C6:.15 E6:.15 G6:.6', 0.12),
+  ),
+  // Back down off the big wheel (1.6's X2): a music box's turn, a gentle waltz round and home.
+  ride: cue(
+    chime('C6:.5 E6:.25 G6:.25 C7:.5 B6:.25 G6:.25 A6:.5 F6:.25 D6:.25 C6:1.2', 0.12),
+    pluck('C4+G4:.75 -:.25 A3+E4:.75 -:.25 F3+C4:.75 -:.25 G3+D4:1', 0.08, 'sine'),
+  ),
+  // Snow days (1.6's X4): a snowball's whoosh and soft thwump as it lands, a crunch as one rolls,
+  // and a rainbow's bright run up over a hum.
+  thwump: cue(
+    { wave: 'brush', notes: line('E6:.4'), gain: 0.05, q: 1.5 },
+    { wave: 'kick', notes: line('-:1.8 G3:.3'), gain: 0.2 },
+    { wave: 'brush', notes: line('-:1.8 C6:.35'), gain: 0.12, q: 0.8 },
+  ),
+  rolled: cue(
+    { wave: 'brush', notes: line('A5:.2 -:.1 G5:.25'), gain: 0.14, q: 1.2 },
+    chime('-:.5 E5:.3', 0.08),
+  ),
+  rainbow: cue(
+    chime('C5:.15 D5:.15 E5:.15 G5:.15 A5:.15 C6:.15 D6:.15 E6:1.2', 0.12),
+    chime('-:.6 C4+G4:2', 0.06),
+  ),
+  // Small delights (1.6's X5): wings landing on her hat, the scarecrow's crow, a sneeze, and
+  // hello at the door: a mew for the cats, Dolly's and Fibi's woof, Pickle's chitter.
+  wings: cue(
+    { wave: 'brush', notes: line('G6:.08 -:.06 G6:.08 -:.06 G6:.08'), gain: 0.04, q: 2 },
+    chime('-:.4 E6:.12 B6:.4', 0.05),
+  ),
+  caw: cue(pluck('E4:.15 D4:.3 -:.15 E4:.15 C4:.4', 0.08, 'square'), {
+    wave: 'brush',
+    notes: line('-:.6 A6:.3'),
+    gain: 0.04,
+    q: 1.5,
+  }),
+  achoo: cue(
+    { wave: 'sine', notes: line('A4:.3 C5:.3 E5:.25'), gain: 0.08, attack: 0.05, release: 0.1 },
+    { wave: 'brush', notes: line('-:.85 C6:.3'), gain: 0.14, q: 1 },
+    chime('-:1.3 G5:.12 C6:.4', 0.06),
+  ),
+  mew: cue(pluck('G5:.12 B5:.18 E5:.45', 0.1)),
+  chitter: cue(pluck('C6:.06 D6:.06 C6:.06 D6:.06 E6:.12', 0.06, 'sine')),
+  // A kite (1.6's X6): a flutter of cloth as the wind takes it up, and a soft wind-down back in.
+  flutter: cue(
+    { wave: 'brush', notes: line('C6:.12 -:.04 D6:.12 -:.04 E6:.16'), gain: 0.09, q: 1.4 },
+    chime('-:.3 G5:.12 C6:.12 E6:.12 G6:.8', 0.12),
+  ),
+  windIn: cue(
+    { wave: 'brush', notes: line('E6:.3'), gain: 0.06, q: 1 },
+    chime('G6:.12 E6:.12 C6:.12 G5:.6', 0.1),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
+
+/** What each pet says by way of hello at the door (1.6's X5); Gary says nothing, happily. */
+const HELLO: Record<PetId, CueId | null> = {
+  florence: 'mew',
+  fibi: 'woof',
+  dolly: 'woof',
+  gary: null,
+  wybie: 'mew',
+  elvira: 'mew',
+  pickle: 'chitter',
+};
 
 /** The sound a moment makes, if any. */
 export function cueOf(event: WorldEvent): CueId | null {
@@ -170,6 +246,22 @@ export function cueOf(event: WorldEvent): CueId | null {
       return event.top ? 'firstCatch' : 'treat';
     case 'readFortune':
       return 'found';
+    case 'rode':
+      return 'ride';
+    case 'threw':
+      return 'thwump';
+    case 'snowball':
+      return 'rolled';
+    case 'snowman':
+      return 'made';
+    case 'thawed':
+      return 'found';
+    case 'rainbow':
+      return 'rainbow';
+    case 'assembled':
+      return 'firstCatch';
+    case 'kite':
+      return event.did === 'up' ? 'flutter' : event.did === 'in' ? 'windIn' : null;
     case 'snackBought':
       return 'coin';
     case 'ate':
@@ -262,6 +354,23 @@ export function cueOf(event: WorldEvent): CueId | null {
       return event.lit ? 'starLit' : 'tap';
     case 'traced':
       return 'traced';
+    // 1.6's X3: the hens fed, their eggs collected, and Reginald at six.
+    case 'fedHens':
+      return 'planted';
+    case 'laid':
+      return 'clucks';
+    case 'crow':
+      return 'crow';
+    case 'landed':
+      return 'wings';
+    case 'cawed':
+      return 'caw';
+    case 'sneezed':
+      return 'achoo';
+    case 'greeted':
+      return HELLO[event.pet];
+    case 'petGift':
+      return 'found';
     default:
       return null;
   }

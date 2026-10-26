@@ -1,6 +1,7 @@
 import { ACTIVITIES, type ActivityId } from '../data/activities';
 import { HAPPENINGS } from '../data/happenings';
-import { TOWN_SPOTS } from '../data/maps';
+import { KITE_FIELDS, type KitePlace } from '../data/kites';
+import { spotIn, TOWN_SPOTS } from '../data/maps';
 import { WANDERING_STALL_AT, type PasserId, type RareEventId } from '../data/rareEvents';
 import type {
   ConstellationId,
@@ -128,6 +129,14 @@ export interface TodayFacts {
    * traced (or the month's), whether it's on her chart, and whether the whole sky is out.
    */
   stars?: { constellation: ConstellationId; found: boolean; showers: boolean } | null;
+  /** The big wheel turning on a fair day (1.6's X2), while the day's free ride is still to be had. */
+  bigWheel?: { open: boolean } | null;
+  /** The eggs waiting in the coop at Boo Acres (1.6's X3). */
+  eggs?: number;
+  /** A rainbow up after the rain (1.6's X4), for its ten minutes. */
+  rainbow?: boolean;
+  /** The wind up for a kite today (1.6's X6), by day: where, and whether she has a kite. */
+  kite?: { zone: KitePlace; hasKite: boolean } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -170,6 +179,14 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'iceFishing' }
   // 1.5's G4: a clear night for the telescope at the castle.
   | { kind: 'stars'; constellation: ConstellationId; found: boolean; showers: boolean }
+  // 1.6's X2: the big wheel turning on a fair day, the first ride free.
+  | { kind: 'bigWheel'; open: boolean }
+  // 1.6's X3: eggs waiting in the coop at Boo Acres.
+  | { kind: 'eggs'; eggs: number }
+  // 1.6's X4: a rainbow after the rain, while it's up.
+  | { kind: 'rainbow' }
+  // 1.6's X6: the wind up for a kite at the pier's end or the castle lookout.
+  | { kind: 'kite'; zone: KitePlace; hasKite: boolean }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -216,6 +233,14 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       sold: facts.stall.sold,
       key: `stall:${window}`,
       go: { zone: 'town', prop: 'honestyStall' },
+    });
+  }
+  if (facts.eggs) {
+    lines.push({
+      kind: 'eggs',
+      eggs: facts.eggs,
+      key: `eggs:${day}`,
+      go: { zone: 'booAcres', prop: 'coop' },
     });
   }
   const byPlace = new Map<ZoneId, RipeBed[]>();
@@ -311,6 +336,25 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       open,
       key: `freeGo:${day}`,
       ...('prop' in at ? { go: { zone: 'fairground' as const, prop: at.prop } } : {}),
+    });
+  }
+  if (facts.rainbow) lines.push({ kind: 'rainbow', key: `rainbow:${day}` });
+  if (facts.kite) {
+    const { zone, hasKite } = facts.kite;
+    lines.push({
+      kind: 'kite',
+      zone,
+      hasKite,
+      key: `kite:${day}`,
+      go: { zone, tile: spotIn(zone, KITE_FIELDS[zone]) },
+    });
+  }
+  if (facts.bigWheel) {
+    lines.push({
+      kind: 'bigWheel',
+      open: facts.bigWheel.open,
+      key: `bigWheel:${day}`,
+      go: { zone: 'fairground', prop: 'ferrisWheel' },
     });
   }
   if (facts.iceFishing) {

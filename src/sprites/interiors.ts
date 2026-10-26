@@ -14,6 +14,7 @@ import {
   INK,
   LAMP,
   LEAVES,
+  letters,
   lightOf,
   ROOF,
   shadeOf,
@@ -27,7 +28,7 @@ import {
 } from './buildings';
 import { mix, PALETTE as C, ramp } from './palette';
 import type { PropLight } from './props';
-import { Sketch } from './sketch';
+import { CLEAR, Sketch } from './sketch';
 import { flames } from './motion';
 import { NEWCOMER_FIXTURE_ART } from './newcomerPieces';
 import { BOOTHOVEN_FIXTURE_ART } from './boothoven';
@@ -330,6 +331,105 @@ const MUSEUM_CASE = (() => {
  * top-left of each box, a little snug since the fish came to ten (0.2's F1).
  */
 const MUSEUM_NOOKS = [6, 33, 60].flatMap((y) => [4, 25, 46, 67].map((x) => ({ x, y })));
+
+/** A bone two pixels thick from one end to the other, a knob at each end. */
+function bone(s: Sketch, x0: number, y0: number, x1: number, y1: number): void {
+  const key = fillOf(WALL);
+  s.line(x0, y0, x1, y1, key).line(x0 + 1, y0, x1 + 1, y1, key);
+  s.rect(x0 - 1, y0 - 1, 3, 3, key).rect(x1, y1 - 1, 3, 3, key);
+}
+
+/** A string of vertebrae, a round bead every few pixels along the way through `points`. */
+function vertebrae(s: Sketch, points: readonly (readonly [number, number])[], r: number): void {
+  for (let i = 0; i + 1 < points.length; i++) {
+    const [x0, y0] = points[i]!;
+    const [x1, y1] = points[i + 1]!;
+    const steps = Math.max(1, Math.round(Math.hypot(x1 - x0, y1 - y0) / (r * 1.6)));
+    for (let k = 0; k <= steps; k++) {
+      const t = k / steps;
+      s.ellipse(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, r, r, fillOf(WALL));
+    }
+  }
+}
+
+/**
+ * Gerald (1.6's X6, decision 385): every fossil she gave the museum, stood up by Wrapunzel as a
+ * little dragon of bones on a plinth, mostly the dragon's tooth and a great deal of hope. He faces
+ * left, his skull round with two big friendly sockets and a smile, his wings folded, his tail
+ * curled up behind him to a spade, a brass rod holding up his middle and his name on the plaque.
+ */
+const SKELETON = (() => {
+  const s = new Sketch(96, 100);
+  // The plinth: its top seen from above, then its front, with a brass plaque.
+  slab(s, 4, 66, 88, 12, STONE);
+  slab(s, 6, 78, 84, 20, STONE);
+  s.rect(6, 78, 84, 1, darkOf(STONE));
+  s.rect(33, 84, 31, 9, fillOf(ACCENT_TWO)).bevel(
+    fillOf(ACCENT_TWO),
+    lightOf(ACCENT_TWO),
+    shadeOf(ACCENT_TWO),
+  );
+  letters(s, 'GERALD', 37, 86, darkOf(ACCENT_TWO));
+  // The brass rod up his middle, and its foot.
+  s.rect(57, 52, 2, 20, fillOf(ACCENT_TWO)).rect(54, 70, 8, 2, shadeOf(ACCENT_TWO));
+  // His tail, curling up behind him to a spade.
+  vertebrae(
+    s,
+    [
+      [70, 52],
+      [78, 58],
+      [85, 56],
+      [89, 48],
+      [87, 40],
+      [82, 37],
+    ],
+    1.6,
+  );
+  s.rect(78, 32, 5, 4, fillOf(WALL)).rect(79, 30, 3, 2, fillOf(WALL)).set(80, 29, fillOf(WALL));
+  // His legs, front and back, and round little feet on the plinth.
+  bone(s, 50, 54, 47, 63);
+  bone(s, 47, 63, 49, 70);
+  bone(s, 68, 54, 72, 62);
+  bone(s, 72, 62, 70, 70);
+  for (const x of [46, 67]) s.rect(x, 70, 7, 3, fillOf(WALL)).set(x, 70, CLEAR);
+  // His wing, folded up over his back: a long arm bone, and three fingers fanned out behind.
+  bone(s, 51, 44, 55, 30);
+  bone(s, 55, 30, 66, 18);
+  bone(s, 55, 30, 72, 26);
+  bone(s, 55, 30, 70, 35);
+  // His ribs, hung from the spine and curving under, a gap between each.
+  for (const x of [51, 55, 59, 63, 67]) {
+    const key = fillOf(WALL);
+    s.line(x, 48, x - 2, 52, key)
+      .line(x - 2, 52, x - 1, 56, key)
+      .set(x, 57, key);
+  }
+  // His spine, from his neck over his back to his hips.
+  vertebrae(
+    s,
+    [
+      [34, 34],
+      [40, 40],
+      [47, 45],
+      [56, 46],
+      [64, 46],
+      [71, 50],
+    ],
+    2,
+  );
+  // His skull: round, with a snout, two little horns, two big sockets and a smile.
+  s.ellipse(28, 24, 11, 10, fillOf(WALL));
+  s.rect(10, 25, 18, 9, fillOf(WALL)).ellipse(12, 29, 4, 4, fillOf(WALL));
+  s.bevel(fillOf(WALL), lightOf(WALL), shadeOf(WALL));
+  s.line(34, 15, 38, 9, fillOf(WALL)).line(35, 15, 39, 9, fillOf(WALL));
+  s.line(29, 14, 31, 8, fillOf(WALL)).line(30, 14, 32, 8, fillOf(WALL));
+  s.ellipse(23, 23, 3.5, 4, INK).ellipse(32, 23, 3.5, 4, INK);
+  s.set(22, 21, WHITE).set(31, 21, WHITE);
+  s.set(11, 27, darkOf(WALL)).set(14, 27, darkOf(WALL));
+  s.line(14, 31, 25, 31, darkOf(WALL)).set(13, 30, darkOf(WALL)).set(26, 30, darkOf(WALL));
+  s.set(16, 32, WHITE).set(22, 32, WHITE);
+  return finish(s);
+})();
 
 // ---- The neighbours' houses --------------------------------------------------------------------
 
@@ -643,6 +743,10 @@ export const FIXTURE_ART: Record<FixtureId, FixtureArt> = {
     // A dusky glass, so a pale moth or orb stands out on it.
     palette: palette({ ...WOOD, trim: C.bark, accentTwo: C.gold, glass: C.dusk }),
     nooks: MUSEUM_NOOKS,
+  },
+  skeleton: {
+    source: SKELETON,
+    palette: palette({ ...WOOD, wall: C.bone, stone: C.stone, accentTwo: C.gold }),
   },
   libraryShelf: {
     source: LIBRARY_SHELF,

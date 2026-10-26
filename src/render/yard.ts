@@ -2,6 +2,8 @@ import { TILE_SIZE } from '../config/world';
 import type { Placed } from '../data/home';
 import { surfaceTop } from '../data/tabletop';
 import { PALETTE } from '../sprites/palette';
+import { bake } from '../sprites/bake';
+import { SNOWBALL_ART, SNOWBALL_PALETTE } from '../sprites/snowman';
 import { footprint } from '../systems/decor';
 import type { Tile } from '../systems/pathfinding';
 import type { World } from '../world/World';
@@ -44,7 +46,25 @@ export function yardDrawables(world: World): { drawables: Drawable[]; lights: Wo
     drawables.push(d);
     lights.push(...s.lights.map((l) => ({ ...l, y: l.y - lift })));
   }
+  const ball = world.yard.snowball;
+  if (ball) drawables.push(snowballDrawable(ball));
   return { drawables, lights };
+}
+
+/** The snowball she's rolling (1.6's X4), on the front of its tile, small and then bigger. */
+function snowballDrawable(ball: { tx: number; ty: number; size: number }): Drawable {
+  const look = Math.min(SNOWBALL_ART.length, ball.size) - 1;
+  const sprite = bake(`snowball:${look}`, SNOWBALL_ART[look]!, SNOWBALL_PALETTE);
+  const x = ball.tx * TILE_SIZE;
+  const footY = (ball.ty + 1) * TILE_SIZE;
+  const wide = look === 0 ? 12 : 20;
+  return {
+    footY,
+    sprite,
+    x,
+    y: footY - sprite.height,
+    shadow: { cx: x + TILE_SIZE / 2, cy: footY - (look === 0 ? 6 : 10), w: wide, h: 6 },
+  };
 }
 
 /** While she decorates her yard: faint dots on the lawn a piece may go on, under everything. */

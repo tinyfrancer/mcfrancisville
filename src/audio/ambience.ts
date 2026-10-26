@@ -32,7 +32,12 @@ export interface Surroundings {
   stormy: boolean;
   /** How near open water she stands, 0 (none in earshot) to 1 (on its edge). */
   water: number;
+  /** The wind up for a kite here today (1.6's X6), heard over the place's own. */
+  breezy?: boolean;
 }
+
+/** What a kite day's breeze adds to a place's wind. */
+const BREEZE = 0.3;
 
 /** When the crickets sing: from dusk until the small hours, from spring until the frosts. */
 const CRICKET_NIGHTS = { from: 20, until: 4, months: [4, 5, 6, 7, 8, 9, 10] } as const;
@@ -91,7 +96,11 @@ export function ambienceFor(s: Surroundings): Bed {
     set('crickets', CRICKETS_IN[s.zone] ?? CRICKETS_ELSEWHERE);
   }
   if (raining) set('rain', s.stormy ? RAIN.storm : RAIN.rain);
-  const wind = (WIND_IN[s.zone] ?? 0) + (s.stormy ? 0.3 : 0) + (s.weather === 'fog' ? 0.1 : 0);
+  const wind =
+    (WIND_IN[s.zone] ?? 0) +
+    (s.stormy ? 0.3 : 0) +
+    (s.weather === 'fog' ? 0.1 : 0) +
+    (s.breezy ? BREEZE : 0);
   set('wind', wind);
   set('water', Math.max(WATER_IN[s.zone] ?? 0, s.water * 0.8));
   if (s.zone === 'fairground' && s.hour >= MURMUR.from && s.hour < MURMUR.until) {
@@ -125,7 +134,7 @@ export function waterNear(
 }
 
 /** What she's walking on, for the sound of her steps. */
-export type Ground = 'grass' | 'path' | 'boards' | 'ice' | 'floor';
+export type Ground = 'grass' | 'path' | 'boards' | 'ice' | 'floor' | 'snow' | 'puddle';
 
 /** The ground a tile is underfoot: indoors is floor, the pier boards, the creek and pond ice. */
 export function groundOf(tile: TileId | undefined, outdoors: boolean, slippery: boolean): Ground {
@@ -181,7 +190,7 @@ const knock = (notes: string, gain: number): Part => ({
 /**
  * Her footsteps, a left and a right for each ground, each a little off the middle on its side:
  * a swish of grass, the crunch of the path, a hollow knock on the boards, a skate's hiss on the
- * ice, a soft pat indoors. All of them quiet: she hears she's walking, not each step.
+ * ice, a soft pat indoors, a squeak in the snow and a splash in a puddle. All of them quiet: she hears she's walking, not each step.
  */
 export const FOOTSTEPS: Record<Ground, readonly [Tune, Tune]> = {
   grass: [
@@ -203,6 +212,15 @@ export const FOOTSTEPS: Record<Ground, readonly [Tune, Tune]> = {
   floor: [
     blip(brush('A4:.12', 0.18, 1, -0.15), knock('A3:.08', 0.075)),
     blip(brush('G4:.12', 0.18, 1, 0.15), knock('G3:.08', 0.075)),
+  ],
+  // Lying snow, a soft squeaky crunch; and a puddle, a splash (1.6's X4).
+  snow: [
+    blip(brush('E6:.08 -:.02 C6:.12', 0.16, 1.6, -0.15), knock('C4:.06', 0.03)),
+    blip(brush('D6:.08 -:.02 B5:.12', 0.16, 1.6, 0.15), knock('B3:.06', 0.03)),
+  ],
+  puddle: [
+    blip(brush('C7:.08 G6:.16', 0.2, 0.7, -0.15), knock('E5:.1', 0.05)),
+    blip(brush('B6:.08 F6:.16', 0.2, 0.7, 0.15), knock('D5:.1', 0.05)),
   ],
 };
 

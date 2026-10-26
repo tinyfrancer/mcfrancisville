@@ -20,6 +20,7 @@ import type { MailEntry } from './Letters';
 import type { PorchSnapshot } from './Porch';
 import type { WorksSnapshot } from './Works';
 import type { CandyTreeSnapshot } from './services/CandyTree';
+import type { HenhouseState } from '../systems/hens';
 import type { LatelySnapshot } from './Lately';
 import type { FreshSnapshot } from './services/Novelty';
 import type { VisitsSnapshot } from './services/Visits';
@@ -79,6 +80,8 @@ export interface WorldOptions {
   visits?: Partial<VisitsSnapshot>;
   /** When she last shook the candy tree. */
   candyTree?: Partial<CandyTreeSnapshot>;
+  /** The day she last fed the hens at Boo Acres, and the eggs waiting (1.6's X3). */
+  henhouse?: Partial<HenhouseState>;
   /** Her first day's steps done (V1's R1); a new town's are all still to do. */
   firstDay?: Partial<FirstDaySnapshot>;
   /** What's on the honesty stall, and in its tin. */
@@ -144,6 +147,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     fresh: save.fresh,
     visits: save.visits,
     candyTree: save.candyTree,
+    henhouse: save.henhouse,
     stall: save.stall,
     kitchen: save.kitchen,
     errand: save.errand,

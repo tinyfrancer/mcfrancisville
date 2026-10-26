@@ -42,17 +42,34 @@ function covers(box: { tx: number; ty: number; w: number; h: number }, tx: numbe
 export class RoomZone implements Zone {
   readonly id: InteriorId;
   readonly room: Room;
-  /** Everything in it, fixtures first, each as it's placed. */
-  readonly things: readonly RoomThing[];
+  /** Everything that may ever stand in it, fixtures first, each as it's placed. */
+  readonly everything: readonly RoomThing[];
+  /** Whether a fixture that stands only some of the time (Gerald, 1.6's X6) is there now. */
+  private readonly standing: (when: NonNullable<PlacedFixture['when']>) => boolean;
 
-  constructor(id: InteriorId) {
+  constructor(
+    id: InteriorId,
+    standing: (when: NonNullable<PlacedFixture['when']>) => boolean = () => true,
+  ) {
     const row = INTERIORS[id];
     this.id = id;
     this.room = roomShaped(row.width, row.floorRows);
-    this.things = [
+    this.standing = standing;
+    this.everything = [
       ...row.fixtures.map((fixture) => ({ fixture })),
       ...row.furniture.map((piece) => ({ piece })),
     ];
+  }
+
+  /** Whether a thing stands in the room now. */
+  isThere(thing: RoomThing): boolean {
+    const when = 'fixture' in thing ? thing.fixture.when : undefined;
+    return when === undefined || this.standing(when);
+  }
+
+  /** Everything in it now, fixtures first, each as it's placed. */
+  get things(): readonly RoomThing[] {
+    return this.everything.filter((t) => this.isThere(t));
   }
 
   get width(): number {

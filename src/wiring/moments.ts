@@ -63,8 +63,14 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'entered') transitions?.entered();
     if (event.kind === 'window') transitions?.windowTurned(event.window);
     if (event.kind === 'photo') {
-      const them = world.neighbourhood.neighbour(event.with).tile;
-      const picture = snapshot([world.movement.tile, them]);
+      const them = world.neighbourhood.neighbour(event.with);
+      // Both turned to the camera, him posing as for hers (1.5's G5), not her back to it as she
+      // walked up to him (1.6's X1); the snapshot draws the frame again so before it's cut.
+      const her = world.movement.player;
+      world.movement.face(her.x, her.y + 1);
+      them.facing = 'down';
+      them.posing = true;
+      const picture = snapshot([world.movement.tile, them.tile]);
       // Kept as a print through the share sheet, made only if she asks (V1's S3).
       const caption = event.caption;
       const print = () => {
@@ -91,6 +97,7 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'wanderingStall') hud.openShop('wandering');
     if (event.kind === 'arrived' && event.at === 'seedCart') hud.openShop('seeds');
     if (event.kind === 'arrived' && event.at === 'barn') hud.openBarn();
+    if (event.kind === 'arrived' && event.at === 'coop') hud.openCoop();
     // Market day's stall by the fairground's stage (0.2's M3): its table, or when it's out.
     if (event.kind === 'arrived' && event.at === 'marketStall') {
       if (world.shops.isOpen('market')) hud.openShop('market');

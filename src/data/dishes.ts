@@ -1,6 +1,7 @@
 import type { DishId, ItemId } from '../types/ids';
 import { CRITTERS, type Family } from './critters';
 import { ITEMS } from './items';
+import { HEN_DISHES, isEgg } from './hens';
 import { ORCHARD_DISHES } from './orchard';
 
 /**
@@ -31,6 +32,7 @@ export const DISHES: Record<DishId, DishRow> = {
   roastGourd: { effect: { lure: 'orb' } },
   lavenderShortbread: { effect: { lure: 'moth' } },
   ...ORCHARD_DISHES,
+  ...HEN_DISHES,
 };
 
 export const DISH_IDS = Object.keys(DISHES) as DishId[];
@@ -63,7 +65,12 @@ export const PANTRY: Record<Pantry, PantryRow> = {
     icon: 'ghostMinnow',
     holds: (id) => id in CRITTERS && CRITTERS[id as keyof typeof CRITTERS].family === 'fish',
   },
-  crop: { name: 'Any crop', icon: 'pumpkin', holds: (id) => ITEMS[id].kind === 'crop' },
+  // An egg is a crop, but asked for by name (1.6's X3), never as whatever's plainest.
+  crop: {
+    name: 'Any crop',
+    icon: 'pumpkin',
+    holds: (id) => ITEMS[id].kind === 'crop' && !isEgg(id),
+  },
   // Late-night snackies count (the plan's phase R): whatever the night left her.
   snack: { name: 'Any snack', icon: 'midnightPizza', holds: (id) => ITEMS[id].kind === 'snack' },
 };

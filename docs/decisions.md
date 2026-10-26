@@ -9874,3 +9874,458 @@ shape, and 1.5's is the attic's); mending the rod with a seed in hand here (it r
 110, which a review shouldn't do in passing); moving the camera's drawer here (a layout change
 smoke would need to measure again, for a case she meets only sideways with a drawer open);
 redrawing the framed Bat or reordering Pickle's branch (above).
+
+## 378. The plan for 1.6, the last day: the festival's lights fixed and the 31st rehearsed, then a ride on the big wheel, chickens, snow and puddles, small delights, the museum's skeleton and a kite (2026-10-26)
+
+**Context:** 1.5 shipped overnight (PR #234). The user has about half a week's usage and one day
+left: "the colored lights up around the festival aren't connected properly. Throw some random
+stuff in to fill up the usage, fun, your call."
+
+**Decision:** `docs/v1.6_plan.md`: the bug first with a rehearsal of 31 October (five days off),
+then six fun sessions chosen for what she does (collects, decorates, plays at night, every day),
+all Opus, two at a time from `v1.6-dev`, a review, and 1.6 cut tonight with whatever has merged.
+No personal touches (decision 177, the user's word of 2026-10-25); no refactors.
+
+**Rejected:** more of 1.4's kinds (another set, more fish: she has those now); anything that
+needs the user's word (the cloud store); a new neighbour (decision 270).
+
+## 380. The festival's lights strung from the roofs' own edges and pole to pole, and the 31st rehearsed (1.6's X1, 2026-10-26)
+
+**Context:** the user: "the colored lights up around the festival aren't connected properly."
+Looked at by eye at `?day=2026-10-28&hour=20` and `21.5`, at Close, every building in town, Boo
+Acres, Whisperwood's and the shore's lots and the fairground, and `npm run sprite --
+'holiday:eaves:*'`. Two faults. **The fairground's poles** (decision 200) were 128 wide, swagging
+a whole curve 62 pixels out each side, but stood three tiles (96) apart: between two poles the
+strings crossed in a W, and at each row's ends a string hung off into the air. **The eaves**
+(`eaveLights`, 0.2's J2): the run broke wherever the roof's edge stepped more than a pixel a
+column, so a steep gable (Cody's manor's front, the post office's, the library's) had no string
+and cut its eave's string in two, and an eave's tip past the wall's corner (a step of four) was a
+string of its own; and the string was `iron` hard against the roof's dark outline, invisible by
+day and at night, so the bulbs read as dots stuck to the roof.
+
+**Decision:** the poles take `joins` from `parseMap` (a pole `POLE_SPAN`, three, along its row:
+2 right, 8 left), and their art is a form per side (`LIGHT_POLE_JOINS`, 96 wide): half the curve
+to the middle on each side with a neighbour, the bulbs counted from the left-hand pole so the
+halves keep step, nothing on a side without one. The eaves: the edge runs on through a step of
+up to three a column (`EAVE_STEEPEST`, a gable) and round one of up to six where an eave's tip
+meets the eave over the wall (`EAVE_CORNER`), but a short stretch caught between two such steps
+(the castle's crenels) isn't strung; the string is one path of touching pixels hugging the edge
+from outside, a staircase down a gable, clipped under it every six pixels and dipping one
+between, drawn in `stoneDark`; every bulb hangs from it, none at or below the door. Held by
+`tests/sprites/eaveLights.test.ts`: on every building with a door and eaves, every lit group has
+string in it and runs at least `EAVE_MIN` columns, no string pixel is more than two from the
+roof, and Cody's manor, the post office, her house and Barty's are each one string from tip to
+tip; at the fair, a pole is `POLE_SPAN` tiles wide, two halves meet, a lone pole hangs nothing,
+and every pole on the map has a neighbour. Cobweb Corner's mansard sides are now lit too (the old
+rule had skipped them). Nothing else about the festival's look changed: the bulbs, their colours
+and glow, the garlands and the banner are as they were.
+
+**The 31st rehearsed** (a scratch script driving the dev server under `?loop=manual` as smoke
+does, screenshots looked at): every neighbour's door on the 30th's evening, town, Boo Acres and
+the two lots, knocked for a sweet and walked in the second time (the town hall goes in until
+she's met the mayor; a test now holds his door answering once she has); the contest lined up
+before the stage, Barty crowned, nobody after; the party set out with Pickle on her walk; Cody
+the bug catcher to her butterfly and the lion to her plain; the photo through his talk and the
+camera after it, each its own card ("Say boo", Keep it and Lovely; "Snap!", with Another); the
+set gone and his letter with the framed photo on 1 November; Today on 27 October saying 25
+critters are visiting. Cody's halves and every neighbour's costume drawn on their builds
+(`figure:*:costume:*`, `figure:cody:*`): all sound. **Fixed:** their photo had her back to the
+camera (she faces Cody as she walks up): the `photo` moment turns her and Cody to face it, Cody
+posing as for her camera, and `main.ts`'s snapshot draws the frame again before it's cut; a
+couple's caption ("a butterfly and a bug catcher") widened the polaroid past the picture, so it
+wraps now; Scarah's place in the line-up (9,6) was behind a light pole, so it's the right end
+(20,6) and the party's chili table moves along a tile (22,6, under the lights between two poles).
+**Logged** (the art notes): the photo keeps the chatter bubbles and has her in front of Cody.
+
+**Rejected:** the poles four tiles apart to fit the old art (a map change for X2's fair and the
+rows' ends would still dangle); a string up any step (it climbed the castle's crenels); a lighter
+string colour than `stoneDark`, or the old `iron` with the dips alone (still lost against a dark
+roof); posing her with an action for the photo (her face to the camera is the fix; a pose is a
+new thing); moving the light pole instead of Scarah (the party's pumpkins stand there).
+
+## 381. A ride on the big wheel, drawn on its sheet's stage, the day's first ride free (2026-10-26)
+
+**Context:** 1.6's X2 (decision 378). The fairground's big wheel turns (E5, decision 284) but
+she couldn't ride it. The plan offered two ways to show a ride: (a) in the world, her sat in the
+lowest car and the camera lifted with it, or (b) a drawn scene on the sheet's stage, as the fair
+games are (R6b, decision 315), and asked for (a) to be tried first.
+
+**Decision:** (b). Tried against the world first: the wheel is 160×208 pixels with a rim of 66,
+so a whole turn lifts the camera about four tiles, less than half a phone's height at Close,
+where the whole wheel is already on screen; and its cars are tubs 15 pixels wide, where she is
+32, so she can't sit in one without the car being drawn anew at a size the wheel can't hang. The
+ride would show neither her in a car nor the town below. So it's a fifth `ACTIVITIES` row
+(`bigWheel`, on the `ferrisWheel` prop, `does: { ride: true }`): walking up to the wheel opens
+the Fair sheet's ride page (`openRide` in `hud/FairSheet.ts`), whose stage (96×112, a whole
+scale of the sheet's width and under half the screen's height, so what's said shows under it,
+upright and on its side) is `render/fairRide.ts`: her car from behind with whoever rides along,
+the rim and spokes turning round it from a hub off the stage, and the view in three bands
+(`sprites/fairRide.ts`: the hills, Castle Mac-A-Boo and the lake; the town's roofs in rows to
+the clock tower and the pond; the fair's stalls, stage, tent and strings of bulbs) sliding past
+each other as she rises, the fair dropping away below and the town coming up behind it, swaying
+with the car. It's lit by the hour as the world is (`gradeOf`, the season's touch, a grey day's),
+the windows, lanterns and the rim's and strings' bulbs glowing after dark (the strings chasing),
+a moon at tonight's phase and twinkling stars, or clouds by day. One turn is 21 s (up 8, 5 at the
+top, down 8, eased; `RIDE` in `data/fairRide.ts`, `rideAt` in `systems/fairRide.ts`).
+
+- **Price:** the day's first ride is always free (`fortune:ride` in `Takings`, once a day), every
+  ride after it 10 Candy, paid as it lands, as a game's go is; getting off early (the sheet
+  closed) costs nothing and leaves the free ride. Free always would make the price row
+  meaningless; R6b's dealt free go (one stall a day) would hide the wheel most days. A ride wins
+  nothing but the view, so no Candy loop (decision 128).
+- **Company:** at boarding, her husband if he's at the fair, else whoever there she has the most
+  hearts with (the town's order on a tie), counting Agatha's tent (`companionOf`; `atFair` reads
+  each neighbour's zone). They sit beside her from behind, and at the top they turn to each
+  other and they say one of three `RIDE_LINES` (Cody's about the view and her). Alone, a brass
+  plaque in the car says one of `MAYOR_VIEW` on the sheet, rather than a toast the sheet would
+  half hide (as `moments.ts` already says of toasts behind sheets). The walking pet waits at the
+  wheel's foot in the fair band, hopping as she comes down.
+- **The keepsake:** a `ticketStub` (kind `keepsake`, value 0, a 16-pixel icon) the first ride,
+  known by her bag holding none, as a keepsake is never sold or stowed. No save change.
+- **`rode`**, a moment as she lands: a music box's turn (`ride` cue), a hum, the stub popped.
+- **Today:** "The big wheel is turning" on a fair day (a weekend or a festival's day,
+  `isFairDay`) while the free ride is still to be had, flying her to the wheel.
+
+**Rejected:** (a), above; a sky band drawn over the world's map edge (the lift was too small for
+it to matter); the town's real map shrunk under her (`overview` scaled down is mush at the
+stage's size, and a picture at two pixel sizes at once); moving her husband's schedule to the
+fair so he'd ride more (not this session's; company is rare outside happenings and Agatha's
+weekend afternoons, and noted for the review).
+
+## 382. Chickens at Boo Acres: a coop by the barn, three hens and a rooster worked out from the clock, fed once a day for an egg each by morning, and three recipes with eggs (1.6's X3, 2026-10-26)
+
+**Context:** 1.6's X3 (decision 378): a coop by Scarah's barn, three hens with names and a rooster
+who crows at six, pecking about by day and in by night, fed once a day from her bag for an egg
+each the next morning, eggs that bake, Scarah's lines, Today's line. Nothing dies or goes hungry
+(decision 11).
+
+**Decision:**
+
+- **The coop** is a prop, `coop` (3×2, `0` in `FARM_LEGEND`), on the grass just east of the barn
+  (17–19, 3–4), clear of every spot, dig spot and path; `tests/data/maps.test.ts` holds everything
+  still reachable. Its art (`sprites/farm.ts`) is a teal henhouse on legs under a berry roof like
+  the barn's, a round window lit at night (`WINDOWS_LIT`, a small light), a pop-hole and a cleated
+  ramp, and the run: trodden earth and straw never outlined (laid under the outlined structure),
+  chicken wire behind post-and-rail fences, a trough and a tin waterer. The run's **front fence
+  is a second picture** (`COOP_FRONT`) drawn by the hens' pass just in front of them, so they
+  potter behind its rails; the coop has snow on its roof in winter (`ROOFED`) and no door, so no
+  festival lights. The overlays and arrivals snapshots were retaken for Boo Acres alone (the coop
+  and the hay bale beside it, walked up to from the tile below now).
+- **The hens** (`data/hens.ts`): Henrietta (speckled), Peck (black, a teal sheen), Omelette (buff)
+  and Reginald the rooster, side-on grids at about her knee (`sprites/hens.ts`: walk and peck
+  pairs, a sit, his crow; flipped to face left, as the pets are). Where each is is **worked out
+  from the clock alone** (`henAt` in `systems/hens.ts`): the pets' wander (`roamGoal`) as a pure
+  rule, a goal in the run hashed from the hen and the stretch, a trot from the last goal, then a
+  peck, stand or sit (Reginald never sits), always inside `RUN_FLOOR` (the run's floor in the
+  footprint's pixels, which the art is drawn round). Out from six until seven in the evening,
+  none drawn after. Nothing is stepped or saved for them: a stepped walker (`Pet`) would need
+  `update` to reach Boo Acres while she's elsewhere, and a hash of the clock gives the same
+  pottering for nothing. `world.henhouse` (`Henhouse`, the `passive` area, beside the candy tree)
+  says where they are; `render/hens.ts`'s `hens` pass draws them sorted just in front of the coop.
+- **Reginald crows at six** (`crow` moment, `crow` cue, a toast saying Scarah has asked him to
+  consider seven): once in the six o'clock hour, the first step she's at Boo Acres in it
+  (`Henhouse.check`, kept for the session, not the save), and he holds his crow frame for
+  `CROW_MS`.
+- **Feeding and eggs:** walking up to the coop (a `PropArrivals` row in `passive`, opening
+  `hud/CoopCard.ts` through `CoopApi` from `moments.ts`) shows the eggs waiting (Collect), the
+  plainest four crops or seeds in her bag (`feedChoices`, never an egg) each with Feed, and who
+  the hens are. Fed once a day, each of the three hens lays an egg by five the next morning:
+  `eggsWaiting` reads the stored day she fed them against today's day key, never ticked; fed
+  again before collecting, the earlier eggs move to `waiting`, so **nothing is ever lost**;
+  unfed, they lay nothing and nothing else happens. Collecting is a `laid` moment, an egg popped
+  over the coop, clucks. **Once a day is the henhouse's own `fed` day, not `Takings`**: Takings
+  prunes yesterday's keys at save, and the day she fed them must outlive the day to lay by.
+- **The egg** is kind `crop` (the bag's Food, a gift Scarah likes, the honesty stall's), value 6
+  (a day's three less than a crop, less than a morning's baking), but **never "any crop"** at the
+  stove (`PANTRY.crop` leaves it out) nor feed for the hens.
+- **Recipes:** an egg custard tart (3 eggs and a candy corn; pep; 90; Ollie loves it) and a
+  frittata (2 eggs and any crop; brings out a creepy-crawly, the first `crawly` lure; 70; Scarah
+  loves it), both **known from the start** so the first eggs have somewhere to go, a quarter
+  over their inputs by the economy test. With Wrapunzel, **meringue ghosts** are the bake instead
+  of the day's whenever she carries `MERINGUE_EGGS` (2), which go into the bowl (`MERINGUE_BAKE`
+  in `data/baking.ts`, its own three steps and line); a snack like the other bakes (15; Maude
+  loves them: they look like her).
+- **Scarah** has three new lines (hello, friend, night) about the hens; her keepsake unchanged.
+  **Today** has "3 eggs in the coop at Boo Acres" while any wait, flying her to the coop.
+- **The save (v59):** `henhouse: { fed: dayKey | null, waiting: number }`, a town from before
+  starting unfed with none waiting; a v58 town opens with the coop and no eggs.
+
+**Rejected:** a `Hens` zone overlay (the hens stand inside a prop's footprint, not on tiles, and
+block nothing); hens stepped by the world as pets are (above); Takings for once a day (above);
+the egg as a `material` (the bag would say "3 egg") or a new kind (every kind's table would
+grow); a card for the recipes at a shop (the eggs would have nowhere to go until she found one);
+meringue ghosts dealt as a fourth day's bake (then they'd need no eggs, or fail without them).
+
+## 383. Snowmen rolled in her yard by a tap on herself, snowballs thrown elsewhere, prints in the snow, splashes in the rain, and a rainbow the first ten minutes out after a rainy day (1.6's X4, 2026-10-26)
+
+**Context:** 1.6's X4 (decision 378). The plan asked for a snowman built by three taps on lying
+snow, swept into her chest as a keepsake at the thaw; neighbours throwing snowballs at each other;
+footprints in snow; splashes in puddles after rain; and a rainbow over the place for the first
+ten minutes after rain stops. Three things in the game shaped it: a tap on open ground already
+walks her there, so "a tap on the snow" can't also roll a snowball; rain comes a day at a time
+(decision 107), so it never stops partway through a day; and the save stays at v58 (only X3 bumps
+it).
+
+**Decision:**
+
+- **The gesture is a tap on herself** (the tile she stands on), on lying snow (`snowyOn`: the
+  lawn, meadow and long grass while `snowLies`, never a path or ice), with her hands empty. In
+  her yard it rolls a snowball on the tile she faces (or the next lawn tile round her that a piece
+  could stand on); a tap on the snowball walks her up to roll it bigger; the next stands it up as
+  a snowman. Out of her yard, or with no room, she throws one instead. The first time she's in her
+  yard on a snowy day (each time the game is opened), a toast says what the snow is for.
+- **A snowman is a yard piece** (`SnowmanId`: `snowmanTopHat`, `snowmanBobble`, `snowmanWitch`,
+  rows in `data/snow.ts`, art in `sprites/snowman.ts`): saved by `Yard` as any piece is, solid,
+  movable, put away in the chest, priced nowhere. His hat is dealt by the tile he was rolled on
+  (`hatOf`) and kept as his id, so moving him keeps it. He never comes indoors (refusal `melts`
+  from `Rooms.refusesHere`). The snowball under way isn't saved (`Yard`'s `ball`, the moment's
+  play): it stands in the way and on the lawn like a piece, and a reload loses it.
+- **The thaw** is any day snow doesn't lie (`thawsOn`): every snowman in her yard and her chest
+  comes in as a "snowman that didn't melt" (`meltlessSnowman`, kind keepsake) in her bag, one each,
+  with a toast; worked out from what's there, so no flag is saved. In her bag rather than the
+  chest because a keepsake is never stowed (`stowable`).
+- **Only her yard builds snowmen.** Elsewhere a tap on herself throws a snowball three tiles the
+  way she faces, or at the nearest neighbour within four tiles, who laughs and throws one back at
+  her 0.9 s later, gently (`Snow`, `world.snow`; nothing saved). Snowmen anywhere in town, standing
+  till the thaw unsaved, were dropped: a snowman that vanishes on a reload reads as lost.
+- **Snowball fights:** in the snow, outdoors, a beat of two neighbours' chatter is a snowball at
+  the other about one beat in four (`SNOW_CHATS` in `chatOn`), both laughing for the beat
+  (`Neighbourhood.snowballing`), with a thwump; never at her unless she throws first.
+- **Footprints** are a decal in the effects layer (`Effects.print`, drawn by the `effects` pass's
+  new `ground` part), one per footfall of hers on snow, one per tile for a neighbour (boots) or a
+  pet (paws), fading over the last ten of their thirty seconds, 160 at most; left even with
+  reduced motion asked for (a mark, not motion). **Splashes** are a burst at each footfall of hers
+  on a puddle tile, and one per tile for a pet or neighbour. Both are `wiring/underfoot.ts`'s
+  (`underfootOn`, `Trails`), which her footsteps' sounds read too (`snow` and `puddle` grounds).
+- **"After rain" for puddles** is while it rains: puddles only lie on a rainy day's ground (V1's
+  L3), and she splashes through them then. Leaving them a morning longer would rebake the ground
+  wet on a dry day, a look change not asked for.
+- **The rainbow's window:** a day is a rainbow day if it's clear and the day before rained (not
+  snowed: `rainbowDay`). The rainbow is up for ten minutes (`RAINBOW_MS`) from the first moment
+  she's outdoors between 7 and 19 that day while the game is open (`Forecast.rainbow`), so if she
+  plays across 5am into a sunny day after rain, it comes up the moment the rain "stops". Kept in
+  memory: a reload brings ten more minutes, which harms nothing. Drawn by `render/rainbow.ts` as
+  soft bands arcing across the top of the view, its feet fading into the town, fixed to the view
+  as the stars are, in the weather pass's `lit` part, only when the shown weather is clear. A
+  `rainbow` line in Today while it's up, and the first time ever a `rainbowJar` keepsake (an item:
+  `Keepsakes` would need a field). `?rainbow` (dev) puts one up at once.
+
+**Rejected:** a tap on any snowy tile rolling (it would stop her walking in winter); the tile
+above her as well as hers counting as "herself" (a tap a tile up should walk her a tile up); a
+snowball stage as a yard piece (the chest would keep half a snowman into summer); snowmen
+indoors; the keepsake as a furniture figurine in the chest (art at 32 for a table, and the
+coordinator asked for an item); puddles kept after a rainy day; the rainbow at a window's turn on
+a rainy day (rain doesn't stop within a day).
+
+## 384. Small delights: a butterfly on her hat, fireflies, the scarecrow's crow, her pets at the door, Fibi's gift, and a sneeze in the long grass (1.6's X5, 2026-10-26)
+
+**Context:** 1.6's X5 (decision 378): six small things that cost nothing and make her smile, each
+an effect or a short rule, no save. The world never names an effect (decision 280), so each is a
+rule in `systems/delights.ts`, a moment from the world, and its look in `wiring/effectsOf.ts`.
+
+**Decision:**
+
+- **A butterfly or moth on her hat.** Eight seconds standing still outdoors (`PERCH_AFTER_MS`,
+  counted by step, so sitting on a bench counts) where one could be about lands one (`landed`),
+  not more than once a minute on the clock (`PERCH_EVERY_MS`). "About" is the moth family's
+  `isAbout` for the place (`fliersAbout`: its `where`, hours, season or visit, weather), never a
+  legendary one and none in the rain; by day that's the mourning cloak and, at the castle in
+  summer, the monarch, and by night the moths, so day and night pick themselves. It's drawn from
+  the critter's own 16-pixel art (`CRITTER_ART[id].frames`) by `Effects`' `perch`, fluttering in,
+  wings open a second and a half and shut a moment, until she moves (`flewOff`, a `flit`). Not
+  catchable: it's no critter in `Collecting`. With reduced motion it sits and goes at once.
+- **Fireflies** in June, July and August from nine at night till four, outdoors on lawn, meadow or
+  long grass, not in the rain (`firefliesOut`), and not while a meal's pep has her running:
+  `world.delights.fireflies()` is asked each step in `main.ts` and `Effects.fireflies` keeps four
+  soft lights circling her middle and trailing as she walks, coming in over 1.5 s and going over
+  0.7 s; they bloom (`glints`). None with reduced motion.
+- **The scarecrow's crow** caws when she steps within two tiles of a scarecrow (hers on the farm,
+  and Boo Acres'), by day while the crows are out (`FLYER_HOURS.crow`), once a window per
+  scarecrow (`caw:<place>:<tx>,<ty>` in `Takings`): a `caw` cue and three feathers. The crow is the
+  view's (`perchDrawables`, read off the view's clock), so the world can't know whether one sits
+  there: given how long since the caw (`world.delights.cawed()`), a crow sat on the arm lifts and
+  flaps and settles, and one that wasn't flaps up out of the straw and away.
+- **Her pets at the door.** When she crosses into her home from anywhere else, every pet at home
+  but the one walking with her comes over (`Pet.comeOver('greet')`): trots to beside her, once
+  round her and sits looking up with a heart, a `greeted` moment as it reaches her with its voice
+  (`mew` for the cats, `woof` for Fibi and Dolly, `chitter` for Pickle). Asleep (Florence at her
+  naps, Pickle by day) it only shows a heart in its sleep; Gary, who'd take all evening, beams
+  from where he is; Pickle up at night plays dead at her feet instead of going round. A pet that
+  can't reach her in nine seconds gives up.
+- **Fibi's gift.** Six seconds after she comes home (`GIFT_AFTER_MS`), once a day (`gift:fibi` in
+  `Takings`, a once-a-day key), if Fibi is at home, she trots up (`comeOver('gift')`) and gives her
+  one of six things dealt by the day (`PET_GIFTS`: a leaf, a striped sock, a bottle cap, a twig, a
+  crow's feather, one glove), a toast in her name ("Fibi has brought you a sock. It is not yours.")
+  and a pop of its picture (`GIFT_ART`) with no "+n". Nothing goes in her bag.
+- **A sneeze in the long grass**, March to May, on meadow and long grass tiles: after four to nine
+  such tiles in a window (`sneezeAfter`, dealt by the window), once a window (`sneeze` in
+  `Takings`). She stops a moment on her way (`Movement.hold`, then walks on to where she was
+  going) and sneezes: the new `sneeze` verb is a shrug (the "ah…", 420 ms) and a crouch (the
+  "choo", 260 ms), there being no sneeze pose and no new art allowed for her; an `achoo` cue and a
+  puff of pollen. The nearest neighbour within four tiles says bless you in their own words
+  (`BLESS_YOU`, a row each), as a toast and a heart over them.
+
+**Rejected:** reading only the critters actually dealt this hour for the butterfly (often none
+of the family dealt where she stands, so it would hardly happen); a butterfly by day and a moth by
+night whatever the place (a monarch in the woods it never lives in); the crow's lift worked out
+in the world (the perch's cycle is the view's clock); a sneeze that halts her walk (she'd have to
+tap again); "bless you" as a bubble with words (the chatter bubbles are emotes only, so the words
+are a toast); Gary trotting over; Fibi's gift as an item.
+
+## 385. Gerald, the museum's skeleton, stood up from the fossils on show; and a kite flown on a windy day dealt from the day key (1.6's X6, 2026-10-26)
+
+**Context:** 1.6's X6 (decision 378). The plan asked for a skeleton in the museum's hall once all
+twelve fossils are donated, with a letter, a shelf (or the existing one) and a plaque; and three
+kites from Cobweb Corner, flown from Lantern Shore's pier and the castle lookout on a windy day
+("ambience's wind tells which"), she holding the string, the kite bobbing in the sky, a tap
+bringing it in, and a keepsake the first flight. The save stays at v59: nothing here needs a field.
+
+**Decision:**
+
+- **The skeleton is derived, never saved.** `Cabinet.assembled` is every `FossilId` in `donated`.
+  The `skeleton` fixture (Gerald: a little dragon of bones on a plinth, his name on a brass
+  plaque, 3×2, drawn at 32 in `sprites/interiors.ts`) stands in Crumbs & Curios at (16, 4),
+  between the two rows of cases, with `when: 'assembled'` on its `PlacedFixture`. `RoomZone` keeps
+  `everything` and filters `things` by a `standing` predicate it's built with (`places.ts` hands
+  it `cabinet.assembled`), so where he'd stand is open floor until then, and `RoomView` bakes
+  every thing once and draws only those there. Walking up reads the plaque (`says`,
+  `SKELETON_PLAQUE`).
+- **The shelf already exists**: `fossilWing` is "every fossil donated", so no `assembled` shelf.
+  Wrapunzel's letter (`museum:gerald`, `SKELETON_LETTER_TEXT` in `data/museum.ts`, read by
+  `letterOf`) is posted by `Fossils.check` (in `World.update`, after the milestones, so the
+  fossil case's shelf letter comes the same day) with an `assembled` moment and its toast; the
+  mailbox holding it is the only record, so a town with every fossil already on show gets it the
+  first time it plays 1.6. A letter of its own rather than rewording `fossilWing`'s, which towns
+  may already have read.
+- **Kites are items of a new kind, `kite`** (`batKite`, `ghostKite`, `mothKite` in
+  `data/kites.ts`, worth 60 so 120 at Cobweb Corner, a `Kites` shelf with all three every day,
+  added last so the shelves before deal as they did), held from the quick bar like a seed
+  (`Hands` holds the `kite` kind; `hands.kite`), drawn folded in her hand (`KITE_HELD`), shown
+  with the treasures in her bag. The keepsake is `skyOnAString` (kind keepsake), given the first
+  time any kite goes up (its absence from her bag is the record, as `rainbowJar`'s is).
+- **The wind is a rule of the day, not the ambience's level.** `ambienceFor`'s wind is fixed by
+  place (none at Lantern Shore at all), so it can't say which days are windy. `windyOn(day, zone)`
+  in `systems/kite.ts` deals it from the day key per place: never on a rainy or foggy day, else
+  65 in 100 clear days up the castle hill and 50 at the shore (the castle hill windier, as its
+  ambience is). The ambience follows the rule rather than the other way round: `Surroundings`
+  takes `breezy`, adding 0.3 wind on a kite day there (`wiring/hearing.ts`).
+- **Where:** the tiles round a named spot in each windy place (`KITE_FIELDS`): `pierEnd` at
+  Lantern Shore and a new `lookout` on the castle hill (`CASTLE_HILL_SPOTS`, by the telescope).
+- **The gesture:** with a kite in her hand, a tap on one of those tiles walks her there and
+  lifts it (a `kite` visit), and a tap on herself tries it where she stands. Elsewhere, or on a
+  still day, a toast says so (`nowhere`, `still`). Other taps with a kite in hand are what they'd
+  be. While it's up, any tap only winds it in (as reeling in does), and so does Find; going
+  anywhere, standing anywhere else or putting it down takes it in quietly (`Kite.check`). A flight
+  isn't saved.
+- **Her pose** is `holdUp` held for the flight through a new `holding` cue on `PoseCues`, so no
+  new pose and no change to her looks or any figure.
+- **Drawing:** the `kite` pass (`render/passes/kite.ts`) in `over`, before the weather, so the
+  hour's light lies over it and rain falls in front: the kite climbs from her raised hand over
+  2.4 s to about four tiles up and two out (the way she faces, right unless facing left), sways
+  and bobs on two slow sines by whole pixels, flaps in two frames (`KITE_ALOFT`), its tail six
+  bows streaming out and down, rippling, and the string a sagging line of cream pixels.
+- **Today** says "A good day for a kite" by day (6 to 20) when the wind is up at either place,
+  the pier first, and that Cobweb Corner sells them if she has none; a tap on it goes there.
+  `world.kite.nextWindy(zone)` is the dev handle smoke finds a windy day with.
+
+**Rejected:** a `kite` field in the save (nothing needs one); the skeleton as a museum case's
+nook art (three tiles of dragon reads better standing on the floor); an `assembled` shelf
+(`fossilWing` is the same set); the wind read from `ambienceFor` (no day in it); any tap anywhere
+lifting the kite with a toast elsewhere (every tap while holding one would nag); a new arm-up pose
+for the string (`holdUp` already is one).
+
+## 386. 1.6: the review after the 1.6 plan, six sessions folded into one card, 1.5's town opened as her phone will and played on through 2027, the shakedown, and the game at the end of the subscription (2026-10-26, 1.6's V1.6)
+
+_Session V1.6 of the 1.6 plan (decision 378), the last: the review after X1–X6 (decisions 380–385),
+and the release PR "Release 1.6" (`v1.6-dev` → `main`, from `release-1.6` at `v1.6-dev`'s head), for
+the coordinator to merge at the user's word. No save change (still v59). 379 stays unused._
+
+- **One card for her, `1.6`, folded from six sessions.** Her phone last saw `1.5` (PR #234), so
+  `notesToShow('1.5')` is the `1.6` row alone. X1 and X2 had filled it (two lines and three, a P.S.
+  about the ticket stub) and X3–X6 handed their lines over in their handoff headings, so it was
+  folded once, here, to five lines in the mayor's voice in the order she'll meet them: the lights
+  strung properly (the bats spoken to) and the two of them facing the camera on the 31st; the big
+  wheel, once round, the first ride free, the town looking back; the hens and Reginald's six o'clock
+  (X3's line whole); the snowman in her yard, the snowball elsewhere, "I have been hit four times",
+  a rainbow after rain; Gerald, a kite from the pier, and a butterfly on her hat if she stands
+  still. Fibi's gifts were the line left off, the one she'll find for herself. The P.S. is new:
+  "This is my last typed note for a good long while: the typewriter is having a rest. The town is
+  not. It will keep the lamps lit and the kettle warm for you." Warm, no goodbye, the town going on;
+  a later release's card can say he's taken it up again. The test holds exactly the one card, its
+  five lines in order and the P.S.
+- **1.5's town, opened as her phone will.** `lived-in-v58.json` in a 1.6 dev build, notes last seen
+  `1.5`, the dedication seen, from a page of the site that isn't the game (decision 377's way), at
+  Close, Far and sideways: the title, one card ("What's new in 1.6", its P.S. reached by scrolling),
+  Cody's hello, save v59 through step 58 (`henhouse` unfed, none waiting), no error notes, the
+  unlinked cloud's 503 the one console error.
+- **Played on by taps** (decision 324's method: a scratch driver on smoke's `lib.mjs`, a persistent
+  profile and a dev server of its own) through 2027 from the town's 10 January: a snowman in her
+  yard (top hat) and a snowball at Rufus; the hens fed and three eggs at six the next morning; every
+  fossil given by the dev handle (as asked) and Gerald's plaque and letter; a bat kite bought by
+  taps and flown at the castle lookout and the pier's end; the big wheel by day with Agatha (free,
+  the stub) and by night alone (10 Candy); the rainbow's jar, a sneeze, a mourning cloak on her hat;
+  fireflies on a July night, the pets at the door, Fibi's leaf; the festival's lights on 28 October
+  at 20:00 and 22:00, upright and sideways; the hens fed that night. Crossings between places by the
+  dev handle, the doing by taps. **Kept as `lived-in-v59.json`** (`livedIn.test.ts`, and the
+  overlays snapshot's first entry for it only), since 1.6 changes the save's shape (X3's v59).
+- **The shakedown**, by eye at phone size in the driver's screenshots (every lit building and pole
+  at 20:00 upright and 22:00 sideways, the coop close up, the wheel's stage by day and night, a kite
+  at both fields both ways, Gerald and his plaque). **Fixed**: the kite flew off the top of a phone
+  on its side, where the view is a few tiles tall; it flies lower there, no higher than its own knot
+  below the view's top (`render/passes/kite.ts`). **Logged** in "Where it hurts" 3 and 4: the big
+  wheel's company rare (nobody's week brings them to the fair but its happenings and Agatha's
+  weekend afternoons), the ride sheet's "your first ride today is on the house" staying after the
+  free ride is spent, a kite in hand keeping the rod down as a seed does (`Hands.use` takes a tool
+  up only from another tool), the snowball under way and the rainbow's minutes kept in memory, two
+  rules saying "wind" (`windyOn` and the ambience's own), the photos carrying the chatter bubbles,
+  and a `delights` check that passes in a whole smoke run and can fail run alone. **Logged** in the
+  art notes: the hens heaped at one side of their run, the ride's town green in winter, the barn and
+  coop unlit at the festival (no door, on purpose), the castle's kite field under the woods' crowns.
+- **Perf**: 1.6 against 1.5 on her phone (`origin/main` served from a copy of its own, 1.6's
+  `scripts/perf.mjs` for both), alternating, two runs each at Close by night and at noon: every draw
+  and update crosses 1.5's runs or sits under, her yard by night one run 2 ms over and the other
+  level, Boo Acres (the hens) the same; the heap up 1.2–1.5 MB, the new art baked. The build is one
+  chunk, 2,048.9 kB (690.5 kB gzipped), against 1,963.9 kB (660.7 kB) at 1.5. The table is in
+  `docs/architecture.md`, "1.6, V1.6's review". Smoke 707 of 707 on a dev server of its own,
+  `smoke:offline` 10 of 10, the suite 3,057 tests.
+- **Docs, written for a year from now**: the handoff's cold-start section rewritten for 1.6 (1.6 the
+  last release, save v59, the user's five things (the cloud store, `?perf` on her phone, her eye on
+  the art notes, the parked touches, two stale branches to delete), what to do first if she reports
+  a bug, where each kind of content goes now including hens, kites, a snowman's hat, a delight and
+  an activity, the next decision 387), "After 1.0" saying 1.6 is the release PR with the user's
+  steps (two stale branches to delete among them), the 1.6 plan's sessions recorded under "1.6, the
+  last day" with "How 1.6 was run", "In progress" empty, "Still to put to the user" kept parked;
+  "Where it hurts" rewritten for after 1.6 and a 1.6 perf table in `docs/architecture.md`;
+  `CLAUDE.md`'s "Project" and integration-branch paragraphs and its bullets checked for the new
+  seams (`LIGHT_POLE_JOINS` and the eave rule added; the ride, hens, snow, delights, Gerald and
+  kites were there), its opening line saying there is no plan now, and a small fix with no plan
+  running branching from `main`; the plan's line.
+
+**Rejected:** keeping X1's and X2's five lines and adding a second card for the rest (her phone
+reads one card a version, decision 324's fold); dropping the lights' line to make room (it's the fix
+the user asked for, and the first thing she'll see); a P.S. that says goodbye (nothing in the game
+ends, decision 11, and the user may come back); adding lights to the barn and the coop (a feature:
+only a building with a door is lit, since 0.2's J2); painting the ride's town by the season (new
+art, logged); moving the kite's castle field out from under the trees (a map change, logged);
+mending the ride sheet's line, the hens' heap or the rod with a kite or seed in hand here (each a
+rule in a session's file, small but not a review's, and the release is tonight); playing on from
+October 2026 rather than 2027 (the fixture's town was last played in January 2027, and a town opened
+before its own last day would be a town going backwards).
+
+**The game at the end of the user's subscription.** McFrancisVille is a little town of monsters on
+her phone, a home-screen app that works offline and keeps her town on the phone (and, once the user
+links it, in the cloud). She is a witch-ish girl of her own design in a house she decorates room by
+room (a front room, a back room and an attic under the eaves, and a yard), married to Cody, who is
+there every day, greets her each time she opens the game and remembers what she tells him. Eleven
+neighbours live in town and out at Boo Acres, Whisperwood and Lantern Shore, each with a home, a
+job, a week of their own, things they love and things they remember, and they grow closer to her as
+she talks, gives and helps; the mayor, Rob Boo, waits at the end of a mystery. She farms her beds
+and Scarah's fields, keeps hens, bakes and cooks, crafts at her workbench, fishes and nets critters
+(a museum of them with Wrapunzel, shinies among them), digs fossils (Gerald stands in the museum
+when they're all given), traces the stars from the castle hill, flies a kite, rides the big wheel,
+plays the fair's games, builds the town's projects, and keeps seven pets who grow fond of her. The
+year turns by the real clock: a Halloween Festival every October with lights, costumes, trick or
+treat and a party, snow and a frozen pond in winter, blossom in spring, fireflies in summer,
+holidays, birthdays, full moons and rainbows. Nothing in it punishes or is lost. It was made by Cody
+for her, with Claude, between 26 September and 26 October 2026, from version 0 to 1.6: decisions
+numbered to 386, 59 versions of the save, and one card from the mayor each time something changed.

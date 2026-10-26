@@ -7,6 +7,7 @@ import {
   hourRequested,
   manualLoopRequested,
   perfRequested,
+  rainbowRequested,
   titleSkipped,
   weatherRequested,
 } from './config/flags';
@@ -29,6 +30,7 @@ import { feelTap } from './wiring/taps';
 import { Chatter } from './wiring/chatter';
 import { Pats } from './wiring/codyHome';
 import { Hearing } from './wiring/hearing';
+import { Trails } from './wiring/underfoot';
 import { clockFromDay, clockFromHour, systemClock } from './systems/clock';
 import type { ZoneId } from './types/ids';
 import { fromSave, tileOf, World, type WorldEvent } from './world/World';
@@ -87,6 +89,7 @@ function startGame(): void {
   // Her phone asking for less motion: the effects calm down, and the reel sweeps gentler (1.0.1).
   const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
   const world = new World({ clock, ...fromSave(loaded), slow: reduced });
+  if (import.meta.env.DEV && rainbowRequested(location.search)) world.weather.showRainbow();
   // What the moments look like where they happen (V1's E1), shared by every view.
   const effects = new Effects({ reduced });
   // Two neighbours standing together chatter, a bubble at a time (V1's E3).
@@ -113,6 +116,9 @@ function startGame(): void {
   };
   // The place's ambience and her footsteps (V1's S1).
   const hearing = new Hearing();
+  // Footprints in the snow and splashes in the puddles (1.6's X4), in the page's weather if asked.
+  const trails = new Trails();
+  const weatherHere = () => weather ?? world.weather.today();
   // Each place's view is made the first time she goes there, and kept; a view she has left rests,
   // letting go of its ground until she's back.
   const views = new Map<ZoneId, SceneView>();
@@ -158,7 +164,11 @@ function startGame(): void {
   world.events.on('yard', () => autosave.markDirty());
   const changed = () => autosave.markDirty();
   const waiting: Waiting = { bed: null };
-  const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);
+  // The party photo (0.2's J4): the frame drawn again as the world now stands, then cut from it.
+  const snapshot = (tiles: readonly Tile[]) => {
+    view().draw(performance.now());
+    return photoOf(canvas, view(), tiles);
+  };
   const play = (events: WorldEvent[]) =>
     playMoments(events, { world, hud, sound, changed, waiting, snapshot, effects, transitions });
   const hud = mountHud(root, {
@@ -262,10 +272,12 @@ function startGame(): void {
     music.play();
     if (fitFor() !== fitted) resize();
     view().follow(stepMs);
-    effects.walking(world.scene, world.player, world.zones.outdoor(world.scene) !== undefined);
-    chatter.show(world, effects);
+    trails.step(world, effects, weatherHere);
+    chatter.show(world, effects, sound);
     pats.show(world, effects);
-    hearing.step(world, sound, clock.now());
+    // Fireflies round her on a summer night (1.6's X5).
+    effects.fireflies(world.scene, world.delights.fireflies());
+    hearing.step(world, sound, clock.now(), weatherHere());
     effects.step(stepMs, resolverFor(world));
     transitions.step(stepMs);
   };

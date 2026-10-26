@@ -22,7 +22,8 @@ describe('dishes', () => {
       const effect = DISHES[id].effect;
       return typeof effect === 'object' ? [effect.lure] : [];
     });
-    expect(new Set(lured)).toEqual(new Set(['moth', 'bat', 'frog', 'orb', 'beetle']));
+    // The frittata brings out a creepy-crawly (1.6's X3).
+    expect(new Set(lured)).toEqual(new Set(['moth', 'bat', 'frog', 'orb', 'beetle', 'crawly']));
     expect(DISH_IDS.some((id) => DISHES[id].effect === 'bites')).toBe(true);
     expect(DISH_IDS.some((id) => DISHES[id].effect === 'pep')).toBe(true);
   });

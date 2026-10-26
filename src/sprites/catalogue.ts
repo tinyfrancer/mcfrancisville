@@ -16,6 +16,7 @@ import type {
   AccessoryId,
   CritterId,
   FossilId,
+  KiteId,
   DisplayPiece,
   Facing,
   FurnitureId,
@@ -84,6 +85,8 @@ import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { TIPPED_CAN } from './actions';
 import { accessoryIcon, BUBBLE_ART, PET_ART, petPalette, petSource, type PetFrame } from './pets';
+import { HEN_ART, HEN_FRAMES, HEN_PALETTES } from './hens';
+import { COOP_FRONT, COOP_PALETTE } from './farm';
 import { POT_ART } from './houses';
 import {
   DOOR_DRESSINGS,
@@ -121,6 +124,7 @@ import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
 import { Sketch } from './sketch';
 import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
 import { GAME_BACKDROPS, GAME_PALETTES, GAME_PIECES, type GamePiece } from './fairGames';
+import { RIDE_FAIR, RIDE_FAR, RIDE_PALETTE, RIDE_TOWN, RIDE_TUB, RIDE_YOKE } from './fairRide';
 import { LEAF_FRAMES, LEAF_PALETTES } from './leaves';
 import {
   GRASS_VARIANTS,
@@ -131,7 +135,16 @@ import {
   TERRAINS,
 } from './terrain';
 import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
-import { CANDY_POP, countArt, EMOTE_BUBBLES, PARCEL_POP, PARTICLE_ART } from './effects';
+import {
+  CANDY_POP,
+  countArt,
+  EMOTE_BUBBLES,
+  PARCEL_POP,
+  PARTICLE_ART,
+  SNOWBALL_THROWN,
+} from './effects';
+import { SNOWBALL_ART, SNOWBALL_PALETTE } from './snowman';
+import { KITE_ALOFT, KITE_HELD, KITE_PALETTES } from './kite';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
 export interface Entry {
@@ -293,6 +306,9 @@ export function catalogue(): Entry[] {
         grid(`prop:goose:${outfit}`, look.source, look.palette);
     if (id === 'fence')
       art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
+    // A light pole alone, and strung to the left or right only (1.6's X1).
+    if (id === 'lightPole')
+      for (const j of [0, 2, 8]) grid(`prop:lightPole:joins${j}`, art.joined![j]!, art.palette);
     if (art.frames) frameRows(`prop:${id}`, art);
     // Its front door ajar and wide open as she walks up (V1's E5).
     const door = art.door;
@@ -355,6 +371,12 @@ export function catalogue(): Entry[] {
   for (const piece of Object.keys(GAME_PIECES) as GamePiece[]) {
     grid(`fair:piece:${piece}`, GAME_PIECES[piece], GAME_PALETTES.duckPond!);
   }
+  // The view from the big wheel and her car (1.6's X2), in daylight.
+  grid('ride:far', RIDE_FAR, RIDE_PALETTE);
+  grid('ride:town', RIDE_TOWN, RIDE_PALETTE);
+  grid('ride:fair', RIDE_FAIR, RIDE_PALETTE);
+  grid('ride:yoke', RIDE_YOKE, RIDE_PALETTE);
+  grid('ride:tub', RIDE_TUB, RIDE_PALETTE);
   grid('greeting:redOne', RED_ONE, RED_ONE_PALETTE);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);
@@ -572,6 +594,13 @@ export function catalogue(): Entry[] {
     const icon = accessoryIcon(accessory);
     grid(`accessory:${accessory}`, icon.source, icon.palette);
   }
+  // The hens at Boo Acres, every look in every frame, and the run's front fence (1.6's X3).
+  for (const [look, frames] of Object.entries(HEN_ART)) {
+    for (const frame of HEN_FRAMES) {
+      grid(`hen:${look}:${frame}`, frames[frame], HEN_PALETTES[look as keyof typeof HEN_ART]);
+    }
+  }
+  grid('prop:coop:front', COOP_FRONT, COOP_PALETTE);
   for (const [id, art] of Object.entries(BUBBLE_ART)) {
     grid(`bubble:${id}`, art.source, art.palette);
   }
@@ -592,6 +621,9 @@ export function catalogue(): Entry[] {
   }
   grid('effect:candy', CANDY_POP.source, CANDY_POP.palette);
   grid('effect:parcel', PARCEL_POP.source, PARCEL_POP.palette);
+  // A snowball in flight, and the one she rolls in her yard, small and bigger (1.6's X4).
+  grid('effect:snowball', SNOWBALL_THROWN.source, SNOWBALL_THROWN.palette);
+  SNOWBALL_ART.forEach((art, i) => grid(`snowball:${i}`, art, SNOWBALL_PALETTE));
   grid('effect:count:1234567890', countArt(1234567890).source, countArt(1234567890).palette);
   // The garden: soil dry and watered, then each crop from seed to ripe.
   grid('soil:tilled', SOIL, TILLED_PALETTE);
@@ -618,6 +650,11 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
   grid('held:seed', HELD_PACKET, ITEM_ART.pumpkinSeed.palette);
   grid('held:canTipped', TIPPED_CAN.source, TIPPED_CAN.palette);
+  // Her kites (1.6's X6): folded in her hand, and up in the sky in their two frames.
+  for (const [id, art] of Object.entries(KITE_HELD)) grid(`held:${id}`, art.source, art.palette);
+  for (const id of Object.keys(KITE_ALOFT) as KiteId[]) {
+    KITE_ALOFT[id].forEach((art, i) => grid(`kite:${id}:${i}`, art, KITE_PALETTES[id]));
+  }
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,

@@ -37,6 +37,8 @@ export function heldLine(held: string, seeds: readonly Stack[]): string {
   const count = seeds.find((s) => s.id === held)?.count ?? 0;
   const row = ITEMS[held as ItemId];
   if (row.kind === 'gear') return `${row.name} ×${count}: tap a bed to fit one in its corner.`;
+  if (row.kind === 'kite')
+    return `${row.name}: tap the end of the pier, or the castle lookout, on a breezy day.`;
   return `${row.name} ×${count}: tap a bed to plant one, or a whole row.`;
 }
 

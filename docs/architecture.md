@@ -1195,6 +1195,33 @@ saved by being held still. Against 1.3's table above, the town at Close by night
 against 37.7–40 there, so this container was a little quicker that day. **The build** is one
 chunk, 1,963.9 kB (660.7 kB gzipped), against 1.84 MB (615 kB) at 1.3.
 
+**1.6, V1.6's review** (2026-10-26, decision 386): the 1.6 plan (the lights, the big wheel, the
+hens, snow and the rainbow, the delights, Gerald and the kites) against 1.5 as it is on her phone,
+the worktree served beside `origin/main` (1.5, PR #234) from a copy of its own, both measured with
+1.6's `scripts/perf.mjs` (a new town), alternating, two runs each at Close at 21:30 and two at
+noon, on 26 October (the festival's lights up in both). Draw means, ms (p50 at 21:30); updates, ms
+(21:30); heap, MB (21:30):
+
+| Scene         | Close 21:30, 1.6      | Close 21:30, 1.5      | Noon, 1.6 / 1.5       | Updates 1.6 / 1.5     | Heap 1.6 / 1.5        |
+| ------------- | --------------------- | --------------------- | --------------------- | --------------------- | --------------------- |
+| Town          | 36–36.7 (25.2–25.9)   | 37.8–39 (26.2–26.8)   | 34.2–34.9 / 34.6–35.6 | 0.89–0.9 / 0.89–0.93  | 33.7–33.9 / 32.4–32.5 |
+| Home          | 18.2–18.5 (10.7–11)   | 19.1–19.5 (11–11.1)   | 5.4–5.7 / 5.2–5.3     | 0.83–0.84 / 0.78–0.92 | 34.7–34.8 / 33.2–33.3 |
+| Fairground    | 23.9–24 (15.7–15.9)   | 24.6 (16.3)           | 23.6–24 / 23.3–24     | 0.6–0.63 / 0.63–0.67  | 34.9–35 / 33.6–33.7   |
+| Whisperwood   | 28–28.2 (18.4–18.6)   | 28.5–29.1 (18.9–19)   | 26.8–28.1 / 26.9–28.2 | 0.67–0.68 / 0.67–0.69 | 35.7–35.8 / 34.5      |
+| Boo Acres     | 22.2 (13.6–13.8)      | 22–22.4 (13.6–13.8)   | 22.5–23.2 / 22.5–23.9 | 0.61–0.63 / 0.54–0.63 | 36.3–36.5 / 34.9      |
+| Her yard      | 37.2–39.3 (28.2–28.9) | 37.2 (27.7–27.8)      | 34–35.9 / 34.4–37.3   | 0.9–0.93 / 0.83–0.9   | 36.5–36.6 / 35–35.2   |
+| Back room     | 21.8–22.3 (15–15.2)   | 21.6–23.8 (14.1–15.8) | 8.1–8.4 / 7.9–8.3     | 1.27–1.32 / 1.21–1.3  | 36.7–37 / 35.2–35.5   |
+| Lantern Shore | 27.4–27.9 (18.9–19.3) | 27.2–27.9 (18.6–19.2) | 24.9–25.2 / 25.5–26.3 | 0.74–0.78 / 0.69–0.73 | 37.5–37.9 / 36.1–36.4 |
+
+Every draw and update crosses 1.5's runs or sits under, by night and at noon; no frame doubled. Her
+yard by night is the one row a run over (39.3 against 37.2), its other run level; Boo Acres, where
+the hens are drawn, is the same. The heap is up 1.2 to 1.5 MB everywhere, most likely the day's new
+art baked (the hens, the kites, the snowmen, the wheel's stage, the delights' effects). Outdoors at
+noon both builds draw nearly as much as by night here, where 1.5's own table had the town at 21–24
+at noon a day earlier; the cause wasn't looked into, and it's alike in both builds, so compare
+within this table. **The build** is one chunk, 2,048.9 kB (690.5 kB gzipped), against 1,963.9 kB
+(660.7 kB) at 1.5.
+
 **On her iPhone** (V1's S3, decision 322). Everything above is a cloud container's Chromium at 4×
 throttle, which says how a change moves the numbers, not what her phone does. The way to read
 her phone: open the deployed game in Safari with `?perf` on the end (`https://<the site>/?perf`,
@@ -1218,65 +1245,81 @@ costs a download per deploy, not a launch.
 
 ## Where it hurts
 
-Honest notes for whatever comes after 1.5, most pressing first, rewritten at V1.5's review
-(decision 377). The 1.4 plan was content, not repair: it did none of 1.3's list and added the
-rough edges of its own new systems (3 and 4 below). What was done is said once at the end, so the
-list is what's left. There is no plan after 1.5: a session that takes one of these up does it on
-a branch from `main`, as a PR the user merges.
+Honest notes for whatever comes after 1.6, most pressing first, rewritten at V1.6's review
+(decision 386), the last of the user's subscription. The 1.6 plan was content, not repair: it did
+none of 1.5's list and added the rough edges of its own new systems (4 below). What was done is
+said once at the end, so the list is what's left. There is no plan after 1.6: a session that takes
+one of these up does it on a branch from `main`, as a PR the user merges.
 
-1. **Two things only her phone and Vercel can say** (as at 1.0, 1.2 and 1.3; the user's, not a
-   session's). The cloud save's function (`api/save.ts`) has never run on Vercel: it's tested with
-   a faked store, and smoke fakes it with a route. The first deploy to `main` that carries it (1.0
-   did, unlinked) is its test: the deployment's Functions tab should list `api/save`, then README's
-   `curl` should answer `{"save":null}` once the store is linked (README's "Cloud save"). If the
-   build trips on TypeScript, the fallback is the same file as `api/save.js` with JSDoc types. And
-   no frame has been timed on her iPhone: `?perf` (production too, `wiring/perf.ts`) is waiting,
-   with the table under "On her iPhone" above.
-2. **One chunk, growing with the content.** The build is one chunk, 1.96 MB (661 kB gzipped) at
-   1.5, against 1.84 MB (615 kB) at 1.3 and 1.66 MB (555 kB) at S3: the week's rows and art are
-   about 120 kB of it (46 kB gzipped). Precached once a version (decision 322), it costs a download
-   per deploy, not a launch; one chunk stays the right shape for an installed app (decision 328)
-   until it costs her a slow first launch on a new version. The big files are data, fine as data:
-   `sprites/items.ts` 2,637 lines, `data/villagers.ts` 1,678, `sprites/pets.ts` 1,519 (Pickle's
-   frames are drawn three times over, bare, in his bow and with his lantern, since his helpers are
-   private to the file), `types/ids.ts` 1,477; a redraw should split by family as `sprites/doll/`
-   was.
-3. **A tool used with a seed in her hand.** Decision 110's rule, that what she holds follows what
-   she does "unless she's holding a seed", is older than the rod: a tap on a fish with a seed in
-   hand casts and lands it, but the rod is never taken up, so the line is drawn from the seed
-   packet (`drawLine` starts at whatever's `held`), on open water and through the ice alike. Her
-   1.2 town held pumpkin seeds, so she'll meet it. The mend is a line in `World`'s `fish` arrival
-   (the rod taken up whatever she holds, the seed back in her hand after) and a decision
-   re-opening 110 for the rod alone; the net with a seed in hand has no line, so it only shows no
-   net.
-4. **The new systems' rough edges** (1.4 and 1.5). The camera's drawer (filters, stickers, the
-   caption) sits over the strip the whole width, so on a phone on its side it covers the lower
-   third of the polaroid, and the caption she types is printed on the foot it hides; upright it
-   clears the photo. A drawer in the gutter beside the polaroid sideways would mend it
-   (`hud/cameraStyles.ts`). The attic's eaves rule reads `TALL` (`data/home.ts`), a list held to
-   the art by `tests/world/attic.test.ts`, so a new tall piece fails that test until it's listed
-   (on purpose: `systems/` can't read a picture). The lake never freezes (decision 372), so ice
-   fishing is the town pond's, 15 December to 15 January, and the hut's the rest of the winter.
-   Shinies are charmed after nine months (decision 370), so the shinies' shelf is most of a second
-   year; the rarity test holds it.
-5. **Smoke on the real clock.** Most sections open on a named day (`openOn`, `PLAIN_DAY`), but a
-   whole run's first sections play on the container's real date and hour, so the town they meet
-   changes with the day (V1.3 met a neighbour on the yard section's tile; the two known flakes,
-   `camera`'s top row with a toast up and `interiors` at 19:00, are the same kind). Opening those
-   sections on a named day would end the kind; it would also stop smoke meeting the town as she
-   does, which is why it hasn't. A whole run is 673 checks and about twenty-five minutes now.
+1. **Two things only her phone and Vercel can say** (as at 1.0, 1.2, 1.3 and 1.5; the user's, not
+   a session's). The cloud save's function (`api/save.ts`) has never run on Vercel: it's tested
+   with a faked store, and smoke fakes it with a route. The first deploy to `main` that carries it
+   (1.0 did, unlinked) is its test: the deployment's Functions tab should list `api/save`, then
+   README's `curl` should answer `{"save":null}` once the store is linked (README's "Cloud save").
+   If the build trips on TypeScript, the fallback is the same file as `api/save.js` with JSDoc
+   types. And no frame has been timed on her iPhone: `?perf` (production too, `wiring/perf.ts`) is
+   waiting, with the table under "On her iPhone" above.
+2. **One chunk, growing with the content.** The build is one chunk, 2,048.9 kB (690.5 kB
+   gzipped) at 1.6, against 1.96 MB (661 kB) at 1.5, 1.84 MB (615 kB) at 1.3 and 1.66 MB (555
+   kB) at S3: 1.6's rows and art are about 85 kB of it (30 kB gzipped). Precached once a version
+   (decision 322), it costs a download per deploy, not a launch; one chunk stays the right shape
+   for an installed app (decision 328) until it costs her a slow first launch on a new version.
+   The big files are data, fine as data (`sprites/items.ts`, `data/villagers.ts`,
+   `sprites/pets.ts`, `types/ids.ts`); a redraw should split by family as `sprites/doll/` was.
+3. **A tool used with a seed in her hand** (1.5's, still open). Decision 110's rule, that what she
+   holds follows what she does "unless she's holding a seed", is older than the rod: a tap on a
+   fish with a seed in hand casts and lands it, but the rod is never taken up, so the line is drawn
+   from the seed packet. The mend is a line in `World`'s `fish` arrival and a decision re-opening
+   110 for the rod alone. A kite in hand (1.6's X6) falls under the same rule: `Hands.use` takes a
+   tool up only from another tool, so with a kite held the rod isn't taken up either.
+4. **The new systems' rough edges** (1.4 to 1.6).
+   - **The big wheel's company is rare** (X2, decision 381): she rides with her husband or the
+     neighbour she's closest to _at the fair_, and nobody's schedule brings them there but the
+     fair's happenings and Agatha's weekend afternoons, so most rides are alone with the mayor's
+     plaque. A neighbour's weekend stop at the fair (a `Stop` row) would mend it. The ride's
+     picture (`sprites/fairRide.ts`) is lit by the hour but drawn green all year, so in January
+     she rides over a summer town from a snowy fair; and the sheet's line "your first ride today
+     is on the house" stays after the free ride is spent (the button says 10).
+   - **Snow** (X4, decision 383): the snowball half rolled in her yard isn't saved (`Yard`'s
+     `ball`), so a reload loses it (a snowman, once stood, is saved); the rainbow's ten minutes are
+     kept in memory (`Forecast.rainbow`), so a reload brings ten more, which harms nothing. Only her
+     yard builds snowmen.
+   - **The kite's wind** (X6, decision 385): `windyOn` deals a windy day per place from the day
+     key, and the ambience follows it (`breezy`, +0.3 wind there); but the ambience's own wind is
+     still fixed by place (none at Lantern Shore but on a kite day), so two rules say "wind". The
+     `holding` cue on `PoseCues` (her `holdUp` while it flies) is optional, like `swinging`, and
+     is asked before every action pose, so a kite up masks any other pose; harmless, since any tap
+     winds it in first. The castle's `lookout` field is under the woods' crowns, so she flies it
+     from under a see-through tree; the pier's end is the open one.
+   - **The photos** (X1, G5): the party photo and the camera's are cut from the frame as it
+     stands, so the neighbours' chatter bubbles and a question's "?" are in them; a mend would
+     draw the shot without the effects layer.
+   - **The hens and the delights** (X3, X5): the hens are worked out from the clock and drawn
+     only by the view (`henAt`), so nothing can walk up to one; a delight (butterfly, fireflies,
+     the crow) is only what the view shows, never a thing in the world. Both on purpose, both
+     cheap; a hen to pat would need a stepped walker like `Pet`.
+   - **Earlier ones, still so**: the camera's drawer covers the polaroid's foot on a phone on its
+     side (`hud/cameraStyles.ts`); the attic's `TALL` list is held to the art by a test; the lake
+     never freezes (decision 372); shinies are charmed after nine months (decision 370).
+5. **Smoke on the real clock, and on part of a run.** Most sections open on a named day (`openOn`,
+   `PLAIN_DAY`), but a whole run's first sections play on the container's real date and hour, so the
+   town they meet changes with the day (the known flakes, `camera`'s top row with a toast up,
+   `interiors` at 19:00 and `faces`' `tapToastAway`, are the kind). And a section run alone may miss
+   what one before it left: X5's `delights` checks pass in a whole run and can fail in a partial one
+   (`npm run smoke -- feel`), so a failure there alone is checked in a whole run before it's
+   believed. A whole run is 707 checks and about half an hour now (forty with the container busy).
+   The helpers plan walks over the map's ground (`nextTapToward` reads `map.solid`), so they can't
+   walk her off the frozen pond; a tap to the bank first does.
 6. **What a build doesn't reach.** The cast is cast (decision 355), but the passers-by (the
-   wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default; a later look may give one a build, a
-   row there.
-7. **The bed card's pause.** The bed card's buttons wait `SETTLE_MS` after the card shows, so a tap
-   on the card the moment it appears does nothing (on purpose, against a stray tap; the second tap
-   on the bed does the job at once).
-8. **The art notes** at the end of `docs/handoff.md` are the art's list: 1.5's five (the shiny
-   glint's size, the framed Bat and Pickle's branch, both kept, the dim fish under the ice, a seed
-   for a rod), F4's three, F3's left for her eye, the frozen pond's ring and the builds at Close.
-   None is clearly wrong; each is for her eye on her phone.
+   wayfarer and Moira) are hers, `UNROWED_BUILDS`'s default.
+7. **The bed card's pause.** Its buttons wait `SETTLE_MS` after the card shows (on purpose, against
+   a stray tap; the second tap on the bed does the job at once).
+8. **The art notes** at the end of `docs/handoff.md` are the art's list: X1's photo and 1.6's
+   four (the hens' heap at one side of their run, the ride's green town in winter, the barn and
+   coop unlit at the festival, the castle's kite field under the trees), 1.5's five, F4's three, F3's left for her eye, the frozen pond's ring and the builds at Close. None is
+   clearly wrong; each is for her eye on her phone.
 
-**Done since 1.0** (decisions 325–377), kept short; the decisions and the tables above hold the
+**Done since 1.0** (decisions 325–386), kept short; the decisions and the tables above hold the
 detail. The 1.1 plan made smoke a file per area and the suite two vitest projects (T1, T2: 346 s
 to 121 s), gave the cast three bodies (A5a, A5b: `Build`s, `measureOf`, `looksHeld`), turned
 arriving into a table and the overlays into one list (W1, both held by snapshots), gave her rooms
@@ -1288,3 +1331,7 @@ long A\* three times faster, the suite 17% shorter), dropped `Home`'s 27 and `Ne
 forwarders and stamped the save by the world's clock (F6). **1.4 and 1.5** added content on those
 seams and changed nothing in the code's shape: shinies (save v56), the winter wardrobe and sets,
 ice fishing and the ice hut, the night sky (v57), the photo mode, the attic (v58) and Pickle.
+**1.6** fixed the festival's lights (X1: the eave strings from the roofs' own edges, the fair's
+poles pole to pole, both held by `eaveLights.test.ts`) and added content the same way: the big
+wheel's ride, the hens (v59), snow days and the rainbow, the small delights, Gerald and the kites;
+its review kept the kite in view on a phone on its side.

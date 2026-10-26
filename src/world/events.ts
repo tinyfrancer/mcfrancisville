@@ -29,6 +29,7 @@ import type { ActivityId } from '../data/activities';
 import type { Grade } from '../systems/activities';
 import type { TuneId } from '../data/instruments';
 import type { PetJob, PetLevel } from '../data/affection';
+import type { PetGiftId } from '../data/petGifts';
 import type {
   BuriedId,
   Carvable,
@@ -43,6 +44,7 @@ import type {
   FurnitureId,
   HappeningId,
   ItemId,
+  KiteId,
   LostId,
   MilestoneId,
   MapZoneId,
@@ -55,6 +57,7 @@ import type {
   RoomId,
   ShelfId,
   ShopId,
+  SnowmanId,
   VillagerId,
   ZoneId,
 } from '../types/ids';
@@ -245,6 +248,12 @@ export type WorldEvent =
   | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
   /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
   | { kind: 'baked'; item: ItemId; candy: number }
+  /** She fed the hens at Boo Acres something from her bag, for eggs in the morning (1.6's X3). */
+  | { kind: 'fedHens'; item: ItemId }
+  /** She collected the eggs waiting in the coop (1.6's X3). */
+  | { kind: 'laid'; eggs: number }
+  /** Reginald crowed at six, with her there at Boo Acres to hear him (1.6's X3). */
+  | { kind: 'crow' }
   /** She joined in at a neighbour's happening (V1's P4): howled, picked the book, named a star. */
   | { kind: 'joined'; happening: HappeningId; villager: VillagerId }
   /** A beat of baking with Wrapunzel (V1's P4): pouring the mix, or down at the oven door. */
@@ -265,6 +274,32 @@ export type WorldEvent =
   | { kind: 'won'; activity: ActivityId; item: ItemId; landed: number; top: boolean }
   /** Her fortune read in the tent, once a day. */
   | { kind: 'readFortune' }
+  /** Back down from a ride on the big wheel (1.6's X2), with whoever rode along; `first` ever. */
+  | { kind: 'rode'; with: VillagerId | null; first: boolean }
+  /** A snowball rolled in her yard, or rolled bigger (1.6's X4), on its tile. */
+  | { kind: 'snowball'; did: 'rolled' | 'grew'; tx: number; ty: number }
+  /** Her snowball stood up as a snowman, in the hat his tile dealt him. */
+  | { kind: 'snowman'; snowman: SnowmanId; tx: number; ty: number }
+  /** A snowball thrown: by her, or by a neighbour back at her (1.6's X4). */
+  | {
+      kind: 'threw';
+      by: 'her' | VillagerId;
+      at: { villager: VillagerId } | { her: true } | { tx: number; ty: number };
+    }
+  /** The thaw: her snowmen came in, a little one each in her bag. */
+  | { kind: 'thawed'; count: number }
+  /** What the snow in her yard is for, the first time she's there on a snowy day. */
+  | { kind: 'snowHint' }
+  /** Every fossil on show, and Wrapunzel has stood Gerald up in the museum (1.6's X6). */
+  | { kind: 'assembled' }
+  /** Her kite up on the wind, and the first time ever her keepsake (1.6's X6). */
+  | { kind: 'kite'; did: 'up'; kite: KiteId; first: boolean }
+  /** Her kite wound back in. */
+  | { kind: 'kite'; did: 'in'; kite: KiteId }
+  /** A kite in her hand and no wind: still today at the spot, or nowhere a kite goes up. */
+  | { kind: 'kite'; did: 'still' | 'nowhere' }
+  /** A rainbow after the rain, and the first time, her jar of it (1.6's X4). */
+  | { kind: 'rainbow'; first: boolean }
   /** A snack bought at a fairground stall. */
   | { kind: 'snackBought'; activity: ActivityId; item: ItemId; price: number }
   | { kind: 'patch'; stage: PatchStage; picked?: boolean }
@@ -339,7 +374,20 @@ export type WorldEvent =
       at: { x: number; y: number };
       /** What Pickle found for her (1.5's G7). */
       item?: ItemId;
-    };
+    }
+  // Small delights (1.6's X5, decision 384).
+  /** A butterfly or moth has landed on her hat as she stood still outdoors. */
+  | { kind: 'landed'; critter: CritterId }
+  /** It has flown off again, as she moved. */
+  | { kind: 'flewOff'; critter: CritterId }
+  /** The crow on a scarecrow she walked past lifted and cawed. */
+  | { kind: 'cawed'; box: TileBox }
+  /** She sneezed in the long grass in spring, and a neighbour close by said bless you. */
+  | { kind: 'sneezed'; by?: VillagerId; line?: string }
+  /** A pet at home trotted up to say hello as she came in, `at` over its back. */
+  | { kind: 'greeted'; pet: PetId; at: { x: number; y: number } }
+  /** Fibi brought her something, which isn't hers: `from` where Fibi is. */
+  | { kind: 'petGift'; pet: PetId; gift: PetGiftId; line: string; from: { x: number; y: number } };
 
 /** What's told as out of the ordinary today (V1's R3). */
 export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };

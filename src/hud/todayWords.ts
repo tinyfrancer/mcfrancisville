@@ -49,6 +49,25 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 export function todayWords(line: TodayLine): TodayWords {
   switch (line.kind) {
     // 1.5's G4.
+    // 1.6's X3: the hens' eggs.
+    case 'eggs':
+      return {
+        text:
+          line.eggs === 1
+            ? 'An egg in the coop at Boo Acres'
+            : `${line.eggs} eggs in the coop at Boo Acres`,
+        small: 'Still warm. Henrietta is keeping them company.',
+        glyph: { item: 'egg' },
+      };
+    // 1.6's X2: the big wheel on a fair day.
+    case 'bigWheel':
+      return {
+        text: 'The big wheel is turning',
+        small: line.open
+          ? 'Your first ride today is free. The whole town looks lovely from the top.'
+          : 'At the Hollow Fairground, your first ride today free.',
+        glyph: 'wheel',
+      };
     case 'stars': {
       const name = CONSTELLATIONS[line.constellation].name;
       return {
@@ -161,6 +180,24 @@ export function todayWords(line: TodayLine): TodayWords {
         glyph: 'sparkle',
       };
     // 1.4's G3: the pond frozen over, to fish through.
+    // 1.6's X4: a rainbow after the rain.
+    case 'rainbow':
+      return {
+        text: 'A rainbow after the rain',
+        small: 'Look up! It only stays a little while.',
+        glyph: { item: 'rainbowJar' },
+      };
+    // 1.6's X6: the wind up for a kite.
+    case 'kite':
+      return {
+        text: 'A good day for a kite',
+        small:
+          (line.zone === 'lanternShore'
+            ? "The wind's up at the end of the pier."
+            : "The wind's up at the castle lookout.") +
+          (line.hasKite ? '' : ' Cobweb Corner sells kites.'),
+        glyph: { item: 'batKite' },
+      };
     case 'iceFishing':
       return {
         text: "The pond's frozen thick enough to fish",

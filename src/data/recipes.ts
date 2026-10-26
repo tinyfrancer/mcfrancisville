@@ -2,6 +2,7 @@ import type { FurnitureId, ItemId, RecipeId, RoomId, VillagerId } from '../types
 import { PANTRY, type Pantry } from './dishes';
 import { FURNITURE } from './furniture';
 import { ITEMS } from './items';
+import type { HenDishId } from './hens';
 import type { OrchardDishId } from './orchard';
 
 /**
@@ -108,6 +109,23 @@ const ORCHARD_RECIPES: Record<OrchardDishId, RecipeRow> = {
     makes: { item: 'persimmonPudding' },
     needs: takes(['persimmon', 2], ['pumpkin', 1]),
     card: 120,
+  },
+};
+
+/**
+ * The hens' dishes (1.6's X3), known from the start so the first eggs have somewhere to go: a
+ * custard tart sweetened with candy corn, and a frittata of whatever she has grown.
+ */
+const HEN_RECIPES: Record<HenDishId, RecipeRow> = {
+  custardTart: {
+    at: 'stove',
+    makes: { item: 'custardTart' },
+    needs: takes(['egg', 3], ['candyCorn', 1]),
+  },
+  frittata: {
+    at: 'stove',
+    makes: { item: 'frittata' },
+    needs: takes(['egg', 2], [{ any: 'crop' }, 1]),
   },
 };
 
@@ -356,6 +374,7 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
   },
   ...FIELD_ROWS,
   ...ORCHARD_RECIPES,
+  ...HEN_RECIPES,
 };
 
 export const RECIPE_IDS = Object.keys(RECIPES) as RecipeId[];

@@ -1,6 +1,16 @@
 import { PROJECTS, type ProjectStage } from '../data/projects';
 import { FORAGE_LINES, GREW_LINES } from '../data/affection';
 import { DECOR } from '../data/holidays';
+import {
+  BUILT,
+  GREW,
+  MELTS,
+  RAINBOW_AGAIN,
+  RAINBOW_FIRST,
+  ROLLED,
+  SNOW_HINT,
+  thawLine,
+} from '../data/snow';
 import { CRITTERS } from '../data/critters';
 import { shinyName, shinyOf } from '../data/shinies';
 import { CROPS } from '../data/crops';
@@ -32,6 +42,7 @@ import { POT_PLANTS } from '../data/porch';
 import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
 import { FOSSILS } from '../data/fossils';
+import { KITE_FIRST, KITE_IN, KITE_NOWHERE, KITE_STILL, KITE_UP } from '../data/kites';
 import type { MoundFind } from '../systems/fossils';
 import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
@@ -405,6 +416,7 @@ const REFUSED: Record<Refusal, string> = {
   blocking: 'That would block the way. Leave a path to the door and the chest.',
   indoors: "That one likes it indoors, where it's cozy and dry. It can go in the house!",
   inTheWay: 'That would block the way round your yard. Leave a path for everyone!',
+  melts: MELTS,
   eaves: 'The eaves are too low for that. Try it further from the back, where the roof is higher.',
 };
 
@@ -561,6 +573,35 @@ export function eventToast(event: WorldEvent): Toast | null {
         text: `You brought ${VILLAGERS[event.from].name} ${asked(event.item, event.count)}. ${candy(event.candy)}, and a thank-you!`,
         icon: 'pin',
       };
+    // Snow days and the rainbow (1.6's X4).
+    case 'snowHint':
+      return { text: SNOW_HINT, icon: { item: 'meltlessSnowman' } };
+    case 'snowball':
+      return { text: event.did === 'rolled' ? ROLLED : GREW };
+    case 'snowman':
+      return { text: BUILT[event.snowman], special: true, icon: { item: 'meltlessSnowman' } };
+    case 'thawed':
+      return { text: thawLine(event.count), special: true, icon: { item: 'meltlessSnowman' } };
+    // Her kite (1.6's X6).
+    case 'kite':
+      if (event.did === 'up') {
+        return event.first
+          ? {
+              text: `${KITE_UP[event.kite]} ${KITE_FIRST}`,
+              special: true,
+              icon: { item: 'skyOnAString' },
+            }
+          : { text: KITE_UP[event.kite], icon: { item: event.kite } };
+      }
+      if (event.did === 'in') return { text: KITE_IN, icon: { item: event.kite } };
+      return { text: event.did === 'still' ? KITE_STILL : KITE_NOWHERE, icon: 'leaf' };
+    // Gerald stood up in the museum (1.6's X6).
+    case 'assembled':
+      return { text: ASSEMBLED, special: true, icon: { item: 'dragonTooth' } };
+    case 'rainbow':
+      return event.first
+        ? { text: RAINBOW_FIRST, special: true, icon: { item: 'rainbowJar' } }
+        : { text: RAINBOW_AGAIN, icon: { item: 'rainbowJar' } };
     case 'weather':
       if (event.storm) {
         return {
@@ -690,6 +731,18 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.item === BEST_SWEET
         ? { text: `${event.line} Your favourite!`, special: true, icon: { item: event.item } }
         : { text: event.line, icon: event.home ? { mark: 'halloween' } : { item: event.item } };
+    // Small delights (1.6's X5): Fibi's gift, and a neighbour's bless you.
+    case 'petGift':
+      return { text: event.line, icon: 'heart' };
+    case 'sneezed':
+      return event.by && event.line
+        ? { text: `${VILLAGERS[event.by].name}: "${event.line}"`, icon: 'heart' }
+        : null;
+    // Reginald at six, if she's at Boo Acres to hear him (1.6's X3); the card says the rest.
+    case 'crow':
+      return {
+        text: 'Cock-a-doodle-doo! Reginald says good morning to all of Boo Acres. Scarah has asked him to consider seven.',
+      };
     case 'stallSold':
       return {
         text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} in the tin!`,
@@ -736,6 +789,10 @@ export function eventToast(event: WorldEvent): Toast | null {
       return null;
   }
 }
+
+/** Every fossil on show, and Wrapunzel couldn't help herself (1.6's X6). */
+export const ASSEMBLED =
+  "Every fossil is on show, and Wrapunzel has been up all night with them. There's a letter in your mailbox!";
 
 /** Said after a rare event's toast when its keepsake has come in the mail with it (V1's R3). */
 export const KEEPSAKE_POSTED = "And there's a letter in your mailbox!";

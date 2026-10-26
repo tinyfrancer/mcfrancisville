@@ -1,7 +1,11 @@
 import { ambienceFor, Footfalls, groundOf, waterNear } from '../audio/ambience';
 import type { SoundBoard } from '../audio/SoundBoard';
+import type { Weather } from '../data/weather';
+import { dayKey } from '../systems/clock';
+import { windyOn } from '../systems/kite';
 import { tileAt } from '../systems/grid';
 import { tileOf, type World } from '../world/World';
+import { underfootOn } from './underfoot';
 
 /** How often the ambience is read again while she stands still, for the hour and the weather. */
 const RECHECK_MS = 60_000;
@@ -19,7 +23,7 @@ export class Hearing {
   private ty = -1;
   private recheckAt = 0;
 
-  step(world: World, sound: SoundBoard, now: number): void {
+  step(world: World, sound: SoundBoard, now: number, weather?: Weather): void {
     const { tx, ty } = tileOf(world.player.x, world.player.y);
     const zone = world.scene;
     const outdoor = world.zones.outdoor(zone);
@@ -43,14 +47,21 @@ export class Hearing {
           weather: world.weather.today(),
           stormy: world.weather.stormy(),
           water,
+          breezy: windyOn(dayKey(now), zone),
         }),
       );
     }
     const foot = this.footfalls.step(world.player);
     if (foot === null) return;
-    const ground = outdoor
-      ? groundOf(tileAt(outdoor.map, tx, ty), true, outdoor.slippery(tx, ty))
-      : groundOf(undefined, false, false);
+    // A crunch in the snow and a splash in a puddle (1.6's X4), or the ground's own.
+    const under = outdoor
+      ? underfootOn(outdoor, tx, ty, dayKey(now), weather ?? world.weather.today())
+      : null;
+    const ground =
+      under ??
+      (outdoor
+        ? groundOf(tileAt(outdoor.map, tx, ty), true, outdoor.slippery(tx, ty))
+        : groundOf(undefined, false, false));
     sound.footstep(ground, foot);
   }
 }

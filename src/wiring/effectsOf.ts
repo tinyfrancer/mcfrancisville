@@ -5,6 +5,7 @@ import type { Ware } from '../data/shop';
 import type { Made } from '../data/recipes';
 import type { VisitGift } from '../data/visits';
 import { CAST_MS } from '../systems/fishing';
+import { SNEEZE_AH_MS } from '../systems/poses';
 import { SPRINKLER } from '../systems/beds';
 import { PROP_ART } from '../sprites/props';
 import type { Anchor, Effect, PopIcon } from '../render/effects';
@@ -55,6 +56,11 @@ const burst = (
   at,
   ...(count !== undefined && { count }),
   ...(spread !== undefined && { spread }),
+});
+/** The middle of a tile, in world pixels. */
+const tileMiddle = (t: { tx: number; ty: number }): Point => ({
+  x: t.tx * TILE_SIZE + TILE_SIZE / 2,
+  y: t.ty * TILE_SIZE + TILE_SIZE / 2,
 });
 const pop = (icon: PopIcon, count: number, from: Anchor, delayMs?: number): Effect => ({
   kind: 'pop',
@@ -166,6 +172,8 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [emote('!')];
     case 'mail':
       return [emote('!')];
+    // Gerald stood up in the museum (1.6's X6), told as a shelf is.
+    case 'assembled':
     case 'shelved':
       return [burst('confetti', head), burst('sparkle', head, 6, 18)];
     // The sky sheet shows the stars (1.5's G4); a new one on her chart sparkles over her too.
@@ -290,6 +298,46 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
         : [pop({ item: event.item }, 1, over)];
     case 'readFortune':
       return [burst('sparkle', head, 6, 18), emote('♪')];
+    // The hens fed, a scatter of seed; the eggs collected, popped up out of the coop (1.6's X3).
+    case 'fedHens':
+      return [burst('sparkle', there, 4, 12), emote('♥')];
+    case 'laid':
+      return [burst('sparkle', there, 5, 16), pop({ item: 'egg' }, event.eggs, there)];
+    // Reginald's crow is drawn on him in the run, and heard.
+    case 'crow':
+      return [];
+    // Snow days (1.6's X4): a puff where the snowball rolls, a flourish for the snowman.
+    case 'snowball':
+      return [burst('snow', tileMiddle(event), event.did === 'rolled' ? 6 : 9, 8)];
+    case 'snowman': {
+      const mid = tileMiddle(event);
+      return [
+        burst('snow', mid, 10, 12),
+        burst('sparkle', { x: mid.x, y: mid.y - 24 }, 5, 14),
+        emote('♪'),
+      ];
+    }
+    case 'threw': {
+      const from: Anchor = event.by === 'her' ? over : { villager: event.by };
+      const at = event.at;
+      const to: Anchor = 'tx' in at ? tileMiddle(at) : at;
+      return [{ kind: 'throw', from, to }];
+    }
+    case 'thawed':
+      return [pop({ item: 'meltlessSnowman' }, event.count, over)];
+    // Her kite up (1.6's X6), and the first time her keepsake; wound in with a little tune.
+    case 'kite':
+      if (event.did === 'up') {
+        return event.first ? [emote('!'), pop({ item: 'skyOnAString' }, 1, over)] : [emote('♪')];
+      }
+      return event.did === 'in' ? [emote('♪')] : [emote('…')];
+    case 'rainbow':
+      return event.first ? [emote('!'), pop({ item: 'rainbowJar' }, 1, over)] : [emote('!')];
+    case 'snowHint':
+      return [];
+    // Back down off the big wheel (1.6's X2), humming, with her ticket stub the first time.
+    case 'rode':
+      return event.first ? [emote('♪'), pop({ item: 'ticketStub' }, 1, over)] : [emote('♪')];
     case 'patch':
       if (event.picked)
         return [burst('leaf', there, 6, 14), pop({ item: 'patchPumpkin' }, 1, there)];
@@ -323,6 +371,25 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return event.job === 'bark'
         ? [emote('!', event.at)]
         : [burst('sparkle', event.at, 5, 10), ...(event.job === 'sniff' ? [emote('!')] : [])];
+    // Small delights (1.6's X5): a butterfly on her hat and off again, the crow's feathers, a
+    // sneeze's pollen and a heart from whoever said bless you, a hello at the door, Fibi's gift.
+    case 'landed':
+      return [{ kind: 'perch', critter: event.critter }];
+    case 'flewOff':
+      return [{ kind: 'flit' }];
+    case 'cawed': {
+      const crow = heights(event.box, 'scarecrow').crown;
+      return [burst('feather', { x: crow.x + 6, y: crow.y }, 3, 6)];
+    }
+    case 'sneezed':
+      return [
+        { ...burst('pollen', { x: at.her.x, y: at.her.y - 22 }, 8, 5), delayMs: SNEEZE_AH_MS },
+        ...(event.by ? [{ ...emote('♥', { villager: event.by }), delayMs: 500 }] : []),
+      ];
+    case 'greeted':
+      return [burst('heart', event.at, 3, 8)];
+    case 'petGift':
+      return [pop({ gift: event.gift }, 0, event.from), burst('sparkle', event.from, 3, 8)];
     case 'frozen':
       return [burst('sparkle', head, 6, 20), emote('♪')];
     case 'dressedUp':
@@ -416,6 +483,8 @@ export function bumpsOf(event: WorldEvent): Bump[] {
       return ['purse'];
     case 'baked':
       return ['bag', 'purse'];
+    case 'laid':
+      return ['bag'];
     case 'unearthed':
       return 'candy' in event.find ? ['purse'] : ['bag'];
     case 'shook':

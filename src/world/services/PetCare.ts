@@ -3,7 +3,9 @@ import { TRICKS, TREAT_LINES, WALK_TILES, type FondKind } from '../../data/affec
 import { isKept, ITEMS } from '../../data/items';
 import { PET_IDS } from '../../data/pets';
 import { ITEM_VALUE } from '../../data/shop';
+import { PET_GIFTS } from '../../data/petGifts';
 import { patLineAt } from '../../systems/affection';
+import { GIFT_AFTER_MS, GIFT_KEY, giftOn } from '../../systems/delights';
 import type { Habitats } from '../../systems/critters';
 import { dayKey } from '../../systems/clock';
 import { hashString } from '../../systems/random';
@@ -12,11 +14,13 @@ import { restSpots, type RestSpot } from '../../systems/petRest';
 import {
   BONE_KEY,
   boneLine,
+  florenceAwake,
   FORAGE_KEY,
   foragedOn,
   lostBone,
   NO_FINDS,
   PAT_DEAD_MS,
+  pickleAwake,
   type LostBone,
   type PetFinds,
 } from '../../systems/pets';
@@ -103,6 +107,9 @@ export class PetCare {
   private readonly drawn = new Map<string, Tile>();
   /** Where each rests in the room she's in, worked out again when the room changes. */
   private rests: { layout: string; spots: Map<PetId, RestSpot> } | null = null;
+  /** How long she has been home since she came in, and the day Fibi last set off with a gift. */
+  private homeMs = 0;
+  private giftDay = '';
 
   constructor(ctx: WorldContext, reads: PetCareReads) {
     this.ctx = ctx;
@@ -115,6 +122,7 @@ export class PetCare {
       if (from === 'home' && to === 'home') this.potterIn();
       this.bringWalker();
       this.lastTile = null;
+      if (to === 'home' && from !== 'home') this.greetHer();
     });
   }
 
@@ -328,6 +336,38 @@ export class PetCare {
     pet.pose = 'sit';
   }
 
+  /**
+   * She has come home (1.6's X5): her pets at home trot over to say hello and go once round her.
+   * One asleep (Florence at her naps, Pickle by day) only dreams of her a moment, and Gary, who
+   * would be all evening getting there, beams from where he is.
+   */
+  private greetHer(): void {
+    this.homeMs = 0;
+    const now = this.ctx.clock.now();
+    for (const pet of this.all) {
+      if (pet.scene !== 'home' || pet.id === this.pets.walking) continue;
+      const asleep =
+        (pet.id === 'florence' && !florenceAwake(now)) ||
+        (pet.id === 'pickle' && !pickleAwake(now));
+      if (asleep || pet.id === 'gary') pet.say('heart', now, 1800);
+      else pet.comeOver('greet');
+    }
+  }
+
+  /**
+   * Once a day, a while after she's come in, Fibi brings her something (1.6's X5), if Fibi's at
+   * home and isn't busy saying hello.
+   */
+  private fetchGift(): void {
+    const day = dayKey(this.ctx.clock.now());
+    if (this.homeMs < GIFT_AFTER_MS || this.giftDay === day) return;
+    if (!this.reads.takings.isReady(GIFT_KEY)) return;
+    const fibi = this.pet('fibi');
+    if (fibi.scene !== 'home' || fibi.comingOver || this.petting === 'fibi') return;
+    this.giftDay = day;
+    fibi.comeOver('gift');
+  }
+
   /** Where each pet rests in the room she's in at home (V1's R6c). */
   restOf(id: PetId): RestSpot | null {
     const home = this.reads.home;
@@ -358,6 +398,24 @@ export class PetCare {
     const done = this.jobsToday();
     if ('trick' in deed) {
       this.ctx.moments.push({ kind: 'petTrick', pet: pet.id, at: over(pet), own: true });
+      return;
+    }
+    if ('greeted' in deed) {
+      this.ctx.moments.push({ kind: 'greeted', pet: pet.id, at: over(pet) });
+      return;
+    }
+    if ('gift' in deed) {
+      const { takings } = this.reads;
+      if (!takings.isReady(GIFT_KEY)) return;
+      takings.take(GIFT_KEY);
+      const gift = giftOn(dayKey(this.ctx.clock.now()));
+      this.ctx.moments.push({
+        kind: 'petGift',
+        pet: pet.id,
+        gift,
+        line: PET_GIFTS[gift].line.replaceAll('{name}', this.pets.nameOf(pet.id)),
+        from: over(pet),
+      });
       return;
     }
     const name = this.pets.nameOf(pet.id);
@@ -445,6 +503,10 @@ export class PetCare {
     else this.stillMs += deltaMs;
     const where = this.reads.where();
     this.countSteps(where);
+    if (where === 'home') {
+      this.homeMs += deltaMs;
+      if (!posing) this.fetchGift();
+    }
     const here = this.here();
     if (here.length === 0) return;
     const now = this.ctx.clock.now();

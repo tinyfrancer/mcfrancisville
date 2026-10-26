@@ -1,3 +1,4 @@
+import type { PetGiftId } from '../data/petGifts';
 import { PALETTE as C } from './palette';
 import type { Palette, SpriteSource } from './sprite';
 
@@ -73,7 +74,19 @@ export const EMOTE_BUBBLES: Record<'♥' | '♪' | '…', EffectArt> = {
 };
 
 /** The kinds of little bits that fly off a moment: each a grid or two, in a colour or a few. */
-export type ParticleKind = 'leaf' | 'dust' | 'splash' | 'sparkle' | 'heart' | 'confetti' | 'coin';
+export type ParticleKind =
+  | 'leaf'
+  | 'dust'
+  | 'splash'
+  | 'sparkle'
+  | 'heart'
+  | 'confetti'
+  | 'coin'
+  // A puff of snow where a snowball lands, or one is rolled (1.6's X4).
+  | 'snow'
+  // A crow's feathers off the scarecrow, and a sneeze's pollen (1.6's X5).
+  | 'feather'
+  | 'pollen';
 
 /**
  * Each kind's frames (most have one; a sparkle twinkles between two) and the palettes a burst
@@ -124,6 +137,132 @@ export const PARTICLE_ART: Record<
     frames: [{ rows: ['.y.', 'yYy', '.y.'] }],
     palettes: [{ '.': null, y: C.gold, Y: C.candleBright }],
   },
+  snow: {
+    frames: [{ rows: ['.w.', 'wWw', '.w.'] }, { rows: ['w'] }],
+    palettes: [
+      { '.': null, w: C.snow, W: C.snowLight },
+      { '.': null, w: C.snowShade, W: C.snow },
+    ],
+  },
+  feather: {
+    frames: [{ rows: ['..k', '.kK', 'kK.', 'k..'] }, { rows: ['k...', '.kKk', '...k'] }],
+    palettes: [
+      { '.': null, k: C.ink, K: C.stoneDark },
+      { '.': null, k: C.stoneDark, K: C.stone },
+    ],
+  },
+  pollen: {
+    frames: [{ rows: ['y'] }, { rows: ['.y.', 'yYy', '.y.'] }],
+    palettes: [
+      { '.': null, y: C.candle, Y: C.candleBright },
+      { '.': null, y: C.blossomLight, Y: C.white },
+    ],
+  },
+};
+
+/**
+ * What Fibi brings her (1.6's X5), each a little picture for its pop: a leaf, a striped sock, a
+ * bottle cap, a twig, a crow's feather and one glove.
+ */
+export const GIFT_ART: Record<PetGiftId, EffectArt> = {
+  leaf: {
+    source: {
+      rows: [
+        '.....oo.',
+        '...ooLo.',
+        '..oLLLo.',
+        '.oLLlLo.',
+        '.oLlLLo.',
+        '.olLLo..',
+        '.ooo....',
+        'o.......',
+      ],
+    },
+    palette: { '.': null, o: C.ink, L: C.pumpkin, l: C.pumpkinLight },
+  },
+  sock: {
+    source: {
+      rows: [
+        '.oooo...',
+        '.owwo...',
+        '.orro...',
+        '.owwo...',
+        '.orro...',
+        '.owwoo..',
+        '.owwwwo.',
+        '.orrrro.',
+        '..oooo..',
+      ],
+    },
+    palette: { '.': null, o: C.ink, w: C.white, r: C.scarlet },
+  },
+  bottleCap: {
+    source: {
+      rows: [
+        '..oooo..',
+        '.oyyyyo.',
+        'oyyWyyyo',
+        'oyyyyyyo',
+        'oyyyyyyo',
+        'oyyyyyYo',
+        '.oyyyYo.',
+        '..oooo..',
+      ],
+    },
+    palette: { '.': null, o: C.ink, y: C.gold, Y: C.goldShade, W: C.candleBright },
+  },
+  twig: {
+    source: {
+      rows: [
+        '......o.',
+        '.....ob.',
+        '..o.ob..',
+        '..bob...',
+        '...b....',
+        '..ob....',
+        '.ob.....',
+        'ob......',
+      ],
+    },
+    palette: { '.': null, o: C.barkDark, b: C.bark },
+  },
+  feather: {
+    source: {
+      rows: [
+        '.....oo.',
+        '....okko',
+        '...okKko',
+        '..okKko.',
+        '.okKko..',
+        '.okko...',
+        '.oo.....',
+        'o.......',
+      ],
+    },
+    palette: { '.': null, o: C.ink, k: C.stoneDark, K: C.stone },
+  },
+  glove: {
+    source: {
+      rows: [
+        '.o.o.o..',
+        'oyoyoyo.',
+        'oyoyoyo.',
+        'oyyyyyoo',
+        'oyyyyyyo',
+        'oyyyyyo.',
+        '.oyyyo..',
+        '.oPPPo..',
+        '.ooooo..',
+      ],
+    },
+    palette: { '.': null, o: C.ink, y: C.plumLight, P: C.plum },
+  },
+};
+
+/** A snowball in flight (1.6's X4), at 16 as the other bits are. */
+export const SNOWBALL_THROWN: EffectArt = {
+  source: { rows: ['.oo.', 'owWo', 'owwo', '.oo.'] },
+  palette: { '.': null, o: C.snowDeep, w: C.snow, W: C.snowLight },
 };
 
 /** A wrapped sweet: Candy, which has no item of its own, flying to her purse. */

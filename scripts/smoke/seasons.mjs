@@ -10,6 +10,7 @@ import {
   page,
   stepUntil,
   tapElement,
+  tapTile,
   tapFairProp,
   tapProp,
   walkTo,
@@ -69,6 +70,117 @@ async function seasons() {
     new Set(keys).size === 4,
     keys.join(' | '),
   );
+}
+
+/**
+ * Into town on a day, at an hour, with the page's other asks (`&weather=clear&rainbow`).
+ * @param {string} day
+ * @param {number} hour
+ */
+async function inTownOn(day, hour, extra = '') {
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=${hour}${extra}`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await closeSheets();
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', `she is in town on ${day}`);
+  await page.evaluate(() => window.view.step(40, 3));
+  await stepUntil(() => window.view.transition() === null, 'the way into town has drawn');
+  await closeSheets();
+}
+
+/**
+ * Snow days and a rainbow (1.6's X4): a snowman rolled in her yard by real taps in January (a tap
+ * on herself, then on the snowball twice), her footprints left in the snow as she walks off; and
+ * `?rainbow` over the town on a spring day, with its line in Today.
+ */
+async function snowDay() {
+  await inTownOn('2027-01-15', 12, '&weather=clear');
+  const spot = await page.evaluate(() => {
+    const w = window.world;
+    const lawn = w.yard.lawn();
+    /** @type {(tx: number, ty: number) => boolean} */
+    const ok = (tx, ty) => lawn.some((t) => t.tx === tx && t.ty === ty) && w.canWalk(tx, ty);
+    const stand = lawn.find((t) => ok(t.tx, t.ty) && ok(t.tx, t.ty + 1) && ok(t.tx, t.ty + 2));
+    return stand ? { stand, below: { tx: stand.tx, ty: stand.ty + 1 } } : null;
+  });
+  check('her yard has open lawn to roll a snowball on', spot !== null, '');
+  if (!spot) return;
+  await walkTo(spot.stand);
+  await page.evaluate(() => {
+    window.world.hands.hold('hands');
+    window.world.player.facing = 'down';
+  });
+  await tapTile(spot.stand.tx, spot.stand.ty);
+  await page.evaluate(() => window.view.step(40, 10));
+  const rolled = await page.evaluate(() => window.world.yard.snowball);
+  check(
+    'a tap on herself in the snow rolls a snowball beside her',
+    rolled?.tx === spot.below.tx && rolled?.ty === spot.below.ty && rolled?.size === 1,
+    JSON.stringify(rolled),
+  );
+  await page.screenshot({ path: '.smoke/snow-snowball.png' });
+  for (const size of [2, 3]) {
+    await tapTile(spot.below.tx, spot.below.ty);
+    await stepUntil(() => !window.world.player.moving, 'she walks up to her snowball');
+    await page.evaluate(() => window.view.step(40, 10));
+    if (size === 2) {
+      const grew = await page.evaluate(() => window.world.yard.snowball?.size ?? null);
+      check('a tap on the snowball rolls it bigger', grew === 2, String(grew));
+    }
+  }
+  const snowman = await page.evaluate(
+    (t) => window.world.yard.pieceAt(t.tx, t.ty)?.id ?? null,
+    spot.below,
+  );
+  check('the third tap stands a snowman up', `${snowman}`.startsWith('snowman'), `${snowman}`);
+  await page.evaluate(() => window.view.step(40, 30));
+  await closeSheets();
+  await page.screenshot({ path: '.smoke/snow-snowman.png' });
+  // Off across the lawn, leaving footprints.
+  const away = await page.evaluate((t) => {
+    const w = window.world;
+    for (let d = 3; d < 8; d++) {
+      for (const g of [
+        { tx: t.tx + d, ty: t.ty },
+        { tx: t.tx - d, ty: t.ty },
+        { tx: t.tx, ty: t.ty + d },
+        { tx: t.tx, ty: t.ty - d },
+      ]) {
+        if (w.canWalk(g.tx, g.ty) && w.snow.underfoot(g)) return g;
+      }
+    }
+    return null;
+  }, spot.stand);
+  if (away) {
+    await walkTo(away);
+    const prints = await page.evaluate(() => window.view.effects().footprints);
+    check('her steps leave footprints in the snow', prints > 0, String(prints));
+    await page.screenshot({ path: '.smoke/snow-footprints.png' });
+  }
+  // The snowman goes, so the days after in the run are as they were.
+  await page.evaluate(() => {
+    window.world.yard.thaw();
+    window.view.saveNow();
+  });
+
+  await inTownOn('2027-04-15', 12, '&weather=clear&rainbow');
+  await page.evaluate(() => window.view.step(40, 10));
+  const rainbow = await page.evaluate(() => ({
+    up: window.view.rainbow(),
+    line: window.world.upNow.lines().some((l) => l.kind === 'rainbow'),
+    jar: window.world.bag.count('rainbowJar'),
+  }));
+  check(
+    '?rainbow puts a rainbow over the town, a line in Today and a jar in her bag',
+    rainbow.up !== null && rainbow.line && rainbow.jar > 0,
+    JSON.stringify(rainbow),
+  );
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 3));
+  await page.screenshot({ path: '.smoke/rainbow.png' });
 }
 
 /**
@@ -379,6 +491,16 @@ async function finale() {
       photo.width > 64 && photo.caption.startsWith('Halloween 2026'),
       JSON.stringify(photo),
     );
+    // 1.6's X1: she turns to the camera for it, and it's the party's own card, not the camera's.
+    const posed = await page.evaluate(() => ({
+      her: window.world.player.facing,
+      another: document.querySelectorAll('.hud-photo-sheet .hud-photo-another').length,
+    }));
+    check(
+      "their photo: she faces the camera, on the party's own card (no Another, as the camera's has)",
+      posed.her === 'down' && posed.another === 0,
+      JSON.stringify(posed),
+    );
     await page.screenshot({ path: '.smoke/photo.png' });
     // Kept as a print (V1's S3): the share sheet on her iPhone, a download here, with none.
     const download = page.waitForEvent('download', { timeout: 10_000 }).catch(() => null);
@@ -531,6 +653,7 @@ async function holidays() {
 export const sections = [
   ['holidays', holidays],
   ['seasons', seasons],
+  ['snowDay', snowDay],
   ['rare', rare],
   ['festival', festival],
   ['trickOrTreat', trickOrTreat],

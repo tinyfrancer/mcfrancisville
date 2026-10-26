@@ -1,4 +1,5 @@
 import type { DayWindow } from './windows';
+import { RIDE_COST } from './fairRide';
 import type { FestivalId } from './calendar';
 import type { FixtureId, ItemId, PropId } from '../types/ids';
 
@@ -9,7 +10,14 @@ import type { FixtureId, ItemId, PropId } from '../types/ids';
  * for; a snack stall sells what it fries, and the night's snack by day.
  */
 export type ActivityId =
-  'ringToss' | 'hookAGhost' | 'duckPond' | 'strengthBell' | 'fortune' | 'cornDogs' | 'toffeeApples';
+  | 'ringToss'
+  | 'hookAGhost'
+  | 'duckPond'
+  | 'strengthBell'
+  | 'fortune'
+  | 'cornDogs'
+  | 'toffeeApples'
+  | 'bigWheel';
 
 /** When it's open: these windows, on every day or only at weekends, and all day in a festival. */
 export interface Hours {
@@ -55,7 +63,15 @@ export interface Snacks {
   tonight?: true;
 }
 
-export type Does = Game | Fortune | Snacks;
+/**
+ * A ride: once round the big wheel (1.6's X2, decision 381), with whoever she knows at the fair,
+ * the day's first free and the rest at `cost`; how it goes is `data/fairRide.ts`.
+ */
+export interface Ride {
+  ride: true;
+}
+
+export type Does = Game | Fortune | Snacks | Ride;
 
 export interface ActivityRow {
   name: string;
@@ -162,6 +178,15 @@ export const ACTIVITIES: Record<ActivityId, ActivityRow> = {
     hours: { windows: ['afternoon', 'evening'], festival: 'halloweenFestival' },
     does: { sells: ['toffeeApple', 'popcorn'] },
     line: 'Toffee apples, still warm, and popcorn by the tub. Mind your teeth!',
+  },
+  // A ride on the big wheel (1.6's X2), turning all day, its bulbs lit after dark.
+  bigWheel: {
+    name: 'The big wheel',
+    at: { prop: 'ferrisWheel' },
+    cost: RIDE_COST,
+    hours: { windows: ['morning', 'afternoon', 'evening'] },
+    does: { ride: true },
+    line: 'Once round, nice and slow, with a stop at the very top. Your first ride today is on the house, love.',
   },
 };
 

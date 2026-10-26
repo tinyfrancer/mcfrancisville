@@ -1,6 +1,9 @@
-/** Growing: Hosta La Vista Farm, the beds beyond it, Boo Acres and what grows there, and the greenhouse's raised beds. */
+/** Growing: Hosta La Vista Farm, the beds beyond it, Boo Acres and what grows there, its hens, and the greenhouse's raised beds. */
 import {
   PHONE,
+  PLAIN_DAY,
+  URL_BASE,
+  answerCody,
   TILE,
   check,
   closeSheets,
@@ -14,6 +17,7 @@ import {
   tapAlong,
   tapElement,
   tapTile,
+  titleAgain,
 } from './lib.mjs';
 
 async function farm() {
@@ -598,11 +602,112 @@ async function whatGrows() {
   await page.evaluate(() => window.view.step(40, 2));
 }
 
+/**
+ * Opens the game on a made-up day at ten in the morning (a dev build's `?day=`), keeping the town.
+ * @param {string} day
+ */
+async function openOn(day) {
+  await page.evaluate(() => window.view.saveNow());
+  await page.goto(`${URL_BASE}?loop=manual&skiptitle&day=${day}&hour=10`, {
+    waitUntil: 'load',
+    timeout: 60_000,
+  });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  await answerCody();
+  await closeSheets();
+}
+
+/**
+ * The hens at Boo Acres (1.6's X3), by real taps: the coop walked up to, the hens pottering in its
+ * run, fed a seed from her bag, and the next morning their three eggs collected.
+ */
+async function hens() {
+  const was = page.url();
+  await openOn(PLAIN_DAY);
+  await page.evaluate(() => {
+    window.world.travel.go('booAcres');
+    window.world.bag.add('pumpkinSeed', 2);
+  });
+  await page.evaluate(() => window.view.step(40, 20));
+  const coop = await page.evaluate(() => {
+    const p = window.world.zones.map('booAcres').map.props.find((p) => p.id === 'coop');
+    return p ? { tx: p.tx, ty: p.ty, w: p.w, h: p.h } : null;
+  });
+  if (!coop) return check('Boo Acres has a coop by the barn', false);
+  const below = { tx: coop.tx + 1, ty: coop.ty + coop.h };
+  if (!(await tapAlong(below, 'to the coop'))) return;
+  await page.evaluate(() => window.view.step(40, 10));
+  const pottering = await page.evaluate(() => window.world.henhouse.hens().length);
+  check('three hens and a rooster potter in the run by day', pottering === 4, `${pottering}`);
+  await page.screenshot({ path: '.smoke/hens.png' });
+  await tapTile(coop.tx + 1, coop.ty + 1);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the coop');
+  await page.evaluate(() => window.view.step(40));
+  const card = (await page.locator('.hud-coop-sheet').count()) === 1;
+  check('walking up to the coop opens its card', card);
+  if (!card) return;
+  await framed('.hud-coop-sheet', { picture: true });
+  await page.screenshot({ path: '.smoke/coop.png' });
+  const seeds = await page.evaluate(() => window.world.bag.count('pumpkinSeed'));
+  await tapElement('.hud-coop-sheet .hud-feed:has-text("Pumpkin") .hud-price:text-is("Feed")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const fed = await page.evaluate(() => ({
+    fed: window.world.henhouse.view().fed,
+    seeds: window.world.bag.count('pumpkinSeed'),
+  }));
+  const said = (await page.locator('.hud-coop-sheet .hud-message').textContent()) ?? '';
+  check(
+    'a seed from her bag feeds the hens, once a day',
+    fed.fed && fed.seeds === seeds - 1 && /scattered/.test(said),
+    `${JSON.stringify(fed)}: ${said}`,
+  );
+  await closeSheets();
+
+  // The next morning, an egg from each hen.
+  const next = new Date(Date.parse(PLAIN_DAY) + 36 * 3600_000).toISOString().slice(0, 10);
+  await openOn(next);
+  const waiting = await page.evaluate(() => window.world.henhouse.eggs());
+  check('the next morning, an egg from each hen waits in the coop', waiting === 3, `${waiting}`);
+  await page.evaluate(() => {
+    if (window.world.scene !== 'booAcres') window.world.travel.go('booAcres');
+  });
+  await page.evaluate(() => window.view.step(40, 20));
+  if (!(await tapAlong(below, 'back to the coop'))) return;
+  await tapTile(coop.tx + 1, coop.ty + 1);
+  await stepUntil(() => !window.world.player.moving, 'she reaches the coop again');
+  await page.evaluate(() => window.view.step(40));
+  if ((await page.locator('.hud-coop-sheet').count()) === 0) {
+    return check('the coop opens again the next morning', false);
+  }
+  const eggs = await page.evaluate(() => window.world.bag.count('egg'));
+  await tapElement('.hud-coop-sheet .hud-eggs .hud-price:text-is("Collect")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const got = await page.evaluate(() => window.world.bag.count('egg'));
+  check('collecting puts the three eggs in her bag', got === eggs + 3, `${eggs} -> ${got}`);
+  await page.screenshot({ path: '.smoke/coop-collected.png' });
+  await closeSheets();
+  await page.evaluate(() => window.view.saveNow());
+  await page.goto(was, { waitUntil: 'load', timeout: 60_000 });
+  await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+  if ((await page.locator('.hud-title').count()) > 0) await titleAgain();
+  // Back on the clock it was on, a town kept on a made-up day may be offered the cloud's: kept.
+  const offered = await page
+    .waitForSelector('.hud-cloud-offer', { timeout: 3000 })
+    .then(() => true)
+    .catch(() => false);
+  if (offered) await tapElement('.hud-cloud-keep');
+  await answerCody();
+  await closeSheets();
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['farm', farm],
   ['plots', plots],
   ['booAcres', booAcres],
   ['whatGrows', whatGrows],
+  ['hens', hens],
   ['greenhouseBeds', greenhouseBeds],
 ];

@@ -42,6 +42,14 @@ export function weatherRequested(search: string): Weather | null {
 }
 
 /**
+ * `?rainbow` puts a rainbow up in a dev build (1.6's X4), as if she had just come out after rain:
+ * rain comes a day at a time, so `?weather=` can't show one. Production ignores it.
+ */
+export function rainbowRequested(search: string): boolean {
+  return new URLSearchParams(search).has('rainbow');
+}
+
+/**
  * `?day=2026-12-24` moves a dev build's clock to that day (at `?hour=`, or noon), so the smoke
  * check and an art review can see a holiday on any day of the year (phase U). Production ignores
  * it. Null when absent or not a day key.

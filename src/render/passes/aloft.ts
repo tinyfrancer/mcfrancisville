@@ -30,6 +30,12 @@ export function butterfliesPass(world: World, zone: MapZone, hour: number | null
   };
 }
 
+/** How long since the crow on the scarecrow here cawed at her (1.6's X5), or null. */
+function cawSince(world: World): number | null {
+  const caw = world.delights.cawed();
+  return caw ? world.clock.now() - caw.at : null;
+}
+
 /** Crows and bats crossing the sky, and a crow on the scarecrow now and then (V1's E5). */
 export function flyersPass(
   world: World,
@@ -45,7 +51,7 @@ export function flyersPass(
       const her = { x: me.x, y: me.y, w: me.sprite.width, h: me.sprite.height };
       const flyers = [
         ...skyDrawables(zone.id, cam, canvas, her, nowMs, at),
-        ...perchDrawables(scarecrows, nowMs, at),
+        ...perchDrawables(scarecrows, nowMs, at, cawSince(world)),
       ];
       count = flyers.length;
       return flyers;

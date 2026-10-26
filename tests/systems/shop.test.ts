@@ -1,3 +1,4 @@
+import { SNOWMAN_IDS } from '../../src/data/snow';
 import { FIRST_DAY } from '../../src/data/firstDay';
 import { EVERY_FIGURINE } from '../../src/data/figurines';
 import { FINALE_LETTER } from '../../src/data/finale';
@@ -249,6 +250,8 @@ describe('the day’s stock', () => {
       ...Object.values(RECIPES).flatMap((r) => ('furniture' in r.makes ? [r.makes.furniture] : [])),
       // Gourdon carves the figurines from three of a kind (0.3's C3), the shinies' too (1.4's G1).
       ...EVERY_FIGURINE,
+      // Rolled in her yard in winter (1.6's X4).
+      ...SNOWMAN_IDS,
     ]);
     // What her neighbours give her, by letter or from their houses, no shop sells either.
     const given = new Set(
@@ -327,6 +330,13 @@ describe('selling', () => {
       'finderRosette',
       // Hazel's star map (1.5's G4).
       'starMap',
+      // The big wheel's ticket stub (1.6's X2).
+      'ticketStub',
+      // A snowman that didn't melt, and a rainbow in a jar (1.6's X4).
+      'meltlessSnowman',
+      'rainbowJar',
+      // The keepsake of her first kite flight (1.6's X6).
+      'skyOnAString',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));

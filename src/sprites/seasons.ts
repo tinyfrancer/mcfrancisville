@@ -414,7 +414,7 @@ const BREAK_SNOW: Palette = { x: C.snow, X: C.snowShade };
 const ROOF_SNOW: Palette = { [ROOF[2]!]: C.snowShade, [ROOF[3]!]: C.snow, [ROOF[4]!]: C.snowLight };
 
 /** What else stands under a roof besides a building with a door: the wells. */
-const ROOFED: ReadonlySet<PropId> = new Set(['well', 'farmWell']);
+const ROOFED: ReadonlySet<PropId> = new Set(['well', 'farmWell', 'coop']);
 
 /**
  * What stands in another shape through a season, form for form (1.0.1, decision 327): the town's
