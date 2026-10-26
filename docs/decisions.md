@@ -9874,3 +9874,17 @@ shape, and 1.5's is the attic's); mending the rod with a seed in hand here (it r
 110, which a review shouldn't do in passing); moving the camera's drawer here (a layout change
 smoke would need to measure again, for a case she meets only sideways with a drawer open);
 redrawing the framed Bat or reordering Pickle's branch (above).
+
+## 378. The plan for 1.6, the last day: the festival's lights fixed and the 31st rehearsed, then a ride on the big wheel, chickens, snow and puddles, small delights, the museum's skeleton and a kite (2026-10-26)
+
+**Context:** 1.5 shipped overnight (PR #234). The user has about half a week's usage and one day
+left: "the colored lights up around the festival aren't connected properly. Throw some random
+stuff in to fill up the usage, fun, your call."
+
+**Decision:** `docs/v1.6_plan.md`: the bug first with a rehearsal of 31 October (five days off),
+then six fun sessions chosen for what she does (collects, decorates, plays at night, every day),
+all Opus, two at a time from `v1.6-dev`, a review, and 1.6 cut tonight with whatever has merged.
+No personal touches (decision 177, the user's word of 2026-10-25); no refactors.
+
+**Rejected:** more of 1.4's kinds (another set, more fish: she has those now); anything that
+needs the user's word (the cloud store); a new neighbour (decision 270).

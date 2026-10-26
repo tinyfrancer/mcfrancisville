@@ -8,9 +8,21 @@ while. Read "In progress", then "If you are starting cold after a long gap", the
 
 ## In progress
 
-Nothing. **The 1.4 plan is complete** (its review, V1.5, merged into `v1.4-dev` as PR #233,
-decision 377), and **1.5 is the release PR #234** (`v1.4-dev` → `main`), for the coordinating
-session to merge at the user's word; "After 1.0" says what's next. No plan follows.
+**The 1.6 plan is running** (`docs/v1.6_plan.md`, decision 378; started 2026-10-26 by the
+coordinating session, the last day: Opus sub-agents in worktrees, two at a time, from `v1.6-dev`).
+**1.5 is on her phone** (PR #234, 2026-10-26). Each session's heading says where it is.
+
+### X1: the festival's lights, and the 31st rehearsed (`claude/x1-lights`; decision 380)
+
+Not started.
+
+### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
+
+Not started.
+
+### X3 chickens, X4 snow and puddles, X5 small delights, X6 the skeleton and a kite, V1.6 the review
+
+Not started; in the plan's order.
 
 ## If you are starting cold after a long gap
 
