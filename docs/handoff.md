@@ -3,27 +3,14 @@
 Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
 V1's review (decision 324) for after 1.0, by V1.1's (decision 356) for after 1.2, by V1.3's
 (decision 366) for after 1.3, and by V1.5's (decision 377) for after 1.5, the last plan for a
-while. Read "In progress", then "If you are
-starting cold after a long gap", then "After 1.0"; "Where things stand" further down is the long
-history.
+while. Read "In progress", then "If you are starting cold after a long gap", then "After 1.0";
+"Where things stand" further down is the long history.
 
 ## In progress
 
-**The 1.4 plan is running** (`docs/v1.4_plan.md`, decision 367; started 2026-10-25 by the
-coordinating session: Opus sub-agents in worktrees, two at a time, from `v1.4-dev`). **1.3 is on
-her phone** (PR #219, merged 2026-10-25). Each session's heading says where it is.
-
-### V1.5: the review and 1.5 (`claude/v15-review`; decision 377; never the save)
-
-**Half done** (from `v1.4-dev` at `37d442e`, save v58; draft PR #233). Done: `lived-in-v55.json`
-opened as her phone will (notes last seen `1.4.1`) at Close, Far and sideways, one `1.5` card each
-time; played on by taps from 25 October to 10 January and kept as `lived-in-v58.json`
-(`livedIn.test.ts`, and the overlays snapshot's saves); the shakedown looked at; the build one
-chunk, 1,963.9 kB (660.7 kB gzipped); smoke 673/673, offline 10/10. Half done: the handoff's
-top, rewritten, with `@@` placeholders still to fill (the release PR's number, V1.5's record,
-"How 1.4 and 1.5 were run"). Next: perf against `main`; "Where it hurts" and a 1.5 perf row;
-`CLAUDE.md`; the plan's line; decision 377; the art notes; open the release PR, put its number in,
-merge this, empty this section.
+Nothing. **The 1.4 plan is complete** (its review, V1.5, merged into `v1.4-dev` as PR #233,
+decision 377), and **1.5 is the release PR #234** (`v1.4-dev` → `main`), for the coordinating
+session to merge at the user's word; "After 1.0" says what's next. No plan follows.
 
 ## If you are starting cold after a long gap
 
@@ -99,7 +86,7 @@ brought up to 1.5 by V1.5's review (decision 377) the same night.
 
 ## After 1.0
 
-**The 1.4 plan is complete, and 1.5 is the release PR #@@REL@@** (`v1.4-dev` → `main`, "Release
+**The 1.4 plan is complete, and 1.5 is the release PR #234** (`v1.4-dev` → `main`, "Release
 1.5"), for the coordinating session to merge at the user's word, as 1.4 was; merging deploys to her
 phone, and `main` after it is the game as it stands. Her phone is on 1.4 until then (PR #231,
 2026-10-25: G1–G4, save v57, the cards `1.4` and `1.4.1`). 1.5 is G5's photo mode, G6's attic and
@@ -147,8 +134,8 @@ sessions from `v1.4-dev` and the review, all Opus sub-agents of one coordinating
 time, all on 2026-10-25. **1.4** (G1–G4) went to her phone mid-plan as the release PR #231
 (`v1.4-dev` at `e8e046e` → `main`, save v55 → v57), cut by the coordinator: she read two cards,
 `1.4` and `1.4.1` (G4's night sky, whose row was made before the cut). **1.5** (G5–G7, save v58)
-is the release PR after V1.5. Each session's heading as it left it follows; the decisions hold the
-detail.
+is the release PR #234, after V1.5. Each session's heading as it left it follows; the decisions
+hold the detail.
 
 #### G1: shiny morphs (`claude/g1-shinies`; decision 370; **save bumped to v56**)
 
@@ -234,9 +221,51 @@ lantern's glass glows after dark, `LANTERN_GLOW`); up by night and asleep by day
 fifth `1.5` notes line; smoke's `pickle` section in `pets`. Decision 376 says what and why.
 Nothing half done. **The review (V1.5) is next**, and folds nothing in 1.5's notes: it has five.
 
-@@V15@@
+#### V1.5: the review and 1.5 (`claude/v15-review`, PR #233, decision 377; Opus)
 
-@@HOW@@
+**Landed.** The notes: her phone last saw `1.4.1`, so 1.5's row is one card of five lines and a
+P.S. as G5–G7 left it (the camera, Cody wanting a copy, the attic, its window and eaves, Pickle),
+read through and kept; a phone that saw `1.4.1` reads exactly it. The lived-in town: 1.2's
+(`lived-in-v55.json`) opened in a 1.5 dev build as her phone will (through steps 55–57), at Close,
+Far and sideways: the title, one card, Cody's hello ("It's been 2 weeks"), no error notes, the
+unlinked cloud's 503 alone. Played on by taps with a scratch driver on smoke's `lib.mjs` in a
+persistent profile of its own (decision 324's method): 25 October at night on the real clock
+(Pickle patted, playing dead, then hanging by his tail; the attic built and climbed, its round
+window full of stars; a photo by the well with a sticker, the moonlit filter and a caption; the
+Bat traced at the castle's telescope, Hazel's letter), 26 October (a shiny tombstone toad in the
+graveyard, Today's "Something glittered", netted), 5 and 6 November (the bat onesie, hood and
+slippers bought and worn, Gourdon's log stove and rocking chair ordered, posted and set out, sat
+in by night) and 10 January (an icicle smelt through the frozen pond). Candy, wood, stone, glow
+gourds and Pickle's fondness were given by the dev handle (her town had 142 Candy); everything
+else by taps. Kept as `lived-in-v58.json` and added to the overlays snapshot. **Fixed**: nothing
+was a pixel. **Logged**: a tool used with a seed in hand (the rod casts from the seed packet), the
+camera's drawer sideways, the shiny glint's size, the framed Bat and Pickle's branch (both kept),
+the dim shadows under the ice ("Where it hurts" and the art notes). **Perf**: 1.5 against 1.4 on her
+phone (`origin/main` served from a copy of its own, 1.5's `scripts/perf.mjs` for both), alternating,
+three runs each at Close by night and at noon: every draw and update crosses 1.4's runs or sits
+under, the back room's update 0.1 ms over (Pickle, a seventh pet about her rooms), the heap up 0.3
+MB at most; the camera up costs about what the held world saves (30–36 ms a whole frame under the
+four filters, 33.6–36 with it down); the build one chunk, 1,963.9 kB (660.7 kB gzipped) against 1.84
+MB (615 kB) at 1.3. The table is in `docs/architecture.md`, "1.5, V1.5's review". The docs:
+this file's top, "Where it hurts", `CLAUDE.md`, the plan's line, decision 377.
+
+### How 1.4 and 1.5 were run, for whoever plans next
+
+A plan settled the afternoon 1.3 shipped and run the same evening: seven content sessions and a
+review, every one Opus (all judged by eye), two at a time by the files each owned, from
+`v1.4-dev`, as 1.3 was. What worked: **content on the seams the earlier plans made**: a critter, a
+set, a piece, a project, a room and a pet were each rows and art, so a session was a day's worth
+of things she'll see and no session needed a refactor; **the save bumps in a named order** (G1
+v56, G4 v57, G6 v58), one PR at a time; **cutting a patch mid-plan** (1.4, PR #231, the day G1–G4
+were in, as 1.3's notes asked), so she had shinies and the winter shelves before the winter. What
+cost: **two sessions writing one `NOTES` row at once** (G1 and G2, then G5 and G6) had to fold it
+at each merge, and G4's row became a second card, `1.4.1`, when 1.4 was cut with it; **the plan's
+brief met code it didn't know** four times (the lake never froze, nothing sells a pet, Hazel is
+the astronomer and not Agatha, there are no candles to build with), each settled well by the
+session in its decision, but each a fork a plan could have read for itself. Worth keeping: the
+seams, the order of the bumps, the mid-plan cut. Worth changing: one session owns a patch's notes
+row and the others hand it a line in their PR; a plan reads the rows it names before it sends a
+session to them.
 
 ### 1.3, the last week (the 1.3 plan's sessions and its review, 2026-10-24/25)
 
@@ -2235,8 +2264,12 @@ screenshots and its own four days of play at phone size, by day and at night. **
 (decision 363) struck the trees and the creek, looked over every place whole in each season and
 smoke's screenshots at Close both ways, and added three. **1.3's review** (decision 366) looked at
 the redrawn creatures in the world, the bag, the Cabinet and the museum at phone size, the town's
-trees by day and night, and smoke's screenshots, and found nothing to add or strike. What's left
-is for the user's eye on her phone, none of it clearly wrong:
+trees by day and night, and smoke's screenshots, and found nothing to add or strike. **1.5's
+review** (decision 377) looked at the 1.4 plan's art at phone size in its own play and smoke's
+screenshots (the shinies in the world and the Cabinet, the winter looks on her, the two sets by
+night, the frozen pond's hole and the ice hut, the Sky sheet and the chart, the camera upright and
+sideways, the attic's ceiling and window, Pickle's frames) and added the five below the creatures.
+What's left is for the user's eye on her phone, none of it clearly wrong:
 
 - **The frozen pond's ring** (A3 kept it, V1.1 and 1.3's F4 too): in winter the town pond is ice
   with a ring of plates and open water round the fountain, which plays on. Looked at again at
@@ -2263,6 +2296,22 @@ is for the user's eye on her phone, none of it clearly wrong:
   for her eye: the catfish (a dark plank its whiskers save), the fog eel's fin dashes, the mud
   puppy's gills like a bow, and the monarch, which could take a black margin like the mourning
   cloak's.
+- **The shiny glint is small** (1.4's G1): a four-pointed star about five pixels across at one
+  corner of the critter every 1.8 s, after the light, so seen by night and in fog. At Close on a
+  still screen it reads (a pearl tombstone toad in the graveyard, by day in a storm); on her phone
+  in her hand, walking, it may be missed. Today's "Something glittered…" carries it either way.
+- **The framed Bat** (1.5's G4, Hazel's "Half the sky" gift, `framedConstellation`): the Bat
+  drawn as its stars and lines at 32, gold on navy. It reads as the constellation she traced (two
+  ears, the wing tips, a straight line under the wings to the tail), not as a drawn bat; a
+  scalloped wing would mean moving the Bat's stars, which the trace is played on. Kept.
+- **Pickle's branch over her legs** (1.5's G7): hanging by his tail on the tile just below her,
+  his branch (the top three rows of his 32) is drawn over her shins. He's nearer the camera than
+  she is, so a branch held up in the air there is in front of her legs: the depth is right. Kept.
+- **The fish under the ice are dim** (1.4's G3, alpha 0.3 against open water's 0.6): on the pale
+  ice by day at Close they're faint smudges, found by looking; on purpose, so the ice looks thick.
+- **Fishing with a seed in her hand** (decision 110's rule, older than the rod): she keeps a seed
+  through a tap on a fish, so the line runs from the seed packet and no rod is drawn ("Where it
+  hurts").
 
 Struck since V1's review: ~~the lavender cobble carrying the town~~ (A1: the square in
 flagstones, the well on setts, two benches, the roads worn down the middle); ~~woods walls of one
