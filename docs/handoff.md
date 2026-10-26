@@ -85,17 +85,16 @@ the review folds to five. Decision 375 says what and why. Nothing half done. **G
 
 ### G7: Pickle the possum (`claude/g7-possum`; decision 376; no save change)
 
-**In progress** (PR #232 into `v1.4-dev`). Done: the `pickle` row (`data/pets.ts`, hers from the
-moment 1.5 lands, as the six are from the first day: nothing sells pets), his art in
+**Landed** (PR #232, merged into `v1.4-dev`; still save v58): Pickle, hers from the moment 1.5
+lands as the six are from the first day (nothing sells pets), last in `PET_IDS`; his art in
 `sprites/pets.ts` (`pickleFrames`: side ×2, sit front and back, curled asleep, playing dead,
-hanging by his tail ×2; each drawn bare, in his bow and with his lantern, `PetArt.dressed`), three
-accessories (`tinyScarf` for every pet; `ribbonBow` and `tailLantern` his alone, `for`, `fitsPet`),
-his rows in `data/affection.ts` (pats, both tricks in one `TRICKS` routine, the `forage` job and
-`FORAGED`, rests), nocturnal habits and playing dead (`Pet.playDead`, `pickleAwake`, `startled`),
-the forage deed in `PetCare` (once a night, `forage:pickle` in `Takings`), the lantern's glow in
-`render/pets.ts`; tests (`tests/world/pickle.test.ts`, `tests/sprites/pets.test.ts`), smoke's
-`pickle` section (in `pets.mjs`, after `pets`), the fifth `1.5` notes line, `CLAUDE.md`, the plan's
-status line, decision 376. Next: CI green on #232, merge `origin/v1.4-dev` in and rerun, merge.
+hanging by his tail ×2, each drawn bare, in his bow and with his lantern, `PetArt.dressed`); a
+`tinyScarf` for any pet and his own `ribbonBow` and `tailLantern` (`for`, `fitsPet`; the
+lantern's glass glows after dark, `LANTERN_GLOW`); up by night and asleep by day
+(`pickleAwake`), playing dead at a pat or a neighbour close by (`Pet.playDead`), foraging one of
+`FORAGED` once a night (`forage:pickle` in `Takings`), both tricks in one `TRICKS` routine; the
+fifth `1.5` notes line; smoke's `pickle` section in `pets`. Decision 376 says what and why.
+Nothing half done. **The review (V1.5) is next**, and folds nothing in 1.5's notes: it has five.
 
 ### V1.5 the review
 
