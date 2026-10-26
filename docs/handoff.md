@@ -84,9 +84,15 @@ save change** (v59). Next: merge when green, then empty this heading.
 fossil and Wrapunzel will stand them up as a skeleton. She has named it Gerald. And there are
 kites at Cobweb Corner: on a breezy day, fly one from the end of the pier."
 
-### V1.6 the review
+### V1.6: the review and 1.6 (`claude/v16-review`; decision 386)
 
-Not started; in the plan's order.
+Under way. **Done:** the `1.6` card folded to five lines and the mayor's last P.S. for a while
+(`src/data/patchNotes.ts`, its test); 1.5's town opened in 1.6 as her phone will (one card, Cody's
+hello, no error notes) and played on by taps to 28 October 2027, kept as
+`tests/persistence/fixtures/lived-in-v59.json` (in `livedIn.test.ts` and the overlays snapshot);
+the kite flies lower rather than off the top of a phone on its side (`render/passes/kite.ts`).
+**Next:** perf against `main`; the docs (this file's top, "Where it hurts", `CLAUDE.md`, the plan's
+line, decision 386); merge into `v1.6-dev`; the release PR "Release 1.6" to `main`, not merged.
 
 ## If you are starting cold after a long gap
 

@@ -28,7 +28,13 @@ import { fromSave, World } from '../../src/world/World';
  * from 25 October to 10 January (V1.5's review): Pickle patted and doing his trick, the attic
  * built and climbed, a photo, the Bat traced, a shiny tombstone toad netted, the bat onesie bought
  * and worn, Gourdon's log stove and rocking chair ordered and set out, and an icicle smelt landed
- * through the frozen pond.
+ * through the frozen pond. 1.6's is 1.5's opened in a 1.6 dev build as her phone will (through
+ * step 58, one `1.6` card), then played on by taps from 12 January to 28 October 2027 (V1.6's
+ * review): a snowman rolled in her yard (in her bag since the thaw), a snowball thrown at Rufus,
+ * the hens fed and their eggs collected, every fossil given and Gerald walked up to, a bat kite
+ * bought and flown at the castle lookout and the pier, the big wheel ridden by day with Agatha and
+ * by night alone, the rainbow's jar, a sneeze in the meadow, fireflies on a July night, Fibi's
+ * gifts, the festival's lights at night, and the hens fed again that night.
  */
 const LIVED_IN = {
   '0.2.2': 'lived-in-v27.json',
@@ -38,6 +44,7 @@ const LIVED_IN = {
   '1.0': 'lived-in-v53.json',
   '1.2': 'lived-in-v55.json',
   '1.5': 'lived-in-v58.json',
+  '1.6': 'lived-in-v59.json',
 };
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');
