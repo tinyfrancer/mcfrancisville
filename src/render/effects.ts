@@ -1,7 +1,10 @@
 import { ITEM_ART } from '../sprites/items';
+import { bake } from '../sprites/bake';
+import { CRITTER_ART } from '../sprites/critters';
 import {
   CANDY_POP,
   countArt,
+  GIFT_ART,
   PARCEL_POP,
   PARTICLE_ART,
   SNOWBALL_THROWN,
@@ -9,7 +12,8 @@ import {
   type ParticleKind,
 } from '../sprites/effects';
 import { NEIGHBOUR_BUBBLES, type Emote } from '../sprites/villagers';
-import type { ItemId, VillagerId, ZoneId } from '../types/ids';
+import type { PetGiftId } from '../data/petGifts';
+import type { CritterId, ItemId, VillagerId, ZoneId } from '../types/ids';
 import type { World } from '../world/World';
 import type { TileBox } from '../world/events';
 import { TILE_SIZE } from '../config/world';
@@ -45,8 +49,11 @@ export type { ParticleKind } from '../sprites/effects';
  */
 export type Anchor = Point | { her: true } | { villager: VillagerId };
 
-/** What a pop shows: an item's own icon, a sweet for Candy, or a parcel for anything else. */
-export type PopIcon = { item: ItemId } | { candy: true } | { parcel: true };
+/**
+ * What a pop shows: an item's own icon, a sweet for Candy, a parcel for anything else, or what
+ * Fibi has brought her (1.6's X5), which isn't hers to count.
+ */
+export type PopIcon = { item: ItemId } | { candy: true } | { parcel: true } | { gift: PetGiftId };
 
 export type Effect =
   /** `from` her is from her hands, up over her head; from anywhere else, an arc to her. */
@@ -66,7 +73,11 @@ export type Effect =
   /** What she tapped, bracketed for a beat (V1's E4): its tiles, or a neighbour as they move. */
   | { kind: 'outline'; around: Outlined; delayMs?: number }
   /** A snowball thrown (1.6's X4): from hands to hands, or to a spot, landing in a puff. */
-  | { kind: 'throw'; from: Anchor; to: Anchor; delayMs?: number };
+  | { kind: 'throw'; from: Anchor; to: Anchor; delayMs?: number }
+  /** A butterfly or moth flutters in and settles on her hat (1.6's X5), until a `flit`. */
+  | { kind: 'perch'; critter: CritterId; delayMs?: number }
+  /** The one on her hat flutters off. */
+  | { kind: 'flit'; delayMs?: number };
 
 /** What a tap's outline goes round: a box of tiles, or a neighbour, standing or sat. */
 export type Outlined = { box: TileBox } | { villager: VillagerId };
@@ -105,6 +116,21 @@ export const PRINT_MS = 30_000;
 const PRINT_FADE_MS = 10_000;
 /** How many footprints there can be at once; the oldest goes first. */
 export const PRINT_POOL = 160;
+/** A butterfly fluttering in to her hat, and off it again (1.6's X5). */
+export const PERCH_IN_MS = 1100;
+export const PERCH_OUT_MS = 1000;
+/** Sat on her hat, its wings stay open this long, then shut a moment. */
+const WINGS_OPEN_MS = 1500;
+const WINGS_SHUT_MS = 600;
+/** Where it comes in from and goes off to, from her hat. */
+const PERCH_FROM = { x: -46, y: -38 };
+const PERCH_TO = { x: 54, y: -60 };
+/** Fireflies round her on a summer night (1.6's X5): how many, and how fast they come and go. */
+export const FIREFLIES = 4;
+const FIREFLY_IN_MS = 1500;
+const FIREFLY_OUT_MS = 700;
+/** How far below the top of her head their middle is: about her waist. */
+const FIREFLY_MIDDLE = 24;
 
 /** How high a pop's arc lifts at its middle, and how far it floats up after. */
 const ARC_LIFT = 22;
@@ -203,6 +229,26 @@ const MOTION: Record<ParticleKind, Motion> = {
     sway: 0,
     frameMs: 0,
   },
+  feather: {
+    life: 1600,
+    count: 3,
+    spread: 6,
+    vx: [-0.02, 0.02],
+    vy: [-0.05, -0.02],
+    gravity: 0.00006,
+    sway: 4,
+    frameMs: 300,
+  },
+  pollen: {
+    life: 700,
+    count: 8,
+    spread: 4,
+    vx: [-0.06, 0.06],
+    vy: [-0.05, 0.01],
+    gravity: 0,
+    sway: 1,
+    frameMs: 200,
+  },
   snow: {
     life: 520,
     count: 7,
@@ -214,6 +260,23 @@ const MOTION: Record<ParticleKind, Motion> = {
     frameMs: 260,
   },
 };
+
+/** A butterfly or moth on her hat (1.6's X5): which, how long since it came, and since it left. */
+interface Perch {
+  zone: ZoneId;
+  critter: CritterId;
+  age: number;
+  leaving: number | null;
+}
+
+/** A firefly round her (1.6's X5), in world pixels, with its own way of circling. */
+interface Firefly {
+  x: number;
+  y: number;
+  phase: number;
+  reach: number;
+  speed: number;
+}
 
 /** What leaves a footprint (1.6's X4): her boots, a neighbour's, or a pet's paws. */
 export type PrintKind = 'boot' | 'paw';
@@ -356,6 +419,12 @@ export class Effects {
   /** Which foot fell last, so her footprints go left, right, left. */
   private foot = 0;
   private readonly prints: Print[] = [];
+  private perch: Perch | null = null;
+  /** The fireflies round her, how bright they are (0 to 1), and the place they're in. */
+  private readonly flies: Firefly[] = [];
+  private glow = 0;
+  private glowZone: ZoneId | null = null;
+  private glowWanted = false;
 
   constructor(options: EffectsOptions = {}) {
     this.reduced = options.reduced ?? (() => false);
@@ -380,6 +449,16 @@ export class Effects {
   /** Something to show in `zone`. A burst with reduced motion asked for shows nothing. */
   push(zone: ZoneId, effect: Effect): void {
     const still = this.reduced();
+    // On her hat until it flits off, rather than for a while (1.6's X5).
+    if (effect.kind === 'perch') {
+      this.perch = { zone, critter: effect.critter, age: still ? PERCH_IN_MS : 0, leaving: null };
+      return;
+    }
+    if (effect.kind === 'flit') {
+      if (this.perch && this.perch.leaving === null) this.perch.leaving = 0;
+      if (still) this.perch = null;
+      return;
+    }
     if ((effect.kind === 'burst' || effect.kind === 'throw') && still) return;
     let delay = effect.delayMs ?? 0;
     if (effect.kind === 'pop') {
@@ -467,9 +546,34 @@ export class Effects {
     ctx.globalAlpha = 1;
   }
 
+  /** The butterfly or moth on her hat, or on its way to or from it. */
+  perched(): CritterId | null {
+    return this.perch?.critter ?? null;
+  }
+
+  /**
+   * Whether fireflies are gathered round her in `zone` now (1.6's X5): asked each step, they come
+   * softly and go softly, and none with reduced motion asked for.
+   */
+  fireflies(zone: ZoneId, wanted: boolean): void {
+    if (zone !== this.glowZone) {
+      this.glowZone = zone;
+      this.glow = 0;
+      this.flies.length = 0;
+    }
+    this.glowWanted = wanted && !this.reduced();
+  }
+
+  /** How many fireflies are showing round her now, in `zone`. */
+  fireflyCount(zone: ZoneId): number {
+    return zone === this.glowZone && this.glow > 0 ? this.flies.length : 0;
+  }
+
   /** Everything moved on by one step of the simulation. */
   step(deltaMs: number, resolve: Resolve): void {
     this.time += deltaMs;
+    this.stepPerch(deltaMs);
+    this.stepFireflies(deltaMs, resolve);
     for (let i = this.live.length - 1; i >= 0; i--) {
       const l = this.live[i]!;
       l.age += deltaMs;
@@ -501,6 +605,72 @@ export class Effects {
       p.x += p.vx * deltaMs;
       p.y += p.vy * deltaMs;
     }
+  }
+
+  private stepPerch(deltaMs: number): void {
+    const p = this.perch;
+    if (!p) return;
+    p.age += deltaMs;
+    if (p.leaving !== null) {
+      p.leaving += deltaMs;
+      if (p.leaving >= PERCH_OUT_MS) this.perch = null;
+    }
+  }
+
+  /** Each firefly circles her in its own way, trailing after her as she walks. */
+  private stepFireflies(deltaMs: number, resolve: Resolve): void {
+    const rate = this.glowWanted ? deltaMs / FIREFLY_IN_MS : -deltaMs / FIREFLY_OUT_MS;
+    this.glow = Math.min(1, Math.max(0, this.glow + rate));
+    if (this.glow === 0) {
+      this.flies.length = 0;
+      return;
+    }
+    const head = resolve({ her: true });
+    if (!head) return;
+    const middle = { x: head.x, y: head.y + FIREFLY_MIDDLE };
+    if (this.flies.length === 0) {
+      const r = this.random;
+      for (let i = 0; i < FIREFLIES; i++) {
+        this.flies.push({
+          x: middle.x + (r() * 2 - 1) * 40,
+          y: middle.y + (r() * 2 - 1) * 30,
+          phase: r() * Math.PI * 2,
+          reach: 14 + r() * 12,
+          speed: (0.5 + r() * 0.5) * (i % 2 === 0 ? 1 : -1),
+        });
+      }
+    }
+    const t = this.time / 1000;
+    const ease = Math.min(1, deltaMs / 500);
+    for (const f of this.flies) {
+      const a = f.phase + t * f.speed;
+      const goal = {
+        x: middle.x + Math.cos(a) * f.reach,
+        y: middle.y + Math.sin(a) * f.reach * 0.6 + Math.sin(t * 1.7 + f.phase) * 4,
+      };
+      f.x += (goal.x - f.x) * ease;
+      f.y += (goal.y - f.y) * ease;
+    }
+  }
+
+  /** The fireflies' soft lights: a bright middle and a fainter cross round it, each breathing. */
+  private drawFireflies(ctx: CanvasRenderingContext2D, cam: Point): void {
+    if (this.glow === 0) return;
+    ctx.fillStyle = PALETTE.fireflyGlow;
+    const t = this.time / 1000;
+    for (const f of this.flies) {
+      const breath = 0.5 + 0.5 * Math.sin(t * 2.4 + f.phase * 3);
+      const x = Math.round(f.x) - cam.x;
+      const y = Math.round(f.y) - cam.y;
+      ctx.globalAlpha = this.glow * (0.35 + 0.65 * breath);
+      ctx.fillRect(x - 1, y - 1, 2, 2);
+      ctx.globalAlpha = this.glow * 0.35 * breath;
+      ctx.fillRect(x - 1, y - 2, 2, 1);
+      ctx.fillRect(x - 1, y + 1, 2, 1);
+      ctx.fillRect(x - 2, y - 1, 1, 2);
+      ctx.fillRect(x + 1, y - 1, 1, 2);
+    }
+    ctx.globalAlpha = 1;
   }
 
   /** An effect's start: a pop's source fixed, a burst's bits thrown (and the burst done). */
@@ -569,11 +739,19 @@ export class Effects {
       });
   }
 
-  /** Where the sparkles and coins are in `zone`, for the light to bloom round after dark (V1's L3). */
+  /**
+   * Where the sparkles, coins and fireflies are in `zone`, for the light to bloom round after dark
+   * (V1's L3).
+   */
   glints(zone: ZoneId): Point[] {
+    const flies =
+      zone === this.glowZone && this.glow > 0.5
+        ? this.flies.map((f) => ({ x: Math.round(f.x), y: Math.round(f.y) }))
+        : [];
     return this.pool
       .filter((p) => p.active && p.zone === zone && (p.kind === 'sparkle' || p.kind === 'coin'))
-      .map((p) => ({ x: Math.round(p.x), y: Math.round(p.y) }));
+      .map((p) => ({ x: Math.round(p.x), y: Math.round(p.y) }))
+      .concat(flies);
   }
 
   /** How many particles are flying in `zone` (or anywhere). */
@@ -604,6 +782,8 @@ export class Effects {
       ctx.drawImage(sprite, x, y);
     }
     ctx.globalAlpha = 1;
+    if (zone === this.glowZone) this.drawFireflies(ctx, cam);
+    if (this.perch?.zone === zone) drawPerch(ctx, this.perch, cam, resolve, still);
     for (const l of this.live) {
       if (!l.started || l.zone !== zone) continue;
       const e = l.effect;
@@ -638,13 +818,67 @@ export class Effects {
     const top = at.y - icon.height - cam.y;
     ctx.globalAlpha = at.alpha;
     ctx.drawImage(icon, left, top);
-    // The count once it's with her, beside it.
-    if (still || l.age >= POP_ARC_MS) {
+    // The count once it's with her, beside it; none for what isn't hers to count.
+    if (e.count > 0 && (still || l.age >= POP_ARC_MS)) {
       const n = countArt(e.count);
       const count = bakeIcon(`effect:count:${e.count}`, n.source, n.palette);
       ctx.drawImage(count, left + icon.width - 2, top + icon.height - count.height);
     }
   }
+}
+
+// ---- Small delights (1.6's X5, decision 384) ------------------------------------------------
+
+/** Where a butterfly on her hat is drawn from: its sprite's bottom middle, on her hat's top. */
+export function perchAt(
+  perch: { age: number; leaving: number | null },
+  hat: Point,
+): Point & { alpha: number; flying: boolean } {
+  const sat = { x: hat.x + 3, y: hat.y + 6 };
+  if (perch.leaving !== null) {
+    const t = Math.min(1, perch.leaving / PERCH_OUT_MS);
+    const e = t * t;
+    return {
+      x: Math.round(sat.x + PERCH_TO.x * e + Math.sin(t * 9) * 4),
+      y: Math.round(sat.y + PERCH_TO.y * e),
+      alpha: fadeOf(perch.leaving, PERCH_OUT_MS),
+      flying: true,
+    };
+  }
+  if (perch.age >= PERCH_IN_MS) return { ...sat, alpha: 1, flying: false };
+  const t = perch.age / PERCH_IN_MS;
+  const k = (1 - t) * (1 - t);
+  return {
+    x: Math.round(sat.x + PERCH_FROM.x * k),
+    y: Math.round(sat.y + PERCH_FROM.y * k + Math.sin(t * Math.PI * 3) * 6 * (1 - t)),
+    alpha: Math.min(1, t * 4),
+    flying: true,
+  };
+}
+
+/** The butterfly or moth on her hat in its own colours, wings beating as it flies, slow as it sits. */
+function drawPerch(
+  ctx: CanvasRenderingContext2D,
+  perch: Perch,
+  cam: Point,
+  resolve: Resolve,
+  still: boolean,
+): void {
+  const hat = resolve({ her: true });
+  if (!hat) return;
+  const at = perchAt(perch, hat);
+  const art = CRITTER_ART[perch.critter];
+  const clock = perch.leaving ?? perch.age;
+  const sitting = perch.age % (WINGS_OPEN_MS + WINGS_SHUT_MS) < WINGS_OPEN_MS ? 0 : 1;
+  const frame = still ? 0 : at.flying ? Math.floor(clock / 90) % 2 : sitting;
+  const sprite = bake(
+    `perch:${perch.critter}:${frame}`,
+    art.frames[frame === 0 ? 0 : 1],
+    art.palette,
+  );
+  ctx.globalAlpha = at.alpha;
+  ctx.drawImage(sprite, at.x - sprite.width / 2 - cam.x, at.y - sprite.height - cam.y);
+  ctx.globalAlpha = 1;
 }
 
 /** How long an effect shows; a burst's life is its bits'. */
@@ -662,6 +896,10 @@ function lifeOf(effect: Effect, still: boolean): number {
       return 0;
     case 'throw':
       return THROW_MS;
+    // Kept apart from the rest (`Effects.perch`), so never live.
+    case 'perch':
+    case 'flit':
+      return 0;
   }
 }
 
@@ -704,6 +942,10 @@ function popSprite(icon: PopIcon): HTMLCanvasElement {
   if ('item' in icon) {
     const art = ITEM_ART[icon.item];
     return bakeIcon(`item:${icon.item}`, art.source, art.palette);
+  }
+  if ('gift' in icon) {
+    const art = GIFT_ART[icon.gift];
+    return bakeIcon(`effect:gift:${icon.gift}`, art.source, art.palette);
   }
   const art: EffectArt = 'candy' in icon ? CANDY_POP : PARCEL_POP;
   return bakeIcon(`effect:${'candy' in icon ? 'candy' : 'parcel'}`, art.source, art.palette);

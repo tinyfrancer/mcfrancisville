@@ -275,6 +275,8 @@ function startGame(): void {
     trails.step(world, effects, weatherHere);
     chatter.show(world, effects, sound);
     pats.show(world, effects);
+    // Fireflies round her on a summer night (1.6's X5).
+    effects.fireflies(world.scene, world.delights.fireflies());
     hearing.step(world, sound, clock.now(), weatherHere());
     effects.step(stepMs, resolverFor(world));
     transitions.step(stepMs);

@@ -1,4 +1,5 @@
 import type { Figure } from '../sprites/villagers';
+import type { PetId } from '../types/ids';
 import { ZONES } from '../data/zones';
 import { hashString } from '../systems/random';
 import type { WorldEvent } from '../world/World';
@@ -147,9 +148,39 @@ export const CUES = {
     chime('C5:.15 D5:.15 E5:.15 G5:.15 A5:.15 C6:.15 D6:.15 E6:1.2', 0.12),
     chime('-:.6 C4+G4:2', 0.06),
   ),
+  // Small delights (1.6's X5): wings landing on her hat, the scarecrow's crow, a sneeze, and
+  // hello at the door: a mew for the cats, Dolly's and Fibi's woof, Pickle's chitter.
+  flutter: cue(
+    { wave: 'brush', notes: line('G6:.08 -:.06 G6:.08 -:.06 G6:.08'), gain: 0.04, q: 2 },
+    chime('-:.4 E6:.12 B6:.4', 0.05),
+  ),
+  caw: cue(pluck('E4:.15 D4:.3 -:.15 E4:.15 C4:.4', 0.08, 'square'), {
+    wave: 'brush',
+    notes: line('-:.6 A6:.3'),
+    gain: 0.04,
+    q: 1.5,
+  }),
+  achoo: cue(
+    { wave: 'sine', notes: line('A4:.3 C5:.3 E5:.25'), gain: 0.08, attack: 0.05, release: 0.1 },
+    { wave: 'brush', notes: line('-:.85 C6:.3'), gain: 0.14, q: 1 },
+    chime('-:1.3 G5:.12 C6:.4', 0.06),
+  ),
+  mew: cue(pluck('G5:.12 B5:.18 E5:.45', 0.1)),
+  chitter: cue(pluck('C6:.06 D6:.06 C6:.06 D6:.06 E6:.12', 0.06, 'sine')),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
+
+/** What each pet says by way of hello at the door (1.6's X5); Gary says nothing, happily. */
+const HELLO: Record<PetId, CueId | null> = {
+  florence: 'mew',
+  fibi: 'woof',
+  dolly: 'woof',
+  gary: null,
+  wybie: 'mew',
+  elvira: 'mew',
+  pickle: 'chitter',
+};
 
 /** The sound a moment makes, if any. */
 export function cueOf(event: WorldEvent): CueId | null {
@@ -317,6 +348,16 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'clucks';
     case 'crow':
       return 'crow';
+    case 'landed':
+      return 'flutter';
+    case 'cawed':
+      return 'caw';
+    case 'sneezed':
+      return 'achoo';
+    case 'greeted':
+      return HELLO[event.pet];
+    case 'petGift':
+      return 'found';
     default:
       return null;
   }

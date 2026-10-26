@@ -134,17 +134,41 @@ const ARM = { x: 36, y: 31 };
 const FROM = { x: -120, y: -90 };
 const TO = { x: 130, y: -100 };
 
+/** A caw at her (1.6's X5): the crow up off the arm, flapping, and back down, this long. */
+export const CAW_MS = 1400;
+const CAW_LIFT = 7;
+
 /**
  * A crow on each scarecrow's arm now and then (V1's E5): it flies in from the top left, sits a
  * while looking about and pecking, then flies off to the top right. By day only, with the crows.
+ * `sinceCaw` is how long since it cawed at her walking past (1.6's X5): a crow sat there lifts off
+ * the arm flapping and settles again; one that wasn't was in the straw all along, and flies off.
  */
-export function perchDrawables(scarecrows: readonly Drawable[], nowMs: number, hour: number) {
+export function perchDrawables(
+  scarecrows: readonly Drawable[],
+  nowMs: number,
+  hour: number,
+  sinceCaw: number | null = null,
+) {
   if (!flyerOut('crow', hour)) return [];
+  const cawing = sinceCaw !== null && sinceCaw >= 0 && sinceCaw < CAW_MS ? sinceCaw : null;
   return scarecrows.flatMap((s): Drawable[] => {
     const t = (nowMs + ((s.x * 37) % PERCH.round)) % PERCH.round;
     const arm = { x: s.x + ARM.x, y: s.y + ARM.y };
     const footY = s.footY + 0.5;
     const { landing, sitting } = PERCH;
+    if (cawing !== null) {
+      const sat = t >= landing && t < landing + sitting;
+      const f = cawing / CAW_MS;
+      const frame = CROW_BEATS[Math.floor(cawing / BEAT_MS.crow) % CROW_BEATS.length]!;
+      const sprite = flyerSprite('crow', frame, true);
+      // Up and down again over the caw; or up out of the straw and away.
+      const lift = sat ? Math.round(Math.sin(f * Math.PI) * CAW_LIFT) : 0;
+      const away = sat ? 0 : f * f;
+      const x = Math.round(arm.x + TO.x * away - sprite.width / 2);
+      const y = Math.round(arm.y - 6 - lift + TO.y * away - sprite.height / 2);
+      return [{ footY, sprite, x, y }];
+    }
     if (t < landing || (t >= landing + sitting && t < 2 * landing + sitting)) {
       const leaving = t >= landing;
       const f = leaving ? (t - landing - sitting) / landing : t / landing;

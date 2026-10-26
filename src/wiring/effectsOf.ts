@@ -5,6 +5,7 @@ import type { Ware } from '../data/shop';
 import type { Made } from '../data/recipes';
 import type { VisitGift } from '../data/visits';
 import { CAST_MS } from '../systems/fishing';
+import { SNEEZE_AH_MS } from '../systems/poses';
 import { SPRINKLER } from '../systems/beds';
 import { PROP_ART } from '../sprites/props';
 import type { Anchor, Effect, PopIcon } from '../render/effects';
@@ -362,6 +363,25 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return event.job === 'bark'
         ? [emote('!', event.at)]
         : [burst('sparkle', event.at, 5, 10), ...(event.job === 'sniff' ? [emote('!')] : [])];
+    // Small delights (1.6's X5): a butterfly on her hat and off again, the crow's feathers, a
+    // sneeze's pollen and a heart from whoever said bless you, a hello at the door, Fibi's gift.
+    case 'landed':
+      return [{ kind: 'perch', critter: event.critter }];
+    case 'flewOff':
+      return [{ kind: 'flit' }];
+    case 'cawed': {
+      const crow = heights(event.box, 'scarecrow').crown;
+      return [burst('feather', { x: crow.x + 6, y: crow.y }, 3, 6)];
+    }
+    case 'sneezed':
+      return [
+        { ...burst('pollen', { x: at.her.x, y: at.her.y - 22 }, 8, 5), delayMs: SNEEZE_AH_MS },
+        ...(event.by ? [{ ...emote('♥', { villager: event.by }), delayMs: 500 }] : []),
+      ];
+    case 'greeted':
+      return [burst('heart', event.at, 3, 8)];
+    case 'petGift':
+      return [pop({ gift: event.gift }, 0, event.from), burst('sparkle', event.from, 3, 8)];
     case 'frozen':
       return [burst('sparkle', head, 6, 20), emote('♪')];
     case 'dressedUp':

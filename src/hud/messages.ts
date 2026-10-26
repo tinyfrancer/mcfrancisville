@@ -714,6 +714,13 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.item === BEST_SWEET
         ? { text: `${event.line} Your favourite!`, special: true, icon: { item: event.item } }
         : { text: event.line, icon: event.home ? { mark: 'halloween' } : { item: event.item } };
+    // Small delights (1.6's X5): Fibi's gift, and a neighbour's bless you.
+    case 'petGift':
+      return { text: event.line, icon: 'heart' };
+    case 'sneezed':
+      return event.by && event.line
+        ? { text: `${VILLAGERS[event.by].name}: "${event.line}"`, icon: 'heart' }
+        : null;
     // Reginald at six, if she's at Boo Acres to hear him (1.6's X3); the card says the rest.
     case 'crow':
       return {
