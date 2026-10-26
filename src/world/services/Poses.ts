@@ -82,6 +82,8 @@ export function verbOf(e: WorldEvent): { verb: Verb; afterMs: number } | null {
     case 'won':
     case 'trickOrTreat':
       return now('show');
+    case 'sneezed':
+      return now('sneeze');
     case 'arrived':
       // A wave hello to a neighbour, and down to pat a pet.
       if (e.villager) return now('greet');
@@ -109,7 +111,12 @@ export function feelOf(e: WorldEvent): Feeling | null {
     case 'wesStays':
     case 'won':
     case 'foundEgg':
+    // A butterfly on her hat, and her pets at the door (1.6's X5).
+    case 'landed':
+    case 'greeted':
       return 'happy';
+    case 'petGift':
+      return 'laugh';
     case 'harvested':
       return e.first ? 'happy' : null;
     case 'unearthed':

@@ -29,6 +29,7 @@ import type { ActivityId } from '../data/activities';
 import type { Grade } from '../systems/activities';
 import type { TuneId } from '../data/instruments';
 import type { PetJob, PetLevel } from '../data/affection';
+import type { PetGiftId } from '../data/petGifts';
 import type {
   BuriedId,
   Carvable,
@@ -364,7 +365,20 @@ export type WorldEvent =
       at: { x: number; y: number };
       /** What Pickle found for her (1.5's G7). */
       item?: ItemId;
-    };
+    }
+  // Small delights (1.6's X5, decision 384).
+  /** A butterfly or moth has landed on her hat as she stood still outdoors. */
+  | { kind: 'landed'; critter: CritterId }
+  /** It has flown off again, as she moved. */
+  | { kind: 'flewOff'; critter: CritterId }
+  /** The crow on a scarecrow she walked past lifted and cawed. */
+  | { kind: 'cawed'; box: TileBox }
+  /** She sneezed in the long grass in spring, and a neighbour close by said bless you. */
+  | { kind: 'sneezed'; by?: VillagerId; line?: string }
+  /** A pet at home trotted up to say hello as she came in, `at` over its back. */
+  | { kind: 'greeted'; pet: PetId; at: { x: number; y: number } }
+  /** Fibi brought her something, which isn't hers: `from` where Fibi is. */
+  | { kind: 'petGift'; pet: PetId; gift: PetGiftId; line: string; from: { x: number; y: number } };
 
 /** What's told as out of the ordinary today (V1's R3). */
 export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };

@@ -69,6 +69,8 @@ export class Movement {
   private path: { x: number; y: number }[] = [];
   /** Slipping on the ice and back (phase B1): she keeps facing it as she slides back. */
   private sliding = false;
+  /** A moment's stop on her way (1.6's X5's sneeze): she stands, then walks on. */
+  private holdMs = 0;
 
   constructor(start: Tile, facing: Facing) {
     this.player = { ...tileCentre(start), facing, moving: false, walkMs: 0 };
@@ -96,6 +98,7 @@ export class Movement {
       if (path && (!best || path.length < best.length)) best = path;
     }
     if (!best) return false;
+    this.holdMs = 0;
     this.target = best.at(-1) ?? here;
     // In tile units, with her own tile's middle first: from part way along a step, heading straight
     // for the next tile could shave the corner of whatever she's walking past, and the pull leaves
@@ -119,6 +122,11 @@ export class Movement {
   step(deltaMs: number, pace = 1): Tile | null {
     if (this.path.length === 0) return null;
     const p = this.player;
+    if (this.holdMs > 0) {
+      this.holdMs -= deltaMs;
+      p.moving = false;
+      return null;
+    }
     let budget = (WALK_SPEED * pace * deltaMs) / 1000;
     p.moving = true;
     p.walkMs += deltaMs * pace;
@@ -166,8 +174,14 @@ export class Movement {
     this.halt();
   }
 
+  /** Stands her still for `ms` where she is, then on she goes the way she was going. */
+  hold(ms: number): void {
+    if (this.path.length > 0) this.holdMs = ms;
+  }
+
   /** Stops where she is, with nowhere left to go. */
   halt(): void {
+    this.holdMs = 0;
     this.path = [];
     this.sliding = false;
     this.player.moving = false;

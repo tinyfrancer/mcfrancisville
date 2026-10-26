@@ -101,7 +101,19 @@ export type PetDeed =
   | { job: 'draw'; key: string; from: Tile; to: Tile }
   | { job: 'fetch'; at: Tile }
   | { job: 'forage'; at: Tile }
-  | { trick: true; own: boolean };
+  | { trick: true; own: boolean }
+  /** It reached her at the door to say hello (1.6's X5). */
+  | { greeted: true }
+  /** Fibi reached her with something in her mouth (1.6's X5). */
+  | { gift: true };
+
+/** Why a pet is coming over to her at home (1.6's X5): to say hello, or with a gift. */
+export type Coming = 'greet' | 'gift';
+
+/** A pet coming over gives up after this long, if it can't get to her. */
+export const COMING_MS = 9_000;
+/** Pickle, up at night, plays dead at her feet by way of hello, for this long. */
+export const HELLO_DEAD_MS = 1_800;
 
 /**
  * One of her pets, where it is and what it's up to. Everything it does is worked out as it goes,
@@ -143,6 +155,8 @@ export class Pet {
   /** Pickle playing dead until then (1.5's G7), and when a neighbour last startled him. */
   private deadUntil = 0;
   private startledAt = -Infinity;
+  /** Coming over to her at home (1.6's X5): why, how long it has been, and whether it's going round her. */
+  private coming: { why: Coming; ms: number; lap: boolean } | null = null;
 
   constructor(id: PetId, at: Tile) {
     this.id = id;
@@ -197,6 +211,7 @@ export class Pet {
    */
   private sitForPhoto(her: Her): void {
     this.deadUntil = 0;
+    this.coming = null;
     this.path = [];
     this.headedFor = null;
     this.moving = false;
@@ -220,6 +235,19 @@ export class Pet {
     this.trickAt = null;
     this.deadUntil = now + ms;
     this.pose = 'playDead';
+  }
+
+  /**
+   * Comes over to her (1.6's X5): to say hello as she comes in at the door, trotting once round
+   * her when it gets there, or (Fibi) with something in its mouth for her.
+   */
+  comeOver(why: Coming): void {
+    this.coming = { why, ms: 0, lap: false };
+  }
+
+  /** Why it's on its way over to her, if it is. */
+  get comingOver(): Coming | null {
+    return this.coming?.why ?? null;
   }
 
   /** Does its trick (V1's R6c), from the start. */
@@ -274,6 +302,7 @@ export class Pet {
       }
       return null;
     }
+    if (this.coming) return this.come(deltaMs, s, this.coming);
     if (s.following) return this.follow(deltaMs, s);
     this.potter(deltaMs, s);
     // Sat about at home while she stands by, it might show off its trick.
@@ -383,6 +412,80 @@ export class Pet {
       this.pose = 'sleep';
     } else if (this.pose !== 'sleep' && this.pose !== 'curl') this.pose = 'sit';
     return null;
+  }
+
+  /**
+   * On its way over to her (1.6's X5): to the open tile beside her, then, to say hello, once round
+   * her and sat looking up at her with a heart; Pickle plays dead at her feet instead; Fibi sits
+   * and gives her what she's brought.
+   */
+  private come(
+    deltaMs: number,
+    s: PetSurroundings,
+    c: { why: Coming; ms: number; lap: boolean },
+  ): PetDeed | null {
+    c.ms += deltaMs;
+    if (this.perch) this.place(this.perch.floor);
+    if (c.lap) {
+      this.pose = 'walk';
+      this.stepPath(deltaMs, PETS[this.id].speed);
+      if (this.path.length > 0) return null;
+      return this.arrived(s);
+    }
+    const her = tileOf(s.her.x, s.her.y);
+    const me = this.tile;
+    if (c.ms > COMING_MS) {
+      this.coming = null;
+      return null;
+    }
+    if (reach(me, her) > 1 || sameTile(me, her)) {
+      const goal = this.behind(s);
+      if (!goal) {
+        this.coming = null;
+        return null;
+      }
+      this.walk(deltaMs, goal, PETS[this.id].speed, s.ground);
+      return null;
+    }
+    this.settle(deltaMs, s.ground);
+    if (this.moving) return null;
+    this.lookAt(s.her);
+    if (c.why === 'gift') {
+      this.coming = null;
+      this.pose = 'sit';
+      this.say('heart', s.now, 2000);
+      return { gift: true };
+    }
+    if (this.id === 'pickle') {
+      this.coming = null;
+      this.playDead(s.now, HELLO_DEAD_MS);
+      return { greeted: true };
+    }
+    const ring = RING.map(([dx, dy]) => ({ tx: her.tx + dx, ty: her.ty + dy })).filter((t) =>
+      s.ground.canWalk(t.tx, t.ty),
+    );
+    if (ring.length < 3) return this.arrived(s, true);
+    const start = ring.reduce(
+      (best, t, i) => (reach(t, me) < reach(ring[best]!, me) ? i : best),
+      0,
+    );
+    const lap = [...ring.slice(start), ...ring.slice(0, start)];
+    this.path = [...lap, lap[0]!].map(centreOf);
+    this.headedFor = null;
+    c.lap = true;
+    this.pose = 'walk';
+    return { greeted: true };
+  }
+
+  /** Round her and home again: it sits looking up at her, pleased. */
+  private arrived(s: PetSurroundings, hello = false): PetDeed | null {
+    this.coming = null;
+    this.moving = false;
+    this.walkMs = 0;
+    this.lookAt(s.her);
+    this.pose = 'sit';
+    this.say('heart', s.now, 1600);
+    return hello ? { greeted: true } : null;
   }
 
   /** Wybie off for a dropped thing, flat out, and back to her with it. */

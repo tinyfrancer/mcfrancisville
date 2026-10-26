@@ -413,6 +413,7 @@ export class World extends WorldParts {
       this.neighbourhood.neighboursIn(this.scene).map((n) => n.tile),
       this.posing,
     );
+    this.delights.step(deltaMs);
     const events = this.ctx.moments.drain();
     events.push(...this.fishing.step());
     const walked = this.player.moving ? walkedTiles(this.player) : null;
