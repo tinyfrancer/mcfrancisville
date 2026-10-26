@@ -121,6 +121,7 @@ import { OPEN_DOOR_PALETTE, openDoor } from './doorsOpen';
 import { Sketch } from './sketch';
 import { BAT_FLYING, BAT_PALETTE, CROW_FLYING, CROW_PALETTE, CROW_PERCHED } from './sky';
 import { GAME_BACKDROPS, GAME_PALETTES, GAME_PIECES, type GamePiece } from './fairGames';
+import { RIDE_FAIR, RIDE_FAR, RIDE_PALETTE, RIDE_TOWN, RIDE_TUB, RIDE_YOKE } from './fairRide';
 import { LEAF_FRAMES, LEAF_PALETTES } from './leaves';
 import {
   GRASS_VARIANTS,
@@ -358,6 +359,12 @@ export function catalogue(): Entry[] {
   for (const piece of Object.keys(GAME_PIECES) as GamePiece[]) {
     grid(`fair:piece:${piece}`, GAME_PIECES[piece], GAME_PALETTES.duckPond!);
   }
+  // The view from the big wheel and her car (1.6's X2), in daylight.
+  grid('ride:far', RIDE_FAR, RIDE_PALETTE);
+  grid('ride:town', RIDE_TOWN, RIDE_PALETTE);
+  grid('ride:fair', RIDE_FAIR, RIDE_PALETTE);
+  grid('ride:yoke', RIDE_YOKE, RIDE_PALETTE);
+  grid('ride:tub', RIDE_TUB, RIDE_PALETTE);
   grid('greeting:redOne', RED_ONE, RED_ONE_PALETTE);
   grid('gate:shut', GATE_SHUT, GATE_PALETTE);
   grid('gate:open', GATE_OPEN, GATE_PALETTE);

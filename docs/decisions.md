@@ -9942,3 +9942,52 @@ rows' ends would still dangle); a string up any step (it climbed the castle's cr
 string colour than `stoneDark`, or the old `iron` with the dips alone (still lost against a dark
 roof); posing her with an action for the photo (her face to the camera is the fix; a pose is a
 new thing); moving the light pole instead of Scarah (the party's pumpkins stand there).
+
+## 381. A ride on the big wheel, drawn on its sheet's stage, the day's first ride free (2026-10-26)
+
+**Context:** 1.6's X2 (decision 378). The fairground's big wheel turns (E5, decision 284) but
+she couldn't ride it. The plan offered two ways to show a ride: (a) in the world, her sat in the
+lowest car and the camera lifted with it, or (b) a drawn scene on the sheet's stage, as the fair
+games are (R6b, decision 315), and asked for (a) to be tried first.
+
+**Decision:** (b). Tried against the world first: the wheel is 160×208 pixels with a rim of 66,
+so a whole turn lifts the camera about four tiles, less than half a phone's height at Close,
+where the whole wheel is already on screen; and its cars are tubs 15 pixels wide, where she is
+32, so she can't sit in one without the car being drawn anew at a size the wheel can't hang. The
+ride would show neither her in a car nor the town below. So it's a fifth `ACTIVITIES` row
+(`bigWheel`, on the `ferrisWheel` prop, `does: { ride: true }`): walking up to the wheel opens
+the Fair sheet's ride page (`openRide` in `hud/FairSheet.ts`), whose stage (96×112, a whole
+scale of the sheet's width and under half the screen's height, so what's said shows under it,
+upright and on its side) is `render/fairRide.ts`: her car from behind with whoever rides along,
+the rim and spokes turning round it from a hub off the stage, and the view in three bands
+(`sprites/fairRide.ts`: the hills, Castle Mac-A-Boo and the lake; the town's roofs in rows to
+the clock tower and the pond; the fair's stalls, stage, tent and strings of bulbs) sliding past
+each other as she rises, the fair dropping away below and the town coming up behind it, swaying
+with the car. It's lit by the hour as the world is (`gradeOf`, the season's touch, a grey day's),
+the windows, lanterns and the rim's and strings' bulbs glowing after dark (the strings chasing),
+a moon at tonight's phase and twinkling stars, or clouds by day. One turn is 21 s (up 8, 5 at the
+top, down 8, eased; `RIDE` in `data/fairRide.ts`, `rideAt` in `systems/fairRide.ts`).
+
+- **Price:** the day's first ride is always free (`fortune:ride` in `Takings`, once a day), every
+  ride after it 10 Candy, paid as it lands, as a game's go is; getting off early (the sheet
+  closed) costs nothing and leaves the free ride. Free always would make the price row
+  meaningless; R6b's dealt free go (one stall a day) would hide the wheel most days. A ride wins
+  nothing but the view, so no Candy loop (decision 128).
+- **Company:** at boarding, her husband if he's at the fair, else whoever there she has the most
+  hearts with (the town's order on a tie), counting Agatha's tent (`companionOf`; `atFair` reads
+  each neighbour's zone). They sit beside her from behind, and at the top they turn to each
+  other and they say one of three `RIDE_LINES` (Cody's about the view and her). Alone, a brass
+  plaque in the car says one of `MAYOR_VIEW` on the sheet, rather than a toast the sheet would
+  half hide (as `moments.ts` already says of toasts behind sheets). The walking pet waits at the
+  wheel's foot in the fair band, hopping as she comes down.
+- **The keepsake:** a `ticketStub` (kind `keepsake`, value 0, a 16-pixel icon) the first ride,
+  known by her bag holding none, as a keepsake is never sold or stowed. No save change.
+- **`rode`**, a moment as she lands: a music box's turn (`ride` cue), a hum, the stub popped.
+- **Today:** "The big wheel is turning" on a fair day (a weekend or a festival's day,
+  `isFairDay`) while the free ride is still to be had, flying her to the wheel.
+
+**Rejected:** (a), above; a sky band drawn over the world's map edge (the lift was too small for
+it to matter); the town's real map shrunk under her (`overview` scaled down is mush at the
+stage's size, and a picture at two pixel sizes at once); moving her husband's schedule to the
+fair so he'd ride more (not this session's; company is rare outside happenings and Agatha's
+weekend afternoons, and noted for the review).

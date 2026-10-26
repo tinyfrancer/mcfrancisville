@@ -14,26 +14,16 @@ coordinating session, the last day: Opus sub-agents in worktrees, two at a time,
 
 ### X1: the festival's lights, and the 31st rehearsed (`claude/x1-lights`; decision 380)
 
-Branch `claude/x1-lights` from `v1.6-dev`, draft PR into `v1.6-dev`; never touches the save.
-
-- **Done: the lights.** The eaves (`eaveLights` in `src/sprites/holidays.ts`): the string now
-  follows a gable's slope up to three pixels a column and turns an eave tip's corner up to six
-  (`EAVE_STEEPEST`, `EAVE_CORNER`), drops a short stretch caught between two steps (the castle's
-  crenels), dips a pixel between clips and is drawn in `stoneDark`, so it reads apart from the
-  roof's outline; bulbs hang from it. The fairground's poles (`LIGHT_POLE_JOINS` in
-  `src/sprites/fairground.ts`, `joins` for `lightPole` in `parseMap`, `POLE_SPAN`): each pole is
-  96 wide and swags half way to a neighbour `POLE_SPAN` along its row, so two halves make one
-  curve. Held by `tests/sprites/eaveLights.test.ts`.
-- **Done: the 31st rehearsed** by taps in a browser (decision 380 has the list): the party photo
-  turns her and Cody to the camera (`moments.ts`, `main.ts`'s `snapshot` draws again), a long
-  caption wraps (`PhotoCard.ts`), Scarah's line-up place is `lineUp11` at 20,6 and the party's
-  chili table 22,6; the mayor's door tested once he's met; smoke's `finale` checks she faces the
-  camera on the party's own card. The `1.6` `NOTES` row has three lines (the review folds).
-- **Next:** CI green, merge into `v1.6-dev`, the plan's status line, empty this heading.
+Landed (PR #236): the eave lights strung unbroken (gables, corners, a visible string) and the
+fair's poles swagged pole to pole (`LIGHT_POLE_JOINS`, `joins` from `parseMap`); the 31st
+rehearsed by taps, the party photo turned to the camera, a long caption wrapping, Scarah's
+line-up place and the chili table moved; two lines on the `1.6` card. No save change. Nothing
+left open; what the rehearsal logged is in the art notes.
 
 ### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
 
-Not started.
+Landed (PR #235): the ride drawn on the Fair sheet's stage, the day's first free, a ticket stub
+the first time; the `1.6` NOTES row made with three lines. No save change. Nothing left open.
 
 ### X3 chickens, X4 snow and puddles, X5 small delights, X6 the skeleton and a kite, V1.6 the review
 

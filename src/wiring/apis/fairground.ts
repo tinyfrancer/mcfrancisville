@@ -1,5 +1,8 @@
 import type { FairApi } from '../../hud/FairSheet';
+import { VILLAGERS } from '../../data/villagers';
 import { drawFairGame } from '../../render/fairGames';
+import { drawRide } from '../../render/fairRide';
+import { dayKey, hourOf } from '../../systems/clock';
 import { drawFixtureIcon } from '../../render/furniture';
 import { drawItemIcon } from '../../render/items';
 import { drawBust } from '../../render/villagers';
@@ -45,6 +48,41 @@ export function fairgroundApis({ world, changed }: ApiWiring): Pick<SheetApis, '
       if (world.neighbourhood.neighbour('agatha').zone === 'fortuneTent') {
         drawBust(canvas, 'agatha');
       } else drawFixtureIcon(canvas, 'fortuneTable');
+    },
+    // The big wheel (1.6's X2).
+    riding: () => world.activities.riding(),
+    board: () => world.activities.board(),
+    land() {
+      changed();
+      return world.activities.land();
+    },
+    getOff: () => world.activities.getOff(),
+    freeRide: () => world.activities.freeRide(),
+    rideWith: () => world.activities.rideWith(),
+    nameOf: (id) => VILLAGERS[id].name,
+    petName: () => {
+      const pet = world.pets.walking;
+      return pet ? world.pets.nameOf(pet) : null;
+    },
+    rideStage(canvas) {
+      const now = world.clock.now();
+      const riding = world.activities.riding();
+      const pet = world.pets.walking;
+      const company = riding?.with ?? null;
+      drawRide(canvas, {
+        day: dayKey(now),
+        hour: hourOf(now),
+        nowMs: now,
+        weather: world.weather.today(),
+        look: world.wardrobe.look,
+        at: riding?.at ?? null,
+        with: company && {
+          id: company,
+          costume: world.finale.costumeOf(company),
+          wears: world.friends.of(company).wears ?? null,
+        },
+        pet: pet && { id: pet, accessory: world.pets.wearing(pet) },
+      });
     },
   };
   return {

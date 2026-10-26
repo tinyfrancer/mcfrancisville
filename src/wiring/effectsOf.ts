@@ -290,6 +290,9 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
         : [pop({ item: event.item }, 1, over)];
     case 'readFortune':
       return [burst('sparkle', head, 6, 18), emote('♪')];
+    // Back down off the big wheel (1.6's X2), humming, with her ticket stub the first time.
+    case 'rode':
+      return event.first ? [emote('♪'), pop({ item: 'ticketStub' }, 1, over)] : [emote('♪')];
     case 'patch':
       if (event.picked)
         return [burst('leaf', there, 6, 14), pop({ item: 'patchPumpkin' }, 1, there)];

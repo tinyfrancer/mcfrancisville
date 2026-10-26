@@ -265,6 +265,8 @@ export type WorldEvent =
   | { kind: 'won'; activity: ActivityId; item: ItemId; landed: number; top: boolean }
   /** Her fortune read in the tent, once a day. */
   | { kind: 'readFortune' }
+  /** Back down from a ride on the big wheel (1.6's X2), with whoever rode along; `first` ever. */
+  | { kind: 'rode'; with: VillagerId | null; first: boolean }
   /** A snack bought at a fairground stall. */
   | { kind: 'snackBought'; activity: ActivityId; item: ItemId; price: number }
   | { kind: 'patch'; stage: PatchStage; picked?: boolean }

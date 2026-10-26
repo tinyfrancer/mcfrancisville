@@ -9,8 +9,16 @@ import {
 import { FAIR_PRIZES } from '../data/fairPrizes';
 import { ITEMS } from '../data/items';
 import type { Grade } from '../systems/activities';
-import type { CritterId, ItemId } from '../types/ids';
-import type { OnStall, Reading, Round, Thrown, Won } from '../world/services/Activities';
+import type { CritterId, ItemId, VillagerId } from '../types/ids';
+import type {
+  Landed,
+  OnStall,
+  Reading,
+  Riding,
+  Round,
+  Thrown,
+  Won,
+} from '../world/services/Activities';
 import { fitIcon, ROW_ICON } from './collection';
 import { button, el, moving, openSheet, PICTURE } from './dom';
 import { aboutFood } from './food';
@@ -41,6 +49,19 @@ export interface FairApi {
   icon(canvas: HTMLCanvasElement, id: ItemId | CritterId): void;
   /** Draws who reads her fortune: Agatha behind her ball, or the ball by itself. */
   reader(canvas: HTMLCanvasElement): void;
+  /** The big wheel (1.6's X2): the ride she's on, getting on, down again, and off early. */
+  riding(): Riding | null;
+  board(): Riding | null;
+  land(): Landed | null;
+  getOff(): void;
+  freeRide(): boolean;
+  /** Who would ride with her now, if anyone, and a neighbour's name. */
+  rideWith(): VillagerId | null;
+  nameOf(id: VillagerId): string;
+  /** The pet walking with her, by name, waiting at the wheel's foot; null with none. */
+  petName(): string | null;
+  /** Draws the ride as it is now, or the car waiting at the bottom. */
+  rideStage(canvas: HTMLCanvasElement): void;
 }
 
 /** The stage's width in the art's pixels: `sprites/fairGames.ts`'s. */
@@ -58,6 +79,7 @@ export function openFair(hud: HTMLElement, api: FairApi, id: ActivityId): () => 
   const does = row.does;
   if ('game' in does) return openGame(hud, api, id, does.game);
   if ('fortune' in does) return openFortune(hud, api);
+  if ('ride' in does) return openRide(hud, api, id);
   return openSnacks(hud, api, id);
 }
 
@@ -262,6 +284,147 @@ function openGame(hud: HTMLElement, api: FairApi, id: ActivityId, game: Game['ga
   render();
   fit();
   api.stage(stage, id, last);
+  requestAnimationFrame(() => {
+    fit();
+    draw();
+  });
+  return sheet.close;
+}
+
+/** The ride's stage, in the art's own pixels: `sprites/fairRide.ts`'s. */
+const RIDE_STAGE = { w: 96, h: 112 } as const;
+
+/** What the ride says as it goes, before the top and after. */
+const RIDE_SAYS = { up: 'Up you go, nice and slow…', down: 'And down again, swaying gently.' };
+
+/**
+ * The big wheel (1.6's X2, decision 381): its stage, where her car goes once round with whoever
+ * she knows at the fair, the view sliding by below; under it who's riding along and Ride (free,
+ * the day's first), what's said at the top, and back on the ground, the ticket stub the first time.
+ */
+function openRide(hud: HTMLElement, api: FairApi, id: ActivityId) {
+  const row = ACTIVITIES[id];
+  const sheet = openSheet(hud, {
+    picture: iconOf(api, 'ticketStub', PICTURE),
+    title: row.name,
+    line: row.line,
+    className: 'hud-fair-sheet hud-ride-sheet',
+    // Off before it's round: nothing's paid, and the free ride waits.
+    onClose: () => {
+      if (api.riding()?.at.part !== 'done') api.getOff();
+    },
+  });
+  const stage = el('canvas', { className: 'hud-fair-stage hud-ride-stage' });
+  stage.setAttribute('aria-hidden', 'true');
+  const below = el('div', { className: 'hud-fair-below' });
+  let landed: Landed | null = null;
+  let shown = '';
+
+  const fit = () => {
+    // The width inside the sheet's padding, and enough of the height left for what's said.
+    const room = Math.min(below.clientWidth || 300, 420);
+    const tall = Math.max(RIDE_STAGE.h * 2, (window.innerHeight || 640) * 0.45);
+    const scale = Math.max(2, Math.floor(Math.min(room / RIDE_STAGE.w, tall / RIDE_STAGE.h)));
+    const width = `${RIDE_STAGE.w * scale}px`;
+    if (stage.style.width === width) return;
+    stage.style.width = width;
+    stage.style.height = `${RIDE_STAGE.h * scale}px`;
+  };
+
+  const render = () => {
+    const riding = api.riding();
+    const parts: (HTMLElement | string)[] = [];
+    if (riding && riding.at.part !== 'done') {
+      const who = riding.with;
+      if (riding.at.part === 'up') parts.push(el('p', { className: 'hud-message' }, RIDE_SAYS.up));
+      else {
+        const said = who ? `${api.nameOf(who)}: “${riding.line}”` : riding.line;
+        parts.push(el('p', { className: 'hud-message hud-ride-line' }, said));
+        if (riding.at.part === 'down')
+          parts.push(el('p', { className: 'hud-fact' }, RIDE_SAYS.down));
+      }
+      shown = `${riding.at.part}`;
+    } else {
+      if (landed) {
+        const pet = api.petName();
+        parts.push(
+          el(
+            'p',
+            { className: 'hud-message' },
+            pet ? `Back on the ground, and ${pet} is right there waiting.` : 'Back on the ground!',
+          ),
+        );
+        if (landed.first) {
+          parts.push(
+            el(
+              'div',
+              { className: 'hud-ware hud-fair-prize' },
+              el('span', { className: 'hud-icon-box' }, iconOf(api, 'ticketStub')),
+              el(
+                'span',
+                { className: 'hud-ware-text' },
+                el('strong', {}, 'Your first ride!'),
+                el('small', {}, 'A ticket stub for your keepsakes, torn along the dotted line.'),
+              ),
+            ),
+          );
+        }
+      }
+      const company = api.rideWith();
+      parts.push(
+        el(
+          'p',
+          { className: 'hud-fact' },
+          company
+            ? `${api.nameOf(company)} is at the fair, and will hop in beside you.`
+            : 'Nobody you know is at the fair just now. A car all to yourself!',
+        ),
+      );
+      const free = api.freeRide();
+      const ride = button(
+        free ? 'Free ride!' : landed ? 'Round again ' : 'Ride ',
+        () => {
+          landed = null;
+          if (!api.board()) {
+            below.replaceChildren(
+              el(
+                'p',
+                { className: 'hud-message' },
+                `A ride is ${candy(row.cost)}. Come back with a little more!`,
+              ),
+            );
+            return;
+          }
+          render();
+        },
+        true,
+      );
+      if (!free) ride.append(price(row.cost));
+      ride.classList.add('hud-fair-go', 'hud-ride-go');
+      ride.disabled = !free && api.candy() < row.cost;
+      parts.push(ride);
+      shown = landed ? 'landed' : 'waiting';
+    }
+    below.replaceChildren(...parts);
+  };
+
+  const draw = () => {
+    if (!stage.isConnected) return;
+    const riding = api.riding();
+    if (riding?.at.part === 'done') {
+      landed = api.land();
+      render();
+    } else if (riding && riding.at.part !== shown) render();
+    // Turned on its side mid-ride, it fits again.
+    fit();
+    api.rideStage(stage);
+    requestAnimationFrame(draw);
+  };
+
+  sheet.body.append(stage, below);
+  render();
+  fit();
+  api.rideStage(stage);
   requestAnimationFrame(() => {
     fit();
     draw();

@@ -6,6 +6,7 @@ import {
   type Game,
 } from '../../data/activities';
 import { CRITTERS } from '../../data/critters';
+import { RIDE_COST } from '../../data/fairRide';
 import type { Weather } from '../../data/weather';
 import { ZONES } from '../../data/zones';
 import {
@@ -28,10 +29,11 @@ import {
   type Pattern,
 } from '../../systems/activities';
 import { dayKey, hourOf, windowOf } from '../../systems/clock';
+import { companionOf, isFairDay, rideAt, topLine, type RideAt } from '../../systems/fairRide';
 import { fill } from '../../systems/friendship';
 import { snackOn } from '../../systems/gathering';
 import { priceOf } from '../../systems/shop';
-import type { CritterId, FixtureId, ItemId, PropId, ZoneId } from '../../types/ids';
+import type { CritterId, FixtureId, ItemId, PropId, VillagerId, ZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 import type { Takings } from './Takings';
@@ -43,6 +45,12 @@ export const FORTUNE_KEY = 'fortune:read';
 /** The day's free go, taken (V1's R6b); `fortune:` keys come once a day. */
 export const FREE_GO_KEY = 'fortune:freeGo';
 
+/** The day's first ride on the big wheel, had (1.6's X2): always free. */
+export const FREE_RIDE_KEY = 'fortune:ride';
+
+/** The keepsake from her first ride. */
+export const TICKET_STUB: ItemId = 'ticketStub';
+
 /** What the fairground reads of the rest of the world. */
 export interface ActivitiesReads {
   /** Her name, for Agatha. */
@@ -52,6 +60,28 @@ export interface ActivitiesReads {
   agathaAt: () => ZoneId;
   /** Whether she has ever caught a critter, so the fortune can point her to a new one. */
   caught: (id: CritterId) => boolean;
+  /** Who's at the fair now, the fortune tent too, to ride the big wheel with her (1.6's X2). */
+  atFair: () => VillagerId[];
+  hearts: (id: VillagerId) => number;
+}
+
+/** A ride on the big wheel under way (1.6's X2): who's with her, what's said at the top, how far round. */
+export interface Riding {
+  startedAt: number;
+  with: VillagerId | null;
+  /** Said at the top: their line, or the mayor's plaque when she's alone. */
+  line: string;
+  /** Whether this is the day's first ride, which is free. */
+  free: boolean;
+  at: RideAt;
+}
+
+/** A ride done: who was with her, what it cost, and whether it was her first (the ticket stub). */
+export interface Landed {
+  with: VillagerId | null;
+  candy: number;
+  free: boolean;
+  first: boolean;
 }
 
 /**
@@ -133,6 +163,10 @@ export class Activities {
   } | null = null;
   /** Goes started, for each go's seed with the day. */
   private goes = 0;
+  /** The ride on the big wheel she's on (1.6's X2), never saved: a ride is a few seconds. */
+  private ride: { startedAt: number; with: VillagerId | null; line: string } | null = null;
+  /** Rides begun, so the line at the top changes ride to ride. */
+  private rides = 0;
 
   constructor(
     ctx: WorldContext,
@@ -275,6 +309,78 @@ export class Activities {
     this.ctx.events.emit('bag', bag.contents);
     this.ctx.moments.push({ kind: 'won', activity: id, item, landed, top });
     return { item, landed, points, rank, top, candy, free };
+  }
+
+  // ---- The big wheel (1.6's X2, decision 381) ------------------------------------------------
+
+  /** Whether her next ride today is the day's first, which is free. */
+  freeRide(): boolean {
+    return this.keeps.takings.isReady(FREE_RIDE_KEY);
+  }
+
+  /** Who would ride with her if she got on now: her husband or her closest at the fair, or nobody. */
+  rideWith(): VillagerId | null {
+    return companionOf(this.reads.atFair(), this.reads.hearts);
+  }
+
+  /** The ride she's on, and how far round it is now; null on the ground. */
+  riding(): Riding | null {
+    const ride = this.ride;
+    if (!ride) return null;
+    const at = rideAt(this.ctx.clock.now() - ride.startedAt);
+    return { ...ride, free: this.freeRide(), at };
+  }
+
+  /**
+   * Gets her into a car, if the wheel is turning and the ride is free or she has the Candy, with
+   * whoever she knows at the fair. A ride already under way goes on. Paid for as it lands.
+   */
+  board(): Riding | null {
+    if (this.ride) return this.riding();
+    if (!this.isOpen('bigWheel')) return null;
+    if (!this.freeRide() && this.keeps.wallet.candy < RIDE_COST) return null;
+    const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    const company = this.rideWith();
+    this.rides += 1;
+    const line = fill(topLine(company, day, this.rides), { name: this.reads.name() });
+    this.ride = { startedAt: now, with: company, line };
+    return this.riding();
+  }
+
+  /**
+   * Brings her back down once the wheel has gone round: the ride is paid (nothing for the day's
+   * first), and the first ride ever gives her the ticket stub. Null while she's still going round.
+   */
+  land(): Landed | null {
+    const riding = this.riding();
+    if (!riding || riding.at.part !== 'done') return null;
+    this.ride = null;
+    const { bag, wallet, takings } = this.keeps;
+    const free = riding.free;
+    const candy = free ? 0 : Math.min(RIDE_COST, wallet.candy);
+    if (free) takings.take(FREE_RIDE_KEY);
+    else wallet.spend(candy);
+    // A keepsake is never sold or put away, so one in her bag means she has ridden before.
+    const first = bag.count(TICKET_STUB) === 0;
+    if (first) {
+      bag.add(TICKET_STUB, 1);
+      this.ctx.events.emit('bag', bag.contents);
+    }
+    this.ctx.moments.push({ kind: 'rode', with: riding.with, first });
+    return { with: riding.with, candy, free, first };
+  }
+
+  /** Off before it's round, the sheet closed: nothing is paid, and the free ride waits. */
+  getOff(): void {
+    this.ride = null;
+  }
+
+  /** Today's word about the wheel: on a fair day, while the free ride is still to be had. */
+  wheelToday(): { open: boolean } | null {
+    const now = this.ctx.clock.now();
+    if (!isFairDay(dayKey(now)) || !this.freeRide()) return null;
+    return { open: this.isOpen('bigWheel') };
   }
 
   /** Whether she has had her fortune read today; reading it again is free. */

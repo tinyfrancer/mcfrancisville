@@ -49,6 +49,15 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 export function todayWords(line: TodayLine): TodayWords {
   switch (line.kind) {
     // 1.5's G4.
+    // 1.6's X2: the big wheel on a fair day.
+    case 'bigWheel':
+      return {
+        text: 'The big wheel is turning',
+        small: line.open
+          ? 'Your first ride today is free. The whole town looks lovely from the top.'
+          : 'At the Hollow Fairground, your first ride today free.',
+        glyph: 'wheel',
+      };
     case 'stars': {
       const name = CONSTELLATIONS[line.constellation].name;
       return {

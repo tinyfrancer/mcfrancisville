@@ -111,6 +111,11 @@ export const CUES = {
     { wave: 'hat', notes: line('C4:.06 -:.08 C4:.1'), gain: 0.16 },
     chime('-:.28 E6:.1 B6:.4', 0.07),
   ),
+  // Back down off the big wheel (1.6's X2): a music box's turn, a gentle waltz round and home.
+  ride: cue(
+    chime('C6:.5 E6:.25 G6:.25 C7:.5 B6:.25 G6:.25 A6:.5 F6:.25 D6:.25 C6:1.2', 0.12),
+    pluck('C4+G4:.75 -:.25 A3+E4:.75 -:.25 F3+C4:.75 -:.25 G3+D4:1', 0.08, 'sine'),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -170,6 +175,8 @@ export function cueOf(event: WorldEvent): CueId | null {
       return event.top ? 'firstCatch' : 'treat';
     case 'readFortune':
       return 'found';
+    case 'rode':
+      return 'ride';
     case 'snackBought':
       return 'coin';
     case 'ate':

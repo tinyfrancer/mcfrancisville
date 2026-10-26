@@ -254,15 +254,17 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '1.6',
     lines: [
-      // 1.6's X1: the festival's lights.
-      "The festival's lights are strung properly now, round every corner and over every " +
-        'gable. I had a word with the bats who hung them.',
-      'At the fair the lights swoop from pole to pole in one long smile, and nothing dangles ' +
-        'off the ends into the dark.',
+      // 1.6's X1: the festival's lights, and their photo on the 31st.
+      "The festival's lights are strung properly now, round every corner and pole to pole at " +
+        'the fair. I had a word with the bats who hung them.',
       "For your photo with Cody on the 31st, you'll both turn to face the camera. Squeeze in, " +
         'and say "boo"!',
+      // 1.6's X2: a ride on the big wheel.
+      'You can ride the big wheel at the fair now: once round, nice and slow, with a stop at the very top.',
+      'The view from the top is the whole town. I am told the town looks back.',
+      'Your first ride each day is free, and anyone you know at the fair will hop in beside you.',
     ],
-    ps: 'P.S. The bats would like it known that they did their best. They did. It was dark.',
+    ps: 'P.S. Your very first ride comes with a ticket stub. I kept mine. It is in a drawer, with my nerves.',
   },
 ];
 
