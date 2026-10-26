@@ -287,7 +287,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   and the barn's wall (`world.barn`, `src/hud/BarnSheet.ts` through `BarnApi`) stands her
   sprinklers in a whole field at once (`fieldsOf`, `sprinklersFor` in `src/systems/barn.ts`).
   Scarah's farmhouse is `scarahFarmhouse` through the farmhouse's door (0.3's F3). Boo Acres is
-  the creepy-crawlies' home (below).
+  the creepy-crawlies' home (below). **The hens** (1.6's X3, decision 382, save v59): the
+  `coop` by the barn (`0` in `FARM_LEGEND`, art in `sprites/farm.ts`, its run's front fence
+  `COOP_FRONT` drawn over them), Henrietta, Peck, Omelette and Reginald the rooster
+  (`src/data/hens.ts`, art `src/sprites/hens.ts`), where each potters in the run worked out from
+  the clock alone (`henAt` in `src/systems/hens.ts`, inside `RUN_FLOOR`, out from six to seven,
+  drawn by the `hens` pass in `src/render/hens.ts`); `world.henhouse` (`Henhouse`, the `passive`
+  area) is fed once a day from her bag (any crop or seed but an egg) for an egg from each hen by
+  five the next morning, from the stored day she fed them (`eggsWaiting`), collected on
+  `src/hud/CoopCard.ts` (`CoopApi`) as she walks up; Reginald crows at six if she's there (`crow`).
+  The `egg` is a crop never taken as "any crop"; it goes into the custard tart and the frittata
+  at the stove (known from the start) and Wrapunzel's meringue ghosts (`MERINGUE_BAKE`, baked
+  instead of the day's when she brings eggs). Today says when eggs are waiting.
 - **Her broom** (0.2's P1, decision 149) swoops her home from anywhere outside and back again:
   `world.travel.home()` and `back()` keep the spot she flew from (save v26, `left`), and the
   map's `go` flies too, each with a `flew` moment. `world.broom` (`Broom`) posts Agatha's letter
