@@ -507,7 +507,8 @@ const EVERYDAY: Record<Exclude<HappeningId, WeeklyId | PartyId | RhythmId>, Happ
       where: { party: true },
       place: AT_THE_STAGE,
       set: [
-        { prop: 'chiliTable', tx: 20, ty: 6 },
+        // Along a tile, so Scarah has the line-up's end (1.6's X1).
+        { prop: 'chiliTable', tx: 22, ty: 6 },
         { prop: 'pumpkin', tx: 10, ty: 5 },
         { prop: 'pumpkin', tx: 19, ty: 5 },
         { prop: 'pumpkin', tx: 7, ty: 6 },

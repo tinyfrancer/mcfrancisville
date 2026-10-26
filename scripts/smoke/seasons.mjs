@@ -379,6 +379,16 @@ async function finale() {
       photo.width > 64 && photo.caption.startsWith('Halloween 2026'),
       JSON.stringify(photo),
     );
+    // 1.6's X1: she turns to the camera for it, and it's the party's own card, not the camera's.
+    const posed = await page.evaluate(() => ({
+      her: window.world.player.facing,
+      another: document.querySelectorAll('.hud-photo-sheet .hud-photo-another').length,
+    }));
+    check(
+      "their photo: she faces the camera, on the party's own card (no Another, as the camera's has)",
+      posed.her === 'down' && posed.another === 0,
+      JSON.stringify(posed),
+    );
     await page.screenshot({ path: '.smoke/photo.png' });
     // Kept as a print (V1's S3): the share sheet on her iPhone, a download here, with none.
     const download = page.waitForEvent('download', { timeout: 10_000 }).catch(() => null);

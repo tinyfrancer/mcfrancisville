@@ -251,6 +251,19 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
   },
+  {
+    version: '1.6',
+    lines: [
+      // 1.6's X1: the festival's lights.
+      "The festival's lights are strung properly now, round every corner and over every " +
+        'gable. I had a word with the bats who hung them.',
+      'At the fair the lights swoop from pole to pole in one long smile, and nothing dangles ' +
+        'off the ends into the dark.',
+      "For your photo with Cody on the 31st, you'll both turn to face the camera. Squeeze in, " +
+        'and say "boo"!',
+    ],
+    ps: 'P.S. The bats would like it known that they did their best. They did. It was dark.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

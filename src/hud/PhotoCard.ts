@@ -49,14 +49,11 @@ export function openPhoto(
   picture.className = 'hud-photo-picture';
   picture.style.width = `${shown}px`;
   picture.style.height = `${Math.round((shown * picture.height) / picture.width)}px`;
-  body.append(
-    el(
-      'figure',
-      { className: 'hud-polaroid' },
-      picture,
-      el('figcaption', { textContent: caption }),
-    ),
-  );
+  // The caption wraps under the picture rather than widen the card past it (1.6's X1): a couple's
+  // costumes ("a butterfly and a bug catcher") once pushed the picture to one side.
+  const written = el('figcaption', { textContent: caption });
+  written.style.maxWidth = `${shown}px`;
+  body.append(el('figure', { className: 'hud-polaroid' }, picture, written));
   const another = words.another
     ? el('button', { type: 'button', className: 'hud-photo-another' }, words.another)
     : null;
