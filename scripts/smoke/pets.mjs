@@ -1,10 +1,12 @@
 /** Her pets, and their growing fond of her. */
 import {
   PHONE,
+  PLAIN_DAY,
   TILE,
   check,
   clearMat,
   framed,
+  openOn,
   page,
   reloadGame,
   stepUntil,
@@ -18,7 +20,7 @@ async function pets() {
   await tapProp('homeHouse');
   await stepUntil(() => window.world.scene === 'home', 'she goes home to her pets');
   const home = await page.evaluate(() => window.world.petCare.here().map((p) => p.id));
-  check('all six pets are at home', home.length === 6, home.join(', '));
+  check('all seven pets are at home', home.length === 7, home.join(', '));
   await page.screenshot({ path: '.smoke/pets.png' });
 
   // A real tap on Dolly walks her over, and opens Dolly's sheet with a pat.
@@ -170,5 +172,83 @@ async function petsThatGrow() {
   await page.screenshot({ path: '.smoke/pet-trick.png' });
 }
 
+/**
+ * Pickle the possum (1.5's G7), out on a night's walk with his lantern lit: a pat makes him play
+ * dead, and his trick plays dead and then hangs him by his tail from a branch.
+ */
+async function pickle() {
+  await openOn(PLAIN_DAY, 22);
+  await page.evaluate(() => {
+    const w = window.world;
+    w.pets.give('tailLantern');
+    w.petCare.dress('pickle', 'tailLantern');
+    w.pets.setPoints('pickle', 60);
+    w.petCare.walkWith('pickle');
+  });
+  await page.evaluate(() => window.view.step(40, 20));
+  const out = await page.evaluate((T) => {
+    const p = window.world.petCare.pet('pickle');
+    const her = window.world.player;
+    return {
+      scene: p.scene,
+      wearing: window.world.pets.wearing('pickle'),
+      reach: Math.max(
+        Math.abs(p.tile.tx - Math.floor(her.x / T)),
+        Math.abs(p.tile.ty - Math.floor(her.y / T)),
+      ),
+    };
+  }, TILE);
+  check(
+    'Pickle walks with her at night, carrying his lantern',
+    out.scene === 'town' && out.reach <= 1 && out.wearing === 'tailLantern',
+    JSON.stringify(out),
+  );
+  await page.screenshot({ path: '.smoke/pickle-night.png' });
+
+  const at = await page.evaluate(() => window.world.petCare.pet('pickle').tile);
+  await tapTile(at.tx, at.ty);
+  const opened = await stepUntil(
+    () => document.querySelector('.hud-pet-sheet') !== null,
+    'walking up to Pickle opens his sheet',
+  );
+  if (!opened) return;
+  const sheet = await page.evaluate(() => ({
+    name: document.querySelector('.hud-pet-sheet h2')?.textContent ?? '',
+    said: document.querySelector('.hud-pet-sheet .hud-speech')?.textContent ?? '',
+    pose: window.world.petCare.pet('pickle').pose,
+    next: document.querySelector('.hud-pet-next')?.textContent ?? '',
+  }));
+  check(
+    'his sheet opens with a pat, and a compliment has him playing dead',
+    sheet.name === 'Pickle' &&
+      sheet.said.includes('Pickle') &&
+      sheet.pose === 'playDead' &&
+      sheet.next.includes('hangs by his tail'),
+    JSON.stringify(sheet),
+  );
+  await page.screenshot({ path: '.smoke/pickle-sheet.png' });
+  await tapElement('.hud-pet-sheet button:text-is("Trick")');
+  await page.evaluate(() => window.view.step(40, 2));
+  const dead = await page.evaluate(() => window.world.petCare.pet('pickle').pose);
+  // Past halfway through his routine he's up in the air, hanging by his tail: the trick runs on
+  // the clock, which is the real one under ?hour=, so this waits for it.
+  await page.waitForTimeout(2000);
+  await page.evaluate(() => window.view.step(40, 2));
+  const hanging = await page.evaluate(() => ({
+    pose: window.world.petCare.pet('pickle').pose,
+    done: window.world.petCare.pet('pickle').trickDone(window.world.clock.now()),
+  }));
+  check(
+    'Trick has him play dead, then hang by his tail',
+    dead === 'trick' && hanging.pose === 'trick' && (hanging.done ?? 0) > 0.48,
+    JSON.stringify({ dead, ...hanging }),
+  );
+  await page.screenshot({ path: '.smoke/pickle-trick.png' });
+  await page.evaluate(() => window.world.petCare.walkWith(null));
+}
+
 /** @type {import('./lib.mjs').Section[]} */
-export const sections = [['pets', pets]];
+export const sections = [
+  ['pets', pets],
+  ['pickle', pickle],
+];

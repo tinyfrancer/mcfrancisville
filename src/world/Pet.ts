@@ -224,6 +224,7 @@ export class Pet {
 
   /** Does its trick (V1's R6c), from the start. */
   perform(now: number): void {
+    this.deadUntil = 0;
     this.trickAt = now;
     this.pose = 'trick';
   }

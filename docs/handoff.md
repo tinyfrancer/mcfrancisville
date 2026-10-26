@@ -93,8 +93,10 @@ accessories (`tinyScarf` for every pet; `ribbonBow` and `tailLantern` his alone,
 his rows in `data/affection.ts` (pats, both tricks in one `TRICKS` routine, the `forage` job and
 `FORAGED`, rests), nocturnal habits and playing dead (`Pet.playDead`, `pickleAwake`, `startled`),
 the forage deed in `PetCare` (once a night, `forage:pickle` in `Takings`), the lantern's glow in
-`render/pets.ts`. Next: tests, smoke's `pets` section, the `1.5` notes line, `CLAUDE.md`, the
-plan's status line, decision 376.
+`render/pets.ts`; tests (`tests/world/pickle.test.ts`, `tests/sprites/pets.test.ts`), smoke's
+`pickle` section (in `pets.mjs`, after `pets`), the fifth `1.5` notes line, `CLAUDE.md`, the plan's
+status line (its PR number still `#n`), decision 376. Next: the PR number into the plan, CI green,
+merge.
 
 ### V1.5 the review
 

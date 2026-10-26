@@ -701,7 +701,7 @@ what each owns, and where it hurts. Update it when a seam moves.
   `src/data/photo.ts`), stickers and the caption's rules `src/systems/photo.ts` (six at most).
   The shutter cuts the photo (`photoFrom`) and shows the party photo's card (`PhotoCard`, Keep
   it through `keepPhoto` / Another / Done); nothing is kept in the save.
-- **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
+- **Her pets:** rows in `src/data/pets.ts` (the seven pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says
   where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `world.petCare` has `walkWith`,
@@ -712,7 +712,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   `affection`), never less; at the first level a job on walks (`JOBS`, decided in `Pet.follow`,
   done by `PetCare.deed`) and three new pat lines (`GROWN_PATS`), at the second a trick (`TRICKS`,
   frames in `PET_ART[id].trick`, beats `TRICK_STEPS`, a Trick button); they rest by the fire, on
-  the bed or sofa or a rug at home (`PET_RESTS`, `src/systems/petRest.ts`).
+  the bed or sofa or a rug at home (`PET_RESTS`, `src/systems/petRest.ts`). **Pickle the possum**
+  (1.5's G7, decision 376) is the seventh, hers from the moment 1.5 landed as the six are from the
+  first day, last in `PET_IDS` so the six keep their rest spots: up from the evening till five
+  (`pickleAwake`), asleep at home and napping on walks by day, playing dead at a pat or a
+  neighbour close by (`Pet.playDead`, a `playDead` pose drawn from his `trick0`), foraging one of
+  `FORAGED` a night on a night's walk (the `forage` job, `forage:pickle` in `Takings`), and both
+  his tricks in one routine (playing dead, then hanging by his tail from a branch). His frames
+  (`pickleFrames` in `sprites/pets.ts`) are drawn bare, in his `ribbonBow` and with his
+  `tailLantern`, accessories `for` him alone (`fitsPet`; `PetArt.dressed`, picked by
+  `petSource`'s accessory), the lantern's glass glowing after dark (`LANTERN_GLOW`); the
+  `tinyScarf` is painted on any pet's neck.
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
