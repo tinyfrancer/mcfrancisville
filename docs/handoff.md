@@ -14,7 +14,20 @@ coordinating session, the last day: Opus sub-agents in worktrees, two at a time,
 
 ### X1: the festival's lights, and the 31st rehearsed (`claude/x1-lights`; decision 380)
 
-Not started.
+Branch `claude/x1-lights` from `v1.6-dev`, draft PR into `v1.6-dev`; never touches the save.
+
+- **Done: the lights.** The eaves (`eaveLights` in `src/sprites/holidays.ts`): the string now
+  follows a gable's slope up to three pixels a column and turns an eave tip's corner up to six
+  (`EAVE_STEEPEST`, `EAVE_CORNER`), drops a short stretch caught between two steps (the castle's
+  crenels), dips a pixel between clips and is drawn in `stoneDark`, so it reads apart from the
+  roof's outline; bulbs hang from it. The fairground's poles (`LIGHT_POLE_JOINS` in
+  `src/sprites/fairground.ts`, `joins` for `lightPole` in `parseMap`, `POLE_SPAN`): each pole is
+  96 wide and swags half way to a neighbour `POLE_SPAN` along its row, so two halves make one
+  curve; the old 128-wide pole crossed its neighbour's string and hung strings off into the air at
+  each row's ends. Held by `tests/sprites/eaveLights.test.ts`.
+- **Next:** rehearse 31 October by taps (`?day=2026-10-31`, and the 30th's evening, 1 November's
+  morning, 27 October's Today); a `finale` smoke check; the `1.6` `NOTES` row; decision 380; the
+  plan's status line.
 
 ### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
 

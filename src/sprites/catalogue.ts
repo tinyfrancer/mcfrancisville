@@ -293,6 +293,9 @@ export function catalogue(): Entry[] {
         grid(`prop:goose:${outfit}`, look.source, look.palette);
     if (id === 'fence')
       art.joined?.forEach((form, j) => grid(`prop:fence:joins${j}`, form, art.palette));
+    // A light pole alone, and strung to the left or right only (1.6's X1).
+    if (id === 'lightPole')
+      for (const j of [0, 2, 8]) grid(`prop:lightPole:joins${j}`, art.joined![j]!, art.palette);
     if (art.frames) frameRows(`prop:${id}`, art);
     // Its front door ajar and wide open as she walks up (V1's E5).
     const door = art.door;

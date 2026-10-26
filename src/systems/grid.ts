@@ -19,7 +19,8 @@ export interface PlacedProp {
   sign?: Signpost;
   /**
    * A fence's: which of its neighbours are fence too, as the ground's are (1 up, 2 right, 4
-   * down, 8 left), so a run joins up and turns its corners (0.2's K1).
+   * down, 8 left), so a run joins up and turns its corners (0.2's K1). A light pole's: which way
+   * a pole stands `POLE_SPAN` along its row, for the string between them (1.6's X1).
    */
   joins?: number;
   /** A tree's: where it stands, which says which of its shapes it may take (1.3's F4). */
@@ -28,6 +29,12 @@ export interface PlacedProp {
 
 /** The props that join up with their own kind, a fence going round a corner. */
 const JOINING: ReadonlySet<PropId> = new Set<PropId>(['fence', 'fencePost']);
+
+/**
+ * How many tiles apart the fairground's light poles stand along a row, a string of lights
+ * swagged between each two (decision 200; 1.6's X1): each pole's art reaches half way.
+ */
+export const POLE_SPAN = 3;
 
 export interface Signpost {
   to: MapZoneId;
@@ -154,6 +161,13 @@ export function parseMap(source: MapSource): TileMap {
       (p.tx < width - 1 && at(1, 0) ? 2 : 0) |
       (at(0, 1) ? 4 : 0) |
       (p.tx > 0 && at(-1, 0) ? 8 : 0);
+  }
+  const poles = new Set(props.filter((p) => p.id === 'lightPole').map((p) => p.ty * width + p.tx));
+  for (const p of props) {
+    if (p.id !== 'lightPole') continue;
+    const x = (dx: number) => p.tx + dx;
+    const at = (dx: number) => x(dx) >= 0 && x(dx) < width && poles.has(p.ty * width + x(dx));
+    p.joins = (at(POLE_SPAN) ? 2 : 0) | (at(-POLE_SPAN) ? 8 : 0);
   }
   const graves = props.filter((p) => p.id === 'gravestone');
   for (const p of props) {

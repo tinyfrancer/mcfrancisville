@@ -166,6 +166,7 @@ import {
   STRENGTH_BELL_PALETTE,
   STRENGTH_BELL_STALL,
   LIGHT_POLE,
+  LIGHT_POLE_JOINS,
   LIGHT_POLE_LIT,
   LIGHT_POLE_PALETTE,
   RING_TOSS_PALETTE,
@@ -224,7 +225,7 @@ export interface PropArt {
   forms?: readonly SpriteSource[];
   /** The tops of its chimneys, in its own pixels, where smoke curls up from (phase L). */
   smoke?: readonly { x: number; y: number }[];
-  /** A shape for each way it can join its own kind (`joins`, a fence's), by that mask. */
+  /** A shape for each way it can join its own kind (`joins`, a fence's or a light pole's), by that mask. */
   joined?: readonly SpriteSource[];
   /** A building with no roof to string lights under (Gourdon's pumpkin), for `eaveLights`. */
   noEaves?: true;
@@ -697,8 +698,9 @@ export const PROP_ART: Record<PropId, PropArt> = {
   lightPole: {
     source: LIGHT_POLE,
     palette: LIGHT_POLE_PALETTE,
+    joined: LIGHT_POLE_JOINS,
     glow: LIGHT_POLE_LIT,
-    lights: [{ x: 64, y: 8, radius: 40 }],
+    lights: [{ x: 48, y: 8, radius: 40 }],
     shadow: { w: 14, h: 5 },
     frames: flame(LIGHT_POLE_LIT),
   },
@@ -788,7 +790,7 @@ export function lookOf(prop: StandingProp): {
       source: art.joined[prop.joins]!,
       palette: art.palette,
       form: prop.joins,
-      key: `prop:fence:${prop.joins}`,
+      key: `prop:${prop.id === 'lightPole' ? 'lightPole' : 'fence'}:${prop.joins}`,
     };
   }
   const v = art.variants ? variantOf(prop.tx, prop.ty, art.variants.length) : 0;

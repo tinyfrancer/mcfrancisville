@@ -67,13 +67,40 @@ function swag(s: Sketch, x0: number, x1: number, y: number, sag: number, first =
 
 // ---- The light pole ------------------------------------------------------------------------------
 
+/** How far apart two poles stand, in pixels (`POLE_SPAN` tiles), and how low the string sags. */
+const POLE_GAP = 96;
+const POLE_SAG = 12;
+/** Where the string is tied to a pole, just under its lamp. */
+const POLE_TIE = 13;
+
 /**
- * A striped pole with a lamp on top and string lights swagged out to either side, half way to the
- * next pole: three tiles apart in a row, so the strings meet and run unbroken along a path.
+ * Half the string between two poles, from this one to the middle, where the other's half meets
+ * it at the bottom of the sag (1.6's X1): one curve across the gap, its bulbs every six pixels
+ * counted from the left-hand pole, so the two halves keep step.
  */
-function drawLightPole(): SpriteSource {
-  const s = new Sketch(128, 72);
-  const cx = 64;
+function halfSwag(s: Sketch, cx: number, side: 1 | -1): void {
+  // `along` is how far across the gap from the left-hand pole, 0 to POLE_GAP.
+  const reach = POLE_GAP / 2;
+  for (let d = 2; d <= reach - (side === 1 ? 1 : 0); d++) {
+    const along = side === 1 ? d : POLE_GAP - d;
+    const t = along / POLE_GAP;
+    const y = POLE_TIE + Math.round(POLE_SAG * 4 * t * (1 - t));
+    s.set(cx + side * d, y, INK);
+    if (along % 6 === 3) {
+      const key = BULB_KEYS[Math.floor(along / 6) % BULB_KEYS.length]!;
+      s.rect(cx + side * d, y + 1, 2, 2, key).set(cx + side * d, y + 3, key);
+    }
+  }
+}
+
+/**
+ * A striped pole with a lamp on top, and string lights swagged half way to the next pole on
+ * whichever side one stands (`joins`: 2 right, 8 left; decision 200), so two poles' halves meet
+ * in one curve and a pole at the end of a row has nothing hanging off into the air (1.6's X1).
+ */
+function drawLightPole(joins: number): SpriteSource {
+  const s = new Sketch(POLE_GAP, 72);
+  const cx = POLE_GAP / 2;
   for (let y = 10; y < 70; y++) {
     const key = Math.floor(y / 6) % 2 === 0 ? fillOf(ACCENT) : fillOf(WALL);
     s.rect(cx - 1, y, 3, 1, key).set(cx - 1, y, lightOf(WALL));
@@ -82,12 +109,16 @@ function drawLightPole(): SpriteSource {
   // A round lamp atop it, in its little cage.
   s.rect(cx - 3, 4, 7, 7, darkOf(TRIM)).rect(cx - 2, 5, 5, 5, LAMP);
   s.rect(cx - 4, 2, 9, 2, fillOf(TRIM)).rect(cx, 0, 1, 2, fillOf(TRIM));
-  swag(s, 0, cx - 2, 13, 10, 1);
-  swag(s, cx + 2, 127, 13, 10, 2);
+  if (joins & 8) halfSwag(s, cx, -1);
+  if (joins & 2) halfSwag(s, cx, 1);
   return finish(s);
 }
 
-export const LIGHT_POLE: SpriteSource = drawLightPole();
+/** A light pole by which side its neighbours stand (`joins`), and on its own. */
+export const LIGHT_POLE_JOINS: readonly SpriteSource[] = Array.from({ length: 16 }, (_, j) =>
+  drawLightPole(j & 10),
+);
+export const LIGHT_POLE: SpriteSource = LIGHT_POLE_JOINS[10]!;
 
 export const LIGHT_POLE_PALETTE: Palette = {
   ...buildingPalette({
