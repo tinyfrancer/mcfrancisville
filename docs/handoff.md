@@ -9,7 +9,16 @@ down is the long history.
 
 ## In progress
 
-Nothing is in progress.
+**Session Y1 of the 1.7 plan (save v60 in the last commit), branch `claude/y1-rough-edges`, a draft
+PR into `v1.7-dev`.** Done: the `1.7` `NOTES` row (the mayor's four lines, his P.S. handing the
+page over, and Cody's line as `handed`, drawn by `NotesCard` in quotes and signed "— Cody"; tests
+in `tests/systems/patchNotes.test.ts` and `tests/hud/notesCard.test.ts`, a smoke check in
+`boot`). Next, in order: (1) the half-rolled snowball and the rainbow's ten minutes kept in the
+save (v60, bumped only in the last commit); (2) company on the big wheel (Cody of an evening, else
+the closest neighbour at the fair, else a crow); (3) the Fair sheet's "on the house" line gone once
+the free ride is spent; (4) the chatter bubbles left out of the party photo and the camera; (5) a
+kite or seed in hand puts the rod in it before a cast; then decision 388, the plan's landed line,
+CLAUDE.md, merge `origin/v1.7-dev`, the save bump, ready, CI, merge.
 
 ## If you are starting cold after a long gap
 
