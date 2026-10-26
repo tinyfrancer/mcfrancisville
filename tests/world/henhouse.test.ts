@@ -108,7 +108,7 @@ describe("the hens at Boo Acres (1.6's X3)", () => {
     h.clock.set(new Date(2026, 9, 27, 9));
     expect(again.henhouse.eggs()).toBe(3);
     // A town from before the hens has none fed and none waiting.
-    const old = new World({ ...fromSave({ ...saved, henhouse: undefined }), clock: h.clock });
+    const old = new World({ ...fromSave(saved), henhouse: undefined, clock: h.clock });
     expect(old.henhouse.eggs()).toBe(0);
   });
 
