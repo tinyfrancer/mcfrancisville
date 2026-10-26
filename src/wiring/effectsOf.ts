@@ -318,6 +318,8 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
     case 'petTrick':
       return [burst('sparkle', event.at, event.own ? 4 : 7, 14)];
     case 'petHelped':
+      if (event.item)
+        return [burst('sparkle', event.at, 5, 10), pop({ item: event.item }, 1, event.at)];
       return event.job === 'bark'
         ? [emote('!', event.at)]
         : [burst('sparkle', event.at, 5, 10), ...(event.job === 'sniff' ? [emote('!')] : [])];

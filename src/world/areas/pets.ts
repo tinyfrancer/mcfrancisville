@@ -46,6 +46,7 @@ export function petServices(s: Shared, parts: PetParts): PetServices {
       mound: mound && { tx: mound.tx, ty: mound.ty },
       critters,
       lost: lying?.at ?? null,
+      outdoors: true,
     };
   };
   const petCare = new PetCare(s.ctx, {

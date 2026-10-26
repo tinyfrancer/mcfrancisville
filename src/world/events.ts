@@ -331,7 +331,15 @@ export type WorldEvent =
       line?: string;
     }
   /** A pet did its job on a walk (V1's R6c), `at` what it found, barked out or drew in. */
-  | { kind: 'petHelped'; pet: PetId; name: string; job: PetJob; at: { x: number; y: number } };
+  | {
+      kind: 'petHelped';
+      pet: PetId;
+      name: string;
+      job: PetJob;
+      at: { x: number; y: number };
+      /** What Pickle found for her (1.5's G7). */
+      item?: ItemId;
+    };
 
 /** What's told as out of the ordinary today (V1's R3). */
 export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };

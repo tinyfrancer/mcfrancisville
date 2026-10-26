@@ -245,6 +245,9 @@ export const NOTES: readonly PatchNotes[] = [
         'room under the roof.',
       'It has a round window full of sky, and it can grow once. Mind the eaves: the tall ' +
         'things must stand further forward.',
+      // 1.5's G7: Pickle the possum.
+      'Pickle has moved in with you: a possum, who plays dead at compliments. He sleeps by day ' +
+        'and forages by night.',
     ],
     ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
   },

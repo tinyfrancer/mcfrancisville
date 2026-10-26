@@ -9734,3 +9734,68 @@ columns (the pieces hung there would be drawn over the slope; a short wedge at e
 without taking a column); "tall" as any piece more than a tile deep (a bed is deep, not tall);
 the rule on every row (only the back row is under the eaves; the rest of the attic is a room);
 new candle and rope items (rows, icons, values and somewhere to get them, for one recipe).
+
+## 376. Pickle the possum: hers from 1.5, up by night, playing dead at compliments, a snack a night, two tricks in one, and a bow and a lantern of his own (2026-10-25, 1.5's G7)
+
+_Session G7 of the 1.4 plan, the last before the review. No save change (still v58). Personal
+touches parked (decision 177): his name and look are the plan's, every line and habit the warmest
+default from "a sweetheart, cute not creepy"; nothing was asked._
+
+- **How she gets him: he's hers from the moment 1.5 lands**, at home with the six. The plan said
+  "at Rufus's shop as the others are sold", but nothing sells pets: the six are hers from the
+  first day (`PETS` has no price, `Pets` keeps no list of owned pets), so the way "as the others"
+  are got is to have him. A new neighbour comes with a release the same way. Selling or adopting
+  him would have needed an owned-pets list in the save (a bump), a shelf that sells a creature,
+  and a town where he isn't, for a week. The mayor's notes tell her (the fifth `1.5` line: "a
+  possum, who plays dead at compliments").
+- **Last in `PET_IDS`**, so the six keep the resting spots they had (`restSpots` hands them out in
+  that order). He likes a sofa, then a rug, a bed, the hearth.
+- **His shape** (`pickleFrames` in `sprites/pets.ts`): a low grey possum a little longer than the
+  cats, a white face under a grey cap, a long snout with a pink nose, round dark ears pink inside
+  (`roundEar`, four across with the corners off; an ellipse that small read spiky), dark legs on
+  pink feet, and a bare pink tail outlined in a deeper pink (`pickleLine`; `finishPet` takes an
+  outline now, `o` for everyone else). Side on (two frames), sitting facing her (pink hands at his
+  tummy) and from behind, curled asleep with his tail round him, playing dead (on his back, paws
+  up, tongue out and an "x" for an eye) and hanging by his tail from a branch drawn for the beat
+  (arms down, or waving). Every frame is within the pets' size (38 × 32, held by a test).
+- **Nocturnal**: up from the evening window till five (`pickleAwake`), as a possum is. By day at
+  home he sleeps (as Florence does, on his rest spot if the room has one), and on a day's walk he
+  naps the moment she stops; at night he potters and follows as the others do. Walks aren't
+  refused by day: he comes, sleepily.
+- **Playing dead** is a pose (`playDead`, drawn from his `trick0`): at every pat (a pat is a
+  compliment; 1.4 s, then up as if nothing happened), and when a neighbour comes within two tiles
+  of him on a walk, once in 15 s (as Dolly barks). His trick or her camera puts an end to it.
+- **His job, at level one, is foraging**: on a night's walk outdoors (never in a shop or a room),
+  when she has stood still a moment, now and then he brings her one of `FORAGED` (the night's
+  four snacks or fried pickles, which he finds a little embarrassing), the same one all day by the
+  day key, **once a night** (`forage:pickle` in `Takings`, a once-a-day key, so it's in the save
+  without a new field). Decision 317 rejected jobs that hand her things outright; this one the
+  plan asked for, and one snack worth 10–20 a day, at night, after two days of fondness, is less
+  than the night's own snack on the ground and no loop (the economy test is unchanged and green).
+- **Two tricks in one** (`TRICKS.pickle`, 3.6 s; `TRICK_STEPS`): he plays dead, springs up, and
+  hangs by his tail from his branch, swinging and waving, then drops down and sits. Each pet has
+  one Trick button and one `TRICKS` row (decision 317); taking turns between two would have needed
+  the trick's choice kept on the pet, the view and the sheet. Both are seen every time.
+- **Accessories**: a **tiny striped scarf** (scarlet and cream, 90) that any pet wears, painted on
+  the neck keys as a bandana is but with its end (`k`) in its second tone; and two **for him
+  alone** (`AccessoryRow.for`, `fitsPet`; the pet sheet lists only what fits, `Pets.dress` and a
+  loading save refuse the rest): a **ribbon bow** on his ear (70) and a **tail lantern** (140)
+  he carries on the curl of his tail, sets down beside him when he sits or sleeps, and holds in
+  his hand hanging from his branch. A bow or a lantern goes where no neckwear does and must not
+  leave a hole when it's off, so his frames are drawn three times, bare, in the bow and with the
+  lantern (`PetArt.dressed`, picked by `petSource`'s accessory), each the same size. The lantern's
+  glass glows after dark (`LANTERN_GLOW`, the drawable's `glow`), so it lights his way; he isn't
+  a ghost, so `PET_ART.glow` stays the ghosts'. All three are on Cobweb Corner's pet shelf from
+  its next deal, as every priced accessory is.
+- **What the town says of him** needs nothing new: the neighbours' and Cody's pet lines name the
+  pet walking with her by `{pet}`, whoever it is.
+- **No save change.** `Pets` keeps names, what's worn and fondness keyed by pet id and drops ids it
+  doesn't know; the new accessories are ids in the same lists. A 1.4 build would drop him and his
+  accessories from a town, but no 1.4 build opens a v58 town (G6's bump), and 1.5 carries both.
+
+**Rejected:** buying or adopting him (above); a separate pickle sprite file (the pets' helpers are
+private to `sprites/pets.ts`, and moving them is a refactor the plan rules out); a bow and lantern
+any pet could wear (each pet's ears and tail are elsewhere: twelve more drawings for six pets
+who never asked); a lantern lit by day too (a possum's lantern is for the dark); foraging by day
+or more than once a night (the economy, and he's asleep); his bubble or a new effect for playing
+dead (the pose says it; a pat's hearts already show).

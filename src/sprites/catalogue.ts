@@ -1,7 +1,7 @@
 import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from './wilds';
 import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
-import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
+import { ACCESSORIES, ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
 import { WORKS } from '../data/work';
 import { takeOff, wear } from '../systems/wardrobe';
@@ -550,17 +550,25 @@ export function catalogue(): Entry[] {
   }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
-    grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
-  for (const id of PET_IDS) {
+    grid(`pet:${name}:${frame}`, petSource(id, frame, accessory), petPalette(id, accessory));
+  const framesOf = (id: PetId) => {
     const tricks = (['trick0', 'trick1', 'trick2'] as const).slice(0, PET_ART[id].trick.length);
-    for (const frame of ['side0', 'side1', 'sitFront', 'sitBack', 'rest', ...tricks] as const) {
-      pet(id, id, null, frame);
-    }
+    return ['side0', 'side1', 'sitFront', 'sitBack', 'rest', ...tricks] as const;
+  };
+  for (const id of PET_IDS) {
+    for (const frame of framesOf(id)) pet(id, id, null, frame);
   }
   for (const accessory of ACCESSORY_IDS) {
-    pet(`fibi:${accessory}`, 'fibi', accessory, 'sitFront');
-    pet(`dolly:${accessory}`, 'dolly', accessory, 'side0');
-    pet(`florence:${accessory}`, 'florence', accessory, 'sitFront');
+    // One made for one pet alone (1.5's G7) is drawn into each of its frames, so each is shown.
+    const only = ACCESSORIES[accessory].for;
+    if (only) {
+      for (const frame of framesOf(only)) pet(`${only}:${accessory}`, only, accessory, frame);
+    } else {
+      pet(`fibi:${accessory}`, 'fibi', accessory, 'sitFront');
+      pet(`dolly:${accessory}`, 'dolly', accessory, 'side0');
+      pet(`florence:${accessory}`, 'florence', accessory, 'sitFront');
+      pet(`pickle:${accessory}`, 'pickle', accessory, 'side0');
+    }
     const icon = accessoryIcon(accessory);
     grid(`accessory:${accessory}`, icon.source, icon.palette);
   }

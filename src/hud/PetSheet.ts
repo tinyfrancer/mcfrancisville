@@ -1,5 +1,5 @@
 import { JOBS, TRICKS, type PetLevel } from '../data/affection';
-import { ACCESSORIES, PET_NAME_MAX, PETS } from '../data/pets';
+import { ACCESSORIES, fitsPet, PET_NAME_MAX, PETS } from '../data/pets';
 import type { AccessoryId, PetId } from '../types/ids';
 import { fitIcon, SLOT_ICON } from './collection';
 import { button, el, openSheet } from './dom';
@@ -174,7 +174,7 @@ export function openPet(hud: HTMLElement, api: PetApi, id: PetId): () => void {
     const pet = api.pet(id);
     const grid = el('div', { className: 'hud-bag' });
     grid.setAttribute('role', 'list');
-    for (const accessory of api.accessories()) {
+    for (const accessory of api.accessories().filter((a) => fitsPet(a, id))) {
       const icon = el('canvas', { className: 'hud-icon' });
       api.accessoryIcon(icon, accessory);
       fitIcon(icon, SLOT_ICON);

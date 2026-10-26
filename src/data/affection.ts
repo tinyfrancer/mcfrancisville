@@ -1,4 +1,4 @@
-import type { FurnitureId, PetId } from '../types/ids';
+import type { FurnitureId, ItemId, PetId } from '../types/ids';
 
 /**
  * Pets that grow (V1's R6c, decision 317): each of her pets grows fonder of her from pats, walks
@@ -117,6 +117,18 @@ export const GROWN_PATS: Record<PetId, readonly [readonly string[], readonly str
       "{name} gives you slow blinks, one after another. That's cat for I love you.",
     ],
   ],
+  pickle: [
+    [
+      '{name} only plays dead for a second now, then peeks to check you are still there.',
+      '{name} curls his bare pink tail round your wrist, gently, like a tiny hug.',
+      '{name} grooms your sleeve with great care. You are his now. Sorry.',
+    ],
+    [
+      "You tell {name} he's the best possum in McFrancisVille. He faints, delighted, then comes right back for more.",
+      '{name} brings you a leaf, very seriously. It is a gift. It is the best leaf.',
+      '{name} snuggles into the crook of your arm and snores the smallest snore.',
+    ],
+  ],
 };
 
 /** A pet's trick, learnt at level two: what it's called on the sheet and what it does. */
@@ -158,10 +170,16 @@ export const TRICKS: Record<PetId, TrickRow> = {
     line: '{name} fades away to nothing… and pops back, right in your arms. Boo!',
     ms: 2000,
   },
+  // Both his tricks, one after the other (1.5's G7): there's one Trick button a pet.
+  pickle: {
+    name: 'plays dead, then hangs by his tail',
+    line: '{name} flops over and plays dead, tongue out… then springs up, and hangs by his tail from a little branch. Ta-da!',
+    ms: 3600,
+  },
 };
 
 /** What a pet does on a walk once it's fond enough (level one). */
-export type PetJob = 'sniff' | 'bark' | 'draw' | 'fetch' | 'nap';
+export type PetJob = 'sniff' | 'bark' | 'draw' | 'fetch' | 'nap' | 'forage';
 
 export interface JobRow {
   job: PetJob;
@@ -176,7 +194,29 @@ export const JOBS: Record<PetId, JobRow> = {
   gary: { job: 'nap', does: 'naps in his shell. It is his job too, and he takes it seriously.' },
   wybie: { job: 'fetch', does: "fetches anything a neighbour's dropped about town." },
   elvira: { job: 'draw', does: 'draws the orbs a little nearer to you.' },
+  pickle: {
+    job: 'forage',
+    does: 'forages after dark, and once a night brings you a snack he found. By day, he naps.',
+  },
 };
+
+/**
+ * What Pickle turns up on a night's walk (1.5's G7): one of the night's snacks, or fried pickles,
+ * which he finds a little embarrassing. One a night, so it never makes Candy of itself.
+ */
+export const FORAGED: readonly ItemId[] = [
+  'midnightPizza',
+  'batWingCookie',
+  'pumpkinPudding',
+  'ghostMallow',
+  'friedPickles',
+];
+
+/** What the toast says of his find: a snack, or the fried pickles (`{item}` is what it was). */
+export const FORAGE_LINES: readonly [string, string] = [
+  '{name} snuffles about in the dark and brings you a {item}! What a forager.',
+  '{name} found you some {item}. He looks a tiny bit guilty about it.',
+];
 
 /** What each says on the sheet's toast as it grows: at level one, then at level two. */
 export const GREW_LINES: Record<PetId, readonly [string, string]> = {
@@ -204,6 +244,10 @@ export const GREW_LINES: Record<PetId, readonly [string, string]> = {
     '{name} adores you a little more, and draws the orbs nearer when you walk.',
     '{name} adores you to bits, and can fade away and back. Try her trick!',
   ],
+  pickle: [
+    '{name} adores you a little more, and forages for you on walks after dark.',
+    '{name} adores you to bits, and has two tricks: playing dead, and hanging by his tail. Try them!',
+  ],
 };
 
 /** What each does with a treat from her bag. `{treat}` is what it was. */
@@ -214,6 +258,7 @@ export const TREAT_LINES: Record<PetId, string> = {
   gary: '{name} gets to work on the {treat}. He will be at it till tomorrow, very content.',
   wybie: '{name} snatches the {treat} and zooms off to eat it somewhere private.',
   elvira: '{name} nibbles the {treat} delicately, then purrs at you for ages.',
+  pickle: '{name} takes the {treat} in both tiny hands, eats every crumb, and plays dead from joy.',
 };
 
 /** Where a pet likes to rest at home: by the fire, on a bed or a sofa, or sprawled on a rug. */
@@ -247,4 +292,6 @@ export const REST_LIKES: Record<PetId, readonly RestKind[]> = {
   gary: ['rug', 'hearth'],
   wybie: ['bed', 'sofa', 'rug'],
   elvira: ['bed', 'sofa', 'hearth', 'rug'],
+  // A possum likes a soft cushion to sleep the day away on.
+  pickle: ['sofa', 'rug', 'bed', 'hearth'],
 };

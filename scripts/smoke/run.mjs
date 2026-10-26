@@ -131,6 +131,7 @@ const ORDER = [
   'fossils',
   'crawlies',
   'pets',
+  'pickle',
   'zones',
   'places',
   'seeThrough',
