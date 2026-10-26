@@ -56,7 +56,7 @@ Next: merge when green, then empty this heading.
 
 ### X5: small delights (`claude/x5-delights`; decision 384)
 
-Done (draft PR into `v1.6-dev`): a butterfly or moth lands on her hat after eight seconds still
+Done (PR #239 into `v1.6-dev`): a butterfly or moth lands on her hat after eight seconds still
 outdoors where one's about (not in the rain, once a minute) and flies off as she moves; fireflies
 round her on summer nights on grass; the crow on a scarecrow caws as she walks within two tiles,
 once a window; her pets at home trot over and round her as she comes in (Pickle plays dead at
