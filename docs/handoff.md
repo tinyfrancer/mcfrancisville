@@ -23,11 +23,13 @@ Branch `claude/x1-lights` from `v1.6-dev`, draft PR into `v1.6-dev`; never touch
   roof's outline; bulbs hang from it. The fairground's poles (`LIGHT_POLE_JOINS` in
   `src/sprites/fairground.ts`, `joins` for `lightPole` in `parseMap`, `POLE_SPAN`): each pole is
   96 wide and swags half way to a neighbour `POLE_SPAN` along its row, so two halves make one
-  curve; the old 128-wide pole crossed its neighbour's string and hung strings off into the air at
-  each row's ends. Held by `tests/sprites/eaveLights.test.ts`.
-- **Next:** rehearse 31 October by taps (`?day=2026-10-31`, and the 30th's evening, 1 November's
-  morning, 27 October's Today); a `finale` smoke check; the `1.6` `NOTES` row; decision 380; the
-  plan's status line.
+  curve. Held by `tests/sprites/eaveLights.test.ts`.
+- **Done: the 31st rehearsed** by taps in a browser (decision 380 has the list): the party photo
+  turns her and Cody to the camera (`moments.ts`, `main.ts`'s `snapshot` draws again), a long
+  caption wraps (`PhotoCard.ts`), Scarah's line-up place is `lineUp11` at 20,6 and the party's
+  chili table 22,6; the mayor's door tested once he's met; smoke's `finale` checks she faces the
+  camera on the party's own card. The `1.6` `NOTES` row has three lines (the review folds).
+- **Next:** CI green, merge into `v1.6-dev`, the plan's status line, empty this heading.
 
 ### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
 
@@ -2337,6 +2339,11 @@ What's left is for the user's eye on her phone, none of it clearly wrong:
 - **Fishing with a seed in her hand** (decision 110's rule, older than the rod): she keeps a seed
   through a tap on a fish, so the line runs from the seed packet and no rod is drawn ("Where it
   hurts").
+- **Their Halloween photo** (1.6's X1, which turned them both to the camera): it's cut from the
+  frame as the party stands, so she's in front of Cody where she walked up to him (his face over
+  her shoulder), and the neighbours' chatter bubbles and a question's "?" are in the picture. The
+  camera's own photos (1.5's G5) are taken the same way; a squeeze side by side would need the
+  photo to move her, which nothing else at the party does.
 
 Struck since V1's review: ~~the lavender cobble carrying the town~~ (A1: the square in
 flagstones, the well on setts, two benches, the roads worn down the middle); ~~woods walls of one
