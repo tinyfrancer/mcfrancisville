@@ -1,4 +1,6 @@
 import { ACTIVITIES } from '../data/activities';
+import { CONSTELLATIONS } from '../data/constellations';
+import { CRITTERS, HABITAT_NAMES } from '../data/critters';
 import type { Glyph } from '../data/glyphs';
 import { HAPPENINGS } from '../data/happenings';
 import { ITEMS } from '../data/items';
@@ -46,6 +48,19 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 /** What a line of Today says. */
 export function todayWords(line: TodayLine): TodayWords {
   switch (line.kind) {
+    // 1.5's G4.
+    case 'stars': {
+      const name = CONSTELLATIONS[line.constellation].name;
+      return {
+        text: 'A clear night for the telescope',
+        small: line.showers
+          ? 'The whole sky is out tonight, every constellation at once! By the castle gate.'
+          : line.found
+            ? `${name.slice(0, 1).toUpperCase()}${name.slice(1)} is up over the castle, on your chart already.`
+            : `Trace ${name} at the telescope by the castle gate.`,
+        glyph: 'telescope',
+      };
+    }
     case 'firstDay':
       return {
         text: `Cody's list for your first day: ${line.done} of ${line.of} done`,
@@ -137,6 +152,20 @@ export function todayWords(line: TodayLine): TodayWords {
         text: wantedLine(line.items),
         small: 'Cobweb Corner pays double for them.',
         glyph: { item: line.items[0]! },
+      };
+    // 1.4's G1: a shiny about where she is, never said which.
+    case 'shiny':
+      return {
+        text: `Something glittered ${HABITAT_NAMES[CRITTERS[line.critter].habitat]}`,
+        small: "It's a shiny one! Creep up and see what it is, before the hour's out.",
+        glyph: 'sparkle',
+      };
+    // 1.4's G3: the pond frozen over, to fish through.
+    case 'iceFishing':
+      return {
+        text: "The pond's frozen thick enough to fish",
+        small: 'Skate out to a shadow under the ice, and fish through a hole.',
+        glyph: { item: 'icicleSmelt' },
       };
     // V1's R3: what's out of the ordinary today.
     case 'rare': {

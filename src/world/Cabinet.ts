@@ -1,6 +1,7 @@
 import { CRITTER_IDS, isCritter } from '../data/critters';
+import { CONSTELLATION_IDS } from '../data/constellations';
 import { FOSSIL_IDS, isFossil } from '../data/fossils';
-import type { CritterId, FossilId } from '../types/ids';
+import type { ConstellationId, CritterId, FossilId } from '../types/ids';
 
 /**
  * What of the Curiosity Cabinet is saved: the day each critter was first caught, and what's on
@@ -11,7 +12,16 @@ export interface CabinetSnapshot {
   donated: (CritterId | FossilId)[];
   /** The biggest of each fish she has landed, in quarters of a hand (V1's R6a, save v52). */
   best: Partial<Record<CritterId, number>>;
+  /** The day she first caught each critter in its shiny colours (1.4's G1, save v56). */
+  shinies: Partial<Record<CritterId, string>>;
+  /** The critters whose case at the museum shows a shiny (1.4's G1, save v56). */
+  shinyShown: CritterId[];
+  /** Her star chart: the day she first traced each constellation (1.5's G4, save v57). */
+  stars: Partial<Record<ConstellationId, string>>;
 }
+
+const isConstellation = (id: string): id is ConstellationId =>
+  (CONSTELLATION_IDS as readonly string[]).includes(id);
 
 /**
  * Her Curiosity Cabinet: every critter she has ever caught, and the day she first did, and which
@@ -22,6 +32,9 @@ export class Cabinet {
   private readonly firsts = new Map<CritterId, string>();
   private readonly shown = new Set<CritterId | FossilId>();
   private readonly biggest = new Map<CritterId, number>();
+  private readonly shone = new Map<CritterId, string>();
+  private readonly shownShiny = new Set<CritterId>();
+  private readonly traced = new Map<ConstellationId, string>();
 
   /** An id a later build added, that this one doesn't know, is left out. */
   constructor(saved: Partial<CabinetSnapshot> = {}) {
@@ -32,6 +45,59 @@ export class Cabinet {
     for (const [id, size] of Object.entries(saved.best ?? {})) {
       if (isCritter(id) && typeof size === 'number' && size > 0) this.biggest.set(id, size);
     }
+    for (const [id, day] of Object.entries(saved.shinies ?? {})) {
+      if (isCritter(id) && typeof day === 'string') this.shone.set(id, day);
+    }
+    for (const id of saved.shinyShown ?? []) if (isCritter(id)) this.shownShiny.add(id);
+    for (const [id, day] of Object.entries(saved.stars ?? {})) {
+      if (isConstellation(id) && typeof day === 'string') this.traced.set(id, day);
+    }
+  }
+
+  /** Puts a constellation on her star chart (1.5's G4). True if it's the first time she traced it. */
+  chart(id: ConstellationId, day: string): boolean {
+    if (this.traced.has(id)) return false;
+    this.traced.set(id, day);
+    return true;
+  }
+
+  /** The day she first traced a constellation, or null if it isn't on her chart yet. */
+  tracedOn(id: ConstellationId): string | null {
+    return this.traced.get(id) ?? null;
+  }
+
+  /** How many constellations are on her star chart. */
+  get stars(): number {
+    return this.traced.size;
+  }
+
+  /** The one she traced most lately, and the day: what Hazel and Agatha bring up. */
+  get newestStar(): { id: ConstellationId; day: string } | null {
+    let newest: { id: ConstellationId; day: string } | null = null;
+    for (const [id, day] of this.traced) if (!newest || day >= newest.day) newest = { id, day };
+    return newest;
+  }
+
+  /** Notes a shiny caught (1.4's G1). True if it's the first shiny of its kind she's caught. */
+  shine(id: CritterId, day: string): boolean {
+    if (this.shone.has(id)) return false;
+    this.shone.set(id, day);
+    return true;
+  }
+
+  /** The day she first caught one in its shiny colours, or null if she never has. */
+  shinyOn(id: CritterId): string | null {
+    return this.shone.get(id) ?? null;
+  }
+
+  /** How many kinds she has caught a shiny of. */
+  get shinies(): number {
+    return this.shone.size;
+  }
+
+  /** Whether its case at the museum shows a shiny. */
+  isShinyShown(id: CritterId): boolean {
+    return this.shownShiny.has(id);
   }
 
   /**
@@ -66,8 +132,17 @@ export class Cabinet {
     return this.shown.has(id);
   }
 
-  /** Puts one on show. False if one is already. */
-  donate(id: CritterId | FossilId): boolean {
+  /**
+   * Puts one on show. False if one is already. A shiny goes in its case in place of the plain one
+   * (1.4's G1), so a case that has a plain one still takes a shiny, but never two.
+   */
+  donate(id: CritterId | FossilId, shiny = false): boolean {
+    if (shiny && isCritter(id)) {
+      if (this.shownShiny.has(id)) return false;
+      this.shownShiny.add(id);
+      this.shown.add(id);
+      return true;
+    }
     if (this.shown.has(id)) return false;
     this.shown.add(id);
     return true;
@@ -96,6 +171,16 @@ export class Cabinet {
       donated: [...CRITTER_IDS, ...FOSSIL_IDS].filter((id) => this.shown.has(id)),
       best: Object.fromEntries(
         CRITTER_IDS.filter((id) => this.biggest.has(id)).map((id) => [id, this.biggest.get(id)!]),
+      ),
+      shinies: Object.fromEntries(
+        CRITTER_IDS.filter((id) => this.shone.has(id)).map((id) => [id, this.shone.get(id)!]),
+      ),
+      shinyShown: CRITTER_IDS.filter((id) => this.shownShiny.has(id)),
+      stars: Object.fromEntries(
+        CONSTELLATION_IDS.filter((id) => this.traced.has(id)).map((id) => [
+          id,
+          this.traced.get(id)!,
+        ]),
       ),
     };
   }

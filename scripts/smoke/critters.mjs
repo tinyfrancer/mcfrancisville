@@ -8,6 +8,7 @@ import {
   framed,
   goInto,
   goOut,
+  openOn,
   page,
   playerTile,
   reloadGame,
@@ -89,7 +90,11 @@ async function critters() {
     await page.evaluate(() => window.view.step(40));
     if (tries === 0) await page.screenshot({ path: '.smoke/net.png' });
   }
-  const caught = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  // It may have come out shiny (1.4's G1), a thing of its own in her bag.
+  const caught = await page.evaluate(
+    (id) => window.world.bag.count(id) + window.world.bag.count(`${id}Shiny`),
+    target.critter,
+  );
   check('tapping a critter walks her up to it and nets it', caught >= 1, target.critter);
   const found = await page.evaluate(() => window.world.cabinet.found);
   check(
@@ -99,7 +104,7 @@ async function critters() {
   );
 
   await tapElement('.hud-cabinet');
-  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Shelves'] });
+  await framed('.hud-cabinet-sheet', { tabs: ['Cases', 'Fossils', 'Sky', 'Shelves'] });
   const cases = await page.evaluate(() => {
     const slots = [
       ...document.querySelectorAll('.hud-cabinet-sheet .hud-slot:not(.hud-slot-empty)'),
@@ -136,19 +141,20 @@ async function critters() {
   });
   check(
     'the Curiosity Cabinet has a thumb-sized case for every critter, all on screen',
-    cases.cases === 70 && cases.thumb && cases.onScreen,
+    cases.cases === 74 && cases.thumb && cases.onScreen,
     JSON.stringify(cases),
   );
   check(
     "on its own tab, her shelves to finish, and every squishy and doll she's still to have",
-    // Nine squishies (the fairground's own since V1's R6b) and eight dolls.
-    book.shelves === 15 && book.sets === 17 && book.setsFit,
+    // Nine squishies (the fairground's own since V1's R6b) and eight dolls; the shinies' two
+    // shelves since 1.4's G1, and the star chart's two since 1.5's G4.
+    book.shelves === 19 && book.sets === 17 && book.setsFit,
     JSON.stringify(book),
   );
   // A tap earlier in the run can net a critter that happened to be on the tile, by the real clock.
   check(
     'it counts what she has found',
-    cases.found.startsWith(`${found} of 70 found`),
+    cases.found.startsWith(`${found} of 74 found`),
     cases.found,
   );
   await page.screenshot({ path: '.smoke/cabinet.png' });
@@ -398,7 +404,11 @@ async function crawlies() {
     await page.evaluate(() => window.view.step(40));
     if (tries === 0) await page.screenshot({ path: '.smoke/crawly.png' });
   }
-  const caught = await page.evaluate((id) => window.world.bag.count(id), target.critter);
+  // It may have come out shiny (1.4's G1), a thing of its own in her bag.
+  const caught = await page.evaluate(
+    (id) => window.world.bag.count(id) + window.world.bag.count(`${id}Shiny`),
+    target.critter,
+  );
   check(
     'tapping a creepy-crawly at Boo Acres walks her up to it and nets it',
     caught >= 1,
@@ -522,6 +532,77 @@ async function fishing() {
 }
 
 /**
+ * 1.4's G3: in January the town's pond is frozen over, its fish dim shadows under the ice; a tap on
+ * one casts through a hole in it, and a tap on the bite lands it.
+ */
+async function iceFishing() {
+  await openOn('2027-01-15', 12);
+  await answerCody();
+  const fish = await page.evaluate(() =>
+    window.world.collecting.critters().filter((c) => window.world.townZone.isIce(c.tx, c.ty)),
+  );
+  check(
+    'in January the fish are under the frozen pond',
+    fish.length >= 1,
+    fish.map((c) => c.critter).join(', '),
+  );
+  const first = fish[0];
+  if (!first) return;
+  // Onto the ice near it, so its shadow is on screen for a real tap.
+  await page.evaluate((c) => {
+    const w = window.world;
+    for (let r = 2; r <= 4; r++) {
+      for (let dy = -r; dy <= r; dy++) {
+        for (let dx = -r; dx <= r; dx++) {
+          if (w.canWalk(c.tx + dx, c.ty + dy) && w.tapTile(c.tx + dx, c.ty + dy)) return;
+        }
+      }
+    }
+  }, first);
+  await stepUntil(() => !window.world.player.moving, 'she skates over to it');
+  await page.evaluate(() => window.view.step(16, 30));
+  await page.screenshot({ path: '.smoke/ice-shadows.png' });
+  await tapTile(first.tx, first.ty);
+  await stepUntil(() => window.world.fishing.line !== null, 'she casts through the ice');
+  const cast = await page.evaluate(() => {
+    const line = window.world.fishing.line;
+    return {
+      held: window.world.hands.held,
+      onIce: !!line && window.world.townZone.isIce(line.tx, line.ty),
+    };
+  });
+  check(
+    'a tap on a shadow under the ice casts her rod through a hole in it',
+    cast.held === 'rod' && cast.onIce,
+    JSON.stringify(cast),
+  );
+  await page.evaluate(() => window.view.step(16, 60));
+  await page.screenshot({ path: '.smoke/ice-hole.png' });
+  let landed = false;
+  const me = await playerTile();
+  for (let tries = 0; tries < 4 && !landed; tries++) {
+    const wait = await page.evaluate(
+      () =>
+        (window.world.fishing.bestTapAt() ?? window.world.clock.now()) - window.world.clock.now(),
+    );
+    if (wait > 25) await page.waitForTimeout(wait - 25);
+    await page.waitForFunction(
+      () => ['bite', 'reel'].includes(window.world.fishing.line?.state ?? ''),
+      null,
+      { timeout: 20_000, polling: 10 },
+    );
+    await tapTile(me.tx, me.ty + 1);
+    await page.evaluate(() => window.view.step(16, 2));
+    landed = await page.evaluate((id) => window.world.cabinet.caughtOn(id) !== null, first.critter);
+    if (!landed && !(await page.evaluate(() => window.world.fishing.line))) {
+      await tapTile(first.tx, first.ty);
+      await stepUntil(() => window.world.fishing.line !== null, 'she casts again');
+    }
+  }
+  check('a tap on the bite lands it, through the ice', landed, first.critter);
+}
+
+/**
  * V1's R6a: a shy critter rushed at drifts a tile away with a hop, drawn on the way, and is
  * netted once she creeps up. Found by trying a few hours of a few days, by a dev build's ?day=.
  */
@@ -607,6 +688,7 @@ async function drifter() {
 export const sections = [
   ['critters', critters],
   ['fishing', fishing],
+  ['iceFishing', iceFishing],
   ['drifter', drifter],
   ['fossils', fossils],
   ['crawlies', crawlies],

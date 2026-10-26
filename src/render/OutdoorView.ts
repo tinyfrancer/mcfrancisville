@@ -31,7 +31,13 @@ import {
   type SceneView,
   type Tapped,
 } from './scene';
-import { butterfliesPass, flyersPass, leavesPass, type CountingPass } from './passes/aloft';
+import {
+  butterfliesPass,
+  flyersPass,
+  leavesPass,
+  starsPass,
+  type CountingPass,
+} from './passes/aloft';
 import { Crowns } from './passes/crowns';
 import {
   boardsPass,
@@ -80,7 +86,7 @@ export interface OutdoorViewOptions {
  * stands is sorted by its feet once, so where two stand level the one named first is drawn first.
  */
 export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
-  ground: ['life', 'weather', 'yard', 'target'],
+  ground: ['life', 'weather', 'yard', 'fishing', 'target'],
   stand: [
     'props',
     'moving',
@@ -128,11 +134,13 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'yard',
   ],
   lit: [
+    'stars',
     'holidays',
     'fountain',
     'weather',
     'snack',
     'beds',
+    'critters',
     'lost',
     'pets',
     'neighbours',
@@ -233,6 +241,7 @@ export class OutdoorView implements SceneView {
         gatesPass(world, zone),
         lanternsPass(b.bobbing),
         butterfliesPass(world, zone, hour),
+        starsPass(world, zone, hour),
         this.flyers,
         this.leaves,
         cartPass(zone),

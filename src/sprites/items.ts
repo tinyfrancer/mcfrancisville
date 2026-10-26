@@ -1,12 +1,13 @@
-import type { CritterId, ItemId } from '../types/ids';
+import type { CritterId, ItemId, ShinyId } from '../types/ids';
 import { FIRST_BROOM } from '../data/broom';
 import { BRACELET_BEADS } from './bracelets';
 import { broomIconArt } from './broom';
-import { CRITTER_ART } from './critters';
+import { CRITTER_ART, SHINY_ART, sparkled, SPARKLE_PALETTE } from './critters';
 import { DOLL_ART } from './dolls';
 import { FOSSIL_ART } from './fossils';
 import { ORCHARD_ITEM_ART } from './orchard';
 import { RARE_KEEPSAKE_ART } from './rareEvents';
+import { STAR_MAP_ART } from './stars';
 import { FAIR_PRIZE_ART } from './fairPrizes';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
@@ -2596,10 +2597,14 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
     palette: { '.': null, o: C.bark, c: C.cream, C: C.white, v: C.lavender },
   },
   ...critterItemArt(),
+  // A shiny is its shiny self with a sparkle in the corner (1.4's G1).
+  ...shinyItemArt(),
   // A fossil in her bag is its picture as the Cabinet and the museum show it (0.3's C1).
   ...FOSSIL_ART,
   // The rare events' keepsakes (V1's R3).
   ...RARE_KEEPSAKE_ART,
+  // Hazel's star map (1.5's G4).
+  starMap: STAR_MAP_ART,
   // Only ever won at the Hollow Fairground (V1's R6b).
   ...FAIR_PRIZE_ART,
 };
@@ -2615,6 +2620,18 @@ function critterItemArt(): Record<CritterId, ItemArt> {
     (typeof CRITTER_ART)[CritterId],
   ][]) {
     art[id] = { source: c.world[0], palette: c.palette };
+  }
+  return art;
+}
+
+/** Each shiny in her bag: its shiny self at 24, as a critter's icon is, with its sparkle. */
+function shinyItemArt(): Record<ShinyId, ItemArt> {
+  const art = {} as Record<ShinyId, ItemArt>;
+  for (const [id, c] of Object.entries(SHINY_ART) as [CritterId, (typeof SHINY_ART)[CritterId]][]) {
+    art[`${id}Shiny`] = {
+      source: sparkled(c.world[0]),
+      palette: { ...c.palette, ...SPARKLE_PALETTE },
+    };
   }
   return art;
 }

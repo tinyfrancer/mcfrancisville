@@ -21,6 +21,7 @@ import type { Taken } from '../systems/crafting';
 import type { Refusal } from '../systems/decor';
 import type { StallSnapshot, StallStack } from '../systems/passive';
 import type { FestivalDay } from '../systems/calendar';
+import type { SkyOpen } from '../systems/stars';
 import type { Tile } from '../systems/pathfinding';
 import type { Letter, Reaction, Sender } from '../systems/friendship';
 import type { Opens } from '../data/interiors';
@@ -31,6 +32,7 @@ import type { PetJob, PetLevel } from '../data/affection';
 import type {
   BuriedId,
   Carvable,
+  ConstellationId,
   CritterId,
   DishId,
   FigurineId,
@@ -210,6 +212,9 @@ export type WorldEvent =
       grade?: Grade;
       /** The water a fish came up out of. */
       water?: Tile;
+      /** In its shiny colours (1.4's G1), and whether it's the first shiny of its kind. */
+      shiny?: true;
+      firstShiny?: true;
     }
   | { kind: 'fled'; critter: CritterId }
   | { kind: 'drifted'; critter: CritterId; first?: true }
@@ -282,6 +287,18 @@ export type WorldEvent =
   | { kind: 'trickOrTreat'; villager: VillagerId; item: ItemId; home: boolean; line: string }
   /** A shelf finished (0.2's F2), its letter posted with it: cheered where she is (V1's E1). */
   | { kind: 'shelved'; shelf: MilestoneId }
+  /**
+   * She looked through a telescope (1.5's G4): the sky open, too bright or too cloudy. The sky
+   * sheet opens on an open sky; the castle's telescope says why not on any other.
+   */
+  | { kind: 'stargaze'; sky: SkyOpen }
+  /** A tap on a star as she traces (1.5's G4): the next lit, or any other twinkling. */
+  | { kind: 'starTapped'; lit: boolean }
+  /**
+   * A constellation traced to its last star (1.5's G4): `first` if it's new to her chart, and
+   * `posted` if Hazel's letter with her star map came with it, the first of all.
+   */
+  | { kind: 'traced'; constellation: ConstellationId; first: boolean; posted?: true }
   /** She gave a neighbour a gift, and how they took it (V1's E1: a heart over them if loved). */
   | { kind: 'gave'; villager: VillagerId; item: ItemId; reaction: Reaction }
   /**

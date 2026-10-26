@@ -11,10 +11,10 @@ import { spotOf } from '../data/maps';
 import { PARTY_SPOTS } from '../data/specialDays';
 import type { CritterId, MapZoneId } from '../types/ids';
 import { stopsIn } from './schedules';
-import { hashString } from './random';
+import { hashMixed, hashString } from './random';
 import { tileAt, walkable, type TileMap } from './grid';
 import { weatherOn } from './weather';
-import { isFullMoon, isNewMoon, shiftDay } from './calendar';
+import { daysBetween, isFullMoon, isNewMoon, shiftDay } from './calendar';
 import { decorOn } from './holidays';
 import { WINDOW_FROM } from './clock';
 import { FULL_MOON_WEIGHT } from '../data/calendar';
@@ -71,6 +71,44 @@ export interface OutCritter {
   critter: CritterId;
   tx: number;
   ty: number;
+  /** In its shiny colours (1.4's G1): the same for anyone who looks that hour. */
+  shiny?: true;
+}
+
+/**
+ * How often a critter that's dealt is a shiny (1.4's G1, decision 370), by its rarity: about one
+ * in twelve of a common one's turns out, one in forty of a legendary one's.
+ */
+export const SHINY_ONE_IN: Record<Rarity, number> = {
+  common: 12,
+  uncommon: 20,
+  rare: 30,
+  legendary: 40,
+};
+
+/**
+ * Whether the critter dealt into a slot is a shiny: its own roll of the day, place, hour and slot
+ * (decision 102's dealing), apart from the one that picked it, so it never changes which critter
+ * comes out, only its colours.
+ */
+export function isShinyDeal(seed: string, hour: number, slot: number, id: CritterId): boolean {
+  return (
+    hashMixed(`shiny:${seed}@${Math.floor(hour)}#${slot}`) % SHINY_ONE_IN[CRITTERS[id].rarity] === 0
+  );
+}
+
+/**
+ * How long a kind waits in her Cabinet for its shiny before it's charmed (1.4's G1): nine months
+ * after she first caught it, if she still hasn't caught it shiny, every one of it that comes out
+ * is shiny until she has. The rarest come out a few times a year at an hour a day, so at one in
+ * thirty or forty a shiny of everything would take four or five years; the charm brings it to
+ * most of a second year, and nothing is ever out of reach (decision 11).
+ */
+export const SHINY_CHARM_DAYS = 270;
+
+/** Whether a kind is charmed shiny on a day: first caught long enough ago, and no shiny yet. */
+export function isCharmed(firstCaught: string | null, shinyCaught: boolean, day: string): boolean {
+  return firstCaught !== null && !shinyCaught && daysBetween(firstCaught, day) >= SHINY_CHARM_DAYS;
 }
 
 /** Whether a critter is about at an hour of the clock (a whole hour, 0–23). */
@@ -117,7 +155,9 @@ export function isVisitDay(day: string): boolean {
  */
 export function isVisiting(id: CritterId, day: string, weather: Weather): boolean {
   const row = CRITTERS[id];
-  if (row.moon) return false;
+  // One that waits on the full moon and keeps a season (1.4's G3's sturgeon) visits on every full
+  // moon out of it, so it's never more than a month away either.
+  if (row.moon) return !inSeason(id, day) && likesWeather(id, weather) && isFullMoon(day);
   if (inSeason(id, day) && likesWeather(id, weather)) return false;
   return isVisitDay(day);
 }
@@ -345,7 +385,8 @@ export function crittersOut(
       if (tiles.length === 0) continue;
       const tile = tiles[(roll >>> 12) % tiles.length]!;
       taken.add(key(tile));
-      out.push({ slot, critter, tx: tile.tx, ty: tile.ty });
+      const shiny = isShinyDeal(seed, h, slot, critter);
+      out.push({ slot, critter, tx: tile.tx, ty: tile.ty, ...(shiny ? { shiny: true } : {}) });
     }
   };
   deal(

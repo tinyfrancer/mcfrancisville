@@ -1,12 +1,13 @@
-import type { CritterId, MilestonePiece } from '../types/ids';
+import type { CritterId, MilestonePiece, ShinyPiece, StarPiece } from '../types/ids';
 import { ACCENT_TWO, darkOf, fillOf, finish, GLASS, GLINT, lightOf, ROOF, TRIM } from './buildings';
-import { CRITTER_ART } from './critters';
+import { critterArt } from './critters';
 import { SHOWCASE_FURNITURE_ART } from './display';
 import type { FurnitureArt } from './furniture';
 import { frame, palette, slab, WOOD } from './furnish';
 import { PALETTE as C } from './palette';
 import { Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
+import { FRAMED_BAT, NIGHT_GLOBE } from './stars';
 
 // What finishing a shelf or a wing sends her (0.2's F2), at 32. The framed critters and the domes
 // are a frame or a dome with the critter itself inside, as she sees it out and about, so each is
@@ -16,8 +17,11 @@ import type { Palette, SpriteSource } from './sprite';
 const SPARE = 'αβγδεζηθικλμνξπρστυφχψω';
 
 /** A critter's town-sized picture and palette, its keys moved to ones the kit leaves alone. */
-function specimen(id: CritterId): { rows: string[]; palette: Palette; glow: Palette } {
-  const art = CRITTER_ART[id];
+function specimen(
+  id: CritterId,
+  shiny = false,
+): { rows: string[]; palette: Palette; glow: Palette } {
+  const art = critterArt(id, shiny);
   return specimenOf(art.world[0], art.palette, art.glow);
 }
 
@@ -100,8 +104,8 @@ const FRAMED: Record<Extract<MilestonePiece, `framed${string}` | `${string}Dome`
 const FRAME_COLOURS = palette({ ...WOOD, accentTwo: C.gold, roof: C.navy });
 const DOME_COLOURS = palette({ ...WOOD, trim: C.bark, accentTwo: C.gold, glass: C.ghost });
 
-export function framed(id: CritterId): FurnitureArt {
-  const critter = specimen(id);
+export function framed(id: CritterId, shiny = false): FurnitureArt {
+  const critter = specimen(id, shiny);
   return {
     source: laid(FRAME, critter.rows, 4, 4),
     palette: { ...FRAME_COLOURS, ...critter.palette },
@@ -109,8 +113,8 @@ export function framed(id: CritterId): FurnitureArt {
   };
 }
 
-export function domed(id: CritterId): FurnitureArt {
-  return domeOver(specimen(id));
+export function domed(id: CritterId, shiny = false): FurnitureArt {
+  return domeOver(specimen(id, shiny));
 }
 
 /** Anything at 24 under the glass dome: its rows, its palette and what of it glows. */
@@ -142,4 +146,16 @@ export const MILESTONE_ART: Record<MilestonePiece, FurnitureArt> = {
   // They show the squishies and dolls she has (0.3's H2), drawn with the other display pieces.
   squishyShelf: SHOWCASE_FURNITURE_ART.squishyShelf,
   dollHouse: SHOWCASE_FURNITURE_ART.dollHouse,
+};
+
+/** What the shiny shelves send her (1.4's G1): her own luna moth framed shiny, and the orbs. */
+export const SHINY_PIECES_ART: Record<ShinyPiece, FurnitureArt> = {
+  framedShiny: framed('lunaMoth', true),
+  shinyDome: domed('orbPair', true),
+};
+
+/** What the star chart's shelves send her (1.5's G4): the Bat framed, and a little sky domed. */
+export const STAR_PIECES_ART: Record<StarPiece, FurnitureArt> = {
+  framedConstellation: FRAMED_BAT,
+  skyDome: domeOver(specimenOf(NIGHT_GLOBE.source, NIGHT_GLOBE.palette, NIGHT_GLOBE.glow)),
 };

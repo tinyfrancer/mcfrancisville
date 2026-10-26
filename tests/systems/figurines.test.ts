@@ -5,6 +5,7 @@ import {
   carvedKindOf,
   FIGURINE_FURNITURE,
   FIGURINE_IDS,
+  SHINY_FIGURINE_IDS,
   figurineOf,
   SQUISHY_IDS,
 } from '../../src/data/figurines';
@@ -27,9 +28,14 @@ describe("Gourdon's figurines (0.3's C3)", () => {
       (Object.keys(ITEMS) as ItemId[]).filter((id) => ITEMS[id].kind === kind);
     expect([...SQUISHY_IDS].sort()).toEqual(kinds('squishy').sort());
     expect(CARVABLE).toEqual([...CRITTER_IDS, ...SQUISHY_IDS, ...kinds('doll'), ...FOSSIL_IDS]);
-    expect(Object.keys(FIGURINE_FURNITURE)).toEqual(FIGURINE_IDS);
-    // Nine squishies since the fairground's own (V1's R6b).
-    expect(FIGURINE_IDS).toHaveLength(70 + 9 + 8 + 12);
+    // The shinies' figurines after the rest (1.4's G1), which the shelf doesn't ask for.
+    expect(Object.keys(FIGURINE_FURNITURE)).toEqual([...FIGURINE_IDS, ...SHINY_FIGURINE_IDS]);
+    expect(SHINY_FIGURINE_IDS).toHaveLength(CRITTER_IDS.length);
+    expect(FURNITURE.lunaMothShinyFigurine.name).toBe('Shiny luna moth figurine');
+    expect(carvedFrom('lunaMothShinyFigurine')).toBe('lunaMothShiny');
+    expect(carvedKindOf('lunaMothShiny')).toBe('critter');
+    // Nine squishies since the fairground's own (V1's R6b), 74 critters since 1.4's G3.
+    expect(FIGURINE_IDS).toHaveLength(74 + 9 + 8 + 12);
     for (const thing of CARVABLE) {
       const id = figurineOf(thing);
       expect(FURNITURE[id].name, id).toBe(`${ITEMS[thing].name} figurine`);

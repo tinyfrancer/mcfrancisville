@@ -1,4 +1,4 @@
-/** The places beyond the town: Whisperwood and the world map, the wilds and the castle, every way out walked, a building gone into, and her broom. */
+/** The places beyond the town: Whisperwood and the world map, the wilds and the castle, every way out walked, a building gone into, her broom, and the night sky through the castle's telescope. */
 import {
   PHONE,
   check,
@@ -7,6 +7,7 @@ import {
   goInto,
   goOut,
   nextTapToward,
+  openOn,
   page,
   playerTile,
   reloadGame,
@@ -535,6 +536,88 @@ async function broom() {
   await closeSheets();
 }
 
+/** A clear October night with no meteor shower: the Bat is up (1.5's G4). */
+const CLEAR_NIGHT = '2026-10-07';
+
+/**
+ * The night sky (1.5's G4): on a clear night the telescope by the castle hill's gate opens the
+ * sky; a tap on a star out of order only twinkles, and the stars tapped in order trace the Bat
+ * onto her star chart, which then hangs faint over the hill.
+ */
+async function stargazing() {
+  await openOn(CLEAR_NIGHT, 22);
+  // A whole run's hud section has put the Cat on her chart already, which is a first of its own.
+  const charted = await page.evaluate(() => window.world.cabinet.stars);
+  check('a clear night', (await page.evaluate(() => window.world.weather.today())) === 'clear');
+  await page.evaluate(() => {
+    window.world.atlas.find('castleHill');
+    window.world.travel.go('castleHill');
+  });
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  check(
+    'she is on the castle hill',
+    (await page.evaluate(() => window.world.scene)) === 'castleHill',
+  );
+  await page.evaluate(() => {
+    const scope = window.world.zones
+      .outdoor('castleHill')
+      ?.map.props.find((p) => p.id === 'telescope');
+    if (scope) window.world.tapTile(scope.tx, scope.ty);
+  });
+  await stepUntil(() => !window.world.player.moving, 'she walks up to the telescope');
+  await page.evaluate(() => window.view.step(40, 2));
+  const opened = await page.locator('.hud-sky-sheet').count();
+  check('walking up to the telescope opens the night sky', opened === 1);
+  if (opened === 0) return;
+  await framed('.hud-sky-sheet', { picture: true });
+  const stage = page.locator('.hud-sky-stage');
+  const box = await stage.boundingBox();
+  const points = JSON.parse((await stage.getAttribute('data-stars')) ?? '[]');
+  check(
+    'the stage is a whole scale of the sky, and fits the phone',
+    !!box && box.width % 96 === 0 && box.x >= 0 && box.x + box.width <= PHONE.width,
+    JSON.stringify(box),
+  );
+  if (!box || points.length === 0) return;
+  /** @param {{ fx: number, fy: number }} p */
+  const touch = async (p) => {
+    const at = (await stage.boundingBox()) ?? box;
+    await page.touchscreen.tap(at.x + p.fx * at.width, at.y + p.fy * at.height);
+    await page.evaluate(() => window.view.step(40, 1));
+  };
+  await touch(points[3]);
+  check(
+    'a star out of order only twinkles',
+    (await page.evaluate(() => window.world.stargazing.trace?.lit)) === 0,
+  );
+  const lit = [];
+  for (const p of points) {
+    await touch(p);
+    lit.push(await page.evaluate(() => window.world.stargazing.trace?.lit ?? -1));
+  }
+  check(
+    'tapping its stars in order traces the Bat onto her star chart',
+    await page.evaluate(() => window.world.cabinet.tracedOn('bat') !== null),
+    lit.join(' '),
+  );
+  const said = (await page.locator('.hud-sky-message').textContent()) ?? '';
+  check('it lights up, and says so', /lights up/.test(said), said);
+  check(
+    "and Hazel's letter comes with her star map, the first time",
+    (await page.evaluate(() => window.world.mailbox.letters.has('stars:first'))) ===
+      (charted === 0),
+    String(charted),
+  );
+  await page.screenshot({ path: '.smoke/sky-sheet.png' });
+  await closeSheets();
+  await page.evaluate(() => window.view.step(40, 3));
+  await page.screenshot({ path: '.smoke/sky-castle.png' });
+  await page.evaluate(() => window.world.travel.go('town'));
+  await page.evaluate(() => window.view.step(40, 2));
+  await closeSheets();
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['zones', zones],
@@ -542,4 +625,5 @@ export const sections = [
   ['edges', edges],
   ['interiors', interiors],
   ['broom', broom],
+  ['stargazing', stargazing],
 ];

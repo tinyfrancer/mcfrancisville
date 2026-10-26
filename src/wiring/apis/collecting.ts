@@ -2,6 +2,7 @@ import { drawFossilSilhouette } from '../../render/fossils';
 import type { CabinetApi } from '../../hud/CabinetSheet';
 import { drawSilhouette } from '../../render/critters';
 import { drawItemIcon } from '../../render/items';
+import { chartAt, drawStarChart } from '../../render/stargazing';
 import { dayKey, hourOf } from '../../systems/clock';
 import { isAbout } from '../../systems/critters';
 import type { ApiWiring, SheetApis } from './shared';
@@ -12,6 +13,8 @@ export function collectingApis({ world, changed }: ApiWiring): Pick<SheetApis, '
     critter: (id) => ({
       caughtOn: world.cabinet.caughtOn(id),
       donated: world.cabinet.isDonated(id),
+      shinyOn: world.cabinet.shinyOn(id),
+      shinyShown: world.cabinet.isShinyShown(id),
       best: world.cabinet.bestOf(id),
       outNow: isAbout(
         id,
@@ -21,9 +24,9 @@ export function collectingApis({ world, changed }: ApiWiring): Pick<SheetApis, '
       ),
     }),
     inBag: (id) => world.bag.count(id),
-    donate(id) {
+    donate(id, shiny) {
       changed();
-      return world.collecting.donate(id);
+      return world.collecting.donate(id, shiny);
     },
     isNew: (id) => world.novelty.isNew('cabinet', id),
     seen: () => world.novelty.seen('cabinet'),
@@ -42,6 +45,11 @@ export function collectingApis({ world, changed }: ApiWiring): Pick<SheetApis, '
     },
     fossilSilhouette: drawFossilSilhouette,
     now: () => ({ day: dayKey(world.clock.now()), hour: hourOf(world.clock.now()) }),
+    // Her star chart (1.5's G4).
+    star: (id) => world.stargazing.tracedOn(id),
+    chart: (canvas, picked) =>
+      drawStarChart(canvas, (id) => world.stargazing.tracedOn(id) !== null, picked),
+    chartAt,
   };
   return {
     cabinet,

@@ -31,9 +31,11 @@ subscription: visitors every fortnight, her phone's frame, the creatures and the
 forwarders, from `v1.3-dev`, the model fit to each session (the personal touches, F5, dropped at
 the user's word). **1.3 is the release PR #219** (`v1.3-dev` → `main`, "Release 1.3 (with
 1.2.1)", save v55 unchanged), the user's to merge; `main` after it is the game as it stands.
-**There is no plan after 1.3**: `docs/v1.3_plan.md`, `docs/v1.1_plan.md`, `docs/v1_plan.md` and
-the plans before them are complete, and a session with nothing asked of it changes nothing and
-asks the user what they'd like next.
+**1.3 was merged by the coordinator at the user's word on 2026-10-25: it is on her phone.** **The
+plan now is `docs/v1.4_plan.md`** (settled 2026-10-25, decision 367): content from `v1.4-dev`,
+every session Opus, two at a time: shinies, a winter wardrobe and two sets, ice fishing (⬆ 1.4),
+the night sky, a photo mode, an attic, a seventh pet, a review (⬆ 1.5). `docs/v1.3_plan.md`,
+`docs/v1.1_plan.md`, `docs/v1_plan.md` and the plans before them are complete.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
@@ -78,10 +80,9 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.3-dev` was the integration branch for 1.3** and ends with it (`v1.1-dev` was 1.1's,
-`v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212). **The next plan makes its own from
-`main`** once the release PR #219 has merged, and adds it to `vercel.json`'s no-preview list that
-day (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
+**`v1.4-dev` is the integration branch for 1.4 and 1.5** (`v1.3-dev` was 1.3's, `v1.1-dev`
+1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212), made from `main` the day 1.3
+merged and added to `vercel.json`'s no-preview list (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
@@ -304,7 +305,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   front and side, over from behind, her hair tucked inside the cape's collar.
   Her shoes go on just under the first hem that hangs over her legs (`hangsOver`: skirts,
   dresses, the opera coat, a cape from behind), so a boot's shaft is under a skirt and over
-  trousers, a neighbour's too (`shoesUnderHems`; 0.3's A1, decision 220). The creator,
+  trousers, a neighbour's too (`shoesUnderHems`; 0.3's A1, decision 220). The winter wardrobe
+  (1.4's G2, decision 371) is `src/sprites/doll/winter.ts`: its scarf is the `necklace` slot,
+  outlined all round and drawn over any coat (`LYING_OVER`), a coat done up (`DONE_UP`) keeps her
+  top off her raised arms, and it's sold November to February (a shelf's `months`). The creator,
   closet and salon sheets are `src/hud/LookSheets.ts`, and reach the game only through `LookApi`;
   a piece's close-up is framed to the pixels it changes on her (`closeUpOf`, `src/sprites/closeUp.ts`).
   She is 32×48 (decision 79): a cut paints body regions (upper arm, elbow, forearm…), never rows,
@@ -498,8 +502,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   chest with it, and is drawn raised to its top (`pieceSprite`'s `raised`).
   The furniture sets (0.3's S3 and S4, decisions 262–263) are rows in `src/data/sets.ts` (a set is
   a "suite" in code: `SuiteId`, `SUITES`, `SET_FURNITURE`; H2's `SetPiece` was taken), art in
-  `src/sprites/sets.ts` and `setsTwo.ts` (the watching portrait's three looks, `WATCHERS`); a new
-  set is a const and a `SUITES` row. Window wallpapers (`src/data/wallsAndFloors.ts`) hang a
+  `src/sprites/sets.ts`, `setsTwo.ts` (the watching portrait's three looks, `WATCHERS`) and
+  `setsThree.ts` (1.4's G2: Cosy Cabin, and Midnight Observatory, whose telescope `plays` the
+  `telescope`'s tune); a new set is a const and a `SUITES` row. Window wallpapers (`src/data/wallsAndFloors.ts`) hang a
   window every four tiles (`windowsAlong`) showing the sky at the hour and in the weather
   (`windowSky` in `src/systems/windowSky.ts`, art `src/sprites/wallsAndFloors.ts`), drawn into the
   room's shell by `roomShell` (`src/render/room.ts`).
@@ -626,11 +631,23 @@ what each owns, and where it hurts. Update it when a seam moves.
   or legendary one is reeled in on a tension bar (`REELS`; a tap out of time only slackens the
   line), each catch has a size (`src/data/fishSizes.ts`, `src/systems/catchSize.ts`) and the
   Cabinet keeps each fish's best (save v52); shy critters drift a tile from her as she rushes up
-  (`src/systems/drift.ts`, `Collecting.notice`). `src/world/Cabinet.ts` is the
+  (`src/systems/drift.ts`, `Collecting.notice`). While the town's pond is frozen over the fish
+  swim on under the ice, dim shadows, and a tap on one casts through a hole drawn under the float
+  (`drawHole`, `holeOf` in `src/render/fishing.ts`; 1.4's G3, decision 372), with four winter
+  fish in the pond and the lake December to February (the icicle smelt, bobble perch, aurora
+  trout and cold moon sturgeon, which as a moon-bound critter with a season visits on every full
+  moon out of it). `src/world/Cabinet.ts` is the
   Curiosity Cabinet, `src/hud/CabinetSheet.ts` the book (📖) and Wrapunzel's museum at Crumbs &
   Curios (through `CabinetApi`), `src/data/museum.ts` her labels and letters; the museum's
   cases, three tiles wide, show each donated critter's 24-pixel art in a `nooks` box. Art is
-  `src/sprites/critters.ts`, drawn by `src/render/critters.ts`. Shelves to finish (0.2's F2,
+  `src/sprites/critters.ts`, drawn by `src/render/critters.ts`. **Shinies** (1.4's G1, decision
+  370): every critter's second palette (`SHINIES` in `src/sprites/critterLooks.ts`, `SHINY_ART`),
+  dealt by a roll of its own per slot (`isShinyDeal`, 1 in 12 to 1 in 40 by tier; a kind nine
+  months caught with no shiny is charmed, `isCharmed`), glinting over the light
+  (`drawShinyGlints`), kept as items of their own (`lunaMothShiny`, `src/data/shinies.ts`, worth
+  double), noted in `Cabinet.shinies` and `shinyShown` (save v56), shown in place of the plain at
+  the museum, carved as shiny figurines (`EVERY_CARVABLE`), two shelves, and told by Today and the
+  `shiny` small talk. Shelves to finish (0.2's F2,
   decision 167) are rows in `src/data/milestones.ts`: a family caught, a season's own, a wing of
   the museum, every squishy or monster doll (kind `doll`, art `src/sprites/dolls.ts`) she has
   had; `world.milestones` works them out (`src/systems/milestones.ts`) and posts a `shelf:<id>`
@@ -652,6 +669,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   dug once a day by walking up to it (`world.fossils`, `mound:<zone>` in `Takings`). A fossil she
   has had is found (`collected`); the Cabinet's Fossils tab shows them, the museum's seventh case
   holds the donated (`cabinet.donated`, save v43), and `fossilWing` and `fossils` are shelves.
+- **The night sky** (1.5's G4, decision 373): fifteen constellations in
+  `src/data/constellations.ts` (twelve by month, three while a holiday's decorations are up),
+  their rules in `src/systems/stars.ts` (`skyOf`: open after 8pm on a clear day; `findableOn`:
+  this month's and the two before, every one on a meteor shower's night; `tapStar`, a wrong star
+  only twinkling), kept by `world.stargazing` (`Stargazing`, the outdoors area). The `telescope`
+  prop by the castle hill's gate (`I` in `CASTLE_LEGEND`, art in `src/sprites/castle.ts`), and the
+  pieces in `STARGAZERS` at home after dark, open `src/hud/SkySheet.ts` (`SkyApi`, drawn by
+  `src/render/stargazing.ts`, stars `src/sprites/stars.ts`), or toast why not. A traced one is
+  `Cabinet.stars` (save v57), the Cabinet's Sky tab, Hazel's first letter with her star map
+  (`stars:first`), two shelves (`halfTheSky`, `wholeSky`), the month's faint over the castle
+  hill at night (`starsPass`, `STARRY` in `src/data/sky.ts`), Today, a `stars` small-talk topic
+  and the calendar Month tab's mark.
 - **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says
@@ -828,7 +857,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   recipe makes is worth a quarter more than its inputs, held by the economy test.
 - **Town projects** (V1's R4, decision 314): rows in `src/data/projects.ts` (a bandstand on the
   square, the castle garden, a footbridge over Whisperwood's creek, her greenhouse behind her
-  house), funded one at a time on the noticeboard's Projects tab (`src/hud/ProjectsPanel.ts`
+  house, and Gourdon's ice hut on the pond's bank, 1.4's G3, whose door goes into a room,
+  `INTERIORS.iceHut`, through `Sites`, and whose floor's hole, `FIXTURES.iceHole`, she fishes
+  through: two fish an hour, `fishInHole` in `src/systems/fishing.ts`, the winter fish in winter
+  and the pond's own the rest of the year), funded one at a time on the noticeboard's Projects tab (`src/hud/ProjectsPanel.ts`
   through `NoticeApi`) by `world.projects` (`Projects`, kept by `Works`, save v51); rules in
   `src/systems/projects.ts`. Each stands where it'll be in three stages (posts, frame, built) through
   `Sites` (`src/world/zones/`), art `src/sprites/projects.ts`; `world.projects.preview(id, stage)`

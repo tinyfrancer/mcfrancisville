@@ -17,6 +17,7 @@ import {
 import { glassesRows, HATS } from './hats';
 import { centred, finish, paint, remember, stamp } from './paint';
 import { OUTFIT_ART, type OutfitArt, withPattern } from './prints';
+import { WINTER_CUTS } from './winter';
 
 /*
  * The cuts: each piece of clothing painted onto her body's regions for one view (decision 27),
@@ -97,8 +98,11 @@ function drawPiece(worn: Worn, view: View, body: Grid): string[] {
   const rows = withPattern(tailor(cutRows(cut, art, view, body), cut, view, body), art.pattern);
   // Glass is see-through, so the bubble helmet is a rim with no outline.
   if (NECKLACES.includes(cut) || GLASSES.includes(cut) || cut === 'helmet') return rows;
-  return finish(rows, body, HATS[cut] ? 'drawn' : 'painted');
+  return finish(rows, body, HATS[cut] || LYING_OVER.includes(cut) ? 'drawn' : 'painted');
 }
+
+/** What lies over her clothes rather than painted on her, so it's outlined all round: a scarf. */
+const LYING_OVER: readonly CutId[] = ['scarf'];
 
 const TOPS: readonly CutId[] = [
   'tee',
@@ -117,9 +121,23 @@ const TOPS: readonly CutId[] = [
   'operaCoat',
   'velvetDress',
   'spacesuit',
+  'jumper',
+  'pyjamaTop',
+  'duffel',
+  'puffer',
+  'chunkyCardigan',
+  'dressingGown',
+  'onesie',
 ];
 
-const CREW_NECKS: readonly CutId[] = ['tee', 'jersey', 'threeQuarterTee', 'bigTee', 'longTee'];
+const CREW_NECKS: readonly CutId[] = [
+  'tee',
+  'jersey',
+  'threeQuarterTee',
+  'bigTee',
+  'longTee',
+  'jumper',
+];
 
 const TROUSERS: readonly CutId[] = ['jeans', 'cutoffs', 'overalls'];
 
@@ -485,11 +503,45 @@ function cutRows(cut: CutId, art: OutfitArt, view: View, body: Grid): string[] {
     case 'batWings':
       // All of them is on her back (`backRows`).
       return [...EMPTY];
+    case 'earflapHat':
+    case 'earmuffs':
+    case 'batHood':
+      return HATS[cut]!(view).rows;
+    case 'duffel':
+    case 'puffer':
+    case 'scarf':
+    case 'mittens':
+    case 'knitTights':
+    case 'snowBoots':
+    case 'jumper':
+    case 'chunkyCardigan':
+    case 'pyjamaTop':
+    case 'pyjamaBottoms':
+    case 'dressingGown':
+    case 'onesie':
+    case 'slippers':
+      return WINTER_CUTS[cut]!(body, view);
   }
 }
 
-/** Jackets worn open over her top, in the `outer` slot: their sleeves come up with her arms. */
-export const JACKETS: readonly CutId[] = ['moto', 'denimJacket', 'operaCoat'];
+/**
+ * Coats done up over her top (1.4's G2): with her arms raised, only their sleeves come up, and
+ * nothing of the top under them (a print stamped on her chest, which a jacket worn open shows).
+ */
+export const DONE_UP: readonly CutId[] = ['duffel', 'puffer', 'dressingGown'];
+
+/**
+ * Coats and jackets in the `outer` slot (open or done up): their sleeves come up with her arms.
+ */
+export const JACKETS: readonly CutId[] = [
+  'moto',
+  'denimJacket',
+  'operaCoat',
+  'duffel',
+  'puffer',
+  'chunkyCardigan',
+  'dressingGown',
+];
 
 /**
  * Whether an outline pixel is where her side meets the air, so something loose can hang out over

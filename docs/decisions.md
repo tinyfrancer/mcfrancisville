@@ -9286,3 +9286,302 @@ own); saying goodbye in the card (the town goes on and nothing expires, decision
 only stops typing); opening smoke's real-clock sections on a named day here (a change to how a
 whole run meets the town, for a later session that wants it); running F5 with the defaults (the
 user said hold).
+
+## 367. The plan for 1.4 and 1.5: shinies, a winter wardrobe and sets, ice fishing, the night sky, a photo mode, an attic and a seventh pet (2026-10-25)
+
+**Context:** 1.3 shipped at midday (PR #219). The user has most of the week's usage left and
+asked what else it could buy; told the choices, they said "go for it". No personal touches
+(decision 177, held again 2026-10-25); no refactors; "a fun game".
+
+**Decision:** `docs/v1.4_plan.md`: seven content sessions and a review from `v1.4-dev` (made from
+`main` today, in `vercel.json`'s no-preview list), every one Opus, two at a time by files, 1.4
+after shinies, the winter wardrobe and sets, and ice fishing; 1.5 after the night sky, the photo
+mode, the attic, the pet and the review. Content on the seams the earlier plans made: a critter a
+row, a set a const and a row, a piece a row and a print, a project a row, a room a row.
+
+**Rejected:** a new neighbour (a week isn't a themed release, decision 270); more recipes or
+happenings (she has 52 and 20; they're not what she does most); a second Cabinet of stickers or
+postcards (a shiny of what she already hunts is more of the same joy, not a new chore); refactors
+(nothing she sees).
+
+## 370. Shinies: a second palette for every critter, dealt from the slot, kept as items of their own, charmed after nine months (2026-10-25, 1.4's G1)
+
+**Context:** the 1.4 plan's G1 (decision 367): once in a while a critter is the wrong colour on
+purpose, and prettier for it. Every critter (70 now) needs a shiny drawn by palette swap only,
+dealt the same for anyone who looks, caught as the same critter with a mark, shown in the
+Cabinet, the museum and the figurines, two shelves, and told.
+
+**Decision:**
+
+- **The looks**: a `Shine` per critter in `SHINIES` (`src/sprites/critterLooks.ts`): a gem (one of
+  nineteen `GEMS`, each a palette colour used as a `ramp`'s base), an `accent` gem on some keys,
+  and `keep` for keys left as they are. `shinePalette` moves each of the palette's colours onto
+  the gem's ramp, tones 1 to 4, by how light it is among the critter's own colours (0.6) and how
+  light it is at all (0.4); ink, eyes, glints and fangs are always kept. `SHINY_ART` in
+  `sprites/critters.ts` is every critter's frames in its shine, its glow following. Picked to be
+  what the plain isn't: a golden pumpkin bat, axolotl and ghost minnow, a rose koi, a blush luna
+  moth with golden eyespots, a sky-blue monarch and ladybug, a sapphire crawdad, a silver vampire
+  bat and twig knight, a pearl tombstone toad, a midnight-shelled golden snail. Looked at plain and
+  shiny side by side at 24, 16 and lit (`npm run sprite -- 'shiny:*' --sheet`); a dark critter's
+  shiny once came out muddy (the catfish), so no colour goes to the ramp's darkest tone.
+- **The dealing**: `isShinyDeal` in `systems/critters.ts`, `hashMixed` of
+  `shiny:<seed>@<hour>#<slot>` modulo `SHINY_ONE_IN` (common 12, uncommon 20, rare 30, legendary 40) by the dealt critter's rarity, set on `OutCritter.shiny`. Its own roll, so it never changes
+  which critter is dealt. `hashString` (FNV-1a) alone dealt the rare and legendary tiers about one
+  in 44 and one in 85 in play, its low bits following the dealing's own roll; mixed, a year of
+  every place and hour deals one in 12.1, 20.3, 27.4 and 41.3 (`tests/systems/shinies.test.ts`
+  holds each within ±30%). A lured critter is never shiny.
+- **The charm**: at an hour a day in two places, the rare and legendary kinds come out a few times a
+  year each, so at one in thirty or forty a shiny of everything took **four to five years** in the
+  rarity test's play (49 to 60 months, nine kinds still missing after five years). So a kind first
+  caught `SHINY_CHARM_DAYS` (270) or more days ago with no shiny yet comes out shiny every time
+  until she catches one (`isCharmed`, applied by `Collecting.critters` from `Cabinet.caughtOn` and
+  `shinyOn`): a shiny of everything now takes **18 to 24 months, about 21**, most of a second year
+  (`tests/systems/rarity.test.ts`, four starts). The plain Cabinet's fill is unchanged.
+- **The sparkle**: `drawShinyGlints` (`render/critters.ts`), the critters pass's `lit` part (so
+  after the light and the weather, seen by night and in fog): a four-pointed star, candle arms and
+  a white heart, swelling and fading at one corner then the other every 1.8 s, the ripe twinkle's
+  way but slower and brighter, with a fleck beside it at its brightest. Over a fish's shadow too.
+- **The mark**: a shiny is an item of its own, `ShinyId` = `` `${CritterId}Shiny` `` (rows made in
+  `src/data/shinies.ts`, kind `critter`, "Shiny luna moth"), as a blue rose is a rose's rare
+  harvest and each bracelet its own id: the bag, the chest, the display pieces, selling and giving
+  all work unchanged, where a count beside the plain one would have needed every one of them to
+  choose. It sells for twice its plain self (`SHINY_VALUES`). Its icon is its shiny self at 24
+  with a sparkle in the top right corner, ringed in ink where it lies over the critter
+  (`sparkled`). The pop of a catch shows it.
+- **The Cabinet**: `shinies` (the day she first caught each kind shiny) and `shinyShown` (the cases
+  that show a shiny) on `CabinetSnapshot`, **save v56**; a step that gives a v55 town none. The
+  Cabinet's cases wear a drawn sparkle (`badge: 'sparkle'` on a collection `Entry`, new) for a
+  kind she has had shiny, the card shows the shiny beside the plain and when she first caught it,
+  and the sheet's line counts "n of 70 shinies".
+- **The museum**: a shiny goes in its case in place of the plain one, once (`Cabinet.donate(id,
+true)`), whether the plain was given first or not; the To donate tab lists shinies, the case
+  draws it (`RoomView.onShow`), Wrapunzel has three labels of her own for it (`MUSEUM_SHINY`).
+- **Figurines**: `Carvable` takes `ShinyId`, so `FigurineId`'s template gives `lunaMothShinyFigurine`
+  with no new type; painted from the shiny's picture on a gilded plinth. `CARVABLE` and
+  `FIGURINE_IDS` stay the plain ones (the figurines' shelf is unchanged and still finished where it
+  was); `EVERY_CARVABLE` and `EVERY_FIGURINE` add the shinies'.
+- **Shelves**: `shinyFamilies` (a shiny of every family: a framed shiny luna moth, `framedShiny`)
+  and `shinies` (a shiny of every critter: the shiny orb pair under a dome, `shinyDome`), a
+  `{ shiny: 'family' | 'all' }` shelf read from `ShelfFacts.shiny`, Wrapunzel's letters.
+- **Told**: Today's line while a shiny is out where she is ("Something glittered by the frozen
+  creek", never which; `Collecting.shinyHere`, `TodayFacts.shiny`); a `shiny` small-talk topic
+  ahead of `caught`, three lines a neighbour, when she caught one today
+  (`Collecting.shinyToday`, `Around.shiny`); the `caught` moment's `shiny` and `firstShiny`, a
+  toast of its own ("It's the wrong colour on purpose, and prettier for it."), the `shinyCatch`
+  cue (the catch's chime and a quick glitter rising to B7) and a shower of sparkles.
+- **Notes**: 1.4's `NOTES` row, made here and G2's at once (they ran side by side), folded at the
+  merge into one: two lines each, the shinies first, G2's P.S.; one left for G3.
+
+**Rejected:** a `shiny: true` on a bag stack or a count beside the plain (every keeper and sheet
+would choose plain or shiny; the precedent is an id each); new grids (the brief, and the 16 is the
+24 drawn small); a shiny lured by a meal (a lure is a promise of a critter, not of a colour); the
+brief's rates without a charm (four or five years); raising the rare tiers' rates instead (the
+brief's "rarer up the tiers"); a per-catch counter for the charm (a new count in the save, where
+the first catch's day is already kept); a second nook in a case for the shiny (the cases are laid
+out for one of each, and in place is what she'd show off).
+
+## 371. A winter wardrobe of sixteen pieces, Cosy Cabin and Midnight Observatory (2026-10-25, 1.4's G2)
+
+_Session G2 of the 1.4 plan (`docs/v1.4_plan.md`). No save change. Personal touches parked
+(decision 177): the pieces, names, colours, words and prices are the warmest plain defaults._
+
+- **Sixteen pieces** (`src/data/outfits.ts`, cuts in a new `src/sprites/doll/winter.ts`, the
+  hats in `doll/hats.ts`, prints in `doll/prints.ts`), each painted on her regions and measured
+  from the body (`measureOf`), so each lands on any build: a duffel coat to the knee with toggles
+  and its hood behind, a quilted puffer a pixel out past her, a long striped scarf, mittens, a
+  snowflake bobble hat with ear flaps and plaits, fluffy earmuffs, cable-knit tights, snow boots
+  with a fluffy cuff, a Fair Isle jumper, a long chunky cardigan, tartan flannel pyjamas (top and
+  bottoms, a new `tartan` pattern, piped in cream), a dressing gown with a shawl collar and belt,
+  a bat onesie (a dress: feet, a pale tummy, little wings on its back) with a bat hood, and
+  fluffy slippers. Every one comes in a blue but the bat's two (ink, plum, lavender, as a bat is).
+- **Slots.** No new slot. **The scarf is the `necklace` slot**, drawn after `outer` and outlined
+  all round (`LYING_OVER` in `cuts.ts`), so it lies over any coat, its tails behind her arms;
+  she wears it or a pendant, as a person does. The rejected ways: a slot of its own (a rail, a
+  save field and a layer for one piece) and `outer` (then no scarf over the coat, which is the
+  point of one). The coats, the cardigan and the gown are `outer` and `JACKETS` (sleeves up with
+  her arms); the duffel and the gown hang over her legs (`HEMS`), so boots go under them; the
+  earflap hat and bat hood rise a few rows (`BOBBLE_ROOM`, `EAR_ROOM`) like the bobble beanie.
+- **A coat done up hides her top on raised arms.** In a pose with her arms up, the `over` layer
+  dressed her top again, so a band tee's print showed through a closed coat. `DONE_UP` (the
+  duffel, puffer and gown) now leaves the top out of that layer. No old look changes: no old
+  piece is `DONE_UP`.
+- **Her looks held.** `tests/sprites/looksHeld.test.ts` keeps every old hash over the pieces
+  there were (`BEFORE`), and holds the winter pieces in a describe of their own, so the snapshot
+  only gained lines. `npm run sprite -- 'doll:winter:*'` draws each winter look every way, posed,
+  sat and acting.
+- **Where they're sold:** Cobweb Corner, November to February only, by a `months` on a
+  `ShelfRow` (`stockOf` reads the day key's month): **Winter woollies**, two pieces a day from
+  the sixteen, and **This week's snug look**, one whole look a week (`everyWeek` with `sets`: a
+  snow day, nights in, a cosy afternoon, a bat at bedtime, out in the cold). Both shelves go
+  last on the counter, so every shelf before them deals as it always has. Prices 220–620,
+  within the economy test.
+- **Ollie's catalogue is unchanged.** The plan had the pyjamas and slippers there "once seen",
+  but clothes are kept once (decision 260): she never needs a second, and the catalogue lists
+  only what she has had. Seeing a thing on a shelf isn't kept anywhere, and keeping it would
+  touch the save; the woollies shelf brings each piece round within a winter instead.
+- **Two sets** (`SUITES` rows in `src/data/sets.ts`, `ThirdSuitePiece`, art in a new
+  `src/sprites/setsThree.ts`, 13 pieces, 300–880 Candy, in Gourdon's book and on the shelves as
+  the eight before): **Cosy cabin** (honey logs, red plaid, cream, moss, an iron stove): a log
+  stove whose fire `frames`, a braided rag rug, the not-a-bear rug (patchwork, buttons and a
+  stitched smile: plainly a rug), a rocking chair (a seat), a log cabin bed, a mug tree (`SMALL`)
+  and a twinkly garland on the wall whose bulbs twinkle by `frames` glows; **Midnight
+  observatory** (dark wood, navy, brass, plum velvet): a brass telescope that `plays`, a
+  celestial chart, a moon on a stand that glows after dark (`SMALL`), a velvet chaise (a seat), a
+  candle cluster that flickers (`SMALL`) and a constellation rug. A sixth piece, the rug, so the
+  set is a room like the others (six to eight each, held by `tests/data/sets.test.ts`).
+- **The telescope is an instrument of its own,** `telescope`, with one tune, the "Starlight
+  Lullaby" (`TUNES`, notes in `src/audio/pianos.ts`: a slow waltz of chimes), and its toast wears
+  the telescope glyph.
+- **A seventh window paper**, `starWindow` (`src/data/wallsAndFloors.ts`): tall round-topped brass
+  windows on navy with little gold stars; at dusk and night its glass shows twice the stars.
+- **1.4's `NOTES` row** is made here (G1 and G3 add theirs; five lines at most): three lines on
+  the woollies, the sets and the snug look, and a P.S. in mittens.
+
+**Rejected:** knitwear dithered (art_style: never dither anything small; knit is rows of its own
+tones instead); a bear rug with a bear's head (it had to be plainly a rug); the winter clothes in
+the year-round boutique (a dressing gown in July; the looks are their own weekly shelf in
+winter).
+
+## 372. Ice fishing: the fish swim on under the frozen pond, four winter fish, and Gourdon's ice hut with a hole in its floor (2026-10-25, 1.4's G3)
+
+_Session G3 of the 1.4 plan (`docs/v1.4_plan.md`). No save change. Personal touches parked
+(decision 177): the names, words, colours and prices are the warmest plain defaults._
+
+- **The ice rule.** The town's pond is frozen over from 15 December to 15 January (`FROZEN`,
+  decision 126, kept as it is: their first date was ice skating, and Nessa's skating and the
+  pond's look are built on it). Until now nothing swam under it (`Collecting.canBe` refused a
+  frozen tile). Now a frozen tile of the pond is still a fish's water: the fish are dealt into it
+  as ever, drawn as their shadows at a lower alpha (0.3 against 0.6, `critterDrawable`'s
+  `underIce`) with no rings, and a tap on one walks her beside it (onto the ice on her skates, or
+  the bank; never onto the fish's own tile) and casts. The hole is drawn on the ground under the
+  float only while her line is in on ice (`holeOf`, `drawHole`, the fishing pass's new `ground`
+  part, the one change to `OUTDOOR_LAYERS`): dark water, the ice's thickness down its far side, a
+  wet rim and lumps of slush, the float's rings kept inside it. Open water is unchanged. Only fish
+  are dealt onto water, so nothing else is ever on the ice; a shy critter's drift keeps off it.
+- **The lake and the creek stay as they are.** The plan says the lake is ice in winter, but it never
+  was: only the town's pond has `Decorations` and freezes, and the lake's melt where the creek
+  meets it (decision 352) says the lake is open. Freezing it would re-lay Lantern Shore's ground
+  and walkability for a season; the winter fish swim in its open water instead. The creek is ice
+  all year but frozen to its bed: no fish are dealt there, as before.
+- **Four winter fish** (`CRITTERS` rows, `season: [12, 2]`, `where: ['town', 'lanternShore']`): the
+  **icicle smelt** (common, all day, a slim silver-blue minnow), the **bobble perch** (uncommon,
+  7 to 19, a striped perch with a white bobble on its back fin), the **aurora trout** (rare, 17 to
+  5, its side banded mint and lavender, glowing after dark) and the **cold moon sturgeon**
+  (legendary, 18 to 5, a winter full moon: frosted pale, bony plates down its back that glow, a
+  long upper tail lobe, whiskers). New shapes `perch`, `trout` and `sturgeon` in
+  `sprites/critters.ts`, drawn at 16 and 24 from the 24's numbers as F3 drew the fish (held by
+  `tests/sprites/critters.test.ts`'s redrawn list); a shine each (gold smelt, ruby-and-gold perch,
+  midnight trout with a gold band, gold sturgeon with pearl plates); sizes; values 30, 75, 240 and
+  520, in the tiers' bands.
+- **A moon-bound critter with a season visits on every full moon out of it** (`isVisiting`), so
+  the sturgeon is never more than a month away (decision 360's rule for the moon-bound). The only
+  such critter is the sturgeon; every other's dealing is unchanged.
+- **The museum** takes 74: the fish outgrew their case (twelve nooks), so a tenth case shows fish,
+  beside the fossils' at the top of the room (`crumbs`' fixtures, the same overflow V1's R5 gave
+  the crawlies). Wrapunzel's full-museum letter is `museum:74`; `museum:70` joins
+  `MUSEUM_FORMERLY_FULL`, so one already had still reads.
+- **The rarity test**: the Cabinet's fill is now 7.6 to 11.4 months, 9.1 on average (it was 7.5 to
+  10, about 9): a January start meets the cold moon sturgeon and the winter fish on the winter's
+  full moons, so the ghost bat at the castle comes last at 11.4; the bound is raised from 11 to 12
+  and said in the test. A shiny of everything is 20.4 to 23.6 months (unchanged bounds).
+- **The ice hut** (`PROJECTS.iceHut`, Gourdon's idea in its blurb and letter): on the pond's
+  north-east bank at 31,38, two tiles by two, its door on the right onto 32,40 by the water; 3800
+  Candy, 70 wood, 20 stone and 6 ghost peppers (for the stove). Posts, a frame of bare timber on
+  runners, and a raspberry shanty with cream trim, a plum gable, a stovepipe that smokes, a round
+  window lit after dark, a lamp, a fish on a board over the door, an auger and a bucket. Its door
+  is in the town's `doors` and found through `Sites` once built (`MapZone.building`). W1's
+  overlay snapshots don't build it, so they're unchanged; a test holds that building it changes
+  only its own four tiles.
+- **Inside** (`INTERIORS.iceHut`, 7 by 4): the round-window paper, oak boards, a pot-bellied stove
+  whose fire `frames` and whose pipe runs up the wall, a bench with a knitted cushion and
+  Gourdon's flask, a stump to sit on, and the hole (`FIXTURES.iceHole`, `fishing: true`). Walking
+  up to it casts (`World.fishHole`, `Fishing.castInHole`): **two fish an hour** come under it
+  (`fishInHole`, `HOLE_FISH`), dealt from the day and hour as the water's are, from the town's
+  fish about then, **the winter fish alone in winter** (December to February, "any winter day",
+  whether or not the pond's frozen) whenever one is about, and the pond's own the rest of the
+  year; shiny and charmed as in the water; kept in `Takings` as `iceHut:critter:<hour>:<slot>`.
+  Once she has had both, the hole says nothing's nibbling till the hour turns. Her rod comes in
+  with her there (`Hands`' `fishingIndoors`, a room with a fishing fixture), her line and the
+  tension bar are drawn in the room (`RoomView`), and the line comes in if she leaves.
+- **Told**: Today's `iceFishing` line on every frozen day ("The pond's frozen thick enough to
+  fish", a tap out onto the ice), its key once a winter so the dot comes once; the Cabinet's
+  winter season shows the four (they're winter's by their rows); a catch on ice or in the hut is
+  a `caught` like any. 1.4's notes' fifth and last line.
+
+**Rejected:** freezing the lake (above); fish under the creek's ice (a year-round ice fishery the
+plan didn't ask for, and every fish's dealing at two places would shift); a longer `FROZEN`
+(settled by the user's touch, and the hut gives all winter); the hut's hole as an `opens` sheet
+(fishing is the world's, not the HUD's; a `fishing` fixture flag the world reads, as `plays` is);
+an unlimited hole (two an hour keeps it a treat beside the pond's three or four); a new save field
+(the hut is a project in `Works`, its catches in `Takings`); the sturgeon with no season (the
+brief's four are winter's own).
+
+## 373. The night sky: a telescope by the castle gate, fifteen constellations traced by taps, three months to find each, and a star chart (2026-10-25, 1.5's G4)
+
+**Context:** the 1.4/1.5 plan's G4 (decision 367): a telescope, a constellation a month to trace by
+taps, a star chart in the Cabinet, the meteor shower showing them all, two shelves, the sky over
+the castle hill. Personal touches parked (decision 177): the shapes, names and words are the
+warmest plain defaults.
+
+**Decision:**
+
+- **Fifteen constellations** (`src/data/constellations.ts`), spooky-cute shapes of five to nine
+  stars in a 60×40 box, lines between them: the Snowflake (January), the Candle, the Toadstool,
+  the Moth, the Broom, the Lantern, the Key, the Cat, the Cauldron, the Bat (October), the
+  Pumpkin, the Ghost (December); and three while a holiday's decorations are up (`decorOn`): the
+  Sweetheart (Valentine's), the Egg (Easter), the Christmas Star. Each has two lines about it.
+- **Findable: this month's and the two months' before** (`findableOn`), and a holiday's while
+  its decorations are up, and on a meteor shower's night (V1's R3) every one. A month alone would
+  leave a missed month a year away; three months means a month of rain or a busy few weeks loses
+  nothing, and still each is its season's. The chart takes a year at most, nothing on it more than
+  a year away, and is never lost (decision 11).
+- **The sky is open after dark on a clear day** (`skyOf`): the snack's night, 8pm to 5am
+  (`isNight`), by the day's own weather. By day the castle's telescope toasts "the stars come out
+  after eight", in rain or fog "cloud, cloud and more cloud".
+- **The telescope** is a prop, `telescope` (a brass tube on a wooden tripod, `src/sprites/castle.ts`),
+  at tile 11,39 on the castle hill, beside the gate's left post, off every spot, dig spot and site,
+  in `CASTLE_LEGEND` as `I` (the shared legend is full, "Where it hurts" 15). Its tile is solid,
+  so `tests/world/overlays.test.ts` and `arrivingAtProps.test.ts` were retaken for castleHill
+  alone. **At home**, the observatory set's brass telescope and Hazel's ten-heart telescope
+  (`STARGAZERS`) open the same sheet after dark on a clear night, through the piece's arrival in
+  `World` beside its `plays` (the Starlight Lullaby plays under the stars); by day they're just
+  telescopes. A list, not an `opens` on the furniture row: a piece opening a sheet only sometimes
+  is a rule, and the rule is the world's (`Stargazing.lookUp`).
+- **The trace** (`tapStar`): the stars in the row's order; the next one lights and draws every
+  line whose both ends are lit, the last lights the whole; any other star only twinkles, and
+  shows which star is next for a moment (decision 272's skill with a floor). The first star
+  pulses to start her off. Nothing is scored: there's nothing to fail, and a grade on a shape she
+  either traced or didn't would only be a way to feel she did it badly. A trace isn't saved: a
+  sheet closed halfway starts the shape again.
+- **The Sky sheet** (`src/hud/SkySheet.ts`, `SkyApi`): tonight's line, the stage (96×64 of the
+  sky's pixels at a whole scale: the title's dithered bands, a seeded field of faint stars kept
+  off the shape, tonight's moon as the title hangs it, `drawMoon` exported), its words in a box of
+  fixed height so the stage never moves under her finger, and a chip for each of tonight's and
+  each found before, looked at lit again any clear night. A meteor shower adds shooting stars.
+- **The star chart**: `Cabinet.stars`, the day each was first traced (**save v57**, a step that
+  gives an older town none); the Cabinet's **Sky** tab draws the whole sky as a map, fifteen
+  cells, the traced lit in gold and the rest faint with a question mark, a tap (or a name below)
+  saying what it is, or when it's up and where to look.
+- **Hazel, not Agatha**, reads the stars here: the plan named Agatha, but Hazel is the town's
+  astronomer already (her telescope at the lookout, her stargazing happening, the meteor shower's
+  letter and star shard). Her letter after the first trace brings her star map (`starMap`, a
+  keepsake); the two shelves (`halfTheSky`: any eight; `wholeSky`: all fifteen) are hers, the Bat
+  framed in gold and a little night sky under glass. Agatha has her own lines in the new `stars`
+  small-talk topic, which every neighbour has three of (the topics need every neighbour), said for
+  two days after she traces one.
+- **The world's sky**: the month's constellation, once traced, hangs faint in the top right of
+  the view over the castle hill after dark on a clear night (`starsPass`, first of `lit`; `STARRY`
+  in `src/data/sky.ts`), fixed to the view as a sky is, its stars breathing slowly. Only there:
+  the view looks down and shows no horizon, and over the town it would be clutter. The meteor
+  shower's shooting stars were already over every place (V1's R3).
+- **Told**: Today's "A clear night for the telescope" (the first of tonight's not yet traced, or
+  the whole sky on a shower's night), a tap taking her to the telescope; the calendar's Month tab
+  shows the month's constellation's 16-pixel mark under the grid.
+- **Notes**: the `1.5` row, three lines and a P.S. from the mayor (the notes need three at least);
+  G5–G7 add theirs, and the review folds them to five, or into 1.4's if 1.4 isn't cut first.
+
+**Rejected:** a month alone (a missed October a year away); every constellation any night (a
+chart in an evening, and no reason to look up next month); a score for the trace (nothing to
+fail is the brief); the stars over every place (no horizon to put them on); a new legend
+character in the shared legend (full); an `opens` on a furniture row (a sheet only at night is a
+rule, not a row).

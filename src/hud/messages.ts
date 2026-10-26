@@ -2,6 +2,7 @@ import { PROJECTS, type ProjectStage } from '../data/projects';
 import { GREW_LINES } from '../data/affection';
 import { DECOR } from '../data/holidays';
 import { CRITTERS } from '../data/critters';
+import { shinyName, shinyOf } from '../data/shinies';
 import { CROPS } from '../data/crops';
 import { FLOORINGS, FURNITURE, WALLPAPERS } from '../data/furniture';
 import { ITEMS } from '../data/items';
@@ -59,6 +60,14 @@ import { PASSERS, RARE_EVENTS } from '../data/rareEvents';
 export const SLIPPED =
   'Whoa! The ice is slippery as anything, and you slide right back to the bank. A pair of skates ' +
   'would do it!';
+
+/** The castle's telescope by day, and on a cloudy night (1.5's G4). */
+export const SKY_SHUT = {
+  bright:
+    'You peek through the telescope. Sky, very blue, and a cloud shaped like a sheep. The stars come out after eight: try a clear night!',
+  cloudy:
+    'You peek through the telescope. Cloud, cloud and more cloud. The stars are up there somewhere: try a clear night!',
+} as const;
 
 export interface Toast {
   text: string;
@@ -476,8 +485,14 @@ export function eventToast(event: WorldEvent): Toast | null {
             icon: { item: event.record },
           }
         : { text: 'No records yet! Cobweb Corner sells one most days.' };
+    // 1.5's G4: the castle's telescope on a night it can't see, or in the day.
+    case 'stargaze':
+      return event.sky === 'open' ? null : { text: SKY_SHUT[event.sky], icon: 'telescope' };
     case 'tune':
-      return { text: event.line ?? TUNES[event.tune].line, icon: 'piano' };
+      return {
+        text: event.line ?? TUNES[event.tune].line,
+        icon: TUNES[event.tune].instrument === 'telescope' ? 'telescope' : 'piano',
+      };
     case 'refused':
       return { text: REFUSED[event.why] };
     case 'mail':
@@ -659,7 +674,9 @@ export function eventToast(event: WorldEvent): Toast | null {
         icon: { mark: 'marketDay' },
       };
     case 'caught':
-      return caughtToast(event.critter, event.first, event);
+      return event.shiny
+        ? shinyToast(event.critter, event.first, event.firstShiny === true)
+        : caughtToast(event.critter, event.first, event);
     case 'hooked':
       return {
         text: 'Hooked! Tap as the needle crosses the glowing part of the line to reel it in.',
@@ -757,6 +774,21 @@ export function caughtToast(
   return size.whopper || size.best === 'best'
     ? { ...told, text: told.text + more, special: true }
     : { ...told, text: told.text + more };
+}
+
+/**
+ * A shiny caught (1.4's G1): always a fuss, and more of one the first of its kind, and the
+ * Cabinet's word if it's the first of the critter at all.
+ */
+export function shinyToast(critter: CritterId, first: boolean, firstShiny: boolean): Toast {
+  const name = shinyName(critter).toLowerCase();
+  const a = /^[aeiou]/.test(name) ? 'an' : 'a';
+  const icon: Glyph = { item: shinyOf(critter) };
+  const cabinet = first ? ' New in your Curiosity Cabinet, shine and all.' : '';
+  const told = firstShiny
+    ? `You caught ${a} ${name}! It's the wrong colour on purpose, and prettier for it.`
+    : `You caught ${a} ${name}! Another one, glittering away.`;
+  return { text: told + cabinet, special: true, icon };
 }
 
 function caughtWords(critter: CritterId, first: boolean): Toast {

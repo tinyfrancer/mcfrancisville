@@ -68,8 +68,58 @@ async function salon() {
   check('walking onto the mat goes back out, in front of the salon door', out);
 }
 
+/** 1.4's G2: the winter wardrobe from her closet by taps, a coat with a scarf over it. */
+async function winter() {
+  if (await page.evaluate(() => window.world.scene !== 'town')) await goOut();
+  const was = await page.evaluate(() => {
+    const ids = /** @type {const} */ ([
+      'duffelCoat',
+      'longScarf',
+      'snowflakeHat',
+      'mittens',
+      'snowBoots',
+    ]);
+    for (const id of ids) window.world.wardrobe.give(id);
+    return window.world.wardrobe.look;
+  });
+  await tapElement('.hud-closet');
+  for (const [rail, piece] of [
+    ['Jackets', 'Duffel coat'],
+    ['Necklaces', 'Long striped scarf'],
+    ['Hats', 'Snowflake bobble hat'],
+    ['Gloves', 'Mittens'],
+    ['Shoes', 'Snow boots'],
+  ]) {
+    await tapElement(`.hud-wardrobe .hud-filters .hud-chip:text-is("${rail}")`);
+    await tapElement(`.hud-wardrobe .hud-slot[aria-label^="${piece}"]`);
+  }
+  const outfit = await page.evaluate(() => window.world.wardrobe.look.outfit);
+  check(
+    'the closet dresses her for snow: a duffel coat, the scarf over it, hat, mittens and boots',
+    outfit.outer?.id === 'duffelCoat' &&
+      outfit.necklace?.id === 'longScarf' &&
+      outfit.hat?.id === 'snowflakeHat' &&
+      outfit.gloves?.id === 'mittens' &&
+      outfit.shoes?.id === 'snowBoots' &&
+      outfit.top?.id === was.outfit.top?.id,
+    JSON.stringify(outfit),
+  );
+  await page.screenshot({ path: '.smoke/closet-winter.png' });
+  await tapElement('.hud-wardrobe .hud-done');
+  await page.evaluate(() => window.view.step(40));
+  await page.screenshot({ path: '.smoke/winter-look.png' });
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.evaluate(() => window.view.step(40, 4));
+  await page.screenshot({ path: '.smoke/winter-look-sideways.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => window.view.step(40, 4));
+  // Back as she was, for the sections after.
+  await page.evaluate((look) => window.world.wardrobe.setLook(look), was);
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['closet', closet],
   ['salon', salon],
+  ['winter', winter],
 ];

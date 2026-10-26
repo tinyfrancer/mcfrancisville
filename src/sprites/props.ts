@@ -74,6 +74,8 @@ import {
   CASTLE,
   CASTLE_BANNERS,
   CASTLE_PALETTE,
+  TELESCOPE,
+  TELESCOPE_PALETTE,
   WEDDING_ARCH,
   WEDDING_ARCH_PALETTE,
 } from './castle';
@@ -530,6 +532,8 @@ export const PROP_ART: Record<PropId, PropArt> = {
     shadow: { w: 280, h: 22 },
   },
   weddingArch: { source: WEDDING_ARCH, palette: WEDDING_ARCH_PALETTE, shadow: { w: 60, h: 8 } },
+  // The telescope at the lookout (1.5's G4).
+  telescope: { source: TELESCOPE, palette: TELESCOPE_PALETTE, shadow: { w: 26, h: 6 } },
   gate: { source: GATE_SHUT, palette: GATE_PALETTE, shadow: { w: 0, h: 0 } },
   // Clutter (phase L), placed by hand in each place.
   bush: {

@@ -2,7 +2,7 @@ import { TILE_SIZE } from '../../config/world';
 import { ITEM_ART } from '../../sprites/items';
 import { tileCentre, type World } from '../../world/World';
 import type { MapZone } from '../../world/zones/MapZone';
-import { critterDrawable, critterLight, drawNet } from '../critters';
+import { critterDrawable, critterLight, drawNet, drawShinyGlints } from '../critters';
 import { bakeIcon } from '../items';
 import { boneDrawable, drawPetBubbles, petDrawable } from '../pets';
 import { drawTarget, type Drawable, type WorldLight } from '../scene';
@@ -122,10 +122,15 @@ export function crittersPass(world: World, zone: MapZone): Pass {
   let stood: Drawable[] = [];
   return {
     name: 'critters',
-    stand: ({ nowMs }) => (stood = critters().map((c) => critterDrawable(c, nowMs))),
+    stand: ({ nowMs }) =>
+      (stood = critters().map((c) => critterDrawable(c, nowMs, zone.isIce(c.tx, c.ty)))),
     wanted: () => stood,
     over(ctx, { cam }) {
       drawNet(ctx, world, cam);
+    },
+    // A shiny's glint, over the light so it's seen by night (1.4's G1).
+    lit(ctx, { cam, nowMs }) {
+      drawShinyGlints(ctx, critters(), cam, nowMs);
     },
     lights({ nowMs }) {
       const lights: WorldLight[] = [];

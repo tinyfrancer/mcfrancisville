@@ -107,11 +107,25 @@ function holds(h: Harness, line: TodayLine): boolean {
       );
     }
     // 1.0.1.
+    case 'shiny':
+      return w.collecting
+        .critters(line.zone)
+        .some((c) => c.shiny === true && c.critter === line.critter);
+    // 1.4's G3: the pond is ice, with something under it to fish for.
+    case 'iceFishing':
+      return w.townZone.isIce(23, 43);
     case 'freeGo':
       return (
         w.activities.freeGo() === line.id &&
         w.activities.freeToday(line.id) &&
         w.activities.isOpen(line.id) === line.open
+      );
+    // 1.5's G4.
+    case 'stars':
+      return (
+        w.stargazing.sky() === 'open' &&
+        w.stargazing.tonight().findable.includes(line.constellation) &&
+        (w.cabinet.tracedOn(line.constellation) !== null) === line.found
       );
   }
 }
@@ -253,5 +267,23 @@ describe("Today (V1's R2)", () => {
     expect(arrived.concat(h.tick(1))).toContainEqual(expect.objectContaining({ at: prop }));
     h.world.takings.take(FREE_GO_KEY);
     expect(h.world.upNow.lines().some((l) => l.kind === 'freeGo')).toBe(false);
+  });
+});
+
+describe('a clear night (1.5 G4)', () => {
+  it('says the telescope is out, takes her there, and moves on once one is traced', () => {
+    const h = harness();
+    // 7 October 2026: clear, and no meteor shower.
+    h.clock.set(new Date(2026, 9, 7, 22));
+    expect(weatherOn('2026-10-07')).toBe('clear');
+    const stars = () => expectTrue(h).find((l) => l.kind === 'stars');
+    expect(stars()).toMatchObject({ constellation: 'bat', found: false });
+    h.world.atlas.find('castleHill');
+    expect(goToday(h.world, stars()!.go!)).toBe(true);
+    h.world.stargazing.begin('bat');
+    for (let i = 0; i < 9; i++) h.world.stargazing.tap(i);
+    expect(stars()).toMatchObject({ constellation: 'cauldron', found: false });
+    h.clock.set(new Date(2026, 9, 7, 13));
+    expect(stars()).toBeUndefined();
   });
 });

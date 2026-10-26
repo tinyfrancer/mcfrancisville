@@ -9,7 +9,8 @@ import { rodPalette, TOOL_ART } from '../sprites/tools';
 import type { RodColourId } from '../data/rods';
 import { paintedRod } from './scene';
 import type { Palette, SpriteSource } from '../sprites/sprite';
-import type { ItemId, ToolId } from '../types/ids';
+import type { ConstellationId, ItemId, ToolId } from '../types/ids';
+import { constellationMark } from '../sprites/stars';
 
 /** How many world pixels a pixel of an icon is, where the world draws one (a snack, a bubble). */
 export const ICON_SCALE = TILE_SIZE / ICON_SIZE;
@@ -32,6 +33,11 @@ export function drawBroomIcon(canvas: HTMLCanvasElement, look: BroomLook): void 
 /** A day's mark on the calendar (0.2's K2), at 1×. */
 export function drawCalendarMark(canvas: HTMLCanvasElement, id: CalendarId): void {
   drawIcon(canvas, `mark:${id}`, CALENDAR_MARKS[id]);
+}
+
+/** A constellation's 16-pixel mark (1.5's G4), for the calendar's month and the sky's head. */
+export function drawConstellationMark(canvas: HTMLCanvasElement, id: ConstellationId): void {
+  drawIcon(canvas, `stars:${id}`, constellationMark(id));
 }
 
 /** A neighbour's birthday cake on the calendar, or a plain page of it (0.2's U4), at 1×. */

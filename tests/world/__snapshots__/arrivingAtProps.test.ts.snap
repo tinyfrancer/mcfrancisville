@@ -26,7 +26,8 @@ exports[`arriving at a prop (1.1 W1) > does what it always did on a festival eve
   "rock@3,32 went: {"kind":"arrived","tx":2,"ty":31,"at":"rock","toward":{"tx":3,"ty":32,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2,"bead":"ghostBead"}",
   "stump@10,36 went: {"kind":"arrived","tx":9,"ty":35,"at":"stump","toward":{"tx":10,"ty":36,"w":1,"h":1}}",
   "log@8,38 went: {"kind":"arrived","tx":7,"ty":37,"at":"log","toward":{"tx":8,"ty":38,"w":2,"h":1}}",
-  "gatePost@12,40 went: {"kind":"arrived","tx":11,"ty":39,"at":"gatePost","toward":{"tx":12,"ty":40,"w":1,"h":1}}",
+  "telescope@11,39 went: {"kind":"arrived","tx":10,"ty":38,"at":"telescope","toward":{"tx":11,"ty":39,"w":1,"h":1}} {"kind":"stargaze","sky":"bright"}",
+  "gatePost@12,40 went: {"kind":"arrived","tx":12,"ty":39,"at":"gatePost","toward":{"tx":12,"ty":40,"w":1,"h":1}}",
   "gatePost@15,40 went: {"kind":"arrived","tx":14,"ty":39,"at":"gatePost","toward":{"tx":15,"ty":40,"w":1,"h":1}}",
 ]
 `;
@@ -190,7 +191,8 @@ exports[`arriving at a prop (1.1 W1) > does what it always did, in castleHill 1`
   "rock@3,32 went: {"kind":"arrived","tx":2,"ty":31,"at":"rock","toward":{"tx":3,"ty":32,"w":1,"h":1}} {"kind":"gathered","from":"rock","item":"stone","count":2}",
   "stump@10,36 went: {"kind":"arrived","tx":9,"ty":35,"at":"stump","toward":{"tx":10,"ty":36,"w":1,"h":1}}",
   "log@8,38 went: {"kind":"arrived","tx":7,"ty":37,"at":"log","toward":{"tx":8,"ty":38,"w":2,"h":1}}",
-  "gatePost@12,40 went: {"kind":"arrived","tx":11,"ty":39,"at":"gatePost","toward":{"tx":12,"ty":40,"w":1,"h":1}}",
+  "telescope@11,39 went: {"kind":"arrived","tx":10,"ty":38,"at":"telescope","toward":{"tx":11,"ty":39,"w":1,"h":1}} {"kind":"stargaze","sky":"bright"}",
+  "gatePost@12,40 went: {"kind":"arrived","tx":12,"ty":39,"at":"gatePost","toward":{"tx":12,"ty":40,"w":1,"h":1}}",
   "gatePost@15,40 went: {"kind":"arrived","tx":14,"ty":39,"at":"gatePost","toward":{"tx":15,"ty":40,"w":1,"h":1}}",
 ]
 `;

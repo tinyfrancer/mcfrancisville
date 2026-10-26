@@ -1,5 +1,5 @@
 import { FIRST_DAY } from '../../src/data/firstDay';
-import { FIGURINE_IDS } from '../../src/data/figurines';
+import { EVERY_FIGURINE } from '../../src/data/figurines';
 import { FINALE_LETTER } from '../../src/data/finale';
 import { HOLIDAY_LETTERS } from '../../src/data/holidays';
 import { MUSEUM_LETTERS } from '../../src/data/museum';
@@ -122,6 +122,33 @@ describe('the day’s stock', () => {
     expect(YEAR.filter((day) => table(day) !== undefined)).toHaveLength(12);
   });
 
+  it("puts the winter wardrobe out from November to February, and only then (1.4's G2)", () => {
+    const shelf = (day: string, name: string) =>
+      stockOf('corner', day).find((s) => s.name === name);
+    for (const day of ['2026-10-31', '2027-03-01', '2027-07-15']) {
+      expect(shelf(day, 'Winter woollies'), day).toBeUndefined();
+      expect(shelf(day, "This week's snug look"), day).toBeUndefined();
+    }
+    for (const day of ['2026-11-01', '2026-12-24', '2027-01-15', '2027-02-28']) {
+      expect(shelf(day, 'Winter woollies')?.offers, day).toHaveLength(2);
+      const look = shelf(day, "This week's snug look")!.offers;
+      expect(look.length, day).toBeGreaterThanOrEqual(3);
+      for (const offer of look) expect(offer.price).toBe(priceOf(offer.ware));
+    }
+    // Every winter piece turns up on the shelf in one winter, and a snug look is the same all week.
+    const winter = YEAR.filter((day) => ['11', '12', '01', '02'].includes(day.slice(5, 7)));
+    const seen = new Set(
+      winter.flatMap((day) =>
+        shelf(day, 'Winter woollies')!.offers.map((o) => JSON.stringify(o.ware)),
+      ),
+    );
+    const woollies = SHOPS.corner.shelves.find((s) => s.name === 'Winter woollies')!.picks[0]!.from;
+    expect(woollies).toHaveLength(16);
+    for (const w of woollies) expect(seen, JSON.stringify(w)).toContain(JSON.stringify(w));
+    const weekOf = (day: string) => shelf(day, "This week's snug look")!.offers;
+    expect(weekOf('2026-11-03')).toEqual(weekOf('2026-11-08'));
+  });
+
   it('deals each shelf the number it asks for, a look whole, with nothing twice', () => {
     for (const shop of SHOP_IDS) {
       for (const day of YEAR.slice(0, 30)) {
@@ -220,8 +247,8 @@ describe('the day’s stock', () => {
     );
     const made = new Set<FurnitureId>([
       ...Object.values(RECIPES).flatMap((r) => ('furniture' in r.makes ? [r.makes.furniture] : [])),
-      // Gourdon carves the figurines from three of a kind (0.3's C3).
-      ...FIGURINE_IDS,
+      // Gourdon carves the figurines from three of a kind (0.3's C3), the shinies' too (1.4's G1).
+      ...EVERY_FIGURINE,
     ]);
     // What her neighbours give her, by letter or from their houses, no shop sells either.
     const given = new Set(
@@ -298,6 +325,8 @@ describe('selling', () => {
       'wayfarerPostcard',
       'snowflakeCharm',
       'finderRosette',
+      // Hazel's star map (1.5's G4).
+      'starMap',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));

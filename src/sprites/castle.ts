@@ -221,3 +221,74 @@ export const WEDDING_ARCH_PALETTE: Palette = {
   M: mix(C.monarch, C.pumpkinDark, 0.4),
   k: C.ink,
 };
+
+/**
+ * The telescope at the lookout by the gate (1.5's G4): a long brass telescope on a tall wooden
+ * tripod, pointed up over the castle at the sky, its tube banded and its far glass catching the
+ * light.
+ */
+function drawTelescope(): SpriteSource {
+  const s = new Sketch(32, 62);
+  const head = { x: 15, y: 35 };
+  // The tripod: the back leg first, in shade, then the two in front.
+  s.line(head.x + 1, head.y, 18, 58, 'W').line(head.x + 2, head.y, 19, 58, 'W');
+  for (const fx of [4, 26]) {
+    s.line(head.x, head.y, fx, 59, 'w').line(head.x + 1, head.y, fx + 1, 59, 'w');
+    s.rect(fx - 1, 59, 4, 2, 'd');
+  }
+  // A brace between the front legs, and the brass mount on top.
+  s.line(8, 50, 23, 50, 'W');
+  s.rect(12, 33, 8, 5, 'b').rect(12, 33, 8, 1, 'B').rect(19, 34, 1, 4, 'd');
+  // The tube: wider toward the sky, from the eyepiece low on the left to the glass high on the right.
+  const from = { x: 9, y: 36 };
+  const to = { x: 25, y: 6 };
+  const steps = Math.ceil(Math.hypot(to.x - from.x, to.y - from.y));
+  const at = (t: number) => ({
+    x: from.x + (to.x - from.x) * t,
+    y: from.y + (to.y - from.y) * t,
+    r: 2 + t * 2.4,
+  });
+  for (let k = 0; k <= steps; k++) {
+    const { x, y, r } = at(k / steps);
+    s.ellipse(x, y, r, r, 'b');
+  }
+  // Lit along its upper left, in shade along its lower right.
+  for (let k = 0; k <= steps; k++) {
+    const { x, y, r } = at(k / steps);
+    s.set(Math.round(x - r * 0.75), Math.round(y - r * 0.35), 'B');
+    s.set(Math.round(x + r * 0.7), Math.round(y + r * 0.45), 'd');
+  }
+  // Its bands.
+  for (const t of [0.18, 0.5, 0.82]) {
+    const { x, y, r } = at(t);
+    s.line(
+      Math.round(x - r),
+      Math.round(y - r * 0.5),
+      Math.round(x + r),
+      Math.round(y + r * 0.5),
+      'k',
+    );
+  }
+  // The glass at the far end, round, with the sky in it, and the eyepiece's little cup.
+  s.ellipse(to.x + 1, to.y - 1, 3.5, 3.5, 'g');
+  s.set(to.x, to.y - 2, 'G').set(to.x - 1, to.y - 1, 'G');
+  s.rect(from.x - 3, from.y + 1, 3, 3, 'k').set(from.x - 3, from.y + 1, 'B');
+  s.outline({ b: 'o', B: 'o', d: 'o', k: 'o', w: 'q', W: 'q', g: 'o', G: 'o' });
+  return s.toSource();
+}
+
+export const TELESCOPE: SpriteSource = drawTelescope();
+
+export const TELESCOPE_PALETTE: Palette = {
+  '.': null,
+  o: mix(C.goldShade, C.ink, 0.55),
+  q: C.barkDark,
+  b: C.gold,
+  B: C.candleBright,
+  d: C.goldShade,
+  k: mix(C.goldShade, C.ink, 0.3),
+  w: C.wood,
+  W: C.bark,
+  g: C.navy,
+  G: C.sky,
+};

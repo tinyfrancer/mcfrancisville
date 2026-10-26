@@ -53,6 +53,12 @@ export const CUES = {
     chime('C5:.2 E5:.2 G5:.2 C6:.2 E6:.2 G6:.2 C7:1'),
     pluck('-:.6 C4+G4:1.2', 0.14),
   ),
+  // A shiny caught (1.4's G1): a short glitter rising high, quick and light, over the catch's chime.
+  shinyCatch: cue(
+    { wave: 'hat', notes: line('C4:.3'), gain: 0.12 },
+    chime('E5:.2 G5:.2 B5:.2 E6:.4'),
+    chime('-:.6 B6:.1 C#7:.1 E7:.1 G#7:.1 B7:.8', 0.14),
+  ),
   fled: cue(chime('E6:.2 C6:.2 A5:.2 E5:.5', 0.16)),
   // Her rod (phase Q): a plop as the float goes in, a tick at a nibble, a splash and a ring at a bite.
   cast: cue(
@@ -94,6 +100,12 @@ export const CUES = {
   // A pet's trick (V1's R6c): a twirl up and a little landing; and Dolly's two brave woofs.
   trick: cue(chime('C5:.1 E5:.1 G5:.1 C6:.1 E6:.15 C6:.1 G6:.6', 0.16)),
   woof: cue(pluck('A3:.12 -:.08 A3:.2', 0.14, 'square')),
+  // The night sky (1.5's G4): a star lit, a high soft bell; a shape traced, a run of them rising.
+  starLit: cue(chime('E6:.12 B6:.5', 0.1)),
+  traced: cue(
+    chime('C6:.12 E6:.12 G6:.12 B6:.12 D7:.12 E7:.9', 0.13),
+    chime('-:.5 C5+G5:1.6', 0.08),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -183,6 +195,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'built':
       return 'treat';
     case 'caught':
+      if (event.shiny) return 'shinyCatch';
       return event.first ? 'firstCatch' : 'caught';
     case 'unearthed':
       return event.first ? 'firstCatch' : 'treat';
@@ -239,6 +252,11 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'trick';
     case 'petHelped':
       return event.job === 'bark' ? 'woof' : event.job === 'fetch' ? null : 'found';
+    // 1.5's G4: a star lit chimes, a wrong one only ticks; a whole shape glitters up.
+    case 'starTapped':
+      return event.lit ? 'starLit' : 'tap';
+    case 'traced':
+      return 'traced';
     default:
       return null;
   }

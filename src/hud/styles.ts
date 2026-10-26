@@ -397,6 +397,7 @@ const CSS = `
 .hud-colours small { color: ${T.muted}; font-size: 13px; }
 .hud-colours p { margin: 2px 0 0 !important; font-size: 14px !important; }
 .hud-colours .hud-choices { margin: 4px 0 0; }
+.hud-badge { position: absolute; top: 1px; right: 1px; line-height: 0; pointer-events: none; }
 .hud-count {
   position: absolute;
   right: 3px;
@@ -1161,6 +1162,35 @@ ${CLOUD_CSS}
 .hud-fact .hud-glyph, .hud-band .hud-glyph { margin-right: 2px; }
 .hud-fair-tally { display: flex; justify-content: center; gap: 6px; }
 .hud-fair-target .hud-glyph { display: block; margin: auto; }
+/* The night sky (1.5's G4): the telescope's view, tonight's constellations, and her star chart. */
+.hud-sky-stage {
+  display: block;
+  margin: 4px auto 8px;
+  image-rendering: pixelated;
+  touch-action: none;
+  border-radius: 6px;
+}
+.hud-sky-view { width: 100%; }
+/* Room kept for its longest words, so the stage never shifts under her finger as they change. */
+.hud-sky-message { text-align: center; min-height: 5.6em; }
+.hud-sky-chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 8px; }
+.hud-sky-chip {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 18px;
+}
+.hud-sky-chip[aria-pressed='true'] { border-color: ${T.accent}; color: ${T.text}; }
+.hud-sky-chart {
+  display: block;
+  width: 100%;
+  max-width: 480px;
+  margin: 4px auto 8px;
+  image-rendering: pixelated;
+  border-radius: 6px;
+}
 .hud-cal-icon .hud-glyph, .hud-map-mark .hud-glyph { display: block; }
 .hud-seed > .hud-glyph { align-self: center; }
 /* A heart won pops in, each after the last. */

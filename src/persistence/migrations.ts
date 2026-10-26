@@ -271,6 +271,17 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
     const each = (list: unknown) => (Array.isArray(list) ? list.map(inFrontRoom) : list);
     return { ...state, beds: each(state.beds), sprinklers: each(state.sprinklers) };
   },
+  // 1.4's G1: the shinies. None was ever dealt before, so a town has caught none and shows none;
+  // the first she nets is the first of its kind.
+  55: (state) => {
+    const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
+    return { ...state, cabinet: { ...cabinet, shinies: {}, shinyShown: [] } };
+  },
+  // 1.5's G4: her star chart. There was no telescope before, so a town has traced nothing yet.
+  56: (state) => {
+    const cabinet = (state.cabinet ?? {}) as Record<string, unknown>;
+    return { ...state, cabinet: { ...cabinet, stars: {} } };
+  },
 };
 
 /**

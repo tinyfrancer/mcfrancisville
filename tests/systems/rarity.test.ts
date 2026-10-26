@@ -8,6 +8,7 @@ import { daysBetween, shiftDay } from '../../src/systems/calendar';
 import {
   crittersOut,
   isAbout,
+  isCharmed,
   nextChance,
   placeHabitats,
   townHabitats,
@@ -23,6 +24,9 @@ import type { CritterId, FossilId, MapZoneId } from '../../src/types/ids';
  * most of a year. Done when a simulated year of play at an hour a day fills it in about ten months;
  * since visitors come every fortnight (1.3's F1, decision 360) it is seven and a half to ten, nine
  * on average, the last to come being the moon-bound legendaries, who still wait for a full moon.
+ * Since 1.4's G3's winter fish it is 7.6 to 11.4, 9.1 on average: starting in January, the cold
+ * moon sturgeon and the winter fish draw her to the pond and the lake on the winter's full moons,
+ * and the ghost bat at the castle, out on those nights alone, is the last she meets.
  */
 
 const PLACES = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined).map((id) => {
@@ -77,7 +81,7 @@ describe('filling the Curiosity Cabinet', () => {
       ).toEqual([]);
       const last = Math.max(...firsts.values());
       expect(last / MONTH, start).toBeGreaterThan(7);
-      expect(last / MONTH, start).toBeLessThan(11);
+      expect(last / MONTH, start).toBeLessThan(12);
     }
   });
 
@@ -102,6 +106,63 @@ describe('filling the Curiosity Cabinet', () => {
     expect(mean('uncommon')).toBeLessThan(mean('rare'));
     expect(mean('rare')).toBeLessThan(mean('legendary'));
   });
+});
+
+/*
+ * 1.4's G1 (decision 370): the shinies. Playing on as above, at an hour a day, to the two places
+ * where the most she still has to find (the Cabinet's kinds, then their shinies) could be about,
+ * and catching everything there, a shiny of every critter takes most of a second year: 18 to 24
+ * months, about 21, the last a kind charmed nine months after she first caught it.
+ */
+
+/** The day of play each kind was first caught shiny, over three years from `start`. */
+function playForShinies(start: Date): Map<CritterId, number> {
+  const firsts = new Map<CritterId, number>();
+  const shinies = new Map<CritterId, number>();
+  for (let d = 0; d < 365 * 3 && shinies.size < CRITTER_IDS.length; d++) {
+    const date = new Date(start.getFullYear(), start.getMonth(), start.getDate() + d, 12);
+    const day = dayKey(date.getTime());
+    const hour = PLAY_HOURS[hashString(`play:${day}`) % PLAY_HOURS.length]!;
+    const weather = weatherOn(day);
+    const wanted = (c: CritterId) =>
+      firsts.size < CRITTER_IDS.length ? !firsts.has(c) : !shinies.has(c);
+    const hinted = (place: MapZoneId) =>
+      CRITTER_IDS.filter(
+        (c) => wanted(c) && CRITTERS[c].where.includes(place) && isAbout(c, day, hour, weather),
+      ).length;
+    const order = [...PLACES].sort((a, b) => hinted(b.id) - hinted(a.id));
+    for (const place of order.slice(0, 2)) {
+      for (const c of crittersOut(day, hour, place.habitats, undefined, place.id)) {
+        const first = firsts.get(c.critter) ?? null;
+        const charmed = isCharmed(
+          first === null ? null : shiftDay('2000-01-01', first),
+          shinies.has(c.critter),
+          shiftDay('2000-01-01', d),
+        );
+        if (first === null) firsts.set(c.critter, d);
+        if ((c.shiny || charmed) && !shinies.has(c.critter)) shinies.set(c.critter, d);
+      }
+    }
+  }
+  return shinies;
+}
+
+describe('a shiny of every critter', () => {
+  it('takes most of a second year at an hour a day, whenever in the year she starts', () => {
+    const months = [0, 3, 6, 9].map((m) => {
+      const start = new Date(2026, 9 + m, 1, 12);
+      const shinies = playForShinies(start);
+      expect(
+        CRITTER_IDS.filter((id) => !shinies.has(id)),
+        dayKey(start.getTime()),
+      ).toEqual([]);
+      return Math.max(...shinies.values()) / MONTH;
+    });
+    for (const m of months) {
+      expect(m).toBeGreaterThan(15);
+      expect(m).toBeLessThan(26);
+    }
+  }, 60_000);
 });
 
 /*

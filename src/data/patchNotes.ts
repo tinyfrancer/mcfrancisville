@@ -200,6 +200,38 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. I shall keep the typewriter oiled, just in case. The W still sticks. I have grown rather fond of it.',
   },
+  {
+    version: '1.4',
+    lines: [
+      // 1.4's G1: the shinies.
+      'Once in a while a critter is the wrong colour on purpose, and prettier for it. Look for ' +
+        'a twinkle: a shiny one is about.',
+      "A shiny is worth twice as much, takes its museum case in the plain one's place, and " +
+        'Wrapunzel has two new shelves just for them.',
+      // 1.4's G2: the winter wardrobe and sets.
+      'Cobweb Corner has winter woollies from November, a snug look each week: duffel coats, ' +
+        'mittens, bobble hats and, I am told, a bat onesie.',
+      'Two new sets for long evenings: a Cosy Cabin with a crackling log stove, and a Midnight ' +
+        'Observatory whose telescope hums to the stars.',
+      // 1.4's G3: ice fishing and the ice hut.
+      'When the pond freezes, the fish carry on underneath: fish through the ice for four ' +
+        'winter ones, or help Gourdon build his ice hut, stove and all.',
+    ],
+    ps: 'P.S. The typewriter keys are cold in the mornings now. I type in mittens. Please excuse the typos.',
+  },
+  {
+    version: '1.4.1',
+    lines: [
+      // 1.4.1's G4: the night sky.
+      'There is a telescope by the castle gate now. On a clear night, look through it: a ' +
+        'constellation a month, and three more for the holidays.',
+      'Tap its stars in order and it lights up. Tap the wrong one and it only twinkles at you. ' +
+        "The stars are very forgiving. I've checked.",
+      'Every one you trace goes on your star chart, in the Cabinet. Hazel would like you to ' +
+        'know she has been waiting years for someone to say so.',
+    ],
+    ps: 'P.S. Hazel has asked me to say: the stars come out after eight, and so should you. Wrap up warm.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

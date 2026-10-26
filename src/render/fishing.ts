@@ -1,11 +1,12 @@
 import { TILE_SIZE } from '../config/world';
-import { PALETTE as C } from '../sprites/palette';
+import { mix, PALETTE as C, ramp } from '../sprites/palette';
 import { ROD_TIP } from '../sprites/tools';
 import { CAST_MS } from '../systems/fishing';
 import { tileHash } from '../sprites/terrain';
 import type { Critter, World } from '../world/World';
 import { isFish } from '../data/critters';
 import type { MapZoneId } from '../types/ids';
+import type { Tile } from '../systems/pathfinding';
 import type { Point } from './camera';
 import type { Pass } from './passes/pass';
 import type { Drawable } from './scene';
@@ -13,7 +14,8 @@ import type { Drawable } from './scene';
 /**
  * Her line (phase Q): from her rod's tip, sagging a little, to her pumpkin float over the fish.
  * The float arcs out as she casts, bobs as it waits, dips at a nibble and goes under at a bite,
- * with rings on the water. `me` is her drawable this frame, whose `held` is the rod.
+ * with rings on the water. `me` is her drawable this frame, whose `held` is the rod. `inHole`
+ * when the float is in a hole through the ice (1.4's G3), where its rings stay inside the hole.
  */
 export function drawLine(
   ctx: CanvasRenderingContext2D,
@@ -21,6 +23,7 @@ export function drawLine(
   me: Drawable,
   cam: Point,
   nowMs: number,
+  inHole = false,
 ): void {
   const line = world.fishing.line;
   const rod = me.held;
@@ -59,7 +62,7 @@ export function drawLine(
     ctx.fillRect(Math.round(x), Math.round(y), 1, 1);
   }
   ctx.globalAlpha = 1;
-  if (line.state !== 'casting') rings(ctx, water, line.state, nowMs);
+  if (line.state !== 'casting') rings(ctx, water, line.state, nowMs, inHole ? HOLE.rx - 2 : 13);
   if (line.state === 'bite' || line.state === 'reel') return;
   // A little pumpkin: orange, a darker rib, and a green stem.
   ctx.fillStyle = C.pumpkinDark;
@@ -82,10 +85,12 @@ export function drawFishRings(
   fish: readonly Critter[],
   cam: Point,
   nowMs: number,
+  under: (f: Critter) => boolean = () => false,
 ): void {
   const hooked = world.fishing.line?.key;
   for (const f of fish) {
-    if (f.key === hooked) continue;
+    // No rings on ice: a fish under it is only its dim shadow (1.4's G3).
+    if (f.key === hooked || under(f)) continue;
     const t = (nowMs + tileHash(f.tx, f.ty) * 3) % FISH_RING_MS;
     if (t > FISH_RING_MS / 3) continue;
     const at = {
@@ -120,16 +125,88 @@ function ring(ctx: CanvasRenderingContext2D, at: Point, r: number, alpha: number
   ctx.globalAlpha = 1;
 }
 
-/** Rings on the water round the float: a slow one as it waits, quick ones at a nibble or bite. */
-function rings(ctx: CanvasRenderingContext2D, at: Point, state: string, nowMs: number): void {
+/**
+ * Rings on the water round the float: a slow one as it waits, quick ones at a nibble or bite, never
+ * wider than `widest`.
+ */
+function rings(
+  ctx: CanvasRenderingContext2D,
+  at: Point,
+  state: string,
+  nowMs: number,
+  widest: number,
+): void {
   const period = state === 'waiting' ? 1600 : 400;
   const t = (nowMs % period) / period;
-  ring(
-    ctx,
-    at,
-    3 + Math.round(t * (state === 'waiting' || state === 'nibble' ? 6 : 10)),
-    0.6 * (1 - t),
-  );
+  const spread = Math.min(widest - 3, state === 'waiting' || state === 'nibble' ? 6 : 10);
+  ring(ctx, at, 3 + Math.round(t * spread), 0.6 * (1 - t));
+}
+
+/**
+ * The hole she fishes through on the ice (1.4's G3), round its middle in world pixels: flattened
+ * as the rings are, `rx` across and `ry` deep, the lip of slush she drilled out round it.
+ */
+export const HOLE = { rx: 10, ry: 5.5 } as const;
+
+/** The hole's colours: dark open water, deeper under the far edge, a wet rim, and slush. */
+const HOLE_COLOURS = {
+  deep: ramp(C.water)[1],
+  water: C.water,
+  glint: C.waterLight,
+  wall: mix(C.ice, C.water, 0.45),
+  rim: mix(ramp(C.ice)[1], C.water, 0.55),
+  slush: C.iceLight,
+  shade: mix(C.ice, ramp(C.ice)[1], 0.55),
+} as const;
+
+/** Which of the hole's colours a pixel `(dx, dy)` from its middle is, if any. */
+export function holePixel(dx: number, dy: number): keyof typeof HOLE_COLOURS | null {
+  const px = dx + 0.5;
+  const py = dy + 0.5;
+  const e = (px / HOLE.rx) ** 2 + (py / HOLE.ry) ** 2;
+  const lip = (px / (HOLE.rx + 2)) ** 2 + (py / (HOLE.ry + 1.5)) ** 2;
+  if (e <= 1) {
+    // The ice's thickness, seen down the far side; then the water, darkest under it.
+    const wall = (px / HOLE.rx) ** 2 + ((py + 1.5) / HOLE.ry) ** 2 > 1;
+    if (wall && dy < 0) return 'wall';
+    if (dy === -1 && dx >= -2 && dx <= 1) return 'deep';
+    if (dy === 1 && (dx === 3 || dx === 4)) return 'glint';
+    return dy < 0 ? 'deep' : 'water';
+  }
+  if (e <= 1.35) return 'rim';
+  if (lip <= 1) {
+    // Slush pushed up round the hole, its near side in shade, in lumps rather than a ring.
+    const lumpy = (dx * 7 + dy * 13 + 40) % 5 !== 0;
+    if (!lumpy) return null;
+    return dy > 0 ? 'shade' : 'slush';
+  }
+  return null;
+}
+
+/**
+ * The hole through the ice under her float (1.4's G3): a dark round of open water with the ice's
+ * thickness showing down its far side, a wet rim, and lumps of the slush she drilled out round it,
+ * drawn on the ground under everything standing. Only while her line is in on ice.
+ */
+export function drawHole(ctx: CanvasRenderingContext2D, at: Tile, cam: Point): void {
+  const cx = at.tx * TILE_SIZE + TILE_SIZE / 2 - cam.x;
+  const cy = at.ty * TILE_SIZE + TILE_SIZE / 2 + 2 - cam.y;
+  for (let dy = -Math.ceil(HOLE.ry + 2); dy <= Math.ceil(HOLE.ry + 2); dy++) {
+    for (let dx = -HOLE.rx - 2; dx <= HOLE.rx + 2; dx++) {
+      const key = holePixel(dx, dy);
+      if (!key) continue;
+      ctx.fillStyle = HOLE_COLOURS[key];
+      ctx.fillRect(cx + dx, cy + dy, 1, 1);
+    }
+  }
+}
+
+/** Where her line's hole through the ice is in a place (1.4's G3), or null if it's on open water. */
+export function holeOf(world: World, zone: MapZoneId): Tile | null {
+  const line = world.fishing.line;
+  if (!line || world.scene !== zone) return null;
+  const place = world.zones.outdoor(zone);
+  return place?.isIce(line.tx, line.ty) ? { tx: line.tx, ty: line.ty } : null;
 }
 
 /**
@@ -260,12 +337,20 @@ export function drawBite(
 }
 
 /**
- * Her fishing as a place outdoors draws it (1.1's A4): the rings over every fish and her line over
- * everything standing, and the bite's "!" and the reel's tension bar over the light.
+ * Her fishing as a place outdoors draws it (1.1's A4): her hole on the ice on the ground (1.4's
+ * G3), the rings over every fish and her line over everything standing, and the bite's "!" and the
+ * reel's tension bar over the light.
  */
 export function fishingPass(world: World, zone: MapZoneId): Pass {
+  const place = world.zones.outdoor(zone);
+  const underIce = (f: Critter) => place?.isIce(f.tx, f.ty) ?? false;
   return {
     name: 'fishing',
+    // Her hole through the ice, under the fish and everything standing (1.4's G3).
+    ground(ctx, { cam }) {
+      const hole = holeOf(world, zone);
+      if (hole) drawHole(ctx, hole, cam);
+    },
     over(ctx, { cam, nowMs, me }) {
       drawFishRings(
         ctx,
@@ -273,8 +358,9 @@ export function fishingPass(world: World, zone: MapZoneId): Pass {
         world.collecting.critters(zone).filter((c) => isFish(c.critter)),
         cam,
         nowMs,
+        underIce,
       );
-      drawLine(ctx, world, me, cam, nowMs);
+      drawLine(ctx, world, me, cam, nowMs, holeOf(world, zone) !== null);
     },
     lit(ctx, { cam, me }) {
       drawBite(ctx, world, me, cam);

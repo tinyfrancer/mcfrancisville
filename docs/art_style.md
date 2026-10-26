@@ -186,6 +186,11 @@ games she loves lends a cue, and the 3D ones are reimagined as 2D sprites:
   the music corner black, cherry red and chrome; the haunted lounge dark wood, crimson velvet and
   old silver), so any two pieces of a set side by side read as a room. A new colour a set needs
   goes in the palette with a name (`sage`, `copper`, `mint`, `terracotta`).
+- **Knitting and fur are rows and rings of their own tones** (1.4's G2, `src/sprites/setsThree.ts`
+  and `doll/winter.ts`): a braid a stitch at a time round its ring, a jumper's band of diamonds
+  between two lines, cables as a two-pixel zigzag up a leg, a puffer's quilting a line every
+  three rows (its sleeves out of step with its body, so her arms read), a patchwork's squares
+  with a running stitch along every seam. Never a dither: at 32 it reads as dirt.
 - **Pieces meant to stand in a run share a line.** The kitchen's counter, sink and stove have one
   worktop height from the floor (`WORKTOP_FROM`), so side by side they're one run of cupboards;
   a new piece for that run (a bathroom's washstand) takes the same height.
@@ -301,10 +306,26 @@ She finds spiders frightening, and they are still in the game, drawn gently
   bands; a slug under a little ghost sheet; a glowworm whose tail glows; a cricket, a grasshopper,
   a stick insect in an acorn-cap helmet, a roly-poly in plates. Two frames, 900ms each: a slow
   wiggle where it is, never pottering toward her.
+- **A shiny is the same critter in another palette** (1.4's G1, decision 370), never a new grid:
+  a gem's `ramp` (`GEMS`, `SHINIES` in `src/sprites/critterLooks.ts`) laid over its colours by how
+  light each is, so its shading, spots and outline keep their places and it reads as itself in
+  colours it never has (a golden bat, a rose koi, a sky-blue monarch). What makes one read at 3×:
+  a hue far from the plain one, not a lighter or darker step of it; an accent gem only where the
+  creature has a part of its own (a shell, spots, a bow, the other orb); its eyes and ink kept, and
+  a lamp, a glowing tail or a peacock's fan kept as they are; nothing on the ramp's darkest tone, or
+  a dark critter's shiny goes muddy. In her bag it wears a four-pointed sparkle in its top right
+  corner, ringed in ink where it lies over the critter; out and about a slow glint over the light.
 - **A fossil is drawn once, at 24** (0.3's C1, `src/sprites/fossils.ts`), stone and amber in
   the kit's warm greys, and that one picture is its bag icon, its case in the Cabinet, its nook
   at the museum and its figurine. What's magic in it (the ghost shell, the amber, the egg's
   crack) glows after dark.
+
+## Stars
+
+- **Stars are whole pixels at 32** (1.5's G4, decision 373, `src/sprites/stars.ts`): a speck, a
+  heart with four arms, or longer arms with a halo, in cream and lavender until traced and gold
+  once lit, the lines between them a pixel wide; the sky behind them is the title screen's bands
+  dithered into each other, and tonight's moon is the title's, at tonight's phase.
 
 ## Animation
 

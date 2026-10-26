@@ -287,7 +287,101 @@ const FARM_HAT: HatStyle = (view) => {
   return s;
 };
 
+/**
+ * A snowflake bobble hat (1.4's G2): a knitted dome with a band of snowflakes round it, flaps over
+ * her ears with plaited ties hanging from them, and a big bobble on top.
+ */
+const EARFLAP_HAT: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT + BOBBLE_ROOM);
+  const cx = view === 'side' ? 15 : 16;
+  const top = BOBBLE_ROOM;
+  s.ellipse(cx, top + 10.5, 12.5, 9.5, 'm').rect(0, top + 11, DOLL_WIDTH, 40, CLEAR);
+  // The band: scarlet, with a little white snowflake every four stitches.
+  s.rect(cx - 12, top + 7, 25, 4, 'y');
+  for (let x = cx - 12; x <= cx + 12; x++) {
+    const at = (x - cx + 16) % 4;
+    if (at === 2) s.set(x, top + 8, 'x').set(x, top + 9, 'x');
+    else if (at === 1 || at === 3) s.set(x, top + 9, 'x');
+    if (at === 2) s.set(x, top + 10, 'x');
+  }
+  // The flaps, over her ears, and their plaits.
+  const flaps = view === 'side' ? [13] : [7, 25];
+  for (const fx of flaps) {
+    s.rect(fx - 2, top + 11, 4, 6, 'm').rect(fx - 1, top + 17, 2, 1, 'm');
+    for (let y = top + 18; y <= top + 22; y++) {
+      s.set(fx - 1, y, y % 2 ? 'M' : 'm').set(fx, y, y % 2 ? 'm' : 'M');
+    }
+    s.rect(fx - 1, top + 23, 2, 2, 'y');
+  }
+  s.ellipse(cx, 3, 3.5, 3, 'y');
+  return s;
+};
+
+/**
+ * Fluffy earmuffs (1.4's G2): two round pompoms over her ears, tufted at the edge, on a thin
+ * silver band over the top of her head.
+ */
+const EARMUFFS: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT);
+  const muffs = view === 'side' ? [14] : [7, 25];
+  if (view === 'side') {
+    for (let y = 1; y <= 12; y++) s.set(14 + (y < 4 ? 1 : 0), y, 'x');
+  } else {
+    for (let x = 8; x <= 24; x++) s.set(x, Math.round(1 + ((x - 16) / 9) ** 2 * 11), 'x');
+  }
+  for (const mx of muffs) {
+    s.ellipse(mx, 16, 3.5, 4, 'm');
+    for (const [dx, dy] of [
+      [-1, -2],
+      [1, 0],
+      [-2, 1],
+      [0, 2],
+    ] as const) {
+      s.set(mx + dx, 16 + dy, (dx + dy) % 2 ? 'L' : 'M');
+    }
+  }
+  return s;
+};
+
+/**
+ * A bat hood (1.4's G2): snug round her face, two pointy ears on top, pink inside where they face
+ * her way, and two little felt fangs at its brim over her forehead.
+ */
+const BAT_HOOD: HatStyle = (view) => {
+  const s = new Sketch(DOLL_WIDTH, DOLL_HEIGHT + EAR_ROOM);
+  const cx = view === 'side' ? 15 : 16;
+  const top = EAR_ROOM;
+  // Over all of her hair, however big, down to her chin.
+  s.ellipse(cx, top + 13, 11, 13, 'm').rect(0, top + 23, DOLL_WIDTH, 30, CLEAR);
+  // Each ear a tall point leaning out, broad where it meets the hood, pink inside.
+  const ears =
+    view === 'side' ? [[cx - 4, -1] as const] : [[cx - 6, -1] as const, [cx + 6, 1] as const];
+  for (const [ex, out] of ears) {
+    for (let i = 0; i < 10; i++) {
+      const w = 1 + Math.floor((i * 6) / 10);
+      const x = ex + out * Math.floor((9 - i) / 4) - Math.floor(w / 2);
+      s.rect(x, i, w, 1, 'm');
+      if (view !== 'back' && i >= 4 && w >= 3) s.rect(x + 1, i, w - 2, 1, 'x');
+    }
+  }
+  if (view === 'front') {
+    s.ellipse(16, top + 17, 7, 7.5, CLEAR);
+    s.set(14, top + 10, 'y').set(17, top + 10, 'y');
+  }
+  if (view === 'side') {
+    s.ellipse(20, top + 17, 6, 7.5, CLEAR);
+    s.set(20, top + 10, 'y');
+  }
+  return s;
+};
+
+/** How many rows a bat hood's ears rise above her head. */
+const EAR_ROOM = 5;
+
 export const HATS: Partial<Record<CutId, HatStyle>> = {
+  earflapHat: EARFLAP_HAT,
+  earmuffs: EARMUFFS,
+  batHood: BAT_HOOD,
   beanie: BEANIE,
   witchHat: WITCH_HAT,
   catEars: CAT_EARS,

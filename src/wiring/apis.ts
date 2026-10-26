@@ -10,6 +10,7 @@ import { petsApis } from './apis/pets';
 import { mysteryApis } from './apis/mystery';
 import { fairgroundApis } from './apis/fairground';
 import { calendarApis } from './apis/calendar';
+import { skyApis } from './apis/sky';
 import { welcomeApis } from './apis/welcome';
 import type { ApiWiring, SheetApis } from './apis/shared';
 
@@ -33,6 +34,7 @@ export function sheetApis(wiring: ApiWiring): SheetApis {
     ...mysteryApis(wiring),
     ...fairgroundApis(wiring),
     ...calendarApis(wiring),
+    ...skyApis(wiring),
     ...welcomeApis(wiring),
   };
 }

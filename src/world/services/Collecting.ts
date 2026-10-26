@@ -1,17 +1,21 @@
 import { CRITTERS, flies, isCritter, type Rarity } from '../../data/critters';
-import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SPECIAL } from '../../data/museum';
+import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SHINY, MUSEUM_SPECIAL } from '../../data/museum';
+import { shinyOf } from '../../data/shinies';
 import { dayKey, hourOf } from '../../systems/clock';
 import { lureKey, luredCritter } from '../../systems/cooking';
 import {
   critterKey,
   crittersOut,
   flutterTo,
+  isCharmed,
   placeHabitats,
   townHabitats,
   type Habitats,
   type OutCritter,
 } from '../../systems/critters';
 import { hashString } from '../../systems/random';
+import { fishInHole, holeKey } from '../../systems/fishing';
+import { weatherOn } from '../../systems/weather';
 import { isWhopper } from '../../systems/catchSize';
 import { DRIFTS_AN_HOUR, drifts, driftTo, HOP_MS, startles } from '../../systems/drift';
 import { walkable } from '../../systems/grid';
@@ -85,6 +89,8 @@ export class Collecting {
   private readonly lurer: Lurer | null;
   /** Her last catch and the day of it, for the neighbours to hear of; not saved (0.2's D2). */
   private lastCatch: { id: CritterId; day: string } | null = null;
+  /** The last shiny she caught and the day of it (1.4's G1); not saved. */
+  private lastShiny: { id: CritterId; day: string } | null = null;
 
   constructor(
     ctx: WorldContext,
@@ -105,6 +111,12 @@ export class Collecting {
   /** The last critter she caught today, if she has caught one since the game opened. */
   caughtToday(): CritterId | null {
     const last = this.lastCatch;
+    return last && last.day === dayKey(this.ctx.clock.now()) ? last.id : null;
+  }
+
+  /** The last shiny she caught today, if she has caught one since the game opened (1.4's G1). */
+  shinyToday(): CritterId | null {
+    const last = this.lastShiny;
     return last && last.day === dayKey(this.ctx.clock.now()) ? last.id : null;
   }
 
@@ -152,10 +164,15 @@ export class Collecting {
       this.dealt.set(place, dealt);
     }
     const out: Critter[] = [];
+    const { cabinet } = this.keeps;
     for (const c of dealt.out) {
       const key = critterKey(hour, c.slot, place);
       if (!this.keeps.takings.isReady(key)) continue;
-      out.push(this.where(c, key, now));
+      // A kind long in her Cabinet with no shiny yet comes out shiny (1.4's G1's charm).
+      const charmed =
+        !c.shiny &&
+        isCharmed(cabinet.caughtOn(c.critter), cabinet.shinyOn(c.critter) !== null, day);
+      out.push(this.where(charmed ? { ...c, shiny: true } : c, key, now));
     }
     const lured = this.luredIn(place, out);
     if (lured) out.push(this.where(lured, lureKey(this.lurer!.lure()!.at), now));
@@ -198,8 +215,12 @@ export class Collecting {
       if (!startles(c.critter, c, { her, walked })) continue;
       const taken = new Set(out.map((o) => `${o.tx},${o.ty}`));
       const zone = this.zone(place);
+      // A shy one hops off over the ground, never out onto the frozen pond.
       const free = (t: Tile) =>
-        this.canBe(place, t) && zone.canWalk(t.tx, t.ty) && !taken.has(`${t.tx},${t.ty}`);
+        this.canBe(place, t) &&
+        zone.canWalk(t.tx, t.ty) &&
+        !zone.isIce(t.tx, t.ty) &&
+        !taken.has(`${t.tx},${t.ty}`);
       const to = driftTo(c, her, free);
       if (!to) continue;
       this.fluttered.set(c.key, {
@@ -291,19 +312,50 @@ export class Collecting {
     return critter;
   }
 
+  /** A shiny out where she is now, if one is (1.4's G1), for Today to tell her of. */
+  shinyHere(): { critter: CritterId; zone: MapZoneId; tile: Tile; hour: number } | null {
+    const place = this.outside();
+    if (place === null) return null;
+    const shiny = this.critters(place).find((c) => c.shiny);
+    if (!shiny) return null;
+    const hour = Math.floor(hourOf(this.ctx.clock.now()));
+    return { critter: shiny.critter, zone: place, tile: { tx: shiny.tx, ty: shiny.ty }, hour };
+  }
+
   /** One of this hour's critters where she is, by its key, if it's still out. */
   find(key: string): Critter | undefined {
     return this.critters().find((c) => c.key === key);
   }
 
   /**
+   * The fish under the ice hut's hole this hour (1.4's G3), at the hole's tile, less any she has
+   * caught: the pond's winter fish in winter, its ordinary ones the rest of the year. A kind long
+   * in her Cabinet with no shiny comes up shiny here as it does in the water.
+   */
+  holeFish(hole: Tile): Critter[] {
+    const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    const hour = Math.floor(hourOf(now));
+    const { cabinet, takings } = this.keeps;
+    return fishInHole(day, hour, weatherOn(day)).flatMap((c) => {
+      const key = holeKey(hour, c.slot);
+      if (!takings.isReady(key)) return [];
+      const charmed =
+        !c.shiny &&
+        isCharmed(cabinet.caughtOn(c.critter), cabinet.shinyOn(c.critter) !== null, day);
+      return [{ ...c, ...(charmed ? { shiny: true as const } : {}), ...hole, key }];
+    });
+  }
+
+  /**
    * Where a critter may be today: open ground nothing is standing on, or water where it can be
-   * reached from open ground.
+   * reached from open ground. The pond frozen over is still the fish's water (1.4's G3): they
+   * swim on under the ice, and she fishes for them through a hole. Only fish are dealt onto
+   * water, so nothing else is ever under it.
    */
   private canBe(place: MapZoneId, t: Tile): boolean {
     const zone = this.zone(place);
-    // Nothing swims under the pond's ice in winter (phase U).
-    if (zone.isIce(t.tx, t.ty)) return false;
+    if (zone.isIce(t.tx, t.ty)) return true;
     if (zone.canWalk(t.tx, t.ty)) return true;
     if (walkable(zone.map, t.tx, t.ty)) return false;
     for (let y = t.ty - 1; y <= t.ty + 1; y++) {
@@ -363,18 +415,22 @@ export class Collecting {
    */
   keep(critter: Critter, size: number | null = null): WorldEvent {
     const id = critter.critter;
+    const shiny = critter.shiny === true;
     const { bag, takings, cabinet } = this.keeps;
     takings.take(critter.key);
-    bag.add(id, 1);
+    // A shiny is a thing of its own in her bag (1.4's G1), and the critter caught all the same.
+    bag.add(shiny ? shinyOf(id) : id, 1);
     const day = dayKey(this.ctx.clock.now());
     const first = cabinet.record(id, day);
+    const firstShiny = shiny && cabinet.shine(id, day);
     const best = size === null ? null : cabinet.measure(id, size);
     this.lastCatch = { id, day };
+    if (shiny) this.lastShiny = { id, day };
     this.ctx.events.emit('bag', bag.contents);
-    if (first || best) this.ctx.events.emit('cabinet', cabinet);
+    if (first || best || firstShiny) this.ctx.events.emit('cabinet', cabinet);
     const rarity = CRITTERS[id].rarity;
     const whopper = size !== null && isWhopper(id, size);
-    if (rarity === 'rare' || rarity === 'legendary' || whopper) {
+    if (rarity === 'rare' || rarity === 'legendary' || whopper || shiny) {
       this.ctx.signals.emit('thrilled', { by: 'catch' });
     }
     return {
@@ -384,6 +440,8 @@ export class Collecting {
       ...(size === null ? {} : { size }),
       ...(best ? { best } : {}),
       ...(whopper ? { whopper } : {}),
+      ...(shiny ? { shiny: true } : {}),
+      ...(firstShiny ? { firstShiny: true } : {}),
     };
   }
 
@@ -391,10 +449,13 @@ export class Collecting {
    * Gives a critter from her bag to Wrapunzel's museum, to go on show: what its label says, or null
    * if she hasn't one, or one is already on show. Wrapunzel writes as the cases fill.
    */
-  donate(id: CritterId): string | null {
+  donate(id: CritterId, shiny = false): string | null {
     const { bag, cabinet, mailbox } = this.keeps;
-    if (!isCritter(id) || cabinet.isDonated(id) || !bag.remove(id)) return null;
-    cabinet.donate(id);
+    if (!isCritter(id)) return null;
+    // A shiny takes its case in place of the plain one, once (1.4's G1).
+    const taken = shiny ? cabinet.isShinyShown(id) : cabinet.isDonated(id);
+    if (taken || !bag.remove(shiny ? shinyOf(id) : id)) return null;
+    cabinet.donate(id, shiny);
     this.ctx.signals.emit('donated', { thing: id });
     this.ctx.events.emit('bag', bag.contents);
     this.ctx.events.emit('cabinet', cabinet);
@@ -402,7 +463,9 @@ export class Collecting {
     for (const letter of MUSEUM_LETTERS) {
       if (cabinet.onShow >= letter.donated) mailbox.post(`museum:${letter.donated}`, day);
     }
-    const label = MUSEUM_SPECIAL[id] ?? MUSEUM_LABELS[hashString(id) % MUSEUM_LABELS.length]!;
+    const label = shiny
+      ? MUSEUM_SHINY[hashString(id) % MUSEUM_SHINY.length]!
+      : (MUSEUM_SPECIAL[id] ?? MUSEUM_LABELS[hashString(id) % MUSEUM_LABELS.length]!);
     return label.replaceAll('{critter}', CRITTERS[id].name.toLowerCase());
   }
 }

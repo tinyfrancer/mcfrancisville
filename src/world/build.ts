@@ -72,6 +72,7 @@ import type { RareEvents } from './services/RareEvents';
 import { Projects } from './services/Projects';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
+import type { Stargazing } from './services/Stargazing';
 import { Garden } from './services/Garden';
 import { Barn } from './services/Barn';
 import { Gathering } from './services/Gathering';
@@ -152,6 +153,8 @@ export abstract class WorldParts {
   readonly weather: Forecast;
   /** Whether the pond's fountain is playing for her, after dark (0.2's H2). */
   readonly fountain: Fountain;
+  /** The night sky through a telescope, and her star chart (1.5's G4). */
+  readonly stargazing: Stargazing;
   /** The day's window, what's on today, and the calendar (phase N). */
   readonly calendar: Calendar;
   /** The notes on the board by the square, and answering them (phase N). */
@@ -383,7 +386,8 @@ export abstract class WorldParts {
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
     this.rareEvents = festival.rareEvents;
     areaMade('festivals');
-    ({ weather: this.weather, fountain: this.fountain } = outdoors(shared, zones, outside));
+    const air = outdoors(shared, zones, outside, mailbox);
+    ({ weather: this.weather, fountain: this.fountain, stargazing: this.stargazing } = air);
     areaMade('outdoors');
     this.activities = fairground(shared, this.weather).activities;
     areaMade('fairground');
@@ -409,6 +413,7 @@ export abstract class WorldParts {
       festival.arrivals,
       caught.arrivals,
       homes.arrivals,
+      air.arrivals,
     );
     this.petCare = petServices(shared, {
       ...place,
@@ -444,6 +449,8 @@ export abstract class WorldParts {
       stalls: this.stalls,
       projects: this.projects,
       activities: this.activities,
+      collecting: this.collecting,
+      stargazing: this.stargazing,
     });
     areaMade('upNow');
   }
@@ -460,6 +467,8 @@ export abstract class WorldParts {
       storm: this.weather.stormy(),
       holding: this.hands.held,
       caught: this.collecting.caughtToday(),
+      shiny: this.collecting.shinyToday(),
+      stars: this.cabinet.newestStar,
       pet: beside ? this.pets.nameOf(walker) : null,
       wearing: Object.values(this.wardrobe.look.outfit).map((worn) => worn.id),
       ...this.lately.last,

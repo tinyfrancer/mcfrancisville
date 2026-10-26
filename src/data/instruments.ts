@@ -3,7 +3,7 @@
  * row names its instrument, and each tune here is a row, played in turn. The notes are
  * `audio/pianos.ts`; nothing here makes a sound.
  */
-export type Instrument = 'piano' | 'musicBox';
+export type Instrument = 'piano' | 'musicBox' | 'telescope';
 
 export type TuneId =
   | 'hushUpAndDance'
@@ -16,7 +16,9 @@ export type TuneId =
   | 'cobwebNocturne'
   | 'belfryBoogie'
   | 'phantomGalop'
-  | 'foreverOrbs';
+  | 'foreverOrbs'
+  // Midnight Observatory's brass telescope (1.4's G2).
+  | 'starlightLullaby';
 
 export interface TuneRow {
   name: string;
@@ -101,6 +103,11 @@ export const TUNES: Record<TuneId, TuneRow> = {
     learnt: 'duet',
     taught:
       'Happy anniversary, {name}. I wrote this for you both: two hands for you, two for me, and it\'s called "Forever Orbs". Ready? One, two…',
+  },
+  starlightLullaby: {
+    name: 'Starlight Lullaby',
+    instrument: 'telescope',
+    line: 'You look through the telescope, and it chimes the "Starlight Lullaby", soft and slow, one note a star.',
   },
 };
 

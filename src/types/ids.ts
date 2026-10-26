@@ -69,6 +69,8 @@ export type PropId =
   | 'castle'
   | 'weddingArch'
   | 'gate'
+  // The telescope at the castle lookout (1.5's G4).
+  | 'telescope'
   // Clutter (phase L).
   | 'bush'
   | 'stump'
@@ -144,7 +146,10 @@ export type PropId =
   | 'bridgeFrame'
   | 'footbridge'
   | 'greenhouseFrame'
-  | 'herGreenhouse';
+  | 'herGreenhouse'
+  // The ice hut on the pond's bank (1.4's G3), and its frame.
+  | 'iceHutFrame'
+  | 'iceHut';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -317,10 +322,44 @@ export type ItemId =
   | 'plushGhost'
   // A keepsake the first time each rare event comes (V1's R3).
   | RareKeepsakeId
+  // Hazel's star map, the first time she traces a constellation (1.5's G4).
+  | 'starMap'
   | DishId
   | FruitId
   | CritterId
+  // A critter in its shiny colours (1.4's G1), kept as a thing of its own.
+  | ShinyId
   | FossilId;
+
+/** A critter's shiny (1.4's G1, decision 370), as a thing in her bag: `lunaMothShiny`. */
+export type ShinyId = `${CritterId}Shiny`;
+
+/** What the shiny shelves send her (1.4's G1): a framed shiny luna moth, a dome of shiny orbs. */
+export type ShinyPiece = 'framedShiny' | 'shinyDome';
+
+/**
+ * The constellations (1.5's G4, decision 373): one for each month, traced through the telescope
+ * at the castle lookout, and three that come out for a holiday.
+ */
+export type ConstellationId =
+  | 'snowflake'
+  | 'candle'
+  | 'toadstool'
+  | 'moth'
+  | 'broom'
+  | 'lantern'
+  | 'key'
+  | 'cat'
+  | 'cauldron'
+  | 'bat'
+  | 'pumpkin'
+  | 'ghost'
+  | 'heart'
+  | 'egg'
+  | 'christmasStar';
+
+/** What the star chart's shelves send her (1.5's G4): the Bat framed, and the sky under glass. */
+export type StarPiece = 'framedConstellation' | 'skyDome';
 
 /**
  * The fossils she digs up (0.3's C1), one mound a day in each place: something for her bag, her
@@ -412,6 +451,11 @@ export type CritterId =
   | 'snowMoth'
   | 'frostBeetle'
   | 'snowglobeFish'
+  // Under the winter ice (1.4's G3).
+  | 'icicleSmelt'
+  | 'bobblePerch'
+  | 'auroraTrout'
+  | 'coldMoonSturgeon'
   // A critter for each big holiday but Halloween, out on its days and round each full moon (V1's R5).
   | 'lovebug'
   | 'luckyFrog'
@@ -588,7 +632,24 @@ export type CutId =
   | 'wraps'
   | 'horns'
   // A farmer's floppy straw hat (0.3's F3).
-  | 'farmHat';
+  | 'farmHat'
+  // The winter wardrobe (1.4's G2).
+  | 'duffel'
+  | 'puffer'
+  | 'scarf'
+  | 'mittens'
+  | 'earflapHat'
+  | 'earmuffs'
+  | 'knitTights'
+  | 'snowBoots'
+  | 'jumper'
+  | 'chunkyCardigan'
+  | 'pyjamaTop'
+  | 'pyjamaBottoms'
+  | 'dressingGown'
+  | 'onesie'
+  | 'batHood'
+  | 'slippers';
 
 export type OutfitId =
   | 'teeGhoulyParton'
@@ -686,7 +747,24 @@ export type OutfitId =
   // Scarah's straw hat, the twin of hers (0.3's F3).
   | 'scarahHat'
   // Rob Boo's top hat, the twin of his (V1's P3b).
-  | 'mayorHat';
+  | 'mayorHat'
+  // The winter wardrobe (1.4's G2).
+  | 'duffelCoat'
+  | 'pufferJacket'
+  | 'longScarf'
+  | 'mittens'
+  | 'snowflakeHat'
+  | 'earmuffs'
+  | 'cableTights'
+  | 'snowBoots'
+  | 'fairIsleJumper'
+  | 'chunkyCardigan'
+  | 'pyjamaTop'
+  | 'pyjamaBottoms'
+  | 'dressingGown'
+  | 'batOnesie'
+  | 'batHood'
+  | 'fluffySlippers';
 
 /** The colours a piece of clothing comes in. Every piece that recolours comes in a blue. */
 export type FabricId =
@@ -771,7 +849,13 @@ export type MilestoneId =
   | 'crawlies'
   | 'crawlyWing'
   // Every figurine Gourdon carves (0.3's C3).
-  | 'figurines';
+  | 'figurines'
+  // The shinies (1.4's G1): one of every family, and one of everything.
+  | 'shinyFamilies'
+  | 'shinies'
+  // The night sky (1.5's G4): half the sky on her star chart, and the whole of it.
+  | 'halfTheSky'
+  | 'wholeSky';
 
 export type FurnitureId =
   | 'batBed'
@@ -893,6 +977,10 @@ export type FurnitureId =
   | FossilPiece
   // What the creepy-crawlies send her (0.3's C2).
   | CrawlyPiece
+  // What the shinies send her (1.4's G1).
+  | ShinyPiece
+  // What the star chart sends her (1.5's G4).
+  | StarPiece
   // Gourdon's figurines (0.3's C3), carved from three of a kind, and the one he carved of himself.
   | FigurineId
   | 'carvedGourdon'
@@ -914,8 +1002,11 @@ export type SquishyId =
 /** What's only ever won at the Hollow Fairground (V1's R6b): a squishy of its own. */
 export type FairPrizeId = 'luckyDuckSquish';
 
-/** What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil. */
-export type Carvable = CritterId | SquishyId | DollId | FossilId;
+/**
+ * What Gourdon carves a figurine of, from three (0.3's C3): a critter, a squishy, a doll, a fossil,
+ * or a shiny (1.4's G1), whose figurine is painted in its shiny colours.
+ */
+export type Carvable = CritterId | SquishyId | DollId | FossilId | ShinyId;
 
 /** A figurine, one for every carvable thing, its id made from the thing's (`lunaMothFigurine`). */
 export type FigurineId = `${Carvable}Figurine`;
@@ -968,7 +1059,10 @@ export type SuiteId =
   | 'bathroom'
   | 'gardenRoom'
   | 'musicCorner'
-  | 'hauntedLounge';
+  | 'hauntedLounge'
+  // Part three, for the winter (1.4's G2).
+  | 'cosyCabin'
+  | 'midnightObservatory';
 
 /** The cosy kitchen's pieces (0.3's S3). */
 export type KitchenPiece =
@@ -1020,14 +1114,30 @@ export type MusicPiece =
 export type LoungePiece =
   'coffinSofa' | 'loungeCandelabra' | 'suitOfArmour' | 'eyePortrait' | 'grandClock' | 'clawTable';
 
+/** Cosy Cabin's pieces (1.4's G2). */
+export type CabinPiece =
+  'logStove' | 'knitRug' | 'bearRug' | 'rockingChair' | 'quiltBed' | 'mugTree' | 'twinkleLights';
+
+/** Midnight Observatory's pieces (1.4's G2). */
+export type ObservatoryPiece =
+  | 'brassTelescope'
+  | 'celestialChart'
+  | 'lunarGlobe'
+  | 'velvetChaise'
+  | 'candleCluster'
+  | 'constellationRug';
+
 /** A piece of the first four furniture sets (0.3's S3). */
 export type FirstSuitePiece = KitchenPiece | BedroomPiece | LibraryPiece | WitchPiece;
 
 /** A piece of the second four (0.3's S4). */
 export type SecondSuitePiece = BathroomPiece | GardenRoomPiece | MusicPiece | LoungePiece;
 
-/** A piece of a furniture set (0.3's S3 and S4). */
-export type SuitePiece = FirstSuitePiece | SecondSuitePiece;
+/** A piece of the two winter sets (1.4's G2). */
+export type ThirdSuitePiece = CabinPiece | ObservatoryPiece;
+
+/** A piece of a furniture set (0.3's S3 and S4, 1.4's G2). */
+export type SuitePiece = FirstSuitePiece | SecondSuitePiece | ThirdSuitePiece;
 
 /** A small thing made for a table (0.3's H3). */
 export type TrinketPiece =
@@ -1056,7 +1166,14 @@ export type WallpaperId =
 
 /** A wallpaper with windows in it that show the sky at the hour (0.3's S4). */
 export type WindowPaperId =
-  'archWindow' | 'roundWindow' | 'latticeWindow' | 'gothicWindow' | 'laceWindow' | 'ivyWindow';
+  | 'archWindow'
+  | 'roundWindow'
+  | 'latticeWindow'
+  | 'gothicWindow'
+  | 'laceWindow'
+  | 'ivyWindow'
+  // Midnight Observatory's (1.4's G2).
+  | 'starWindow';
 
 /** The bracelets she strings at her workbench, which she can wear (0.2's W1). */
 export type BraceletId = Extract<
@@ -1166,7 +1283,9 @@ export type InteriorId =
   // Scarah's farmhouse at Boo Acres (0.3's F3).
   | 'scarahFarmhouse'
   // The mayor's office in the town hall (V1's P3b), Rob Boo's.
-  | 'mayorsOffice';
+  | 'mayorsOffice'
+  // The ice hut on the pond's bank (1.4's G3), once it's built.
+  | 'iceHut';
 
 /**
  * Her neighbours' own events (phase S): the book club, the midnight bake, a spell gone mildly
@@ -1286,7 +1405,11 @@ export type FixtureId =
   // Scarah's (0.3's F3): a wall of seed drawers in her farmhouse.
   | 'seedDrawers'
   // Rob Boo's desk in the town hall (V1's P3b).
-  | 'mayorsDesk';
+  | 'mayorsDesk'
+  // The ice hut's (1.4's G3): its pot-bellied stove, its bench, and the hole in its floor.
+  | 'hutStove'
+  | 'hutBench'
+  | 'iceHole';
 
 /**
  * Her neighbours (phase 9), every one a spooky creature (decisions.md 16): a ghost librarian, a
@@ -1342,4 +1465,4 @@ export type ShelfId = 'bag' | 'closet' | 'storage' | 'cabinet' | 'recipes';
 export type FirstDayStepId = 'shake' | 'plant' | 'stall' | 'notice' | 'meet' | 'eat';
 
 /** The town's projects (V1's R4), funded over weeks at the noticeboard. */
-export type ProjectId = 'bandstand' | 'castleGarden' | 'footbridge' | 'greenhouse';
+export type ProjectId = 'bandstand' | 'castleGarden' | 'footbridge' | 'greenhouse' | 'iceHut';

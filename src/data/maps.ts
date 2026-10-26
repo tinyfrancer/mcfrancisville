@@ -174,6 +174,7 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   rowboat: { w: 2, h: 1 },
   mound: { w: 1, h: 1 },
   gatePost: { w: 1, h: 1 },
+  telescope: { w: 1, h: 1 },
   castle: { w: 9, h: 5, door: 4 },
   weddingArch: { w: 2, h: 1 },
   // Never written in a map: it hangs across a way out with a `gate`, one tile in, while the place
@@ -268,6 +269,9 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   footbridge: { w: 2, h: 2 },
   greenhouseFrame: { w: 3, h: 2 },
   herGreenhouse: { w: 3, h: 1 },
+  // The ice hut on the pond's bank (1.4's G3), whose door goes in once it's built.
+  iceHutFrame: { w: 2, h: 2 },
+  iceHut: { w: 2, h: 2, door: 1 },
 };
 
 /**
@@ -370,6 +374,8 @@ export const WILD_LEGEND: Record<string, LegendEntry> = {
 export const CASTLE_LEGEND: Record<string, LegendEntry> = {
   ...LEGEND,
   '=': { tile: 'gravel' },
+  // The telescope at the lookout by the gate (1.5's G4).
+  I: { tile: 'grass', prop: 'telescope' },
 };
 
 /**
@@ -526,6 +532,8 @@ export const TOWN: MapSource = {
     { prop: 'boothovenHouse', to: 'boothovenParlour' },
     // Rob Boo's town hall (V1's P3b).
     { prop: 'townHall', to: 'mayorsOffice' },
+    // The ice hut (1.4's G3), once the town has built it on the pond's bank.
+    { prop: 'iceHut', to: 'iceHut' },
   ],
   // Ollie's, below Agatha's in the west meadow, Gourdon's pumpkin past the bakery, and
   // Boothoven's east of the square, beside the salon.
@@ -891,7 +899,7 @@ export const CASTLE_HILL: MapSource = {
     '#..T.T..TTq..==...T.T.....T#',
     '#.T.TT;......==....TT......T',
     '#.......oo..L==L..TT.T..RT.T',
-    'T.T...TT.....==...TT...T...#',
+    'T.T...TT...I.==...TT...T...#',
     '#.T.T...TT..P==P...T..T..T.#',
     '###T#####T###==####T####T###',
   ],

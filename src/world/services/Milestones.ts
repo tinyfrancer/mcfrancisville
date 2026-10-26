@@ -1,4 +1,4 @@
-import { FIGURINE_IDS } from '../../data/figurines';
+import { EVERY_FIGURINE } from '../../data/figurines';
 import { ITEMS } from '../../data/items';
 import { MILESTONE_IDS } from '../../data/milestones';
 import { dayKey } from '../../systems/clock';
@@ -32,7 +32,7 @@ export function isCollectable(id: string): id is Had {
   return kind === 'squishy' || kind === 'doll' || kind === 'fossil';
 }
 
-const FIGURINES: ReadonlySet<string> = new Set(FIGURINE_IDS);
+const FIGURINES: ReadonlySet<string> = new Set(EVERY_FIGURINE);
 
 /**
  * Her shelves to finish (0.2's F2): each family caught, each season's own, each wing of the
@@ -54,6 +54,8 @@ export class Milestones {
     this.note();
     this.facts = {
       caught: (id) => reads.cabinet.caughtOn(id) !== null,
+      shiny: (id) => reads.cabinet.shinyOn(id) !== null,
+      star: (id) => reads.cabinet.tracedOn(id) !== null,
       donated: (id) => reads.cabinet.isDonated(id),
       had: (id) => this.had.has(id),
     };
@@ -100,7 +102,7 @@ export class Milestones {
   }
 
   snapshot(): CollectedSnapshot {
-    const ids: Had[] = [...(Object.keys(ITEMS) as ItemId[]), ...FIGURINE_IDS];
+    const ids: Had[] = [...(Object.keys(ITEMS) as ItemId[]), ...EVERY_FIGURINE];
     return { collected: ids.filter((id) => this.had.has(id)) };
   }
 }

@@ -1,7 +1,9 @@
 import { ACTIVITIES, type ActivityId } from '../data/activities';
 import { HAPPENINGS } from '../data/happenings';
+import { TOWN_SPOTS } from '../data/maps';
 import { WANDERING_STALL_AT, type PasserId, type RareEventId } from '../data/rareEvents';
 import type {
+  ConstellationId,
   CritterId,
   HappeningId,
   ItemId,
@@ -117,6 +119,15 @@ export interface TodayFacts {
   project: { id: ProjectId; stage: ProjectStage | null; progress: number } | null;
   /** The fair's free go today (V1's R6b), until she has had it, and whether its stall is open. */
   freeGo: { id: ActivityId; open: boolean } | null;
+  /** A shiny out where she is this hour (1.4's G1), and where. */
+  shiny?: { critter: CritterId; zone: MapZoneId; tile: Tile; hour: number } | null;
+  /** The town's pond frozen over today, its fish under the ice to fish through (1.4's G3). */
+  iceFishing?: boolean;
+  /**
+   * A clear night for the telescope (1.5's G4): the first of tonight's constellations she hasn't
+   * traced (or the month's), whether it's on her chart, and whether the whole sky is out.
+   */
+  stars?: { constellation: ConstellationId; found: boolean; showers: boolean } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -153,6 +164,12 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'project'; id: ProjectId; percent: number }
   // 1.0.1: the day's first go at one of the fair's stalls is free, until she has had it.
   | { kind: 'freeGo'; id: ActivityId; open: boolean }
+  // 1.4's G1: something glittering where she is, a shiny critter.
+  | { kind: 'shiny'; critter: CritterId; zone: MapZoneId }
+  // 1.4's G3: the pond frozen thick enough to fish through.
+  | { kind: 'iceFishing' }
+  // 1.5's G4: a clear night for the telescope at the castle.
+  | { kind: 'stars'; constellation: ConstellationId; found: boolean; showers: boolean }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -277,6 +294,14 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       go: { zone },
     });
   }
+  if (facts.stars) {
+    lines.push({
+      kind: 'stars',
+      ...facts.stars,
+      key: `stars:${day}:${facts.stars.constellation}`,
+      go: { zone: 'castleHill', prop: 'telescope' },
+    });
+  }
   if (facts.freeGo) {
     const { id, open } = facts.freeGo;
     const at = ACTIVITIES[id].at;
@@ -286,6 +311,15 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       open,
       key: `freeGo:${day}`,
       ...('prop' in at ? { go: { zone: 'fairground' as const, prop: at.prop } } : {}),
+    });
+  }
+  if (facts.iceFishing) {
+    // News once a winter, the first day it's frozen she sees it.
+    const winter = Number(day.slice(0, 4)) - (Number(day.slice(5, 7)) < 6 ? 1 : 0);
+    lines.push({
+      kind: 'iceFishing',
+      key: `iceFishing:${winter}`,
+      go: { zone: 'town', tile: TOWN_SPOTS.pondIce },
     });
   }
   if (facts.critters.visiting.length > 0) {
@@ -312,6 +346,16 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
 function outOfTheOrdinary(facts: TodayFacts): TodayLine[] {
   const { day, hour } = facts;
   const lines: TodayLine[] = [];
+  if (facts.shiny) {
+    const { critter, zone, tile } = facts.shiny;
+    lines.push({
+      kind: 'shiny',
+      critter,
+      zone,
+      key: `shiny:${zone}:${day}@${facts.shiny.hour}:${tile.tx},${tile.ty}`,
+      go: { zone, tile },
+    });
+  }
   if (facts.rare) {
     const { id, began } = facts.rare;
     lines.push({

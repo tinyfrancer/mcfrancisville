@@ -526,6 +526,55 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("1.5's G4 step (56 to 57)", () => {
+  it('gives a town an empty star chart, and keeps its Cabinet', () => {
+    const old = { ...structuredClone(SAVE), version: 56 } as Record<string, unknown>;
+    const cabinet = {
+      caught: { lunaMoth: '2026-10-01' },
+      donated: ['lunaMoth'],
+      best: {},
+      shinies: { lunaMoth: '2026-10-20' },
+      shinyShown: [],
+    };
+    old.cabinet = cabinet;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.cabinet).toEqual({ ...cabinet, stars: {} });
+  });
+
+  it('refuses a star chart whose days are not days', () => {
+    const cabinet = { caught: {}, donated: [], best: {}, shinies: {}, shinyShown: [] };
+    expect(migrateSave({ ...SAVE, cabinet: { ...cabinet, stars: { bat: 3 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, cabinet: { ...cabinet, stars: ['bat'] } })).toBeNull();
+    const charted = { ...cabinet, stars: { bat: '2026-10-07' } };
+    expect(migrateSave({ ...SAVE, cabinet: charted })?.cabinet).toEqual(charted);
+  });
+});
+
+describe("1.4's G1 step (55 to 56)", () => {
+  it('gives a town no shinies caught and none on show, and keeps its Cabinet', () => {
+    const old = { ...structuredClone(SAVE), version: 55 } as Record<string, unknown>;
+    old.cabinet = { caught: { lunaMoth: '2026-10-01' }, donated: ['lunaMoth'], best: {} };
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.cabinet).toEqual({
+      caught: { lunaMoth: '2026-10-01' },
+      donated: ['lunaMoth'],
+      best: {},
+      shinies: {},
+      shinyShown: [],
+      stars: {},
+    });
+  });
+
+  it('refuses a Cabinet whose shinies are not days or names', () => {
+    const cabinet = { caught: {}, donated: [], best: {}, shinies: {}, shinyShown: [], stars: {} };
+    expect(migrateSave({ ...SAVE, cabinet: { ...cabinet, shinies: { lunaMoth: 3 } } })).toBeNull();
+    expect(migrateSave({ ...SAVE, cabinet: { ...cabinet, shinyShown: [3] } })).toBeNull();
+    expect(migrateSave({ ...SAVE, cabinet })?.cabinet).toEqual(cabinet);
+  });
+});
+
 describe("1.1's W2 step (54 to 55)", () => {
   const planting = { crop: 'basil', plantedAt: 5, waterings: 1, lastWatered: '2026-10-18' };
 
@@ -606,8 +655,8 @@ describe("V1's R6a step (51 to 52)", () => {
     old.cabinet = cabinet;
     const up = migrateSave(old);
     expect(up?.version).toBe(SAVE_VERSION);
-    expect(up?.cabinet).toEqual({ ...cabinet, best: {} });
-    const measured = { ...cabinet, best: { moonCarp: 9 } };
+    expect(up?.cabinet).toEqual({ ...cabinet, best: {}, shinies: {}, shinyShown: [], stars: {} });
+    const measured = { ...cabinet, best: { moonCarp: 9 }, shinies: {}, shinyShown: [], stars: {} };
     expect(migrateSave({ ...SAVE, cabinet: measured })?.cabinet).toEqual(measured);
     expect(migrateSave({ ...SAVE, cabinet: { ...cabinet, best: { moonCarp: '9' } } })).toBeNull();
     expect(migrateSave({ ...SAVE, cabinet })).toBeNull();
@@ -809,12 +858,25 @@ describe("0.3's C1 step (42 to 43)", () => {
     const up = migrateSave(old);
     expect(up?.version).toBe(SAVE_VERSION);
     // V1's R6a's step gives it no fish measured yet.
-    expect(up?.cabinet).toEqual({ ...(old.cabinet as object), best: {} });
+    expect(up?.cabinet).toEqual({
+      ...(old.cabinet as object),
+      best: {},
+      shinies: {},
+      shinyShown: [],
+      stars: {},
+    });
     expect(up?.collected).toEqual(['vampDoll']);
   });
 
   it('reads fossils on show and had once she has some, and refuses a list of the wrong shape', () => {
-    const cabinet = { caught: {}, donated: ['lunaMoth', 'trilobite', 'dragonEgg'], best: {} };
+    const cabinet = {
+      caught: {},
+      donated: ['lunaMoth', 'trilobite', 'dragonEgg'],
+      best: {},
+      shinies: {},
+      shinyShown: [],
+      stars: {},
+    };
     const up = migrateSave({ ...SAVE, cabinet, collected: ['trilobite'] });
     expect(up?.cabinet.donated).toEqual(cabinet.donated);
     expect(up?.collected).toEqual(['trilobite']);
@@ -1105,7 +1167,14 @@ describe('the shape check', () => {
     expect(migrateSave({ ...SAVE, cabinet: { caught: [], donated: [] } })).toBeNull();
     expect(migrateSave({ ...SAVE, cabinet: { caught: { lunaMoth: 3 }, donated: [] } })).toBeNull();
     expect(migrateSave({ ...SAVE, cabinet: { caught: {}, donated: 'all' } })).toBeNull();
-    const later = { caught: { someDayMoth: '2026-09-27' }, donated: ['someDayMoth'], best: {} };
+    const later = {
+      caught: { someDayMoth: '2026-09-27' },
+      donated: ['someDayMoth'],
+      best: {},
+      shinies: {},
+      shinyShown: [],
+      stars: { someDayStar: '2027-01-02' },
+    };
     expect(migrateSave({ ...SAVE, cabinet: later })?.cabinet).toEqual(later);
   });
 
