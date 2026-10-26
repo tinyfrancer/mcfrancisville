@@ -62,9 +62,9 @@ import { surfaceTop } from '../data/tabletop';
 import { setOf, SETS } from '../data/display';
 import { showcaseLayers } from './display';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
-import { WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
+import { atticWindowArt, WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
 import { WINDOW_SKIES } from '../data/wallsAndFloors';
-import { DOORWAY_ART } from './doorway';
+import { DOORWAY_ART, eavesArt, HATCH_ART, ladderArt } from './doorway';
 import { SURROUND_PANEL, surroundFooting, surroundPost, surroundRoof } from './roomSurround';
 import { PUDDLE_ART, PUDDLE_PALETTE } from './puddles';
 import {
@@ -695,6 +695,19 @@ export function catalogue(): Entry[] {
   }
   grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   grid('surface:doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
+  // The attic (1.5's G6): the ladder up through a back wall, the hatch down, its sloped ceiling over
+  // a seven-tile wall, and its round window under every sky.
+  for (const [name, art] of [
+    ['ladder', ladderArt(3 * 32)],
+    ['hatch', HATCH_ART],
+    ['eaves', eavesArt(7 * 32)],
+  ] as const) {
+    grid(`surface:${name}`, art.source, art.palette);
+  }
+  for (const sky of WINDOW_SKIES) {
+    const art = atticWindowArt(sky);
+    grid(`window:attic:${sky}`, art.source, art.palette);
+  }
   // What a room stands in (decision 290), round a nine-tile shop.
   grid('surround:panel', SURROUND_PANEL.source, SURROUND_PANEL.palette);
   for (const [name, art] of [

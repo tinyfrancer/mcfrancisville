@@ -9645,11 +9645,92 @@ save. Personal touches parked (decision 177): the words are the warmest plain de
   neighbour, so he poses too. **Pets** stop wherever they are, mid-trot or mid-trick, asleep or
   not, and sit looking at her (`Pet.sitForPhoto`, through `PetSurroundings.posing`). Putting the
   camera down, they all carry on. `looksHeld` is unchanged: the pose draws the wave's layers.
-- **Notes**: the `1.5` row, made here (G4's became 1.4.1 and shipped), three lines and a P.S. (the
-  notes need three); G6 and G7 add theirs, and the review folds to five.
+- **Notes**: the `1.5` row, made here and by G6 at once (G4's became 1.4.1 and shipped), folded
+  at this merge to two lines each, the camera's first and G6's P.S. (the camera's P.S., Cody
+  wanting a copy, became a line), so G7's line still fits under five; the review folds.
 
 **Rejected:** stepping the world at a crawl (people walk out of the photo); the frame drawn in the
 page (the polaroid is the town's, drawn at its pixels); compositing filters (untestable, and the
 live and kept pictures would be two sums); a peace sign (unreadable at the size); the slot only
 with empty hands (it moves the seeds); the viewfinder as an `openSheet` sheet (it covers nothing
 but the bars); keeping the photos in the save (the phone keeps pictures; the save is her town).
+
+## 375. An attic up a ladder from the back room, under a sloped ceiling with a round window, and the eaves too low for tall things at the back (2026-10-25, 1.5's G6)
+
+**Context:** the 1.4/1.5 plan's G6 (decision 367): a third room of her home, up a ladder in the
+back room's wall, reached as the back room is (`Crossing.room`), built at the workbench, a sloped
+ceiling drawn as a `roomShell` variant with a round window showing the sky, its own first size
+and one extension. Personal touches parked (decision 177): the size, the place of the ladder, the
+recipe and the words are the warmest plain defaults. **Save v58.**
+
+**Decision:**
+
+- **A row, as decision 233 said a third room would be**: `ROOMS.attic` (`RoomId` `attic`), 7×5
+  tiles of floor and one extension to 9×7 (odd widths keep the hatch and the window centred),
+  `through: { from: 'back', tx: 9 }`, near the back room's far corner from the arch, and
+  `eaves: true`. Everything H4 built carries it: `roomOf` puts a doorway in the back room's back
+  wall once it's built, `HomeZone.doorAt`/`through` cross it, its mat goes back through to the
+  back room onto the foot of the ladder facing out, `HomeZone.leave` puts her in the front room
+  whenever she goes out, pets and visitors follow, and it is `home` like the rest. Building it puts
+  anything in the ladder's way in the back room into the chest (`Rooms.build`, as the arch did).
+- **The ladder is a doorway with `ladder: true`**, set by `roomOf` for a room whose row has
+  `eaves`, and drawn by `roomShell` instead of the arch: two rails and rungs up the whole wall
+  into a hole in the ceiling, its feet on the tile she walks onto (`ladderArt` in
+  `src/sprites/doorway.ts`, the arch's sibling). A tap on the ladder in the wall is a way up, as a
+  tap on an arch is (`standBeside`). **In the attic the mat is a hatch** (`HATCH_ART`): a hole in
+  the floor framed in boards, the ladder's top in it and its lid propped open. Walking onto it goes
+  down, as the back room's mat goes back through.
+- **The sloped ceiling is the top row of the wall** (`Room.eaves`; `eavesArt`): boards running
+  along under the roof, rafters every other tile down onto a wall plate at the eaves, and the slope
+  carried a little way down each end where the side walls lean in, all in place of the moulding,
+  with its shadow on the paper. The wall under it is two tiles high. A single **round window** in
+  a wooden ring hangs low in the middle of the wall (`atticWindowArt` in
+  `src/sprites/wallsAndFloors.ts`, the round window paper's porthole with four panes), showing the
+  sky through `windowSky` at the hour and in the weather (stars and the moon at night), whatever
+  paper is up, unless something hangs over it, as a paper's windows give way (decision 263). A
+  window paper's own windows aren't hung in the attic: they're too tall for a wall under eaves.
+- **Its first surfaces are its own**: a row may say what it's papered and floored with when built
+  (`first`), given to her with it (`Workbench`), else the room it's through's as before. The
+  attic's are **whitewashed planks** (`atticPlanks`, a new wallpaper row and tile, given, never
+  sold; hers for every room like any paper) and oak boards (every town's from the first day).
+- **The eaves rule** (`underEaves` in `src/systems/decor.ts`, refusal `eaves`, "The eaves are too
+  low for that. Try it further from the back, where the roof is higher."): in a room under the
+  roof, nothing hangs on the top row of the wall (it's the ceiling), and a **tall** piece may not
+  stand on the back row of floor, where the roof comes down lowest. **Tall is from the art**: a
+  standing piece whose picture rises more than a tile (`EAVES_RISE`, 32 pixels) above its
+  footprint at any turn. The rules can't read a picture (`systems/` may not import `sprites/`), so
+  the ten are a list, `TALL` in `src/data/home.ts` (the canopy bed, fern stand, grandfather clock,
+  hat stand, lemon tree, library ladder, potion rack, suit of armour, tall bookcase, wardrobe),
+  held to the art by `tests/world/attic.test.ts`: a new tall piece fails it until it's listed. A
+  tile was chosen over her height (48, two pieces) and two tiles (none): it catches what reads as
+  tall and leaves every chair, lamp and shelf free. Everything else fits as in any room;
+  planters work there, their beds keyed by the room (decision 341); the chest is shared.
+- **The recipes**: `attic` (`{ newRoom: 'attic' }`, 60 wood, 10 stone and 3 glow gourds, known
+  from the start as the back room is, waiting "Soon" until there's a back room) and
+  `atticExtension`. There are no candles or rope in her bag (the plan's "wood and candles"): glow
+  gourds, "a nightlight that grew", light its corners instead, and adding items for one recipe
+  wasn't asked for. **An extension of a room other than the front is `{ room, in }`**
+  (`Made`; `in` unsaid is the front room, so every existing `'room' in made` reads as before):
+  `cantMake` checks the room is built and its own size (`Maker.sizes`), `Rooms.grow(id)` grows it
+  (`sizeOf`, `grows`; `canGrow` and `extensions` stay the front room's), 50 wood and 15 stone.
+- **Told** by the workbench's toast ("An attic! Climb the new ladder in your back room. Mind your
+  head on the eaves.", and its own for the extension), as rooms have no line coming in (only
+  interiors do), and by three lines in the `1.5` notes, which G6 started (G5's wasn't there yet).
+  Cody's "how was your day" answers are a table of days, not of rooms: nothing there.
+- **The save, v58**: no new field. `home.rooms` is a record keyed by room already, `isSaveState`
+  takes any key, and a missing attic is one not built (`Rooms` builds a room only if it and the
+  room it's through are saved), so step 57 is the identity. The bump is so a 1.4 build, which
+  doesn't know an attic and would drop its pieces, never opens a town that has one: `migrateSave`
+  reads no save from a newer build, and it's moved aside, never deleted (decision 25). The
+  lived-in fixtures open with no attic.
+
+**Rejected:** a ladder as a piece of furniture she places (a way through that could be put away,
+or walled in, is a door nobody can rely on; H4 made doorways fixed for that reason); the attic
+through the front room (its back wall already has the arch, the chest and the first day's
+pieces); stairs (a whole tile of wall turned to treads reads as a second floor, not a loft, and
+a ladder is cosier); a lower wall for the attic, two rows (every piece hanging on the wall is
+drawn for three, and `nearestFit` hangs at row 1); sloping the side walls inward across their
+columns (the pieces hung there would be drawn over the slope; a short wedge at each end says it
+without taking a column); "tall" as any piece more than a tile deep (a bed is deep, not tall);
+the rule on every row (only the back row is under the eaves; the rest of the attic is a room);
+new candle and rope items (rows, icons, values and somewhere to get them, for one recipe).

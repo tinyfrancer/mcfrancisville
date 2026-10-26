@@ -69,12 +69,12 @@ describe('recipes', () => {
     }
   });
 
-  it('builds each size of house once, in order', () => {
+  it('builds each size of house once, in order, and the attic’s one extension (1.5’s G6)', () => {
     const rooms = RECIPE_IDS.flatMap((id) => {
       const made = RECIPES[id].makes;
-      return 'room' in made ? [made.room] : [];
+      return 'room' in made ? [`${made.in ?? 'main'}:${made.room}`] : [];
     });
-    expect(rooms).toEqual([1, 2]);
+    expect(rooms).toEqual(['main:1', 'main:2', 'attic:1']);
   });
 });
 

@@ -5,14 +5,15 @@ import { ITEMS } from './items';
 import type { OrchardDishId } from './orchard';
 
 /**
- * What a recipe makes: a thing for her bag, a piece for her storage chest, her house bigger, a
- * new row of beds at the farm (0.2's N1), each extension the one after the last, a second
- * shelf on the honesty stall (0.2's E1), or a room of her home through a doorway (0.3's H4).
+ * What a recipe makes: a thing for her bag, a piece for her storage chest, her house bigger (the
+ * front room, or `in` another room that grows: 1.5's G6's attic), a new row of beds at the farm
+ * (0.2's N1), each extension the one after the last, a second shelf on the honesty stall (0.2's
+ * E1), or a room of her home through a doorway (0.3's H4).
  */
 export type Made =
   | { item: ItemId }
   | { furniture: FurnitureId }
-  | { room: number }
+  | { room: number; in?: RoomId }
   | { newRoom: RoomId }
   | { beds: number }
   | { shelf: number };
@@ -241,6 +242,21 @@ export const RECIPES: Record<RecipeId, RecipeRow> = {
     name: 'Back room',
     description:
       'Opens an arch in your back wall, by the chest, into a cozy new room all of its own.',
+  },
+  // 1.5's G6: a little room under the roof, up a ladder from the back room, and its extension.
+  // Less than the back room, as it's smaller; glow gourds to light its dusty corners.
+  attic: {
+    makes: { newRoom: 'attic' },
+    needs: needs(['wood', 60], ['stone', 10], ['glowGourd', 3]),
+    name: 'Attic',
+    description:
+      'Leans a ladder on the back room wall, up to a snug little attic under the eaves. Mind your head!',
+  },
+  atticExtension: {
+    makes: { room: 1, in: 'attic' },
+    needs: needs(['wood', 50], ['stone', 15]),
+    name: 'Attic extension',
+    description: 'Pushes the attic out under more of the roof: wider, deeper, and just as snug.',
   },
   // 0.2's N1: the farm grows as her house does, a row of beds at a time on grass kept for it, and
   // a planter is a bed of her own indoors.

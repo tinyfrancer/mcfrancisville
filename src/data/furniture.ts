@@ -1010,6 +1010,8 @@ export const WALLPAPERS: Record<WallpaperId, SurfaceRow> = {
   mossPanels: { name: 'Moss panels', price: 360 },
   // The Muse's, black and gold (personal_touches.md, "After phase H").
   goldDamask: { name: 'Black & gold damask', price: 480 },
+  // The attic's own (1.5's G6): given with it, never sold.
+  atticPlanks: { name: 'Whitewashed planks', price: 340 },
   // With windows that show the sky outside (0.3's S4).
   ...WINDOW_WALLPAPERS,
 };

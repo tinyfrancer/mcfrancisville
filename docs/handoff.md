@@ -64,13 +64,28 @@ pets sit), the bars down to a strip, a polaroid frame on the canvas (`src/render
 drag to pan (`FollowCamera.pan`), pinch or the ± for Close/Far, four filters
 (`src/render/filters.ts`, rows `src/data/photo.ts`), six stickers and a caption
 (`src/systems/photo.ts`), the shutter to the party photo's card (Keep it / Another / Done). The
-`1.5` NOTES row is made: three lines and a P.S.; **G6 and G7 add a line each**, the review folds
-to five. Decision 374 says what and why. Nothing half done. The smoke section is `photoMode`
+`1.5` NOTES row was made by G5 and G6 at once and folded at G5's merge to two lines each, G5's
+first, G6's P.S.: **G7 adds the fifth**, and the review folds. Decision 374 says what and why. Nothing half done. The smoke section is `photoMode`
 (in `hud`, after `starChart`).
 
-### G6 the attic, G7 the pet, V1.5 the review
+### G6: an attic (`claude/g6-attic`; decision 375; **save bumped to v58**)
 
-G6 runs beside G5; G7 and the review after, in the plan's order.
+**Landed** (PR #230, into `v1.4-dev`): the attic, a third `ROOMS` row (7×5, one extension to 9×7,
+`through: { from: 'back', tx: 9 }`, `eaves`), up a ladder in the back room's wall
+(`Doorway.ladder`, `ladderArt` in `sprites/doorway.ts`) and down a hatch where its mat would be
+(`HATCH_ART`); a sloped ceiling and a round window showing the sky in `roomShell` (`eavesArt`,
+`atticWindowArt`); its own whitewashed planks (`atticPlanks`, a row's `first`); the eaves rule
+(`underEaves`, refusal `eaves`, `TALL` in `data/home.ts` held to the art by
+`tests/world/attic.test.ts`: a new tall piece fails it until listed); the recipes `attic` and
+`atticExtension` (`Made` `{ room, in }`, `Rooms.grow(id)`); the toasts; smoke's `attic` section.
+Save v58: step 57 is the identity (the rooms' record was open-ended; a missing attic is one not
+built). **The `1.5` NOTES row** was made by G6, three lines and a P.S.: G5 and G7 add theirs and
+the review folds to five. Decision 375 says what and why. Nothing half done. **G7 bumps next
+(v59) if a row needs it.**
+
+### G7 the pet, V1.5 the review
+
+Not started; in the plan's order.
 
 ## If you are starting cold after a long gap
 

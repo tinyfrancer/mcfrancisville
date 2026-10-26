@@ -481,7 +481,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   `home.rooms.placed`). They're all the one place, `home`: a doorway in
   a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
   within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe. A
-  planter stands in any room, its bed keyed by its room (`Plot.room`, save v55).
+  planter stands in any room, its bed keyed by its room (`Plot.room`, save v55). **The attic**
+  (1.5's G6, decision 375, save v58) is a third row, `eaves`, up a ladder in the back room's wall
+  (a doorway with `ladder`, `ladderArt` in `doorway.ts`) and down a hatch where its mat would be
+  (`HATCH_ART`): `roomShell` draws its sloped ceiling over the wall's top row (`eavesArt`) and a
+  round window showing `windowSky` (`atticWindowArt`), and in it nothing hangs on that row and no
+  `TALL` piece (rising over a tile above its footprint, held to the art by
+  `tests/world/attic.test.ts`) stands on the back row (`underEaves`, refusal `eaves`). It's the
+  `attic` recipe, papered in its own `atticPlanks` (a row's `first`), and grows once by
+  `atticExtension` (`Made` `{ room, in }`, `Rooms.grow(id)`).
   The chest takes things from her bag too (0.3's H1, decision 230): `home.items`, moved by
   `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
   or what's on her wrist), put away from the bag's card at home and taken out on the chest

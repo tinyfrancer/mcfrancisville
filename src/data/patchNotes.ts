@@ -236,14 +236,17 @@ export const NOTES: readonly PatchNotes[] = [
     version: '1.5',
     lines: [
       // 1.5's G5: the photo mode.
-      'You have a camera now, on the quick bar and in the tray. Drag to look about, and step ' +
-        'in or out to fit everyone in.',
-      'Lift it and everyone close by stops to pose, and the pets sit nicely. I always blink. ' +
-        'Please take another.',
-      'Four filters, a sticker of every critter you have caught, and room for a caption. ' +
-        'Keep the good ones on your phone.',
+      'You have a camera now: everyone close by stops to pose, and the pets sit nicely. ' +
+        'Filters, stickers and a caption, too.',
+      'Keep the good ones on your phone. Cody would like a copy of every single one, and has ' +
+        'asked me to say so twice.',
+      // 1.5's G6: the attic.
+      'Your workbench can build an attic now: a ladder up from the back room, to a snug little ' +
+        'room under the roof.',
+      'It has a round window full of sky, and it can grow once. Mind the eaves: the tall ' +
+        'things must stand further forward.',
     ],
-    ps: 'P.S. Cody would like a copy of every single one. He has asked me to say so twice.',
+    ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
   },
 ];
 
