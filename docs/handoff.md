@@ -56,7 +56,7 @@ Next: merge when green, then empty this heading.
 
 ### X6: the museum's skeleton, and a kite (`claude/x6-skeleton-kite`; decision 385)
 
-Done, PR open into `v1.6-dev`: Gerald, a little dragon of bones on a plinth, stands in the
+Done, PR #240 into `v1.6-dev`: Gerald, a little dragon of bones on a plinth, stands in the
 middle of the museum at Crumbs & Curios once every fossil is on show (derived from
 `cabinet.donated`, `when: 'assembled'` on his fixture), with Wrapunzel's letter (`museum:gerald`)
 and his plaque; three kites at Cobweb Corner (bat, ghost, moth), held from the quick bar and flown
