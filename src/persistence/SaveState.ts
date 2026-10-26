@@ -44,7 +44,7 @@ import type { HenhouseState } from '../systems/hens';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 58;
+export const SAVE_VERSION = 59;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -259,10 +259,10 @@ export interface SaveState {
    */
   projects: WorksSnapshot;
   /**
-   * The hens at Boo Acres (1.6's X3): the day key she last fed them, or null, and the eggs waiting
-   * that she hasn't collected. Optional until the save's version is bumped for it.
+   * The hens at Boo Acres (save v59, 1.6's X3): the day key she last fed them, or null, and the
+   * eggs waiting that she hasn't collected.
    */
-  henhouse?: HenhouseState;
+  henhouse: HenhouseState;
 }
 
 export function newSave(
@@ -713,7 +713,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isJoinedShape(s.happenings) &&
     isFirstDayShape(s.firstDay) &&
     isProjectsShape(s.projects) &&
-    (s.henhouse === undefined || isHenhouseShape(s.henhouse))
+    isHenhouseShape(s.henhouse)
   );
 }
 

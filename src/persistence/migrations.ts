@@ -286,6 +286,9 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // built, so a town has no attic until she builds one; the bump keeps a build that doesn't know
   // an attic from opening (and dropping) one.
   57: (state) => state,
+  // 1.6's X3: the hens at Boo Acres. There were none before, so a town has never fed them and has
+  // no eggs waiting; the coop stands there from the moment it opens.
+  58: (state) => ({ ...state, henhouse: { fed: null, waiting: 0 } }),
 };
 
 /**

@@ -526,6 +526,25 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("1.6's X3 step (58 to 59)", () => {
+  it('opens a town with the hens never fed and no eggs waiting, everything else as it was', () => {
+    const old = { ...structuredClone(SAVE), version: 58 } as Record<string, unknown>;
+    delete old.henhouse;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.henhouse).toEqual({ fed: null, waiting: 0 });
+    expect(up?.home).toEqual(SAVE.home);
+    expect(up?.bag).toEqual(SAVE.bag);
+  });
+
+  it('keeps the day they were fed and the eggs waiting, and refuses a henhouse of the wrong shape', () => {
+    const henhouse = { fed: '2026-10-26', waiting: 3 };
+    expect(migrateSave({ ...SAVE, henhouse })?.henhouse).toEqual(henhouse);
+    expect(migrateSave({ ...SAVE, henhouse: { fed: 3, waiting: 0 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, henhouse: { fed: null, waiting: -1 } })).toBeNull();
+  });
+});
+
 describe("1.5's G6 step (57 to 58)", () => {
   it('opens a town with no attic as one that has none, everything else as it was', () => {
     const old = { ...structuredClone(SAVE), version: 57 } as Record<string, unknown>;

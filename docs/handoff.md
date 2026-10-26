@@ -25,16 +25,14 @@ left open; what the rehearsal logged is in the art notes.
 Landed (PR #235): the ride drawn on the Fair sheet's stage, the day's first free, a ticket stub
 the first time; the `1.6` NOTES row made with three lines. No save change. Nothing left open.
 
-### X3: chickens at Boo Acres (`claude/x3-chickens`; decision 382; save v59 in its last commit)
+### X3: chickens at Boo Acres (`claude/x3-chickens`; decision 382; **save bumped to v59**)
 
-In progress. Done and pushed: the coop by the barn (art, map, footprint), the four hens' art and
-their pottering worked out from the clock (`henAt`), `world.henhouse` (feeding once a day, an egg
-each by morning, collecting on the coop's card, Reginald's crow at six), the egg and its three
-recipes (custard tart and frittata at the stove, meringue ghosts with Wrapunzel), Scarah's three
-lines, Today's line, tests, a `hens` smoke section in `farm`, decision 382 and CLAUDE.md. The
-save field `henhouse` is optional in `SaveState` until the bump. Next: merge `origin/v1.6-dev`,
-then the last commit: `SAVE_VERSION` 59, migration step 58 (`henhouse: { fed: null, waiting: 0 }`)
-with its test, `henhouse` required in `SaveState`/`isSaveState`; push, CI, merge.
+Landed (PR #238): the coop by the barn, Henrietta, Peck, Omelette and Reginald pottering in its
+run (worked out from the clock, `henAt`), `world.henhouse` (fed once a day for an egg each by
+morning, collected on the coop's card, Reginald's crow at six), the egg's three recipes (custard
+tart and frittata at the stove, meringue ghosts with Wrapunzel), Scarah's three lines, Today's
+line, a `hens` smoke section in `farm`. **The save is v59** (`henhouse: { fed, waiting }`, step 58
+gives an old town none fed and none waiting), bumped in the last commit. Nothing left open.
 
 **For the review's `1.6` row (full, so not added to `patchNotes.ts`):** "Chickens at Boo Acres!
 Feed Henrietta, Peck and Omelette once a day for eggs in the morning. Reginald crows at six;
