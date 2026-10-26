@@ -28,7 +28,9 @@ export const AREAS = [
   {
     area: 'passive',
     hears: {},
-    why: "Visits and the candy tree, after `Belongings`, which a visit's gift of furniture goes through.",
+    why:
+      "Visits, the candy tree and the hens (1.6's X3), after `Belongings`, which a visit's gift " +
+      'of furniture goes through.',
   },
   {
     area: 'firstDay',

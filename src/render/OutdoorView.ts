@@ -9,6 +9,7 @@ import { tileCentre, tileOf, type World } from '../world/World';
 import type { MapZone } from '../world/zones/MapZone';
 import { FollowCamera, screenToWorld, worldToScreen, type Point } from './camera';
 import { fountainPass } from './fountain';
+import { hensPass } from './hens';
 import { Ground } from './ground';
 import { fishingPass } from './fishing';
 import { Lighting } from './lighting';
@@ -116,6 +117,8 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'wes',
     'critters',
     'pets',
+    // The hens at Boo Acres and their run's front fence (1.6's X3).
+    'hens',
     'bone',
     'her',
   ],
@@ -251,6 +254,7 @@ export class OutdoorView implements SceneView {
         wesPass(world),
         crittersPass(world, zone),
         petsPass(world),
+        hensPass(world, zone),
         bonePass(world, zone),
         herPass,
         fountainPass(b.fountains, options.fountainBeat ?? (() => null)),

@@ -43,6 +43,8 @@ describe('the passes outdoors', () => {
         'wes',
         'critters',
         'pets',
+        // The hens in their run at Boo Acres (1.6's X3), the one part added since to `stand`.
+        'hens',
         'bone',
         'her',
       ],

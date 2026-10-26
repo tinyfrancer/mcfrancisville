@@ -122,6 +122,9 @@ function holds(h: Harness, line: TodayLine): boolean {
         w.activities.isOpen(line.id) === line.open
       );
     // 1.6's X2: a fair day, the day's free ride still to be had.
+    // 1.6's X3.
+    case 'eggs':
+      return line.eggs > 0 && w.henhouse.view().eggs === line.eggs;
     case 'bigWheel':
       return (
         isFairDay(day) && w.activities.freeRide() && w.activities.isOpen('bigWheel') === line.open

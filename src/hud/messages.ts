@@ -690,6 +690,11 @@ export function eventToast(event: WorldEvent): Toast | null {
       return event.item === BEST_SWEET
         ? { text: `${event.line} Your favourite!`, special: true, icon: { item: event.item } }
         : { text: event.line, icon: event.home ? { mark: 'halloween' } : { item: event.item } };
+    // Reginald at six, if she's at Boo Acres to hear him (1.6's X3); the card says the rest.
+    case 'crow':
+      return {
+        text: 'Cock-a-doodle-doo! Reginald says good morning to all of Boo Acres. Scarah has asked him to consider seven.',
+      };
     case 'stallSold':
       return {
         text: `Your honesty stall sold ${listed(event.sold)} while you were away. ${candy(event.candy)} in the tin!`,

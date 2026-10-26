@@ -256,6 +256,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   pearTree: { w: 1, h: 1 },
   plumTree: { w: 1, h: 1 },
   persimmonTree: { w: 1, h: 1 },
+  // The henhouse by the barn and its fenced run, where the hens potter by day (1.6's X3).
+  coop: { w: 3, h: 2 },
   // The town's projects going up (V1's R4): a post at each corner of a site, each one's frame, and
   // what's built. The footbridge's rails stand over its deck, walked on.
   sitePost: { w: 1, h: 1 },
@@ -1043,6 +1045,7 @@ export const FAIRGROUND: MapSource = {
  * of the road, through a gate in the fence, are the fields: four long rows of beds (x) with paths
  * between, grass kept for two more rows (3, 4) she can build, and a scarecrow (c). The pond is
  * to the west, with reeds (r), and the greenhouse (5) to the east, its door at the end of a path.
+ * The hens' coop (0) stands beside the barn (1.6's X3).
  */
 export const FARM_LEGEND: Record<string, LegendEntry> = {
   ...LEGEND,
@@ -1058,6 +1061,8 @@ export const FARM_LEGEND: Record<string, LegendEntry> = {
   // The farm's extension rows go on from the town's two (0.2's N1): the third and fourth.
   '3': { tile: 'grass', plot: 3 },
   '4': { tile: 'grass', plot: 4 },
+  // The hens' coop by the barn (1.6's X3).
+  '0': { tile: 'grass', prop: 'coop' },
   // Its ways are dirt tracks (V1's L2), between the fields too.
   '=': { tile: 'dirt' },
 };
@@ -1100,8 +1105,8 @@ export const BOO_ACRES: MapSource = {
     '##################################',
     "#T.....T.'''''''''.v..,..........#",
     "#........'''''''''..............T#",
-    '#..IIIII...DDDDDD....@..$..&..*..#',
-    '#..IIIII...DDDDDD...........,....#',
+    '#..IIIII...DDDDDD000.@..$..&..*..#',
+    '#..IIIII...DDDDDD000........,....#',
     '#T.IIIII..dDDDDDDy...............#',
     '#..IIIII..dDDDDDDyy..*..@..$..&..#',
     '#....=.......==..................#',

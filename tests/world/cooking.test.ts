@@ -35,6 +35,9 @@ describe('her stove', () => {
       // Hers (0.2's N2).
       'spaghetti',
       'chipsAndGuac',
+      // The hens' (1.6's X3).
+      'custardTart',
+      'frittata',
     ]);
     expect(h.world.workbench.recipes).not.toContain('pumpkinSoup');
     expect(h.world.kitchen.cantCook('ghostChili')).toBe('unknown');

@@ -84,6 +84,8 @@ import { ITEM_ART } from './items';
 import { HELD_ART, HELD_PACKET, TOOL_ART } from './tools';
 import { TIPPED_CAN } from './actions';
 import { accessoryIcon, BUBBLE_ART, PET_ART, petPalette, petSource, type PetFrame } from './pets';
+import { HEN_ART, HEN_FRAMES, HEN_PALETTES } from './hens';
+import { COOP_FRONT, COOP_PALETTE } from './farm';
 import { POT_ART } from './houses';
 import {
   DOOR_DRESSINGS,
@@ -582,6 +584,13 @@ export function catalogue(): Entry[] {
     const icon = accessoryIcon(accessory);
     grid(`accessory:${accessory}`, icon.source, icon.palette);
   }
+  // The hens at Boo Acres, every look in every frame, and the run's front fence (1.6's X3).
+  for (const [look, frames] of Object.entries(HEN_ART)) {
+    for (const frame of HEN_FRAMES) {
+      grid(`hen:${look}:${frame}`, frames[frame], HEN_PALETTES[look as keyof typeof HEN_ART]);
+    }
+  }
+  grid('prop:coop:front', COOP_FRONT, COOP_PALETTE);
   for (const [id, art] of Object.entries(BUBBLE_ART)) {
     grid(`bubble:${id}`, art.source, art.palette);
   }

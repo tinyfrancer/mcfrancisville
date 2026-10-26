@@ -49,6 +49,16 @@ const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
 export function todayWords(line: TodayLine): TodayWords {
   switch (line.kind) {
     // 1.5's G4.
+    // 1.6's X3: the hens' eggs.
+    case 'eggs':
+      return {
+        text:
+          line.eggs === 1
+            ? 'An egg in the coop at Boo Acres'
+            : `${line.eggs} eggs in the coop at Boo Acres`,
+        small: 'Still warm. Henrietta is keeping them company.',
+        glyph: { item: 'egg' },
+      };
     // 1.6's X2: the big wheel on a fair day.
     case 'bigWheel':
       return {

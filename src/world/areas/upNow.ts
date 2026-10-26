@@ -31,6 +31,7 @@ import type { Noticeboard } from '../services/Noticeboard';
 import type { Shops } from '../services/Shops';
 import { UpNow } from '../services/UpNow';
 import type { Stargazing } from '../services/Stargazing';
+import type { Henhouse } from '../services/Henhouse';
 import type { Shared } from './shared';
 
 /** What Today reads (V1's R2), each a service made before it. */
@@ -57,6 +58,8 @@ export interface UpNowParts {
   collecting: Collecting;
   /** The night sky, for a clear night at the telescope (1.5's G4). */
   stargazing: Stargazing;
+  /** The hens at Boo Acres, for the eggs waiting (1.6's X3). */
+  henhouse: Henhouse;
 }
 
 /** A clear night for the telescope, and what's to trace (1.5's G4). */
@@ -165,6 +168,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       shiny: parts.collecting.shinyHere(),
       iceFishing: isFrozen(day),
       stars: starsTonight(parts.stargazing),
+      eggs: parts.henhouse.eggs(),
     };
   });
 }

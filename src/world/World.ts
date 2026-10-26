@@ -369,6 +369,7 @@ export class World extends WorldParts {
     this.broom.check();
     this.milestones.check();
     this.stall.check();
+    this.henhouse.check();
     this.decorating.check();
     // Last, and only on a step with nothing else to say, so a letter's toast doesn't take its line.
     this.rareEvents.check();

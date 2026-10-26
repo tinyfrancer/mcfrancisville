@@ -42,13 +42,13 @@ import { slab } from './furnish';
 import { clumpsOf, type Crown, leaves, paintCrown } from './nature';
 import { mix, PALETTE as C, ramp } from './palette';
 import type { PropArt } from './props';
-import { Sketch } from './sketch';
+import { CLEAR, Sketch } from './sketch';
 import type { Palette, SpriteSource } from './sprite';
 
 /*
  * Boo Acres (0.3's F1, decision 241), drawn at 32 from the building kit like the town: Scarah's
  * farmhouse, the big barn with the place's name over its doors, the greenhouse, the seed cart, the
- * farm's well and the orchard's four kinds of fruit tree.
+ * farm's well, the orchard's four kinds of fruit tree, and the hens' coop (1.6's X3).
  */
 
 /** Writes a word centred on `cx`. */
@@ -380,6 +380,133 @@ export const FARM_WELL_PALETTE: Palette = buildingPalette({
   stone: C.stone,
 });
 
+// ---- The coop ---------------------------------------------------------------------------------
+
+/**
+ * The coop's size: three tiles wide, its footprint the bottom two tiles (64 pixels), the run's
+ * floor round where the hens may be (`RUN_FLOOR`, from the footprint's top, 40 pixels down).
+ */
+export const COOP_W = 96;
+export const COOP_H = 104;
+/** The run's posts, front and back, by their left column. */
+const RUN_POSTS = [41, 66, 90] as const;
+
+/** The run's floor: trodden earth scattered with straw, never outlined so it lies flat. */
+function runFloor(s: Sketch): void {
+  const inside = (x: number, y: number) => {
+    const dx = (x + 0.5 - 66) / 26;
+    const dy = (y + 0.5 - 76) / 25;
+    return Math.abs(dx) ** 4 + Math.abs(dy) ** 4 <= 1;
+  };
+  for (let y = 50; y < 102; y++) {
+    for (let x = 40; x < 94; x++) {
+      if (!inside(x, y)) continue;
+      const n = ((x * 73 + y * 151) ^ (x * y * 7)) % 17;
+      const key = n === 0 ? darkOf(ACCENT) : n < 4 ? shadeOf(ACCENT) : fillOf(ACCENT);
+      s.set(x, y, n === 16 ? lightOf(ACCENT) : key);
+    }
+  }
+  // Straw, in short strokes this way and that.
+  for (let k = 0; k < 22; k++) {
+    const x = 44 + ((k * 17) % 46);
+    const y = 54 + ((k * 23) % 44);
+    if (!inside(x, y) || !inside(x + 2, y + 1)) continue;
+    const key = k % 3 === 0 ? lightOf(ACCENT_TWO) : fillOf(ACCENT_TWO);
+    if (k % 2 === 0) s.rect(x, y, 3, 1, key);
+    else
+      s.set(x, y, key)
+        .set(x + 1, y + 1, key)
+        .set(x + 2, y + 1, key);
+  }
+}
+
+/** The fence's chicken wire, a fine diamond mesh, behind the back rails: never outlined. */
+function mesh(s: Sketch, x: number, y: number, w: number, h: number): void {
+  for (let j = y; j < y + h; j++) {
+    for (let i = x; i < x + w; i++) {
+      if ((i + j) % 5 === 0 || (i - j + 100) % 5 === 0) s.set(i, j, lightOf(STONE));
+    }
+  }
+}
+
+/** A post of the run's fence, from its cap at `top` to the ground at `bottom`. */
+function post(s: Sketch, x: number, top: number, bottom: number): void {
+  slab(s, x, top, 3, bottom - top, DOOR);
+  s.rect(x - 1, top - 1, 5, 2, fillOf(DOOR)).rect(x - 1, top - 1, 5, 1, lightOf(DOOR));
+}
+
+/** Two rails along the run, `top` the upper one's row. */
+function rails(s: Sketch, x: number, w: number, top: number): void {
+  for (const y of [top, top + 7]) {
+    s.rect(x, y, w, 2, fillOf(TRIM)).rect(x, y, w, 1, lightOf(TRIM));
+  }
+}
+
+/**
+ * The hens' coop by Scarah's barn (1.6's X3), three tiles wide: a little teal henhouse on legs
+ * under a berry-red roof like the barn's, with a round window that glows when they're in for the
+ * night and a pop-hole with a cleated ramp down into the run; and the run itself, a patch of
+ * trodden earth and straw behind a post-and-rail fence hung with chicken wire, with a trough and
+ * a tin waterer at the back. Its front fence is `COOP_FRONT`, drawn over the hens.
+ */
+function drawCoop(): SpriteSource {
+  const ground = new Sketch(COOP_W, COOP_H);
+  runFloor(ground);
+  mesh(ground, 42, 37, 50, 13);
+
+  const s = new Sketch(COOP_W, COOP_H);
+  // The back fence and the side, behind the hens.
+  for (const x of RUN_POSTS) post(s, x, 36, 52);
+  rails(s, 41, 52, 38);
+  slab(s, 90, 50, 3, 40, DOOR);
+  // The trough and the waterer at the back of the run.
+  slab(s, 52, 52, 16, 5, DOOR);
+  s.rect(53, 52, 14, 1, fillOf(ACCENT_TWO));
+  s.rect(79, 47, 8, 2, fillOf(STONE)).rect(78, 49, 10, 7, fillOf(STONE));
+  s.rect(78, 49, 1, 7, lightOf(STONE)).rect(78, 55, 10, 1, shadeOf(STONE));
+  s.ellipse(83, 56.5, 6, 1.5, shadeOf(STONE));
+  // The henhouse up on its legs.
+  for (const x of [9, 34]) slab(s, x, 82, 3, 20, DOOR);
+  wall(s, 7, 46, 33, 38, 'boards', WALL, 6);
+  lightWall(s, 7, 46, 33, 38, 4);
+  gableRoof(s, 23, 14, 48, 42, 6, 'shingles', 'boards');
+  window(s, 16, 54, 12, 12, { shape: 'round', panes: [2, 2] });
+  // The pop-hole, arched over the dark inside, under a little trim.
+  s.rect(27, 70, 10, 13, fillOf(TRIM)).rect(29, 72, 6, 11, INK);
+  s.set(27, 70, CLEAR).set(36, 70, CLEAR).set(29, 72, fillOf(TRIM)).set(34, 72, fillOf(TRIM));
+  s.rect(7, 83, 33, 2, fillOf(TRIM)).rect(7, 83, 33, 1, lightOf(TRIM));
+  // The ramp down into the run, with its cleats.
+  for (let i = 0; i <= 18; i++) {
+    const y = 83 + Math.round(i * 0.8);
+    s.rect(29 + i, y, 1, 5, fillOf(DOOR));
+    s.set(29 + i, y, lightOf(DOOR)).set(29 + i, y + 4, shadeOf(DOOR));
+    if (i % 4 === 2) s.set(29 + i, y + 1, darkOf(DOOR)).set(29 + i, y + 2, darkOf(DOOR));
+  }
+  ground.stamp(finish(s), 0, 0);
+  return ground.toSource();
+}
+
+/** The run's front fence, drawn over the hens so they potter behind it. */
+function drawCoopFront(): SpriteSource {
+  const s = new Sketch(COOP_W, COOP_H);
+  for (const x of RUN_POSTS) post(s, x, 86, 103);
+  rails(s, 41, 52, 88);
+  return finish(s);
+}
+
+export const COOP: SpriteSource = drawCoop();
+export const COOP_FRONT: SpriteSource = drawCoopFront();
+
+export const COOP_PALETTE: Palette = buildingPalette({
+  wall: C.teal,
+  roof: C.berry,
+  trim: C.cream,
+  door: C.wood,
+  stone: C.silver,
+  accent: C.soilLight,
+  accentTwo: C.gold,
+});
+
 // ---- The orchard ------------------------------------------------------------------------------
 
 /** The kinds of fruit tree, each its own prop for what it gives (F2). */
@@ -470,7 +597,8 @@ const ORCHARD_ART = Object.fromEntries(
 
 /** Everything that stands at Boo Acres, lit after dark where it has windows. */
 export const FARM_PROP_ART: Record<
-  Extract<PropId, 'farmhouse' | 'barn' | 'greenhouse' | 'seedCart' | 'farmWell'> | FruitTreeId,
+  | Extract<PropId, 'farmhouse' | 'barn' | 'greenhouse' | 'seedCart' | 'farmWell' | 'coop'>
+  | FruitTreeId,
   PropArt
 > = {
   farmhouse: {
@@ -506,5 +634,13 @@ export const FARM_PROP_ART: Record<
   },
   seedCart: { source: SEED_CART, palette: SEED_CART_PALETTE, shadow: { w: 64, h: 10 } },
   farmWell: { source: FARM_WELL, palette: FARM_WELL_PALETTE, shadow: { w: 56, h: 10 } },
+  // The hens' window glows once they're in for the night (1.6's X3).
+  coop: {
+    source: COOP,
+    palette: COOP_PALETTE,
+    glow: WINDOWS_LIT,
+    lights: [{ x: 22, y: 60, radius: 16 }],
+    shadow: { w: 88, h: 12 },
+  },
   ...ORCHARD_ART,
 };

@@ -245,6 +245,12 @@ export type WorldEvent =
   | { kind: 'sapling'; did: 'planted' | 'growing' | 'waiting'; days?: number }
   /** She baked the day's bake with Wrapunzel, and was paid for it (0.2's E1). */
   | { kind: 'baked'; item: ItemId; candy: number }
+  /** She fed the hens at Boo Acres something from her bag, for eggs in the morning (1.6's X3). */
+  | { kind: 'fedHens'; item: ItemId }
+  /** She collected the eggs waiting in the coop (1.6's X3). */
+  | { kind: 'laid'; eggs: number }
+  /** Reginald crowed at six, with her there at Boo Acres to hear him (1.6's X3). */
+  | { kind: 'crow' }
   /** She joined in at a neighbour's happening (V1's P4): howled, picked the book, named a star. */
   | { kind: 'joined'; happening: HappeningId; villager: VillagerId }
   /** A beat of baking with Wrapunzel (V1's P4): pouring the mix, or down at the oven door. */

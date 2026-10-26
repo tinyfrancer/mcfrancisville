@@ -111,6 +111,22 @@ export const CUES = {
     { wave: 'hat', notes: line('C4:.06 -:.08 C4:.1'), gain: 0.16 },
     chime('-:.28 E6:.1 B6:.4', 0.07),
   ),
+  // Reginald at six (1.6's X3): cock-a-doodle-doo, three quick notes up and a long one let go,
+  // a little reedy, from across the farmyard.
+  crow: cue({
+    wave: 'triangle',
+    notes: line('G4:.12 C5:.12 E5:.14 -:.06 G5:.3 A5:.5 F5:.6'),
+    gain: 0.16,
+    attack: 0.02,
+    release: 0.2,
+    chorus: 14,
+    pan: 0.3,
+  }),
+  // The eggs collected: a soft cluck-cluck, and a little chime for each being warm.
+  clucks: cue(
+    pluck('D4:.12 -:.06 D4:.12 -:.2 F4:.25', 0.12, 'sine'),
+    chime('-:.5 C6:.15 E6:.15 G6:.6', 0.12),
+  ),
   // Back down off the big wheel (1.6's X2): a music box's turn, a gentle waltz round and home.
   ride: cue(
     chime('C6:.5 E6:.25 G6:.25 C7:.5 B6:.25 G6:.25 A6:.5 F6:.25 D6:.25 C6:1.2', 0.12),
@@ -269,6 +285,13 @@ export function cueOf(event: WorldEvent): CueId | null {
       return event.lit ? 'starLit' : 'tap';
     case 'traced':
       return 'traced';
+    // 1.6's X3: the hens fed, their eggs collected, and Reginald at six.
+    case 'fedHens':
+      return 'planted';
+    case 'laid':
+      return 'clucks';
+    case 'crow':
+      return 'crow';
     default:
       return null;
   }

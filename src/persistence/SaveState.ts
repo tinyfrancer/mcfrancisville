@@ -38,6 +38,7 @@ import type { LatelySnapshot } from '../world/Lately';
 import type { JoinedSnapshot } from '../systems/joining';
 import type { FirstDaySnapshot } from '../world/services/FirstDay';
 import type { WorksSnapshot } from '../world/Works';
+import type { HenhouseState } from '../systems/hens';
 
 /**
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
@@ -257,6 +258,11 @@ export interface SaveState {
    * Candy and by thing, and those built. One this build doesn't know is let go.
    */
   projects: WorksSnapshot;
+  /**
+   * The hens at Boo Acres (1.6's X3): the day key she last fed them, or null, and the eggs waiting
+   * that she hasn't collected. Optional until the save's version is bumped for it.
+   */
+  henhouse?: HenhouseState;
 }
 
 export function newSave(
@@ -310,6 +316,7 @@ export function newSave(
     happenings: {},
     firstDay: { done: [], over: false },
     projects: { current: null, given: {}, built: [] },
+    henhouse: { fed: null, waiting: 0 },
   };
 }
 
@@ -705,7 +712,20 @@ export function isSaveState(value: unknown): value is SaveState {
     isLatelyShape(s.lately) &&
     isJoinedShape(s.happenings) &&
     isFirstDayShape(s.firstDay) &&
-    isProjectsShape(s.projects)
+    isProjectsShape(s.projects) &&
+    (s.henhouse === undefined || isHenhouseShape(s.henhouse))
+  );
+}
+
+/** The hens (1.6's X3): the day she last fed them, null or a day key, and the eggs waiting. */
+function isHenhouseShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const { fed, waiting } = value as Record<string, unknown>;
+  return (
+    (fed === null || typeof fed === 'string') &&
+    typeof waiting === 'number' &&
+    Number.isInteger(waiting) &&
+    waiting >= 0
   );
 }
 
