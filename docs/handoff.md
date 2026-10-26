@@ -14,7 +14,11 @@ coordinating session, the last day: Opus sub-agents in worktrees, two at a time,
 
 ### X1: the festival's lights, and the 31st rehearsed (`claude/x1-lights`; decision 380)
 
-Not started.
+Landed (PR #236): the eave lights strung unbroken (gables, corners, a visible string) and the
+fair's poles swagged pole to pole (`LIGHT_POLE_JOINS`, `joins` from `parseMap`); the 31st
+rehearsed by taps, the party photo turned to the camera, a long caption wrapping, Scarah's
+line-up place and the chili table moved; two lines on the `1.6` card. No save change. Nothing
+left open; what the rehearsal logged is in the art notes.
 
 ### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
 
@@ -2325,6 +2329,11 @@ What's left is for the user's eye on her phone, none of it clearly wrong:
 - **Fishing with a seed in her hand** (decision 110's rule, older than the rod): she keeps a seed
   through a tap on a fish, so the line runs from the seed packet and no rod is drawn ("Where it
   hurts").
+- **Their Halloween photo** (1.6's X1, which turned them both to the camera): it's cut from the
+  frame as the party stands, so she's in front of Cody where she walked up to him (his face over
+  her shoulder), and the neighbours' chatter bubbles and a question's "?" are in the picture. The
+  camera's own photos (1.5's G5) are taken the same way; a squeeze side by side would need the
+  photo to move her, which nothing else at the party does.
 
 Struck since V1's review: ~~the lavender cobble carrying the town~~ (A1: the square in
 flagstones, the well on setts, two benches, the roads worn down the middle); ~~woods walls of one

@@ -9889,6 +9889,60 @@ No personal touches (decision 177, the user's word of 2026-10-25); no refactors.
 **Rejected:** more of 1.4's kinds (another set, more fish: she has those now); anything that
 needs the user's word (the cloud store); a new neighbour (decision 270).
 
+## 380. The festival's lights strung from the roofs' own edges and pole to pole, and the 31st rehearsed (1.6's X1, 2026-10-26)
+
+**Context:** the user: "the colored lights up around the festival aren't connected properly."
+Looked at by eye at `?day=2026-10-28&hour=20` and `21.5`, at Close, every building in town, Boo
+Acres, Whisperwood's and the shore's lots and the fairground, and `npm run sprite --
+'holiday:eaves:*'`. Two faults. **The fairground's poles** (decision 200) were 128 wide, swagging
+a whole curve 62 pixels out each side, but stood three tiles (96) apart: between two poles the
+strings crossed in a W, and at each row's ends a string hung off into the air. **The eaves**
+(`eaveLights`, 0.2's J2): the run broke wherever the roof's edge stepped more than a pixel a
+column, so a steep gable (Cody's manor's front, the post office's, the library's) had no string
+and cut its eave's string in two, and an eave's tip past the wall's corner (a step of four) was a
+string of its own; and the string was `iron` hard against the roof's dark outline, invisible by
+day and at night, so the bulbs read as dots stuck to the roof.
+
+**Decision:** the poles take `joins` from `parseMap` (a pole `POLE_SPAN`, three, along its row:
+2 right, 8 left), and their art is a form per side (`LIGHT_POLE_JOINS`, 96 wide): half the curve
+to the middle on each side with a neighbour, the bulbs counted from the left-hand pole so the
+halves keep step, nothing on a side without one. The eaves: the edge runs on through a step of
+up to three a column (`EAVE_STEEPEST`, a gable) and round one of up to six where an eave's tip
+meets the eave over the wall (`EAVE_CORNER`), but a short stretch caught between two such steps
+(the castle's crenels) isn't strung; the string is one path of touching pixels hugging the edge
+from outside, a staircase down a gable, clipped under it every six pixels and dipping one
+between, drawn in `stoneDark`; every bulb hangs from it, none at or below the door. Held by
+`tests/sprites/eaveLights.test.ts`: on every building with a door and eaves, every lit group has
+string in it and runs at least `EAVE_MIN` columns, no string pixel is more than two from the
+roof, and Cody's manor, the post office, her house and Barty's are each one string from tip to
+tip; at the fair, a pole is `POLE_SPAN` tiles wide, two halves meet, a lone pole hangs nothing,
+and every pole on the map has a neighbour. Cobweb Corner's mansard sides are now lit too (the old
+rule had skipped them). Nothing else about the festival's look changed: the bulbs, their colours
+and glow, the garlands and the banner are as they were.
+
+**The 31st rehearsed** (a scratch script driving the dev server under `?loop=manual` as smoke
+does, screenshots looked at): every neighbour's door on the 30th's evening, town, Boo Acres and
+the two lots, knocked for a sweet and walked in the second time (the town hall goes in until
+she's met the mayor; a test now holds his door answering once she has); the contest lined up
+before the stage, Barty crowned, nobody after; the party set out with Pickle on her walk; Cody
+the bug catcher to her butterfly and the lion to her plain; the photo through his talk and the
+camera after it, each its own card ("Say boo", Keep it and Lovely; "Snap!", with Another); the
+set gone and his letter with the framed photo on 1 November; Today on 27 October saying 25
+critters are visiting. Cody's halves and every neighbour's costume drawn on their builds
+(`figure:*:costume:*`, `figure:cody:*`): all sound. **Fixed:** their photo had her back to the
+camera (she faces Cody as she walks up): the `photo` moment turns her and Cody to face it, Cody
+posing as for her camera, and `main.ts`'s snapshot draws the frame again before it's cut; a
+couple's caption ("a butterfly and a bug catcher") widened the polaroid past the picture, so it
+wraps now; Scarah's place in the line-up (9,6) was behind a light pole, so it's the right end
+(20,6) and the party's chili table moves along a tile (22,6, under the lights between two poles).
+**Logged** (the art notes): the photo keeps the chatter bubbles and has her in front of Cody.
+
+**Rejected:** the poles four tiles apart to fit the old art (a map change for X2's fair and the
+rows' ends would still dangle); a string up any step (it climbed the castle's crenels); a lighter
+string colour than `stoneDark`, or the old `iron` with the dips alone (still lost against a dark
+roof); posing her with an action for the photo (her face to the camera is the fix; a pose is a
+new thing); moving the light pole instead of Scarah (the party's pumpkins stand there).
+
 ## 381. A ride on the big wheel, drawn on its sheet's stage, the day's first ride free (2026-10-26)
 
 **Context:** 1.6's X2 (decision 378). The fairground's big wheel turns (E5, decision 284) but

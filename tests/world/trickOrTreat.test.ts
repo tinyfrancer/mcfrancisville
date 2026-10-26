@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
+import { CHAIN, UNMASKED } from '../../src/data/mysteryChain';
 import { TREE_FIRST_FILL, CANDY_PER_WINDOW } from '../../src/data/passive';
 import { dayKey } from '../../src/systems/clock';
 import { sweetAt } from '../../src/systems/trickOrTreat';
 import type { PropId } from '../../src/types/ids';
-import type { WorldEvent } from '../../src/world/World';
+import { fromSave, World, type WorldEvent } from '../../src/world/World';
 import { harness, type Harness } from './harness';
 
 function walkUp(h: Harness, building: PropId): WorldEvent[] {
@@ -51,6 +52,19 @@ describe('trick or treat at the doors', () => {
     h.clock.set(new Date(2026, 9, 3, 20));
     expect(h.world.trickOrTreat.answers('ollieCottage')).toBe(true);
     expect(h.world.trickOrTreat.answers('bartyCottage')).toBe(true);
+  });
+
+  // 1.6's X1, rehearsing the 31st: every door was knocked on, and the mayor's waits on him.
+  it("is at the mayor's door too, once she has met him", () => {
+    const h = harness();
+    h.clock.set(new Date(2026, 9, 30, 19));
+    expect(h.world.trickOrTreat.answers('mayorsOffice')).toBe(false);
+    for (const s of CHAIN) h.world.casebook.pin(s.clue, '2026-10-01');
+    h.world.casebook.pin(UNMASKED, '2026-10-02');
+    const world = new World({ ...fromSave(h.world.save()), clock: h.clock });
+    expect(world.trickOrTreat.answers('mayorsOffice')).toBe(true);
+    const knock = world.trickOrTreat.knock('mayorsOffice');
+    expect(knock).toMatchObject({ kind: 'trickOrTreat', villager: 'robBoo' });
   });
 
   it('leaves a door open when a happening is on inside', () => {

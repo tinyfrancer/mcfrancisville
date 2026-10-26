@@ -158,7 +158,11 @@ function startGame(): void {
   world.events.on('yard', () => autosave.markDirty());
   const changed = () => autosave.markDirty();
   const waiting: Waiting = { bed: null };
-  const snapshot = (tiles: readonly Tile[]) => photoOf(canvas, view(), tiles);
+  // The party photo (0.2's J4): the frame drawn again as the world now stands, then cut from it.
+  const snapshot = (tiles: readonly Tile[]) => {
+    view().draw(performance.now());
+    return photoOf(canvas, view(), tiles);
+  };
   const play = (events: WorldEvent[]) =>
     playMoments(events, { world, hud, sound, changed, waiting, snapshot, effects, transitions });
   const hud = mountHud(root, {

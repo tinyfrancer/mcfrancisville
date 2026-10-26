@@ -962,8 +962,8 @@ export const FAIRGROUND_SPOTS = {
   lineUp8: { tx: 17, ty: 6 },
   lineUp9: { tx: 18, ty: 6 },
   lineUp10: { tx: 19, ty: 6 },
-  // Scarah's (0.3's F3), at the left end, where a pumpkin stood.
-  lineUp11: { tx: 9, ty: 6 },
+  // Scarah's (0.3's F3), at the right end: the left end's tile is behind a light pole (1.6's X1).
+  lineUp11: { tx: 20, ty: 6 },
   // The town's gatherings before the stage, a place each (`STAGE_SPOTS`).
   crowdFront: { tx: 14, ty: 7 },
   crowdFrontLeft: { tx: 13, ty: 7 },
