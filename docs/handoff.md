@@ -69,7 +69,22 @@ untouched): "Small things: a butterfly on your hat if you stand still, fireflies
 gifts, which are not yours. Bless you."
 Next: merge when green, then empty this heading.
 
-### X6 the skeleton and a kite, V1.6 the review
+### X6: the museum's skeleton, and a kite (`claude/x6-skeleton-kite`; decision 385)
+
+Done, PR #240 into `v1.6-dev`: Gerald, a little dragon of bones on a plinth, stands in the
+middle of the museum at Crumbs & Curios once every fossil is on show (derived from
+`cabinet.donated`, `when: 'assembled'` on his fixture), with Wrapunzel's letter (`museum:gerald`)
+and his plaque; three kites at Cobweb Corner (bat, ghost, moth), held from the quick bar and flown
+from the end of the pier or the castle lookout on a day `windyOn` deals windy, her string held
+up, the kite bobbing in the `kite` pass, any tap winding it in, `skyOnAString` the first time; a
+Today line; a breeze in the ambience on a kite day. Smoke `gerald` and `kite` in `places`. **No
+save change** (v59). Next: merge when green, then empty this heading.
+
+**For the review's `1.6` row (full, so not added to `patchNotes.ts`):** "Give the museum every
+fossil and Wrapunzel will stand them up as a skeleton. She has named it Gerald. And there are
+kites at Cobweb Corner: on a breezy day, fly one from the end of the pier."
+
+### V1.6 the review
 
 Not started; in the plan's order.
 

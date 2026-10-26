@@ -74,6 +74,8 @@ import { Projects } from './services/Projects';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import type { Stargazing } from './services/Stargazing';
+import type { Kite } from './services/Kite';
+import { KITE_IDS } from '../data/kites';
 import type { Snow } from './services/Snow';
 import type { Delights } from './services/Delights';
 import { Garden } from './services/Garden';
@@ -158,6 +160,8 @@ export abstract class WorldParts {
   readonly fountain: Fountain;
   /** The night sky through a telescope, and her star chart (1.5's G4). */
   readonly stargazing: Stargazing;
+  /** Her kite up on the wind (1.6's X6). */
+  readonly kite: Kite;
   /** Snow to play in, in winter (1.6's X4). */
   readonly snow: Snow;
   /** Small delights outdoors (1.6's X5): a butterfly on her hat, fireflies, a caw, a sneeze. */
@@ -447,6 +451,7 @@ export abstract class WorldParts {
     });
     ({ hands: this.hands, novelty: this.novelty, milestones: this.milestones } = hers);
     ({ sitting: this.sitting, poses: this.poses } = hers);
+    this.kite = hers.kite;
     areaMade('her');
     const { candyTree, stall, garden, noticeboard, fossils, shops, calendar, henhouse } = this;
     const today = { candyTree, stall, garden, noticeboard, fossils, shops, calendar, henhouse };
@@ -463,6 +468,7 @@ export abstract class WorldParts {
       collecting: this.collecting,
       stargazing: this.stargazing,
       weather: this.weather,
+      hasKite: () => KITE_IDS.some((id) => this.bag.count(id) > 0),
     });
     areaMade('upNow');
   }

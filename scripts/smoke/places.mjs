@@ -431,6 +431,59 @@ async function interiors() {
   check("the mat takes her back out in front of Cody's door", out);
 }
 
+/** Every fossil there is, to give the museum all at once (1.6's X6). */
+const FOSSIL_IDS = [
+  'trilobite',
+  'fernInSlate',
+  'ammonite',
+  'stoneAcorn',
+  'batSkull',
+  'boneFish',
+  'ghostShell',
+  'dragonTooth',
+  'fairyLoaf',
+  'toadstone',
+  'mothInAmber',
+  'dragonEgg',
+];
+
+/**
+ * The museum's skeleton (1.6's X6): every fossil given through the dev handle, Wrapunzel writes,
+ * and Gerald stands in the middle of the museum at Crumbs & Curios, his plaque read as she walks
+ * up to him.
+ */
+async function gerald() {
+  await closeSheets();
+  await page.evaluate(() => {
+    if (window.world.scene !== 'town') window.world.travel.go('town');
+  });
+  await page.evaluate(() => window.view.step(40, 3));
+  await closeSheets();
+  const given = await page.evaluate((ids) => {
+    for (const id of /** @type {import('../../src/types/ids').FossilId[]} */ (ids)) {
+      if (window.world.cabinet.isDonated(id)) continue;
+      window.world.bag.add(id, 1);
+      window.world.fossils.donate(id);
+    }
+    return window.world.cabinet.assembled;
+  }, FOSSIL_IDS);
+  check('every fossil is on show', given);
+  await page.evaluate(() => window.view.step(40, 3));
+  check(
+    "Wrapunzel's letter comes the day Gerald stands up",
+    await page.evaluate(() => window.world.mailbox.letters.has('museum:gerald')),
+  );
+  await closeSheets();
+  if (!(await goInto('bakery', 'crumbs'))) return;
+  await tapFixture('skeleton');
+  await page.evaluate(() => window.view.step(40, 10));
+  const plaque = (await page.locator('.hud-toast').textContent()) ?? '';
+  check('walking up to Gerald reads his plaque', /GERALD/.test(plaque), plaque);
+  await page.screenshot({ path: '.smoke/gerald.png' });
+  await tapToastAway();
+  await goOut();
+}
+
 /**
  * Her broom (0.2's P1): Agatha's letter brings it and sets its stand out by her mat; a tap on the
  * quick bar swoops her home from the castle hill, and the stand flies her back to the same tile.
@@ -618,12 +671,89 @@ async function stargazing() {
   await closeSheets();
 }
 
+/**
+ * A kite (1.6's X6): on a windy day found by the dev handle, a ghost kite in her hand, a real tap on
+ * the end of the pier walks her there and lifts it; she holds the string up, it climbs and bobs;
+ * a tap winds it in.
+ */
+async function kite() {
+  await closeSheets();
+  const day = await page.evaluate(() => window.world.kite.nextWindy('lanternShore'));
+  check('a windy day at Lantern Shore is found', !!day, String(day));
+  if (!day) return;
+  await openOn(day, 11);
+  await page.evaluate(() => {
+    const w = window.world;
+    w.bag.add('ghostKite', 1);
+    w.hands.hold('ghostKite');
+    w.atlas.find('lanternShore');
+    if (w.scene !== 'lanternShore') w.travel.go('lanternShore');
+  });
+  await page.evaluate(() => window.view.step(40, 5));
+  await closeSheets();
+  check(
+    'she is at Lantern Shore with her kite',
+    await page.evaluate(
+      () => window.world.scene === 'lanternShore' && window.world.hands.kite === 'ghostKite',
+    ),
+  );
+  await page.evaluate(() => window.world.movement.standAt({ tx: 12, ty: 20 }, 'up'));
+  await page.evaluate(() => window.view.step(40, 5));
+  // What the morning has to tell (a rainbow after yesterday's rain, a letter) is tapped away first.
+  for (let i = 0; i < 8 && (await page.locator('.hud-toast-shown').count()) > 0; i++) {
+    await tapToastAway();
+    await page.evaluate(() => window.view.step(40, 3));
+  }
+  await tapTile(12, 14);
+  await stepUntil(() => !window.world.player.moving, 'she walks out to the end of the pier');
+  await page.evaluate(() => window.view.step(40, 5));
+  const up = await page.evaluate(() => ({
+    kite: window.world.kite.flying?.kite ?? null,
+    pose: window.world.poses.pose(),
+  }));
+  check(
+    'a tap on the end of the pier lifts her kite, and she holds its string up',
+    up.kite === 'ghostKite' && up.pose === 'holdUp',
+    JSON.stringify(up),
+  );
+  const said = (await page.locator('.hud-toast').textContent()) ?? '';
+  check('she hears it go up', /Up goes the ghost kite/.test(said), said);
+  await page.evaluate(() => window.view.step(40, 70));
+  check(
+    'it stays up while the toasts come and go',
+    await page.evaluate(() => window.world.kite.flying !== null),
+  );
+  await page.screenshot({ path: '.smoke/kite-pier.png' });
+  await tapToastAway();
+  const tile = await playerTile();
+  await page.evaluate((t) => window.world.tapTile(t.tx, t.ty + 2), tile);
+  await page.evaluate(() => window.view.step(40, 2));
+  check(
+    'a tap winds it in, and she stays put',
+    await page.evaluate(
+      (t) =>
+        window.world.kite.flying === null &&
+        window.world.movement.tile.tx === t.tx &&
+        window.world.movement.tile.ty === t.ty,
+      tile,
+    ),
+  );
+  await page.evaluate(() => {
+    window.world.hands.hold('hands');
+    window.world.travel.go('town');
+  });
+  await page.evaluate(() => window.view.step(40, 2));
+  await closeSheets();
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['zones', zones],
   ['places', places],
   ['edges', edges],
   ['interiors', interiors],
+  ['gerald', gerald],
   ['broom', broom],
   ['stargazing', stargazing],
+  ['kite', kite],
 ];

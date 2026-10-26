@@ -9,6 +9,7 @@ import { happeningsOn, hourOfNight, venueOf } from '../../src/systems/happenings
 import { parseMap } from '../../src/systems/grid';
 import { hasFresh, type TodayLine } from '../../src/systems/today';
 import { weatherOn } from '../../src/systems/weather';
+import { windyOn } from '../../src/systems/kite';
 import { PASSERS } from '../../src/data/rareEvents';
 import { passersOn, rareEventOn } from '../../src/systems/rareEvents';
 import { canGoToday, goToday } from '../../src/wiring/todayGo';
@@ -132,6 +133,9 @@ function holds(h: Harness, line: TodayLine): boolean {
     // 1.6's X4.
     case 'rainbow':
       return w.weather.rainbow() !== null;
+    // 1.6's X6.
+    case 'kite':
+      return windyOn(day, line.zone);
     // 1.5's G4.
     case 'stars':
       return (

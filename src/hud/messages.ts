@@ -42,6 +42,7 @@ import { POT_PLANTS } from '../data/porch';
 import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
 import { FOSSILS } from '../data/fossils';
+import { KITE_FIRST, KITE_IN, KITE_NOWHERE, KITE_STILL, KITE_UP } from '../data/kites';
 import type { MoundFind } from '../systems/fossils';
 import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
@@ -581,6 +582,22 @@ export function eventToast(event: WorldEvent): Toast | null {
       return { text: BUILT[event.snowman], special: true, icon: { item: 'meltlessSnowman' } };
     case 'thawed':
       return { text: thawLine(event.count), special: true, icon: { item: 'meltlessSnowman' } };
+    // Her kite (1.6's X6).
+    case 'kite':
+      if (event.did === 'up') {
+        return event.first
+          ? {
+              text: `${KITE_UP[event.kite]} ${KITE_FIRST}`,
+              special: true,
+              icon: { item: 'skyOnAString' },
+            }
+          : { text: KITE_UP[event.kite], icon: { item: event.kite } };
+      }
+      if (event.did === 'in') return { text: KITE_IN, icon: { item: event.kite } };
+      return { text: event.did === 'still' ? KITE_STILL : KITE_NOWHERE, icon: 'leaf' };
+    // Gerald stood up in the museum (1.6's X6).
+    case 'assembled':
+      return { text: ASSEMBLED, special: true, icon: { item: 'dragonTooth' } };
     case 'rainbow':
       return event.first
         ? { text: RAINBOW_FIRST, special: true, icon: { item: 'rainbowJar' } }
@@ -772,6 +789,10 @@ export function eventToast(event: WorldEvent): Toast | null {
       return null;
   }
 }
+
+/** Every fossil on show, and Wrapunzel couldn't help herself (1.6's X6). */
+export const ASSEMBLED =
+  "Every fossil is on show, and Wrapunzel has been up all night with them. There's a letter in your mailbox!";
 
 /** Said after a rare event's toast when its keepsake has come in the mail with it (V1's R3). */
 export const KEEPSAKE_POSTED = "And there's a letter in your mailbox!";

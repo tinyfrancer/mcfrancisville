@@ -14,7 +14,12 @@ import {
   WEDDING_YEAR,
   type SpecialDayId,
 } from '../data/specialDays';
-import { MUSEUM_FORMERLY_FULL, MUSEUM_LETTERS } from '../data/museum';
+import {
+  MUSEUM_FORMERLY_FULL,
+  MUSEUM_LETTERS,
+  SKELETON_LETTER,
+  SKELETON_LETTER_TEXT,
+} from '../data/museum';
 import { MILESTONES } from '../data/milestones';
 import { HOLIDAY_LETTERS } from '../data/holidays';
 import { HOLIDAY_LINES } from '../data/holidayLines';
@@ -325,6 +330,8 @@ export function letterOf(id: string): Letter | null {
     const rare = n && n in RARE_EVENTS ? RARE_EVENTS[n as RareEventId] : undefined;
     return rare ? { ...rare.letter, gift: { item: rare.keepsake } } : null;
   }
+  // Gerald stood up in the museum (1.6's X6), every fossil on show.
+  if (id === SKELETON_LETTER) return { from: 'wrapunzel', text: SKELETON_LETTER_TEXT };
   // The first constellation she traces (1.5's G4): Hazel's, with her star map.
   if (id === FIRST_STARS) return { ...FIRST_STARS_LETTER, gift: { item: 'starMap' } };
   // A town project built (V1's R4): the mayor's thanks, signed by name once she has met him.

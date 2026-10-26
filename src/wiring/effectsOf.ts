@@ -172,6 +172,8 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [emote('!')];
     case 'mail':
       return [emote('!')];
+    // Gerald stood up in the museum (1.6's X6), told as a shelf is.
+    case 'assembled':
     case 'shelved':
       return [burst('confetti', head), burst('sparkle', head, 6, 18)];
     // The sky sheet shows the stars (1.5's G4); a new one on her chart sparkles over her too.
@@ -323,6 +325,12 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
     }
     case 'thawed':
       return [pop({ item: 'meltlessSnowman' }, event.count, over)];
+    // Her kite up (1.6's X6), and the first time her keepsake; wound in with a little tune.
+    case 'kite':
+      if (event.did === 'up') {
+        return event.first ? [emote('!'), pop({ item: 'skyOnAString' }, 1, over)] : [emote('♪')];
+      }
+      return event.did === 'in' ? [emote('♪')] : [emote('…')];
     case 'rainbow':
       return event.first ? [emote('!'), pop({ item: 'rainbowJar' }, 1, over)] : [emote('!')];
     case 'snowHint':

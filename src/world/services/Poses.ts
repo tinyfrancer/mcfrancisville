@@ -11,7 +11,7 @@ import {
   swingFrame,
   type Verb,
 } from '../../systems/poses';
-import type { Pose } from '../../types/ids';
+import type { ActionPose, Pose } from '../../types/ids';
 import type { Feeling } from '../../types/mood';
 import type { WorldContext } from '../context';
 import type { Thrill, WorldEvent } from '../events';
@@ -26,6 +26,8 @@ export interface PoseCues {
   busy(): boolean;
   /** How far through a swing of her net she is, 0 to 1, or null when she isn't swinging it. */
   swinging?(): number | null;
+  /** A pose she holds for as long as something lasts: her kite's string, up (1.6's X6). */
+  holding?(): ActionPose | null;
 }
 
 /** A thrill waits for what brought it to finish: her net's swing, for a catch. */
@@ -225,6 +227,8 @@ export class Poses {
   pose(): Pose | null {
     if (this.cues.moving()) return null;
     if (this.cues.seated()) return 'sit';
+    const held = this.cues.holding?.() ?? null;
+    if (held) return held;
     const acting = this.acting();
     if (acting) return acting.pose;
     const rock = rockPose(this.ctx.clock.now() - this.rockFrom);
@@ -234,7 +238,7 @@ export class Poses {
 
   /** Which frame of her pose: a wave's hand, a swing's arm. */
   frame(): number {
-    if (this.cues.moving() || this.cues.seated()) return 0;
+    if (this.cues.moving() || this.cues.seated() || this.cues.holding?.()) return 0;
     return this.acting()?.frame ?? 0;
   }
 

@@ -44,6 +44,7 @@ import type {
   FurnitureId,
   HappeningId,
   ItemId,
+  KiteId,
   LostId,
   MilestoneId,
   MapZoneId,
@@ -289,6 +290,14 @@ export type WorldEvent =
   | { kind: 'thawed'; count: number }
   /** What the snow in her yard is for, the first time she's there on a snowy day. */
   | { kind: 'snowHint' }
+  /** Every fossil on show, and Wrapunzel has stood Gerald up in the museum (1.6's X6). */
+  | { kind: 'assembled' }
+  /** Her kite up on the wind, and the first time ever her keepsake (1.6's X6). */
+  | { kind: 'kite'; did: 'up'; kite: KiteId; first: boolean }
+  /** Her kite wound back in. */
+  | { kind: 'kite'; did: 'in'; kite: KiteId }
+  /** A kite in her hand and no wind: still today at the spot, or nowhere a kite goes up. */
+  | { kind: 'kite'; did: 'still' | 'nowhere' }
   /** A rainbow after the rain, and the first time, her jar of it (1.6's X4). */
   | { kind: 'rainbow'; first: boolean }
   /** A snack bought at a fairground stall. */

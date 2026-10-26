@@ -12,6 +12,7 @@ import { fountainPass } from './fountain';
 import { hensPass } from './hens';
 import { Ground } from './ground';
 import { fishingPass } from './fishing';
+import { kitePass } from './passes/kite';
 import { Lighting } from './lighting';
 import { rimLit, underMoon } from './moonlight';
 import { WEATHER_LOOK } from './weather';
@@ -123,7 +124,18 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'her',
   ],
   wanted: ['givers', 'snack', 'mounds', 'holidays', 'neighbours', 'critters', 'pets', 'bone'],
-  over: ['yard', 'holidays', 'beds', 'life', 'neighbours', 'critters', 'fishing', 'weather'],
+  over: [
+    'yard',
+    'holidays',
+    'beds',
+    'life',
+    'neighbours',
+    'critters',
+    'fishing',
+    // Her kite up on the wind (1.6's X6), under the rain.
+    'kite',
+    'weather',
+  ],
   lights: [
     'props',
     'fountain',
@@ -260,6 +272,7 @@ export class OutdoorView implements SceneView {
         fountainPass(b.fountains, options.fountainBeat ?? (() => null)),
         lostPass(world, zone),
         fishingPass(world, zone.id),
+        kitePass(world, zone),
         effectsPass(world, zone.id, options.effects ?? null),
       ],
       OUTDOOR_LAYERS,

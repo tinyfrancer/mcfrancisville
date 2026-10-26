@@ -16,6 +16,7 @@ import type {
   AccessoryId,
   CritterId,
   FossilId,
+  KiteId,
   DisplayPiece,
   Facing,
   FurnitureId,
@@ -143,6 +144,7 @@ import {
   SNOWBALL_THROWN,
 } from './effects';
 import { SNOWBALL_ART, SNOWBALL_PALETTE } from './snowman';
+import { KITE_ALOFT, KITE_HELD, KITE_PALETTES } from './kite';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
 export interface Entry {
@@ -648,6 +650,11 @@ export function catalogue(): Entry[] {
   for (const [id, art] of Object.entries(HELD_ART)) grid(`held:${id}`, art.source, art.palette);
   grid('held:seed', HELD_PACKET, ITEM_ART.pumpkinSeed.palette);
   grid('held:canTipped', TIPPED_CAN.source, TIPPED_CAN.palette);
+  // Her kites (1.6's X6): folded in her hand, and up in the sky in their two frames.
+  for (const [id, art] of Object.entries(KITE_HELD)) grid(`held:${id}`, art.source, art.palette);
+  for (const id of Object.keys(KITE_ALOFT) as KiteId[]) {
+    KITE_ALOFT[id].forEach((art, i) => grid(`kite:${id}:${i}`, art, KITE_PALETTES[id]));
+  }
   // The critters' second icon frames, in town, lit, and as the Curiosity Cabinet shows one missing.
   for (const [id, art] of Object.entries(CRITTER_ART) as [
     CritterId,

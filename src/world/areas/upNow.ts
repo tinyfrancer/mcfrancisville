@@ -17,6 +17,10 @@ import type { Projects } from '../services/Projects';
 import type { Activities } from '../services/Activities';
 import type { Stalls } from '../zones/Stalls';
 import { weatherOn } from '../../systems/weather';
+import { windyPlaces } from '../../systems/kite';
+
+/** When a kite day is over for Today: the sky goes dark for kites at eight. */
+const KITE_DUSK = 20;
 import type { MapZoneId } from '../../types/ids';
 import type { Calendar } from '../services/Calendar';
 import type { Collecting } from '../services/Collecting';
@@ -63,6 +67,15 @@ export interface UpNowParts {
   henhouse: Henhouse;
   /** A rainbow after the rain (1.6's X4); none in a test that doesn't give the weather. */
   weather?: Forecast;
+  /** Whether she has a kite (1.6's X6), read from her bag. */
+  hasKite?: () => boolean;
+}
+
+/** By day, the first place the wind is up for a kite today (1.6's X6), and whether she has one. */
+function kiteToday(day: string, hour: number, hasKite: boolean): TodayFacts['kite'] {
+  if (hour < 6 || hour >= KITE_DUSK) return null;
+  const zone = windyPlaces(day)[0];
+  return zone ? { zone, hasKite } : null;
 }
 
 /** A clear night for the telescope, and what's to trace (1.5's G4). */
@@ -173,6 +186,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       stars: starsTonight(parts.stargazing),
       eggs: parts.henhouse.eggs(),
       rainbow: (parts.weather?.rainbow() ?? null) !== null,
+      kite: kiteToday(day, hourOf(now), parts.hasKite?.() ?? false),
     };
   });
 }

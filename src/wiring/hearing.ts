@@ -2,6 +2,7 @@ import { ambienceFor, Footfalls, groundOf, waterNear } from '../audio/ambience';
 import type { SoundBoard } from '../audio/SoundBoard';
 import type { Weather } from '../data/weather';
 import { dayKey } from '../systems/clock';
+import { windyOn } from '../systems/kite';
 import { tileAt } from '../systems/grid';
 import { tileOf, type World } from '../world/World';
 import { underfootOn } from './underfoot';
@@ -46,6 +47,7 @@ export class Hearing {
           weather: world.weather.today(),
           stormy: world.weather.stormy(),
           water,
+          breezy: windyOn(dayKey(now), zone),
         }),
       );
     }

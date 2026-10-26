@@ -724,6 +724,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   dug once a day by walking up to it (`world.fossils`, `mound:<zone>` in `Takings`). A fossil she
   has had is found (`collected`); the Cabinet's Fossils tab shows them, the museum's seventh case
   holds the donated (`cabinet.donated`, save v43), and `fossilWing` and `fossils` are shelves.
+  With every one on show (`Cabinet.assembled`, nothing saved), Gerald stands in the museum's
+  middle (1.6's X6, decision 385): the `skeleton` fixture, `when: 'assembled'` on its
+  `PlacedFixture`, which `RoomZone` (built with a `standing` predicate; `everything` and `things`)
+  and `RoomView` leave out till then; his plaque is its `says`, and `Fossils.check` posts
+  Wrapunzel's `museum:gerald` letter once.
 - **The night sky** (1.5's G4, decision 373): fifteen constellations in
   `src/data/constellations.ts` (twelve by month, three while a holiday's decorations are up),
   their rules in `src/systems/stars.ts` (`skyOf`: open after 8pm on a clear day; `findableOn`:
@@ -770,6 +775,16 @@ what each owns, and where it hurts. Update it when a seam moves.
   `tailLantern`, accessories `for` him alone (`fitsPet`; `PetArt.dressed`, picked by
   `petSource`'s accessory), the lantern's glass glowing after dark (`LANTERN_GLOW`); the
   `tinyScarf` is painted on any pet's neck.
+- **Kites** (1.6's X6, decision 385): three items of kind `kite` (`src/data/kites.ts`, a `Kites`
+  shelf at Cobweb Corner, icons, folded `KITE_HELD` and flying `KITE_ALOFT` art in
+  `src/sprites/kite.ts`), held from the quick bar (`hands.kite`). The wind is `windyOn(day, zone)`
+  (`src/systems/kite.ts`: dealt from the day key, clear days only, the castle hill windier), at the
+  tiles round each place's `KITE_FIELDS` spot (the pier's `pierEnd`, the castle hill's `lookout`).
+  With one in hand a tap there walks her up and lifts it, a tap on herself tries it where she is
+  (`world.kite`, `Kite`: `fly`, `bringIn`, `check`; a flight isn't saved); while it's up she holds
+  `holdUp` (the `holding` pose cue), any tap winds it in, and the `kite` pass
+  (`src/render/passes/kite.ts`, in `over`) draws it climbing, bobbing, its tail and string. The
+  first flight gives `skyOnAString`; Today says a windy day; the ambience takes `breezy`.
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`

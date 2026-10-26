@@ -59,7 +59,8 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
         return new MapZone(id, map, null, isOpen, lotsIn(id), set, rows, null, mounds, sites);
       }),
     ],
-    INTERIOR_IDS.map((id) => new RoomZone(id)),
+    // Gerald stands in the museum once every fossil is on show (1.6's X6).
+    INTERIOR_IDS.map((id) => new RoomZone(id, () => s.cabinet.assembled)),
   );
   return { stalls, townZone, homeZone, zones };
 }

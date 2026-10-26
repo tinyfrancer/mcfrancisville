@@ -99,7 +99,7 @@ describe('what the delights look and sound like (1.6’s X5)', () => {
       { kind: 'perch', critter: 'monarch' },
     ]);
     expect(effectsOf({ kind: 'flewOff', critter: 'monarch' }, here)).toEqual([{ kind: 'flit' }]);
-    expect(cueOf({ kind: 'landed', critter: 'monarch' })).toBe('flutter');
+    expect(cueOf({ kind: 'landed', critter: 'monarch' })).toBe('wings');
   });
 
   it('drops a crow’s feathers off the scarecrow as it caws', () => {

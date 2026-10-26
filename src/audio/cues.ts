@@ -150,7 +150,7 @@ export const CUES = {
   ),
   // Small delights (1.6's X5): wings landing on her hat, the scarecrow's crow, a sneeze, and
   // hello at the door: a mew for the cats, Dolly's and Fibi's woof, Pickle's chitter.
-  flutter: cue(
+  wings: cue(
     { wave: 'brush', notes: line('G6:.08 -:.06 G6:.08 -:.06 G6:.08'), gain: 0.04, q: 2 },
     chime('-:.4 E6:.12 B6:.4', 0.05),
   ),
@@ -167,6 +167,15 @@ export const CUES = {
   ),
   mew: cue(pluck('G5:.12 B5:.18 E5:.45', 0.1)),
   chitter: cue(pluck('C6:.06 D6:.06 C6:.06 D6:.06 E6:.12', 0.06, 'sine')),
+  // A kite (1.6's X6): a flutter of cloth as the wind takes it up, and a soft wind-down back in.
+  flutter: cue(
+    { wave: 'brush', notes: line('C6:.12 -:.04 D6:.12 -:.04 E6:.16'), gain: 0.09, q: 1.4 },
+    chime('-:.3 G5:.12 C6:.12 E6:.12 G6:.8', 0.12),
+  ),
+  windIn: cue(
+    { wave: 'brush', notes: line('E6:.3'), gain: 0.06, q: 1 },
+    chime('G6:.12 E6:.12 C6:.12 G5:.6', 0.1),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -249,6 +258,10 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'found';
     case 'rainbow':
       return 'rainbow';
+    case 'assembled':
+      return 'firstCatch';
+    case 'kite':
+      return event.did === 'up' ? 'flutter' : event.did === 'in' ? 'windIn' : null;
     case 'snackBought':
       return 'coin';
     case 'ate':
@@ -349,7 +362,7 @@ export function cueOf(event: WorldEvent): CueId | null {
     case 'crow':
       return 'crow';
     case 'landed':
-      return 'flutter';
+      return 'wings';
     case 'cawed':
       return 'caw';
     case 'sneezed':

@@ -1,4 +1,5 @@
 import { bake } from '../sprites/bake';
+import { KITE_HELD } from '../sprites/kite';
 import { PALETTE } from '../sprites/palette';
 import type { Palette, RasterOptions, SpriteSource } from '../sprites/sprite';
 import { tileCentre, type World } from '../world/World';
@@ -31,7 +32,7 @@ import {
 } from '../sprites/tools';
 import { FIRST_ROD, type RodColourId } from '../data/rods';
 import { ITEMS } from '../data/items';
-import type { Facing } from '../types/ids';
+import type { Facing, KiteId } from '../types/ids';
 
 /** What draws one of the places she can be: the town, or her home. */
 export interface SceneView {
@@ -233,12 +234,22 @@ function inHand(
 ): Drawable['held'] {
   if (held === 'hands') return undefined;
   const seed = !isTool(held) && ITEMS[held].kind === 'seed';
+  // A kite is held folded along its spar (1.6's X6).
+  const kite = !isTool(held) && ITEMS[held].kind === 'kite' ? KITE_HELD[held as KiteId] : null;
   const art = isTool(held)
     ? HELD_ART[held]
-    : seed
-      ? { ...ITEM_ART[held], source: HELD_PACKET }
-      : ITEM_ART[held];
-  const grip = isTool(held) ? HELD_ART[held].grip : seed ? PACKET_GRIP : ICON_GRIP;
+    : kite
+      ? kite
+      : seed
+        ? { ...ITEM_ART[held], source: HELD_PACKET }
+        : ITEM_ART[held];
+  const grip = isTool(held)
+    ? HELD_ART[held].grip
+    : kite
+      ? kite.grip
+      : seed
+        ? PACKET_GRIP
+        : ICON_GRIP;
   const hand = HAND[facing];
   const bare = cast && held === 'rod';
   const own = held === 'rod' ? rodPalette(rodColour) : art.palette;

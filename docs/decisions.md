@@ -10171,3 +10171,65 @@ night whatever the place (a monarch in the woods it never lives in); the crow's 
 in the world (the perch's cycle is the view's clock); a sneeze that halts her walk (she'd have to
 tap again); "bless you" as a bubble with words (the chatter bubbles are emotes only, so the words
 are a toast); Gary trotting over; Fibi's gift as an item.
+
+## 385. Gerald, the museum's skeleton, stood up from the fossils on show; and a kite flown on a windy day dealt from the day key (1.6's X6, 2026-10-26)
+
+**Context:** 1.6's X6 (decision 378). The plan asked for a skeleton in the museum's hall once all
+twelve fossils are donated, with a letter, a shelf (or the existing one) and a plaque; and three
+kites from Cobweb Corner, flown from Lantern Shore's pier and the castle lookout on a windy day
+("ambience's wind tells which"), she holding the string, the kite bobbing in the sky, a tap
+bringing it in, and a keepsake the first flight. The save stays at v59: nothing here needs a field.
+
+**Decision:**
+
+- **The skeleton is derived, never saved.** `Cabinet.assembled` is every `FossilId` in `donated`.
+  The `skeleton` fixture (Gerald: a little dragon of bones on a plinth, his name on a brass
+  plaque, 3×2, drawn at 32 in `sprites/interiors.ts`) stands in Crumbs & Curios at (16, 4),
+  between the two rows of cases, with `when: 'assembled'` on its `PlacedFixture`. `RoomZone` keeps
+  `everything` and filters `things` by a `standing` predicate it's built with (`places.ts` hands
+  it `cabinet.assembled`), so where he'd stand is open floor until then, and `RoomView` bakes
+  every thing once and draws only those there. Walking up reads the plaque (`says`,
+  `SKELETON_PLAQUE`).
+- **The shelf already exists**: `fossilWing` is "every fossil donated", so no `assembled` shelf.
+  Wrapunzel's letter (`museum:gerald`, `SKELETON_LETTER_TEXT` in `data/museum.ts`, read by
+  `letterOf`) is posted by `Fossils.check` (in `World.update`, after the milestones, so the
+  fossil case's shelf letter comes the same day) with an `assembled` moment and its toast; the
+  mailbox holding it is the only record, so a town with every fossil already on show gets it the
+  first time it plays 1.6. A letter of its own rather than rewording `fossilWing`'s, which towns
+  may already have read.
+- **Kites are items of a new kind, `kite`** (`batKite`, `ghostKite`, `mothKite` in
+  `data/kites.ts`, worth 60 so 120 at Cobweb Corner, a `Kites` shelf with all three every day,
+  added last so the shelves before deal as they did), held from the quick bar like a seed
+  (`Hands` holds the `kite` kind; `hands.kite`), drawn folded in her hand (`KITE_HELD`), shown
+  with the treasures in her bag. The keepsake is `skyOnAString` (kind keepsake), given the first
+  time any kite goes up (its absence from her bag is the record, as `rainbowJar`'s is).
+- **The wind is a rule of the day, not the ambience's level.** `ambienceFor`'s wind is fixed by
+  place (none at Lantern Shore at all), so it can't say which days are windy. `windyOn(day, zone)`
+  in `systems/kite.ts` deals it from the day key per place: never on a rainy or foggy day, else
+  65 in 100 clear days up the castle hill and 50 at the shore (the castle hill windier, as its
+  ambience is). The ambience follows the rule rather than the other way round: `Surroundings`
+  takes `breezy`, adding 0.3 wind on a kite day there (`wiring/hearing.ts`).
+- **Where:** the tiles round a named spot in each windy place (`KITE_FIELDS`): `pierEnd` at
+  Lantern Shore and a new `lookout` on the castle hill (`CASTLE_HILL_SPOTS`, by the telescope).
+- **The gesture:** with a kite in her hand, a tap on one of those tiles walks her there and
+  lifts it (a `kite` visit), and a tap on herself tries it where she stands. Elsewhere, or on a
+  still day, a toast says so (`nowhere`, `still`). Other taps with a kite in hand are what they'd
+  be. While it's up, any tap only winds it in (as reeling in does), and so does Find; going
+  anywhere, standing anywhere else or putting it down takes it in quietly (`Kite.check`). A flight
+  isn't saved.
+- **Her pose** is `holdUp` held for the flight through a new `holding` cue on `PoseCues`, so no
+  new pose and no change to her looks or any figure.
+- **Drawing:** the `kite` pass (`render/passes/kite.ts`) in `over`, before the weather, so the
+  hour's light lies over it and rain falls in front: the kite climbs from her raised hand over
+  2.4 s to about four tiles up and two out (the way she faces, right unless facing left), sways
+  and bobs on two slow sines by whole pixels, flaps in two frames (`KITE_ALOFT`), its tail six
+  bows streaming out and down, rippling, and the string a sagging line of cream pixels.
+- **Today** says "A good day for a kite" by day (6 to 20) when the wind is up at either place,
+  the pier first, and that Cobweb Corner sells them if she has none; a tap on it goes there.
+  `world.kite.nextWindy(zone)` is the dev handle smoke finds a windy day with.
+
+**Rejected:** a `kite` field in the save (nothing needs one); the skeleton as a museum case's
+nook art (three tiles of dragon reads better standing on the floor); an `assembled` shelf
+(`fossilWing` is the same set); the wind read from `ambienceFor` (no day in it); any tap anywhere
+lifting the kite with a toast elsewhere (every tap while holding one would nag); a new arm-up pose
+for the string (`holdUp` already is one).
