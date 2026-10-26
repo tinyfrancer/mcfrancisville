@@ -1,6 +1,7 @@
 import { ACTIVITIES, type ActivityId } from '../data/activities';
 import { HAPPENINGS } from '../data/happenings';
-import { TOWN_SPOTS } from '../data/maps';
+import { KITE_FIELDS, type KitePlace } from '../data/kites';
+import { spotIn, TOWN_SPOTS } from '../data/maps';
 import { WANDERING_STALL_AT, type PasserId, type RareEventId } from '../data/rareEvents';
 import type {
   ConstellationId,
@@ -134,6 +135,8 @@ export interface TodayFacts {
   eggs?: number;
   /** A rainbow up after the rain (1.6's X4), for its ten minutes. */
   rainbow?: boolean;
+  /** The wind up for a kite today (1.6's X6), by day: where, and whether she has a kite. */
+  kite?: { zone: KitePlace; hasKite: boolean } | null;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -182,6 +185,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'eggs'; eggs: number }
   // 1.6's X4: a rainbow after the rain, while it's up.
   | { kind: 'rainbow' }
+  // 1.6's X6: the wind up for a kite at the pier's end or the castle lookout.
+  | { kind: 'kite'; zone: KitePlace; hasKite: boolean }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -334,6 +339,16 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
     });
   }
   if (facts.rainbow) lines.push({ kind: 'rainbow', key: `rainbow:${day}` });
+  if (facts.kite) {
+    const { zone, hasKite } = facts.kite;
+    lines.push({
+      kind: 'kite',
+      zone,
+      hasKite,
+      key: `kite:${day}`,
+      go: { zone, tile: spotIn(zone, KITE_FIELDS[zone]) },
+    });
+  }
   if (facts.bigWheel) {
     lines.push({
       kind: 'bigWheel',

@@ -187,6 +187,17 @@ export function todayWords(line: TodayLine): TodayWords {
         small: 'Look up! It only stays a little while.',
         glyph: { item: 'rainbowJar' },
       };
+    // 1.6's X6: the wind up for a kite.
+    case 'kite':
+      return {
+        text: 'A good day for a kite',
+        small:
+          (line.zone === 'lanternShore'
+            ? "The wind's up at the end of the pier."
+            : "The wind's up at the castle lookout.") +
+          (line.hasKite ? '' : ' Cobweb Corner sells kites.'),
+        glyph: { item: 'batKite' },
+      };
     case 'iceFishing':
       return {
         text: "The pond's frozen thick enough to fish",

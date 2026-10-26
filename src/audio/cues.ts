@@ -147,6 +147,15 @@ export const CUES = {
     chime('C5:.15 D5:.15 E5:.15 G5:.15 A5:.15 C6:.15 D6:.15 E6:1.2', 0.12),
     chime('-:.6 C4+G4:2', 0.06),
   ),
+  // A kite (1.6's X6): a flutter of cloth as the wind takes it up, and a soft wind-down back in.
+  flutter: cue(
+    { wave: 'brush', notes: line('C6:.12 -:.04 D6:.12 -:.04 E6:.16'), gain: 0.09, q: 1.4 },
+    chime('-:.3 G5:.12 C6:.12 E6:.12 G6:.8', 0.12),
+  ),
+  windIn: cue(
+    { wave: 'brush', notes: line('E6:.3'), gain: 0.06, q: 1 },
+    chime('G6:.12 E6:.12 C6:.12 G5:.6', 0.1),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -218,6 +227,10 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'found';
     case 'rainbow':
       return 'rainbow';
+    case 'assembled':
+      return 'firstCatch';
+    case 'kite':
+      return event.did === 'up' ? 'flutter' : event.did === 'in' ? 'windIn' : null;
     case 'snackBought':
       return 'coin';
     case 'ate':

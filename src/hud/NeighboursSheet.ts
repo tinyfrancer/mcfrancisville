@@ -64,6 +64,7 @@ const LIKED: Record<ItemKind, string> = {
   gear: 'garden gear',
   dish: 'home cooking',
   fossil: 'fossils',
+  kite: 'kites',
 };
 
 /** "flowers, snacks and records". */

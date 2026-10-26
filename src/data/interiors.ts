@@ -12,6 +12,7 @@ import type { Family } from './critters';
 import type { Placed } from './home';
 import type { Instrument } from './instruments';
 import type { ActivityId } from './activities';
+import { SKELETON_PLAQUE } from './museum';
 
 /**
  * What walking up to a fixture opens: a shop's counter, her salon chair, the museum's cases, and
@@ -164,6 +165,13 @@ export const FIXTURES: Record<FixtureId, FixtureRow> = {
     size: { w: 3, h: 1 },
     opens: { sheet: 'museum' },
   },
+  // Every fossil given to the museum, stood up in the middle of it (1.6's X6, decision 385).
+  skeleton: {
+    name: 'Gerald',
+    layer: 'floor',
+    size: { w: 3, h: 2 },
+    says: SKELETON_PLAQUE,
+  },
   libraryShelf: {
     name: 'Bookshelves',
     layer: 'floor',
@@ -303,6 +311,8 @@ export interface PlacedFixture {
   tx: number;
   ty: number;
   shows?: Family | 'fossil';
+  /** Stands there only once every fossil is on show (1.6's X6): Gerald, the museum's skeleton. */
+  when?: 'assembled';
 }
 
 /**
@@ -565,6 +575,8 @@ export const INTERIORS: Record<InteriorId, InteriorRow> = {
       { id: 'museumCase', tx: 20, ty: 8, shows: 'crawly' },
       // The ninth (V1's R5): the crawlies outgrew theirs when the jumping spiders came.
       { id: 'museumCase', tx: 23, ty: 8, shows: 'crawly' },
+      // Gerald (1.6's X6), in the middle of the hall once every fossil is on show.
+      { id: 'skeleton', tx: 16, ty: 4, when: 'assembled' },
     ],
     furniture: [
       { id: 'cupcakeTower', tx: 4, ty: 3, turn: 0, keepsake: FIRST },

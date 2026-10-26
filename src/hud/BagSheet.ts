@@ -52,7 +52,7 @@ export const BAG_GROUPS: readonly (Group & { kinds: readonly ItemKind[] })[] = [
   {
     id: 'treasures',
     label: 'Treasures',
-    kinds: ['squishy', 'doll', 'record', 'fossil', 'bone', 'keepsake'],
+    kinds: ['squishy', 'doll', 'record', 'fossil', 'kite', 'bone', 'keepsake'],
   },
 ];
 

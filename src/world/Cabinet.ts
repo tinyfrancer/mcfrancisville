@@ -163,6 +163,11 @@ export class Cabinet {
     return FOSSIL_IDS.filter((id) => this.shown.has(id)).length;
   }
 
+  /** Every fossil is on show, so Wrapunzel has stood Gerald up in the museum (1.6's X6). */
+  get assembled(): boolean {
+    return this.fossilsOnShow === FOSSIL_IDS.length;
+  }
+
   snapshot(): CabinetSnapshot {
     return {
       caught: Object.fromEntries(

@@ -32,7 +32,12 @@ export interface Surroundings {
   stormy: boolean;
   /** How near open water she stands, 0 (none in earshot) to 1 (on its edge). */
   water: number;
+  /** The wind up for a kite here today (1.6's X6), heard over the place's own. */
+  breezy?: boolean;
 }
+
+/** What a kite day's breeze adds to a place's wind. */
+const BREEZE = 0.3;
 
 /** When the crickets sing: from dusk until the small hours, from spring until the frosts. */
 const CRICKET_NIGHTS = { from: 20, until: 4, months: [4, 5, 6, 7, 8, 9, 10] } as const;
@@ -91,7 +96,11 @@ export function ambienceFor(s: Surroundings): Bed {
     set('crickets', CRICKETS_IN[s.zone] ?? CRICKETS_ELSEWHERE);
   }
   if (raining) set('rain', s.stormy ? RAIN.storm : RAIN.rain);
-  const wind = (WIND_IN[s.zone] ?? 0) + (s.stormy ? 0.3 : 0) + (s.weather === 'fog' ? 0.1 : 0);
+  const wind =
+    (WIND_IN[s.zone] ?? 0) +
+    (s.stormy ? 0.3 : 0) +
+    (s.weather === 'fog' ? 0.1 : 0) +
+    (s.breezy ? BREEZE : 0);
   set('wind', wind);
   set('water', Math.max(WATER_IN[s.zone] ?? 0, s.water * 0.8));
   if (s.zone === 'fairground' && s.hour >= MURMUR.from && s.hour < MURMUR.until) {

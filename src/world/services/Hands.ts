@@ -1,11 +1,11 @@
 import { ITEMS, type ItemKind } from '../../data/items';
 import { isTool, type Held } from '../../data/tools';
-import type { ItemId, ToolId } from '../../types/ids';
+import type { ItemId, KiteId, ToolId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
 
-/** What in her bag she can hold: seeds to plant, and sprinklers to fit (phase P). */
-const HOLDABLE: readonly (ItemKind | undefined)[] = ['seed', 'gear'];
+/** What in her bag she can hold: seeds to plant, sprinklers to fit (phase P), and a kite (1.6's X6). */
+const HOLDABLE: readonly (ItemKind | undefined)[] = ['seed', 'gear', 'kite'];
 
 /**
  * What she's holding, picked on the quick bar (phase M): her hands, her net, her watering can, or
@@ -52,6 +52,12 @@ export class Hands {
   get seed(): ItemId | null {
     if (isTool(this.holding)) return null;
     return ITEMS[this.holding].kind === 'seed' ? this.holding : null;
+  }
+
+  /** The kite in her hand, if it's one (1.6's X6). */
+  get kite(): KiteId | null {
+    if (isTool(this.holding)) return null;
+    return ITEMS[this.holding].kind === 'kite' ? (this.holding as KiteId) : null;
   }
 
   /** Picks something up from the quick bar. False for a seed she has none of. */
