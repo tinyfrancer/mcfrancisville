@@ -25,6 +25,22 @@ left open; what the rehearsal logged is in the art notes.
 Landed (PR #235): the ride drawn on the Fair sheet's stage, the day's first free, a ticket stub
 the first time; the `1.6` NOTES row made with three lines. No save change. Nothing left open.
 
+### X4: snow days, puddles and a rainbow (`claude/x4-snow`; decision 383)
+
+Done, its PR into `v1.6-dev` open: snowmen rolled in her yard by a tap on herself (three hats,
+yard pieces, never indoors), the thaw sweeping them into her bag as `meltlessSnowman` keepsakes,
+snowballs thrown out of the yard and thrown back by a neighbour, snowball fights in neighbours'
+chatter in the snow, footprints in snow and splashes in rainy-day puddles (hers, neighbours',
+pets'), snow and puddle footsteps, and a rainbow the first ten minutes out on a clear day after
+rain (Today line, `rainbowJar` the first time, `?rainbow` in a dev build). Smoke `snowDay` in
+`seasons`. **No save change** (v58). Its line for the `1.6` card, for the review to fold (the
+row is full, so `patchNotes.ts` is untouched): "In the snow, tap yourself in your yard to roll a
+snowman. He comes with a hat, and when spring comes he hops indoors rather than melt. Anywhere
+else, a snowball. The neighbours will throw one back. I have been hit four times." And, if
+there's room: "On a rainy day the puddles are for splashing, and the day after, look up: a
+rainbow."
+Next: merge when green, then empty this heading.
+
 ### X3 chickens, X4 snow and puddles, X5 small delights, X6 the skeleton and a kite, V1.6 the review
 
 Not started; in the plan's order.
