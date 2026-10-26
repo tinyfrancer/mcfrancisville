@@ -689,6 +689,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`stars:first`), two shelves (`halfTheSky`, `wholeSky`), the month's faint over the castle
   hill at night (`starsPass`, `STARRY` in `src/data/sky.ts`), Today, a `stars` small-talk topic
   and the calendar Month tab's mark.
+- **Photo mode** (1.5's G5, decision 374): her camera, a quick-bar slot outdoors and a tray
+  button anywhere, lifts the viewfinder (`src/hud/CameraSheet.ts`, not a sheet, through
+  `CameraApi`, made in `main.ts` by `src/wiring/apis/camera.ts`): `world.posing` is set, one step
+  runs (neighbours within `POSE_TILES` hold a `pose` stance from `stanceOf`, pets sit facing her,
+  `Pet.sitForPhoto`), and the loop stops stepping the world while it's up, the view still drawing
+  from its own clock. `data-camera` hides the bars but a strip (`src/hud/cameraStyles.ts`); a
+  polaroid is drawn over the canvas (`frameOf`, `drawViewfinder` in `src/render/viewfinder.ts`),
+  one finger pans (`FollowCamera.pan`), a pinch or the ± goes Close or Far for the viewfinder alone
+  (`lens` in `main.ts`). Filters are pixel sums (`src/render/filters.ts`, rows
+  `src/data/photo.ts`), stickers and the caption's rules `src/systems/photo.ts` (six at most).
+  The shutter cuts the photo (`photoFrom`) and shows the party photo's card (`PhotoCard`, Keep
+  it through `keepPhoto` / Another / Done); nothing is kept in the save.
 - **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says

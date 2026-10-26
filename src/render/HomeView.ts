@@ -78,6 +78,11 @@ export class HomeView implements SceneView {
     this.ctx = ctx;
   }
 
+  /** The photo mode's viewfinder looking away from her (1.5's G5), or back at her with null. */
+  pan(by: Point | null): void {
+    this.follower.pan(by);
+  }
+
   follow(deltaMs: number): void {
     this.follower.follow(this.world.player, deltaMs);
   }

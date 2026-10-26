@@ -55,6 +55,19 @@ Decision 373 says what and why. Nothing half done. **The `1.5` NOTES row** is ma
 (the notes' minimum) and a P.S.: G5–G7 add theirs and the review folds to five (or into 1.4's if
 1.4 isn't cut first). **G6 bumps next (v58).**
 
+### G5: a photo mode (`claude/g5-photo`; decision 374; never the save)
+
+**Landed** (PR #229, merged into `v1.4-dev`; no save change). The camera (a quick-bar slot outdoors, a tray button everywhere) lifts the viewfinder
+(`src/hud/CameraSheet.ts`, `CameraApi` from `src/wiring/apis/camera.ts`, made in `main.ts`): the
+world held still while `world.posing` (one step first, so neighbours within three tiles pose and
+pets sit), the bars down to a strip, a polaroid frame on the canvas (`src/render/viewfinder.ts`),
+drag to pan (`FollowCamera.pan`), pinch or the ± for Close/Far, four filters
+(`src/render/filters.ts`, rows `src/data/photo.ts`), six stickers and a caption
+(`src/systems/photo.ts`), the shutter to the party photo's card (Keep it / Another / Done). The
+`1.5` NOTES row was made by G5 and G6 at once and folded at G5's merge to two lines each, G5's
+first, G6's P.S.: **G7 adds the fifth**, and the review folds. Decision 374 says what and why. Nothing half done. The smoke section is `photoMode`
+(in `hud`, after `starChart`).
+
 ### G6: an attic (`claude/g6-attic`; decision 375; **save bumped to v58**)
 
 **Landed** (PR #230, into `v1.4-dev`): the attic, a third `ROOMS` row (7×5, one extension to 9×7,
@@ -70,7 +83,7 @@ built). **The `1.5` NOTES row** was made by G6, three lines and a P.S.: G5 and G
 the review folds to five. Decision 375 says what and why. Nothing half done. **G7 bumps next
 (v59) if a row needs it.**
 
-### G5 the photo mode, G7 the pet, V1.5 the review
+### G7 the pet, V1.5 the review
 
 Not started; in the plan's order.
 

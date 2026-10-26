@@ -71,16 +71,19 @@ describe("the mayor's notes", () => {
     expect(card.lines.length).toBeLessThanOrEqual(5);
   });
 
-  it('has a 1.4.1 card after it, the night sky first', () => {
-    // G4's row (decision 373), which ships with 1.4.
-    const card = NOTES.find((n) => n.version === '1.4.1')!;
-    expect(card.lines[0]).toMatch(/telescope by the castle gate/);
-    expect(card.lines.length).toBeLessThanOrEqual(5);
+  it('shipped the night sky as 1.4.1, kept as it went', () => {
+    // 1.5's G4 made the row (decision 373); it went to her phone with 1.4 as 1.4.1.
+    const sky = NOTES.find((n) => n.version === '1.4.1')!;
+    expect(sky.lines[0]).toMatch(/telescope by the castle gate/);
+    expect(sky.lines).toHaveLength(3);
   });
 
-  it('has a 1.5 card after that, the attic first; G5 and G7 add theirs, five at most', () => {
-    // 1.5's G6 made the row (decision 375); the review folds it to five.
+  it('shows a phone that saw 1.4.1 the 1.5 card: the camera, then the attic; G7 adds one', () => {
+    // 1.5's G5 and G6 made the row at once (decisions 374, 375), folded to two lines each, so
+    // G7's line still fits; the review folds it to five.
     expect(newest.version).toBe('1.5');
+    expect(notesToShow('1.4.1', true)).toEqual([newest]);
+    expect(newest.lines[0]).toMatch(/You have a camera now/);
     expect(newest.lines.join(' ')).toMatch(/build an attic now/);
     expect(newest.lines.length).toBeLessThanOrEqual(5);
   });

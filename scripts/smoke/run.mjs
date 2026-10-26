@@ -97,6 +97,7 @@ const ORDER = [
   'bag',
   'calendar',
   'starChart',
+  'photoMode',
   'notices',
   'projects',
   'passive',
@@ -265,17 +266,21 @@ const first = await context.newPage();
 attach(browser, context, first);
 listen(first);
 
+/** The section running, so a run that stops says where. */
+let running = '';
 try {
   for (const name of ORDER) {
     const section = SECTIONS.get(name);
     if (!section || !(name === 'boot' || all || chosen.has(name))) continue;
     console.log(`--- ${section.area}: ${name}`);
+    running = name;
     await section.run();
   }
   check('no console errors', consoleErrors.length === 0, consoleErrors.join(' | '));
 } catch (error) {
   await page.screenshot({ path: '.smoke/error.png' }).catch(() => {});
-  check('the run finished', false, String(error));
+  // On one line, the section first: CI's annotation keeps only a message's first line.
+  check('the run finished', false, `in ${running}: ${String(error).replace(/\s+/g, ' ')}`);
 } finally {
   await browser.close();
 }

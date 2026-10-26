@@ -46,6 +46,8 @@ export interface SceneView {
   /** Where on the page the middle of a tile is drawn, for the smoke check to tap it for real. */
   tileToClient(tx: number, ty: number): Point;
   cameraOrigin(): Point;
+  /** Looks away from her by world pixels for the photo mode (1.5's G5), or back with null. */
+  pan(by: Point | null): void;
   /** She has left this view for another: let go of what's cheap to make again (the ground). */
   rest?(): void;
   /** The ground's baked chunks and the canvas memory they hold, in bytes. */

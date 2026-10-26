@@ -32,5 +32,5 @@ export function holdablesIn(world: World): Stack[] {
   return [...seedsIn(world), ...gear];
 }
 
-/** Every sheet's Api: the HUD's options but those `main.ts` makes itself. */
-export type SheetApis = Omit<HudOptions, 'save' | 'sound' | 'view' | 'standalone'>;
+/** Every sheet's Api: the HUD's options but those `main.ts` makes itself (the camera: 1.5's G5). */
+export type SheetApis = Omit<HudOptions, 'save' | 'sound' | 'view' | 'camera' | 'standalone'>;

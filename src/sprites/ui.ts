@@ -625,6 +625,51 @@ export const GLYPHS: Record<GlyphId, ItemArt> = {
     },
     { k: C.wood, b: C.gold, B: C.goldShade, g: C.sky },
   ),
+  // The photo mode's strip (1.5's G5): its filters as three swatches, a sticker with its corner
+  // peeling, a pencil for the caption, and the looking glass in and out.
+  filters: mark(
+    (s) => {
+      s.ellipse(5.5, 6, 4, 4, 'r').ellipse(10.5, 6, 4, 4, 'g').ellipse(8, 10.5, 4, 4, 't');
+      s.set(4, 4, 'w').set(9, 4, 'w').set(7, 9, 'w');
+    },
+    { r: C.rose, g: C.candle, t: C.teal, w: C.white },
+  ),
+  sticker: mark(
+    (s) => {
+      s.rect(2, 2, 12, 12, 'w');
+      for (let k = 0; k < 5; k++) {
+        s.rect(9 + k, 13 - k, 5 - k, 1, CLEAR);
+        s.rect(9, 13 - k, k + 1, 1, 'f');
+      }
+      s.rect(5, 5, 2, 2, 'r').rect(8, 5, 2, 2, 'r').rect(4, 6, 7, 2, 'r');
+      s.rect(5, 8, 5, 1, 'r').rect(6, 9, 3, 1, 'r').set(7, 10, 'r');
+    },
+    { w: C.white, f: C.creamShade, r: C.rose },
+  ),
+  pencil: mark(
+    (s) => {
+      for (let k = 0; k < 8; k++) s.rect(4 + k, 9 - k, 3, 3, 'y');
+      s.rect(11, 2, 3, 3, 'p').rect(12, 2, 2, 2, 'p');
+      s.rect(2, 12, 2, 2, 'k').rect(3, 11, 2, 2, 'k').set(1, 14, 'l').set(2, 13, 'l');
+    },
+    { y: C.candle, p: C.rose, k: C.wood, l: C.ink },
+  ),
+  zoomIn: mark(
+    (s) => {
+      for (let k = 0; k < 4; k++) s.rect(10 + k, 10 + k, 2, 2, 'h');
+      s.ellipse(6.5, 6.5, 5.5, 5.5, 'g').ellipse(6.5, 6.5, 3.5, 3.5, 'l');
+      s.rect(4, 6, 5, 1, INK).rect(6, 4, 1, 5, INK);
+    },
+    { h: C.wood, g: C.gold, l: C.sky },
+  ),
+  zoomOut: mark(
+    (s) => {
+      for (let k = 0; k < 4; k++) s.rect(10 + k, 10 + k, 2, 2, 'h');
+      s.ellipse(6.5, 6.5, 5.5, 5.5, 'g').ellipse(6.5, 6.5, 3.5, 3.5, 'l');
+      s.rect(4, 6, 5, 1, INK);
+    },
+    { h: C.wood, g: C.gold, l: C.sky },
+  ),
   hammer: mark(
     (s) => {
       s.line(10, 6, 3, 13, 'h').line(11, 6, 4, 13, 'h');

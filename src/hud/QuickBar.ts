@@ -4,6 +4,7 @@ import type { ItemId, ToolId } from '../types/ids';
 import type { Stack } from '../world/Bag';
 import { fitIcon } from './collection';
 import { el } from './dom';
+import { glyph } from './glyph';
 
 /** What the quick bar may ask of the game. Like the sheets, it never reaches the world directly. */
 export interface QuickApi {
@@ -59,6 +60,8 @@ export function quickBar(
   api: QuickApi,
   /** A second tap on her rod while she holds it: its colours (0.2's K2). */
   paintRod: () => void = () => {},
+  /** Her camera (1.5's G5): a slot after her tools, lifting it. */
+  camera?: () => void,
 ): { element: HTMLElement; render(): void } {
   const slots = el('div', { className: 'hud-quick-slots' });
   const say = el('p', { className: 'hud-quick-say' });
@@ -98,6 +101,15 @@ export function quickBar(
     return b;
   };
 
+  // Her camera isn't held either: a tap lifts it to her eye (1.5's G5).
+  const cameraSlot = (lift: () => void) => {
+    const b = el('button', { type: 'button', className: 'hud-quick-slot hud-quick-camera' });
+    b.append(glyph('camera', 32));
+    b.setAttribute('aria-label', 'Camera');
+    b.addEventListener('click', lift);
+    return b;
+  };
+
   // A slot cut off at the strip's end reads as clipped, so the end with more beyond it fades out
   // instead, as a "this way" (1.0.1: sideways, four seeds ran up against the bag).
   const edges = () => {
@@ -116,6 +128,7 @@ export function quickBar(
     slots.replaceChildren(
       ...(api.hasBroom() ? [broom()] : []),
       ...TOOL_IDS.map((id) => slot(id, TOOLS[id].name, (c) => api.toolIcon(c, id))),
+      ...(camera ? [cameraSlot(camera)] : []),
       ...seeds.map((s) => slot(s.id, ITEMS[s.id].name, (c) => api.itemIcon(c, s.id), s.count)),
     );
     edges();

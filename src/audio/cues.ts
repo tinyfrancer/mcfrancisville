@@ -106,6 +106,11 @@ export const CUES = {
     chime('C6:.12 E6:.12 G6:.12 B6:.12 D7:.12 E7:.9', 0.13),
     chime('-:.5 C5+G5:1.6', 0.08),
   ),
+  // Her camera's shutter (1.5's G5): a soft click-clack, and a little bright wink after it.
+  shutter: cue(
+    { wave: 'hat', notes: line('C4:.06 -:.08 C4:.1'), gain: 0.16 },
+    chime('-:.28 E6:.1 B6:.4', 0.07),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;

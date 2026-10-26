@@ -235,13 +235,16 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '1.5',
     lines: [
+      // 1.5's G5: the photo mode.
+      'You have a camera now: everyone close by stops to pose, and the pets sit nicely. ' +
+        'Filters, stickers and a caption, too.',
+      'Keep the good ones on your phone. Cody would like a copy of every single one, and has ' +
+        'asked me to say so twice.',
       // 1.5's G6: the attic.
       'Your workbench can build an attic now: a ladder up from the back room, to a snug little ' +
         'room under the roof.',
-      'It has a round window that shows the sky, stars and all, and its own whitewashed planks. ' +
-        'It can grow once, too.',
-      'Mind the eaves at the back: the tall things will have to stand further forward. The ' +
-        'roof is very firm about this.',
+      'It has a round window full of sky, and it can grow once. Mind the eaves: the tall ' +
+        'things must stand further forward.',
     ],
     ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
   },

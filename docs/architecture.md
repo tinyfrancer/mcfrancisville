@@ -522,7 +522,10 @@ buttons), which `sheetApis` in
 `making`, `garden`, `shopping`, `home`, `neighbours`, `collecting`, `pets`, `mystery`,
 `fairground`, `calendar` and `welcome`, matching `world/areas/` where they fit, what they share in
 `apis/shared.ts`), each from the world's services; Settings' save and sound are
-`apis/settings.ts`'s, which `main.ts` hands the HUD with its view. So a sheet is testable with a
+`apis/settings.ts`'s, which `main.ts` hands the HUD with its view, and the photo mode's
+`CameraApi` (1.5's G5) is `apis/camera.ts`'s, made by `main.ts` too, since it needs the canvas,
+the view and the fit: it sets `world.posing`, which stops the loop stepping the world while the
+viewfinder is up (the view draws on). So a sheet is testable with a
 stub and never reaches into the world. The world's moments, from the loop
 or from a sheet, go through `playMoments` (`wiring/moments.ts`): each one's cue, the sheet it
 opens, and its toast. A bed's card (phase P) is the one piece of the HUD that follows the world:

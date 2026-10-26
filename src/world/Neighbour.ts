@@ -4,6 +4,7 @@ import {
   lingerFor,
   NEAR_TILES,
   NEIGHBOUR_WAVE_MS,
+  POSE_TILES,
   strollAfter,
 } from '../systems/neighbourLife';
 import { findPath, stringPull, type Tile } from '../systems/pathfinding';
@@ -48,6 +49,8 @@ export class Neighbour {
   /** How much longer they wave, and whether they have since she came near. */
   waveMs = 0;
   private greeted = false;
+  /** Posing for her camera, while it's up and she's close (1.5's G5). */
+  posing = false;
   /** The seat beside their stop they're sitting on, or null. */
   seat: Seat | null = null;
   /** Their job, done standing at their stop, or null. */
@@ -163,9 +166,12 @@ export class Neighbour {
 
   /**
    * She's `tiles` away (the further of across and down): coming within two, they wave once, if
-   * they're standing; gone beyond three, they'll wave again when she's back.
+   * they're standing; gone beyond three, they'll wave again when she's back. With her camera up
+   * (`posing`, 1.5's G5), within three they pose instead, and the wave waits.
    */
-  notice(tiles: number, deltaMs: number): void {
+  notice(tiles: number, deltaMs: number, posing = false): void {
+    this.posing = posing && tiles <= POSE_TILES && !this.moving;
+    if (this.posing) return;
     this.waveMs = Math.max(0, this.waveMs - deltaMs);
     if (tiles > GONE_TILES) this.greeted = false;
     if (tiles <= NEAR_TILES && !this.greeted && !this.moving) {
@@ -181,6 +187,7 @@ export class Neighbour {
     this.stillMs = 0;
     this.waveMs = 0;
     this.greeted = false;
+    this.posing = false;
     this.seat = null;
     this.working = null;
   }
