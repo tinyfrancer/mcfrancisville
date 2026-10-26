@@ -79,3 +79,22 @@ export const MUSEUM_SHINY: readonly string[] = [
   'The shiny {critter} goes in its case, and the whole back room looks a little brighter.',
   'A shiny {critter}, in colours all its own! Wrapunzel is writing the label in gold ink.',
 ];
+
+/**
+ * Gerald (1.6's X6, decision 385): with every fossil on show, Wrapunzel stands them up in the
+ * middle of the museum as a little dragon of bones. What his plaque says when she walks up to him.
+ */
+export const SKELETON_PLAQUE =
+  'GERALD. A dragon (probably), assembled from twelve fossils, some wire and a great deal of ' +
+  'hope, by Wrapunzel. Donated by {name}. Please do not feed Gerald.';
+
+/** The id of Wrapunzel's letter the day Gerald stands up. */
+export const SKELETON_LETTER = 'museum:gerald';
+
+/** Wrapunzel's letter the day every fossil is on show and Gerald stands up. */
+export const SKELETON_LETTER_TEXT =
+  'Dearest {name},\n\nAssembled at last! With all twelve of your fossils in the case, I simply ' +
+  'had to. I stayed up all night with a pot of tea and some wire, and now there is a dragon in ' +
+  'the middle of the museum. The fern is his tail. The acorn is his kneecap. I am told that is ' +
+  'not how bones work, and I do not care one bit.\n\nI have named him Gerald. Come and say hello. ' +
+  'He has a plaque and everything.\n\nYour friend, a little dusty,\nWrapunzel';

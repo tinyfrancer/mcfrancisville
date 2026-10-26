@@ -336,6 +336,9 @@ export type ItemId =
   | 'meringueGhost'
   // A snowman swept in at the thaw, and the first rainbow after rain (1.6's X4).
   | SnowKeepsakeId
+  // Three kites from Cobweb Corner, and the keepsake of her first flight (1.6's X6).
+  | KiteId
+  | 'skyOnAString'
   | DishId
   | FruitId
   | CritterId
@@ -1007,6 +1010,9 @@ export type SnowmanId = 'snowmanTopHat' | 'snowmanBobble' | 'snowmanWitch';
 /** The keepsakes of 1.6's X4: a snowman that didn't melt, and a jar of the first rainbow. */
 export type SnowKeepsakeId = 'meltlessSnowman' | 'rainbowJar';
 
+/** The kites she flies from the pier's end and the castle lookout (1.6's X6). */
+export type KiteId = 'batKite' | 'ghostKite' | 'mothKite';
+
 /** The squishies she collects (0.2's F2), kept apart for the figurines (0.3's C3). */
 export type SquishyId =
   | 'ghostGooBall'
@@ -1401,6 +1407,8 @@ export type FixtureId =
   | 'bakeryCounter'
   | 'bakeryOven'
   | 'museumCase'
+  // Gerald, every fossil donated stood up in the museum's hall (1.6's X6).
+  | 'skeleton'
   | 'libraryShelf'
   | 'flowerBuckets'
   | 'bigCauldron'

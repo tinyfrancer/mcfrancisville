@@ -26,10 +26,11 @@ export function seedsIn(world: World): Stack[] {
   return world.bag.contents.filter((s) => ITEMS[s.id].kind === 'seed');
 }
 
-/** What in her bag the quick bar holds: her seeds, then her sprinklers (phase P). */
+/** What in her bag the quick bar holds: her seeds, then her sprinklers (phase P), then her kites. */
 export function holdablesIn(world: World): Stack[] {
   const gear = world.bag.contents.filter((s) => ITEMS[s.id].kind === 'gear');
-  return [...seedsIn(world), ...gear];
+  const kites = world.bag.contents.filter((s) => ITEMS[s.id].kind === 'kite');
+  return [...seedsIn(world), ...gear, ...kites];
 }
 
 /** Every sheet's Api: the HUD's options but those `main.ts` makes itself (the camera: 1.5's G5). */

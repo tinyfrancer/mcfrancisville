@@ -57,6 +57,7 @@ export function catching(s: Shared, parts: CatchingParts): Catching {
     cabinet,
     zones: parts.zones,
     hasHad: parts.hasHad,
+    mailbox: parts.mailbox,
   });
   const digging = new Digging(ctx, s.dug, s.bag);
   const arrivals: PropArrivals = {

@@ -842,9 +842,15 @@ export const HIDDEN_CLEARING: MapSource = {
  * rose bushes, hedged, with the wedding arch (a) in a nook, and Castle Mac-A-Boo (K) at the top,
  * whose doors go into its hall (phase U).
  */
+/** Where things are on the castle hill, by name: the lookout by the telescope (1.6's X6's kite). */
+export const CASTLE_HILL_SPOTS = {
+  lookout: { tx: 10, ty: 38 },
+} as const satisfies Record<string, Tile>;
+
 export const CASTLE_HILL: MapSource = {
   legend: CASTLE_LEGEND,
   woods: true,
+  spots: CASTLE_HILL_SPOTS,
   spawn: { tx: 13, ty: 9 },
   // Where the day's mound may be (0.3's C1).
   digSpots: [
@@ -1142,7 +1148,7 @@ export const SPOTS = {
   town: TOWN_SPOTS,
   whisperwood: WHISPERWOOD_SPOTS,
   lanternShore: LANTERN_SHORE_SPOTS,
-  castleHill: {},
+  castleHill: CASTLE_HILL_SPOTS,
   hiddenClearing: {},
   fairground: FAIRGROUND_SPOTS,
   booAcres: BOO_ACRES_SPOTS,

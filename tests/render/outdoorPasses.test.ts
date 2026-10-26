@@ -50,7 +50,18 @@ describe('the passes outdoors', () => {
       ],
       // Wes is meant to be half hidden, so he isn't wanted.
       wanted: ['givers', 'snack', 'mounds', 'holidays', 'neighbours', 'critters', 'pets', 'bone'],
-      over: ['yard', 'holidays', 'beds', 'life', 'neighbours', 'critters', 'fishing', 'weather'],
+      // Her kite (1.6's X6), the one part added since to `over`, under the rain.
+      over: [
+        'yard',
+        'holidays',
+        'beds',
+        'life',
+        'neighbours',
+        'critters',
+        'fishing',
+        'kite',
+        'weather',
+      ],
       lights: [
         'props',
         'fountain',

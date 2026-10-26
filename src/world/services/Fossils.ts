@@ -1,4 +1,5 @@
 import { FOSSILS, isFossil } from '../../data/fossils';
+import { SKELETON_LETTER } from '../../data/museum';
 import { dayKey } from '../../systems/clock';
 import { findIn, moundKey, type MoundFind } from '../../systems/fossils';
 import type { PlacedProp } from '../../systems/grid';
@@ -8,6 +9,7 @@ import type { Cabinet } from '../Cabinet';
 import type { WorldContext } from '../context';
 import type { WorldEvent } from '../events';
 import type { Zones } from '../zones/Zones';
+import type { Mailbox } from './Mailbox';
 import type { Takings } from './Takings';
 import type { Wallet } from './Wallet';
 
@@ -20,6 +22,8 @@ export interface FossilKeeps {
   zones: Zones;
   /** Whether she has ever had one, whatever became of it (`Milestones.hasHad`). */
   hasHad: (id: ItemId) => boolean;
+  /** Where Wrapunzel's letter goes the day Gerald stands up (1.6's X6). */
+  mailbox: Mailbox;
 }
 
 /**
@@ -78,6 +82,18 @@ export class Fossils {
   /** How many of a fossil are in her bag. */
   inBag(id: FossilId): number {
     return this.keeps.bag.count(id);
+  }
+
+  /**
+   * Gerald (1.6's X6, decision 385): once every fossil is on show, Wrapunzel's letter, the day it
+   * happens, or the first time a town that had them all already plays this build. Nothing is kept
+   * but the letter; the skeleton stands whenever the case is full.
+   */
+  check(): void {
+    const { cabinet, mailbox } = this.keeps;
+    if (!cabinet.assembled || mailbox.letters.has(SKELETON_LETTER)) return;
+    mailbox.post(SKELETON_LETTER, dayKey(this.ctx.clock.now()));
+    this.ctx.moments.push({ kind: 'assembled' });
   }
 
   /** Gives one from her bag to the seventh case: Wrapunzel's label, or null if it couldn't be. */

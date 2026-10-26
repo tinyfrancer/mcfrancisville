@@ -7,6 +7,7 @@ import { FAIR_PRIZE_ITEMS } from './fairPrizes';
 import { STAR_ITEMS } from './constellations';
 import { TICKET_ITEMS } from './fairRide';
 import { HEN_ITEMS } from './hens';
+import { KITE_ITEMS } from './kites';
 import { SNOW_ITEMS } from './snow';
 import { SHINY_ITEMS } from './shinies';
 
@@ -32,7 +33,9 @@ export type ItemKind =
   /** Cooked at a stove (phase R), to eat or to give. */
   | 'dish'
   /** Dug up from a mound (0.3's C1), for the Curiosity Cabinet and the museum. */
-  | 'fossil';
+  | 'fossil'
+  /** Held from the quick bar and flown where the wind is up (1.6's X6). */
+  | 'kite';
 
 export interface ItemRow {
   name: string;
@@ -885,6 +888,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
   // The hens' eggs at Boo Acres, and what's made from them (1.6's X3).
   ...HEN_ITEMS,
   ...SNOW_ITEMS,
+  // Three kites, and the keepsake of her first flight (1.6's X6).
+  ...KITE_ITEMS,
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */
