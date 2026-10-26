@@ -1,8 +1,9 @@
 # Handoff: picking up the game cold
 
 Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
-V1's review (decision 324) for after 1.0, by V1.1's (decision 356) for after 1.2, and by V1.3's
-(decision 366) for after 1.3, the last plan for a while. Read "In progress", then "If you are
+V1's review (decision 324) for after 1.0, by V1.1's (decision 356) for after 1.2, by V1.3's
+(decision 366) for after 1.3, and by V1.5's (decision 377) for after 1.5, the last plan for a
+while. Read "In progress", then "If you are
 starting cold after a long gap", then "After 1.0"; "Where things stand" further down is the long
 history.
 
@@ -12,7 +13,144 @@ history.
 coordinating session: Opus sub-agents in worktrees, two at a time, from `v1.4-dev`). **1.3 is on
 her phone** (PR #219, merged 2026-10-25). Each session's heading says where it is.
 
-### G1: shiny morphs (`claude/g1-shinies`; decision 370; **save bumped to v56**)
+### V1.5: the review and 1.5 (`claude/v15-review`; decision 377; never the save)
+
+**Half done** (from `v1.4-dev` at `37d442e`, save v58; draft PR #233). Done: `lived-in-v55.json`
+opened as her phone will (notes last seen `1.4.1`) at Close, Far and sideways, one `1.5` card each
+time; played on by taps from 25 October to 10 January and kept as `lived-in-v58.json`
+(`livedIn.test.ts`, and the overlays snapshot's saves); the shakedown looked at; the build one
+chunk, 1,963.9 kB (660.7 kB gzipped); smoke 673/673, offline 10/10. Half done: the handoff's
+top, rewritten, with `@@` placeholders still to fill (the release PR's number, V1.5's record,
+"How 1.4 and 1.5 were run"). Next: perf against `main`; "Where it hurts" and a 1.5 perf row;
+`CLAUDE.md`; the plan's line; decision 377; the art notes; open the release PR, put its number in,
+merge this, empty this section.
+
+## If you are starting cold after a long gap
+
+Written at 1.3 (2026-10-25) for a session that may come months later and knows nothing, and
+brought up to 1.5 by V1.5's review (decision 377) the same night.
+
+- **What the game is.** McFrancisVille is a cozy, spooky-cute pixel-art life sim the user (Cody)
+  made as a gift for his wife, played on her iPhone as a home-screen app: Animal Crossing and
+  Stardew Valley by way of The Nightmare Before Christmas. She dresses up, decorates, farms,
+  befriends monster neighbours, keeps seven pets and fills the Curiosity Cabinet; Cody is in it,
+  married to her. Cozy is the brief: nothing punishes, expires or is lost (decision 11). Questions
+  go to the user, never to her (decision 14). `CLAUDE.md` is the map of the code,
+  `docs/architecture.md` the layers and services, `docs/decisions.md` every fork argued (read it
+  before re-opening one).
+- **Where it lives.** `tinyfrancer/mcfrancisville` on GitHub (public). Vercel deploys `main`, and
+  only `main`, to her phone: previews are off for `claude/**`, `release-*` and every dev branch
+  (`vercel.json`'s `deploymentEnabled`, the user's call), so **merging to `main` publishes**. **1.5
+  is the last release** (the release PR from `v1.4-dev`, "Release 1.5"; "After 1.0" says where it
+  stands). Her town is in her phone's `localStorage` (`mcfrancisville:save`, save v58 at 1.5),
+  migrated forward on load (`src/persistence/`); the installed app is a cached shell
+  (`public/sw.js`), so a deploy reaches her on the next open or the one after.
+- **How to run it.** `npm ci` (from the lockfile; "Environment notes" below), `npm run dev`, open
+  `http://localhost:5173/`. A dev build takes `?skiptitle`, `?day=2026-12-24&hour=21.5`,
+  `?weather=rain` and `?loop=manual` (smoke's hand crank); any build takes `?gallery` and `?perf`;
+  `npm run sprite -- 'critter:*' --sheet` renders art to `.sprites/`. Before a push, CLAUDE.md's
+  "Commands": lint, format:check, typecheck, test and build (about two and a half minutes), then
+  smoke against a running dev server (about twenty-five; in a Claude Code cloud container
+  `CHROMIUM_PATH=/opt/pw-browsers/chromium`, `SMOKE_URL` for another port, never
+  `playwright install`) and `smoke:offline` against `npm run preview` (`PREVIEW_URL`). CI runs the
+  same on every push to a PR. Known flaky smoke checks: `camera`'s top row with a toast up,
+  `interiors`' "she goes into codyManor" alone at 19:00, and any section that meets a neighbour
+  visiting her on the real clock; re-run the job.
+- **What is still the user's** (no session can do it): (1) **the cloud save's store** (README's
+  "Cloud save": Vercel → Storage → Upstash for Redis with the `KV` prefix, then redeploy, then
+  README's `curl` and Settings → Backup on her phone); until then Settings says the cloud isn't
+  set up and the one console error on her phone is its 503. (2) **Her phone's frame time**: the
+  deployed site with `?perf` on the end, the table under "On her iPhone" in
+  `docs/architecture.md`, still empty. (3) **Her eye on the art notes** at the end of this file.
+- **Where new content goes** (each a row and some art on a seam an earlier plan made; CLAUDE.md
+  names the files): a **critter** is a `CRITTERS` row (hours, habitat, `where`, rarity, `season`),
+  its 16 and 24 art in `sprites/critters.ts` and a `SHINIES` row for its shiny, then rerun
+  `tests/systems/rarity.test.ts`; a **piece** of furniture is a `FURNITURE` row, a drawing at 32
+  and a place on a shelf (a `TALL` one listed for the attic's eaves, which `attic.test.ts` checks);
+  a piece of **clothing** is an `OUTFITS` row and a cut or print; a **set** is a const and a
+  `SUITES` row in `data/sets.ts`; a **constellation** is a `CONSTELLATIONS` row (its month or
+  holiday, five to nine stars in a 60×40 box, its lines); a **pet** is a `PETS` row, last in
+  `PET_IDS`, with frames in `sprites/pets.ts` and a `TRICKS` row (G7's Pickle is the pattern); a
+  **project** is a `PROJECTS` row with three stages of art and a spot in town; a **room** is a
+  `ROOMS` row and a recipe (G6's attic is the pattern). A **neighbour** comes with a release,
+  never over time (CLAUDE.md). A new place is the biggest: a map, a `ZONES` row, signposts both
+  ways.
+- **How a plan was run** (0.3 to 1.5): a written plan (`docs/v*_plan.md`) cut into sessions of one
+  context window by the files each owns; an integration branch made from `main` (`v1.4-dev` was
+  the last) and added to `vercel.json`'s no-preview list that day; one coordinating session
+  starting each session as a sub-agent in a worktree of its own, two at a time; each a draft PR
+  into the integration branch, merged with a merge commit once green, with one decision appended
+  to `docs/decisions.md` (numbered, never edited; **the next is 378**; 364, 368 and 369 unused); a
+  review last, which plays a real town by taps, reads or folds the `NOTES` rows her phone never
+  saw into one card, and writes the release PR from the integration branch to `main`. "How 1.4 and
+  1.5 were run", "How 1.3 was run" and "How 1.1 was run" below say what worked and what cost. A
+  small fix needs none of it: a branch from `main`, a PR, the checks, the user merges.
+- **What's logged.** "Where it hurts" in `docs/architecture.md` (most pressing first: the two
+  things only her phone and Vercel can say, the one chunk, the new systems' rough edges, smoke on
+  the real clock) and "Art notes for the final pass" at the end of this file (for her eye, none
+  clearly wrong). "Still to put to the user" holds the personal-touch questions, parked
+  (decision 177) and left there at the user's word of 2026-10-25.
+- **Before changing what she sees**: `docs/art_style.md` before drawing; a change to the save's
+  shape bumps `SAVE_VERSION` with a migration step, a test and `isSaveState`, and the lived-in
+  fixtures (`tests/persistence/fixtures/`, held by `livedIn.test.ts`; 1.5's is
+  `lived-in-v58.json`) must lose nothing; a release adds its own `NOTES` row in
+  `src/data/patchNotes.ts` (her phone will have last seen `1.5`). **With nothing asked of it, a
+  session changes nothing and asks the user what they'd like next.**
+
+## After 1.0
+
+**The 1.4 plan is complete, and 1.5 is the release PR #@@REL@@** (`v1.4-dev` → `main`, "Release
+1.5"), for the coordinating session to merge at the user's word, as 1.4 was; merging deploys to her
+phone, and `main` after it is the game as it stands. Her phone is on 1.4 until then (PR #231,
+2026-10-25: G1–G4, save v57, the cards `1.4` and `1.4.1`). 1.5 is G5's photo mode, G6's attic and
+G7's Pickle: she reads one card, `1.5`, five lines and a P.S. (decision 377), and her save goes
+v57 → v58 (G6's bump, an identity step), held by `livedIn.test.ts`'s fixtures (the newest,
+`lived-in-v58.json`, is 1.2's town opened in 1.5 and played on to January). **No plan follows
+1.5**. A session starting cold with nothing asked of it does nothing to the game and asks the user
+what they'd like next.
+
+**The user's steps, after the release PR merges** (1 and 2 carried from 1.2; as far as the repo
+knows, neither is done):
+
+1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
+   Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
+   **Redeploy** the production deployment, since a deployment only sees the variables it was built
+   with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
+   set up yet". Check the deployment's Functions tab lists `api/save` (if the build trips on
+   TypeScript, the fallback is `api/save.js` with JSDoc types, decision 323), then README's
+   `curl`, then Settings on her phone.
+2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
+   town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
+   readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
+   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 to 1.5 are the tables just
+   above it.
+3. **1.5 on her phone**: the camera (the quick bar's last slot, or the tray) and **Keep it** saving
+   the photo through the share sheet into Photos; Pickle about at night and asleep by day, playing
+   dead at a pat; the attic (the workbench's Home tab, once the back room is built: 60 wood, 10
+   stone and 3 glow gourds), its round window at night.
+4. **1.4's winter, as it comes**: the woollies and the snug look at Cobweb Corner from 1 November;
+   the pond frozen 15 December to 15 January, with fish under the ice; a constellation each month
+   at the castle telescope on a clear night after eight; a shiny now and then (Today says
+   "something glittered").
+5. Earlier checks, if never made: the moon's visitors the day after a full or new moon (1.3), the
+   silent switch and **Play on silent**, the **Ambience** switch, the builds (1.2).
+
+**`v1.4-dev` was the integration branch for 1.4 and 1.5** and ends with 1.5 (`v1.3-dev` was 1.3's,
+`v1.1-dev` 1.1's, `v1-dev` V1's). A later plan makes its own from `main` once the release PR has
+merged, and adds it to `vercel.json`'s no-preview list that day (decision 265).
+
+### 1.4 and 1.5, the week after (the 1.4 plan's sessions and its review, 2026-10-25)
+
+`docs/v1.4_plan.md` (decision 367): the week's usage left after 1.3 spent on "a fun game",
+content she collects, wears, decorates with and looks at, on the seams the earlier plans made. Seven
+sessions from `v1.4-dev` and the review, all Opus sub-agents of one coordinating session, two at a
+time, all on 2026-10-25. **1.4** (G1–G4) went to her phone mid-plan as the release PR #231
+(`v1.4-dev` at `e8e046e` → `main`, save v55 → v57), cut by the coordinator: she read two cards,
+`1.4` and `1.4.1` (G4's night sky, whose row was made before the cut). **1.5** (G5–G7, save v58)
+is the release PR after V1.5. Each session's heading as it left it follows; the decisions hold the
+detail.
+
+#### G1: shiny morphs (`claude/g1-shinies`; decision 370; **save bumped to v56**)
 
 **Landed** (PR #224, merged into `v1.4-dev`): every critter's shiny by palette swap, dealt per
 slot (1 in 12 to 1 in 40 by tier) with a nine-month charm, a glint over the light, its own item
@@ -20,7 +158,7 @@ slot (1 in 12 to 1 in 40 by tier) with a nine-month charm, a glint over the ligh
 shelves, Today and small talk. Decision 370 says what and why. Nothing half done. **G4 bumps
 next (v57).**
 
-### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
+#### G2: a winter wardrobe and two winter sets (`claude/g2-winter`; decision 371; never the save)
 
 **Landed** (PR #225, merged into `v1.4-dev`): sixteen winter pieces, the winter shelves at Cobweb
 Corner (November to February), Cosy Cabin and Midnight Observatory, the star window paper. Decision
@@ -29,7 +167,7 @@ Corner (November to February), Cosy Cabin and Midnight Observatory, the star win
 **1.4's `NOTES` row** was made by G1 and G2 at once and folded at G1's merge into four lines, two
 each, shinies first, G2's P.S.: **G3 adds the fifth**, the last.
 
-### G3: ice fishing (`claude/g3-ice-fishing`; decision 372; no save change)
+#### G3: ice fishing (`claude/g3-ice-fishing`; decision 372; no save change)
 
 **Landed** (PR #227, merged into `v1.4-dev`): the fish swim on under the frozen town pond (15
 December to 15 January), dim shadows, cast to through a hole drawn under the float; four winter
@@ -42,7 +180,7 @@ The lake was left unfrozen (it never froze; decision 372 says why). The rarity t
 11 → 12 months (9.1 average). One line in `hud/CabinetSheet.ts`'s `seasonOf` (G4's file) says a
 moon-bound critter with a season visits on the full moon. **1.4 is ready to cut** (G1–G3 in).
 
-### G4: the night sky (`claude/g4-night-sky`; decision 373; **save bumped to v57**)
+#### G4: the night sky (`claude/g4-night-sky`; decision 373; **save bumped to v57**)
 
 **Landed** (PR #226, into `v1.4-dev`): a telescope by the castle hill's gate (and the brass
 telescope and Hazel's at home after dark) opening the Sky sheet on a clear night; fifteen
@@ -55,7 +193,7 @@ Decision 373 says what and why. Nothing half done. **The `1.5` NOTES row** is ma
 (the notes' minimum) and a P.S.: G5–G7 add theirs and the review folds to five (or into 1.4's if
 1.4 isn't cut first). **G6 bumps next (v58).**
 
-### G5: a photo mode (`claude/g5-photo`; decision 374; never the save)
+#### G5: a photo mode (`claude/g5-photo`; decision 374; never the save)
 
 **Landed** (PR #229, merged into `v1.4-dev`; no save change). The camera (a quick-bar slot outdoors, a tray button everywhere) lifts the viewfinder
 (`src/hud/CameraSheet.ts`, `CameraApi` from `src/wiring/apis/camera.ts`, made in `main.ts`): the
@@ -68,7 +206,7 @@ drag to pan (`FollowCamera.pan`), pinch or the ± for Close/Far, four filters
 first, G6's P.S.: **G7 adds the fifth**, and the review folds. Decision 374 says what and why. Nothing half done. The smoke section is `photoMode`
 (in `hud`, after `starChart`).
 
-### G6: an attic (`claude/g6-attic`; decision 375; **save bumped to v58**)
+#### G6: an attic (`claude/g6-attic`; decision 375; **save bumped to v58**)
 
 **Landed** (PR #230, into `v1.4-dev`): the attic, a third `ROOMS` row (7×5, one extension to 9×7,
 `through: { from: 'back', tx: 9 }`, `eaves`), up a ladder in the back room's wall
@@ -83,7 +221,7 @@ built). **The `1.5` NOTES row** was made by G6, three lines and a P.S.: G5 and G
 the review folds to five. Decision 375 says what and why. Nothing half done. **G7 bumps next
 (v59) if a row needs it.**
 
-### G7: Pickle the possum (`claude/g7-possum`; decision 376; no save change)
+#### G7: Pickle the possum (`claude/g7-possum`; decision 376; no save change)
 
 **Landed** (PR #232, merged into `v1.4-dev`; still save v58): Pickle, hers from the moment 1.5
 lands as the six are from the first day (nothing sells pets), last in `PET_IDS`; his art in
@@ -96,109 +234,9 @@ lantern's glass glows after dark, `LANTERN_GLOW`); up by night and asleep by day
 fifth `1.5` notes line; smoke's `pickle` section in `pets`. Decision 376 says what and why.
 Nothing half done. **The review (V1.5) is next**, and folds nothing in 1.5's notes: it has five.
 
-### V1.5: the review and 1.5 (`claude/v15-review`; decision 377; never the save)
+@@V15@@
 
-**Started** (from `v1.4-dev` at `37d442e`, save v58). The suite is green at the start; the build
-is one chunk, 1,963.9 kB (660.7 kB gzipped). Next, in order: open `lived-in-v55.json` as her
-phone will (notes last seen `1.4.1`) at Close, Far and sideways; play it on by taps through the
-new things and keep it as `lived-in-v58.json`; the shakedown; perf against `main`; the notes; the
-docs; decision 377; merge, then the release PR `v1.4-dev` → `main` (not merged: the
-coordinator's). The driver is a scratch script on smoke's `lib.mjs` (decision 324's method).
-
-## If you are starting cold after a long gap
-
-Written at 1.3 (2026-10-25) for a session that may come months later and knows nothing.
-
-- **What the game is.** McFrancisVille is a cozy, spooky-cute pixel-art life sim the user (Cody)
-  made as a gift for his wife, played on her iPhone as a home-screen app: Animal Crossing and
-  Stardew Valley by way of The Nightmare Before Christmas. She dresses up, decorates, farms,
-  befriends monster neighbours and fills the Curiosity Cabinet; Cody is in it, married to her.
-  Cozy is the brief: nothing punishes, expires or is lost (decision 11). Questions go to the
-  user, never to her (decision 14). `CLAUDE.md` is the map of the code, `docs/architecture.md`
-  the layers and services, `docs/decisions.md` every fork argued (read it before re-opening one).
-- **Where it lives.** `tinyfrancer/mcfrancisville` on GitHub (public). Vercel deploys `main`, and
-  only `main`, to her phone: previews are off for `claude/**` and every dev branch
-  (`vercel.json`'s `deploymentEnabled`, the user's call), so **merging to `main` publishes**. Her
-  town is in her phone's `localStorage` (`mcfrancisville:save`, save v55 at 1.3), migrated forward
-  on load (`src/persistence/`); the installed app is a cached shell (`public/sw.js`), so a deploy
-  reaches her on the next open or the one after.
-- **How to run it.** `npm ci` (from the lockfile; "Environment notes" below), `npm run dev`, open
-  `http://localhost:5173/`. A dev build takes `?skiptitle`, `?day=2026-12-24&hour=21.5`,
-  `?weather=rain` and `?loop=manual` (smoke's hand crank); any build takes `?gallery` and `?perf`;
-  `npm run sprite -- 'critter:*' --sheet` renders art to `.sprites/`. Before a push, CLAUDE.md's
-  "Commands": lint, format:check, typecheck, test and build (about two minutes), then smoke
-  against a running dev server (about twenty; in a Claude Code cloud container
-  `CHROMIUM_PATH=/opt/pw-browsers/chromium`, `SMOKE_URL` for another port, never
-  `playwright install`) and `smoke:offline` against `npm run preview` (`PREVIEW_URL`). CI runs the
-  same on every push to a PR. Known flaky smoke checks: `camera`'s top row with a toast up, and
-  `interiors`' "she goes into codyManor" alone at 19:00; re-run the job.
-- **What is still the user's** (no session can do it): (1) **the cloud save's store** (README's
-  "Cloud save": Vercel → Storage → Upstash for Redis with the `KV` prefix, then redeploy, then
-  README's `curl` and Settings → Backup on her phone); until then Settings says the cloud isn't
-  set up and the one console error on her phone is its 503. (2) **Her phone's frame time**: the
-  deployed site with `?perf`, the table under "On her iPhone" in `docs/architecture.md`, still
-  empty. (3) **Her eye on the art notes** at the end of this file.
-- **How a plan was run** (0.3 to 1.3): a written plan (`docs/v*_plan.md`) cut into sessions of one
-  context window by the files each owns; an integration branch made from `main` (`v1.3-dev` was
-  the last) and added to `vercel.json`'s no-preview list that day; one coordinating session
-  starting each session as a sub-agent in a worktree of its own, two at a time; each a draft PR
-  into the integration branch, merged with a merge commit once green, with one decision appended
-  to `docs/decisions.md` (numbered, never edited; **the next is 367**, 364 unused); a review last,
-  which plays a real town by taps, folds the `NOTES` rows her phone never saw into one card, and
-  writes the release PR from the integration branch to `main` for the user to merge. "How 1.3 was
-  run" and "How 1.1 was run" below say what worked and what cost. A small fix needs none of it: a
-  branch from `main`, a PR, the checks, the user merges.
-- **What's logged.** "Where it hurts" in `docs/architecture.md` (most pressing first: the two
-  things only her phone and Vercel can say, the passers-by's build, the big data files and the one
-  chunk, the bed card's pause) and "Art notes for the final pass" at the end of this file (for her
-  eye, none clearly wrong). "Still to put to the user" holds the personal-touch questions, parked
-  (decision 177) and left there at the user's word of 2026-10-25.
-- **Before changing what she sees**: `docs/art_style.md` before drawing; a change to the save's
-  shape bumps `SAVE_VERSION` with a migration step, a test and `isSaveState`, and the lived-in
-  fixtures (`tests/persistence/fixtures/`, held by `livedIn.test.ts`) must lose nothing; a release
-  adds its own `NOTES` row in `src/data/patchNotes.ts` (her phone will have last seen `1.3`); a new
-  neighbour comes with a release, never over time (CLAUDE.md). **With nothing asked of it, a
-  session changes nothing and asks the user what they'd like next.**
-
-## After 1.0
-
-**The 1.3 plan is complete, and 1.3 is the release PR #219** (`v1.3-dev` → `main`, "Release 1.3
-(with 1.2.1)"), **the user's to merge**; merging deploys to her phone, and `main` after it is the
-game as it stands. Her phone is on 1.2 (PR #201, 2026-10-20) until then. 1.2.1 (F1's moon twice a
-month) was ready the day F1 merged but never cut, so it goes with 1.3: she reads one card, `1.3`,
-five lines folding 1.2.1's (decision 366), and her save stays v55 with no migration, held by
-`livedIn.test.ts`'s fixtures (1.2's town, `lived-in-v55.json`, the newest: 1.3 changed nothing
-in the save's shape). **No plan follows 1.3**; the user's subscription ended with it. A session
-starting cold with nothing asked of it does nothing to the game and asks the user what they'd like
-next.
-
-**The user's steps, after merging the release PR** (1 and 2 carried from 1.2; as far as the repo
-knows, neither is done):
-
-1. **Link the cloud save's store and redeploy** (README's "Cloud save": Vercel → Storage → Create
-   Database → Upstash for Redis, the free plan, connected to the project with the `KV` prefix, then
-   **Redeploy** the production deployment, since a deployment only sees the variables it was built
-   with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
-   set up yet". Check the deployment's Functions tab lists `api/save` (if the build trips on
-   TypeScript, the fallback is `api/save.js` with JSDoc types, decision 323), then README's
-   `curl`, then Settings on her phone.
-2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
-   town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
-   readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
-   iPhone" in `docs/architecture.md`. The container's numbers for 1.0, 1.2 and 1.3 are the tables
-   just above it.
-3. **The moon's visitors**: on the next day after a full or new moon (27 October 2026, then 10
-   November, 25 November…), Today should say critters are visiting out of season, and the
-   Cabinet's shadows "visiting today"; on other days the Cabinet says the next date.
-4. **The creatures and the trees**: whether the redrawn bats, moths, fish (and their shadows),
-   orbs and crawlies read on her phone, Fibi and Dolly with their muzzles, and the town leafy with
-   the graveyard's one dead tree (the art notes below).
-5. 1.2's checks, if they were never made: the silent switch and **Play on silent**, the crickets
-   and the **Ambience** switch, the slim and sturdy builds, the woods' edges (decision 356).
-
-**`v1.3-dev` was the integration branch for 1.3** and ends with it (`v1.1-dev` was 1.1's, `v1-dev`
-V1's). A later plan makes its own from `main` once #219 has merged, and adds it to `vercel.json`'s
-no-preview list that day (decision 265).
+@@HOW@@
 
 ### 1.3, the last week (the 1.3 plan's sessions and its review, 2026-10-24/25)
 
