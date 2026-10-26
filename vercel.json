@@ -9,7 +9,8 @@
       "v1-dev": false,
       "v1.1-dev": false,
       "v1.3-dev": false,
-      "v1.4-dev": false
+      "v1.4-dev": false,
+      "release-*": false
     }
   },
   "headers": [
