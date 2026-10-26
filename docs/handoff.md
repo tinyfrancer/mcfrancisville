@@ -2,129 +2,69 @@
 
 Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
 V1's review (decision 324) for after 1.0, by V1.1's (decision 356) for after 1.2, by V1.3's
-(decision 366) for after 1.3, and by V1.5's (decision 377) for after 1.5, the last plan for a
-while. Read "In progress", then "If you are starting cold after a long gap", then "After 1.0";
-"Where things stand" further down is the long history.
+(decision 366) for after 1.3, by V1.5's (decision 377) for after 1.5, and by V1.6's
+(decision 386) for after 1.6, the last release of the user's subscription. Read "In progress",
+then "If you are starting cold after a long gap", then "After 1.0"; "Where things stand" further
+down is the long history.
 
 ## In progress
 
-**The 1.6 plan is running** (`docs/v1.6_plan.md`, decision 378; started 2026-10-26 by the
-coordinating session, the last day: Opus sub-agents in worktrees, two at a time, from `v1.6-dev`).
-**1.5 is on her phone** (PR #234, 2026-10-26). Each session's heading says where it is.
-
-### X1: the festival's lights, and the 31st rehearsed (`claude/x1-lights`; decision 380)
-
-Landed (PR #236): the eave lights strung unbroken (gables, corners, a visible string) and the
-fair's poles swagged pole to pole (`LIGHT_POLE_JOINS`, `joins` from `parseMap`); the 31st
-rehearsed by taps, the party photo turned to the camera, a long caption wrapping, Scarah's
-line-up place and the chili table moved; two lines on the `1.6` card. No save change. Nothing
-left open; what the rehearsal logged is in the art notes.
-
-### X2: a ride on the big wheel (`claude/x2-big-wheel`; decision 381)
-
-Landed (PR #235): the ride drawn on the Fair sheet's stage, the day's first free, a ticket stub
-the first time; the `1.6` NOTES row made with three lines. No save change. Nothing left open.
-
-### X3: chickens at Boo Acres (`claude/x3-chickens`; decision 382; **save bumped to v59**)
-
-Landed (PR #238): the coop by the barn, Henrietta, Peck, Omelette and Reginald pottering in its
-run (worked out from the clock, `henAt`), `world.henhouse` (fed once a day for an egg each by
-morning, collected on the coop's card, Reginald's crow at six), the egg's three recipes (custard
-tart and frittata at the stove, meringue ghosts with Wrapunzel), Scarah's three lines, Today's
-line, a `hens` smoke section in `farm`. **The save is v59** (`henhouse: { fed, waiting }`, step 58
-gives an old town none fed and none waiting), bumped in the last commit. Nothing left open.
-
-**For the review's `1.6` row (full, so not added to `patchNotes.ts`):** "Chickens at Boo Acres!
-Feed Henrietta, Peck and Omelette once a day for eggs in the morning. Reginald crows at six;
-Scarah has asked him to consider seven."
-
-### X4: snow days, puddles and a rainbow (`claude/x4-snow`; decision 383)
-
-Done (PR #237 into `v1.6-dev`): snowmen rolled in her yard by a tap on herself (three hats,
-yard pieces, never indoors), the thaw sweeping them into her bag as `meltlessSnowman` keepsakes,
-snowballs thrown out of the yard and thrown back by a neighbour, snowball fights in neighbours'
-chatter in the snow, footprints in snow and splashes in rainy-day puddles (hers, neighbours',
-pets'), snow and puddle footsteps, and a rainbow the first ten minutes out on a clear day after
-rain (Today line, `rainbowJar` the first time, `?rainbow` in a dev build). Smoke `snowDay` in
-`seasons`. **No save change** (v58). Its line for the `1.6` card, for the review to fold (the
-row is full, so `patchNotes.ts` is untouched): "In the snow, tap yourself in your yard to roll a
-snowman. He comes with a hat, and when spring comes he hops indoors rather than melt. Anywhere
-else, a snowball. The neighbours will throw one back. I have been hit four times." And, if
-there's room: "On a rainy day the puddles are for splashing, and the day after, look up: a
-rainbow."
-Next: merge when green, then empty this heading.
-
-### X5: small delights (`claude/x5-delights`; decision 384)
-
-Done (PR #239 into `v1.6-dev`): a butterfly or moth lands on her hat after eight seconds still
-outdoors where one's about (not in the rain, once a minute) and flies off as she moves; fireflies
-round her on summer nights on grass; the crow on a scarecrow caws as she walks within two tiles,
-once a window; her pets at home trot over and round her as she comes in (Pickle plays dead at
-night, sleepers and Gary only beam); Fibi brings her something once a day at home that isn't
-hers; and in spring's meadow and long grass she stops and sneezes once a window, blessed by a
-neighbour within four tiles. `world.delights`, `systems/delights.ts`, `Pet.comeOver`, the
-`perch`/`flit` effects and `Effects.fireflies`; smoke `delights` in `feel`. **No save change.**
-Its line for the `1.6` card, for the review to fold (the row is full, so `patchNotes.ts` is
-untouched): "Small things: a butterfly on your hat if you stand still, fireflies in summer, Fibi's
-gifts, which are not yours. Bless you."
-Next: merge when green, then empty this heading.
-
-### X6: the museum's skeleton, and a kite (`claude/x6-skeleton-kite`; decision 385)
-
-Done, PR #240 into `v1.6-dev`: Gerald, a little dragon of bones on a plinth, stands in the
-middle of the museum at Crumbs & Curios once every fossil is on show (derived from
-`cabinet.donated`, `when: 'assembled'` on his fixture), with Wrapunzel's letter (`museum:gerald`)
-and his plaque; three kites at Cobweb Corner (bat, ghost, moth), held from the quick bar and flown
-from the end of the pier or the castle lookout on a day `windyOn` deals windy, her string held
-up, the kite bobbing in the `kite` pass, any tap winding it in, `skyOnAString` the first time; a
-Today line; a breeze in the ambience on a kite day. Smoke `gerald` and `kite` in `places`. **No
-save change** (v59). Next: merge when green, then empty this heading.
-
-**For the review's `1.6` row (full, so not added to `patchNotes.ts`):** "Give the museum every
-fossil and Wrapunzel will stand them up as a skeleton. She has named it Gerald. And there are
-kites at Cobweb Corner: on a breezy day, fly one from the end of the pier."
-
-### V1.6 the review
-
-Not started; in the plan's order.
+Nothing is in progress.
 
 ## If you are starting cold after a long gap
 
-Written at 1.3 (2026-10-25) for a session that may come months later and knows nothing, and
-brought up to 1.5 by V1.5's review (decision 377) the same night.
+Written at 1.3 (2026-10-25) for a session that may come months later and knows nothing, brought
+up to 1.5 by V1.5's review (decision 377), and rewritten by V1.6's (decision 386) on 2026-10-26,
+the last day of the user's subscription, for whoever comes next: perhaps nobody for a long while,
+perhaps a year from now. Read this, then "After 1.0", then the code.
 
 - **What the game is.** McFrancisVille is a cozy, spooky-cute pixel-art life sim the user (Cody)
   made as a gift for his wife, played on her iPhone as a home-screen app: Animal Crossing and
-  Stardew Valley by way of The Nightmare Before Christmas. She dresses up, decorates, farms,
-  befriends monster neighbours, keeps seven pets and fills the Curiosity Cabinet; Cody is in it,
-  married to her. Cozy is the brief: nothing punishes, expires or is lost (decision 11). Questions
-  go to the user, never to her (decision 14). `CLAUDE.md` is the map of the code,
-  `docs/architecture.md` the layers and services, `docs/decisions.md` every fork argued (read it
-  before re-opening one).
+  Stardew Valley by way of The Nightmare Before Christmas. She dresses up, decorates, farms (and
+  keeps hens), befriends monster neighbours, keeps seven pets and fills the Curiosity Cabinet;
+  Cody is in it, married to her. Cozy is the brief: nothing punishes, expires or is lost
+  (decision 11). Questions go to the user, never to her (decision 14). `CLAUDE.md` is the map of
+  the code, `docs/architecture.md` the layers and services, `docs/decisions.md` every fork argued
+  (read it before re-opening one).
 - **Where it lives.** `tinyfrancer/mcfrancisville` on GitHub (public). Vercel deploys `main`, and
   only `main`, to her phone: previews are off for `claude/**`, `release-*` and every dev branch
-  (`vercel.json`'s `deploymentEnabled`, the user's call), so **merging to `main` publishes**. **1.5
-  is the last release** (the release PR from `v1.4-dev`, "Release 1.5"; "After 1.0" says where it
-  stands). Her town is in her phone's `localStorage` (`mcfrancisville:save`, save v58 at 1.5),
-  migrated forward on load (`src/persistence/`); the installed app is a cached shell
-  (`public/sw.js`), so a deploy reaches her on the next open or the one after.
+  (`vercel.json`'s `deploymentEnabled`, the user's call), so **merging to `main` publishes**.
+  **1.6 is the last release** (the release PR from `v1.6-dev`, "Release 1.6"; "After 1.0" says
+  where it stands). Her town is in her phone's `localStorage` (`mcfrancisville:save`, save v59 at
+  1.6), migrated forward on load (`src/persistence/`); the installed app is a cached shell
+  (`public/sw.js`), so a deploy reaches her on the next open or the one after. **No plan follows
+  1.6.**
 - **How to run it.** `npm ci` (from the lockfile; "Environment notes" below), `npm run dev`, open
   `http://localhost:5173/`. A dev build takes `?skiptitle`, `?day=2026-12-24&hour=21.5`,
-  `?weather=rain` and `?loop=manual` (smoke's hand crank); any build takes `?gallery` and `?perf`;
-  `npm run sprite -- 'critter:*' --sheet` renders art to `.sprites/`. Before a push, CLAUDE.md's
-  "Commands": lint, format:check, typecheck, test and build (about two and a half minutes), then
-  smoke against a running dev server (about twenty-five; in a Claude Code cloud container
-  `CHROMIUM_PATH=/opt/pw-browsers/chromium`, `SMOKE_URL` for another port, never
-  `playwright install`) and `smoke:offline` against `npm run preview` (`PREVIEW_URL`). CI runs the
-  same on every push to a PR. Known flaky smoke checks: `camera`'s top row with a toast up,
-  `interiors`' "she goes into codyManor" alone at 19:00, and any section that meets a neighbour
-  visiting her on the real clock; re-run the job.
+  `?weather=rain`, `?rainbow` and `?loop=manual` (smoke's hand crank); any build takes `?gallery`
+  and `?perf`; `npm run sprite -- 'critter:*' --sheet` renders art to `.sprites/`. Before a push,
+  CLAUDE.md's "Commands": lint, format:check, typecheck, test and build (about two and a half
+  minutes), then smoke against a running dev server (about half an hour now, 707 checks; in a
+  Claude Code cloud container `CHROMIUM_PATH=/opt/pw-browsers/chromium`, `SMOKE_URL` for another
+  port, never `playwright install`) and `smoke:offline` against `npm run preview` (`PREVIEW_URL`).
+  CI runs the same on every push to a PR. Known flaky smoke checks: `camera`'s top row with a
+  toast up, `interiors`' "she goes into codyManor" alone at 19:00, `faces`' `tapToastAway`, and
+  any section that meets a neighbour visiting her on the real clock; re-run the job.
 - **What is still the user's** (no session can do it): (1) **the cloud save's store** (README's
   "Cloud save": Vercel → Storage → Upstash for Redis with the `KV` prefix, then redeploy, then
   README's `curl` and Settings → Backup on her phone); until then Settings says the cloud isn't
   set up and the one console error on her phone is its 503. (2) **Her phone's frame time**: the
   deployed site with `?perf` on the end, the table under "On her iPhone" in
   `docs/architecture.md`, still empty. (3) **Her eye on the art notes** at the end of this file.
+  (4) **The personal touches**, parked since decision 177: the numbered questions under "Still to
+  put to the user" wait for the user to take them up; a session doesn't ask them unprompted.
+  (5) **Two stale branches** in GitHub to delete, `release-1.4` and, once merged, `release-1.6`
+  ("After 1.0", step 6).
+- **If she reports a bug**, first: (1) ask the user for a screenshot and what she did, and for
+  Settings' error note if it shows one (`src/errorNotes.ts` keeps the last five uncaught errors on
+  her phone, with a note to copy for Cody); (2) before anything that touches the save, have her
+  back up from Settings (the code restores through the same migrations, decision 25), and never
+  delete a save (an unreadable one is moved aside); (3) reproduce it on a dev build at her day and
+  hour (`?day=…&hour=…`), with a lived-in fixture if it's her town's shape
+  (`tests/persistence/fixtures/lived-in-v59.json` is 1.6's, loaded into `localStorage` from a
+  page of the site that isn't the game, as decision 377 and 386 did); (4) a test that fails, the
+  fix, the checks, on a branch from `main`, as a PR the user merges, with a `NOTES` row (`1.6.1`)
+  only if it's something she'd notice. A small fix needs no plan.
 - **Where new content goes** (each a row and some art on a seam an earlier plan made; CLAUDE.md
   names the files): a **critter** is a `CRITTERS` row (hours, habitat, `where`, rarity, `season`),
   its 16 and 24 art in `sprites/critters.ts` and a `SHINIES` row for its shiny, then rerun
@@ -134,43 +74,55 @@ brought up to 1.5 by V1.5's review (decision 377) the same night.
   `SUITES` row in `data/sets.ts`; a **constellation** is a `CONSTELLATIONS` row (its month or
   holiday, five to nine stars in a 60×40 box, its lines); a **pet** is a `PETS` row, last in
   `PET_IDS`, with frames in `sprites/pets.ts` and a `TRICKS` row (G7's Pickle is the pattern); a
-  **project** is a `PROJECTS` row with three stages of art and a spot in town; a **room** is a
-  `ROOMS` row and a recipe (G6's attic is the pattern). A **neighbour** comes with a release,
-  never over time (CLAUDE.md). A new place is the biggest: a map, a `ZONES` row, signposts both
-  ways.
-- **How a plan was run** (0.3 to 1.5): a written plan (`docs/v*_plan.md`) cut into sessions of one
-  context window by the files each owns; an integration branch made from `main` (`v1.4-dev` was
+  **hen** is a `HENS` row in `data/hens.ts` (a `HenId`, her colours, art in `sprites/hens.ts`;
+  `LAYERS` counts the eggs) who potters in the run with the rest; a **kite** is a `KiteId`, an
+  item row in `data/kites.ts` with its `KITE_UP` line, folded and flying art in `sprites/kite.ts`
+  (`KITE_HELD`, `KITE_ALOFT`, `KITE_KNOT`, `KITE_TAIL`), and it's on the shelf (`KITE_IDS`); a
+  windy place is a `KITE_FIELDS` spot and a `WINDY_CHANCE`; a **snowman's hat** is a
+  `SNOWMAN_IDS` row in `data/snow.ts` and its art; a **small delight** is a rule in
+  `systems/delights.ts`, kept by `world.delights`, a moment, and its look in
+  `wiring/effectsOf.ts` (Fibi's gifts are `PET_GIFTS` rows, the bless-yous `BLESS_YOU`); a fair
+  **activity** is an `ACTIVITIES` row (the wheel's ride lines are `RIDE_LINES`); a **project** is a
+  `PROJECTS` row with three stages of art and a spot in town; a **room** is a `ROOMS` row and a
+  recipe (G6's attic is the pattern). A **neighbour** comes with a release, never over time
+  (CLAUDE.md). A new place is the biggest: a map, a `ZONES` row, signposts both ways.
+- **How a plan was run** (0.3 to 1.6): a written plan (`docs/v*_plan.md`) cut into sessions of one
+  context window by the files each owns; an integration branch made from `main` (`v1.6-dev` was
   the last) and added to `vercel.json`'s no-preview list that day; one coordinating session
   starting each session as a sub-agent in a worktree of its own, two at a time; each a draft PR
   into the integration branch, merged with a merge commit once green, with one decision appended
-  to `docs/decisions.md` (numbered, never edited; **the next is 378**; 364, 368 and 369 unused); a
-  review last, which plays a real town by taps, reads or folds the `NOTES` rows her phone never
-  saw into one card, and writes the release PR from the integration branch to `main`. "How 1.4 and
-  1.5 were run", "How 1.3 was run" and "How 1.1 was run" below say what worked and what cost. A
-  small fix needs none of it: a branch from `main`, a PR, the checks, the user merges.
-- **What's logged.** "Where it hurts" in `docs/architecture.md` (most pressing first: the two
-  things only her phone and Vercel can say, the one chunk, the new systems' rough edges, smoke on
-  the real clock) and "Art notes for the final pass" at the end of this file (for her eye, none
-  clearly wrong). "Still to put to the user" holds the personal-touch questions, parked
-  (decision 177) and left there at the user's word of 2026-10-25.
+  to `docs/decisions.md` (numbered, never edited; **the next is 387**; 364, 368, 369 and 379
+  unused); a review last, which plays a real town by taps, folds the `NOTES` rows her phone never
+  saw into one card, and writes the release PR from the integration branch to `main`. "How 1.6 was
+  run", "How 1.4 and 1.5 were run", "How 1.3 was run" and "How 1.1 was run" below say what worked
+  and what cost.
+- **What's logged.** "Where it hurts" in `docs/architecture.md` (most pressing first: the two things
+  only her phone and Vercel can say, the one chunk, a tool with a seed or kite in hand, the new
+  systems' rough edges, smoke on the real clock) and "Art notes for the final pass" at the end of
+  this file (for her eye, none clearly wrong). "Still to put to the user" holds the personal-touch
+  questions, parked (decision 177) and left there at the user's word of 2026-10-25.
 - **Before changing what she sees**: `docs/art_style.md` before drawing; a change to the save's
   shape bumps `SAVE_VERSION` with a migration step, a test and `isSaveState`, and the lived-in
-  fixtures (`tests/persistence/fixtures/`, held by `livedIn.test.ts`; 1.5's is
-  `lived-in-v58.json`) must lose nothing; a release adds its own `NOTES` row in
-  `src/data/patchNotes.ts` (her phone will have last seen `1.5`). **With nothing asked of it, a
-  session changes nothing and asks the user what they'd like next.**
+  fixtures (`tests/persistence/fixtures/`, held by `livedIn.test.ts`; 1.6's is
+  `lived-in-v59.json`) must lose nothing; a release adds its own `NOTES` row in
+  `src/data/patchNotes.ts` (her phone will have last seen `1.6`, whose P.S. says the mayor's
+  typewriter is having a rest: a later card might say he's taken it up again). **With nothing
+  asked of it, a session changes nothing and asks the user what they'd like next.**
 
 ## After 1.0
 
-**The 1.4 plan is complete, and 1.5 is the release PR #234** (`v1.4-dev` → `main`, "Release
-1.5"), for the coordinating session to merge at the user's word, as 1.4 was; merging deploys to her
-phone, and `main` after it is the game as it stands. Her phone is on 1.4 until then (PR #231,
-2026-10-25: G1–G4, save v57, the cards `1.4` and `1.4.1`). 1.5 is G5's photo mode, G6's attic and
-G7's Pickle: she reads one card, `1.5`, five lines and a P.S. (decision 377), and her save goes
-v57 → v58 (G6's bump, an identity step), held by `livedIn.test.ts`'s fixtures (the newest,
-`lived-in-v58.json`, is 1.2's town opened in 1.5 and played on to January). **No plan follows
-1.5**. A session starting cold with nothing asked of it does nothing to the game and asks the user
-what they'd like next.
+**The 1.6 plan is complete, and 1.6 is the release PR "Release 1.6"** (`v1.6-dev` → `main`, from the
+branch `release-1.6` at `v1.6-dev`'s head after V1.6 merged), for the coordinating session to merge
+at the user's word, as 1.4 and 1.5 were; merging deploys to her phone, and `main` after it is the
+game as it stands. Her phone is on 1.5 until then (PR #234, 2026-10-26: the photo mode, the attic,
+Pickle, save v58). 1.6 is X1's festival lights fixed and the 31st rehearsed, X2's ride on the big
+wheel, X3's hens at Boo Acres, X4's snowmen, snowballs, footprints, puddles and rainbow, X5's small
+delights and X6's Gerald and kites: she reads one card, `1.6`, five lines and the mayor's last P.S.
+for a long while (decision 386), and her save goes v58 → v59 (X3's henhouse, a town from before
+starting unfed with no eggs), held by `livedIn.test.ts`'s fixtures (the newest, `lived-in-v59.json`,
+is 1.5's town opened in 1.6 and played on to the festival of 2027). **No plan follows 1.6**, and the
+user's subscription ends with it. A session starting cold with nothing asked of it does nothing to
+the game and asks the user what they'd like next.
 
 **The user's steps, after the release PR merges** (1 and 2 carried from 1.2; as far as the repo
 knows, neither is done):
@@ -181,26 +133,143 @@ knows, neither is done):
    with). Until then the game plays exactly as before and Settings → Backup says "The cloud isn't
    set up yet". Check the deployment's Functions tab lists `api/save` (if the build trips on
    TypeScript, the fallback is `api/save.js` with JSDoc types, decision 323), then README's
-   `curl`, then Settings on her phone.
+   `curl`, then Settings on her phone. Meanwhile, a backup code from Settings now and then is her
+   town's only copy off the phone.
 2. **Time her phone**: open the deployed game in Safari with `?perf` on the end, go in, walk the
    town at Close for 30 s from the first tap, at about 21:30 and again at noon, and write the
    readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
-   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 to 1.5 are the tables just
+   iPhone" in `docs/architecture.md`. The container's numbers for 1.0 to 1.6 are the tables just
    above it.
-3. **1.5 on her phone**: the camera (the quick bar's last slot, or the tray) and **Keep it** saving
-   the photo through the share sheet into Photos; Pickle about at night and asleep by day, playing
-   dead at a pat; the attic (the workbench's Home tab, once the back room is built: 60 wood, 10
-   stone and 3 glow gourds), its round window at night.
-4. **1.4's winter, as it comes**: the woollies and the snug look at Cobweb Corner from 1 November;
-   the pond frozen 15 December to 15 January, with fish under the ice; a constellation each month
-   at the castle telescope on a clear night after eight; a shiny now and then (Today says
-   "something glittered").
+3. **1.6 on her phone, as the days come**: the festival's lights strung round every roof and pole
+   to pole at the fair, any evening to 31 October; the party photo on the 31st, both facing the
+   camera; the big wheel (walk up to it at the fair; the first ride each day free; a weekend
+   afternoon brings Agatha along); the coop by Scarah's barn (feed the hens from the bag, eggs by
+   morning); in the snow from December, a tap on herself in her yard; a kite from Cobweb Corner on
+   a breezy day at the pier's end; every fossil to the museum for Gerald; standing still outdoors
+   for a butterfly.
+4. **1.4's and 1.5's, as they come**: the woollies at Cobweb Corner from 1 November; the pond
+   frozen 15 December to 15 January; a constellation each month at the castle telescope; a shiny
+   now and then; the camera's **Keep it** into Photos; the attic once the back room is built.
 5. Earlier checks, if never made: the moon's visitors the day after a full or new moon (1.3), the
    silent switch and **Play on silent**, the **Ambience** switch, the builds (1.2).
+6. **Tidy the branches in GitHub**: delete `release-1.4` (PR #231's head, merged long since) and,
+   once the release PR has merged, `release-1.6`. Sessions don't delete branches, so it's left for
+   the user's hand; nothing reads either.
 
-**`v1.4-dev` was the integration branch for 1.4 and 1.5** and ends with 1.5 (`v1.3-dev` was 1.3's,
-`v1.1-dev` 1.1's, `v1-dev` V1's). A later plan makes its own from `main` once the release PR has
-merged, and adds it to `vercel.json`'s no-preview list that day (decision 265).
+**`v1.6-dev` was the integration branch for 1.6** and ends with it (`v1.4-dev` was 1.4 and 1.5's,
+`v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's). A later plan makes its own from `main` once
+the release PR has merged, and adds it to `vercel.json`'s no-preview list that day (decision 265).
+
+### 1.6, the last day (the 1.6 plan's sessions and its review, 2026-10-26)
+
+`docs/v1.6_plan.md` (decision 378): the last day of the user's subscription, spent on the bug he
+named ("the colored lights up around the festival aren't connected properly") and then "fun, your
+call": six sessions and the review from `v1.6-dev`, every one an Opus sub-agent of one
+coordinating session, two at a time, all on 2026-10-26. Each heading says what landed; the
+decisions hold the detail.
+
+#### X1: the festival's lights, and the 31st rehearsed (`claude/x1-lights`, PR #236, decision 380)
+
+Landed. The eave lights strung from each roof's own edge, unbroken over the gables and round the
+corners (`EAVE_STEEPEST`, `EAVE_CORNER`, `tests/sprites/eaveLights.test.ts`), and the fair's poles
+swagged pole to pole, half a swag a side (`LIGHT_POLE_JOINS`, `joins` from `parseMap`); the 31st
+rehearsed by taps, the party photo turned to the camera, a long caption wrapping, Scarah's
+line-up place off a light pole and the chili table moved. No save change. Logged: the photo keeps
+the chatter bubbles and has her in front of Cody (the art notes).
+
+#### X2: a ride on the big wheel (`claude/x2-big-wheel`, PR #235, decision 381)
+
+Landed. A fifth activity, `bigWheel`: once round on the Fair sheet's stage, the day's first ride
+free, her husband or her closest neighbour at the fair beside her and a line at the top (a brass
+plaque's `MAYOR_VIEW` alone), a ticket stub the first time, Today's line on a fair day. No save
+change. Logged: company is rare outside happenings and Agatha's weekend afternoons ("Where it
+hurts" 4).
+
+#### X3: chickens at Boo Acres (`claude/x3-chickens`, PR #238, decision 382; **save v59**)
+
+Landed. The coop by the barn, Henrietta, Peck, Omelette and Reginald pottering in its run, worked
+out from the clock (`henAt`); `world.henhouse`, fed once a day from her bag for an egg each by five
+the next morning, collected on the coop's card, Reginald's crow at six; the custard tart and
+frittata at the stove and Wrapunzel's meringue ghosts; Scarah's lines; Today's. **Save v59**
+(`henhouse: { fed, waiting }`; step 58 gives an old town none fed and none waiting).
+
+#### X4: snow days, puddles and a rainbow (`claude/x4-snow`, PR #237, decision 383)
+
+Landed. Snowmen rolled in her yard by a tap on herself (three hats, yard pieces, never indoors),
+coming in at the thaw as `meltlessSnowman` keepsakes; snowballs thrown elsewhere and thrown back;
+snowball fights in the neighbours' chatter; footprints in snow and splashes in rainy-day puddles;
+a rainbow the first ten minutes out on a clear day after rain (`rainbowJar` the first time). No
+save change. Logged: the snowball under way and the rainbow's ten minutes aren't saved ("Where it
+hurts" 4).
+
+#### X5: small delights (`claude/x5-delights`, PR #239, decision 384)
+
+Landed. A butterfly or moth on her hat after eight seconds still, fireflies on summer nights, the
+scarecrow's crow cawing, her pets greeting her at the door, Fibi's daily gift (never an item), a
+sneeze in spring's long grass and a neighbour's bless-you. `world.delights`, nothing saved.
+
+#### X6: the museum's skeleton, and a kite (`claude/x6-skeleton-kite`, PR #240, decision 385)
+
+Landed. Gerald, a dragon of bones on a plinth in the museum once every fossil is on show
+(`when: 'assembled'`, nothing saved), with Wrapunzel's letter and his plaque; three kites at Cobweb
+Corner flown from the pier's end and the castle lookout on a day `windyOn` deals windy, `kite`
+pass, `skyOnAString` the first flight, a breeze in the ambience. No save change.
+
+#### V1.6: the review and 1.6 (`claude/v16-review`, PR #241, decision 386; Opus)
+
+**Landed.** **The notes**: her phone last saw `1.5`, so `notesToShow('1.5')` is exactly `1.6`: X1's
+two lines and X2's three were in the row and X3–X6 handed theirs over, so the review folded the six
+sessions into one card of five lines in the mayor's voice, in the order she'll meet them (the lights
+and the photo; the wheel; the hens; the snow and the rainbow; Gerald, the kite and a butterfly on
+her hat; Fibi's gifts the one thing left off), and a new P.S., his last typed note for a good long
+while, the typewriter resting and the town not. **1.5's town, opened as her phone will**:
+`lived-in-v58.json` in a 1.6 dev build with notes last seen `1.5` and the dedication seen, from a
+page of the site that isn't the game, at Close, Far and sideways: the title, one card ("What's new
+in 1.6", its P.S. reached by scrolling, the sheet's right column sideways), Cody's hello, save v59
+through step 58 (`henhouse: { fed: null, waiting: 0 }`), no error notes; the one console error is
+the unlinked cloud's 503, as on her phone. **Played on by taps** with a scratch driver on smoke's
+`lib.mjs` in a persistent browser profile of its own (decision 324's method), through 2027 from
+where 1.5's town was left (10 January): a snowman rolled in her yard by a tap on herself and two on
+the ball (his top hat), a snowball at Rufus on the snow by the square (he laughed); the hens fed a
+pumpkin seed and three eggs collected at six the next morning; every fossil given (the dev handle,
+as asked) and Gerald walked up to, his plaque and Wrapunzel's letter; a bat kite bought at Cobweb
+Corner and flown from the castle lookout (the first flight's `skyOnAString`) and the pier's end; the
+big wheel by day with Agatha (free, the ticket stub) and by night alone (10 Candy, the mayor's
+plaque); the rainbow (`?rainbow`) with its jar and Today's line, a sneeze on the meadow, a mourning
+cloak on her hat; fireflies on a clear July night, the pets at the door and Fibi's leaf; the
+festival's lights at 20:00 and 22:00 on 28 October, upright and sideways; the hens fed again that
+night. Crossing between places was the dev handle (`travel.go`), everything done there by taps.
+**Kept as `lived-in-v59.json`**, held by `livedIn.test.ts` and added to the overlays snapshot (its
+first snapshot only). **The shakedown**: **fixed**, the kite flying off the top of a phone on its
+side (it flies lower there, `render/passes/kite.ts`); **logged** ("Where it hurts" 3 and 4, the art
+notes), the big wheel's company rare and its picture's town green all year, the ride sheet's "on the
+house" line staying after the free ride, a kite in hand keeping the rod down as a seed does, the
+castle's kite field under the woods' crowns, the hens heaped at one side of their run, the snowball
+under way and the rainbow's minutes kept in memory, the barn and coop unlit at the festival (on
+purpose: no door). **Perf**: 1.6 against 1.5 on her phone (`origin/main` from a copy of its own,
+1.6's `scripts/perf.mjs` for both), alternating, two runs each at Close by night and at noon: every
+draw and update crosses 1.5's runs or sits under, the heap up 1.2–1.5 MB (the new art baked); the
+build one chunk, 2,048.9 kB (690.5 kB gzipped). The table is in `docs/architecture.md`, "1.6, V1.6's
+review". The docs: this file's top, "Where it hurts", `CLAUDE.md`, the plan's line, decision 386.
+
+### How 1.6 was run, for whoever plans next
+
+A plan settled the morning 1.5 shipped and run the same day, the last of the subscription: a bug
+fix and five content sessions and a review, every one Opus, two at a time by the files each owned,
+from `v1.6-dev`, as 1.4 and 1.5 were. What worked: **the user's bug first** (X1), with a rehearsal
+of the day it matters most (31 October) by taps, which found and fixed three more things on the
+way (the photo's back to the camera, a caption too wide, Scarah behind a pole); **content on the
+seams**, again: a fifth `ACTIVITIES` row, a prop and a keeper, a yard piece, an effect, a fixture
+that waits on a derived fact, a new item kind, each a session's worth with no refactor; **one save
+bump** (X3's v59), named in the plan, so the rest could merge in any order; **the notes row owned
+by the first two sessions and handed lines by the rest** (1.5's lesson): no session refolded
+another's card, and the review folded once. What cost: **the plan's brief met the code** twice
+again (a tap on snow already walks her, so X4's gesture became a tap on herself; rain comes a day
+at a time, so "after rain" became a rainbow day; X2 tried the wheel in the world and drew it on a
+stage instead), each settled in its decision; **smoke grew to half an hour or more** a whole run
+(707 checks), the longest step of every session's push. Worth keeping: the bug first and
+rehearsed, the seams, the one bump, one card. Worth changing: a plan that asks for "a tap on X"
+checks what a tap on X does now.
 
 ### 1.4 and 1.5, the week after (the 1.4 plan's sessions and its review, 2026-10-25)
 
@@ -2345,7 +2414,11 @@ review** (decision 377) looked at the 1.4 plan's art at phone size in its own pl
 screenshots (the shinies in the world and the Cabinet, the winter looks on her, the two sets by
 night, the frozen pond's hole and the ice hut, the Sky sheet and the chart, the camera upright and
 sideways, the attic's ceiling and window, Pickle's frames) and added the five below the creatures.
-What's left is for the user's eye on her phone, none of it clearly wrong:
+**1.6's X1** (decision 380) added their Halloween photo, and **1.6's review** (decision 386)
+looked at the 1.6 plan's art in its own play to the festival of 2027 (the strung lights at every
+building and pole by night, upright and sideways, the hens in their run, a snowman, footprints,
+the rainbow, Gerald, a kite at the pier's end and the lookout, the wheel's stage) and added the
+four after it; the kite flying off the top of a phone on its side was mended, not logged. What's left is for the user's eye on her phone, none of it clearly wrong:
 
 - **The frozen pond's ring** (A3 kept it, V1.1 and 1.3's F4 too): in winter the town pond is ice
   with a ring of plates and open water round the fountain, which plays on. Looked at again at
@@ -2393,6 +2466,20 @@ What's left is for the user's eye on her phone, none of it clearly wrong:
   her shoulder), and the neighbours' chatter bubbles and a question's "?" are in the picture. The
   camera's own photos (1.5's G5) are taken the same way; a squeeze side by side would need the
   photo to move her, which nothing else at the party does.
+- **The hens bunch up** (1.6's X3, seen by V1.6): four birds in a run 32 pixels wide, each
+  pottering from the clock alone (`henAt`), so at times three or four stand in a heap at one side
+  of the run with the other half empty. Spreading them (a spot each, or a nudge apart) is a rule
+  in `systems/hens.ts`; whether it reads as a heap or as hens being hens is hers to say.
+- **The ride's town is green all year** (1.6's X2, seen by V1.6): the picture below the big
+  wheel's car (`sprites/fairRide.ts`) is lit by the hour but drawn in summer, so in January she
+  rides over a green town from a snowy fair. A winter picture is new art, a season's swap as the
+  ground's.
+- **The barn and the coop are unlit at the festival** (1.6's X1): the eave lights go on a
+  building with a door (0.2's J2), so the farmhouse and greenhouse at Boo Acres glow and the barn
+  and coop beside them don't. On purpose; a string on the barn is a feature, if she misses it.
+- **The castle's kite field is under the trees** (1.6's X6): the lookout's tiles stand under the
+  woods' crowns, so she flies a kite there from under a see-through tree; the pier's end is the
+  open one.
 
 Struck since V1's review: ~~the lavender cobble carrying the town~~ (A1: the square in
 flagstones, the well on setts, two benches, the roads worn down the middle); ~~woods walls of one

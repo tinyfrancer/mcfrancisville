@@ -91,20 +91,18 @@ describe("the mayor's notes", () => {
     expect(card.lines).toHaveLength(5);
   });
 
-  it('shows her phone, which has 1.5, the 1.6 card: the lights first', () => {
-    // 1.6's X1 put its two lines first (decision 380), beside X2's three (381); the sessions
-    // after add theirs, and the review folds the card to five at most (decision 378).
+  it('shows her phone, which has 1.5, exactly the 1.6 card: five lines, the lights first', () => {
+    // 1.6's X1 and X2 made the row (decisions 380, 381) and X3–X6 handed the review their lines;
+    // it folded the six sessions into five and the mayor's last P.S. for a long while (386).
     expect(newest.version).toBe('1.6');
     expect(notesToShow('1.5', true)).toEqual([newest]);
+    expect(newest.lines).toHaveLength(5);
     expect(newest.lines[0]).toMatch(/I had a word with the bats who hung them/);
-    expect(newest.lines.length).toBeLessThanOrEqual(5);
-  });
-
-  it('shows a phone that has 1.5 the 1.6 card, with the big wheel on it', () => {
-    // 1.6's X2 made the row (decision 381); the rest of 1.6 adds to it, and its review folds it.
-    expect(newest.version).toBe('1.6');
-    expect(notesToShow('1.5', true)).toEqual([newest]);
-    expect(newest.lines.join(' ')).toMatch(/the town looks back/);
+    expect(newest.lines[1]).toMatch(/big wheel.*It looks back/);
+    expect(newest.lines[2]).toMatch(/^Chickens at Boo Acres!/);
+    expect(newest.lines[3]).toMatch(/snowman.*rainbow/);
+    expect(newest.lines[4]).toMatch(/Gerald.*kite.*butterfly/);
+    expect(newest.ps).toMatch(/last typed note/);
   });
 
   it('shows the newest to a phone that last saw a version these notes no longer know', () => {

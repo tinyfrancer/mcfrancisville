@@ -103,7 +103,11 @@ export function drawKite(
   const grip = HAND_UP[facing];
   const hand = { x: me.x + grip.x - cam.x, y: body + grip.y - cam.y };
   const side = facing === 'left' ? -1 : 1;
-  const knot = kiteAt(hand, side, sinceMs, nowMs);
+  const tie = KITE_KNOT[flight.kite];
+  const aloft = kiteAt(hand, side, sinceMs, nowMs);
+  // On a phone on its side the view is a few tiles tall, and the top of the string is above it:
+  // the kite flies lower there rather than off the top (V1.6's review, decision 386).
+  const knot = { x: aloft.x, y: Math.max(aloft.y, tie.y + 2) };
   ctx.fillStyle = C.cream;
   ctx.globalAlpha = 0.85;
   drawString(ctx, hand, knot, 8);
@@ -112,7 +116,6 @@ export function drawKite(
   const frame = Math.floor(nowMs / FLAP_MS) % 2;
   const art = KITE_ALOFT[flight.kite][frame]!;
   const sprite = bake(`kite:${flight.kite}:${frame}`, art, KITE_PALETTES[flight.kite]);
-  const tie = KITE_KNOT[flight.kite];
   ctx.drawImage(sprite, knot.x - tie.x, knot.y - tie.y);
 }
 

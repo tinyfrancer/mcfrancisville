@@ -10233,3 +10233,99 @@ nook art (three tiles of dragon reads better standing on the floor); an `assembl
 (`fossilWing` is the same set); the wind read from `ambienceFor` (no day in it); any tap anywhere
 lifting the kite with a toast elsewhere (every tap while holding one would nag); a new arm-up pose
 for the string (`holdUp` already is one).
+
+## 386. 1.6: the review after the 1.6 plan, six sessions folded into one card, 1.5's town opened as her phone will and played on through 2027, the shakedown, and the game at the end of the subscription (2026-10-26, 1.6's V1.6)
+
+_Session V1.6 of the 1.6 plan (decision 378), the last: the review after X1–X6 (decisions 380–385),
+and the release PR "Release 1.6" (`v1.6-dev` → `main`, from `release-1.6` at `v1.6-dev`'s head), for
+the coordinator to merge at the user's word. No save change (still v59). 379 stays unused._
+
+- **One card for her, `1.6`, folded from six sessions.** Her phone last saw `1.5` (PR #234), so
+  `notesToShow('1.5')` is the `1.6` row alone. X1 and X2 had filled it (two lines and three, a P.S.
+  about the ticket stub) and X3–X6 handed their lines over in their handoff headings, so it was
+  folded once, here, to five lines in the mayor's voice in the order she'll meet them: the lights
+  strung properly (the bats spoken to) and the two of them facing the camera on the 31st; the big
+  wheel, once round, the first ride free, the town looking back; the hens and Reginald's six o'clock
+  (X3's line whole); the snowman in her yard, the snowball elsewhere, "I have been hit four times",
+  a rainbow after rain; Gerald, a kite from the pier, and a butterfly on her hat if she stands
+  still. Fibi's gifts were the line left off, the one she'll find for herself. The P.S. is new:
+  "This is my last typed note for a good long while: the typewriter is having a rest. The town is
+  not. It will keep the lamps lit and the kettle warm for you." Warm, no goodbye, the town going on;
+  a later release's card can say he's taken it up again. The test holds exactly the one card, its
+  five lines in order and the P.S.
+- **1.5's town, opened as her phone will.** `lived-in-v58.json` in a 1.6 dev build, notes last seen
+  `1.5`, the dedication seen, from a page of the site that isn't the game (decision 377's way), at
+  Close, Far and sideways: the title, one card ("What's new in 1.6", its P.S. reached by scrolling),
+  Cody's hello, save v59 through step 58 (`henhouse` unfed, none waiting), no error notes, the
+  unlinked cloud's 503 the one console error.
+- **Played on by taps** (decision 324's method: a scratch driver on smoke's `lib.mjs`, a persistent
+  profile and a dev server of its own) through 2027 from the town's 10 January: a snowman in her
+  yard (top hat) and a snowball at Rufus; the hens fed and three eggs at six the next morning; every
+  fossil given by the dev handle (as asked) and Gerald's plaque and letter; a bat kite bought by
+  taps and flown at the castle lookout and the pier's end; the big wheel by day with Agatha (free,
+  the stub) and by night alone (10 Candy); the rainbow's jar, a sneeze, a mourning cloak on her hat;
+  fireflies on a July night, the pets at the door, Fibi's leaf; the festival's lights on 28 October
+  at 20:00 and 22:00, upright and sideways; the hens fed that night. Crossings between places by the
+  dev handle, the doing by taps. **Kept as `lived-in-v59.json`** (`livedIn.test.ts`, and the
+  overlays snapshot's first entry for it only), since 1.6 changes the save's shape (X3's v59).
+- **The shakedown**, by eye at phone size in the driver's screenshots (every lit building and pole
+  at 20:00 upright and 22:00 sideways, the coop close up, the wheel's stage by day and night, a kite
+  at both fields both ways, Gerald and his plaque). **Fixed**: the kite flew off the top of a phone
+  on its side, where the view is a few tiles tall; it flies lower there, no higher than its own knot
+  below the view's top (`render/passes/kite.ts`). **Logged** in "Where it hurts" 3 and 4: the big
+  wheel's company rare (nobody's week brings them to the fair but its happenings and Agatha's
+  weekend afternoons), the ride sheet's "your first ride today is on the house" staying after the
+  free ride is spent, a kite in hand keeping the rod down as a seed does (`Hands.use` takes a tool
+  up only from another tool), the snowball under way and the rainbow's minutes kept in memory, two
+  rules saying "wind" (`windyOn` and the ambience's own), the photos carrying the chatter bubbles,
+  and a `delights` check that passes in a whole smoke run and can fail run alone. **Logged** in the
+  art notes: the hens heaped at one side of their run, the ride's town green in winter, the barn and
+  coop unlit at the festival (no door, on purpose), the castle's kite field under the woods' crowns.
+- **Perf**: 1.6 against 1.5 on her phone (`origin/main` served from a copy of its own, 1.6's
+  `scripts/perf.mjs` for both), alternating, two runs each at Close by night and at noon: every draw
+  and update crosses 1.5's runs or sits under, her yard by night one run 2 ms over and the other
+  level, Boo Acres (the hens) the same; the heap up 1.2–1.5 MB, the new art baked. The build is one
+  chunk, 2,048.9 kB (690.5 kB gzipped), against 1,963.9 kB (660.7 kB) at 1.5. The table is in
+  `docs/architecture.md`, "1.6, V1.6's review". Smoke 707 of 707 on a dev server of its own,
+  `smoke:offline` 10 of 10, the suite 3,057 tests.
+- **Docs, written for a year from now**: the handoff's cold-start section rewritten for 1.6 (1.6 the
+  last release, save v59, the user's five things (the cloud store, `?perf` on her phone, her eye on
+  the art notes, the parked touches, two stale branches to delete), what to do first if she reports
+  a bug, where each kind of content goes now including hens, kites, a snowman's hat, a delight and
+  an activity, the next decision 387), "After 1.0" saying 1.6 is the release PR with the user's
+  steps (two stale branches to delete among them), the 1.6 plan's sessions recorded under "1.6, the
+  last day" with "How 1.6 was run", "In progress" empty, "Still to put to the user" kept parked;
+  "Where it hurts" rewritten for after 1.6 and a 1.6 perf table in `docs/architecture.md`;
+  `CLAUDE.md`'s "Project" and integration-branch paragraphs and its bullets checked for the new
+  seams (`LIGHT_POLE_JOINS` and the eave rule added; the ride, hens, snow, delights, Gerald and
+  kites were there), its opening line saying there is no plan now, and a small fix with no plan
+  running branching from `main`; the plan's line.
+
+**Rejected:** keeping X1's and X2's five lines and adding a second card for the rest (her phone
+reads one card a version, decision 324's fold); dropping the lights' line to make room (it's the fix
+the user asked for, and the first thing she'll see); a P.S. that says goodbye (nothing in the game
+ends, decision 11, and the user may come back); adding lights to the barn and the coop (a feature:
+only a building with a door is lit, since 0.2's J2); painting the ride's town by the season (new
+art, logged); moving the kite's castle field out from under the trees (a map change, logged);
+mending the ride sheet's line, the hens' heap or the rod with a kite or seed in hand here (each a
+rule in a session's file, small but not a review's, and the release is tonight); playing on from
+October 2026 rather than 2027 (the fixture's town was last played in January 2027, and a town opened
+before its own last day would be a town going backwards).
+
+**The game at the end of the user's subscription.** McFrancisVille is a little town of monsters on
+her phone, a home-screen app that works offline and keeps her town on the phone (and, once the user
+links it, in the cloud). She is a witch-ish girl of her own design in a house she decorates room by
+room (a front room, a back room and an attic under the eaves, and a yard), married to Cody, who is
+there every day, greets her each time she opens the game and remembers what she tells him. Eleven
+neighbours live in town and out at Boo Acres, Whisperwood and Lantern Shore, each with a home, a
+job, a week of their own, things they love and things they remember, and they grow closer to her as
+she talks, gives and helps; the mayor, Rob Boo, waits at the end of a mystery. She farms her beds
+and Scarah's fields, keeps hens, bakes and cooks, crafts at her workbench, fishes and nets critters
+(a museum of them with Wrapunzel, shinies among them), digs fossils (Gerald stands in the museum
+when they're all given), traces the stars from the castle hill, flies a kite, rides the big wheel,
+plays the fair's games, builds the town's projects, and keeps seven pets who grow fond of her. The
+year turns by the real clock: a Halloween Festival every October with lights, costumes, trick or
+treat and a party, snow and a frozen pond in winter, blossom in spring, fireflies in summer,
+holidays, birthdays, full moons and rainbows. Nothing in it punishes or is lost. It was made by Cody
+for her, with Claude, between 26 September and 26 October 2026, from version 0 to 1.6: decisions
+numbered to 386, 59 versions of the save, and one card from the mayor each time something changed.

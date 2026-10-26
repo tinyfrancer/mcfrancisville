@@ -254,17 +254,23 @@ export const NOTES: readonly PatchNotes[] = [
   {
     version: '1.6',
     lines: [
-      // 1.6's X1: the festival's lights, and their photo on the 31st.
-      "The festival's lights are strung properly now, round every corner and pole to pole at " +
-        'the fair. I had a word with the bats who hung them.',
-      "For your photo with Cody on the 31st, you'll both turn to face the camera. Squeeze in, " +
-        'and say "boo"!',
-      // 1.6's X2: a ride on the big wheel.
-      'You can ride the big wheel at the fair now: once round, nice and slow, with a stop at the very top.',
-      'The view from the top is the whole town. I am told the town looks back.',
-      'Your first ride each day is free, and anyone you know at the fair will hop in beside you.',
+      // 1.6's X1 (the lights, and their photo on the 31st) and X2 (the big wheel), folded by its
+      // review with X3–X6's lines into one card (decision 386).
+      "The festival's lights are strung properly now: I had a word with the bats who hung " +
+        'them. And on the 31st, you and Cody will face the camera. Say "boo"!',
+      'Ride the big wheel at the fair: once round, slow, with a stop at the top. The first ride ' +
+        'each day is free, and the view is the whole town. It looks back.',
+      // X3: the hens.
+      'Chickens at Boo Acres! Feed Henrietta, Peck and Omelette once a day for eggs by morning. ' +
+        'Reginald crows at six; Scarah has asked him to consider seven.',
+      // X4: snow, and the rainbow.
+      'In the snow, tap yourself in your yard to roll a snowman, or throw a snowball anywhere ' +
+        'else. I have been hit four times. After rain, look for a rainbow.',
+      // X6 (Gerald, the kites) and X5 (the small delights).
+      'Give Wrapunzel every fossil and meet Gerald. Fly a kite from the pier on a breezy day. ' +
+        'And stand still a while: a butterfly may land on your hat.',
     ],
-    ps: 'P.S. Your very first ride comes with a ticket stub. I kept mine. It is in a drawer, with my nerves.',
+    ps: 'P.S. This is my last typed note for a good long while: the typewriter is having a rest. The town is not. It will keep the lamps lit and the kettle warm for you.',
   },
 ];
 
