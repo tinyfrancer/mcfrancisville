@@ -1,5 +1,6 @@
 import {
   ACCESSORY_IDS,
+  fitsPet,
   isAccessory,
   isPet,
   PET_IDS,
@@ -36,7 +37,7 @@ export class Pets {
     }
     for (const [id, what] of Object.entries(saved.wearing ?? {})) {
       if (isPet(id) && typeof what === 'string' && isAccessory(what) && this.owned.has(what)) {
-        this.worn.set(id, what);
+        if (fitsPet(what, id)) this.worn.set(id, what);
       }
     }
     const bones = saved.bones ?? 0;
@@ -102,13 +103,16 @@ export class Pets {
     return this.worn.get(id) ?? null;
   }
 
-  /** Puts something she owns on a pet, or takes off what they're wearing. False if she hasn't it. */
+  /**
+   * Puts something she owns on a pet, or takes off what they're wearing. False if she hasn't it,
+   * or it's made for another pet (1.5's G7).
+   */
   dress(id: PetId, what: AccessoryId | null): boolean {
     if (what === null) {
       this.worn.delete(id);
       return true;
     }
-    if (!this.owned.has(what)) return false;
+    if (!this.owned.has(what) || !fitsPet(what, id)) return false;
     this.worn.set(id, what);
     return true;
   }

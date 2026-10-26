@@ -1,5 +1,5 @@
 import { PROJECTS, type ProjectStage } from '../data/projects';
-import { GREW_LINES } from '../data/affection';
+import { FORAGE_LINES, GREW_LINES } from '../data/affection';
 import { DECOR } from '../data/holidays';
 import { CRITTERS } from '../data/critters';
 import { shinyName, shinyOf } from '../data/shinies';
@@ -641,6 +641,14 @@ export function eventToast(event: WorldEvent): Toast | null {
     case 'petTrick':
       return event.line ? { text: event.line, icon: 'sparkle' } : null;
     case 'petHelped':
+      if (event.job === 'forage' && event.item) {
+        return {
+          text: FORAGE_LINES[event.item === 'friedPickles' ? 1 : 0]
+            .replaceAll('{name}', event.name)
+            .replaceAll('{item}', ITEMS[event.item].name.toLowerCase()),
+          icon: { item: event.item },
+        };
+      }
       return event.job === 'sniff'
         ? { text: `${event.name} is sitting by today's mound. What a good nose!`, icon: 'sparkle' }
         : null;

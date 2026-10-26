@@ -4,7 +4,9 @@ import type { Fondness } from './affection';
 /**
  * Their six real pets (personal_touches.md, "The pets"; decisions.md 17). Florence, Fibi, Dolly
  * and Gary are themselves; Wybie and Elvira have passed, and are here as gentle ghost pets, never
- * sad. Each is hers from the first day, and lives at home until she takes one for a walk.
+ * sad. Each is hers from the first day, and lives at home until she takes one for a walk. Pickle
+ * the possum (1.5's G7, decision 376) came with 1.5, as a new neighbour comes with a release, and
+ * is hers from the moment it lands.
  */
 export interface PetRow {
   /** Their real name, which she can change. */
@@ -19,7 +21,16 @@ export interface PetRow {
   pats: readonly string[];
 }
 
-export const PET_IDS: readonly PetId[] = ['florence', 'fibi', 'dolly', 'gary', 'wybie', 'elvira'];
+/** Pickle last, so the six keep the resting spots they had before him (`restSpots`). */
+export const PET_IDS: readonly PetId[] = [
+  'florence',
+  'fibi',
+  'dolly',
+  'gary',
+  'wybie',
+  'elvira',
+  'pickle',
+];
 
 export const PETS: Record<PetId, PetRow> = {
   florence: {
@@ -88,10 +99,25 @@ export const PETS: Record<PetId, PetRow> = {
       '{name} tucks her head under your chin. She is staying right here.',
     ],
   },
+  pickle: {
+    name: 'Pickle',
+    what: 'Grey-and-white possum. Up all night. Plays dead at compliments.',
+    ghost: false,
+    speed: 4,
+    pats: [
+      "You tell {name} he's handsome. He flops over and plays dead at once. (He's thrilled.)",
+      '{name} holds your finger in his tiny pink hand and blinks up at you, slow and sleepy.',
+      '{name} sniffs your pockets for snacks, finds only pats, and plays dead about it. Bliss.',
+    ],
+  },
 };
 
-/** How an accessory sits on a pet: a band round the neck, spiked, belled, or a bandana's point. */
-export type AccessoryStyle = 'collar' | 'spiked' | 'bell' | 'bandana';
+/**
+ * How an accessory sits on a pet: a band round the neck, spiked, belled, a bandana's point, or a
+ * scarf's two tones (1.5's G7); or one drawn into the frames of the only pet it's for, a bow on an
+ * ear or a lantern carried (`for`).
+ */
+export type AccessoryStyle = 'collar' | 'spiked' | 'bell' | 'bandana' | 'scarf' | 'bow' | 'lantern';
 
 export interface AccessoryRow {
   name: string;
@@ -99,11 +125,14 @@ export interface AccessoryRow {
   /** What Cobweb Corner asks for it; none if she has it from the start. */
   price?: number;
   description: string;
+  /** The one pet it's made for (1.5's G7): drawn into his own frames, so only he can wear it. */
+  for?: PetId;
 }
 
 /**
  * What the pets wear, round their necks (decisions.md 69). Owned like her walls and floors: once
- * she has one, any pet can wear it, and several can wear the same.
+ * she has one, any pet can wear it, and several can wear the same; but Pickle's bow and lantern
+ * are his alone (1.5's G7).
  */
 export const ACCESSORIES: Record<AccessoryId, AccessoryRow> = {
   pinkSpikedCollar: {
@@ -174,12 +203,40 @@ export const ACCESSORIES: Record<AccessoryId, AccessoryRow> = {
     price: 100,
     description: 'Jingles a little. Now you always know where they are.',
   },
+  tinyScarf: {
+    name: 'Tiny striped scarf',
+    style: 'scarf',
+    price: 90,
+    description:
+      'Hand-knitted, scarlet and cream, and just long enough to flap a little in a breeze.',
+  },
+  ribbonBow: {
+    name: 'Ribbon bow',
+    style: 'bow',
+    price: 70,
+    for: 'pickle',
+    description: "A pink bow for one ear. Pickle pretends he doesn't love it. He loves it.",
+  },
+  tailLantern: {
+    name: 'Tail lantern',
+    style: 'lantern',
+    price: 140,
+    for: 'pickle',
+    description:
+      'A little lantern for a possum to carry on his tail. It lights his way home after dark.',
+  },
 };
 
 export const ACCESSORY_IDS = Object.keys(ACCESSORIES) as AccessoryId[];
 
 export function isAccessory(id: string): id is AccessoryId {
   return id in ACCESSORIES;
+}
+
+/** Whether a pet can wear an accessory: any of them, but for one made for one pet alone. */
+export function fitsPet(accessory: AccessoryId, pet: PetId): boolean {
+  const only = ACCESSORIES[accessory].for;
+  return only === undefined || only === pet;
 }
 
 export function isPet(id: string): id is PetId {

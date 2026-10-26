@@ -83,7 +83,20 @@ built). **The `1.5` NOTES row** was made by G6, three lines and a P.S.: G5 and G
 the review folds to five. Decision 375 says what and why. Nothing half done. **G7 bumps next
 (v59) if a row needs it.**
 
-### G7 the pet, V1.5 the review
+### G7: Pickle the possum (`claude/g7-possum`; decision 376; no save change)
+
+**In progress** (draft PR into `v1.4-dev`). Done: the `pickle` row (`data/pets.ts`, hers from the
+moment 1.5 lands, as the six are from the first day: nothing sells pets), his art in
+`sprites/pets.ts` (`pickleFrames`: side ×2, sit front and back, curled asleep, playing dead,
+hanging by his tail ×2; each drawn bare, in his bow and with his lantern, `PetArt.dressed`), three
+accessories (`tinyScarf` for every pet; `ribbonBow` and `tailLantern` his alone, `for`, `fitsPet`),
+his rows in `data/affection.ts` (pats, both tricks in one `TRICKS` routine, the `forage` job and
+`FORAGED`, rests), nocturnal habits and playing dead (`Pet.playDead`, `pickleAwake`, `startled`),
+the forage deed in `PetCare` (once a night, `forage:pickle` in `Takings`), the lantern's glow in
+`render/pets.ts`. Next: tests, smoke's `pets` section, the `1.5` notes line, `CLAUDE.md`, the
+plan's status line, decision 376.
+
+### V1.5 the review
 
 Not started; in the plan's order.
 

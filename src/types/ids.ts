@@ -1441,12 +1441,12 @@ export type VillagerId =
   | 'robBoo';
 
 /**
- * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie
- * and Elvira as gentle ghost pets.
+ * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, Wybie
+ * and Elvira as gentle ghost pets, and Pickle the possum (1.5's G7, decision 376).
  */
-export type PetId = 'florence' | 'fibi' | 'dolly' | 'gary' | 'wybie' | 'elvira';
+export type PetId = 'florence' | 'fibi' | 'dolly' | 'gary' | 'wybie' | 'elvira' | 'pickle';
 
-/** What a pet wears round its neck: collars and bandanas (phase 11). */
+/** What a pet wears: collars and bandanas (phase 11), and a scarf, a bow and a lantern (1.5's G7). */
 export type AccessoryId =
   | 'pinkSpikedCollar'
   | 'plumSpikedCollar'
@@ -1459,7 +1459,10 @@ export type AccessoryId =
   | 'tealCollar'
   | 'roseCollar'
   | 'bellCollar'
-  | 'ghostBandana';
+  | 'ghostBandana'
+  | 'tinyScarf'
+  | 'ribbonBow'
+  | 'tailLantern';
 
 /** What she can hold in her hand from the quick bar, besides a seed (phase M). A rod comes later. */
 export type ToolId = 'hands' | 'net' | 'can' | 'rod';
