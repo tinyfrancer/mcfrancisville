@@ -14,7 +14,9 @@ It is a static site (TypeScript + Vite, Canvas 2D, and a backend, a tiny one: `a
 in `localStorage`, and go up sealed to the cloud save beside it (`src/persistence/cloud.ts`; the
 store is the user's to link, README's "Cloud save").
 
-**The current plan is `docs/v1_plan.md`** (settled 2026-10-06, decisions 266–275, after
+**There is no plan now; the last was `docs/v1.6_plan.md`, and 1.6 the last release** (the end
+of this paragraph). The releases, oldest first: **the V1 plan was `docs/v1_plan.md`** (settled
+2026-10-06, decisions 266–275, after
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
 word, 1.0 when it is all in; its status line says which have landed. **The V1 plan is complete**
@@ -38,11 +40,15 @@ decision 377): content from `v1.4-dev`, every session Opus. **1.4 is on her phon
 cards `1.4` and `1.4.1`). **1.5 is the release PR #234** (`v1.4-dev` → `main`, "Release 1.5":
 the photo mode, the attic and Pickle the possum, save v57 → v58), the coordinator's to merge at
 the user's word; `main` after it is the game as it stands. **1.5 was merged by the coordinator
-on 2026-10-26: it is on her phone.** **The plan now is `docs/v1.6_plan.md`** (settled 2026-10-26,
-decision 378), the last day: the festival's lights fixed and the 31st rehearsed, a ride on the big
-wheel, chickens at Boo Acres, snow and puddles, small delights, the museum's skeleton and a kite,
-from `v1.6-dev`, every session Opus, 1.6 cut tonight. `docs/v1.4_plan.md`, `docs/v1.3_plan.md`,
-`docs/v1.1_plan.md`, `docs/v1_plan.md` and the plans before them are complete.
+on 2026-10-26: it is on her phone.** **The 1.6 plan is complete** (`docs/v1.6_plan.md`,
+settled 2026-10-26, decision 378; its review, V1.6, decision 386), the last day of the user's
+subscription: the festival's lights fixed and the 31st rehearsed, a ride on the big wheel,
+chickens at Boo Acres, snow and puddles, small delights, the museum's skeleton and a kite, from
+`v1.6-dev`, every session Opus. **1.6 is the release PR "Release 1.6"** (`v1.6-dev` → `main`,
+save v58 → v59), the coordinator's to merge at the user's word; `main` after it is the game as it
+stands. **There is no plan after 1.6**: `docs/v1.6_plan.md` and every plan before it are
+complete, and a session starting cold with nothing asked of it changes nothing, reads the
+handoff's cold-start section and asks the user what they'd like next.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
@@ -87,15 +93,19 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.6-dev` is the integration branch for 1.6** (`v1.4-dev` was 1.4 and 1.5's, `v1.3-dev`
-1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212), made from
-`main` the day 1.5 merged and added to `vercel.json`'s no-preview list (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
-soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
+**`v1.6-dev` was the integration branch for 1.6** and ends with it (`v1.4-dev` was 1.4 and
+1.5's, `v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision
+212). **The next plan makes its own from `main`** once the release PR has merged, and adds it to
+`vercel.json`'s no-preview list that day (decision 265). While a plan runs, each session
+branches from its branch, its PR targets it, and it is merged with a merge commit as soon as it is
+green. With no plan running, a small fix branches from `main` and its PR targets `main`, the
+user's to merge. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
 0.6–0.9, decision 324). A session that changes the save bumps `SAVE_VERSION` only in its last
 commit, after merging the latest integration branch, and says so in its handoff heading; save-bumping PRs
-merge one at a time. Vercel previews stay off for every `claude/**` branch and the dev branches, by
+merge one at a time. Vercel previews stay off for every `claude/**` branch, the dev branches and
+`release-*` (a release PR's head), by
 `git.deploymentEnabled` in `vercel.json` (the user's call), so pushes cost no deployments; only
 `main` deploys. They stay off until the user asks for them back (remove those lines).
 
@@ -249,7 +259,8 @@ what each owns, and where it hurts. Update it when a seam moves.
 - **The Hollow Fairground** (0.2's M1, decision 200) is through a `gate` at the town's south-east,
   open from the first day: `FAIRGROUND` in `maps.ts` (its own `FAIR_LEGEND`,
   `FAIRGROUND_SPOTS` at the stage and each stall), art in `src/sprites/fairground.ts` (the stage,
-  four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart),
+  four stalls, the big wheel, the fortune tent, light poles whose strings meet three tiles apart:
+  `joins` from `parseMap` and a half swag a side, `LIGHT_POLE_JOINS`, 1.6's X1, decision 380),
   and the fortune tent a room (`INTERIORS.fortuneTent`, Agatha's on weekend afternoons).
   What there is to do there (0.2's M2, decision 201) is `ACTIVITIES` (`src/data/activities.ts`:
   a stall's prop or a fixture, a cost, `hours`, and a game of taps, a fortune or snacks), worked
@@ -865,7 +876,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   puts out a Halloween shelf of costumes (a shelf may be `on` a festival); the neighbours dress up
   a few more each week (`src/data/costumes.ts`, `src/systems/costumes.ts`, `COSTUMES` in
   `src/sprites/villagers.ts`); lights hang under every building's eaves, found from its roof keys
-  (`eaveLights` in `src/sprites/holidays.ts`); and it has a tune of its own (`musicFor` in
+  (`eaveLights` in `src/sprites/holidays.ts`: one string hugging the roof's edge, on round a gable
+  up to `EAVE_STEEPEST` and a corner up to `EAVE_CORNER`, 1.6's X1, decision 380, held by
+  `tests/sprites/eaveLights.test.ts`; a building with no door, the barn and the coop, has none);
+  and it has a tune of its own (`musicFor` in
   `src/audio/cues.ts`). Its middle weeks are J3's (decision 156): the pumpkin patch on her farm
   (`pumpkinPatch`, `i` in the map) grows by the festival's day (`src/systems/pumpkinPatch.ts`,
   rows in `src/data/pumpkinPatch.ts`, art in `src/sprites/pumpkinPatch.ts`) and gives a patch
