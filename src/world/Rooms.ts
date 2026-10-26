@@ -25,6 +25,7 @@ import {
 } from '../systems/decor';
 import { isSmall } from '../data/tabletop';
 import { takes } from '../systems/display';
+import { isSnowman } from '../systems/snow';
 import type { Tile } from '../systems/pathfinding';
 import type { FlooringId, FurnitureId, ItemId, RoomId, WallpaperId } from '../types/ids';
 import type { Decorable } from './services/Decorator';
@@ -268,8 +269,9 @@ export class Rooms implements Decorable {
    * Why a piece can't come out in the room she's in at all: never, since 1.1's W2 gave a
    * planter's bed its room (planters stayed in the front room before, decision 233).
    */
-  refusesHere(): Refusal | null {
-    return null;
+  refusesHere(id?: FurnitureId): Refusal | null {
+    // A snowman stays out in the cold (1.6's X4).
+    return id !== undefined && isSnowman(id) ? 'melts' : null;
   }
 
   /**
@@ -277,6 +279,7 @@ export class Rooms implements Decorable {
    * piece left in the chest, if she has none or there's no room anywhere.
    */
   takeOut(id: FurnitureId, near: Tile, standing: Tile | null): Placed | null {
+    if (this.refusesHere(id)) return null;
     const piece = nearestFit(this.room, this.at.pieces, id, near, standing);
     if (!piece || !this.chest.unstore(id)) return null;
     this.at.pieces.push(piece);

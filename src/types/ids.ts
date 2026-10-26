@@ -334,6 +334,8 @@ export type ItemId =
   // The hens' eggs at Boo Acres, and the meringue ghosts baked from them with Wrapunzel (1.6's X3).
   | 'egg'
   | 'meringueGhost'
+  // A snowman swept in at the thaw, and the first rainbow after rain (1.6's X4).
+  | SnowKeepsakeId
   | DishId
   | FruitId
   | CritterId
@@ -995,7 +997,15 @@ export type FurnitureId =
   | FigurineId
   | 'carvedGourdon'
   // Cody's keepsake for her first day (V1's R1).
-  | 'welcomeSampler';
+  | 'welcomeSampler'
+  // A snowman she rolled in her yard (1.6's X4), standing till the thaw.
+  | SnowmanId;
+
+/** A snowman she rolls in her yard (1.6's X4): one a hat, dealt by the tile it stands on. */
+export type SnowmanId = 'snowmanTopHat' | 'snowmanBobble' | 'snowmanWitch';
+
+/** The keepsakes of 1.6's X4: a snowman that didn't melt, and a jar of the first rainbow. */
+export type SnowKeepsakeId = 'meltlessSnowman' | 'rainbowJar';
 
 /** The squishies she collects (0.2's F2), kept apart for the figurines (0.3's C3). */
 export type SquishyId =

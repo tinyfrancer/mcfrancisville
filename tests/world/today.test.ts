@@ -129,6 +129,9 @@ function holds(h: Harness, line: TodayLine): boolean {
       return (
         isFairDay(day) && w.activities.freeRide() && w.activities.isOpen('bigWheel') === line.open
       );
+    // 1.6's X4.
+    case 'rainbow':
+      return w.weather.rainbow() !== null;
     // 1.5's G4.
     case 'stars':
       return (

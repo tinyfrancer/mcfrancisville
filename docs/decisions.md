@@ -10055,3 +10055,64 @@ block nothing); hens stepped by the world as pets are (above); Takings for once 
 the egg as a `material` (the bag would say "3 egg") or a new kind (every kind's table would
 grow); a card for the recipes at a shop (the eggs would have nowhere to go until she found one);
 meringue ghosts dealt as a fourth day's bake (then they'd need no eggs, or fail without them).
+
+## 383. Snowmen rolled in her yard by a tap on herself, snowballs thrown elsewhere, prints in the snow, splashes in the rain, and a rainbow the first ten minutes out after a rainy day (1.6's X4, 2026-10-26)
+
+**Context:** 1.6's X4 (decision 378). The plan asked for a snowman built by three taps on lying
+snow, swept into her chest as a keepsake at the thaw; neighbours throwing snowballs at each other;
+footprints in snow; splashes in puddles after rain; and a rainbow over the place for the first
+ten minutes after rain stops. Three things in the game shaped it: a tap on open ground already
+walks her there, so "a tap on the snow" can't also roll a snowball; rain comes a day at a time
+(decision 107), so it never stops partway through a day; and the save stays at v58 (only X3 bumps
+it).
+
+**Decision:**
+
+- **The gesture is a tap on herself** (the tile she stands on), on lying snow (`snowyOn`: the
+  lawn, meadow and long grass while `snowLies`, never a path or ice), with her hands empty. In
+  her yard it rolls a snowball on the tile she faces (or the next lawn tile round her that a piece
+  could stand on); a tap on the snowball walks her up to roll it bigger; the next stands it up as
+  a snowman. Out of her yard, or with no room, she throws one instead. The first time she's in her
+  yard on a snowy day (each time the game is opened), a toast says what the snow is for.
+- **A snowman is a yard piece** (`SnowmanId`: `snowmanTopHat`, `snowmanBobble`, `snowmanWitch`,
+  rows in `data/snow.ts`, art in `sprites/snowman.ts`): saved by `Yard` as any piece is, solid,
+  movable, put away in the chest, priced nowhere. His hat is dealt by the tile he was rolled on
+  (`hatOf`) and kept as his id, so moving him keeps it. He never comes indoors (refusal `melts`
+  from `Rooms.refusesHere`). The snowball under way isn't saved (`Yard`'s `ball`, the moment's
+  play): it stands in the way and on the lawn like a piece, and a reload loses it.
+- **The thaw** is any day snow doesn't lie (`thawsOn`): every snowman in her yard and her chest
+  comes in as a "snowman that didn't melt" (`meltlessSnowman`, kind keepsake) in her bag, one each,
+  with a toast; worked out from what's there, so no flag is saved. In her bag rather than the
+  chest because a keepsake is never stowed (`stowable`).
+- **Only her yard builds snowmen.** Elsewhere a tap on herself throws a snowball three tiles the
+  way she faces, or at the nearest neighbour within four tiles, who laughs and throws one back at
+  her 0.9 s later, gently (`Snow`, `world.snow`; nothing saved). Snowmen anywhere in town, standing
+  till the thaw unsaved, were dropped: a snowman that vanishes on a reload reads as lost.
+- **Snowball fights:** in the snow, outdoors, a beat of two neighbours' chatter is a snowball at
+  the other about one beat in four (`SNOW_CHATS` in `chatOn`), both laughing for the beat
+  (`Neighbourhood.snowballing`), with a thwump; never at her unless she throws first.
+- **Footprints** are a decal in the effects layer (`Effects.print`, drawn by the `effects` pass's
+  new `ground` part), one per footfall of hers on snow, one per tile for a neighbour (boots) or a
+  pet (paws), fading over the last ten of their thirty seconds, 160 at most; left even with
+  reduced motion asked for (a mark, not motion). **Splashes** are a burst at each footfall of hers
+  on a puddle tile, and one per tile for a pet or neighbour. Both are `wiring/underfoot.ts`'s
+  (`underfootOn`, `Trails`), which her footsteps' sounds read too (`snow` and `puddle` grounds).
+- **"After rain" for puddles** is while it rains: puddles only lie on a rainy day's ground (V1's
+  L3), and she splashes through them then. Leaving them a morning longer would rebake the ground
+  wet on a dry day, a look change not asked for.
+- **The rainbow's window:** a day is a rainbow day if it's clear and the day before rained (not
+  snowed: `rainbowDay`). The rainbow is up for ten minutes (`RAINBOW_MS`) from the first moment
+  she's outdoors between 7 and 19 that day while the game is open (`Forecast.rainbow`), so if she
+  plays across 5am into a sunny day after rain, it comes up the moment the rain "stops". Kept in
+  memory: a reload brings ten more minutes, which harms nothing. Drawn by `render/rainbow.ts` as
+  soft bands arcing across the top of the view, its feet fading into the town, fixed to the view
+  as the stars are, in the weather pass's `lit` part, only when the shown weather is clear. A
+  `rainbow` line in Today while it's up, and the first time ever a `rainbowJar` keepsake (an item:
+  `Keepsakes` would need a field). `?rainbow` (dev) puts one up at once.
+
+**Rejected:** a tap on any snowy tile rolling (it would stop her walking in winter); the tile
+above her as well as hers counting as "herself" (a tap a tile up should walk her a tile up); a
+snowball stage as a yard piece (the chest would keep half a snowman into summer); snowmen
+indoors; the keepsake as a furniture figurine in the chest (art at 32 for a table, and the
+coordinator asked for an item); puddles kept after a rainy day; the rainbow at a window's turn on
+a rainy day (rain doesn't stop within a day).

@@ -132,6 +132,21 @@ export const CUES = {
     chime('C6:.5 E6:.25 G6:.25 C7:.5 B6:.25 G6:.25 A6:.5 F6:.25 D6:.25 C6:1.2', 0.12),
     pluck('C4+G4:.75 -:.25 A3+E4:.75 -:.25 F3+C4:.75 -:.25 G3+D4:1', 0.08, 'sine'),
   ),
+  // Snow days (1.6's X4): a snowball's whoosh and soft thwump as it lands, a crunch as one rolls,
+  // and a rainbow's bright run up over a hum.
+  thwump: cue(
+    { wave: 'brush', notes: line('E6:.4'), gain: 0.05, q: 1.5 },
+    { wave: 'kick', notes: line('-:1.8 G3:.3'), gain: 0.2 },
+    { wave: 'brush', notes: line('-:1.8 C6:.35'), gain: 0.12, q: 0.8 },
+  ),
+  rolled: cue(
+    { wave: 'brush', notes: line('A5:.2 -:.1 G5:.25'), gain: 0.14, q: 1.2 },
+    chime('-:.5 E5:.3', 0.08),
+  ),
+  rainbow: cue(
+    chime('C5:.15 D5:.15 E5:.15 G5:.15 A5:.15 C6:.15 D6:.15 E6:1.2', 0.12),
+    chime('-:.6 C4+G4:2', 0.06),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -193,6 +208,16 @@ export function cueOf(event: WorldEvent): CueId | null {
       return 'found';
     case 'rode':
       return 'ride';
+    case 'threw':
+      return 'thwump';
+    case 'snowball':
+      return 'rolled';
+    case 'snowman':
+      return 'made';
+    case 'thawed':
+      return 'found';
+    case 'rainbow':
+      return 'rainbow';
     case 'snackBought':
       return 'coin';
     case 'ate':

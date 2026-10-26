@@ -162,6 +162,7 @@ const ORDER = [
   'scarah',
   'holidays',
   'seasons',
+  'snowDay',
   'rare',
   'festival',
   'trickOrTreat',

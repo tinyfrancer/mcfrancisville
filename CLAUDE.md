@@ -416,6 +416,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   tracks and the roofs and the rain falls as snow, the jack-o'-lanterns are snow lanterns (a
   prop's other shape for a season is `RESHAPED`, 1.0.1's X2, decision 327), and Nessa skates on
   the frozen pond (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
+  **Snow days** (1.6's X4, decision 383): on lying snow (`snowyOn` in `src/systems/snow.ts`) a tap
+  on herself, hands empty, rolls a snowball beside her in her yard (`Yard`'s unsaved `ball`), a
+  tap on it rolls it bigger and the next stands a snowman, a yard piece (`SnowmanId`, rows
+  `src/data/snow.ts`, art `src/sprites/snowman.ts`, his hat by his tile, `hatOf`; never indoors,
+  refusal `melts`); out of her yard she throws one (`world.snow`, `Snow`), at a neighbour within
+  four tiles, who laughs and throws one back; at the thaw her snowmen come in as `meltlessSnowman`
+  keepsakes. Two neighbours chatting in the snow throw snowballs now and then (`chatOn`'s snowy
+  beats, `Neighbourhood.snowballing`), and steps in snow leave footprints (`Effects.print`, the
+  effects pass's `ground` part, from `src/wiring/underfoot.ts`'s `Trails`).
 - **Weather and life outdoors** (phase L, decisions 107–108): a day is clear, rainy or foggy by its
   key (`src/systems/weather.ts`, always clear on her special days), and `world.weather`
   (`Forecast`) says which. Rain waters every bed (`rainsOn` in `systems/farming.ts`); critters are
@@ -432,7 +441,11 @@ what each owns, and where it hurts. Update it when a seam moves.
   dress for the month or the holiday (`data/geese.ts`, `gooseOn` in `systems/holidays.ts`, art
   `src/sprites/geese.ts`). About a third of rainy days are thunderstorms (`stormOn`, `lastFlash`
   in `systems/weather.ts`): `drawFlash` in `src/render/weather.ts`, and a `thunder` moment's
-  rumble from `world.weather`.
+  rumble from `world.weather`. On a rainy day she and her pets splash through the puddles
+  (`underfootOn`, a `puddle` footstep), and on a clear day after a rainy one a rainbow arcs over
+  the view the first ten minutes she's out (`Forecast.rainbow`, `rainbowDay`, `render/rainbow.ts`
+  in the weather pass; a Today line, a `rainbowJar` the first time; `?rainbow` in a dev build;
+  1.6's X4, decision 383).
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
   solid), crops are rows in `src/data/crops.ts`, the growing rules are `src/systems/farming.ts`,
   and `src/world/Farm.ts` holds which beds are tilled, what's in them and her sprinklers (save

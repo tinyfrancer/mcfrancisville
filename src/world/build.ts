@@ -74,6 +74,7 @@ import { Projects } from './services/Projects';
 import type { Forecast } from './services/Forecast';
 import type { Fountain } from './services/Fountain';
 import type { Stargazing } from './services/Stargazing';
+import type { Snow } from './services/Snow';
 import { Garden } from './services/Garden';
 import { Barn } from './services/Barn';
 import { Gathering } from './services/Gathering';
@@ -156,6 +157,8 @@ export abstract class WorldParts {
   readonly fountain: Fountain;
   /** The night sky through a telescope, and her star chart (1.5's G4). */
   readonly stargazing: Stargazing;
+  /** Snow to play in, in winter (1.6's X4). */
+  readonly snow: Snow;
   /** The day's window, what's on today, and the calendar (phase N). */
   readonly calendar: Calendar;
   /** The notes on the board by the square, and answering them (phase N). */
@@ -389,8 +392,9 @@ export abstract class WorldParts {
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
     this.rareEvents = festival.rareEvents;
     areaMade('festivals');
-    const air = outdoors(shared, zones, outside, mailbox);
+    const air = outdoors(shared, zones, outside, mailbox, this.neighbourhood);
     ({ weather: this.weather, fountain: this.fountain, stargazing: this.stargazing } = air);
+    this.snow = air.snow;
     areaMade('outdoors');
     this.activities = fairground(shared, this.weather).activities;
     areaMade('fairground');
@@ -454,6 +458,7 @@ export abstract class WorldParts {
       activities: this.activities,
       collecting: this.collecting,
       stargazing: this.stargazing,
+      weather: this.weather,
     });
     areaMade('upNow');
   }

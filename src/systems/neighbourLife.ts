@@ -175,13 +175,34 @@ export const CHAT_BEAT_MS = 2_600;
 const CHATS: readonly (Chatter | null)[] = ['…', '…', '…', '♪', '♪', '♥', null, null];
 
 /**
+ * In the snow (1.6's X4, decision 383) two together throw a snowball at each other now and then
+ * instead, about a beat in four, and laugh; a pause and a song are said less.
+ */
+const SNOW_CHATS: readonly (Chat | null)[] = [
+  '…',
+  '…',
+  '♪',
+  'snowball',
+  'snowball',
+  '♥',
+  null,
+  null,
+];
+
+/** A beat of chatter: a bubble, or in the snow a snowball thrown at the other. */
+export type Chat = Chatter | 'snowball';
+
+/**
  * What a pair standing together says on a beat of their chat: whose turn it is (the first named,
- * or the second), and the bubble, or nothing for a moment.
+ * or the second), and the bubble, or nothing for a moment. Out in the snow, now and then a
+ * snowball at the other instead, never at her.
  */
 export function chatOn(
   pair: readonly [VillagerId, VillagerId],
   beat: number,
-): { by: VillagerId; chat: Chatter } | null {
-  const chat = CHATS[hashMixed(`chat:${pair[0]}+${pair[1]}:${beat}`) % CHATS.length]!;
+  snowy = false,
+): { by: VillagerId; chat: Chat } | null {
+  const chats = snowy ? SNOW_CHATS : CHATS;
+  const chat = chats[hashMixed(`chat:${pair[0]}+${pair[1]}:${beat}`) % chats.length]!;
   return chat ? { by: pair[beat % 2]!, chat } : null;
 }

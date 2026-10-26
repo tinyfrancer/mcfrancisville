@@ -132,6 +132,8 @@ export interface TodayFacts {
   bigWheel?: { open: boolean } | null;
   /** The eggs waiting in the coop at Boo Acres (1.6's X3). */
   eggs?: number;
+  /** A rainbow up after the rain (1.6's X4), for its ten minutes. */
+  rainbow?: boolean;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -178,6 +180,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'bigWheel'; open: boolean }
   // 1.6's X3: eggs waiting in the coop at Boo Acres.
   | { kind: 'eggs'; eggs: number }
+  // 1.6's X4: a rainbow after the rain, while it's up.
+  | { kind: 'rainbow' }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -329,6 +333,7 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       ...('prop' in at ? { go: { zone: 'fairground' as const, prop: at.prop } } : {}),
     });
   }
+  if (facts.rainbow) lines.push({ kind: 'rainbow', key: `rainbow:${day}` });
   if (facts.bigWheel) {
     lines.push({
       kind: 'bigWheel',

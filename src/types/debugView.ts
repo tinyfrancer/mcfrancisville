@@ -39,7 +39,7 @@ export interface DebugView {
    */
   effects(): {
     shown: {
-      kind: 'pop' | 'burst' | 'emote' | 'ring' | 'outline';
+      kind: 'pop' | 'burst' | 'emote' | 'ring' | 'outline' | 'throw';
       zone: ZoneId;
       age: number;
       icon?: { item: ItemId } | { candy: true } | { parcel: true };
@@ -48,6 +48,8 @@ export interface DebugView {
       over?: { x: number; y: number } | { her: true } | { villager: VillagerId };
     }[];
     particles: number;
+    /** Footprints in the snow where she is (1.6's X4). */
+    footprints: number;
   };
   /**
    * Her neighbours where she is (V1's E3), and how each is drawn this instant: walking, or the
@@ -74,4 +76,6 @@ export interface DebugView {
    * as baked: the average of its first grass tiles, 0 to 255 a channel. Null indoors.
    */
   season(): { season: string; look: string; lawn: number[] } | null;
+  /** How far through its ten minutes a rainbow is (1.6's X4), or null with none up. */
+  rainbow(): number | null;
 }

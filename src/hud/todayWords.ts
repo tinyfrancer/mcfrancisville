@@ -180,6 +180,13 @@ export function todayWords(line: TodayLine): TodayWords {
         glyph: 'sparkle',
       };
     // 1.4's G3: the pond frozen over, to fish through.
+    // 1.6's X4: a rainbow after the rain.
+    case 'rainbow':
+      return {
+        text: 'A rainbow after the rain',
+        small: 'Look up! It only stays a little while.',
+        glyph: { item: 'rainbowJar' },
+      };
     case 'iceFishing':
       return {
         text: "The pond's frozen thick enough to fish",
