@@ -4,6 +4,7 @@ import {
   countArt,
   PARCEL_POP,
   PARTICLE_ART,
+  SNOWBALL_THROWN,
   type EffectArt,
   type ParticleKind,
 } from '../sprites/effects';
@@ -63,7 +64,9 @@ export type Effect =
   /** Where her finger came down (V1's E4): a ring that opens and fades. */
   | { kind: 'ring'; at: Point; delayMs?: number }
   /** What she tapped, bracketed for a beat (V1's E4): its tiles, or a neighbour as they move. */
-  | { kind: 'outline'; around: Outlined; delayMs?: number };
+  | { kind: 'outline'; around: Outlined; delayMs?: number }
+  /** A snowball thrown (1.6's X4): from hands to hands, or to a spot, landing in a puff. */
+  | { kind: 'throw'; from: Anchor; to: Anchor; delayMs?: number };
 
 /** What a tap's outline goes round: a box of tiles, or a neighbour, standing or sat. */
 export type Outlined = { box: TileBox } | { villager: VillagerId };
@@ -92,6 +95,16 @@ export const OUTLINE_MS = 640;
 export const STILL_RING_MS = 240;
 /** How many particles there can be at once, across every burst. */
 export const POOL_SIZE = 96;
+/** A snowball's flight (1.6's X4), and how high its arc lifts. */
+export const THROW_MS = 460;
+const THROW_LIFT = 14;
+/** From over a head, a thrower's hands are this far down. */
+const HANDS_FROM_HEAD = 18;
+/** A footprint in the snow stays this long, fading over the last part of it (1.6's X4). */
+export const PRINT_MS = 30_000;
+const PRINT_FADE_MS = 10_000;
+/** How many footprints there can be at once; the oldest goes first. */
+export const PRINT_POOL = 160;
 
 /** How high a pop's arc lifts at its middle, and how far it floats up after. */
 const ARC_LIFT = 22;
@@ -190,7 +203,34 @@ const MOTION: Record<ParticleKind, Motion> = {
     sway: 0,
     frameMs: 0,
   },
+  snow: {
+    life: 520,
+    count: 7,
+    spread: 5,
+    vx: [-0.05, 0.05],
+    vy: [-0.12, -0.05],
+    gravity: 0.0005,
+    sway: 0,
+    frameMs: 260,
+  },
 };
+
+/** What leaves a footprint (1.6's X4): her boots, a neighbour's, or a pet's paws. */
+export type PrintKind = 'boot' | 'paw';
+
+/** A footprint in the snow, in world pixels: where, which way, which foot, how old. */
+interface Print {
+  zone: ZoneId;
+  x: number;
+  y: number;
+  /** Across the way she walks (left and right) or along it (up and down). */
+  across: boolean;
+  kind: PrintKind;
+  age: number;
+}
+
+/** What she's walking on, for what a footfall leaves: a footprint in snow, a splash in a puddle. */
+export type Underfoot = 'snow' | 'puddle' | null;
 
 /** One pooled bit, in world pixels. */
 interface Particle {
@@ -313,6 +353,9 @@ export class Effects {
   private time = 0;
   private nextPop = 0;
   private lastFootfall: number | null = null;
+  /** Which foot fell last, so her footprints go left, right, left. */
+  private foot = 0;
+  private readonly prints: Print[] = [];
 
   constructor(options: EffectsOptions = {}) {
     this.reduced = options.reduced ?? (() => false);
@@ -337,7 +380,7 @@ export class Effects {
   /** Something to show in `zone`. A burst with reduced motion asked for shows nothing. */
   push(zone: ZoneId, effect: Effect): void {
     const still = this.reduced();
-    if (effect.kind === 'burst' && still) return;
+    if ((effect.kind === 'burst' || effect.kind === 'throw') && still) return;
     let delay = effect.delayMs ?? 0;
     if (effect.kind === 'pop') {
       delay = Math.max(delay, this.nextPop - this.time);
@@ -360,15 +403,68 @@ export class Effects {
    */
   walking(
     zone: ZoneId,
-    player: { x: number; y: number; moving: boolean; walkMs: number },
+    player: { x: number; y: number; moving: boolean; walkMs: number; facing?: string },
     outdoors: boolean,
+    underfoot: Underfoot = null,
   ): void {
     const step = player.moving ? Math.floor(player.walkMs / STEP_MS) : null;
     const fell = step !== null && this.lastFootfall !== null && step !== this.lastFootfall;
     this.lastFootfall = step;
-    if (!fell || !outdoors || this.reduced()) return;
+    if (!fell || !outdoors) return;
+    this.foot = 1 - this.foot;
     const feet = { x: player.x, y: player.y + FEET_BELOW_CENTRE };
-    this.spawn(zone, 'dust', feet, 1, 3, 0.6);
+    // A footprint isn't motion: it's left even with reduced motion asked for (1.6's X4).
+    const across = player.facing === 'left' || player.facing === 'right';
+    if (underfoot === 'snow') {
+      const side = this.foot === 0 ? -3 : 3;
+      this.print(zone, across ? feet.x : feet.x + side, across ? feet.y + side : feet.y, across);
+      return;
+    }
+    if (this.reduced()) return;
+    if (underfoot === 'puddle') this.spawn(zone, 'splash', feet, 4, 4);
+    else this.spawn(zone, 'dust', feet, 1, 3, 0.6);
+  }
+
+  /**
+   * A footprint in the snow at a point (1.6's X4): her boots', a neighbour's or a pet's paws',
+   * fading after a while. The oldest goes when there are too many.
+   */
+  print(zone: ZoneId, x: number, y: number, across: boolean, kind: PrintKind = 'boot'): void {
+    if (this.prints.length >= PRINT_POOL) this.prints.shift();
+    this.prints.push({ zone, x: Math.round(x), y: Math.round(y), across, kind, age: 0 });
+  }
+
+  /** How many footprints lie in `zone` (or anywhere), for the tests and the smoke check. */
+  footprints(zone?: ZoneId): number {
+    return this.prints.filter((p) => zone === undefined || p.zone === zone).length;
+  }
+
+  /** The footprints in `zone`, on the ground under everything standing (1.6's X4). */
+  drawPrints(ctx: CanvasRenderingContext2D, zone: ZoneId, cam: Point): void {
+    ctx.fillStyle = PALETTE.snowDeep;
+    for (const p of this.prints) {
+      if (p.zone !== zone) continue;
+      const left = PRINT_MS - p.age;
+      ctx.globalAlpha = 0.75 * Math.min(1, left / PRINT_FADE_MS);
+      const x = p.x - cam.x;
+      const y = p.y - cam.y;
+      if (p.kind === 'paw') {
+        ctx.fillRect(x - 1, y, 3, 2);
+        ctx.fillRect(x - 2, y - 2, 1, 1);
+        ctx.fillRect(x, y - 3, 1, 1);
+        ctx.fillRect(x + 2, y - 2, 1, 1);
+        continue;
+      }
+      // A boot: its sole and, a gap behind, its heel.
+      if (p.across) {
+        ctx.fillRect(x - 3, y - 1, 3, 3);
+        ctx.fillRect(x + 1, y - 1, 2, 3);
+      } else {
+        ctx.fillRect(x - 1, y - 3, 3, 3);
+        ctx.fillRect(x - 1, y + 1, 3, 2);
+      }
+    }
+    ctx.globalAlpha = 1;
   }
 
   /** Everything moved on by one step of the simulation. */
@@ -379,7 +475,19 @@ export class Effects {
       l.age += deltaMs;
       if (l.age < 0) continue;
       if (!l.started) this.begin(l, resolve);
-      if (l.age >= l.life) this.live.splice(i, 1);
+      if (l.age >= l.life) {
+        this.live.splice(i, 1);
+        // A snowball lands in a puff of snow where it was thrown.
+        if (l.effect.kind === 'throw') {
+          const at = handsOf(l.effect.to, resolve);
+          if (at) this.spawn(l.zone, 'snow', at);
+        }
+      }
+    }
+    for (let i = this.prints.length - 1; i >= 0; i--) {
+      const p = this.prints[i]!;
+      p.age += deltaMs;
+      if (p.age >= PRINT_MS) this.prints.splice(i, 1);
     }
     for (const p of this.pool) {
       if (!p.active) continue;
@@ -408,6 +516,7 @@ export class Effects {
       if (at) this.spawn(l.zone, e.particle, at, e.count, e.spread);
       l.life = 0;
     }
+    if (e.kind === 'throw') l.from = handsOf(e.from, resolve);
   }
 
   private spawn(
@@ -501,6 +610,7 @@ export class Effects {
       if (e.kind === 'pop') this.drawPop(ctx, l, e, cam, resolve, still);
       else if (e.kind === 'emote') drawEmote(ctx, l, e, cam, resolve, still);
       else if (e.kind === 'ring') drawRing(ctx, ringAt(l.age, l.life, still), e.at, cam);
+      else if (e.kind === 'throw') drawThrow(ctx, l, handsOf(e.to, resolve), cam);
       else if (e.kind === 'outline') {
         const rect =
           'box' in e.around ? boxRect(e.around.box) : resolve.figure?.(e.around.villager);
@@ -550,7 +660,33 @@ function lifeOf(effect: Effect, still: boolean): number {
       return OUTLINE_MS;
     case 'burst':
       return 0;
+    case 'throw':
+      return THROW_MS;
   }
+}
+
+/** Where a snowball leaves or lands: a thrower's hands, under their head, or the point itself. */
+function handsOf(anchor: Anchor, resolve: Resolve): Point | null {
+  const at = resolve(anchor);
+  if (!at) return null;
+  return isPoint(anchor) ? at : { x: at.x, y: at.y + HANDS_FROM_HEAD };
+}
+
+/** Where a snowball is, `t` (0 to 1) of the way along its arc from `from` to `to`. */
+export function throwAt(t: number, from: Point, to: Point): Point {
+  const lift = THROW_LIFT * 4 * t * (1 - t);
+  return {
+    x: Math.round(from.x + (to.x - from.x) * t),
+    y: Math.round(from.y + (to.y - from.y) * t - lift),
+  };
+}
+
+function drawThrow(ctx: CanvasRenderingContext2D, l: Live, to: Point | null, cam: Point): void {
+  if (!l.from || !to) return;
+  const at = throwAt(Math.min(1, l.age / l.life), l.from, to);
+  const sprite = bakeIcon('effect:snowball', SNOWBALL_THROWN.source, SNOWBALL_THROWN.palette);
+  ctx.globalAlpha = 1;
+  ctx.drawImage(sprite, at.x - sprite.width / 2 - cam.x, at.y - sprite.height / 2 - cam.y);
 }
 
 function particleAlpha(age: number, life: number): number {
@@ -742,6 +878,9 @@ function drawBrackets(
 export function effectsPass(world: World, zone: ZoneId, effects: Effects | null): Pass {
   return {
     name: 'effects',
+    ground(ctx, { cam }) {
+      effects?.drawPrints(ctx, zone, cam);
+    },
     lit(ctx, { cam, light }) {
       if (effects) drawGlints(ctx, effects.glints(zone), cam, light.lamps);
       effects?.draw(ctx, zone, cam, resolverFor(world));

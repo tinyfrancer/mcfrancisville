@@ -60,7 +60,9 @@ type Visit =
   | { kind: 'ice'; toward: Tile }
   | { kind: 'wes'; at: Tile }
   /** Someone passing through (V1's R3): the wayfarer, or a visitor staying the week. */
-  | { kind: 'passer'; who: PasserId; at: Tile };
+  | { kind: 'passer'; who: PasserId; at: Tile }
+  /** The snowball she's rolling in her yard (1.6's X4). */
+  | { kind: 'snowball'; at: Tile };
 
 /**
  * What a tap has set her off toward, for the view to outline for a beat (V1's E4, decision 283):
@@ -222,6 +224,7 @@ export class World extends WorldParts {
         return null;
       case 'wes':
       case 'passer':
+      case 'snowball':
         return tile(visit.at);
     }
   }
@@ -258,6 +261,8 @@ export class World extends WorldParts {
     if (critter) return this.stalk(critter);
     const pet = this.petCare.petAt(tx, ty);
     if (pet) return this.approach(pet);
+    const played = this.inTheSnow(tx, ty);
+    if (played !== null) return played;
     const prop = this.zone.propAt(tx, ty);
     const piece =
       this.scene === 'home'
@@ -285,6 +290,27 @@ export class World extends WorldParts {
     } else if (piece && FURNITURE[piece.id].layer !== 'rug') visit = { kind: 'piece', piece };
     else if (thing && worthVisiting(thing)) visit = { kind: 'thing', thing };
     return this.walkTo(goals, visit) || this.toTheIce(goals);
+  }
+
+  /**
+   * Snow days (1.6's X4): a tap on her snowball walks up to roll it on; a tap on herself in the
+   * snow, her hands empty, rolls one beside her in her yard or throws one anywhere else. Null for
+   * a tap that's neither, to be what it would be any other day.
+   */
+  private inTheSnow(tx: number, ty: number): boolean | null {
+    if (this.snow.snowballAt(tx, ty)) {
+      const at = { tx, ty };
+      const here = this.movement.tile;
+      const goals = reach(here, at) === 1 ? [here] : this.zone.standBeside(tx, ty);
+      return this.walkTo(goals, { kind: 'snowball', at });
+    }
+    const here = this.movement.tile;
+    if (tx !== here.tx || ty !== here.ty || this.player.moving) return null;
+    if (this.hands.held !== 'hands') return null;
+    const played = this.snow.play(here, this.player.facing);
+    if (!played) return null;
+    for (const e of played) this.ctx.moments.push(e);
+    return true;
   }
 
   /**
@@ -363,6 +389,7 @@ export class World extends WorldParts {
     this.marriage.check();
     this.deliveries.check();
     this.weather.check();
+    this.snow.check();
     this.holidays.check();
     this.calendar.check();
     this.visits.check();
@@ -530,6 +557,12 @@ export class World extends WorldParts {
       arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
       this.face(here, arrived.toward);
       return [arrived, this.rareEvents.meet(who)];
+    },
+    snowball: ({ at }, here, arrived) => {
+      if (reach(here, at) !== 1 || !this.snow.snowballAt(at.tx, at.ty)) return [arrived];
+      arrived.toward = { tx: at.tx, ty: at.ty, w: 1, h: 1 };
+      this.face(here, arrived.toward);
+      return [arrived, ...this.snow.roll(here)];
     },
     ice: ({ toward }, here, arrived) => {
       const ice = iceBeside(here, toward, this.slipsOn);

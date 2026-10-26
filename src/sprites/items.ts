@@ -9,6 +9,7 @@ import { ORCHARD_ITEM_ART } from './orchard';
 import { RARE_KEEPSAKE_ART } from './rareEvents';
 import { STAR_MAP_ART } from './stars';
 import { TICKET_STUB_ART } from './fairRide';
+import { SNOW_KEEPSAKE_ART } from './snowman';
 import { FAIR_PRIZE_ART } from './fairPrizes';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
@@ -2608,6 +2609,8 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   starMap: STAR_MAP_ART,
   // From her first ride on the big wheel (1.6's X2).
   ticketStub: TICKET_STUB_ART,
+  // A snowman that didn't melt, and the first rainbow in a jar (1.6's X4).
+  ...SNOW_KEEPSAKE_ART,
   // Only ever won at the Hollow Fairground (V1's R6b).
   ...FAIR_PRIZE_ART,
 };

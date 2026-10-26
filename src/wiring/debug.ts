@@ -55,7 +55,12 @@ export function exposeForDebugging(d: Debugging): void {
     },
     groundSeams: () => view().groundSeams?.() ?? null,
     seeThroughCrowns: () => view().seeThroughCrowns?.() ?? [],
-    effects: () => ({ shown: effects.shown(), particles: effects.particles(world.scene) }),
+    effects: () => ({
+      shown: effects.shown(),
+      particles: effects.particles(world.scene),
+      footprints: effects.footprints(world.scene),
+    }),
+    rainbow: () => world.weather.rainbow(),
     transition: () => transitions.state(),
     motion: () => view().motion?.() ?? { props: [], flyers: 0, leaves: 0 },
     season: () => view().seasonNow?.() ?? null,
@@ -71,7 +76,7 @@ export function exposeForDebugging(d: Debugging): void {
       her: world.poses.face(),
       neighbours: world.neighbourhood
         .neighboursIn(world.scene)
-        .map((n) => ({ id: n.id, feel: world.talk.feelingOf(n.id) })),
+        .map((n) => ({ id: n.id, feel: world.talk.feelingOf(n.id) ?? world.snow.feelingOf(n.id) })),
     }),
   };
   Object.assign(window, { world, view: debug, sound });

@@ -130,6 +130,8 @@ export interface TodayFacts {
   stars?: { constellation: ConstellationId; found: boolean; showers: boolean } | null;
   /** The big wheel turning on a fair day (1.6's X2), while the day's free ride is still to be had. */
   bigWheel?: { open: boolean } | null;
+  /** A rainbow up after the rain (1.6's X4), for its ten minutes. */
+  rainbow?: boolean;
 }
 
 /** Where a line takes her, if it can: up to a neighbour, or to a place, and up to what's there. */
@@ -174,6 +176,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'stars'; constellation: ConstellationId; found: boolean; showers: boolean }
   // 1.6's X2: the big wheel turning on a fair day, the first ride free.
   | { kind: 'bigWheel'; open: boolean }
+  // 1.6's X4: a rainbow after the rain, while it's up.
+  | { kind: 'rainbow' }
 );
 
 export type TodayKind = TodayLine['kind'];
@@ -317,6 +321,7 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       ...('prop' in at ? { go: { zone: 'fairground' as const, prop: at.prop } } : {}),
     });
   }
+  if (facts.rainbow) lines.push({ kind: 'rainbow', key: `rainbow:${day}` });
   if (facts.bigWheel) {
     lines.push({
       kind: 'bigWheel',

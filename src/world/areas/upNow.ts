@@ -31,6 +31,7 @@ import type { Noticeboard } from '../services/Noticeboard';
 import type { Shops } from '../services/Shops';
 import { UpNow } from '../services/UpNow';
 import type { Stargazing } from '../services/Stargazing';
+import type { Forecast } from '../services/Forecast';
 import type { Shared } from './shared';
 
 /** What Today reads (V1's R2), each a service made before it. */
@@ -57,6 +58,8 @@ export interface UpNowParts {
   collecting: Collecting;
   /** The night sky, for a clear night at the telescope (1.5's G4). */
   stargazing: Stargazing;
+  /** A rainbow after the rain (1.6's X4); none in a test that doesn't give the weather. */
+  weather?: Forecast;
 }
 
 /** A clear night for the telescope, and what's to trace (1.5's G4). */
@@ -165,6 +168,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       shiny: parts.collecting.shinyHere(),
       iceFishing: isFrozen(day),
       stars: starsTonight(parts.stargazing),
+      rainbow: (parts.weather?.rainbow() ?? null) !== null,
     };
   });
 }

@@ -10,7 +10,11 @@ import {
   STILL_POP_MS,
   STILL_RING_MS,
   OUTLINE_MS,
+  PRINT_MS,
+  PRINT_POOL,
   RING_MS,
+  THROW_MS,
+  throwAt,
   outlineAt,
   popAt,
   ringAt,
@@ -214,5 +218,68 @@ describe('a tap (V1, decision 283)', () => {
     expect(outlineAt(0, OUTLINE_MS, true).out).toBe(settled.out);
     stepFor(effects, OUTLINE_MS);
     expect(effects.shown()).toEqual([]);
+  });
+});
+
+describe('snow days and puddles (1.6’s X4)', () => {
+  const walk = (walkMs: number, facing = 'down') => ({
+    x: 50,
+    y: 50,
+    moving: true,
+    walkMs,
+    facing,
+  });
+
+  it('leaves a footprint at each footfall in the snow, left and right, gone after a while', () => {
+    const effects = new Effects({ random: seeded() });
+    for (let i = 0; i <= 4; i++) effects.walking('town', walk(i * 280), true, 'snow');
+    expect(effects.footprints('town')).toBe(4);
+    expect(effects.particles()).toBe(0);
+    expect(effects.footprints('lanternShore')).toBe(0);
+    stepFor(effects, PRINT_MS / 2);
+    expect(effects.footprints()).toBe(4);
+    stepFor(effects, PRINT_MS / 2 + STEP_MS);
+    expect(effects.footprints()).toBe(0);
+  });
+
+  it('leaves footprints with reduced motion too, which are no motion, and keeps the newest', () => {
+    const effects = new Effects({ reduced: () => true, random: seeded() });
+    effects.walking('town', walk(0), true, 'snow');
+    effects.walking('town', walk(300), true, 'snow');
+    expect(effects.footprints()).toBe(1);
+    for (let i = 0; i < PRINT_POOL + 10; i++) effects.print('town', i, 0, false, 'paw');
+    expect(effects.footprints()).toBe(PRINT_POOL);
+  });
+
+  it('splashes at each footfall in a puddle', () => {
+    const effects = new Effects({ random: seeded() });
+    effects.walking('town', walk(0), true, 'puddle');
+    effects.walking('town', walk(300), true, 'puddle');
+    expect(effects.particles()).toBe(4);
+    effects.walking('town', walk(600), true, null);
+    expect(effects.particles()).toBe(5);
+  });
+
+  it('throws a snowball in an arc from her hands to theirs, landing in a puff of snow', () => {
+    const effects = new Effects({ random: seeded() });
+    effects.push('town', { kind: 'throw', from: { her: true }, to: { villager: 'maude' } });
+    stepFor(effects, STEP_MS);
+    expect(effects.shown().map((s) => s.kind)).toEqual(['throw']);
+    expect(effects.particles()).toBe(0);
+    stepFor(effects, THROW_MS);
+    expect(effects.shown()).toEqual([]);
+    expect(effects.particles()).toBeGreaterThan(0);
+    const from = { x: 0, y: 100 };
+    const to = { x: 100, y: 100 };
+    expect(throwAt(0, from, to)).toEqual(from);
+    expect(throwAt(1, from, to)).toEqual(to);
+    expect(throwAt(0.5, from, to).y).toBeLessThan(100);
+  });
+
+  it('throws nothing with reduced motion asked for', () => {
+    const effects = new Effects({ reduced: () => true, random: seeded() });
+    effects.push('town', { kind: 'throw', from: { her: true }, to: { x: 0, y: 0 } });
+    stepFor(effects, THROW_MS * 2);
+    expect(effects.particles()).toBe(0);
   });
 });

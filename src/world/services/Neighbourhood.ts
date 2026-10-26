@@ -21,8 +21,9 @@ import {
   stopNow,
   strollTiles,
   strollTo,
-  type Chatter,
+  type Chat,
 } from '../../systems/neighbourLife';
+import { snowLies } from '../../systems/seasons';
 import {
   stopsIn,
   visitOf,
@@ -56,6 +57,14 @@ export interface NeighbourhoodKeeps {
   errand?: (id: VillagerId) => Errand | null;
   /** Where her pets are, in the place she is, for Cody to go and pat one (V1's P5). */
   pets?: () => readonly Tile[];
+}
+
+/** A beat of chatter: who says it, to whom, and what, named by its beat so it's shown once. */
+export interface Said {
+  by: VillagerId;
+  to: VillagerId;
+  chat: Chat;
+  beat: string;
 }
 
 /** Where a neighbour has gone instead of their stop, and what they do once there (V1's P4). */
@@ -472,14 +481,16 @@ export class Neighbourhood {
   /**
    * What two neighbours standing together in a place say just now (V1's E3): a guest and whoever
    * they're visiting, or any two standing still side by side, each in one pair; a bubble at a
-   * beat, taking turns. `beat` names it, so the view shows each once.
+   * beat, taking turns. `beat` names it, so the view shows each once. Out in the snow, now and
+   * then a snowball at the other (`to`) instead (1.6's X4).
    */
-  chatter(zone: ZoneId): { by: VillagerId; chat: Chatter; beat: string }[] {
+  chatter(zone: ZoneId): Said[] {
     const still = this.neighboursIn(zone).filter(
       (n) => !n.moving && n.id !== this.keeps.talk.talkingTo && n.waveMs === 0,
     );
+    const snowy = this.zones.outdoor(zone) !== undefined && snowLies(dayKey(this.ctx.clock.now()));
     const paired = new Set<VillagerId>();
-    const said: { by: VillagerId; chat: Chatter; beat: string }[] = [];
+    const said: Said[] = [];
     for (const a of still) {
       if (paired.has(a.id)) continue;
       const b = still.find((o) => o !== a && !paired.has(o.id) && together(a, o));
@@ -487,10 +498,20 @@ export class Neighbourhood {
       paired.add(a.id).add(b.id);
       const pair = [a.id, b.id] as const;
       const beat = Math.floor(this.chatMs / CHAT_BEAT_MS);
-      const on = chatOn(pair, beat);
-      if (on) said.push({ ...on, beat: `${a.id}+${b.id}:${beat}` });
+      const on = chatOn(pair, beat, snowy);
+      const to = on?.by === a.id ? b.id : a.id;
+      if (on) said.push({ ...on, to, beat: `${a.id}+${b.id}:${beat}` });
     }
     return said;
+  }
+
+  /** Who's in a snowball fight just now where she is (1.6's X4), both laughing. */
+  snowballing(zone: ZoneId): Set<VillagerId> {
+    const fighting = new Set<VillagerId>();
+    for (const s of this.chatter(zone)) {
+      if (s.chat === 'snowball') fighting.add(s.by).add(s.to);
+    }
+    return fighting;
   }
 
   /**

@@ -125,7 +125,7 @@ export function waterNear(
 }
 
 /** What she's walking on, for the sound of her steps. */
-export type Ground = 'grass' | 'path' | 'boards' | 'ice' | 'floor';
+export type Ground = 'grass' | 'path' | 'boards' | 'ice' | 'floor' | 'snow' | 'puddle';
 
 /** The ground a tile is underfoot: indoors is floor, the pier boards, the creek and pond ice. */
 export function groundOf(tile: TileId | undefined, outdoors: boolean, slippery: boolean): Ground {
@@ -181,7 +181,7 @@ const knock = (notes: string, gain: number): Part => ({
 /**
  * Her footsteps, a left and a right for each ground, each a little off the middle on its side:
  * a swish of grass, the crunch of the path, a hollow knock on the boards, a skate's hiss on the
- * ice, a soft pat indoors. All of them quiet: she hears she's walking, not each step.
+ * ice, a soft pat indoors, a squeak in the snow and a splash in a puddle. All of them quiet: she hears she's walking, not each step.
  */
 export const FOOTSTEPS: Record<Ground, readonly [Tune, Tune]> = {
   grass: [
@@ -203,6 +203,15 @@ export const FOOTSTEPS: Record<Ground, readonly [Tune, Tune]> = {
   floor: [
     blip(brush('A4:.12', 0.18, 1, -0.15), knock('A3:.08', 0.075)),
     blip(brush('G4:.12', 0.18, 1, 0.15), knock('G3:.08', 0.075)),
+  ],
+  // Lying snow, a soft squeaky crunch; and a puddle, a splash (1.6's X4).
+  snow: [
+    blip(brush('E6:.08 -:.02 C6:.12', 0.16, 1.6, -0.15), knock('C4:.06', 0.03)),
+    blip(brush('D6:.08 -:.02 B5:.12', 0.16, 1.6, 0.15), knock('B3:.06', 0.03)),
+  ],
+  puddle: [
+    blip(brush('C7:.08 G6:.16', 0.2, 0.7, -0.15), knock('E5:.1', 0.05)),
+    blip(brush('B6:.08 F6:.16', 0.2, 0.7, 0.15), knock('D5:.1', 0.05)),
   ],
 };
 

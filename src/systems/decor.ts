@@ -11,7 +11,15 @@ import type { Tile } from './pathfinding';
  * town; or in her attic (1.5's G6), the eaves are too low for it. (A planter stayed in the front
  * room until 1.1's W2 gave its bed a room.)
  */
-export type Refusal = 'noRoom' | 'standing' | 'blocking' | 'indoors' | 'inTheWay' | 'eaves';
+export type Refusal =
+  | 'noRoom'
+  | 'standing'
+  | 'blocking'
+  | 'indoors'
+  | 'inTheWay'
+  | 'eaves'
+  // A snowman, who stays out in the cold (1.6's X4).
+  | 'melts';
 
 /** The tiles a piece covers, which for a long piece turned on its side are the other way round. */
 export function footprint(id: FurnitureId, turn: number): { w: number; h: number } {

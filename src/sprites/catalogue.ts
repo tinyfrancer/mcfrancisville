@@ -132,7 +132,15 @@ import {
   TERRAINS,
 } from './terrain';
 import { figureLayers, NEIGHBOUR_BUBBLES } from './villagers';
-import { CANDY_POP, countArt, EMOTE_BUBBLES, PARCEL_POP, PARTICLE_ART } from './effects';
+import {
+  CANDY_POP,
+  countArt,
+  EMOTE_BUBBLES,
+  PARCEL_POP,
+  PARTICLE_ART,
+  SNOWBALL_THROWN,
+} from './effects';
+import { SNOWBALL_ART, SNOWBALL_PALETTE } from './snowman';
 
 /** One picture the game can draw, by name, drawn at its grid's own size. */
 export interface Entry {
@@ -602,6 +610,9 @@ export function catalogue(): Entry[] {
   }
   grid('effect:candy', CANDY_POP.source, CANDY_POP.palette);
   grid('effect:parcel', PARCEL_POP.source, PARCEL_POP.palette);
+  // A snowball in flight, and the one she rolls in her yard, small and bigger (1.6's X4).
+  grid('effect:snowball', SNOWBALL_THROWN.source, SNOWBALL_THROWN.palette);
+  SNOWBALL_ART.forEach((art, i) => grid(`snowball:${i}`, art, SNOWBALL_PALETTE));
   grid('effect:count:1234567890', countArt(1234567890).source, countArt(1234567890).palette);
   // The garden: soil dry and watered, then each crop from seed to ripe.
   grid('soil:tilled', SOIL, TILLED_PALETTE);

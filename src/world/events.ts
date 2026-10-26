@@ -55,6 +55,7 @@ import type {
   RoomId,
   ShelfId,
   ShopId,
+  SnowmanId,
   VillagerId,
   ZoneId,
 } from '../types/ids';
@@ -267,6 +268,22 @@ export type WorldEvent =
   | { kind: 'readFortune' }
   /** Back down from a ride on the big wheel (1.6's X2), with whoever rode along; `first` ever. */
   | { kind: 'rode'; with: VillagerId | null; first: boolean }
+  /** A snowball rolled in her yard, or rolled bigger (1.6's X4), on its tile. */
+  | { kind: 'snowball'; did: 'rolled' | 'grew'; tx: number; ty: number }
+  /** Her snowball stood up as a snowman, in the hat his tile dealt him. */
+  | { kind: 'snowman'; snowman: SnowmanId; tx: number; ty: number }
+  /** A snowball thrown: by her, or by a neighbour back at her (1.6's X4). */
+  | {
+      kind: 'threw';
+      by: 'her' | VillagerId;
+      at: { villager: VillagerId } | { her: true } | { tx: number; ty: number };
+    }
+  /** The thaw: her snowmen came in, a little one each in her bag. */
+  | { kind: 'thawed'; count: number }
+  /** What the snow in her yard is for, the first time she's there on a snowy day. */
+  | { kind: 'snowHint' }
+  /** A rainbow after the rain, and the first time, her jar of it (1.6's X4). */
+  | { kind: 'rainbow'; first: boolean }
   /** A snack bought at a fairground stall. */
   | { kind: 'snackBought'; activity: ActivityId; item: ItemId; price: number }
   | { kind: 'patch'; stage: PatchStage; picked?: boolean }

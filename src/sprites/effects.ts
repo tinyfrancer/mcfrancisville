@@ -73,7 +73,16 @@ export const EMOTE_BUBBLES: Record<'♥' | '♪' | '…', EffectArt> = {
 };
 
 /** The kinds of little bits that fly off a moment: each a grid or two, in a colour or a few. */
-export type ParticleKind = 'leaf' | 'dust' | 'splash' | 'sparkle' | 'heart' | 'confetti' | 'coin';
+export type ParticleKind =
+  | 'leaf'
+  | 'dust'
+  | 'splash'
+  | 'sparkle'
+  | 'heart'
+  | 'confetti'
+  | 'coin'
+  // A puff of snow where a snowball lands, or one is rolled (1.6's X4).
+  | 'snow';
 
 /**
  * Each kind's frames (most have one; a sparkle twinkles between two) and the palettes a burst
@@ -124,6 +133,19 @@ export const PARTICLE_ART: Record<
     frames: [{ rows: ['.y.', 'yYy', '.y.'] }],
     palettes: [{ '.': null, y: C.gold, Y: C.candleBright }],
   },
+  snow: {
+    frames: [{ rows: ['.w.', 'wWw', '.w.'] }, { rows: ['w'] }],
+    palettes: [
+      { '.': null, w: C.snow, W: C.snowLight },
+      { '.': null, w: C.snowShade, W: C.snow },
+    ],
+  },
+};
+
+/** A snowball in flight (1.6's X4), at 16 as the other bits are. */
+export const SNOWBALL_THROWN: EffectArt = {
+  source: { rows: ['.oo.', 'owWo', 'owwo', '.oo.'] },
+  palette: { '.': null, o: C.snowDeep, w: C.snow, W: C.snowLight },
 };
 
 /** A wrapped sweet: Candy, which has no item of its own, flying to her purse. */
