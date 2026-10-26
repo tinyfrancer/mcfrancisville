@@ -32,10 +32,15 @@ forwarders, from `v1.3-dev`, the model fit to each session (the personal touches
 the user's word). **1.3 is the release PR #219** (`v1.3-dev` → `main`, "Release 1.3 (with
 1.2.1)", save v55 unchanged), the user's to merge; `main` after it is the game as it stands.
 **1.3 was merged by the coordinator at the user's word on 2026-10-25: it is on her phone.** **The
-plan now is `docs/v1.4_plan.md`** (settled 2026-10-25, decision 367): content from `v1.4-dev`,
-every session Opus, two at a time: shinies, a winter wardrobe and two sets, ice fishing (⬆ 1.4),
-the night sky, a photo mode, an attic, a seventh pet, a review (⬆ 1.5). `docs/v1.3_plan.md`,
-`docs/v1.1_plan.md`, `docs/v1_plan.md` and the plans before them are complete.
+1.4 plan is complete** (`docs/v1.4_plan.md`, settled 2026-10-25, decision 367; its review, V1.5,
+decision 377): content from `v1.4-dev`, every session Opus. **1.4 is on her phone** (PR #231,
+2026-10-25: shinies, a winter wardrobe and two sets, ice fishing and the night sky, save v57, the
+cards `1.4` and `1.4.1`). **1.5 is the release PR #234** (`v1.4-dev` → `main`, "Release 1.5":
+the photo mode, the attic and Pickle the possum, save v57 → v58), the coordinator's to merge at
+the user's word; `main` after it is the game as it stands. **There is no plan after 1.5**:
+`docs/v1.4_plan.md`, `docs/v1.3_plan.md`, `docs/v1.1_plan.md`, `docs/v1_plan.md` and the plans
+before them are complete, and a session starting cold with nothing asked of it changes nothing
+and asks the user what they'd like next.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
@@ -80,9 +85,10 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.4-dev` is the integration branch for 1.4 and 1.5** (`v1.3-dev` was 1.3's, `v1.1-dev`
-1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212), made from `main` the day 1.3
-merged and added to `vercel.json`'s no-preview list (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
+**`v1.4-dev` was the integration branch for 1.4 and 1.5** and ends with 1.5 (`v1.3-dev` was
+1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision 212). **The next
+plan makes its own from `main`** once the release PR #234 has merged, and adds it to
+`vercel.json`'s no-preview list that day (decision 265). While a plan runs, each session branches from its branch, its PR targets it, and it is merged with a merge commit as
 soon as it is green. `main` (her phone) gets a patch only when the user says so, as one PR from
 the integration branch, because Vercel deployments are limited. Each release adds its own `NOTES`
 row in `src/data/patchNotes.ts` (rows her phone never saw may be folded into one, as 1.0's holds
@@ -481,7 +487,15 @@ what each owns, and where it hurts. Update it when a seam moves.
   `home.rooms.placed`). They're all the one place, `home`: a doorway in
   a back wall (an arch, `src/sprites/doorway.ts`) is walked onto as the mat is, and crosses
   within it (`Crossing.room`, `HomeZone.through`); the back room is the `backRoom` recipe. A
-  planter stands in any room, its bed keyed by its room (`Plot.room`, save v55).
+  planter stands in any room, its bed keyed by its room (`Plot.room`, save v55). **The attic**
+  (1.5's G6, decision 375, save v58) is a third row, `eaves`, up a ladder in the back room's wall
+  (a doorway with `ladder`, `ladderArt` in `doorway.ts`) and down a hatch where its mat would be
+  (`HATCH_ART`): `roomShell` draws its sloped ceiling over the wall's top row (`eavesArt`) and a
+  round window showing `windowSky` (`atticWindowArt`), and in it nothing hangs on that row and no
+  `TALL` piece (rising over a tile above its footprint, held to the art by
+  `tests/world/attic.test.ts`) stands on the back row (`underEaves`, refusal `eaves`). It's the
+  `attic` recipe, papered in its own `atticPlanks` (a row's `first`), and grows once by
+  `atticExtension` (`Made` `{ room, in }`, `Rooms.grow(id)`).
   The chest takes things from her bag too (0.3's H1, decision 230): `home.items`, moved by
   `world.chest` (`Chest`; what may go is `stowable` in `src/systems/chest.ts`, never a kept thing
   or what's on her wrist), put away from the bag's card at home and taken out on the chest
@@ -681,7 +695,19 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`stars:first`), two shelves (`halfTheSky`, `wholeSky`), the month's faint over the castle
   hill at night (`starsPass`, `STARRY` in `src/data/sky.ts`), Today, a `stars` small-talk topic
   and the calendar Month tab's mark.
-- **Her pets:** rows in `src/data/pets.ts` (the six pets and their accessories), with art in
+- **Photo mode** (1.5's G5, decision 374): her camera, a quick-bar slot outdoors and a tray
+  button anywhere, lifts the viewfinder (`src/hud/CameraSheet.ts`, not a sheet, through
+  `CameraApi`, made in `main.ts` by `src/wiring/apis/camera.ts`): `world.posing` is set, one step
+  runs (neighbours within `POSE_TILES` hold a `pose` stance from `stanceOf`, pets sit facing her,
+  `Pet.sitForPhoto`), and the loop stops stepping the world while it's up, the view still drawing
+  from its own clock. `data-camera` hides the bars but a strip (`src/hud/cameraStyles.ts`); a
+  polaroid is drawn over the canvas (`frameOf`, `drawViewfinder` in `src/render/viewfinder.ts`),
+  one finger pans (`FollowCamera.pan`), a pinch or the ± goes Close or Far for the viewfinder alone
+  (`lens` in `main.ts`). Filters are pixel sums (`src/render/filters.ts`, rows
+  `src/data/photo.ts`), stickers and the caption's rules `src/systems/photo.ts` (six at most).
+  The shutter cuts the photo (`photoFrom`) and shows the party photo's card (`PhotoCard`, Keep
+  it through `keepPhoto` / Another / Done); nothing is kept in the save.
+- **Her pets:** rows in `src/data/pets.ts` (the seven pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
   or pottering at home, its habits read off the clock in `src/systems/pets.ts`, which also says
   where Fibi's bone is today; `src/world/Pets.ts` is what's saved. `world.petCare` has `walkWith`,
@@ -692,7 +718,17 @@ what each owns, and where it hurts. Update it when a seam moves.
   `affection`), never less; at the first level a job on walks (`JOBS`, decided in `Pet.follow`,
   done by `PetCare.deed`) and three new pat lines (`GROWN_PATS`), at the second a trick (`TRICKS`,
   frames in `PET_ART[id].trick`, beats `TRICK_STEPS`, a Trick button); they rest by the fire, on
-  the bed or sofa or a rug at home (`PET_RESTS`, `src/systems/petRest.ts`).
+  the bed or sofa or a rug at home (`PET_RESTS`, `src/systems/petRest.ts`). **Pickle the possum**
+  (1.5's G7, decision 376) is the seventh, hers from the moment 1.5 landed as the six are from the
+  first day, last in `PET_IDS` so the six keep their rest spots: up from the evening till five
+  (`pickleAwake`), asleep at home and napping on walks by day, playing dead at a pat or a
+  neighbour close by (`Pet.playDead`, a `playDead` pose drawn from his `trick0`), foraging one of
+  `FORAGED` a night on a night's walk (the `forage` job, `forage:pickle` in `Takings`), and both
+  his tricks in one routine (playing dead, then hanging by his tail from a branch). His frames
+  (`pickleFrames` in `sprites/pets.ts`) are drawn bare, in his `ribbonBow` and with his
+  `tailLantern`, accessories `for` him alone (`fitsPet`; `PetArt.dressed`, picked by
+  `petSource`'s accessory), the lantern's glass glowing after dark (`LANTERN_GLOW`); the
+  `tinyScarf` is painted on any pet's neck.
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`

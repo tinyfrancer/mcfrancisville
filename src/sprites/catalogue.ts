@@ -1,7 +1,7 @@
 import { GATE_OPEN, GATE_PALETTE, GATE_SHUT } from './wilds';
 import { idsOf, HAIR_COLOURS, HAIR_STYLES, SKINS } from '../data/looks';
 import { DEFAULT_LOOK, OUTFITS } from '../data/outfits';
-import { ACCESSORY_IDS, PET_IDS } from '../data/pets';
+import { ACCESSORIES, ACCESSORY_IDS, PET_IDS } from '../data/pets';
 import { VILLAGER_IDS, VILLAGERS } from '../data/villagers';
 import { WORKS } from '../data/work';
 import { takeOff, wear } from '../systems/wardrobe';
@@ -62,9 +62,9 @@ import { surfaceTop } from '../data/tabletop';
 import { setOf, SETS } from '../data/display';
 import { showcaseLayers } from './display';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from './surfaces';
-import { WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
+import { atticWindowArt, WINDOW_PAPER_ART, windowArt } from './wallsAndFloors';
 import { WINDOW_SKIES } from '../data/wallsAndFloors';
-import { DOORWAY_ART } from './doorway';
+import { DOORWAY_ART, eavesArt, HATCH_ART, ladderArt } from './doorway';
 import { SURROUND_PANEL, surroundFooting, surroundPost, surroundRoof } from './roomSurround';
 import { PUDDLE_ART, PUDDLE_PALETTE } from './puddles';
 import {
@@ -550,17 +550,25 @@ export function catalogue(): Entry[] {
   }
   // The pets, every frame, then dressed in every accessory, and the bubbles they say things in.
   const pet = (name: string, id: PetId, accessory: AccessoryId | null, frame: PetFrame) =>
-    grid(`pet:${name}:${frame}`, petSource(id, frame), petPalette(id, accessory));
-  for (const id of PET_IDS) {
+    grid(`pet:${name}:${frame}`, petSource(id, frame, accessory), petPalette(id, accessory));
+  const framesOf = (id: PetId) => {
     const tricks = (['trick0', 'trick1', 'trick2'] as const).slice(0, PET_ART[id].trick.length);
-    for (const frame of ['side0', 'side1', 'sitFront', 'sitBack', 'rest', ...tricks] as const) {
-      pet(id, id, null, frame);
-    }
+    return ['side0', 'side1', 'sitFront', 'sitBack', 'rest', ...tricks] as const;
+  };
+  for (const id of PET_IDS) {
+    for (const frame of framesOf(id)) pet(id, id, null, frame);
   }
   for (const accessory of ACCESSORY_IDS) {
-    pet(`fibi:${accessory}`, 'fibi', accessory, 'sitFront');
-    pet(`dolly:${accessory}`, 'dolly', accessory, 'side0');
-    pet(`florence:${accessory}`, 'florence', accessory, 'sitFront');
+    // One made for one pet alone (1.5's G7) is drawn into each of its frames, so each is shown.
+    const only = ACCESSORIES[accessory].for;
+    if (only) {
+      for (const frame of framesOf(only)) pet(`${only}:${accessory}`, only, accessory, frame);
+    } else {
+      pet(`fibi:${accessory}`, 'fibi', accessory, 'sitFront');
+      pet(`dolly:${accessory}`, 'dolly', accessory, 'side0');
+      pet(`florence:${accessory}`, 'florence', accessory, 'sitFront');
+      pet(`pickle:${accessory}`, 'pickle', accessory, 'side0');
+    }
     const icon = accessoryIcon(accessory);
     grid(`accessory:${accessory}`, icon.source, icon.palette);
   }
@@ -695,6 +703,19 @@ export function catalogue(): Entry[] {
   }
   grid('surface:doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   grid('surface:doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
+  // The attic (1.5's G6): the ladder up through a back wall, the hatch down, its sloped ceiling over
+  // a seven-tile wall, and its round window under every sky.
+  for (const [name, art] of [
+    ['ladder', ladderArt(3 * 32)],
+    ['hatch', HATCH_ART],
+    ['eaves', eavesArt(7 * 32)],
+  ] as const) {
+    grid(`surface:${name}`, art.source, art.palette);
+  }
+  for (const sky of WINDOW_SKIES) {
+    const art = atticWindowArt(sky);
+    grid(`window:attic:${sky}`, art.source, art.palette);
+  }
   // What a room stands in (decision 290), round a nine-tile shop.
   grid('surround:panel', SURROUND_PANEL.source, SURROUND_PANEL.palette);
   for (const [name, art] of [

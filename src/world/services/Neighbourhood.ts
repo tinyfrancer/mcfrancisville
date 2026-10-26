@@ -17,6 +17,7 @@ import {
   CHAT_BEAT_MS,
   chatOn,
   NEAR_TILES,
+  POSE_TILES,
   stopNow,
   strollTiles,
   strollTo,
@@ -307,9 +308,15 @@ export class Neighbourhood {
    * in, they walk there, out by the edge or a door if it's somewhere else; one she's talking to,
    * or walking up to (`heading`), waits for her, and one she's standing near turns to look at her,
    * or else at whoever they're visiting. Anywhere else, they're simply where they should be, or
-   * come in by the way from where they were when that is where she is.
+   * come in by the way from where they were when that is where she is. With her camera up
+   * (`posing`, 1.5's G5), those within three tiles stop where they are, turn to her and pose.
    */
-  step(deltaMs: number, her: { x: number; y: number }, heading: VillagerId | null): void {
+  step(
+    deltaMs: number,
+    her: { x: number; y: number },
+    heading: VillagerId | null,
+    posing = false,
+  ): void {
     const where = this.here();
     const me = tileOf(her.x, her.y);
     const plan = this.plan();
@@ -338,7 +345,8 @@ export class Neighbourhood {
           : evening
             ? AT_HERS
             : stopNow(n.id, hour, day);
-      const held = n.id === this.keeps.talk.talkingTo || n.id === heading;
+      const held =
+        n.id === this.keeps.talk.talkingTo || n.id === heading || (posing && away <= POSE_TILES);
       if (held) n.hold();
       else {
         const to = goal.zone === n.zone ? goal : this.wayOut(n, goal);
@@ -348,7 +356,7 @@ export class Neighbourhood {
         const aim = stop ? n.roam(goal, deltaMs, near, pick) : to;
         n.step(deltaMs, aim, this.zones.get(n.zone));
       }
-      n.notice(away, deltaMs);
+      n.notice(away, deltaMs, posing);
       const settled = stop !== null && n.settled;
       n.seat = settled && stop.sits !== false ? this.seatBeside(n.zone, goal) : null;
       // At their stop, a happening they host, or an errand, their job once they're there (V1's P4).

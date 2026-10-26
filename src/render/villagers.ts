@@ -85,7 +85,7 @@ function gourdonGlow(facing: Facing, frame: number, stance: Stance): HTMLCanvasE
 /** What glows of what a neighbour holds at their job (Nessa's lantern), or null. */
 function heldGlow(facing: Facing, stance: Stance): HTMLCanvasElement | null {
   const act = stance.act;
-  if (!act || act === 'wave') return null;
+  if (!act || act === 'wave' || act === 'pose') return null;
   const pose = workPose(act, viewOf(facing), stance.frame ?? 0);
   const lit = pose?.held.find((h) => h.lit);
   if (!lit?.lit) return null;

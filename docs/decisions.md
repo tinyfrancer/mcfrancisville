@@ -9585,3 +9585,292 @@ chart in an evening, and no reason to look up next month); a score for the trace
 fail is the brief); the stars over every place (no horizon to put them on); a new legend
 character in the shared legend (full); an `opens` on a furniture row (a sheet only at night is a
 rule, not a row).
+
+## 374. A photo mode: a viewfinder over the town held still, four filters, six stickers, a caption, and everyone close by posing (2026-10-25, 1.5's G5)
+
+**Context:** the 1.4/1.5 plan's G5 (decision 367): a camera in the tray and on the quick bar, the
+world frozen to a viewfinder, filters, stickers from her bag, a caption, the shutter cropping the
+canvas and kept through the share sheet (decision 322's path), and neighbours posing. Never the
+save. Personal touches parked (decision 177): the words are the warmest plain defaults.
+
+**Decision:**
+
+- **The camera** is a slot on the quick bar outdoors, after her tools (`hud-quick-camera`), and a
+  button in the tray (`hud-camera-open`), indoors and out. **Always there, not only when her hands
+  are empty** as the plan put it: a slot that comes and goes moves her seeds under her finger.
+- **The viewfinder** (`src/hud/CameraSheet.ts`, `CameraApi` built in `src/wiring/apis/camera.ts`
+  by `main.ts`, as Settings' are) is a mode, not a sheet (nothing rises over the town, so it isn't
+  `openSheet`'s; the photo's card after it is): `data-camera` on the HUD hides the top bar and all
+  of the bottom but one strip, Done, Filters, Stickers, the shutter (bigger, in the middle),
+  Caption, and in or out, each a thumb wide. A drawer over the strip holds one of the filters,
+  the stickers or the caption field at a time; a line at the top says what she just did. Sideways
+  the strip runs the whole width along the bottom and the photo is wider (to half again).
+- **The town holds still**: lifting the camera sets `world.posing`, runs one step (so everyone
+  close turns and poses, and her pets sit), and the loop stops stepping the world while it's set.
+  The view keeps drawing every frame from its own clock, so the water glints, flames flicker and
+  frames move; only the world is frozen. Stepping at a crawl was rejected: someone walking by
+  would walk out of the photo, and a crawl is still a world that changes under the shutter.
+- **The frame** is a polaroid laid over the canvas (`render/viewfinder.ts`: `frameOf`, the photo
+  as big as fits with its white edge and deeper foot and a margin, square upright; the world
+  outside it dimmed). The canvas is at her pixels already (`fitPixelScale`'s backing size), so the
+  photo is cut pixel for pixel. **One finger pans the camera** (`FollowCamera.pan`, a look away
+  from her kept to the looks that move the view, so dragging back from an edge comes back at
+  once); **a pinch or the ± goes Close or Far** for the viewfinder alone (`lens` in `main.ts`,
+  never written to her Settings). Putting the camera down looks back at her, as close as she had it.
+- **Filters** (`src/data/photo.ts` rows, `src/render/filters.ts` the sums): plain; sepia (the old
+  photo's matrix, blacks lifted a touch); spooky (the light in green, a little of the colour kept,
+  the corners darkened); moonlit (cool blue, shadows lifted to navy, a seeded scatter of stars in
+  the top two-fifths, lit only where it's dark). **Worked a pixel at a time, not by compositing**
+  as the grade is: the photo is a few hundred pixels across, a test can hold what a pixel becomes,
+  and the live picture and the photo are one sum. Live, the frame's pixels are read back and
+  filtered about eight times a second (`REFILTER_MS`), put back between, since a read every frame
+  is what a phone feels.
+- **Stickers** (`src/systems/photo.ts`): every critter she has caught (the Cabinet's order, a shiny
+  after its plain), then the dolls, squishies and keepsakes in her bag; **six at most**
+  (`STICKER_LIMIT`; a seventh says six is plenty). Placed in the middle, dragged anywhere, and
+  dragged off the photo to take one off (it fades as it goes). Drawn on the photo over the filter,
+  as a sticker is on a print, at twice their 16-pixel icons (`bakeIcon`).
+- **The caption** is a text field in the drawer, one line of 32 letters (`captionOf`), shown on the
+  polaroid's foot in the page's font as she types, and written under the photo by `printOf`.
+- **The shutter**: the town drawn once clean, the photo cut, filtered and stickered
+  (`photoFrom`), a soft click-clack cue (`shutter`), the flash, and the party photo's card
+  (`PhotoCard`, now taking its words: "Snap!", "Cody would like a copy, please.") with **Keep it**
+  (the share sheet, decision 322, named for the day), **Another** (back to the viewfinder, stickers
+  and caption kept) and **Done** (the camera down). Nothing is kept in the game.
+- **Everyone poses**: a neighbour within three tiles (`POSE_TILES`) is held where they are, turned
+  to her, and stands in a new `pose` stance (`stanceOf` while `Neighbour.posing`, set by `notice`
+  from the flag `Neighbourhood.step` is handed): a hand up to the camera, the wave's arm held still
+  (one way or the other, each their own), smiling, or for a few laughing, eyes open. **A held
+  wave, not a peace sign**: at 32 pixels a hand is three, and two fingers don't read. Cody is a
+  neighbour, so he poses too. **Pets** stop wherever they are, mid-trot or mid-trick, asleep or
+  not, and sit looking at her (`Pet.sitForPhoto`, through `PetSurroundings.posing`). Putting the
+  camera down, they all carry on. `looksHeld` is unchanged: the pose draws the wave's layers.
+- **Notes**: the `1.5` row, made here and by G6 at once (G4's became 1.4.1 and shipped), folded
+  at this merge to two lines each, the camera's first and G6's P.S. (the camera's P.S., Cody
+  wanting a copy, became a line), so G7's line still fits under five; the review folds.
+
+**Rejected:** stepping the world at a crawl (people walk out of the photo); the frame drawn in the
+page (the polaroid is the town's, drawn at its pixels); compositing filters (untestable, and the
+live and kept pictures would be two sums); a peace sign (unreadable at the size); the slot only
+with empty hands (it moves the seeds); the viewfinder as an `openSheet` sheet (it covers nothing
+but the bars); keeping the photos in the save (the phone keeps pictures; the save is her town).
+
+## 375. An attic up a ladder from the back room, under a sloped ceiling with a round window, and the eaves too low for tall things at the back (2026-10-25, 1.5's G6)
+
+**Context:** the 1.4/1.5 plan's G6 (decision 367): a third room of her home, up a ladder in the
+back room's wall, reached as the back room is (`Crossing.room`), built at the workbench, a sloped
+ceiling drawn as a `roomShell` variant with a round window showing the sky, its own first size
+and one extension. Personal touches parked (decision 177): the size, the place of the ladder, the
+recipe and the words are the warmest plain defaults. **Save v58.**
+
+**Decision:**
+
+- **A row, as decision 233 said a third room would be**: `ROOMS.attic` (`RoomId` `attic`), 7×5
+  tiles of floor and one extension to 9×7 (odd widths keep the hatch and the window centred),
+  `through: { from: 'back', tx: 9 }`, near the back room's far corner from the arch, and
+  `eaves: true`. Everything H4 built carries it: `roomOf` puts a doorway in the back room's back
+  wall once it's built, `HomeZone.doorAt`/`through` cross it, its mat goes back through to the
+  back room onto the foot of the ladder facing out, `HomeZone.leave` puts her in the front room
+  whenever she goes out, pets and visitors follow, and it is `home` like the rest. Building it puts
+  anything in the ladder's way in the back room into the chest (`Rooms.build`, as the arch did).
+- **The ladder is a doorway with `ladder: true`**, set by `roomOf` for a room whose row has
+  `eaves`, and drawn by `roomShell` instead of the arch: two rails and rungs up the whole wall
+  into a hole in the ceiling, its feet on the tile she walks onto (`ladderArt` in
+  `src/sprites/doorway.ts`, the arch's sibling). A tap on the ladder in the wall is a way up, as a
+  tap on an arch is (`standBeside`). **In the attic the mat is a hatch** (`HATCH_ART`): a hole in
+  the floor framed in boards, the ladder's top in it and its lid propped open. Walking onto it goes
+  down, as the back room's mat goes back through.
+- **The sloped ceiling is the top row of the wall** (`Room.eaves`; `eavesArt`): boards running
+  along under the roof, rafters every other tile down onto a wall plate at the eaves, and the slope
+  carried a little way down each end where the side walls lean in, all in place of the moulding,
+  with its shadow on the paper. The wall under it is two tiles high. A single **round window** in
+  a wooden ring hangs low in the middle of the wall (`atticWindowArt` in
+  `src/sprites/wallsAndFloors.ts`, the round window paper's porthole with four panes), showing the
+  sky through `windowSky` at the hour and in the weather (stars and the moon at night), whatever
+  paper is up, unless something hangs over it, as a paper's windows give way (decision 263). A
+  window paper's own windows aren't hung in the attic: they're too tall for a wall under eaves.
+- **Its first surfaces are its own**: a row may say what it's papered and floored with when built
+  (`first`), given to her with it (`Workbench`), else the room it's through's as before. The
+  attic's are **whitewashed planks** (`atticPlanks`, a new wallpaper row and tile, given, never
+  sold; hers for every room like any paper) and oak boards (every town's from the first day).
+- **The eaves rule** (`underEaves` in `src/systems/decor.ts`, refusal `eaves`, "The eaves are too
+  low for that. Try it further from the back, where the roof is higher."): in a room under the
+  roof, nothing hangs on the top row of the wall (it's the ceiling), and a **tall** piece may not
+  stand on the back row of floor, where the roof comes down lowest. **Tall is from the art**: a
+  standing piece whose picture rises more than a tile (`EAVES_RISE`, 32 pixels) above its
+  footprint at any turn. The rules can't read a picture (`systems/` may not import `sprites/`), so
+  the ten are a list, `TALL` in `src/data/home.ts` (the canopy bed, fern stand, grandfather clock,
+  hat stand, lemon tree, library ladder, potion rack, suit of armour, tall bookcase, wardrobe),
+  held to the art by `tests/world/attic.test.ts`: a new tall piece fails it until it's listed. A
+  tile was chosen over her height (48, two pieces) and two tiles (none): it catches what reads as
+  tall and leaves every chair, lamp and shelf free. Everything else fits as in any room;
+  planters work there, their beds keyed by the room (decision 341); the chest is shared.
+- **The recipes**: `attic` (`{ newRoom: 'attic' }`, 60 wood, 10 stone and 3 glow gourds, known
+  from the start as the back room is, waiting "Soon" until there's a back room) and
+  `atticExtension`. There are no candles or rope in her bag (the plan's "wood and candles"): glow
+  gourds, "a nightlight that grew", light its corners instead, and adding items for one recipe
+  wasn't asked for. **An extension of a room other than the front is `{ room, in }`**
+  (`Made`; `in` unsaid is the front room, so every existing `'room' in made` reads as before):
+  `cantMake` checks the room is built and its own size (`Maker.sizes`), `Rooms.grow(id)` grows it
+  (`sizeOf`, `grows`; `canGrow` and `extensions` stay the front room's), 50 wood and 15 stone.
+- **Told** by the workbench's toast ("An attic! Climb the new ladder in your back room. Mind your
+  head on the eaves.", and its own for the extension), as rooms have no line coming in (only
+  interiors do), and by three lines in the `1.5` notes, which G6 started (G5's wasn't there yet).
+  Cody's "how was your day" answers are a table of days, not of rooms: nothing there.
+- **The save, v58**: no new field. `home.rooms` is a record keyed by room already, `isSaveState`
+  takes any key, and a missing attic is one not built (`Rooms` builds a room only if it and the
+  room it's through are saved), so step 57 is the identity. The bump is so a 1.4 build, which
+  doesn't know an attic and would drop its pieces, never opens a town that has one: `migrateSave`
+  reads no save from a newer build, and it's moved aside, never deleted (decision 25). The
+  lived-in fixtures open with no attic.
+
+**Rejected:** a ladder as a piece of furniture she places (a way through that could be put away,
+or walled in, is a door nobody can rely on; H4 made doorways fixed for that reason); the attic
+through the front room (its back wall already has the arch, the chest and the first day's
+pieces); stairs (a whole tile of wall turned to treads reads as a second floor, not a loft, and
+a ladder is cosier); a lower wall for the attic, two rows (every piece hanging on the wall is
+drawn for three, and `nearestFit` hangs at row 1); sloping the side walls inward across their
+columns (the pieces hung there would be drawn over the slope; a short wedge at each end says it
+without taking a column); "tall" as any piece more than a tile deep (a bed is deep, not tall);
+the rule on every row (only the back row is under the eaves; the rest of the attic is a room);
+new candle and rope items (rows, icons, values and somewhere to get them, for one recipe).
+
+## 376. Pickle the possum: hers from 1.5, up by night, playing dead at compliments, a snack a night, two tricks in one, and a bow and a lantern of his own (2026-10-25, 1.5's G7)
+
+_Session G7 of the 1.4 plan, the last before the review. No save change (still v58). Personal
+touches parked (decision 177): his name and look are the plan's, every line and habit the warmest
+default from "a sweetheart, cute not creepy"; nothing was asked._
+
+- **How she gets him: he's hers from the moment 1.5 lands**, at home with the six. The plan said
+  "at Rufus's shop as the others are sold", but nothing sells pets: the six are hers from the
+  first day (`PETS` has no price, `Pets` keeps no list of owned pets), so the way "as the others"
+  are got is to have him. A new neighbour comes with a release the same way. Selling or adopting
+  him would have needed an owned-pets list in the save (a bump), a shelf that sells a creature,
+  and a town where he isn't, for a week. The mayor's notes tell her (the fifth `1.5` line: "a
+  possum, who plays dead at compliments").
+- **Last in `PET_IDS`**, so the six keep the resting spots they had (`restSpots` hands them out in
+  that order). He likes a sofa, then a rug, a bed, the hearth.
+- **His shape** (`pickleFrames` in `sprites/pets.ts`): a low grey possum a little longer than the
+  cats, a white face under a grey cap, a long snout with a pink nose, round dark ears pink inside
+  (`roundEar`, four across with the corners off; an ellipse that small read spiky), dark legs on
+  pink feet, and a bare pink tail outlined in a deeper pink (`pickleLine`; `finishPet` takes an
+  outline now, `o` for everyone else). Side on (two frames), sitting facing her (pink hands at his
+  tummy) and from behind, curled asleep with his tail round him, playing dead (on his back, paws
+  up, tongue out and an "x" for an eye) and hanging by his tail from a branch drawn for the beat
+  (arms down, or waving). Every frame is within the pets' size (38 × 32, held by a test).
+- **Nocturnal**: up from the evening window till five (`pickleAwake`), as a possum is. By day at
+  home he sleeps (as Florence does, on his rest spot if the room has one), and on a day's walk he
+  naps the moment she stops; at night he potters and follows as the others do. Walks aren't
+  refused by day: he comes, sleepily.
+- **Playing dead** is a pose (`playDead`, drawn from his `trick0`): at every pat (a pat is a
+  compliment; 1.4 s, then up as if nothing happened), and when a neighbour comes within two tiles
+  of him on a walk, once in 15 s (as Dolly barks). His trick or her camera puts an end to it.
+- **His job, at level one, is foraging**: on a night's walk outdoors (never in a shop or a room),
+  when she has stood still a moment, now and then he brings her one of `FORAGED` (the night's
+  four snacks or fried pickles, which he finds a little embarrassing), the same one all day by the
+  day key, **once a night** (`forage:pickle` in `Takings`, a once-a-day key, so it's in the save
+  without a new field). Decision 317 rejected jobs that hand her things outright; this one the
+  plan asked for, and one snack worth 10–20 a day, at night, after two days of fondness, is less
+  than the night's own snack on the ground and no loop (the economy test is unchanged and green).
+- **Two tricks in one** (`TRICKS.pickle`, 3.6 s; `TRICK_STEPS`): he plays dead, springs up, and
+  hangs by his tail from his branch, swinging and waving, then drops down and sits. Each pet has
+  one Trick button and one `TRICKS` row (decision 317); taking turns between two would have needed
+  the trick's choice kept on the pet, the view and the sheet. Both are seen every time.
+- **Accessories**: a **tiny striped scarf** (scarlet and cream, 90) that any pet wears, painted on
+  the neck keys as a bandana is but with its end (`k`) in its second tone; and two **for him
+  alone** (`AccessoryRow.for`, `fitsPet`; the pet sheet lists only what fits, `Pets.dress` and a
+  loading save refuse the rest): a **ribbon bow** on his ear (70) and a **tail lantern** (140)
+  he carries on the curl of his tail, sets down beside him when he sits or sleeps, and holds in
+  his hand hanging from his branch. A bow or a lantern goes where no neckwear does and must not
+  leave a hole when it's off, so his frames are drawn three times, bare, in the bow and with the
+  lantern (`PetArt.dressed`, picked by `petSource`'s accessory), each the same size. The lantern's
+  glass glows after dark (`LANTERN_GLOW`, the drawable's `glow`), so it lights his way; he isn't
+  a ghost, so `PET_ART.glow` stays the ghosts'. All three are on Cobweb Corner's pet shelf from
+  its next deal, as every priced accessory is.
+- **What the town says of him** needs nothing new: the neighbours' and Cody's pet lines name the
+  pet walking with her by `{pet}`, whoever it is.
+- **No save change.** `Pets` keeps names, what's worn and fondness keyed by pet id and drops ids it
+  doesn't know; the new accessories are ids in the same lists. A 1.4 build would drop him and his
+  accessories from a town, but no 1.4 build opens a v58 town (G6's bump), and 1.5 carries both.
+
+**Rejected:** buying or adopting him (above); a separate pickle sprite file (the pets' helpers are
+private to `sprites/pets.ts`, and moving them is a refactor the plan rules out); a bow and lantern
+any pet could wear (each pet's ears and tail are elsewhere: twelve more drawings for six pets
+who never asked); a lantern lit by day too (a possum's lantern is for the dark); foraging by day
+or more than once a night (the economy, and he's asleep); his bubble or a new effect for playing
+dead (the pose says it; a pat's hearts already show).
+
+## 377. 1.5: the review after the 1.4 plan, its card kept as written, 1.2's town opened as her phone will and played on to January, the shakedown logged (2026-10-25, 1.5's V1.5)
+
+_Session V1.5 of the 1.4 plan (decision 367), the last: the review after G5, G6 and G7 (decisions
+374–376; G1–G4 went to her phone as 1.4, PR #231), and the release PR #234 (`v1.4-dev` →
+`main`, "Release 1.5"), for the coordinator to merge. No save change (still v58). 368 and 369 stay
+unused._
+
+- **One card for her, `1.5`, as G5–G7 wrote it.** Her phone last saw `1.4.1` (PR #231 shipped
+  `1.4` and `1.4.1`), so `notesToShow('1.4.1')` is the `1.5` row alone. Its five lines (the camera,
+  everyone posing and the pets sitting; Cody wanting a copy of every photo; the attic up a ladder
+  from the back room; its round window and the eaves; Pickle, who plays dead at compliments,
+  sleeps by day and forages by night) and the mayor's P.S. about his attic of typewriter ribbons
+  read as one card in his voice, in the order she'll meet them, so nothing was refolded or
+  reworded: a review that rewrites lines which already flow only spends the sessions' care. The
+  test now holds five lines with Pickle's last; `1.4` and `1.4.1` stay as shipped.
+- **1.2's town, opened as her phone will.** `lived-in-v55.json` in a 1.5 dev build with notes
+  last seen `1.4.1` and the dedication seen, at Close, Far and sideways, from a page of the site
+  that isn't the game (the manifest), so no new town is booted and saved over hers on the way:
+  the title, one card ("What's new in 1.5", its P.S. reached by scrolling, in the sheet's right
+  column sideways), Cody's hello ("It's been 2 weeks, mi amor"), save v58 through steps 55–57, no
+  error notes; the one console error is the unlinked cloud's 503, as on her phone.
+- **Played on by taps** with a scratch driver on smoke's `lib.mjs` in a persistent browser profile
+  of its own on a dev server of its own (decision 324's method): 25 October at night on the real
+  clock (Pickle patted and playing dead, his trick to hanging by his tail; the attic made at the
+  workbench and climbed by the ladder, the round window full of stars; a photo by the well with
+  Pickle sat beside her, the moonlit filter, a ghost minnow sticker and "Pickle says hi"; the Bat
+  traced at the castle's telescope, Hazel's letter); 26 October (a shiny tombstone toad in the
+  graveyard in a thunderstorm, Today's "Something glittered in the graveyard", netted, the
+  Cabinet's sparkle and "1 of 74 shinies"); 5 and 6 November (the bat onesie, its hood and fluffy
+  slippers from the week's snug look, worn from the closet's rails; Gourdon's log stove and
+  rocking chair ordered from his book, Ollie's letters the next evening, set out in her front room
+  and sat in by night); 10 January (an icicle smelt landed through the frozen pond). The Candy
+  (her town had 142), the attic's wood, stone and glow gourds and Pickle's fondness for his trick
+  were given by the dev handle and said so; everything else was tapped. **Kept as
+  `lived-in-v58.json`**, 1.5's lived-in town, held by `livedIn.test.ts` (nothing lost opening it
+  again) and added to the overlays snapshot's saves (its first snapshot only, as F6 did), since
+  1.5 changes the save's shape (G6's v58).
+- **The shakedown**, with its own eyes at phone size and smoke's screenshots: the shinies' glint
+  and palettes in the world and the Cabinet; the winter looks on her; Cosy Cabin and Midnight
+  Observatory in a room at night; the frozen pond's hole and the ice hut outside and in; the Sky
+  sheet and the chart; the camera upright and sideways; the attic's ceiling and window; Pickle's
+  frames. **Fixed: nothing**; nothing found was a pixel or a line. **Judged and kept**: the
+  framed Bat (G4's flag that it reads as a zig-zag: it is the Bat's stars and lines, as she traced
+  them, and redrawing it as a bat would mean moving the stars the trace is played on) and
+  Pickle's branch over her legs (G7's flag: hanging on the tile below her he's nearer the camera,
+  so the branch is in front of her shins; a sort-order tweak would put it behind her, which is
+  wrong). **Logged**: a tap on a fish with a seed in her hand casts from the seed packet with no
+  rod drawn (decision 110's "unless she's holding a seed", older than the rod; "Where it hurts"
+  3, a line and a decision to mend); the camera's drawer covering the polaroid's foot sideways
+  ("Where it hurts" 4, a layout to mend); the shiny glint's size and the dim fish under the ice
+  (the art notes, for her eye). Smoke 673 of 673, `smoke:offline` 10 of 10.
+- **Perf**: 1.5 against 1.4 on her phone (`origin/main` served from a copy of its own, 1.5's
+  `scripts/perf.mjs` for both), alternating, three runs each at Close by night and at noon: every
+  draw and update crosses 1.4's runs or sits under, the back room's update 0.1 ms over (Pickle, a
+  seventh pet about her rooms), the heap up 0.3 MB at most; the camera up costs about what the held
+  world saves (30–36 ms a whole frame under the four filters, 33.6–36 with it down); the build one
+  chunk, 1,963.9 kB (660.7 kB gzipped) against 1.84 MB (615 kB) at 1.3. The table is in
+  `docs/architecture.md`, "1.5, V1.5's review".
+- **Docs, for whoever comes after**: the handoff's cold-start section brought to 1.5 (save v58,
+  the next decision 378, where new content goes: a critter, a piece, clothing, a set, a
+  constellation, a pet, a project, a room), "After 1.0" saying 1.5 is the release PR with the
+  user's steps, the 1.4 plan's sessions recorded under "1.4 and 1.5, the week after" with "How
+  1.4 and 1.5 were run", "Still to put to the user" kept parked, "In progress" empty;
+  `docs/architecture.md`'s "Where it hurts" rewritten for after 1.5 (eight items, the done list
+  one paragraph) and a 1.5 perf table; `CLAUDE.md`'s "Project" (the 1.4 plan complete, 1.4 on her
+  phone, 1.5 the release, no plan after) and the integration-branch paragraph (`v1.4-dev` ends
+  with 1.5, the next made from `main`), its bullets checked for the new seams; the plan's line.
+
+**Rejected:** rewording a card whose lines already flow; folding `1.4.1` into anything (her phone
+has read it); a fixture without the attic or Pickle in it (a fixture holds a release's save
+shape, and 1.5's is the attic's); mending the rod with a seed in hand here (it re-opens decision
+110, which a review shouldn't do in passing); moving the camera's drawer here (a layout change
+smoke would need to measure again, for a case she meets only sideways with a drawer open);
+redrawing the framed Bat or reordering Pickle's branch (above).

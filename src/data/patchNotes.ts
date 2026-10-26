@@ -232,6 +232,25 @@ export const NOTES: readonly PatchNotes[] = [
     ],
     ps: 'P.S. Hazel has asked me to say: the stars come out after eight, and so should you. Wrap up warm.',
   },
+  {
+    version: '1.5',
+    lines: [
+      // 1.5's G5: the photo mode.
+      'You have a camera now: everyone close by stops to pose, and the pets sit nicely. ' +
+        'Filters, stickers and a caption, too.',
+      'Keep the good ones on your phone. Cody would like a copy of every single one, and has ' +
+        'asked me to say so twice.',
+      // 1.5's G6: the attic.
+      'Your workbench can build an attic now: a ladder up from the back room, to a snug little ' +
+        'room under the roof.',
+      'It has a round window full of sky, and it can grow once. Mind the eaves: the tall ' +
+        'things must stand further forward.',
+      // 1.5's G7: Pickle the possum.
+      'Pickle has moved in with you: a possum, who plays dead at compliments. He sleeps by day ' +
+        'and forages by night.',
+    ],
+    ps: 'P.S. Every good house has an attic. Mine is full of old typewriter ribbons. Yours, I hope, is cosier.',
+  },
 ];
 
 /** The top of every card, and how it's signed. */

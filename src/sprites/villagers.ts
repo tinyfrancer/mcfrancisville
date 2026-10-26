@@ -1422,7 +1422,7 @@ export type { Stance };
  */
 export function stanceFolded(layers: Layer[], stance: Stance): Layer[] {
   let out = layers;
-  if (stance.act && stance.act !== 'wave' && WORKS[stance.act].kneels) {
+  if (stance.act && stance.act !== 'wave' && stance.act !== 'pose' && WORKS[stance.act].kneels) {
     out = folded(out, CROUCH_FROM, CROUCH_DROP);
   }
   if (stance.sit) out = seated(out);
@@ -1457,7 +1457,8 @@ function armsOf(
   build: Build,
 ): { pose: PoseBody; held: readonly Held[] } | null {
   const frame = stance.frame ?? 0;
-  if (stance.act === 'wave') {
+  // Posing for her camera (1.5's G5), a hand held up to it as in a wave, kept still.
+  if (stance.act === 'wave' || stance.act === 'pose') {
     return { pose: ACTION_BODIES[build].wave[view][frame % 2]!, held: [] };
   }
   const work = stance.act ? workPose(stance.act, view, frame, build) : null;
@@ -1485,7 +1486,7 @@ export function figureLayers(
   if (id === 'maude') {
     const look: MaudeLook = {
       hem: acting ? 0 : frame,
-      wave: stance.act === 'wave' ? (stance.frame ?? 0) % 2 : null,
+      wave: stance.act === 'wave' || stance.act === 'pose' ? (stance.frame ?? 0) % 2 : null,
       blink: stance.blink ?? false,
       read: stance.act === 'reading' ? (stance.frame ?? 0) % 2 : null,
       feel: stance.feel ?? null,

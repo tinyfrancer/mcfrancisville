@@ -3,11 +3,19 @@ import { FURNITURE } from '../data/furniture';
 import type { Placed, Room } from '../data/home';
 import { FURNITURE_ART, furnitureSprite } from '../sprites/furniture';
 import { DOOR_MAT_ART, FLOORING_ART, WALLPAPER_ART } from '../sprites/surfaces';
-import { windowArt } from '../sprites/wallsAndFloors';
+import { atticWindowArt, windowArt } from '../sprites/wallsAndFloors';
 import { WATCHERS, type Glance } from '../sprites/setsTwo';
 import { isWindowPaper, type WindowSky } from '../data/wallsAndFloors';
 import { windowsAlong } from '../systems/windowSky';
-import { DOORWAY_ART, DOORWAY_HEIGHT, DOORWAY_OVERHANG } from '../sprites/doorway';
+import {
+  DOORWAY_ART,
+  DOORWAY_HEIGHT,
+  DOORWAY_OVERHANG,
+  EAVES_DEPTH,
+  eavesArt,
+  HATCH_ART,
+  ladderArt,
+} from '../sprites/doorway';
 import { PALETTE } from '../sprites/palette';
 import { footprint } from '../systems/decor';
 import type { FlooringId, WallpaperId } from '../types/ids';
@@ -118,7 +126,10 @@ const shells = new Map<string, HTMLCanvasElement>();
 /**
  * The walls papered and the floor laid, with a moulding along the top, a skirting board along the
  * bottom of the wall, its shadow on the floor, the door mat, and an arch to each room beyond. A
- * wallpaper with windows (0.3's S4) hangs them along the wall, showing `sky`.
+ * wallpaper with windows (0.3's S4) hangs them along the wall, showing `sky`. An attic (1.5's G6)
+ * has a sloped ceiling over its wall's top row in place of the moulding, a round window in the
+ * middle of its wall showing `sky` whatever the paper, and a hatch where the mat would be; a room
+ * with a ladder up to one has the ladder where an arch would be.
  */
 export function roomShell(
   room: Room,
@@ -127,9 +138,11 @@ export function roomShell(
   sky: WindowSky = 'day',
   covered: readonly number[] = [],
 ): HTMLCanvasElement {
-  const ways = room.doorways.map((d) => d.tx).join(',');
-  const windows = isWindowPaper(wallpaper) ? `:${sky}:${covered.join(',')}` : '';
-  const key = `${wallpaper}${windows}:${flooring}:${room.width}x${room.height}:${ways}`;
+  const ways = room.doorways.map((d) => `${d.tx}${d.ladder ? 'L' : ''}`).join(',');
+  const glazed = room.eaves || isWindowPaper(wallpaper);
+  const windows = glazed ? `:${sky}:${covered.join(',')}` : '';
+  const attic = room.eaves ? ':eaves' : '';
+  const key = `${wallpaper}${windows}:${flooring}:${room.width}x${room.height}:${ways}${attic}`;
   const made = shells.get(key);
   if (made) return made;
   const T = TILE_SIZE;
@@ -151,7 +164,7 @@ export function roomShell(
       g.drawImage(ty < room.wallRows ? paperTile : floorTile, tx * T, ty * T);
     }
   }
-  if (isWindowPaper(wallpaper)) {
+  if (isWindowPaper(wallpaper) && !room.eaves) {
     const art = windowArt(wallpaper, sky);
     const pane = bake(`window:${wallpaper}:${sky}`, art.source, art.palette);
     for (const tx of windowsAlong(
@@ -166,13 +179,28 @@ export function roomShell(
     g.fillStyle = colour;
     g.fillRect(0, y, width, h);
   };
-  // The moulding: a dark lip, a lit edge, and its shadow on the paper.
-  band(0, 4, PALETTE.barkDark);
-  band(4, 2, PALETTE.bark);
-  band(6, 1, PALETTE.wood);
-  g.globalAlpha = SHADOW_ALPHA;
-  band(7, 3, PALETTE.ink);
-  g.globalAlpha = 1;
+  if (room.eaves) {
+    // Under the roof: the round window low in the middle of the wall, then the ceiling over it.
+    const middle = Math.floor(room.width / 2);
+    if (!covered.includes(middle)) {
+      const art = atticWindowArt(sky);
+      const pane = bake(`window:attic:${sky}`, art.source, art.palette);
+      g.drawImage(pane, middle * T + (T - pane.width) / 2, art.foot - pane.height);
+    }
+    const eaves = eavesArt(width);
+    g.globalAlpha = SHADOW_ALPHA;
+    band(EAVES_DEPTH, 3, PALETTE.ink);
+    g.globalAlpha = 1;
+    g.drawImage(bake(`eaves:${width}`, eaves.source, eaves.palette), 0, 0);
+  } else {
+    // The moulding: a dark lip, a lit edge, and its shadow on the paper.
+    band(0, 4, PALETTE.barkDark);
+    band(4, 2, PALETTE.bark);
+    band(6, 1, PALETTE.wood);
+    g.globalAlpha = SHADOW_ALPHA;
+    band(7, 3, PALETTE.ink);
+    g.globalAlpha = 1;
+  }
   // The skirting board, lit along its top.
   band(wallHeight - 9, 1, PALETTE.barkDark);
   band(wallHeight - 8, 2, PALETTE.wood);
@@ -184,12 +212,20 @@ export function roomShell(
   g.globalAlpha = SHADOW_ALPHA / 2;
   band(wallHeight + 3, 3, PALETTE.ink);
   g.globalAlpha = 1;
-  const mat = bake('doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
+  const mat = room.eaves
+    ? bake('hatch', HATCH_ART.source, HATCH_ART.palette)
+    : bake('doorMat', DOOR_MAT_ART.source, DOOR_MAT_ART.palette);
   g.drawImage(mat, room.mat.tx * T, room.mat.ty * T);
-  // An arch through the back wall to each room beyond it (0.3's H4), its foot on the floor.
+  // An arch through the back wall to each room beyond it (0.3's H4), its foot on the floor, or a
+  // ladder up to the attic (1.5's G6), its feet on the floor in front of the wall.
   const arch = bake('doorway', DOORWAY_ART.source, DOORWAY_ART.palette);
   for (const d of room.doorways) {
-    g.drawImage(arch, d.tx * T - DOORWAY_OVERHANG, wallHeight - DOORWAY_HEIGHT + 2);
+    if (d.ladder) {
+      const art = ladderArt(wallHeight);
+      g.drawImage(bake(`ladder:${wallHeight}`, art.source, art.palette), d.tx * T, 0);
+    } else {
+      g.drawImage(arch, d.tx * T - DOORWAY_OVERHANG, wallHeight - DOORWAY_HEIGHT + 2);
+    }
   }
   shells.set(key, canvas);
   return canvas;

@@ -1162,6 +1162,8 @@ export type WallpaperId =
   | 'moonlitBlue'
   | 'mossPanels'
   | 'goldDamask'
+  // The attic's own (1.5's G6), given with it.
+  | 'atticPlanks'
   | WindowPaperId;
 
 /** A wallpaper with windows in it that show the sky at the hour (0.3's S4). */
@@ -1220,6 +1222,9 @@ export type RecipeId =
   | 'roomyExtension'
   | 'grandExtension'
   | 'backRoom'
+  // 1.5's G6: the attic up a ladder from the back room, and its one extension.
+  | 'attic'
+  | 'atticExtension'
   | 'gardenRow'
   | 'northRow'
   // Boo Acres' extension rows (0.3's F1).
@@ -1356,9 +1361,10 @@ export type ZoneId = MapZoneId | 'home' | InteriorId;
 
 /**
  * The rooms of her home (0.3's H4), each a row in `ROOMS` (`data/home.ts`): the one she starts
- * with, and the back room through a doorway in its back wall, once she has built it.
+ * with, the back room through a doorway in its back wall, and the attic up a ladder from the back
+ * room (1.5's G6), once she has built each.
  */
-export type RoomId = 'main' | 'back';
+export type RoomId = 'main' | 'back' | 'attic';
 
 /**
  * What stands in a building for good (phase H), drawn at 32: counters, shelves, the salon chair,
@@ -1435,12 +1441,12 @@ export type VillagerId =
   | 'robBoo';
 
 /**
- * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, and Wybie
- * and Elvira as gentle ghost pets.
+ * Their pets (phase 11, decisions.md 17): Florence, Fibi, Dolly and Gary as themselves, Wybie
+ * and Elvira as gentle ghost pets, and Pickle the possum (1.5's G7, decision 376).
  */
-export type PetId = 'florence' | 'fibi' | 'dolly' | 'gary' | 'wybie' | 'elvira';
+export type PetId = 'florence' | 'fibi' | 'dolly' | 'gary' | 'wybie' | 'elvira' | 'pickle';
 
-/** What a pet wears round its neck: collars and bandanas (phase 11). */
+/** What a pet wears: collars and bandanas (phase 11), and a scarf, a bow and a lantern (1.5's G7). */
 export type AccessoryId =
   | 'pinkSpikedCollar'
   | 'plumSpikedCollar'
@@ -1453,7 +1459,10 @@ export type AccessoryId =
   | 'tealCollar'
   | 'roseCollar'
   | 'bellCollar'
-  | 'ghostBandana';
+  | 'ghostBandana'
+  | 'tinyScarf'
+  | 'ribbonBow'
+  | 'tailLantern';
 
 /** What she can hold in her hand from the quick bar, besides a seed (phase M). A rod comes later. */
 export type ToolId = 'hands' | 'net' | 'can' | 'rod';

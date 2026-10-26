@@ -12,8 +12,11 @@ import { restSpots, type RestSpot } from '../../systems/petRest';
 import {
   BONE_KEY,
   boneLine,
+  FORAGE_KEY,
+  foragedOn,
   lostBone,
   NO_FINDS,
+  PAT_DEAD_MS,
   type LostBone,
   type PetFinds,
 } from '../../systems/pets';
@@ -75,7 +78,7 @@ function middleOf(t: Tile): { x: number; y: number } {
 }
 
 /**
- * Their six pets (decisions.md 17, 67–71): the one walking with her, those pottering at home,
+ * Their pets (decisions.md 17, 67–71; Pickle since 1.5's G7, decision 376): the one walking with her, those pottering at home,
  * patting, names and accessories, and Fibi's lost bones; and since V1's R6c, how fond each is of
  * her, the treats she gives them, their jobs on walks, their tricks and where they rest at home.
  */
@@ -158,6 +161,8 @@ export class PetCare {
     this.pats.set(id, count + 1);
     const pet = this.pet(id);
     pet.say('heart', this.ctx.clock.now(), 1600);
+    // A pat is a compliment, and Pickle plays dead at compliments (1.5's G7).
+    if (id === 'pickle') pet.playDead(this.ctx.clock.now(), PAT_DEAD_MS);
     this.fonder(id, 'pat');
     this.ctx.moments.push({ kind: 'petted', pet: id, at: over(pet) });
     return patLineAt(id, this.pets.nameOf(id), count, this.pets.level(id));
@@ -387,6 +392,22 @@ export class PetCare {
         job: 'draw',
         at: middleOf(deed.to),
       });
+    } else if (deed.job === 'forage') {
+      // Once a night, one of the night's snacks, into her bag (1.5's G7).
+      const { bag, takings } = this.reads;
+      if (!takings.isReady(FORAGE_KEY)) return;
+      const item = foragedOn(dayKey(this.ctx.clock.now()));
+      takings.take(FORAGE_KEY);
+      bag.add(item, 1);
+      this.ctx.events.emit('bag', bag.contents);
+      this.ctx.moments.push({
+        kind: 'petHelped',
+        pet: pet.id,
+        name,
+        job: 'forage',
+        at: middleOf(deed.at),
+        item,
+      });
     } else {
       this.ctx.moments.push({
         kind: 'petHelped',
@@ -418,7 +439,7 @@ export class PetCare {
    * and those at home potter about. One she's walking up to (`heading`), or whose sheet is open,
    * waits. `villagers` are the tiles her neighbours stand on, where she is.
    */
-  step(deltaMs: number, heading: PetId | null, villagers: readonly Tile[]): void {
+  step(deltaMs: number, heading: PetId | null, villagers: readonly Tile[], posing = false): void {
     const p = this.reads.movement.player;
     if (p.moving) this.stillMs = 0;
     else this.stillMs += deltaMs;
@@ -436,7 +457,9 @@ export class PetCare {
       villagers: where === 'home' ? [] : [...villagers],
       roam: where === 'home' ? this.reads.homeZone.roamTiles() : [],
       happy: this.pets.fibiHappy(dayKey(now)),
-      done: (key: string) => done.has(`${where}:${key}`),
+      // Pickle's find is once a night wherever she is, kept with the day's takings (1.5's G7).
+      done: (key: string) =>
+        key === 'forage' ? !this.reads.takings.isReady(FORAGE_KEY) : done.has(`${where}:${key}`),
     };
     for (const pet of here) {
       const following = pet.id === this.pets.walking;
@@ -446,6 +469,7 @@ export class PetCare {
         ...surroundings,
         following,
         held: pet.id === this.petting || pet.id === heading,
+        posing,
         level,
         rest: where === 'home' && !following ? this.restOf(pet.id) : null,
         finds,

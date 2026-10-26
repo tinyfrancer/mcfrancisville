@@ -23,7 +23,12 @@ import { fromSave, World } from '../../src/world/World';
  * then played on by taps over four days to 5 October: the square's bench sat on, the fair's free
  * go, Whisperwood and Lantern Shore found on foot and their ice skated, talks with every build of
  * neighbour, the back room built with a pumpkin growing in a planter there, Fibi fond enough for
- * her trick, and Rufus's lost frog carried home on a rare event's day.
+ * her trick, and Rufus's lost frog carried home on a rare event's day. 1.5's is 1.2's opened in a
+ * 1.5 dev build as her phone will (through steps 55 to 57, one `1.5` card), then played on by taps
+ * from 25 October to 10 January (V1.5's review): Pickle patted and doing his trick, the attic
+ * built and climbed, a photo, the Bat traced, a shiny tombstone toad netted, the bat onesie bought
+ * and worn, Gourdon's log stove and rocking chair ordered and set out, and an icicle smelt landed
+ * through the frozen pond.
  */
 const LIVED_IN = {
   '0.2.2': 'lived-in-v27.json',
@@ -32,6 +37,7 @@ const LIVED_IN = {
   '0.3': 'lived-in-v43.json',
   '1.0': 'lived-in-v53.json',
   '1.2': 'lived-in-v55.json',
+  '1.5': 'lived-in-v58.json',
 };
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');

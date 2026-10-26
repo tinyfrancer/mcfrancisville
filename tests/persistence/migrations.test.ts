@@ -526,6 +526,28 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("1.5's G6 step (57 to 58)", () => {
+  it('opens a town with no attic as one that has none, everything else as it was', () => {
+    const old = { ...structuredClone(SAVE), version: 57 } as Record<string, unknown>;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.home).toEqual(SAVE.home);
+    expect(Object.keys(up!.home.rooms)).toEqual(['main']);
+  });
+
+  it('keeps an attic a town has built, with what stands in it', () => {
+    const attic: RoomSnapshot = {
+      placed: [{ id: 'cauldron', tx: 2, ty: 4, turn: 0 }],
+      wallpaper: 'atticPlanks',
+      flooring: 'oakBoards',
+      size: 1,
+    };
+    const back = { ...SAVE.home.rooms.main, placed: [] };
+    const home: HomeSnapshot = { ...SAVE.home, rooms: { ...SAVE.home.rooms, back, attic } };
+    expect(migrateSave({ ...SAVE, home })?.home.rooms.attic).toEqual(attic);
+  });
+});
+
 describe("1.5's G4 step (56 to 57)", () => {
   it('gives a town an empty star chart, and keeps its Cabinet', () => {
     const old = { ...structuredClone(SAVE), version: 56 } as Record<string, unknown>;

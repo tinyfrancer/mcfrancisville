@@ -102,6 +102,59 @@ describe('pet art', () => {
     expect(upper).toContain('f');
   });
 
+  it("keeps every pet's every frame, dressed or not, within the pets' size", () => {
+    for (const id of PET_IDS) {
+      for (const frame of FRAMES) {
+        for (const accessory of [null, ...ACCESSORY_IDS]) {
+          const { width, height } = spriteSize(petSource(id, frame, accessory));
+          expect(width, `${id} ${frame}`).toBeLessThanOrEqual(38);
+          expect(height, `${id} ${frame}`).toBeLessThanOrEqual(32);
+        }
+      }
+    }
+  });
+
+  // 1.5's G7: Pickle the possum.
+  it('draws Pickle in his bow and with his lantern in every frame, the same size as bare', () => {
+    for (const accessory of ['ribbonBow', 'tailLantern'] as const) {
+      for (const frame of FRAMES) {
+        const bare = petSource('pickle', frame);
+        const dressed = petSource('pickle', frame, accessory);
+        expect(spriteSize(dressed), `${accessory} ${frame}`).toEqual(spriteSize(bare));
+        const a = rasterize(bare, petPalette('pickle', null)).data;
+        const b = rasterize(dressed, petPalette('pickle', accessory)).data;
+        expect(b, `${accessory} ${frame}`).not.toEqual(a);
+      }
+    }
+    // His lantern's glass, which glows after dark, is in every frame he carries it.
+    for (const frame of FRAMES) {
+      expect(petSource('pickle', frame, 'tailLantern').rows.join(''), frame).toMatch(/G/);
+    }
+    // A scarf is painted on, as every pet's neckwear is.
+    const scarf = rasterize(petSource('pickle', 'side0'), petPalette('pickle', 'tinyScarf')).data;
+    const bare = rasterize(petSource('pickle', 'side0'), petPalette('pickle', null)).data;
+    expect(scarf).not.toEqual(bare);
+  });
+
+  it('gives Pickle a white face, a pink nose and a bare pink tail, from every side', () => {
+    for (const frame of ['side0', 'sitFront', 'rest', 'trick0', 'trick1'] as const) {
+      const keys = petSource('pickle', frame).rows.join('');
+      expect(keys, frame).toMatch(/u/);
+      expect(keys, frame).toMatch(/p/);
+    }
+    for (const frame of FRAMES) {
+      if (frame === 'sitFront' || frame === 'rest' || frame.startsWith('trick')) continue;
+      expect(petSource('pickle', frame).rows.join(''), frame).toMatch(/t/);
+    }
+    // Playing dead, his eye is a little "x"; hanging, a branch is drawn over him.
+    const dead = petSource('pickle', 'trick0').rows;
+    expect(dead.some((row, y) => row.includes('e') && dead[y + 2]?.includes('e'))).toBe(true);
+    expect(petSource('pickle', 'trick1').rows[1]).toMatch(/B/);
+    expect(trickStep('pickle', 0.2).frame).toBe('trick0');
+    expect(trickStep('pickle', 0.5).frame).toBe('trick1');
+    expect(trickStep('pickle', 0.5).lift).toBeGreaterThan(0);
+  });
+
   it('gives the ghost pets a glow, and only them', () => {
     expect(PET_IDS.filter((id) => PET_ART[id].glow)).toEqual(['wybie', 'elvira']);
   });

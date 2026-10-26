@@ -1,5 +1,7 @@
+import { FORAGED } from '../data/affection';
 import { PETS } from '../data/pets';
-import type { PetId } from '../types/ids';
+import type { ItemId, PetId } from '../types/ids';
+import { windowOf } from './clock';
 import { hashString } from './random';
 import type { Tile } from './pathfinding';
 
@@ -112,6 +114,8 @@ export interface PetFinds {
   critters: readonly FoundCritter[];
   /** Something a neighbour lost, lying in this place. */
   lost: Tile | null;
+  /** She's outdoors, where Pickle forages (1.5's G7); not in a shop or a room. */
+  outdoors?: boolean;
 }
 
 export interface FoundCritter extends Tile {
@@ -230,6 +234,34 @@ export function restsNow(id: PetId, now: number): boolean {
 /** Whether a pet that knows its trick shows it off on its own in this stretch of time. */
 export function trickNow(id: PetId, now: number, ms: number): boolean {
   return nowAndThen(`${id}:trick`, now, 40_000, 3, ms);
+}
+
+/**
+ * Whether Pickle is up (1.5's G7): a possum keeps the night, from the evening window till five,
+ * and sleeps the day away.
+ */
+export function pickleAwake(now: number): boolean {
+  return windowOf(now) === 'evening';
+}
+
+/** How near Pickle a neighbour comes before he plays dead, how long for, and how often at most. */
+export const STARTLE_REACH = 2;
+export const STARTLE_MS = 2200;
+export const STARTLE_EVERY_MS = 15_000;
+/** How long he plays dead when she pays him a compliment (a pat). */
+export const PAT_DEAD_MS = 1400;
+
+/** What his once-a-night find is remembered by in `taken` (1.5's G7). */
+export const FORAGE_KEY = 'forage:pickle';
+
+/** Whether Pickle turns something up in this stretch, out on a night's walk while she stands by. */
+export function forageNow(now: number): boolean {
+  return nowAndThen('pickle:forage', now, 20_000, 2, 20_000);
+}
+
+/** What Pickle finds tonight: the same all day, read off the day key. */
+export function foragedOn(day: string): ItemId {
+  return FORAGED[hashString(`forage:${day}`) % FORAGED.length]!;
 }
 
 /** Whether Florence, asleep and fond of her, purrs a heart through her Zs just now. */

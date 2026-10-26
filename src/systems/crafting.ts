@@ -20,6 +20,8 @@ export interface Maker {
   roomSize: number;
   /** The rooms her home has (0.3's H4); the front room alone if not given. */
   rooms?: readonly RoomId[];
+  /** How many extensions each room but the front has had (1.5's G6: the attic's); none if not given. */
+  sizes?: Partial<Record<RoomId, number>>;
   /** How many extension rows her farm has had (0.2's N1). */
   farmRows?: number;
   /** How many shelves the honesty stall has had built on (0.2's E1). */
@@ -119,8 +121,11 @@ export function cantMake(id: RecipeId, maker: Maker): CantMake | null {
   if (!maker.knows(id)) return 'unknown';
   const makes = RECIPES[id].makes;
   if ('room' in makes) {
-    if (maker.roomSize >= makes.room) return 'built';
-    if (maker.roomSize < makes.room - 1) return 'notYet';
+    const id = makes.in ?? 'main';
+    if (id !== 'main' && !(maker.rooms ?? ['main']).includes(id)) return 'notYet';
+    const size = id === 'main' ? maker.roomSize : (maker.sizes?.[id] ?? 0);
+    if (size >= makes.room) return 'built';
+    if (size < makes.room - 1) return 'notYet';
   }
   if ('newRoom' in makes) {
     const rooms = maker.rooms ?? ['main'];

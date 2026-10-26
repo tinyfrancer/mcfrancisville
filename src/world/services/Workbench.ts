@@ -71,6 +71,7 @@ export class Workbench {
       count: (item) => this.bag.count(item),
       roomSize: this.home.rooms.extensions,
       rooms: this.home.rooms.built,
+      sizes: Object.fromEntries(this.home.rooms.built.map((r) => [r, this.home.rooms.sizeOf(r)])),
       farmRows: this.farm.rows,
       stallShelves: this.stall.shelves,
       night: isNight(hourOf(this.ctx.clock.now())),
@@ -99,10 +100,15 @@ export class Workbench {
     const made = RECIPES[id].makes;
     if ('item' in made) this.bag.add(made.item, 1);
     else if ('furniture' in made) this.home.store(made.furniture);
-    else if ('room' in made) this.home.rooms.grow();
+    else if ('room' in made) this.home.rooms.grow(made.in);
     else if ('newRoom' in made) {
       // Anything that stood in the doorway's way goes in the chest, a planter's crop with it.
       const room = ROOMS[made.newRoom].through?.from ?? 'main';
+      const first = ROOMS[made.newRoom].first;
+      if (first) {
+        this.home.giveWallpaper(first.wallpaper);
+        this.home.giveFlooring(first.flooring);
+      }
       for (const p of this.home.rooms.build(made.newRoom) ?? []) {
         this.ctx.signals.emit('moved', {
           piece: p.id,

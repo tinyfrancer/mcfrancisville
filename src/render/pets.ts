@@ -1,11 +1,12 @@
 import { TILE_SIZE } from '../config/world';
-import { PETS } from '../data/pets';
+import { ACCESSORIES, PETS } from '../data/pets';
 import { bake } from '../sprites/bake';
 import { DOG_BONE, ITEM_ART } from '../sprites/items';
 import { PALETTE } from '../sprites/palette';
 import {
   accessoryIcon,
   BUBBLE_ART,
+  LANTERN_GLOW,
   PET_ART,
   petPalette,
   petSource,
@@ -56,6 +57,7 @@ function lookOf(pet: Pet, now: number): Look {
   if (pet.pose === 'walk' && pet.moving) {
     frame = Math.floor(pet.walkMs / TROT_FRAME_MS) % 2 === 0 ? 'side1' : 'side0';
   } else if (pet.pose === 'sit') frame = pet.looking === 'back' ? 'sitBack' : 'sitFront';
+  else if (pet.pose === 'playDead') frame = 'trick0';
   else if (pet.pose === 'sleep' || pet.pose === 'curl') frame = 'rest';
   // Sitting, they face her or the room; walking or curled, the way they're facing.
   const sits = frame === 'sitFront' || frame === 'sitBack';
@@ -70,7 +72,7 @@ export function bakePet(
   flip = false,
 ): HTMLCanvasElement {
   const key = `pet:${id}:${frame}:${accessory ?? 'none'}:${flip ? 'l' : 'r'}`;
-  return bake(key, petSource(id, frame), petPalette(id, accessory), { flipX: flip });
+  return bake(key, petSource(id, frame, accessory), petPalette(id, accessory), { flipX: flip });
 }
 
 /** A pet's feet sit this far below the middle of its tile. */
@@ -101,11 +103,17 @@ export function petDrawable(pet: Pet, world: World, nowMs: number): Drawable {
     shadow: { cx: x, cy: ground - 2 - (pet.perch?.lift ?? 0), w: Math.min(sprite.width, 28), h: 6 },
   };
   if (look.alpha < 1) d.alpha = look.alpha;
+  // Pickle's lantern glows after dark, its glass alone (1.5's G7).
+  if (accessory && ACCESSORIES[accessory].style === 'lantern') {
+    const key = `glow:pet:${pet.id}:${frame}:${accessory}:${flip ? 'l' : 'r'}`;
+    const source = petSource(pet.id, frame, accessory);
+    d.glow = glowOf(key, source, petPalette(pet.id, accessory), LANTERN_GLOW, { flipX: flip });
+  }
   const glow = PET_ART[pet.id].glow;
   if (ghost && glow) {
     d.alpha = GHOST_ALPHA * look.alpha;
     const key = `glow:pet:${pet.id}:${frame}:${flip ? 'l' : 'r'}`;
-    d.glow = glowOf(key, petSource(pet.id, frame), petPalette(pet.id, accessory), glow, {
+    d.glow = glowOf(key, petSource(pet.id, frame, accessory), petPalette(pet.id, accessory), glow, {
       flipX: flip,
     });
   }

@@ -9,11 +9,16 @@ import {
   drawTarget,
   fetchable,
   florenceAwake,
+  forageNow,
   habitBubble,
   NO_FINDS,
+  pickleAwake,
   restsNow,
   roamGoal,
   sniffGoal,
+  STARTLE_EVERY_MS,
+  STARTLE_MS,
+  STARTLE_REACH,
   trickNow,
   zoomies,
   type Bubble,
@@ -26,9 +31,9 @@ import type { Ground } from './Neighbour';
 /**
  * How a pet is standing: on its feet, trotting, sitting beside her, or, for Florence, asleep
  * under her blanket, and for Elvira, curled up in a ball; and once it knows one (V1's R6c), in
- * the middle of its trick.
+ * the middle of its trick; and Pickle (1.5's G7) playing dead, startled or complimented.
  */
-export type PetPose = 'stand' | 'walk' | 'sit' | 'sleep' | 'curl' | 'trick';
+export type PetPose = 'stand' | 'walk' | 'sit' | 'sleep' | 'curl' | 'trick' | 'playDead';
 
 /** Beyond this many tiles from her, a pet following her is simply beside her again. */
 export const CATCH_UP_TILES = 10;
@@ -68,6 +73,8 @@ export interface PetSurroundings {
   following: boolean;
   /** She is walking up to it, or has its sheet open, so it waits for her. */
   held: boolean;
+  /** Her camera is up (1.5's G5): it stops where it is and sits facing her for the photo. */
+  posing?: boolean;
   /** Where her neighbours are standing, for Dolly to bark at. */
   villagers: readonly Tile[];
   /** The open tiles it can wander to at home. */
@@ -93,6 +100,7 @@ export type PetDeed =
   | { job: 'bark'; key: string; at: Tile }
   | { job: 'draw'; key: string; from: Tile; to: Tile }
   | { job: 'fetch'; at: Tile }
+  | { job: 'forage'; at: Tile }
   | { trick: true; own: boolean };
 
 /**
@@ -132,6 +140,9 @@ export class Pet {
   /** Which stretch it last showed off its trick in, on its own, so it's once a stretch. */
   private trickSlot = -1;
   private level: PetLevel = 0;
+  /** Pickle playing dead until then (1.5's G7), and when a neighbour last startled him. */
+  private deadUntil = 0;
+  private startledAt = -Infinity;
 
   constructor(id: PetId, at: Tile) {
     this.id = id;
@@ -180,8 +191,40 @@ export class Pet {
     this.looking = her.y < this.y - TILE_SIZE / 2 ? 'back' : 'front';
   }
 
+  /**
+   * Her camera is up (1.5's G5): wherever it is, mid-trot or mid-trick, asleep or not, it stops
+   * and sits looking at her, on its perch if it's up on one, until the camera goes down.
+   */
+  private sitForPhoto(her: Her): void {
+    this.deadUntil = 0;
+    this.path = [];
+    this.headedFor = null;
+    this.moving = false;
+    this.walkMs = 0;
+    this.zooming = false;
+    this.fetching = null;
+    this.trickAt = null;
+    this.lookAt(her);
+    this.pose = 'sit';
+  }
+
+  /**
+   * Plays dead for `ms` (1.5's G7): Pickle, startled by a neighbour or paid a compliment, flops
+   * over wherever he is, and is up again as if nothing happened.
+   */
+  playDead(now: number, ms: number): void {
+    this.path = [];
+    this.headedFor = null;
+    this.moving = false;
+    this.walkMs = 0;
+    this.trickAt = null;
+    this.deadUntil = now + ms;
+    this.pose = 'playDead';
+  }
+
   /** Does its trick (V1's R6c), from the start. */
   perform(now: number): void {
+    this.deadUntil = 0;
     this.trickAt = now;
     this.pose = 'trick';
   }
@@ -194,6 +237,15 @@ export class Pet {
 
   update(deltaMs: number, s: PetSurroundings): PetDeed | null {
     this.level = s.level ?? 0;
+    if (s.posing) {
+      this.sitForPhoto(s.her);
+      return null;
+    }
+    if (s.now < this.deadUntil) {
+      this.pose = 'playDead';
+      return null;
+    }
+    if (this.pose === 'playDead') this.pose = 'sit';
     if (this.trickAt !== null) {
       const over = s.now - this.trickAt >= TRICKS[this.id].ms;
       if (over || (s.following && s.her.moving && !s.held)) {
@@ -281,7 +333,14 @@ export class Pet {
       }
     }
     if (this.id === 'dolly') this.barkAt(s, her);
+    if (this.id === 'pickle' && this.startled(s)) return null;
     if (this.id === 'wybie' && this.zoom(deltaMs, s, her)) return null;
+    if (working && job === 'forage' && finds.outdoors && pickleAwake(s.now)) {
+      if (!this.moving && s.her.stillMs >= JOB_AFTER_MS && !done('forage') && forageNow(s.now)) {
+        this.say('found', s.now, 1600);
+        return { job: 'forage', at: me };
+      }
+    }
     if (working && job === 'sniff' && finds.mound && s.her.stillMs >= JOB_AFTER_MS) {
       const sniff = sniffGoal(her, finds.mound, s.ground.canWalk);
       if (sniff) {
@@ -317,7 +376,10 @@ export class Pet {
     this.lookAt(s.her);
     if (this.id === 'elvira' && s.her.stillMs >= CUDDLE_AFTER_MS) this.pose = 'curl';
     else if (this.id === 'florence' && s.her.stillMs >= NAP_AFTER_MS) this.pose = 'sleep';
-    else if (this.id === 'gary' && working && s.her.stillMs >= NAP_AFTER_MS * 2) {
+    else if (this.id === 'pickle' && !pickleAwake(s.now) && s.her.stillMs >= NAP_AFTER_MS) {
+      // Out with her by day, he naps the moment she stops: it's the middle of his night.
+      this.pose = 'sleep';
+    } else if (this.id === 'gary' && working && s.her.stillMs >= NAP_AFTER_MS * 2) {
       this.pose = 'sleep';
     } else if (this.pose !== 'sleep' && this.pose !== 'curl') this.pose = 'sit';
     return null;
@@ -389,7 +451,9 @@ export class Pet {
       }
       return;
     }
-    const asleep = this.id === 'florence' && !florenceAwake(now);
+    const asleep =
+      (this.id === 'florence' && !florenceAwake(now)) ||
+      (this.id === 'pickle' && !pickleAwake(now));
     if (s.rest && (asleep || restsNow(this.id, now))) return this.rest(deltaMs, s, s.rest, asleep);
     if (this.perch) this.place(this.perch.floor);
     if (asleep) {
@@ -430,6 +494,15 @@ export class Pet {
       this.perch = { lift: spot.perch.lift, floor: spot.floor };
     }
     this.pose = settled;
+  }
+
+  /** Pickle plays dead when a neighbour comes right up to him, now and then. True if he does. */
+  private startled(s: PetSurroundings): boolean {
+    if (s.now - this.startledAt < STARTLE_EVERY_MS) return false;
+    if (!s.villagers.some((v) => reach(v, this.tile) <= STARTLE_REACH)) return false;
+    this.startledAt = s.now;
+    this.playDead(s.now, STARTLE_MS);
+    return true;
   }
 
   /** Dolly barks at a neighbour who comes close, then hides behind her. */
