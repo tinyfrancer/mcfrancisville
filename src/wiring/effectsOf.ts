@@ -295,6 +295,14 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
         : [pop({ item: event.item }, 1, over)];
     case 'readFortune':
       return [burst('sparkle', head, 6, 18), emote('♪')];
+    // The hens fed, a scatter of seed; the eggs collected, popped up out of the coop (1.6's X3).
+    case 'fedHens':
+      return [burst('sparkle', there, 4, 12), emote('♥')];
+    case 'laid':
+      return [burst('sparkle', there, 5, 16), pop({ item: 'egg' }, event.eggs, there)];
+    // Reginald's crow is drawn on him in the run, and heard.
+    case 'crow':
+      return [];
     // Snow days (1.6's X4): a puff where the snowball rolls, a flourish for the snowman.
     case 'snowball':
       return [burst('snow', tileMiddle(event), event.did === 'rolled' ? 6 : 9, 8)];
@@ -447,6 +455,8 @@ export function bumpsOf(event: WorldEvent): Bump[] {
       return ['purse'];
     case 'baked':
       return ['bag', 'purse'];
+    case 'laid':
+      return ['bag'];
     case 'unearthed':
       return 'candy' in event.find ? ['purse'] : ['bag'];
     case 'shook':

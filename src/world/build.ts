@@ -57,6 +57,7 @@ import type { Catalogue } from './services/Catalogue';
 import type { Workshop } from './services/Workshop';
 import type { Figurines } from './services/Figurines';
 import type { CandyTree } from './services/CandyTree';
+import type { Henhouse } from './services/Henhouse';
 import type { Chest } from './services/Chest';
 import type { Display } from './services/Display';
 import type { Collecting } from './services/Collecting';
@@ -252,6 +253,8 @@ export abstract class WorldParts {
   readonly milestones: Milestones;
   /** The candy tree by her house, which fills a little each window (phase O). */
   readonly candyTree: CandyTree;
+  /** The hens at Boo Acres, fed for eggs the next morning (1.6's X3). */
+  readonly henhouse: Henhouse;
   /** The honesty stall at the farm gate, which sells what she grows while she's away (phase O). */
   readonly stall: HonestyStall;
   /** The barn's wall at Boo Acres: her sprinklers, and the fields to sprinkle (0.3's F2). */
@@ -318,7 +321,7 @@ export abstract class WorldParts {
     this.belongings = made.belongings;
     areaMade('making');
     const passed = passive(shared, this.belongings);
-    ({ visits: this.visits, candyTree: this.candyTree } = passed);
+    ({ visits: this.visits, candyTree: this.candyTree, henhouse: this.henhouse } = passed);
     areaMade('passive');
     this.firstDay = firstDay(shared, { ...made, visits: this.visits, candyTree: this.candyTree });
     areaMade('firstDay');
@@ -441,8 +444,8 @@ export abstract class WorldParts {
     ({ hands: this.hands, novelty: this.novelty, milestones: this.milestones } = hers);
     ({ sitting: this.sitting, poses: this.poses } = hers);
     areaMade('her');
-    const { candyTree, stall, garden, noticeboard, fossils, shops, calendar } = this;
-    const today = { candyTree, stall, garden, noticeboard, fossils, shops, calendar };
+    const { candyTree, stall, garden, noticeboard, fossils, shops, calendar, henhouse } = this;
+    const today = { candyTree, stall, garden, noticeboard, fossils, shops, calendar, henhouse };
     this.upNow = upNow(shared, {
       ...today,
       neighbourhood,
@@ -515,6 +518,7 @@ export abstract class WorldParts {
       ...this.novelty.snapshot(),
       ...this.visits.snapshot(),
       ...this.candyTree.snapshot(),
+      ...this.henhouse.snapshot(),
       ...this.stall.snapshot(),
       ...this.kitchen.snapshot(),
       ...this.smallEvents.snapshot(),

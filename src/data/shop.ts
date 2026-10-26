@@ -17,6 +17,7 @@ import { SHINY_VALUES } from './shinies';
 import { RARE_KEEPSAKE_VALUES } from './rareEvents';
 import { STAR_VALUES } from './constellations';
 import { TICKET_VALUES } from './fairRide';
+import { HEN_VALUES } from './hens';
 import { SNOW_VALUES } from './snow';
 import { FAIR_PRIZE_VALUES } from './fairPrizes';
 import { ORCHARD_VALUES } from './orchard';
@@ -212,6 +213,7 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   ...RARE_KEEPSAKE_VALUES,
   ...STAR_VALUES,
   ...TICKET_VALUES,
+  ...HEN_VALUES,
   ...SNOW_VALUES,
   // Only ever won at the Hollow Fairground (V1's R6b).
   ...FAIR_PRIZE_VALUES,

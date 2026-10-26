@@ -207,6 +207,8 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
       'ghostDaisy',
       'moonflower',
       'ghostMallow',
+      // They look just like her (1.6's X3).
+      'meringueGhost',
       'moonflowerTea',
       'lavender',
       'lavenderShortbread',
@@ -1060,7 +1062,7 @@ export const VILLAGERS: Record<VillagerId, VillagerRow> = {
           "Evening, {name}! The round's done. Now I read the postcards. Not yours. Not properly.",
       },
     },
-    loves: ['moonPie', 'pumpkinPie', 'candyCorn'],
+    loves: ['moonPie', 'pumpkinPie', 'candyCorn', 'custardTart'],
     likes: ['snack', 'record'],
     reactions: {
       loved: "For me? {name}, that's first class. That's a gold star with a stamp on it.",

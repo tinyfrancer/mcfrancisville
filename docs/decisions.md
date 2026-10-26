@@ -9992,6 +9992,70 @@ stage's size, and a picture at two pixel sizes at once); moving her husband's sc
 fair so he'd ride more (not this session's; company is rare outside happenings and Agatha's
 weekend afternoons, and noted for the review).
 
+## 382. Chickens at Boo Acres: a coop by the barn, three hens and a rooster worked out from the clock, fed once a day for an egg each by morning, and three recipes with eggs (1.6's X3, 2026-10-26)
+
+**Context:** 1.6's X3 (decision 378): a coop by Scarah's barn, three hens with names and a rooster
+who crows at six, pecking about by day and in by night, fed once a day from her bag for an egg
+each the next morning, eggs that bake, Scarah's lines, Today's line. Nothing dies or goes hungry
+(decision 11).
+
+**Decision:**
+
+- **The coop** is a prop, `coop` (3×2, `0` in `FARM_LEGEND`), on the grass just east of the barn
+  (17–19, 3–4), clear of every spot, dig spot and path; `tests/data/maps.test.ts` holds everything
+  still reachable. Its art (`sprites/farm.ts`) is a teal henhouse on legs under a berry roof like
+  the barn's, a round window lit at night (`WINDOWS_LIT`, a small light), a pop-hole and a cleated
+  ramp, and the run: trodden earth and straw never outlined (laid under the outlined structure),
+  chicken wire behind post-and-rail fences, a trough and a tin waterer. The run's **front fence
+  is a second picture** (`COOP_FRONT`) drawn by the hens' pass just in front of them, so they
+  potter behind its rails; the coop has snow on its roof in winter (`ROOFED`) and no door, so no
+  festival lights. The overlays and arrivals snapshots were retaken for Boo Acres alone (the coop
+  and the hay bale beside it, walked up to from the tile below now).
+- **The hens** (`data/hens.ts`): Henrietta (speckled), Peck (black, a teal sheen), Omelette (buff)
+  and Reginald the rooster, side-on grids at about her knee (`sprites/hens.ts`: walk and peck
+  pairs, a sit, his crow; flipped to face left, as the pets are). Where each is is **worked out
+  from the clock alone** (`henAt` in `systems/hens.ts`): the pets' wander (`roamGoal`) as a pure
+  rule, a goal in the run hashed from the hen and the stretch, a trot from the last goal, then a
+  peck, stand or sit (Reginald never sits), always inside `RUN_FLOOR` (the run's floor in the
+  footprint's pixels, which the art is drawn round). Out from six until seven in the evening,
+  none drawn after. Nothing is stepped or saved for them: a stepped walker (`Pet`) would need
+  `update` to reach Boo Acres while she's elsewhere, and a hash of the clock gives the same
+  pottering for nothing. `world.henhouse` (`Henhouse`, the `passive` area, beside the candy tree)
+  says where they are; `render/hens.ts`'s `hens` pass draws them sorted just in front of the coop.
+- **Reginald crows at six** (`crow` moment, `crow` cue, a toast saying Scarah has asked him to
+  consider seven): once in the six o'clock hour, the first step she's at Boo Acres in it
+  (`Henhouse.check`, kept for the session, not the save), and he holds his crow frame for
+  `CROW_MS`.
+- **Feeding and eggs:** walking up to the coop (a `PropArrivals` row in `passive`, opening
+  `hud/CoopCard.ts` through `CoopApi` from `moments.ts`) shows the eggs waiting (Collect), the
+  plainest four crops or seeds in her bag (`feedChoices`, never an egg) each with Feed, and who
+  the hens are. Fed once a day, each of the three hens lays an egg by five the next morning:
+  `eggsWaiting` reads the stored day she fed them against today's day key, never ticked; fed
+  again before collecting, the earlier eggs move to `waiting`, so **nothing is ever lost**;
+  unfed, they lay nothing and nothing else happens. Collecting is a `laid` moment, an egg popped
+  over the coop, clucks. **Once a day is the henhouse's own `fed` day, not `Takings`**: Takings
+  prunes yesterday's keys at save, and the day she fed them must outlive the day to lay by.
+- **The egg** is kind `crop` (the bag's Food, a gift Scarah likes, the honesty stall's), value 6
+  (a day's three less than a crop, less than a morning's baking), but **never "any crop"** at the
+  stove (`PANTRY.crop` leaves it out) nor feed for the hens.
+- **Recipes:** an egg custard tart (3 eggs and a candy corn; pep; 90; Ollie loves it) and a
+  frittata (2 eggs and any crop; brings out a creepy-crawly, the first `crawly` lure; 70; Scarah
+  loves it), both **known from the start** so the first eggs have somewhere to go, a quarter
+  over their inputs by the economy test. With Wrapunzel, **meringue ghosts** are the bake instead
+  of the day's whenever she carries `MERINGUE_EGGS` (2), which go into the bowl (`MERINGUE_BAKE`
+  in `data/baking.ts`, its own three steps and line); a snack like the other bakes (15; Maude
+  loves them: they look like her).
+- **Scarah** has three new lines (hello, friend, night) about the hens; her keepsake unchanged.
+  **Today** has "3 eggs in the coop at Boo Acres" while any wait, flying her to the coop.
+- **The save (v59):** `henhouse: { fed: dayKey | null, waiting: number }`, a town from before
+  starting unfed with none waiting; a v58 town opens with the coop and no eggs.
+
+**Rejected:** a `Hens` zone overlay (the hens stand inside a prop's footprint, not on tiles, and
+block nothing); hens stepped by the world as pets are (above); Takings for once a day (above);
+the egg as a `material` (the bag would say "3 egg") or a new kind (every kind's table would
+grow); a card for the recipes at a shop (the eggs would have nowhere to go until she found one);
+meringue ghosts dealt as a fourth day's bake (then they'd need no eggs, or fail without them).
+
 ## 383. Snowmen rolled in her yard by a tap on herself, snowballs thrown elsewhere, prints in the snow, splashes in the rain, and a rainbow the first ten minutes out after a rainy day (1.6's X4, 2026-10-26)
 
 **Context:** 1.6's X4 (decision 378). The plan asked for a snowman built by three taps on lying

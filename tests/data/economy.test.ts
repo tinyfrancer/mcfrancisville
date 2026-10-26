@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { ACTIVITIES } from '../../src/data/activities';
 import { FAIR_PRIZES } from '../../src/data/fairPrizes';
-import { BAKE_CANDY, BAKE_KEEPS, BAKES } from '../../src/data/baking';
+import { BAKE_CANDY, BAKE_KEEPS, BAKES, MERINGUE_BAKE } from '../../src/data/baking';
+import { LAYERS, MERINGUE_EGGS } from '../../src/data/hens';
 import { CRITTERS, PLACE_NAMES } from '../../src/data/critters';
 import { FOSSIL_IDS, FOSSILS, MOUND_BEADS, MOUND_CANDY, MOUND_ODDS } from '../../src/data/fossils';
 import { FOSSIL_WEIGHT, fossilsIn } from '../../src/systems/fossils';
@@ -234,6 +235,17 @@ describe('the economy', () => {
   it("pays a morning's baking with Wrapunzel less than a round of the town (E1)", () => {
     const most = Math.max(...BAKES.map((b) => ITEM_VALUE[b.item]));
     expect(BAKE_CANDY + BAKE_KEEPS * most).toBeLessThan(roundOf('town').candy);
+  });
+
+  it("keeps a day's eggs small change, and meringue ghosts a quarter over their eggs (1.6's X3)", () => {
+    const day = LAYERS.length * ITEM_VALUE.egg;
+    // Fed once a day, the hens lay less than a morning's baking pays, and less than a crop.
+    expect(day).toBeLessThan(BAKE_CANDY);
+    expect(day).toBeLessThan(ITEM_VALUE.pumpkin);
+    const eggs = MERINGUE_EGGS * ITEM_VALUE.egg;
+    expect(BAKE_KEEPS * ITEM_VALUE[MERINGUE_BAKE.item]).toBeGreaterThanOrEqual(1.25 * eggs);
+    const most = Math.max(...BAKES.map((b) => ITEM_VALUE[b.item]));
+    expect(ITEM_VALUE[MERINGUE_BAKE.item]).toBeLessThanOrEqual(most);
   });
 
   it("wins nothing at the fairground's games worth a go, so no go makes Candy (M2)", () => {

@@ -153,6 +153,7 @@ const ORDER = [
   'plots',
   'booAcres',
   'whatGrows',
+  'hens',
   'greenhouseBeds',
   'edges',
   'interiors',

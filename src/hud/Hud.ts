@@ -35,6 +35,7 @@ import { openReveal } from './RevealSheet';
 import { openNotices, type NoticeApi } from './NoticeSheet';
 import { openStall, type StallApi } from './StallSheet';
 import { openBarn, type BarnApi } from './BarnSheet';
+import { openCoop, type CoopApi } from './CoopCard';
 import { openFair, type FairApi } from './FairSheet';
 import { openSky, type SkyApi } from './SkySheet';
 import type { ActivityId } from '../data/activities';
@@ -81,6 +82,8 @@ export interface HudOptions {
   notices: NoticeApi;
   stall: StallApi;
   barn: BarnApi;
+  /** The hens' coop at Boo Acres (1.6's X3). */
+  coop: CoopApi;
   fair: FairApi;
   /** The night sky through a telescope (1.5's G4). */
   sky: SkyApi;
@@ -142,6 +145,8 @@ export interface Hud {
   openStall(): void;
   /** Opens the barn's wall at Boo Acres, unless a sheet is already up (0.3's F2). */
   openBarn(): void;
+  /** Opens the hens' coop at Boo Acres, unless a sheet is already up (1.6's X3). */
+  openCoop(): void;
   /** Opens a stall at the fairground, or the fortune table, unless a sheet is already up (0.2's M2). */
   openFair(id: ActivityId): void;
   /** Opens the night sky through a telescope, unless a sheet is already up (1.5's G4). */
@@ -472,6 +477,9 @@ export function mountHud(root: HTMLElement, options: HudOptions): Hud {
     },
     openBarn() {
       if (!sheetOpen(hud)) openBarn(hud, options.barn);
+    },
+    openCoop() {
+      if (!sheetOpen(hud)) openCoop(hud, options.coop);
     },
     openFair(id) {
       if (!sheetOpen(hud)) openFair(hud, options.fair, id);

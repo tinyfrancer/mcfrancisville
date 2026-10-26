@@ -31,6 +31,7 @@ import type { Noticeboard } from '../services/Noticeboard';
 import type { Shops } from '../services/Shops';
 import { UpNow } from '../services/UpNow';
 import type { Stargazing } from '../services/Stargazing';
+import type { Henhouse } from '../services/Henhouse';
 import type { Forecast } from '../services/Forecast';
 import type { Shared } from './shared';
 
@@ -58,6 +59,8 @@ export interface UpNowParts {
   collecting: Collecting;
   /** The night sky, for a clear night at the telescope (1.5's G4). */
   stargazing: Stargazing;
+  /** The hens at Boo Acres, for the eggs waiting (1.6's X3). */
+  henhouse: Henhouse;
   /** A rainbow after the rain (1.6's X4); none in a test that doesn't give the weather. */
   weather?: Forecast;
 }
@@ -168,6 +171,7 @@ export function upNow(s: Shared, parts: UpNowParts): UpNow {
       shiny: parts.collecting.shinyHere(),
       iceFishing: isFrozen(day),
       stars: starsTonight(parts.stargazing),
+      eggs: parts.henhouse.eggs(),
       rainbow: (parts.weather?.rainbow() ?? null) !== null,
     };
   });

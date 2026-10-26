@@ -6,6 +6,7 @@ import { RARE_KEEPSAKES } from './rareEvents';
 import { FAIR_PRIZE_ITEMS } from './fairPrizes';
 import { STAR_ITEMS } from './constellations';
 import { TICKET_ITEMS } from './fairRide';
+import { HEN_ITEMS } from './hens';
 import { SNOW_ITEMS } from './snow';
 import { SHINY_ITEMS } from './shinies';
 
@@ -881,6 +882,8 @@ export const ITEMS: Record<ItemId, ItemRow> = {
   ...STAR_ITEMS,
   // A ticket stub from her first ride on the big wheel (1.6's X2).
   ...TICKET_ITEMS,
+  // The hens' eggs at Boo Acres, and what's made from them (1.6's X3).
+  ...HEN_ITEMS,
   ...SNOW_ITEMS,
 };
 

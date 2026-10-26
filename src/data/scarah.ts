@@ -57,6 +57,8 @@ export const SCARAH: VillagerRow = {
       "I'm hopeless at scaring things. The crows think I'm the friendliest thing in the field. They're not wrong!",
       "Seeds are just plants that haven't heard the good news yet. I tell them every morning.",
       '{name}, mind the lettuce! Not for my sake. The beetles are having a meeting in it.',
+      // The hens by the barn (1.6's X3).
+      "Have you met the hens? Henrietta, Peck and Omelette, and Reginald, who thinks he's in charge. Henrietta is in charge.",
     ],
     friend: [
       "Barty taught me which end of a seed goes up. There isn't one! I was so relieved.",
@@ -68,6 +70,7 @@ export const SCARAH: VillagerRow = {
       "Agatha says I'm the only scarecrow she knows who came to life by accident. She says it's the best way to do it.",
       'When I get in a flap, I stand very still in the field with my arms out. Old habit. It helps!',
       'Pimp Daddy Francis bought every pumpkin on my cart and said they were all for you. I gave him a free one for being sweet.',
+      "Reginald crows at six sharp, every morning. I've asked him to consider seven. He's considering it. Loudly. At six.",
     ],
     close: [
       "{name}, before the harvest moon I was only straw. Now I'm straw and a friend of yours. That's a much better recipe.",
@@ -88,6 +91,7 @@ export const SCARAH: VillagerRow = {
       '{name}, look at the fields by moonlight. All silver, like somebody tucked a sheet over them.',
       'The barn owl and I have an understanding. She keeps the mice in order, and I keep her company.',
       "Off home soon? If you see little glowing faces on the way, that's just the pumpkins saying goodnight.",
+      'The hens are all tucked up in the coop by now. Omelette sleeps with one eye open. Nobody knows which one.',
     ],
     windows: {
       morning:
@@ -97,7 +101,17 @@ export const SCARAH: VillagerRow = {
       evening: 'Evening, {name}! The golden hour. The whole farm goes the colour of a pumpkin pie.',
     },
   },
-  loves: ['sweetcorn', 'sunflower', 'ladybug', 'jewelBeetle', 'mossBeetle', 'pear', 'applePie'],
+  loves: [
+    'sweetcorn',
+    'sunflower',
+    'ladybug',
+    'jewelBeetle',
+    'mossBeetle',
+    'pear',
+    'applePie',
+    // Made with her hens' eggs and whatever's growing (1.6's X3).
+    'frittata',
+  ],
   likes: ['crop', 'seed', 'critter'],
   reactions: {
     loved: `Oh, {name}! For me? I'm so happy a bit of straw's come loose. Cornelius says "${CORNELIUS_SAYS}!" He means thank you.`,

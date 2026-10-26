@@ -87,6 +87,31 @@ export const BAKES: readonly Bake[] = [
   },
 ];
 
+/**
+ * Meringue ghosts (1.6's X3): baked instead of the day's bake whenever she brings eggs from the
+ * hens at Boo Acres (`MERINGUE_EGGS` of them, which go into the bowl).
+ */
+export const MERINGUE_BAKE: Bake = {
+  item: 'meringueGhost',
+  line:
+    'Out they come! Crisp outside, soft inside, and every one of them saying "boo" under its ' +
+    'breath. Those chocolate-chip eyes, {name}. I could cry. I might unravel.',
+  steps: [
+    {
+      line: "Eggs! From Scarah's hens? Oh, {name}, you know what this means. Whites in the bowl. Pour, and I'll whisk!",
+      does: 'pour',
+    },
+    {
+      line: 'Whisk, whisk, sugar, whisk… stiff peaks! Like little ghosts standing to attention. Now we pipe them tall.',
+      does: 'pour',
+    },
+    {
+      line: 'Two chocolate chips each, for eyes, and into a very low oven. They dry out slowly, like me on a sunny day.',
+      does: 'crouch',
+    },
+  ],
+};
+
 /** What Wrapunzel pays for an hour in her kitchen. */
 export const BAKE_CANDY = 60;
 

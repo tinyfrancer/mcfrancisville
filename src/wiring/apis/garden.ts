@@ -1,17 +1,19 @@
 import type { BarnApi } from '../../hud/BarnSheet';
+import type { CoopApi } from '../../hud/CoopCard';
+import { drawHen } from '../../render/hens';
 import { drawBedPicture } from '../../render/garden';
 import type { BedApi } from '../../hud/BedCard';
 import type { FarmApi } from '../../hud/SeedSheet';
 import { drawItemIcon } from '../../render/items';
 import { seedsIn, type ApiWiring, type SheetApis } from './shared';
 
-/** The garden: planting a bed, a bed's card, and the barn's wall. */
+/** The garden: planting a bed, a bed's card, the barn's wall, and the hens' coop (1.6's X3). */
 export function gardenApis({
   world,
   changed,
   play,
   waiting,
-}: ApiWiring): Pick<SheetApis, 'farm' | 'bed' | 'barn'> {
+}: ApiWiring): Pick<SheetApis, 'farm' | 'bed' | 'barn' | 'coop'> {
   const farm: FarmApi = {
     seeds: () => seedsIn(world),
     icon: drawItemIcon,
@@ -60,9 +62,24 @@ export function gardenApis({
     },
     icon: drawItemIcon,
   };
+  const coop: CoopApi = {
+    view: () => world.henhouse.view(),
+    feed(item) {
+      changed();
+      return world.henhouse.feed(item);
+    },
+    collect() {
+      changed();
+      return world.henhouse.collect();
+    },
+    count: (item) => world.bag.count(item),
+    icon: drawItemIcon,
+    hen: drawHen,
+  };
   return {
     farm,
     bed,
     barn,
+    coop,
   };
 }

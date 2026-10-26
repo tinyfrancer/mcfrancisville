@@ -130,6 +130,8 @@ export interface TodayFacts {
   stars?: { constellation: ConstellationId; found: boolean; showers: boolean } | null;
   /** The big wheel turning on a fair day (1.6's X2), while the day's free ride is still to be had. */
   bigWheel?: { open: boolean } | null;
+  /** The eggs waiting in the coop at Boo Acres (1.6's X3). */
+  eggs?: number;
   /** A rainbow up after the rain (1.6's X4), for its ten minutes. */
   rainbow?: boolean;
 }
@@ -176,6 +178,8 @@ export type TodayLine = { key: string; go?: TodayGo } & (
   | { kind: 'stars'; constellation: ConstellationId; found: boolean; showers: boolean }
   // 1.6's X2: the big wheel turning on a fair day, the first ride free.
   | { kind: 'bigWheel'; open: boolean }
+  // 1.6's X3: eggs waiting in the coop at Boo Acres.
+  | { kind: 'eggs'; eggs: number }
   // 1.6's X4: a rainbow after the rain, while it's up.
   | { kind: 'rainbow' }
 );
@@ -224,6 +228,14 @@ export function todayLines(facts: TodayFacts): TodayLine[] {
       sold: facts.stall.sold,
       key: `stall:${window}`,
       go: { zone: 'town', prop: 'honestyStall' },
+    });
+  }
+  if (facts.eggs) {
+    lines.push({
+      kind: 'eggs',
+      eggs: facts.eggs,
+      key: `eggs:${day}`,
+      go: { zone: 'booAcres', prop: 'coop' },
     });
   }
   const byPlace = new Map<ZoneId, RipeBed[]>();

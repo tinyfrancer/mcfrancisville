@@ -1,4 +1,12 @@
-import { BAKE_CANDY, BAKE_KEEPS, BAKE_POINTS, BAKES, type Bake } from '../../data/baking';
+import {
+  BAKE_CANDY,
+  BAKE_KEEPS,
+  BAKE_POINTS,
+  BAKES,
+  MERINGUE_BAKE,
+  type Bake,
+} from '../../data/baking';
+import { MERINGUE_EGGS } from '../../data/hens';
 import { dayKey } from '../../systems/clock';
 import { fill } from '../../systems/friendship';
 import { hashString } from '../../systems/random';
@@ -62,19 +70,28 @@ export class Baking {
   }
 
   /**
+   * What they bake now: meringue ghosts if she has brought eggs from the hens (1.6's X3), or the
+   * day's bake.
+   */
+  private bakeNow(): Bake {
+    if (this.keeps.bag.count('egg') >= MERINGUE_EGGS) return MERINGUE_BAKE;
+    return bakeOn(dayKey(this.ctx.clock.now()));
+  }
+
+  /**
    * Today's bake told a step at a time (V1's P4), Wrapunzel's lines filled in, the last being
    * `bake`'s; nothing is baked or paid until `bake`. Null if she can't bake now.
    */
   scene(villager: VillagerId): string[] | null {
     if (!this.canBake(villager)) return null;
-    const bake = bakeOn(dayKey(this.ctx.clock.now()));
+    const bake = this.bakeNow();
     const name = this.reads.name();
     return [...bake.steps.map((s) => fill(s.line, { name })), fill(bake.line, { name })];
   }
 
   /** A step of today's bake as it's told: her at the bowl, pouring, or down at the oven. */
   step(k: number): void {
-    const step = bakeOn(dayKey(this.ctx.clock.now())).steps[k];
+    const step = this.bakeNow().steps[k];
     if (step && this.keeps.takings.isReady(BAKE_KEY)) {
       this.ctx.moments.push({ kind: 'bakeStep', does: step.does });
     }
@@ -86,8 +103,9 @@ export class Baking {
   ): { line: string; item: Bake['item']; count: number; candy: number } | null {
     if (!this.canBake(villager)) return null;
     const { bag, wallet, takings } = this.keeps;
-    const bake = bakeOn(dayKey(this.ctx.clock.now()));
+    const bake = this.bakeNow();
     takings.take(BAKE_KEY);
+    if (bake === MERINGUE_BAKE) bag.remove('egg', MERINGUE_EGGS);
     wallet.earn(BAKE_CANDY);
     bag.add(bake.item, BAKE_KEEPS);
     this.ctx.events.emit('bag', bag.contents);
