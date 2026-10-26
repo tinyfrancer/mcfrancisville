@@ -96,9 +96,14 @@ lantern's glass glows after dark, `LANTERN_GLOW`); up by night and asleep by day
 fifth `1.5` notes line; smoke's `pickle` section in `pets`. Decision 376 says what and why.
 Nothing half done. **The review (V1.5) is next**, and folds nothing in 1.5's notes: it has five.
 
-### V1.5 the review
+### V1.5: the review and 1.5 (`claude/v15-review`; decision 377; never the save)
 
-Not started; in the plan's order.
+**Started** (from `v1.4-dev` at `37d442e`, save v58). The suite is green at the start; the build
+is one chunk, 1,963.9 kB (660.7 kB gzipped). Next, in order: open `lived-in-v55.json` as her
+phone will (notes last seen `1.4.1`) at Close, Far and sideways; play it on by taps through the
+new things and keep it as `lived-in-v58.json`; the shakedown; perf against `main`; the notes; the
+docs; decision 377; merge, then the release PR `v1.4-dev` → `main` (not merged: the
+coordinator's). The driver is a scratch script on smoke's `lib.mjs` (decision 324's method).
 
 ## If you are starting cold after a long gap
 
