@@ -10117,6 +10117,61 @@ indoors; the keepsake as a furniture figurine in the chest (art at 32 for a tabl
 coordinator asked for an item); puddles kept after a rainy day; the rainbow at a window's turn on
 a rainy day (rain doesn't stop within a day).
 
+## 384. Small delights: a butterfly on her hat, fireflies, the scarecrow's crow, her pets at the door, Fibi's gift, and a sneeze in the long grass (1.6's X5, 2026-10-26)
+
+**Context:** 1.6's X5 (decision 378): six small things that cost nothing and make her smile, each
+an effect or a short rule, no save. The world never names an effect (decision 280), so each is a
+rule in `systems/delights.ts`, a moment from the world, and its look in `wiring/effectsOf.ts`.
+
+**Decision:**
+
+- **A butterfly or moth on her hat.** Eight seconds standing still outdoors (`PERCH_AFTER_MS`,
+  counted by step, so sitting on a bench counts) where one could be about lands one (`landed`),
+  not more than once a minute on the clock (`PERCH_EVERY_MS`). "About" is the moth family's
+  `isAbout` for the place (`fliersAbout`: its `where`, hours, season or visit, weather), never a
+  legendary one and none in the rain; by day that's the mourning cloak and, at the castle in
+  summer, the monarch, and by night the moths, so day and night pick themselves. It's drawn from
+  the critter's own 16-pixel art (`CRITTER_ART[id].frames`) by `Effects`' `perch`, fluttering in,
+  wings open a second and a half and shut a moment, until she moves (`flewOff`, a `flit`). Not
+  catchable: it's no critter in `Collecting`. With reduced motion it sits and goes at once.
+- **Fireflies** in June, July and August from nine at night till four, outdoors on lawn, meadow or
+  long grass, not in the rain (`firefliesOut`), and not while a meal's pep has her running:
+  `world.delights.fireflies()` is asked each step in `main.ts` and `Effects.fireflies` keeps four
+  soft lights circling her middle and trailing as she walks, coming in over 1.5 s and going over
+  0.7 s; they bloom (`glints`). None with reduced motion.
+- **The scarecrow's crow** caws when she steps within two tiles of a scarecrow (hers on the farm,
+  and Boo Acres'), by day while the crows are out (`FLYER_HOURS.crow`), once a window per
+  scarecrow (`caw:<place>:<tx>,<ty>` in `Takings`): a `caw` cue and three feathers. The crow is the
+  view's (`perchDrawables`, read off the view's clock), so the world can't know whether one sits
+  there: given how long since the caw (`world.delights.cawed()`), a crow sat on the arm lifts and
+  flaps and settles, and one that wasn't flaps up out of the straw and away.
+- **Her pets at the door.** When she crosses into her home from anywhere else, every pet at home
+  but the one walking with her comes over (`Pet.comeOver('greet')`): trots to beside her, once
+  round her and sits looking up with a heart, a `greeted` moment as it reaches her with its voice
+  (`mew` for the cats, `woof` for Fibi and Dolly, `chitter` for Pickle). Asleep (Florence at her
+  naps, Pickle by day) it only shows a heart in its sleep; Gary, who'd take all evening, beams
+  from where he is; Pickle up at night plays dead at her feet instead of going round. A pet that
+  can't reach her in nine seconds gives up.
+- **Fibi's gift.** Six seconds after she comes home (`GIFT_AFTER_MS`), once a day (`gift:fibi` in
+  `Takings`, a once-a-day key), if Fibi is at home, she trots up (`comeOver('gift')`) and gives her
+  one of six things dealt by the day (`PET_GIFTS`: a leaf, a striped sock, a bottle cap, a twig, a
+  crow's feather, one glove), a toast in her name ("Fibi has brought you a sock. It is not yours.")
+  and a pop of its picture (`GIFT_ART`) with no "+n". Nothing goes in her bag.
+- **A sneeze in the long grass**, March to May, on meadow and long grass tiles: after four to nine
+  such tiles in a window (`sneezeAfter`, dealt by the window), once a window (`sneeze` in
+  `Takings`). She stops a moment on her way (`Movement.hold`, then walks on to where she was
+  going) and sneezes: the new `sneeze` verb is a shrug (the "ah…", 420 ms) and a crouch (the
+  "choo", 260 ms), there being no sneeze pose and no new art allowed for her; an `achoo` cue and a
+  puff of pollen. The nearest neighbour within four tiles says bless you in their own words
+  (`BLESS_YOU`, a row each), as a toast and a heart over them.
+
+**Rejected:** reading only the critters actually dealt this hour for the butterfly (often none
+of the family dealt where she stands, so it would hardly happen); a butterfly by day and a moth by
+night whatever the place (a monarch in the woods it never lives in); the crow's lift worked out
+in the world (the perch's cycle is the view's clock); a sneeze that halts her walk (she'd have to
+tap again); "bless you" as a bubble with words (the chatter bubbles are emotes only, so the words
+are a toast); Gary trotting over; Fibi's gift as an item.
+
 ## 385. Gerald, the museum's skeleton, stood up from the fossils on show; and a kite flown on a windy day dealt from the day key (1.6's X6, 2026-10-26)
 
 **Context:** 1.6's X6 (decision 378). The plan asked for a skeleton in the museum's hall once all

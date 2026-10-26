@@ -77,6 +77,7 @@ import type { Stargazing } from './services/Stargazing';
 import type { Kite } from './services/Kite';
 import { KITE_IDS } from '../data/kites';
 import type { Snow } from './services/Snow';
+import type { Delights } from './services/Delights';
 import { Garden } from './services/Garden';
 import { Barn } from './services/Barn';
 import { Gathering } from './services/Gathering';
@@ -163,6 +164,8 @@ export abstract class WorldParts {
   readonly kite: Kite;
   /** Snow to play in, in winter (1.6's X4). */
   readonly snow: Snow;
+  /** Small delights outdoors (1.6's X5): a butterfly on her hat, fireflies, a caw, a sneeze. */
+  readonly delights: Delights;
   /** The day's window, what's on today, and the calendar (phase N). */
   readonly calendar: Calendar;
   /** The notes on the board by the square, and answering them (phase N). */
@@ -396,9 +399,10 @@ export abstract class WorldParts {
     ({ pumpkinPatch: this.pumpkinPatch, finale: this.finale } = festival);
     this.rareEvents = festival.rareEvents;
     areaMade('festivals');
-    const air = outdoors(shared, zones, outside, mailbox, this.neighbourhood);
+    const air = outdoors(shared, zones, outside, mailbox, this.neighbourhood, this.kitchen);
     ({ weather: this.weather, fountain: this.fountain, stargazing: this.stargazing } = air);
     this.snow = air.snow;
+    this.delights = air.delights;
     areaMade('outdoors');
     this.activities = fairground(shared, this.weather).activities;
     areaMade('fairground');

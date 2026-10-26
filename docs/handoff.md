@@ -54,6 +54,21 @@ there's room: "On a rainy day the puddles are for splashing, and the day after, 
 rainbow."
 Next: merge when green, then empty this heading.
 
+### X5: small delights (`claude/x5-delights`; decision 384)
+
+Done (PR #239 into `v1.6-dev`): a butterfly or moth lands on her hat after eight seconds still
+outdoors where one's about (not in the rain, once a minute) and flies off as she moves; fireflies
+round her on summer nights on grass; the crow on a scarecrow caws as she walks within two tiles,
+once a window; her pets at home trot over and round her as she comes in (Pickle plays dead at
+night, sleepers and Gary only beam); Fibi brings her something once a day at home that isn't
+hers; and in spring's meadow and long grass she stops and sneezes once a window, blessed by a
+neighbour within four tiles. `world.delights`, `systems/delights.ts`, `Pet.comeOver`, the
+`perch`/`flit` effects and `Effects.fireflies`; smoke `delights` in `feel`. **No save change.**
+Its line for the `1.6` card, for the review to fold (the row is full, so `patchNotes.ts` is
+untouched): "Small things: a butterfly on your hat if you stand still, fireflies in summer, Fibi's
+gifts, which are not yours. Bless you."
+Next: merge when green, then empty this heading.
+
 ### X6: the museum's skeleton, and a kite (`claude/x6-skeleton-kite`; decision 385)
 
 Done, PR #240 into `v1.6-dev`: Gerald, a little dragon of bones on a plinth, stands in the
@@ -69,7 +84,7 @@ save change** (v59). Next: merge when green, then empty this heading.
 fossil and Wrapunzel will stand them up as a skeleton. She has named it Gerald. And there are
 kites at Cobweb Corner: on a breezy day, fly one from the end of the pier."
 
-### X5 small delights, V1.6 the review
+### V1.6 the review
 
 Not started; in the plan's order.
 

@@ -58,7 +58,11 @@ function walkRound(place: MapZoneId, h: Harness): string[] {
     events.push(...h.tick(1));
     events.push(...h.until(() => !h.world.movement.walking, 'walking up', 30_000));
     events.push(...h.tick(1));
-    const told = events.map((e) => JSON.stringify(e)).join(' ');
+    // The crow on a scarecrow cawing as she walks past (1.6's X5) is the walk's, not the arrival's.
+    const told = events
+      .filter((e) => e.kind !== 'cawed')
+      .map((e) => JSON.stringify(e))
+      .join(' ');
     lines.push(`${prop.id}@${prop.tx},${prop.ty} ${went ? 'went' : 'stayed'}: ${told}`);
     if (h.world.scene !== place) h.world.travel.cross({ to: place, along: 0 });
     h.tick(1);

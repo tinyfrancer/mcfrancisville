@@ -1,7 +1,9 @@
 import type { MapZoneId } from '../../types/ids';
 import type { PropArrivals } from '../arrivals';
+import { Delights } from '../services/Delights';
 import { Forecast } from '../services/Forecast';
 import { Fountain } from '../services/Fountain';
+import type { Kitchen } from '../services/Kitchen';
 import type { Mailbox } from '../services/Mailbox';
 import { Snow } from '../services/Snow';
 import { Stargazing } from '../services/Stargazing';
@@ -11,7 +13,7 @@ import type { Shared } from './shared';
 
 /**
  * What's in the air outdoors: the day's weather and its rainbow, the pond's fountain, the stars after
- * dark and the snow in winter.
+ * dark, the snow in winter and the small delights (1.6's X5).
  */
 export interface Outdoors {
   weather: Forecast;
@@ -20,6 +22,8 @@ export interface Outdoors {
   stargazing: Stargazing;
   /** Snow to play in, in winter (1.6's X4): snowmen in her yard, snowballs anywhere. */
   snow: Snow;
+  /** Small delights (1.6's X5): a butterfly on her hat, fireflies, the crow's caw, a sneeze. */
+  delights: Delights;
   /** The telescope at the castle lookout. */
   arrivals: PropArrivals;
 }
@@ -31,6 +35,7 @@ export function outdoors(
   outside: () => MapZoneId | null,
   mailbox: Mailbox,
   neighbourhood: Neighbourhood,
+  kitchen: Kitchen,
 ): Outdoors {
   const weather = new Forecast(s.ctx, outside, s.bag);
   const stargazing = new Stargazing(s.ctx, {
@@ -56,6 +61,16 @@ export function outdoors(
       neighbourhood,
       movement: s.movement,
       outside,
+    }),
+    delights: new Delights(s.ctx, {
+      zones,
+      takings: s.takings,
+      neighbourhood,
+      movement: s.movement,
+      outside,
+      weather: () => weather.today(),
+      pace: () => kitchen.pace(),
+      name: s.town.name,
     }),
     arrivals: {
       telescope: () => {

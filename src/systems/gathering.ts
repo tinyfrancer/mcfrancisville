@@ -45,6 +45,8 @@ export function onceADay(key: string): boolean {
       'together:',
       // What Pickle found on a night's walk (1.5's G7).
       'forage:',
+      // What Fibi brings her at home (1.6's X5).
+      'gift:',
     ].some((prefix) => key.startsWith(prefix))
   );
 }

@@ -493,9 +493,88 @@ async function verbs() {
   await closeSheets();
 }
 
+/**
+ * Small delights (1.6's X5, decision 384): standing still in town on a clear day, a butterfly
+ * lands on her hat (still, as smoke asks for reduced motion) and is gone as she walks; walking
+ * past the scarecrow on her farm, its crow caws; and coming home, her pets trot over to say hello.
+ */
+async function delights() {
+  await openOn('2026-09-27', 13);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  await closeSheets();
+  const landed = await stepUntil(
+    () => window.view.effects().perched !== null,
+    'a butterfly lands on her hat as she stands still',
+  );
+  await page.screenshot({ path: '.smoke/delights-butterfly.png' });
+  if (landed) {
+    check(
+      'a butterfly lands on her hat as she stands still in town',
+      (await page.evaluate(() => window.world.delights.perched())) !== null,
+    );
+  }
+
+  const scarecrow = await propTile('scarecrow', { nearest: true });
+  const by = await page.evaluate((s) => {
+    for (let r = 4; r <= 7; r++) {
+      for (let ty = s.ty - r; ty <= s.ty + r; ty++) {
+        for (let tx = s.tx - r; tx <= s.tx + r; tx++) {
+          if (Math.max(Math.abs(tx - s.tx), Math.abs(ty - s.ty)) !== r) continue;
+          if (window.world.canWalk(tx, ty)) return { tx, ty };
+        }
+      }
+    }
+    return null;
+  }, scarecrow);
+  if (!by) {
+    check('open ground a little way from the scarecrow', false);
+    return;
+  }
+  await walkTo(by);
+  check(
+    'the butterfly flies off as she walks',
+    (await page.evaluate(() => window.view.effects().perched)) === null,
+  );
+  const near = await page.evaluate((s) => {
+    for (let ty = s.ty - 2; ty <= s.ty + 2; ty++) {
+      for (let tx = s.tx - 2; tx <= s.tx + 2; tx++) {
+        if ((tx !== s.tx || ty !== s.ty) && window.world.canWalk(tx, ty)) return { tx, ty };
+      }
+    }
+    return null;
+  }, scarecrow);
+  if (near) {
+    await walkTo(near);
+    await page.evaluate((ms) => window.view.step(ms, 10), FRAME_MS);
+    check(
+      'the crow on the scarecrow caws as she walks past',
+      (await page.evaluate(() => window.view.cawed())) !== null,
+    );
+    await page.screenshot({ path: '.smoke/delights-caw.png' });
+  }
+  await tapToastAway();
+
+  await page.evaluate(() => window.world.travel.home());
+  await stepUntil(() => window.world.scene === 'home', 'she flies home');
+  const greeting = await stepUntil(
+    () => window.world.petCare.all.some((p) => p.comingOver === 'greet'),
+    'her pets come over to say hello',
+    4000,
+  );
+  check('her pets trot over to say hello as she comes home', greeting);
+  await page.evaluate((ms) => window.view.step(ms, 30), FRAME_MS);
+  await page.screenshot({ path: '.smoke/delights-home.png' });
+  await closeSheets();
+  // Back out to town, where the sections after expect to find her.
+  await page.evaluate(() => window.world.travel.back());
+  await stepUntil(() => window.world.scene === 'town', 'she flies back to town');
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['effects', effects],
+  ['delights', delights],
   ['verbs', verbs],
   ['moves', moves],
   ['taps', taps],

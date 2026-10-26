@@ -407,7 +407,19 @@ what each owns, and where it hurts. Update it when a seam moves.
   the world: pops of what she got, particles and emotes, pushed from the moments by
   `src/wiring/effectsOf.ts` (the world never names an effect). A tap shows a ring and brackets
   round what she set off toward (`feelTap` in `src/wiring/taps.ts`, `World.aim`), a shrug where
-  she can't go, and places pass through an iris (`src/render/transition.ts`).
+  she can't go, and places pass through an iris (`src/render/transition.ts`). **Small delights**
+  (1.6's X5, decision 384), each a short rule (`src/systems/delights.ts`) and a moment, nothing
+  saved: `world.delights` (`Delights`, the outdoors area) lands a butterfly or moth about there on
+  her hat after eight seconds still outdoors, not in the rain, once a minute (`landed`, drawn by
+  `Effects`' `perch` from the critter's own art until a `flit` as she moves), gathers fireflies
+  round her on summer nights on grass (`fireflies()`, `Effects.fireflies`, set each step in
+  `main.ts`), has the crow on a scarecrow caw within two tiles by day once a window (`cawed`,
+  `caw:` in `Takings`, lifted in `perchDrawables`), and sneezes her in spring's meadow and long
+  grass once a window (`Movement.hold`, the `sneeze` verb, a shrug and a crouch, `BLESS_YOU` in
+  `src/data/delights.ts` from a neighbour within four tiles); her pets at home trot over and round
+  her as she comes in (`Pet.comeOver('greet')`, a `greeted` moment and a cue per pet), and Fibi
+  brings her something once a day at home, never an item (`comeOver('gift')`, `PET_GIFTS` in
+  `src/data/petGifts.ts`, `gift:fibi` in `Takings`, a `petGift` pop of `GIFT_ART`).
 - **The seasons** (V1's L4, decision 294): `seasonOf(day)` (`src/systems/seasons.ts`) by the
   month, October still the town as it was. What lies on the ground by month is `src/data/seasons.ts`
   (decals hidden and added, snow); the colours are palette swaps in `src/sprites/seasons.ts`
