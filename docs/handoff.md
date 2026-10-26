@@ -85,7 +85,7 @@ the review folds to five. Decision 375 says what and why. Nothing half done. **G
 
 ### G7: Pickle the possum (`claude/g7-possum`; decision 376; no save change)
 
-**In progress** (draft PR into `v1.4-dev`). Done: the `pickle` row (`data/pets.ts`, hers from the
+**In progress** (PR #232 into `v1.4-dev`). Done: the `pickle` row (`data/pets.ts`, hers from the
 moment 1.5 lands, as the six are from the first day: nothing sells pets), his art in
 `sprites/pets.ts` (`pickleFrames`: side ×2, sit front and back, curled asleep, playing dead,
 hanging by his tail ×2; each drawn bare, in his bow and with his lantern, `PetArt.dressed`), three
@@ -95,8 +95,7 @@ his rows in `data/affection.ts` (pats, both tricks in one `TRICKS` routine, the 
 the forage deed in `PetCare` (once a night, `forage:pickle` in `Takings`), the lantern's glow in
 `render/pets.ts`; tests (`tests/world/pickle.test.ts`, `tests/sprites/pets.test.ts`), smoke's
 `pickle` section (in `pets.mjs`, after `pets`), the fifth `1.5` notes line, `CLAUDE.md`, the plan's
-status line (its PR number still `#n`), decision 376. Next: the PR number into the plan, CI green,
-merge.
+status line, decision 376. Next: CI green on #232, merge `origin/v1.4-dev` in and rerun, merge.
 
 ### V1.5 the review
 
