@@ -30,6 +30,9 @@ function sheds(id: PropId): boolean {
 
 const key = (t: Tile) => `${t.tx},${t.ty}`;
 
+/** How many rows over a prop's footprint its picture may rise: a tree's crown, a roof. */
+const BEHIND = 3;
+
 /**
  * The tiles a place keeps clear of a pile: anywhere a neighbour stands or the day's mound may be,
  * where the snack or a stall turns up, her yard and the farm's rows to come, the way in at a door,
@@ -68,7 +71,9 @@ export function pileSpots(
   const clear = keptClear(zone, map);
   const standing = new Set<string>();
   for (const p of map.props) {
-    for (let y = p.ty; y < p.ty + p.h; y++) {
+    // Its footprint, and the three rows over it that a crown or a roof rises into, so a pile is
+    // never drawn showing through another tree's branches.
+    for (let y = p.ty - BEHIND; y < p.ty + p.h; y++) {
       for (let x = p.tx; x < p.tx + p.w; x++) standing.add(key({ tx: x, ty: y }));
     }
   }

@@ -79,13 +79,16 @@ export function leafDrawables(trees: readonly Drawable[], nowMs: number): Drawab
 
 /**
  * Autumn's leaf piles at the trees' feet (1.7's Y2), heaped, or flat once she has jumped in one
- * this window: on the ground, under everything standing, so she stands in the leaves.
+ * this window: on the ground, under everything standing, so she stands in the leaves. A heaped one
+ * is something she might want, so a crown over it near her goes see-through.
  */
 export function leafPilesPass(world: World, zone: MapZone): Pass {
+  let heapedNow: Drawable[] = [];
   return {
     name: 'leafPiles',
     ground(ctx, { cam }) {
       const piles = world.leafPiles.piles(zone.id);
+      heapedNow = [];
       if (piles.length === 0) return;
       const heaped = bake('prop:leafPile:0', LEAF_PILE, LEAF_PILE_PALETTE);
       const flat = bake('prop:leafPile:flat', LEAF_PILE_FLAT, LEAF_PILE_PALETTE);
@@ -93,9 +96,12 @@ export function leafPilesPass(world: World, zone: MapZone): Pass {
         const sprite = down ? flat : heaped;
         const footY = (pile.ty + 1) * TILE_SIZE;
         const x = pile.tx * TILE_SIZE + (TILE_SIZE - sprite.width) / 2;
-        return { footY, sprite, x, y: footY - sprite.height };
+        const d: Drawable = { footY, sprite, x, y: footY - sprite.height };
+        if (!down) heapedNow.push(d);
+        return d;
       });
       drawDrawables(ctx, drawn, cam);
     },
+    wanted: () => heapedNow,
   };
 }

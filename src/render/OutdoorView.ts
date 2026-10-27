@@ -125,7 +125,17 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'bone',
     'her',
   ],
-  wanted: ['givers', 'snack', 'mounds', 'holidays', 'neighbours', 'critters', 'pets', 'bone'],
+  wanted: [
+    'givers',
+    'snack',
+    'mounds',
+    'holidays',
+    'neighbours',
+    'critters',
+    'pets',
+    'bone',
+    'leafPiles',
+  ],
   over: [
     'yard',
     'holidays',
