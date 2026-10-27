@@ -3,6 +3,28 @@ import type { SceneView } from './scene';
 import { TILE_SIZE } from '../config/world';
 import { PALETTE } from '../sprites/palette';
 
+/** Whether the frame being drawn is one a photo will be cut from (1.7's Y1). */
+let candid = false;
+
+/**
+ * Whether the frame being drawn now is for a photo (1.7's Y1, decision 388): the bubbles over
+ * heads (the chatter, a "!" or "?", a heart) are the game talking to her, not the town, so the
+ * effects' emotes and the neighbours' bubbles leave themselves out of it.
+ */
+export function forPhoto(): boolean {
+  return candid;
+}
+
+/** Draws a frame for a photo to be cut from, the bubbles over heads left out; then back to as was. */
+export function drawForPhoto(draw: () => void): void {
+  candid = true;
+  try {
+    draw();
+  } finally {
+    candid = false;
+  }
+}
+
 /** How much room the photo leaves round them, in tiles: a little either side, more above. */
 const ROOM = { side: 1.25, above: 2, below: 0.75 };
 
