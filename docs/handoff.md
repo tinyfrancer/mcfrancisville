@@ -9,14 +9,7 @@ down is the long history.
 
 ## In progress
 
-**Session Y1 of the 1.7 plan (save v60 in the last commit), branch `claude/y1-rough-edges`, PR
-#243 into `v1.7-dev`.** Done and pushed: the `1.7` card with Cody's line, the snowball and the
-rainbow kept (as optional fields, not yet a version), Cody or a crow on the big wheel, the free
-line, no bubbles in photos, the rod for a cast, and the docs (decision 388, the plan's landed line,
-CLAUDE.md, "Where it hurts"). Left, in order: merge the latest `origin/v1.7-dev`; in one last
-commit bump `SAVE_VERSION` to 60 with migration 59 (`rainbow: null`), its test, `rainbow`
-required in `SaveState` and `isSaveState`, and this section emptied; the checks; push, mark ready,
-CI green, merge with a merge commit.
+Nothing is in progress.
 
 ## If you are starting cold after a long gap
 

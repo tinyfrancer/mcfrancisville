@@ -44,7 +44,7 @@ import type { HenhouseState } from '../systems/hens';
  * Bump when `SaveState` changes shape or meaning, and add the step that upgrades the old shape to
  * `migrations.ts` with a test. A save with no chain to this version is set aside, not loaded.
  */
-export const SAVE_VERSION = 59;
+export const SAVE_VERSION = 60;
 
 /**
  * Version 0.1's first save (decisions.md 80). Versions 1 to 11 were version 0's test saves, which
@@ -267,7 +267,7 @@ export interface SaveState {
    * When she was first out under the day's rainbow (save v60, 1.7's Y1, decision 388): its day
    * key and the time, so a reload keeps its ten minutes; null with none seen.
    */
-  rainbow?: RainbowSeen | null;
+  rainbow: RainbowSeen | null;
 }
 
 /** When she was first out under a day's rainbow (1.6's X4), kept since save v60. */
@@ -742,7 +742,7 @@ export function isSaveState(value: unknown): value is SaveState {
     isFirstDayShape(s.firstDay) &&
     isProjectsShape(s.projects) &&
     isHenhouseShape(s.henhouse) &&
-    (s.rainbow === undefined || isRainbowShape(s.rainbow))
+    isRainbowShape(s.rainbow)
   );
 }
 
