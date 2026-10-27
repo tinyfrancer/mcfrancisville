@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RIDE, RIDE_COST, RIDE_LINES, RIDE_MS } from '../../src/data/fairRide';
+import { CROW_VIEW, RIDE, RIDE_COST, RIDE_LINES, RIDE_MS } from '../../src/data/fairRide';
 import { fill } from '../../src/systems/friendship';
 import { FREE_RIDE_KEY, TICKET_STUB } from '../../src/world/services/Activities';
 import { harness, type Harness } from './harness';
@@ -103,11 +103,25 @@ describe('a ride on the big wheel (1.6 X2)', () => {
     expect(h.tick(1)).toContainEqual({ kind: 'rode', with: 'agatha', first: true });
   });
 
-  it('has the car to herself with nobody she knows at the fair, and the mayor plaque', () => {
+  it('has the car to herself with nobody she knows at the fair, and a crow opposite', () => {
     const h = harness();
     h.clock.set(new Date(2026, 8, 16, 10));
     h.tick(2);
     expect(h.world.activities.rideWith()).toBeNull();
-    expect(h.world.activities.board()!.line).toMatch(/plaque/);
+    const riding = h.world.activities.board()!;
+    expect(riding.with).toBeNull();
+    expect(CROW_VIEW).toContain(riding.line);
+  });
+
+  it('takes Cody along of an evening, wherever he was (1.7’s Y1)', () => {
+    const h = harness();
+    // A Wednesday evening: nobody's schedule has them at the fair.
+    h.clock.set(new Date(2026, 8, 16, 19));
+    h.tick(2);
+    expect(h.world.neighbourhood.neighbour('cody').zone).not.toBe('fairground');
+    expect(h.world.activities.rideWith()).toBe('cody');
+    const riding = h.world.activities.board()!;
+    expect(riding.with).toBe('cody');
+    expect(RIDE_LINES.cody.map((l) => fill(l, { name: h.world.name }))).toContain(riding.line);
   });
 });

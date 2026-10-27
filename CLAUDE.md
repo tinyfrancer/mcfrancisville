@@ -278,8 +278,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   `fortune:freeGo` in `Takings`), and the lucky duck squish is only won there (`data/fairPrizes.ts`).
   A ride on the big wheel (1.6's X2, decision 381) is a fifth row (`bigWheel`, `does: { ride }`):
   once round on the sheet's stage (`render/fairRide.ts`, art `sprites/fairRide.ts`, rules
-  `systems/fairRide.ts`, `world.activities.board`/`land`), with her husband or her closest
-  neighbour at the fair, the day's first ride free (`fortune:ride`), a ticket stub the first time.
+  `systems/fairRide.ts`, `world.activities.board`/`land`), with Cody of an evening, else her
+  husband or her closest neighbour at the fair, else a crow in the car opposite who says nothing
+  (`CROW_VIEW`; 1.7's Y1, decision 388), the day's first ride free (`fortune:ride`, the sheet's
+  line saying so only till it's had), a ticket stub the first time.
   The calendar comes there with the gate open, as it is from the start (0.2's M3, decision 202): a happening row's `fair`
   (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
   `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,
@@ -443,7 +445,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   prop's other shape for a season is `RESHAPED`, 1.0.1's X2, decision 327), and Nessa skates on
   the frozen pond (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
   **Snow days** (1.6's X4, decision 383): on lying snow (`snowyOn` in `src/systems/snow.ts`) a tap
-  on herself, hands empty, rolls a snowball beside her in her yard (`Yard`'s unsaved `ball`), a
+  on herself, hands empty, rolls a snowball beside her in her yard (`Yard`'s `ball`, saved since
+  save v60, 1.7's Y1), a
   tap on it rolls it bigger and the next stands a snowman, a yard piece (`SnowmanId`, rows
   `src/data/snow.ts`, art `src/sprites/snowman.ts`, his hat by his tile, `hatOf`; never indoors,
   refusal `melts`); out of her yard she throws one (`world.snow`, `Snow`), at a neighbour within
@@ -469,7 +472,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   in `systems/weather.ts`): `drawFlash` in `src/render/weather.ts`, and a `thunder` moment's
   rumble from `world.weather`. On a rainy day she and her pets splash through the puddles
   (`underfootOn`, a `puddle` footstep), and on a clear day after a rainy one a rainbow arcs over
-  the view the first ten minutes she's out (`Forecast.rainbow`, `rainbowDay`, `render/rainbow.ts`
+  the view the first ten minutes she's out (`Forecast.rainbow`, `rainbowDay`, kept in the save's
+  `rainbow` since v60, `render/rainbow.ts`
   in the weather pass; a Today line, a `rainbowJar` the first time; `?rainbow` in a dev build;
   1.6's X4, decision 383).
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
@@ -693,7 +697,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   a simulated year filling the Cabinet in about nine months (seven and a half to ten): rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
   too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
-  tapping one walks her to the bank and casts her rod (`world.fishing`,
+  tapping one walks her to the bank, puts the rod in her hand whatever she holds (`Hands.takeUp`,
+  1.7's Y1) and casts it (`world.fishing`,
   `src/world/services/Fishing.ts`), the line's nibbles and bite are worked out from the cast in
   `src/systems/fishing.ts`, any tap reels in, and `src/render/fishing.ts` draws the line, float
   and "!". Since V1's R6a (decision 316) a bite is shorter the rarer the fish (`BITE_MS`), a rare
@@ -765,7 +770,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   one finger pans (`FollowCamera.pan`), a pinch or the ± goes Close or Far for the viewfinder alone
   (`lens` in `main.ts`). Filters are pixel sums (`src/render/filters.ts`, rows
   `src/data/photo.ts`), stickers and the caption's rules `src/systems/photo.ts` (six at most).
-  The shutter cuts the photo (`photoFrom`) and shows the party photo's card (`PhotoCard`, Keep
+  The shutter cuts the photo (`photoFrom`) from a frame drawn by `drawForPhoto`
+  (`render/photo.ts`), which the bubbles over heads leave themselves out of (1.7's Y1), as the party
+  photo's is, and shows the party photo's card (`PhotoCard`, Keep
   it through `keepPhoto` / Another / Done); nothing is kept in the save.
 - **Her pets:** rows in `src/data/pets.ts` (the seven pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
@@ -944,7 +951,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. The first
   time a phone opens a new version, the mayor's typed notes follow (decision 142): a `NOTES` row
   per version in `src/data/patchNotes.ts`, the newest being the version on her phone (a release
-  adds or finishes its row), shown by `src/hud/NotesCard.ts` and again from Settings. Then the
+  adds or finishes its row), shown by `src/hud/NotesCard.ts` and again from Settings; a row's
+  `handed` is someone else's line under the P.S., signed (1.7's, Cody's, decision 388). Then the
   creator or Cody's welcome. A dev build's `?skiptitle` goes straight in.
 - **Greetings, visits and passive Candy** (phase O, decisions 114–116): Cody's greeting as she
   opens the game is `greetingFor` in `src/systems/greetings.ts` (lines in `src/data/greetings.ts`:

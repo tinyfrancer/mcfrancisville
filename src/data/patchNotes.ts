@@ -15,6 +15,12 @@ export interface PatchNotes {
   lines: readonly string[];
   /** A last word under the signature. */
   ps: string;
+  /**
+   * Someone else's line, under the P.S., in their own words and signed by them (1.7's, decision
+   * 388: the mayor hands the last line of his last card for a while to Cody). Shown as written,
+   * in quotes, never filled in or reworded.
+   */
+  handed?: { words: string; by: string };
 }
 
 export const NOTES: readonly PatchNotes[] = [
@@ -271,6 +277,28 @@ export const NOTES: readonly PatchNotes[] = [
         'And stand still a while: a butterfly may land on your hat.',
     ],
     ps: 'P.S. This is my last typed note for a good long while: the typewriter is having a rest. The town is not. It will keep the lamps lit and the kettle warm for you.',
+  },
+  {
+    version: '1.7',
+    lines: [
+      // 1.7's Y1 (decision 388): the last card for a while, written first so it ships whatever
+      // else does. The third line is Y2's well and leaf piles, from the plan; the coordinator
+      // folds in what Y2 hands over.
+      'I did say the last note was my last. Then I found one more sheet of paper. So here it ' +
+        'is, and after it the typewriter goes under its cover for a while.',
+      'A few loose threads, tied: a half-rolled snowball waits for you, the rainbow keeps its ' +
+        'ten minutes, and nobody rides the big wheel alone. Well. There is a crow.',
+      'Toss a Candy in the well in the square once a day and make a wish. And while the leaves ' +
+        'fall, the piles under the trees are for jumping in. I insist.',
+      'The town keeps on without my notes: every day still turns, the hens still lay, and ' +
+        'nothing here stops or runs out. It will be just where you left it.',
+    ],
+    ps: 'P.S. I am handing the last line of this page to Cody. He asked ever so nicely.',
+    // His words, as he wrote them (only the first letter made a capital).
+    handed: {
+      words: 'You are my everything, and I want nothing more than to see you smile everyday.',
+      by: 'Cody',
+    },
   },
 ];
 

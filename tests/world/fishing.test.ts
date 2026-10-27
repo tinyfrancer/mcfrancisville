@@ -158,3 +158,18 @@ describe('a session at the pond (V1 R6a)', () => {
 function firstBed(h: Harness): [{ tx: number; ty: number }, 'tend'] {
   return [h.world.map.beds[0]!, 'tend'];
 }
+
+describe('the rod taken up for a cast (1.7’s Y1)', () => {
+  it.each([
+    ['a seed', 'pumpkinSeed'],
+    ['a kite', 'batKite'],
+  ] as const)('puts the rod in her hand over %s before the cast, the thing kept', (_, thing) => {
+    const h = harness(undefined, { finds: { bag: [{ id: thing, count: 1 }] } });
+    expect(h.world.hands.hold(thing)).toBe(true);
+    castTo(h, aFish(h));
+    expect(h.world.hands.held).toBe('rod');
+    expect(h.world.bag.count(thing)).toBe(1);
+    // Back on the quick bar, to pick up again.
+    expect(h.world.hands.hold(thing)).toBe(true);
+  });
+});

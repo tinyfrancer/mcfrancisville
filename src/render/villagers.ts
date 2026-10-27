@@ -22,6 +22,7 @@ import type { World } from '../world/World';
 import { PALETTE } from '../sprites/palette';
 import { TILE_SIZE } from '../config/world';
 import type { Point } from './camera';
+import { forPhoto } from './photo';
 import { fillPixelEllipse } from './ground';
 import { bakeIcon } from './items';
 import { glowOf, type Drawable } from './scene';
@@ -332,6 +333,7 @@ export function drawNeighbourBubbles(
   cam: Point,
   nowMs: number,
 ): void {
+  if (forPhoto()) return;
   for (const n of world.neighbourhood.neighboursIn(zone)) {
     const bubbles = bubblesOver(world.smallEvents.bubble(n.id), world.talk.favour(n.id) !== null);
     if (bubbles.length === 0) continue;

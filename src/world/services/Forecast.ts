@@ -2,6 +2,7 @@ import type { Weather } from '../../data/weather';
 import { dayKey, hourOf } from '../../systems/clock';
 import { rainbowAt, rainbowDay, rainbowHour } from '../../systems/snow';
 import { lastFlash, RUMBLE_AFTER_MS, stormOn, weatherOn } from '../../systems/weather';
+import type { RainbowSeen } from '../../persistence/SaveState';
 import type { MapZoneId } from '../../types/ids';
 import type { Bag } from '../Bag';
 import type { WorldContext } from '../context';
@@ -15,7 +16,7 @@ const SHOWN_UP_MS = 60_000;
  * steps outdoors on a rainy or foggy day. What's told is kept only while the game is open: a
  * word again after a reload is a hello, not a nag. After a rainy day, the first ten minutes she's
  * out under the sun there's a rainbow (1.6's X4, decision 383): from when she was first outdoors that
- * day while the game has been open, so a reload brings it back for another ten, which is no harm.
+ * day, kept in the save since 1.7's Y1 (decision 388), so a reload keeps its ten minutes.
  */
 export class Forecast {
   private readonly ctx: WorldContext;
@@ -28,12 +29,27 @@ export class Forecast {
   /** Where her rainbow's jar goes, the first time; none in a test that doesn't give one. */
   private readonly bag: Bag | null;
   /** When she was first out under today's rainbow, if there is one. */
-  private rainbowFrom: { day: string; at: number } | null = null;
+  private rainbowFrom: RainbowSeen | null = null;
 
-  constructor(ctx: WorldContext, outside: () => MapZoneId | null, bag: Bag | null = null) {
+  constructor(
+    ctx: WorldContext,
+    outside: () => MapZoneId | null,
+    bag: Bag | null = null,
+    saved: RainbowSeen | null = null,
+  ) {
     this.ctx = ctx;
     this.outside = outside;
     this.bag = bag;
+    if (saved && typeof saved.day === 'string' && Number.isFinite(saved.at)) {
+      this.rainbowFrom = { day: saved.day, at: saved.at };
+    }
+  }
+
+  /** When she was first out under today's rainbow, for the save; an old day's is let go. */
+  snapshot(): { rainbow: RainbowSeen | null } {
+    const from = this.rainbowFrom;
+    const today = from !== null && from.day === dayKey(this.ctx.clock.now());
+    return { rainbow: today ? { ...from } : null };
   }
 
   /** How far through its ten minutes today's rainbow is (0 to 1), or null with none up now. */

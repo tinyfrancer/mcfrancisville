@@ -526,6 +526,32 @@ describe("0.3's F0 step (37 to 38)", () => {
   });
 });
 
+describe("1.7's Y1 step (59 to 60)", () => {
+  it('opens a town with no rainbow seen today and no snowball, everything else as it was', () => {
+    const old = { ...structuredClone(SAVE), version: 59 } as Record<string, unknown>;
+    delete old.rainbow;
+    const up = migrateSave(old);
+    expect(up?.version).toBe(SAVE_VERSION);
+    expect(up?.rainbow).toBeNull();
+    expect(up?.yard).toEqual({ placed: [] });
+    expect(up?.henhouse).toEqual(SAVE.henhouse);
+    expect(up?.bag).toEqual(SAVE.bag);
+  });
+
+  it('keeps a rainbow and a snowball, and refuses either of the wrong shape', () => {
+    const rainbow = { day: '2027-04-03', at: 1_800_000_000_000 };
+    const yard = { placed: [], ball: { tx: 30, ty: 47, size: 2 } };
+    const kept = migrateSave({ ...SAVE, rainbow, yard });
+    expect(kept?.rainbow).toEqual(rainbow);
+    expect(kept?.yard).toEqual(yard);
+    expect(migrateSave({ ...SAVE, rainbow: { day: 3, at: 0 } })).toBeNull();
+    expect(migrateSave({ ...SAVE, rainbow: undefined })).toBeNull();
+    expect(
+      migrateSave({ ...SAVE, yard: { placed: [], ball: { tx: 1.5, ty: 2, size: 1 } } }),
+    ).toBeNull();
+  });
+});
+
 describe("1.6's X3 step (58 to 59)", () => {
   it('opens a town with the hens never fed and no eggs waiting, everything else as it was', () => {
     const old = { ...structuredClone(SAVE), version: 58 } as Record<string, unknown>;

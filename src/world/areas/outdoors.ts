@@ -37,7 +37,7 @@ export function outdoors(
   neighbourhood: Neighbourhood,
   kitchen: Kitchen,
 ): Outdoors {
-  const weather = new Forecast(s.ctx, outside, s.bag);
+  const weather = new Forecast(s.ctx, outside, s.bag, s.options.rainbow ?? null);
   const stargazing = new Stargazing(s.ctx, {
     cabinet: s.cabinet,
     mailbox,
