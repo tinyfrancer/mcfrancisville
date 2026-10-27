@@ -289,6 +289,10 @@ export const MIGRATIONS: Record<number, MigrationStep> = {
   // 1.6's X3: the hens at Boo Acres. There were none before, so a town has never fed them and has
   // no eggs waiting; the coop stands there from the moment it opens.
   58: (state) => ({ ...state, henhouse: { fed: null, waiting: 0 } }),
+  // 1.7's Y1: the rainbow's ten minutes kept, and a half-rolled snowball in her yard. Neither was
+  // saved before, so a town has seen no rainbow today (it comes as before) and has no snowball
+  // (the yard's `ball` is simply absent).
+  59: (state) => ({ ...state, rainbow: null }),
 };
 
 /**

@@ -1,4 +1,4 @@
-import { photoOf } from './render/photo';
+import { drawForPhoto, photoOf } from './render/photo';
 import type { Tile } from './systems/pathfinding';
 import {
   galleryPage,
@@ -166,7 +166,7 @@ function startGame(): void {
   const waiting: Waiting = { bed: null };
   // The party photo (0.2's J4): the frame drawn again as the world now stands, then cut from it.
   const snapshot = (tiles: readonly Tile[]) => {
-    view().draw(performance.now());
+    drawForPhoto(() => view().draw(performance.now()));
     return photoOf(canvas, view(), tiles);
   };
   const play = (events: WorldEvent[]) =>

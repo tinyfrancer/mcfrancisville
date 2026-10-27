@@ -190,6 +190,27 @@ async function notes() {
   );
   await page.waitForTimeout(1_600);
   await page.screenshot({ path: '.smoke/notes.png' });
+  // 1.7's card ends with Cody's own line (decision 388): scrolled to, it reads whole.
+  const handed = await page.evaluate(() => {
+    const line = document.querySelector('.hud-notes-sheet .hud-notes-handed');
+    if (!line) return null;
+    line.scrollIntoView({ block: 'end' });
+    const box = line.getBoundingClientRect();
+    return {
+      text: line.textContent ?? '',
+      inside: box.left >= 0 && box.right <= window.innerWidth && box.bottom <= window.innerHeight,
+      unclipped: line.scrollWidth <= line.clientWidth,
+    };
+  });
+  if (handed) {
+    check(
+      "Cody's line reads whole at the foot of the card, signed by him",
+      handed.inside && handed.unclipped && /smile everyday\.\u201d\u2014 Cody$/.test(handed.text),
+      JSON.stringify(handed),
+    );
+    await page.waitForTimeout(300);
+    await page.screenshot({ path: '.smoke/notes-handed.png' });
+  }
   await tapElement('.hud-notes-sheet .hud-done');
   const greeted = (await page.locator('.hud-talk-sheet').count()) > 0;
   check("Cody's hello follows the notes", greeted);

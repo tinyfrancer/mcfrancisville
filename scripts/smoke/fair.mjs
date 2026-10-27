@@ -329,6 +329,15 @@ async function bigWheel() {
     JSON.stringify(landed),
   );
   await page.screenshot({ path: '.smoke/big-wheel-landed.png' });
+  // 1.7's Y1: the free ride spent, the line under its name stops promising one.
+  const head = await page.evaluate(
+    () => document.querySelector('.hud-ride-sheet .hud-sheet-line')?.textContent ?? '',
+  );
+  check(
+    "the wheel's line drops 'on the house' once the free ride is spent",
+    head.length > 0 && !/on the house/.test(head),
+    head,
+  );
   await tapElement('.hud-ride-sheet .hud-done');
 }
 

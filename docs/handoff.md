@@ -2462,14 +2462,13 @@ four after it; the kite flying off the top of a phone on its side was mended, no
   she is, so a branch held up in the air there is in front of her legs: the depth is right. Kept.
 - **The fish under the ice are dim** (1.4's G3, alpha 0.3 against open water's 0.6): on the pale
   ice by day at Close they're faint smudges, found by looking; on purpose, so the ice looks thick.
-- **Fishing with a seed in her hand** (decision 110's rule, older than the rod): she keeps a seed
-  through a tap on a fish, so the line runs from the seed packet and no rod is drawn ("Where it
-  hurts").
+- **Fishing with a seed in her hand**: mended by 1.7's Y1 (decision 388), the rod taken up for a
+  cast whatever she holds.
 - **Their Halloween photo** (1.6's X1, which turned them both to the camera): it's cut from the
   frame as the party stands, so she's in front of Cody where she walked up to him (his face over
-  her shoulder), and the neighbours' chatter bubbles and a question's "?" are in the picture. The
-  camera's own photos (1.5's G5) are taken the same way; a squeeze side by side would need the
-  photo to move her, which nothing else at the party does.
+  her shoulder). The bubbles over heads are left out since 1.7's Y1 (decision 388). The camera's
+  own photos (1.5's G5) are taken the same way; a squeeze side by side would need the photo to
+  move her, which nothing else at the party does.
 - **The hens bunch up** (1.6's X3, seen by V1.6): four birds in a run 32 pixels wide, each
   pottering from the clock alone (`henAt`), so at times three or four stand in a heap at one side
   of the run with the other half empty. Spreading them (a spot each, or a nudge apart) is a rule

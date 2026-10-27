@@ -4,7 +4,7 @@ import type { HomeInput } from '../data/home';
 import type { MapSource } from '../data/maps';
 import type { PetsSnapshot } from '../data/pets';
 import type { YardSnapshot } from '../data/yard';
-import type { SavedPlayer, SaveState } from '../persistence/SaveState';
+import type { RainbowSeen, SavedPlayer, SaveState } from '../persistence/SaveState';
 import type { Order } from '../systems/catalogue';
 import type { Clock } from '../systems/clock';
 import type { Meals } from '../systems/cooking';
@@ -82,6 +82,8 @@ export interface WorldOptions {
   candyTree?: Partial<CandyTreeSnapshot>;
   /** The day she last fed the hens at Boo Acres, and the eggs waiting (1.6's X3). */
   henhouse?: Partial<HenhouseState>;
+  /** When she was first out under the day's rainbow (1.7's Y1), or null. */
+  rainbow?: RainbowSeen | null;
   /** Her first day's steps done (V1's R1); a new town's are all still to do. */
   firstDay?: Partial<FirstDaySnapshot>;
   /** What's on the honesty stall, and in its tin. */
@@ -148,6 +150,7 @@ export function fromSave(save: WorldSave | null): WorldOptions {
     visits: save.visits,
     candyTree: save.candyTree,
     henhouse: save.henhouse,
+    rainbow: save.rainbow ?? null,
     stall: save.stall,
     kitchen: save.kitchen,
     errand: save.errand,

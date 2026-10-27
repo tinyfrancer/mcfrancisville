@@ -9,6 +9,7 @@ import {
   vignetteAt,
 } from '../../src/render/filters';
 import { fitPixelScale, TILE_SIZE, TILES_ACROSS } from '../../src/render/pixelScale';
+import { drawForPhoto, forPhoto } from '../../src/render/photo';
 import { frameOf, POLAROID } from '../../src/render/viewfinder';
 
 describe("the photo mode's filters (1.5's G5)", () => {
@@ -123,5 +124,26 @@ describe("the viewfinder's frame", () => {
 
   it('is none on a canvas too small to hold a polaroid', () => {
     expect(frameOf(40, 40)).toBeNull();
+  });
+});
+
+describe('a frame drawn for a photo (1.7’s Y1)', () => {
+  it('is drawn with the bubbles over heads left out, and the next frame has them again', () => {
+    expect(forPhoto()).toBe(false);
+    let during: boolean | null = null;
+    drawForPhoto(() => {
+      during = forPhoto();
+    });
+    expect(during).toBe(true);
+    expect(forPhoto()).toBe(false);
+  });
+
+  it('puts them back even if the drawing goes wrong', () => {
+    expect(() =>
+      drawForPhoto(() => {
+        throw new Error('a frame that fails');
+      }),
+    ).toThrow();
+    expect(forPhoto()).toBe(false);
   });
 });
