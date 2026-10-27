@@ -10352,3 +10352,56 @@ card alone is 1.7.
 nothing); anything saved for the well or the piles (`Takings` keeps a day); a new neighbour
 (a release's neighbour needs a session of its own); the card in Cody's voice throughout (the
 mayor's notes are the mayor's, and his one line reads warmer handed over).
+
+## 388. The last card for a while, with Cody's own line; and the rough edges she'd meet, fixed (1.7's Y1, 2026-10-26)
+
+**Context:** 1.7's plan (decision 387) gave Y1 the card, first, so it ships whatever else does,
+and the leftovers 1.6's review logged in "Where it hurts" (4) and (3): a half-rolled snowball and
+the rainbow lost or restarted by a reload; company on the big wheel rare (nobody's schedule brings
+them to the fair); the ride sheet still promising a free ride once it was had; chatter bubbles in
+the party photo and the camera's; and the line drawn from a seed packet or a kite when she cast
+with one in hand.
+
+**Decision:**
+
+- **The `1.7` card.** Four lines in the mayor's voice: he found one more sheet of paper after
+  saying 1.6's was his last; the loose threads tied (the snowball, the rainbow, nobody rides alone,
+  "well, there is a crow"); Y2's well and leaf piles in one line written from the plan, for the
+  coordinator to adjust; and the town keeping on without his notes (every day still turns, the
+  hens still lay, nothing stops or runs out). His P.S. hands the last line of the page to Cody,
+  and Cody's line follows, his words as he wrote them ("everyday" kept) with only the first letter
+  a capital, in curly quotes, signed "— Cody", under a dashed rule. A row's new optional `handed`
+  (`{ words, by }`) carries it, drawn by `NotesCard` after the P.S. (`.hud-notes-handed`); no
+  earlier row has one. The card read on a phone-sized viewport in smoke, the quote whole (`boot`'s
+  check and `.smoke/notes-handed.png`).
+- **The snowball and the rainbow kept** (save v60). `YardSnapshot` takes an optional `ball`
+  (`{ tx, ty, size }`), restored only where a snowman could still stand, gone at the thaw as before;
+  the save takes `rainbow` (`{ day, at }` or null), `Forecast`'s `rainbowFrom`, saved only on its
+  own day, so a reload halfway through shows the second half and a later reload that day none.
+  Migration 59 → 60 adds `rainbow: null`; a v59 yard simply has no ball.
+- **Company on the big wheel.** `companionOf(atFair, hearts, evening)`: of an evening Cody comes
+  along wherever he was ("he's hers": the sheet says he "has come along"); else her husband if at
+  the fair, else her closest at the fair, as before; else she rides alone and a crow has the car
+  opposite, which at the top says nothing, in one of three ways (`CROW_VIEW` in
+  `data/fairRide.ts`, replacing the mayor's plaque lines, one of which keeps the plaque in her car).
+  The crow is in the words only: the car opposite is off the stage, and `render/fairRide.ts` draws
+  only hers.
+- **The free line.** The ride sheet's line under its name is the row's (with "on the house") only
+  while the day's free ride waits, and `RIDE_LINE_SPENT` once it's been had, set again on every
+  render, so it changes as she lands.
+- **Photos without bubbles.** The party photo and the camera's shutter draw the frame they cut from
+  inside `drawForPhoto` (`render/photo.ts`); while `forPhoto()`, the effects' emotes (the chatter,
+  hearts, a "!") and the neighbours' "!", "?" and parcel leave themselves out. Pops and particles
+  stay: they're things in the air, not the game talking.
+- **The rod for a cast.** A tap on a fish, or walking up to the ice hut's hole, takes the rod up
+  whatever she holds (`Hands.takeUp`), so the cast is drawn from the rod; the seed or kite stays in
+  her bag, a tap away on the quick bar. Decision 110's "unless she's holding a seed" now holds for
+  the net and the can only. Chosen over making the cast wait with a toast to empty her hands: a tap
+  on a fish means only fishing, and a toast asking her to put something down first is a small
+  scold, which the brief (decision 11) keeps out.
+
+**Rejected:** a neighbour's weekend stop at the fair for company (more rows and more walking for a
+rarer gain than Cody of an evening; the plan named Cody); drawing the crow (a car opposite would
+need the rim's other cars drawn); hiding the bubbles by stepping the effects (it would lose the
+bubbles still due after the shot); the net taken up over a seed too (a seed in hand while farming
+is the point of 110, and a critter tapped near the beds is likelier a slip).

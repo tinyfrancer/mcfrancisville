@@ -9,16 +9,14 @@ down is the long history.
 
 ## In progress
 
-**Session Y1 of the 1.7 plan (save v60 in the last commit), branch `claude/y1-rough-edges`, a draft
-PR into `v1.7-dev`.** Done: the `1.7` `NOTES` row (the mayor's four lines, his P.S. handing the
-page over, and Cody's line as `handed`, drawn by `NotesCard` in quotes and signed "— Cody"; tests
-in `tests/systems/patchNotes.test.ts` and `tests/hud/notesCard.test.ts`, a smoke check in
-`boot`). Next, in order: (1) the half-rolled snowball and the rainbow's ten minutes kept in the
-save (v60, bumped only in the last commit); (2) company on the big wheel (Cody of an evening, else
-the closest neighbour at the fair, else a crow); (3) the Fair sheet's "on the house" line gone once
-the free ride is spent; (4) the chatter bubbles left out of the party photo and the camera; (5) a
-kite or seed in hand puts the rod in it before a cast; then decision 388, the plan's landed line,
-CLAUDE.md, merge `origin/v1.7-dev`, the save bump, ready, CI, merge.
+**Session Y1 of the 1.7 plan (save v60 in the last commit), branch `claude/y1-rough-edges`, PR
+#243 into `v1.7-dev`.** Done and pushed: the `1.7` card with Cody's line, the snowball and the
+rainbow kept (as optional fields, not yet a version), Cody or a crow on the big wheel, the free
+line, no bubbles in photos, the rod for a cast, and the docs (decision 388, the plan's landed line,
+CLAUDE.md, "Where it hurts"). Left, in order: merge the latest `origin/v1.7-dev`; in one last
+commit bump `SAVE_VERSION` to 60 with migration 59 (`rainbow: null`), its test, `rainbow`
+required in `SaveState` and `isSaveState`, and this section emptied; the checks; push, mark ready,
+CI green, merge with a merge commit.
 
 ## If you are starting cold after a long gap
 
@@ -2467,14 +2465,13 @@ four after it; the kite flying off the top of a phone on its side was mended, no
   she is, so a branch held up in the air there is in front of her legs: the depth is right. Kept.
 - **The fish under the ice are dim** (1.4's G3, alpha 0.3 against open water's 0.6): on the pale
   ice by day at Close they're faint smudges, found by looking; on purpose, so the ice looks thick.
-- **Fishing with a seed in her hand** (decision 110's rule, older than the rod): she keeps a seed
-  through a tap on a fish, so the line runs from the seed packet and no rod is drawn ("Where it
-  hurts").
+- **Fishing with a seed in her hand**: mended by 1.7's Y1 (decision 388), the rod taken up for a
+  cast whatever she holds.
 - **Their Halloween photo** (1.6's X1, which turned them both to the camera): it's cut from the
   frame as the party stands, so she's in front of Cody where she walked up to him (his face over
-  her shoulder), and the neighbours' chatter bubbles and a question's "?" are in the picture. The
-  camera's own photos (1.5's G5) are taken the same way; a squeeze side by side would need the
-  photo to move her, which nothing else at the party does.
+  her shoulder). The bubbles over heads are left out since 1.7's Y1 (decision 388). The camera's
+  own photos (1.5's G5) are taken the same way; a squeeze side by side would need the photo to
+  move her, which nothing else at the party does.
 - **The hens bunch up** (1.6's X3, seen by V1.6): four birds in a run 32 pixels wide, each
   pottering from the clock alone (`henAt`), so at times three or four stand in a heap at one side
   of the run with the other half empty. Spreading them (a spot each, or a nudge apart) is a rule
