@@ -337,6 +337,9 @@ describe('selling', () => {
       'rainbowJar',
       // The keepsake of her first kite flight (1.6's X6).
       'skyOnAString',
+      // The well's lucky penny, and the leaf piles' golden leaf (1.7's Y2).
+      'wellPenny',
+      'goldenLeaf',
     ];
     for (const id of Object.keys(ITEMS) as ItemId[]) {
       expect(canSell(id), id).toBe(!kept.includes(id));

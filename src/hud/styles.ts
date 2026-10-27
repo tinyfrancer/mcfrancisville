@@ -843,6 +843,14 @@ ${CAMERA_CSS}
 }
 .hud-notes-signed { color: ${T.accent}; }
 .hud-notes-ps { font-size: 13px; color: ${T.muted}; }
+.hud-notes-handed {
+  margin: 14px 0 0;
+  padding-top: 10px;
+  border-top: 1px dashed ${T.panelEdge};
+  font-size: 15px;
+  color: ${T.text};
+}
+.hud-notes-by { display: block; margin-top: 4px; text-align: right; color: ${T.accent}; }
 .hud-map {
   position: relative;
   width: 100%;

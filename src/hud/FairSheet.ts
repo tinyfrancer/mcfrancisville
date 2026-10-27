@@ -9,6 +9,7 @@ import {
 import { FAIR_PRIZES } from '../data/fairPrizes';
 import { ITEMS } from '../data/items';
 import type { Grade } from '../systems/activities';
+import { isHusband } from '../systems/cody';
 import type { CritterId, ItemId, VillagerId } from '../types/ids';
 import type {
   Landed,
@@ -298,6 +299,13 @@ const RIDE_STAGE = { w: 96, h: 112 } as const;
 const RIDE_SAYS = { up: 'Up you go, nice and slow…', down: 'And down again, swaying gently.' };
 
 /**
+ * The wheel's line under its name once the day's free ride is spent (1.7's Y1, decision 388): its
+ * row's says the first is on the house, which it isn't any more until tomorrow.
+ */
+const RIDE_LINE_SPENT =
+  'Once round, nice and slow, with a stop at the very top. Round again whenever you like, love.';
+
+/**
  * The big wheel (1.6's X2, decision 381): its stage, where her car goes once round with whoever
  * she knows at the fair, the view sliding by below; under it who's riding along and Ride (free,
  * the day's first), what's said at the top, and back on the ground, the ticket stub the first time.
@@ -307,7 +315,7 @@ function openRide(hud: HTMLElement, api: FairApi, id: ActivityId) {
   const sheet = openSheet(hud, {
     picture: iconOf(api, 'ticketStub', PICTURE),
     title: row.name,
-    line: row.line,
+    line: api.freeRide() ? row.line : RIDE_LINE_SPENT,
     className: 'hud-fair-sheet hud-ride-sheet',
     // Off before it's round: nothing's paid, and the free ride waits.
     onClose: () => {
@@ -334,6 +342,7 @@ function openRide(hud: HTMLElement, api: FairApi, id: ActivityId) {
   const render = () => {
     const riding = api.riding();
     const parts: (HTMLElement | string)[] = [];
+    sheet.line(api.freeRide() ? row.line : RIDE_LINE_SPENT);
     if (riding && riding.at.part !== 'done') {
       const who = riding.with;
       if (riding.at.part === 'up') parts.push(el('p', { className: 'hud-message' }, RIDE_SAYS.up));
@@ -375,9 +384,11 @@ function openRide(hud: HTMLElement, api: FairApi, id: ActivityId) {
         el(
           'p',
           { className: 'hud-fact' },
-          company
-            ? `${api.nameOf(company)} is at the fair, and will hop in beside you.`
-            : 'Nobody you know is at the fair just now. A car all to yourself!',
+          company && isHusband(company)
+            ? `${api.nameOf(company)} has come along, and will hop in beside you.`
+            : company
+              ? `${api.nameOf(company)} is at the fair, and will hop in beside you.`
+              : 'Nobody you know is at the fair just now. A car to yourself, and a crow in the one opposite.',
         ),
       );
       const free = api.freeRide();

@@ -16,7 +16,10 @@ import { fromSave, World, type WorldOptions } from '../../src/world/World';
  * Saturday, a film night, Christmas Eve (the square's tree, the pond frozen) and a day in May.
  * The snapshot is a hash of each place's answers, taken from the code the list replaced; 1.2's
  * town (`lived-in-v55`) was added in 1.3's F6, its snapshot taken from the code as it then was,
- * 1.5's (`lived-in-v58`) in V1.5's review and 1.6's (`lived-in-v59`) in V1.6's, the same way.
+ * 1.5's (`lived-in-v58`) in V1.5's review, 1.6's (`lived-in-v59`) in V1.6's and 1.7's
+ * (`lived-in-v60`) at its release, the same way.
+ * Autumn's leaf piles (1.7's Y2), a new overlay that never blocks, are left out of the hash, so
+ * it still holds everything else as it was; `leafPiles.test.ts` holds them.
  */
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), '../persistence/fixtures');
 const SAVES = [
@@ -28,6 +31,7 @@ const SAVES = [
   'lived-in-v55',
   'lived-in-v58',
   'lived-in-v59',
+  'lived-in-v60',
 ];
 
 const PLACES = ZONE_IDS.filter((id): id is MapZoneId => ZONES[id].map !== undefined);
@@ -60,7 +64,8 @@ function answers(world: World, place: MapZoneId): string {
   const out: string[] = [];
   for (let ty = -1; ty <= zone.height; ty++) {
     for (let tx = -1; tx <= zone.width; tx++) {
-      const prop = zone.propAt(tx, ty);
+      const answered = zone.propAt(tx, ty);
+      const prop = answered?.id === 'leafPile' ? undefined : answered;
       out.push(`${zone.canWalk(tx, ty) ? 1 : 0}${prop ? `${prop.id}@${prop.tx},${prop.ty}` : ''}`);
     }
   }

@@ -58,6 +58,8 @@ import type { Workshop } from './services/Workshop';
 import type { Figurines } from './services/Figurines';
 import type { CandyTree } from './services/CandyTree';
 import type { Henhouse } from './services/Henhouse';
+import type { LeafPiles } from './services/LeafPiles';
+import type { Well } from './services/Well';
 import type { Chest } from './services/Chest';
 import type { Display } from './services/Display';
 import type { Collecting } from './services/Collecting';
@@ -166,6 +168,10 @@ export abstract class WorldParts {
   readonly snow: Snow;
   /** Small delights outdoors (1.6's X5): a butterfly on her hat, fireflies, a caw, a sneeze. */
   readonly delights: Delights;
+  /** The wishing well on the square (1.7's Y2). */
+  readonly well: Well;
+  /** Autumn's leaf piles to jump in (1.7's Y2). */
+  readonly leafPiles: LeafPiles;
   /** The day's window, what's on today, and the calendar (phase N). */
   readonly calendar: Calendar;
   /** The notes on the board by the square, and answering them (phase N). */
@@ -403,12 +409,21 @@ export abstract class WorldParts {
     ({ weather: this.weather, fountain: this.fountain, stargazing: this.stargazing } = air);
     this.snow = air.snow;
     this.delights = air.delights;
+    this.well = air.well;
     areaMade('outdoors');
     this.activities = fairground(shared, this.weather).activities;
     areaMade('fairground');
-    const caught = catching(shared, { mailbox, zones, kitchen: this.kitchen, outside, hasHad });
+    const caught = catching(shared, {
+      mailbox,
+      zones,
+      kitchen: this.kitchen,
+      outside,
+      hasHad,
+      smallEvents: this.smallEvents,
+    });
     ({ collecting: this.collecting, fishing: this.fishing, fossils: this.fossils } = caught);
     this.digging = caught.digging;
+    this.leafPiles = caught.leafPiles;
     areaMade('catching');
     const gone = going(shared, { zones, mailbox, visits: this.visits });
     ({ movement: this.movement, travel: this.travel, broom: this.broom } = gone);
@@ -529,6 +544,7 @@ export abstract class WorldParts {
       ...this.visits.snapshot(),
       ...this.candyTree.snapshot(),
       ...this.henhouse.snapshot(),
+      ...this.weather.snapshot(),
       ...this.stall.snapshot(),
       ...this.kitchen.snapshot(),
       ...this.smallEvents.snapshot(),

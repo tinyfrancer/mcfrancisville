@@ -98,6 +98,8 @@ export function playMoments(events: readonly WorldEvent[], stage: Stage): void {
     if (event.kind === 'arrived' && event.at === 'seedCart') hud.openShop('seeds');
     if (event.kind === 'arrived' && event.at === 'barn') hud.openBarn();
     if (event.kind === 'arrived' && event.at === 'coop') hud.openCoop();
+    // The wishing well (1.7's Y2).
+    if (event.kind === 'arrived' && event.at === 'well') hud.openWell();
     // Market day's stall by the fairground's stage (0.2's M3): its table, or when it's out.
     if (event.kind === 'arrived' && event.at === 'marketStall') {
       if (world.shops.isOpen('market')) hud.openShop('market');

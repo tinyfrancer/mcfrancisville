@@ -1,4 +1,4 @@
-import { MAYOR_VIEW, RIDE, RIDE_LINES, RIDE_MS } from '../data/fairRide';
+import { CROW_VIEW, RIDE, RIDE_LINES, RIDE_MS } from '../data/fairRide';
 import { VILLAGER_IDS } from '../data/villagers';
 import type { VillagerId } from '../types/ids';
 import { festivalsOn, partsOf } from './calendar';
@@ -47,25 +47,28 @@ export function rideAt(ms: number): RideAt {
 }
 
 /**
- * Who rides with her, of those at the fair now: her husband if he's there, else whoever she's
- * closest to (the first in the town's order of the closest), or nobody.
+ * Who rides with her (1.7's Y1, decision 388): her husband of an evening, wherever he was, since
+ * he's hers and comes along; else her husband if he's at the fair; else whoever she's closest to
+ * of those at the fair now (the first in the town's order of the closest); or nobody, and the
+ * crow in the car opposite.
  */
 export function companionOf(
   atFair: readonly VillagerId[],
   hearts: (id: VillagerId) => number,
+  evening = false,
 ): VillagerId | null {
+  const husband = VILLAGER_IDS.find(isHusband);
+  if (husband && (evening || atFair.includes(husband))) return husband;
   const here = VILLAGER_IDS.filter((id) => atFair.includes(id));
-  const husband = here.find(isHusband);
-  if (husband) return husband;
   let best: VillagerId | null = null;
   for (const id of here) if (best === null || hearts(id) > hearts(best)) best = id;
   return best;
 }
 
-/** What's said at the top: one of the companion's lines, or the mayor's plaque, dealt a ride. */
+/** What's said at the top: one of the companion's lines, or the crow's nothing, dealt a ride. */
 export function topLine(who: VillagerId | null, day: string, ride: number): string {
-  const lines = who ? RIDE_LINES[who] : MAYOR_VIEW;
-  return lines[hashString(`ride:${day}:${who ?? 'plaque'}:${ride}`) % lines.length]!;
+  const lines = who ? RIDE_LINES[who] : CROW_VIEW;
+  return lines[hashString(`ride:${day}:${who ?? 'crow'}:${ride}`) % lines.length]!;
 }
 
 /** A fair day, when Today says the wheel is turning: a weekend, or a festival's. */

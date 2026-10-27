@@ -91,13 +91,14 @@ export const RIDE_LINES: Record<VillagerId, readonly [string, string, string]> =
 };
 
 /**
- * Alone, a little brass plaque in the car says it for the mayor's office, one dealt a ride.
- * The mayor writes them whether she has met him yet or not: he writes everything.
+ * Alone (1.7's Y1, decision 388): nobody rides by herself, quite. A crow has the car opposite,
+ * and at the top it says nothing, one way of saying it dealt a ride. The mayor's plaque is still
+ * in her car.
  */
-export const MAYOR_VIEW: readonly string[] = [
-  "A brass plaque in the car reads: 'The view from the top is the whole town. Please wave. The town will wave back. — The Mayor'",
-  "A brass plaque in the car reads: 'You are now the tallest person in McFrancisVille. Congratulations. — The Mayor'",
-  "A brass plaque in the car reads: 'Every light down there is somebody glad you're here. — The Mayor'",
+export const CROW_VIEW: readonly string[] = [
+  'A crow has the car opposite. At the very top it looks at the view, then at you, and says nothing at all. It seems to mean it kindly.',
+  "The crow in the car opposite says nothing. You say nothing back. It's a very companionable nothing.",
+  "In the car opposite, a crow fluffs up its feathers at the top and says absolutely nothing. The mayor's plaque says: 'Please wave.' You wave. So, nearly, does the crow.",
 ];
 
 /** The ticket stub, hers to keep from her first ride. */

@@ -12,6 +12,8 @@ import { TICKET_STUB_ART } from './fairRide';
 import { HEN_ITEM_ART } from './hens';
 import { SNOW_KEEPSAKE_ART } from './snowman';
 import { KITE_ICON_ART } from './kite';
+import { WELL_ITEM_ART } from './well';
+import { GOLDEN_LEAF_ART } from './leafPiles';
 import { FAIR_PRIZE_ART } from './fairPrizes';
 import { BONE, OUTFIT_ART } from './doll';
 import { PALETTE as C, ramp } from './palette';
@@ -2616,6 +2618,9 @@ export const ITEM_ART: Record<ItemId, ItemArt> = {
   // A snowman that didn't melt, and the first rainbow in a jar (1.6's X4).
   ...SNOW_KEEPSAKE_ART,
   ...KITE_ICON_ART,
+  // What comes back up the wishing well, and the leaf piles' keepsake (1.7's Y2).
+  ...WELL_ITEM_ART,
+  goldenLeaf: GOLDEN_LEAF_ART,
   // Only ever won at the Hollow Fairground (V1's R6b).
   ...FAIR_PRIZE_ART,
 };

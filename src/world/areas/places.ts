@@ -6,6 +6,7 @@ import { HomeZone } from '../zones/HomeZone';
 import { Lots } from '../zones/Lots';
 import { MapZone } from '../zones/MapZone';
 import { Mounds } from '../zones/Mounds';
+import { Piles } from '../zones/Piles';
 import { RoomZone } from '../zones/RoomZone';
 import { Sites } from '../zones/Sites';
 import { Stalls } from '../zones/Stalls';
@@ -44,6 +45,7 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
     s.yard,
     new Mounds('town', s.map.digSpots, ctx.clock),
     real ? new Sites(s.works, 'town') : null,
+    new Piles('town', s.map, ctx.clock),
   );
   const homeZone = new HomeZone(home);
   const zones = new Zones(
@@ -56,7 +58,20 @@ export function places(s: Shared, isOpen: (zone: ZoneId) => boolean): Places {
         const mounds = new Mounds(id, map.digSpots, ctx.clock);
         const sites = new Sites(s.works, id);
         const rows = () => s.farm.rows;
-        return new MapZone(id, map, null, isOpen, lotsIn(id), set, rows, null, mounds, sites);
+        const piles = new Piles(id, map, ctx.clock);
+        return new MapZone(
+          id,
+          map,
+          null,
+          isOpen,
+          lotsIn(id),
+          set,
+          rows,
+          null,
+          mounds,
+          sites,
+          piles,
+        );
       }),
     ],
     // Gerald stands in the museum once every fossil is on show (1.6's X6).

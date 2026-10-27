@@ -86,7 +86,9 @@ export type ParticleKind =
   | 'snow'
   // A crow's feathers off the scarecrow, and a sneeze's pollen (1.6's X5).
   | 'feather'
-  | 'pollen';
+  | 'pollen'
+  // Autumn's leaves flying up out of a pile she jumped in (1.7's Y2).
+  | 'autumnLeaf';
 
 /**
  * Each kind's frames (most have one; a sparkle twinkles between two) and the palettes a burst
@@ -156,6 +158,15 @@ export const PARTICLE_ART: Record<
     palettes: [
       { '.': null, y: C.candle, Y: C.candleBright },
       { '.': null, y: C.blossomLight, Y: C.white },
+    ],
+  },
+  autumnLeaf: {
+    frames: [{ rows: ['.ab', 'ab.'] }, { rows: ['ab.', '.ab'] }],
+    palettes: [
+      { '.': null, a: C.pumpkin, b: C.pumpkinShade },
+      { '.': null, a: C.gold, b: C.goldShade },
+      { '.': null, a: C.scarlet, b: C.pumpkinDark },
+      { '.': null, a: C.pumpkinLight, b: C.pumpkin },
     ],
   },
 };

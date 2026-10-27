@@ -318,9 +318,13 @@ export class Activities {
     return this.keeps.takings.isReady(FREE_RIDE_KEY);
   }
 
-  /** Who would ride with her if she got on now: her husband or her closest at the fair, or nobody. */
+  /**
+   * Who would ride with her if she got on now: her husband of an evening or at the fair, her
+   * closest at the fair, or nobody (and the crow).
+   */
   rideWith(): VillagerId | null {
-    return companionOf(this.reads.atFair(), this.reads.hearts);
+    const evening = windowOf(this.ctx.clock.now()) === 'evening';
+    return companionOf(this.reads.atFair(), this.reads.hearts, evening);
   }
 
   /** The ride she's on, and how far round it is now; null on the ground. */

@@ -158,7 +158,7 @@ export class World extends WorldParts {
    * under it this hour, or hears that nothing's nibbling till the hour turns.
    */
   private fishHole(hole: Tile, arrived: Arrived): WorldEvent[] {
-    this.hands.use('rod');
+    this.hands.takeUp('rod');
     const cast = this.fishing.castInHole({ tx: hole.tx, ty: hole.ty });
     if (cast) return [cast];
     arrived.says = HOLE_QUIET;
@@ -567,7 +567,7 @@ export class World extends WorldParts {
       if (reach(here, fish) > 0) {
         this.player.facing = facingFor(at.x - this.player.x, at.y - this.player.y);
       }
-      this.hands.use('rod');
+      this.hands.takeUp('rod');
       return [arrived, this.fishing.castTo(fish)];
     },
     villager: (visit, here, arrived) => {

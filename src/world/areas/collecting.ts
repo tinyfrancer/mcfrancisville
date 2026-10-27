@@ -5,8 +5,10 @@ import { Collecting } from '../services/Collecting';
 import { Fishing } from '../services/Fishing';
 import { Digging } from '../services/Digging';
 import { Fossils } from '../services/Fossils';
+import { LeafPiles } from '../services/LeafPiles';
 import type { Kitchen } from '../services/Kitchen';
 import type { Mailbox } from '../services/Mailbox';
+import type { SmallEvents } from '../services/SmallEvents';
 import type { Zones } from '../zones/Zones';
 import type { Shared } from './shared';
 
@@ -17,7 +19,9 @@ export interface Catching {
   fossils: Fossils;
   /** Digging up what's buried, once (phase I). */
   digging: Digging;
-  /** A mound walked up to: today's fossil first, then a buried key. */
+  /** Autumn's leaf piles to jump in (1.7's Y2), where a critter may rustle out for her net. */
+  leafPiles: LeafPiles;
+  /** A mound walked up to: today's fossil first, then a buried key; and a leaf pile jumped in. */
   arrivals: PropArrivals;
 }
 
@@ -29,6 +33,8 @@ interface CatchingParts {
   outside: () => MapZoneId | null;
   /** Whether she has ever had a thing (the milestones, made later). */
   hasHad: (id: ItemId) => boolean;
+  /** The window's small event, whose lost thing may turn up in a leaf pile in town. */
+  smallEvents: SmallEvents;
 }
 
 export function catching(s: Shared, parts: CatchingParts): Catching {
@@ -60,6 +66,11 @@ export function catching(s: Shared, parts: CatchingParts): Catching {
     mailbox: parts.mailbox,
   });
   const digging = new Digging(ctx, s.dug, s.bag);
+  const leafPiles = new LeafPiles(
+    ctx,
+    { bag: s.bag, wallet: s.wallet, takings: s.takings, home: s.home },
+    { zones: parts.zones, collecting, smallEvents: parts.smallEvents },
+  );
   const arrivals: PropArrivals = {
     mound: ({ prop, place }) => {
       if (!place) return null;
@@ -68,6 +79,7 @@ export function catching(s: Shared, parts: CatchingParts): Catching {
         : digging.dig(place.id, prop);
       return dug ? [dug] : [];
     },
+    leafPile: ({ prop, place }) => (place ? leafPiles.jump(place, prop) : null),
   };
-  return { collecting, fishing, fossils, digging, arrivals };
+  return { collecting, fishing, fossils, digging, leafPiles, arrivals };
 }

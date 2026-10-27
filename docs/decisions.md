@@ -10329,3 +10329,169 @@ treat and a party, snow and a frozen pond in winter, blossom in spring, fireflie
 holidays, birthdays, full moons and rainbows. Nothing in it punishes or is lost. It was made by Cody
 for her, with Claude, between 26 September and 26 October 2026, from version 0 to 1.6: decisions
 numbered to 386, 59 versions of the save, and one card from the mayor each time something changed.
+
+## 387. 1.7, the last update for a while (2026-10-26)
+
+**Context:** 1.6 merged to her phone with about a fifth of the week's usage left on the last
+evening. The user: "let's squeeze something else in. Your call. On the patch notes put a note
+from me: 'you are my everything, and I want nothing more than to see you smile everyday.'
+Mention it'll be the last update for awhile."
+
+**Decision:** `docs/v1.7_plan.md`: two Opus sessions in parallel from `v1.7-dev` (made from
+`main` at 1.6, in `vercel.json`'s no-preview list), then the release by the coordinator. Y1 fixes
+the rough edges 1.6's review logged that she'd meet (the snowball and the rainbow surviving a
+reload, save v60; company on the big wheel; the ride's stale free line; chatter bubbles out of
+photos; the rod in her hand before a cast) and writes the `1.7` card in its first commit: the
+mayor's last note for a while, the town going on without him, and Cody's line exactly as he wrote
+it, in quotes and his. Y2 adds two things she'll see tonight, in October: the wishing well on the
+square (a Candy a day for a wish line, now and then something back) and leaf piles under the
+autumn trees to jump into. Decisions 388 and 389; the release 390. If the evening runs out, the
+card alone is 1.7.
+
+**Rejected:** a third session (the usage left is a fifth, and a cut-off session's half-work ships
+nothing); anything saved for the well or the piles (`Takings` keeps a day); a new neighbour
+(a release's neighbour needs a session of its own); the card in Cody's voice throughout (the
+mayor's notes are the mayor's, and his one line reads warmer handed over).
+
+## 388. The last card for a while, with Cody's own line; and the rough edges she'd meet, fixed (1.7's Y1, 2026-10-26)
+
+**Context:** 1.7's plan (decision 387) gave Y1 the card, first, so it ships whatever else does,
+and the leftovers 1.6's review logged in "Where it hurts" (4) and (3): a half-rolled snowball and
+the rainbow lost or restarted by a reload; company on the big wheel rare (nobody's schedule brings
+them to the fair); the ride sheet still promising a free ride once it was had; chatter bubbles in
+the party photo and the camera's; and the line drawn from a seed packet or a kite when she cast
+with one in hand.
+
+**Decision:**
+
+- **The `1.7` card.** Four lines in the mayor's voice: he found one more sheet of paper after
+  saying 1.6's was his last; the loose threads tied (the snowball, the rainbow, nobody rides alone,
+  "well, there is a crow"); Y2's well and leaf piles in one line written from the plan, for the
+  coordinator to adjust; and the town keeping on without his notes (every day still turns, the
+  hens still lay, nothing stops or runs out). His P.S. hands the last line of the page to Cody,
+  and Cody's line follows, his words as he wrote them ("everyday" kept) with only the first letter
+  a capital, in curly quotes, signed "— Cody", under a dashed rule. A row's new optional `handed`
+  (`{ words, by }`) carries it, drawn by `NotesCard` after the P.S. (`.hud-notes-handed`); no
+  earlier row has one. The card read on a phone-sized viewport in smoke, the quote whole (`boot`'s
+  check and `.smoke/notes-handed.png`).
+- **The snowball and the rainbow kept** (save v60). `YardSnapshot` takes an optional `ball`
+  (`{ tx, ty, size }`), restored only where a snowman could still stand, gone at the thaw as before;
+  the save takes `rainbow` (`{ day, at }` or null), `Forecast`'s `rainbowFrom`, saved only on its
+  own day, so a reload halfway through shows the second half and a later reload that day none.
+  Migration 59 → 60 adds `rainbow: null`; a v59 yard simply has no ball.
+- **Company on the big wheel.** `companionOf(atFair, hearts, evening)`: of an evening Cody comes
+  along wherever he was ("he's hers": the sheet says he "has come along"); else her husband if at
+  the fair, else her closest at the fair, as before; else she rides alone and a crow has the car
+  opposite, which at the top says nothing, in one of three ways (`CROW_VIEW` in
+  `data/fairRide.ts`, replacing the mayor's plaque lines, one of which keeps the plaque in her car).
+  The crow is in the words only: the car opposite is off the stage, and `render/fairRide.ts` draws
+  only hers.
+- **The free line.** The ride sheet's line under its name is the row's (with "on the house") only
+  while the day's free ride waits, and `RIDE_LINE_SPENT` once it's been had, set again on every
+  render, so it changes as she lands.
+- **Photos without bubbles.** The party photo and the camera's shutter draw the frame they cut from
+  inside `drawForPhoto` (`render/photo.ts`); while `forPhoto()`, the effects' emotes (the chatter,
+  hearts, a "!") and the neighbours' "!", "?" and parcel leave themselves out. Pops and particles
+  stay: they're things in the air, not the game talking.
+- **The rod for a cast.** A tap on a fish, or walking up to the ice hut's hole, takes the rod up
+  whatever she holds (`Hands.takeUp`), so the cast is drawn from the rod; the seed or kite stays in
+  her bag, a tap away on the quick bar. Decision 110's "unless she's holding a seed" now holds for
+  the net and the can only. Chosen over making the cast wait with a toast to empty her hands: a tap
+  on a fish means only fishing, and a toast asking her to put something down first is a small
+  scold, which the brief (decision 11) keeps out.
+
+**Rejected:** a neighbour's weekend stop at the fair for company (more rows and more walking for a
+rarer gain than Cody of an evening; the plan named Cody); drawing the crow (a car opposite would
+need the rim's other cars drawn); hiding the bubbles by stepping the effects (it would lose the
+bubbles still due after the shot); the net taken up over a seed too (a seed in hand while farming
+is the point of 110, and a critter tapped near the beds is likelier a slip).
+
+## 389. The wishing well takes a Candy a day for a wish, and autumn's leaf piles are jumped in, each finding something the first time a day in a place (1.7's Y2, 2026-10-26)
+
+**Context:** 1.7's plan (decision 387) asked for two warm things she'd see tonight, in October: the
+square's well taking wishes, and leaf piles under the autumn trees to jump into, nothing saved.
+
+**Decision:**
+
+- **The well.** Walking up to `well` opens its card (`hud/WellCard.ts`, `WellApi` in
+  `wiring/apis/well.ts`, from `moments.ts`; the arrival row in the outdoors area returns nothing,
+  so the mystery's clue at the well still comes as before). Toss a Candy (`WISH_CANDY`, 1) or Not
+  today; with no Candy the card says the well doesn't mind and only Not today will do; once
+  wished, Done. `world.well` (`Well`) takes the Candy and the day (`well:wish`, a new `well:`
+  prefix in `onceADay`), and a `wished` moment gives the wish back as a toast, a `plink` cue (the
+  coin far down, its echo, a shimmer), and a ring and sparkle over the water. The toss closes the
+  card so the ripple is seen. Fifty lines in `data/wishes.ts` in the well's gentle nonsense, a
+  pair each for every season, Halloween's and Christmas's decorations, rain and fog; `wishOn` in
+  `systems/well.ts` draws a day only from the lines at its own parity (day number from 1 January
+  2026), so two days running never share one, with no memory and no recursion; a third of days
+  with a line of their own say it. About one toss in seven (`comesUpOn`, dealt from the day) brings
+  up a `wellPebble` (new, worth 2) four times in seven or a heart, smiley or ghost bead (the
+  bracelet beads the bag already knows); worth 0.74 Candy a toss on average, held under the Candy
+  by the economy test. **Her very first wish** brings up the `wellPenny` keepsake instead, so she
+  sees something tonight; "once ever" is read from her bag, chest and shelves, as the rainbow jar
+  and the kite's keepsake are, since `Takings` drops yesterday's on every save.
+- **The piles.** In autumn (`pilesFallOn`, the season `FALLING_LEAVES` falls in; `render/leaves.ts`'s
+  `leavesFall` now reads it) each place has two or three (`PILES_A_PLACE`), dealt from the day key
+  by `systems/leafPiles.ts`: in front of or beside a shedding tree's trunk, on open grass, never a
+  path, a bed, the farm's rows to come, her yard, a spot anyone stands at, a dig spot, a snack, stall
+  or cart spot, a way out, a doorstep, a flower patch, under three rows of any other prop's picture
+  (so never showing through another tree's branches), or beside another pile. `Piles`
+  (`world/zones/Piles.ts`) is the overlay, last in `MapZone`'s list, worked out against
+  `MapZone.canWalk` once a day; it never blocks, and a flat pile is grass to `propAt`. A tap walks
+  her into one (`leafPile` arrival in the catching area, `world.leafPiles`, `LeafPiles`): a `leapt`
+  moment, the `jump` verb (a crouch, then `holdUp` with `hopOf` lifting her nine pixels in an arc,
+  `Poses.hop`, read by `playerDrawable`), an `autumnLeaf` burst up and a second as she lands, a
+  `rustle` cue; the pile lies flat till the window turns (kept in `Piles`, never saved). **The
+  first jump of the day in each place** (`pile:<zone>`, once a day) always finds something: the
+  `goldenLeaf` keepsake the very first time ever; else in town the window's lost thing if one is
+  lying (`SmallEvents.turnUp`, carried back as if picked up); else three days in five a crawly,
+  beetle or frog that lives there and is about, the uncaught first, rustling out beside the pile
+  for her net (`Collecting.rustle`, under `rustled:<zone>` till caught or the window turns); else,
+  or if none can come out, 2 to 4 Candy. Drawn by the `leafPiles` pass on the ground (she stands in
+  the leaves), heaped or flat (`sprites/leafPiles.ts`), and a heaped one is `wanted`, so a crown
+  over it near her fades.
+- Tests: `tests/data/wishes.test.ts` (every line read with sample names, the pairs' parities, two
+  years never the same twice running and every line said, the odds), `tests/world/well.test.ts`,
+  `tests/world/leafPiles.test.ts`, `tests/hud/wellCard.test.ts`, the jump in `poses.test.ts`, two
+  economy checks; `arrivingAtProps`' snapshot gains only its leaf-pile lines; the overlays hash
+  leaves the piles out so it still holds everything else as it was. Smoke `wishingWell` and
+  `leafPiles` (feel), after `delights`.
+- **Card lines for 1.7** (Y1 writes the card; the coordinator folds them in): "The old well on the
+  square takes wishes now: toss in a Candy once a day and something kind comes back up." and "The
+  trees have dropped their leaves in piles. Jump in! There's often something hiding in there."
+
+**Rejected:** keeping "once ever" in `Takings` as `well:penny` (pruned every day, so the penny would
+come again tomorrow); the penny one in seven like the rest (she'd likely not see it tonight); a
+small card floating by the well like the bed's (a sheet is the coop's pattern, and closing it on
+the toss shows the ripple); a pile drawn standing among what's sorted by its feet (she'd be drawn
+behind it, half in the grass); critters kept off pile tiles (it would change where every critter is
+dealt, and the rarity year); piles in winter's snow or spring (the leaves fall in autumn); Today's
+"a wish is waiting at the well" (not a one-line add: a fact, a line kind, its words and where it
+goes; the brief said skip it then).
+
+## 390. 1.7 released: the last update for a while (2026-10-26)
+
+**Context:** Y1 (decision 388, PR #243, save v60) and Y2 (decision 389, PR #244) merged into
+`v1.7-dev` the same evening. The plan's V1.7 is the coordinator's: the card checked whole, the
+fixture, the docs, the release PR.
+
+**Decision:** the `1.7` card's third line is Y1's and Y2's folded into one ("The old well on the
+square grants wishes: toss in a Candy once a day and something kind comes back up. And the
+leaves lie in piles under the trees. Jump in."), the rest of Y1's card as written; Cody's
+line stands exactly as he gave it, under the mayor's P.S., signed by him. 1.6's lived-in town
+(`lived-in-v59.json`) was opened in a 1.7 dev build as her phone will (notes last seen `1.6`, the
+dedication seen, a page of the site that isn't the game, the method of decisions 377 and 386): the
+title, then the one `1.7` card (his line whole at phone size, reached by scrolling), Cody's hello,
+save v60; then played by taps on 27 October 2026, in town: a Candy tossed in the well (the wish's
+toast, the lucky penny with the first), a jump in a leaf pile (the golden leaf with the first),
+and the evening after a reload, the wish kept. Kept as `lived-in-v60.json` in `livedIn.test.ts`
+and the overlays snapshot. The handoff's head, cold-start section and "After 1.0", `CLAUDE.md`
+and the plan say 1.7 is the last release and no plan follows it. The release PR is
+`release-1.7` → `main` at `v1.7-dev`'s head, merged by the coordinator at the user's word for the
+evening ("let's squeeze something else in… mention it'll be the last update for awhile").
+
+**Rejected:** a review session of its own (the usage left was for the game, not for a document
+of it: the checks here are the play-through and the suite); a fifth line on the card for Y2
+(the mayor's four and Cody's one is the shape Y1 chose, and his line is what the card is for); a
+perf table for 1.7 (nothing in it runs per frame but the piles' overlay and the well's ripple,
+and 1.6's table stands).

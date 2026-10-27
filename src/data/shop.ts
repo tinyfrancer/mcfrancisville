@@ -20,6 +20,8 @@ import { TICKET_VALUES } from './fairRide';
 import { HEN_VALUES } from './hens';
 import { SNOW_VALUES } from './snow';
 import { KITE_IDS, KITE_VALUES } from './kites';
+import { WELL_VALUES } from './wishes';
+import { LEAF_PILE_VALUES } from './leafPiles';
 import { FAIR_PRIZE_VALUES } from './fairPrizes';
 import { ORCHARD_VALUES } from './orchard';
 import { DISPLAY_WARES } from './display';
@@ -217,6 +219,8 @@ export const ITEM_VALUE: Record<ItemId, number> = {
   ...HEN_VALUES,
   ...SNOW_VALUES,
   ...KITE_VALUES,
+  ...WELL_VALUES,
+  ...LEAF_PILE_VALUES,
   // Only ever won at the Hollow Fairground (V1's R6b).
   ...FAIR_PRIZE_VALUES,
 };

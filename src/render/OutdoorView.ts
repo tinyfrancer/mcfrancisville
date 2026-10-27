@@ -13,6 +13,7 @@ import { hensPass } from './hens';
 import { Ground } from './ground';
 import { fishingPass } from './fishing';
 import { kitePass } from './passes/kite';
+import { leafPilesPass } from './leaves';
 import { Lighting } from './lighting';
 import { rimLit, underMoon } from './moonlight';
 import { WEATHER_LOOK } from './weather';
@@ -88,7 +89,8 @@ export interface OutdoorViewOptions {
  * stands is sorted by its feet once, so where two stand level the one named first is drawn first.
  */
 export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
-  ground: ['life', 'effects', 'weather', 'yard', 'fishing', 'target'],
+  // Autumn's leaf piles (1.7's Y2) lie on the ground, under her and the effects' prints.
+  ground: ['life', 'leafPiles', 'effects', 'weather', 'yard', 'fishing', 'target'],
   stand: [
     'props',
     'moving',
@@ -123,7 +125,17 @@ export const OUTDOOR_LAYERS: Readonly<Record<Layer, readonly string[]>> = {
     'bone',
     'her',
   ],
-  wanted: ['givers', 'snack', 'mounds', 'holidays', 'neighbours', 'critters', 'pets', 'bone'],
+  wanted: [
+    'givers',
+    'snack',
+    'mounds',
+    'holidays',
+    'neighbours',
+    'critters',
+    'pets',
+    'bone',
+    'leafPiles',
+  ],
   over: [
     'yard',
     'holidays',
@@ -235,6 +247,7 @@ export class OutdoorView implements SceneView {
     this.layers = composeLayers(
       [
         lifePass(zone),
+        leafPilesPass(world, zone),
         weatherPass(world, this.weatherShown !== null),
         yardPass(world, town),
         targetPass(world),

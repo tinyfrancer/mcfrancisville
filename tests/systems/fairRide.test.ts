@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { ACTIVITIES } from '../../src/data/activities';
-import { MAYOR_VIEW, RIDE, RIDE_COST, RIDE_LINES, RIDE_MS } from '../../src/data/fairRide';
+import { CROW_VIEW, RIDE, RIDE_COST, RIDE_LINES, RIDE_MS } from '../../src/data/fairRide';
 import { VILLAGER_IDS } from '../../src/data/villagers';
 import { activityAt } from '../../src/systems/activities';
 import { companionOf, isFairDay, rideAt, topLine } from '../../src/systems/fairRide';
@@ -48,12 +48,21 @@ describe('the big wheel (1.6 X2)', () => {
     expect(companionOf(['rufus', 'maude'], () => 2)).toBe('maude');
   });
 
-  it('has three warm lines at the top for everyone, and the mayor plaque alone', () => {
+  it('takes her husband along of an evening, wherever he was (1.7’s Y1)', () => {
+    const hearts = (id: string) => ({ agatha: 3, rufus: 6 })[id] ?? 0;
+    expect(companionOf([], hearts, true)).toBe('cody');
+    expect(companionOf(['agatha', 'rufus'], hearts, true)).toBe('cody');
+    expect(companionOf(['agatha', 'rufus'], hearts, false)).toBe('rufus');
+  });
+
+  it('has three warm lines at the top for everyone, and the crow’s nothing alone', () => {
     for (const id of VILLAGER_IDS) {
       expect(RIDE_LINES[id], id).toHaveLength(3);
       expect(RIDE_LINES[id]).toContain(topLine(id, '2026-09-19', 1));
     }
-    expect(MAYOR_VIEW).toContain(topLine(null, '2026-09-19', 1));
+    expect(CROW_VIEW).toContain(topLine(null, '2026-09-19', 1));
+    for (const line of CROW_VIEW)
+      expect(line).toMatch(/crow.*(says nothing|nothing at all|absolutely nothing)/);
     // The same ride says the same; another ride may say another.
     expect(topLine('cody', '2026-09-19', 2)).toBe(topLine('cody', '2026-09-19', 2));
     const said = new Set([1, 2, 3, 4, 5, 6].map((n) => topLine('cody', '2026-09-19', n)));

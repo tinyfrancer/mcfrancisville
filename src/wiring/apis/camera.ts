@@ -3,7 +3,7 @@ import type { SoundBoard } from '../../audio/SoundBoard';
 import type { FilterId } from '../../data/photo';
 import type { CameraApi } from '../../hud/CameraSheet';
 import { drawItemIcon } from '../../render/items';
-import { pngOf, printOf } from '../../render/photo';
+import { drawForPhoto, pngOf, printOf } from '../../render/photo';
 import type { SceneView } from '../../render/scene';
 import { frameOf, photoFrom, POLAROID } from '../../render/viewfinder';
 import { stickerChoices } from '../../systems/photo';
@@ -88,8 +88,9 @@ export function cameraApi(w: CameraWiring): CameraApi {
       ),
     stickerIcon: drawItemIcon,
     shoot(stickers, caption) {
-      // Drawn once more without the viewfinder over it, then the next frame puts it back.
-      w.view().draw(performance.now());
+      // Drawn once more without the viewfinder over it, nor the bubbles over heads (1.7's Y1),
+      // then the next frame puts them back.
+      drawForPhoto(() => w.view().draw(performance.now()));
       const picture = photoFrom(canvas, viewfinder.filter, stickers);
       if (!picture) return null;
       w.sound.cue(CUES.shutter);

@@ -21,6 +21,7 @@ import { PALETTE } from '../sprites/palette';
 import { drawGlints } from './bloom';
 import type { Point } from './camera';
 import { bakeIcon } from './items';
+import { forPhoto } from './photo';
 import type { Pass } from './passes/pass';
 import { playerDrawable } from './scene';
 import { overHead } from './villagers';
@@ -159,6 +160,17 @@ interface Motion {
 }
 
 const MOTION: Record<ParticleKind, Motion> = {
+  // Up out of a leaf pile and fluttering down round her (1.7's Y2).
+  autumnLeaf: {
+    life: 1400,
+    count: 12,
+    spread: 12,
+    vx: [-0.05, 0.05],
+    vy: [-0.17, -0.08],
+    gravity: 0.00028,
+    sway: 3,
+    frameMs: 180,
+  },
   leaf: {
     life: 900,
     count: 6,
@@ -788,8 +800,9 @@ export class Effects {
       if (!l.started || l.zone !== zone) continue;
       const e = l.effect;
       if (e.kind === 'pop') this.drawPop(ctx, l, e, cam, resolve, still);
-      else if (e.kind === 'emote') drawEmote(ctx, l, e, cam, resolve, still);
-      else if (e.kind === 'ring') drawRing(ctx, ringAt(l.age, l.life, still), e.at, cam);
+      else if (e.kind === 'emote') {
+        if (!forPhoto()) drawEmote(ctx, l, e, cam, resolve, still);
+      } else if (e.kind === 'ring') drawRing(ctx, ringAt(l.age, l.life, still), e.at, cam);
       else if (e.kind === 'throw') drawThrow(ctx, l, handsOf(e.to, resolve), cam);
       else if (e.kind === 'outline') {
         const rect =

@@ -5,7 +5,7 @@ import type { Ware } from '../data/shop';
 import type { Made } from '../data/recipes';
 import type { VisitGift } from '../data/visits';
 import { CAST_MS } from '../systems/fishing';
-import { SNEEZE_AH_MS } from '../systems/poses';
+import { JUMP_CROUCH_MS, SNEEZE_AH_MS } from '../systems/poses';
 import { SPRINKLER } from '../systems/beds';
 import { PROP_ART } from '../sprites/props';
 import type { Anchor, Effect, PopIcon } from '../render/effects';
@@ -35,6 +35,20 @@ export type Bump = 'bag' | 'purse';
 
 /** How long a first day's gift waits for what she did to show first (V1's R1). */
 const FIRST_DAY_BEAT_MS = 600;
+
+/** When the coin reaches the well's water, and when what comes back up has come up (1.7's Y2). */
+const WELL_PLINK_MS = 300;
+const WELL_BACK_MS = 1300;
+/** When what was in a leaf pile shows: once she's landed. */
+const LEAPT_FIND_MS = 760;
+
+/**
+ * The middle of the well's water, from its box: the water sits 36 pixels over its foot
+ * (`drawWell` in `sprites/townProps.ts`).
+ */
+function wellWater(box: TileBox): Point {
+  return { x: (box.tx + box.w / 2) * TILE_SIZE, y: (box.ty + box.h) * TILE_SIZE - 36 };
+}
 
 /** Her feet, a little under her tile's centre, where dust is kicked up. */
 const FEET = 13;
@@ -390,6 +404,37 @@ export function effectsOf(event: WorldEvent, at: Placing): Effect[] {
       return [burst('heart', event.at, 3, 8)];
     case 'petGift':
       return [pop({ gift: event.gift }, 0, event.from), burst('sparkle', event.from, 3, 8)];
+    // The wishing well (1.7's Y2): a ripple of light over its water as the Candy goes in, a glint
+    // of the coin, and whatever comes back up floated over to her once the echo has.
+    case 'wished': {
+      const water = wellWater(event.well);
+      const shown: Effect[] = [
+        { kind: 'ring', at: water, delayMs: WELL_PLINK_MS },
+        { ...burst('sparkle', water, 6, 22), delayMs: WELL_PLINK_MS },
+        { ...burst('coin', water, 1, 2), delayMs: 120 },
+      ];
+      if (event.found) shown.push(pop({ item: event.found }, 1, water, WELL_BACK_MS));
+      return shown;
+    }
+    // A leaf pile (1.7's Y2): leaves flying up as she springs out of it, and down again round her
+    // as she lands, then what was in it.
+    case 'leapt': {
+      const pile = {
+        x: event.tile.tx * TILE_SIZE + TILE_SIZE / 2,
+        y: (event.tile.ty + 1) * TILE_SIZE - 8,
+      };
+      const shown: Effect[] = [
+        { ...burst('autumnLeaf', pile, 14, 12), delayMs: JUMP_CROUCH_MS },
+        { ...burst('autumnLeaf', pile, 6, 16), delayMs: JUMP_CROUCH_MS + 420 },
+      ];
+      if (event.candy) shown.push(pop({ candy: true }, event.candy, pile, LEAPT_FIND_MS));
+      if (event.item) {
+        shown.push(pop({ item: event.item }, 1, pile, LEAPT_FIND_MS));
+        shown.push({ ...burst('sparkle', head, 6, 14), delayMs: LEAPT_FIND_MS });
+      }
+      if (event.critter) shown.push({ ...emote('!'), delayMs: LEAPT_FIND_MS });
+      return shown;
+    }
     case 'frozen':
       return [burst('sparkle', head, 6, 20), emote('♪')];
     case 'dressedUp':
@@ -485,6 +530,10 @@ export function bumpsOf(event: WorldEvent): Bump[] {
       return ['bag', 'purse'];
     case 'laid':
       return ['bag'];
+    case 'wished':
+      return event.found ? ['bag'] : [];
+    case 'leapt':
+      return event.candy ? ['purse'] : event.item ? ['bag'] : [];
     case 'unearthed':
       return 'candy' in event.find ? ['purse'] : ['bag'];
     case 'shook':

@@ -1266,24 +1266,19 @@ one of these up does it on a branch from `main`, as a PR the user merges.
    for an installed app (decision 328) until it costs her a slow first launch on a new version.
    The big files are data, fine as data (`sprites/items.ts`, `data/villagers.ts`,
    `sprites/pets.ts`, `types/ids.ts`); a redraw should split by family as `sprites/doll/` was.
-3. **A tool used with a seed in her hand** (1.5's, still open). Decision 110's rule, that what she
-   holds follows what she does "unless she's holding a seed", is older than the rod: a tap on a
-   fish with a seed in hand casts and lands it, but the rod is never taken up, so the line is drawn
-   from the seed packet. The mend is a line in `World`'s `fish` arrival and a decision re-opening
-   110 for the rod alone. A kite in hand (1.6's X6) falls under the same rule: `Hands.use` takes a
-   tool up only from another tool, so with a kite held the rod isn't taken up either.
+3. **A tool used with a seed in her hand** (mended for the rod by 1.7's Y1, decision 388: a cast
+   takes the rod up whatever she holds, `Hands.takeUp`). The net still swings from a seed packet
+   (decision 110's rule, kept on purpose for the beds), and watering a bed with a kite in hand
+   keeps the kite in it; `Hands.use` is the one place to change.
 4. **The new systems' rough edges** (1.4 to 1.6).
-   - **The big wheel's company is rare** (X2, decision 381): she rides with her husband or the
-     neighbour she's closest to _at the fair_, and nobody's schedule brings them there but the
-     fair's happenings and Agatha's weekend afternoons, so most rides are alone with the mayor's
-     plaque. A neighbour's weekend stop at the fair (a `Stop` row) would mend it. The ride's
-     picture (`sprites/fairRide.ts`) is lit by the hour but drawn green all year, so in January
-     she rides over a summer town from a snowy fair; and the sheet's line "your first ride today
-     is on the house" stays after the free ride is spent (the button says 10).
-   - **Snow** (X4, decision 383): the snowball half rolled in her yard isn't saved (`Yard`'s
-     `ball`), so a reload loses it (a snowman, once stood, is saved); the rainbow's ten minutes are
-     kept in memory (`Forecast.rainbow`), so a reload brings ten more, which harms nothing. Only her
-     yard builds snowmen.
+   - **The big wheel** (X2, decision 381; 1.7's Y1, decision 388): Cody rides along of an
+     evening, so a ride by day is still mostly alone (with the crow in the car opposite, in words
+     only: the car isn't drawn) but for the fair's happenings and Agatha's weekend afternoons; a
+     neighbour's weekend stop at the fair (a `Stop` row) would bring more. The ride's picture
+     (`sprites/fairRide.ts`) is lit by the hour but drawn green all year, so in January she rides
+     over a summer town from a snowy fair.
+   - **Snow** (X4, decision 383): the half-rolled snowball and the rainbow's ten minutes are saved
+     since 1.7's Y1 (save v60). Only her yard builds snowmen.
    - **The kite's wind** (X6, decision 385): `windyOn` deals a windy day per place from the day
      key, and the ambience follows it (`breezy`, +0.3 wind there); but the ambience's own wind is
      still fixed by place (none at Lantern Shore but on a kite day), so two rules say "wind". The
@@ -1291,9 +1286,8 @@ one of these up does it on a branch from `main`, as a PR the user merges.
      is asked before every action pose, so a kite up masks any other pose; harmless, since any tap
      winds it in first. The castle's `lookout` field is under the woods' crowns, so she flies it
      from under a see-through tree; the pier's end is the open one.
-   - **The photos** (X1, G5): the party photo and the camera's are cut from the frame as it
-     stands, so the neighbours' chatter bubbles and a question's "?" are in them; a mend would
-     draw the shot without the effects layer.
+   - **The photos** (X1, G5; 1.7's Y1): the frame a photo is cut from leaves out the bubbles over
+     heads (`drawForPhoto`), but a pop or the tap's ring still in the air is in it.
    - **The hens and the delights** (X3, X5): the hens are worked out from the clock and drawn
      only by the view (`henAt`), so nothing can walk up to one; a delight (butterfly, fireflies,
      the crow) is only what the view shows, never a thing in the world. Both on purpose, both

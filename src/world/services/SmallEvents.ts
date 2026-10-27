@@ -85,6 +85,15 @@ export class SmallEvents {
     return [{ kind: 'foundLost', lost: lying.lost }];
   }
 
+  /** It turned up in a leaf pile in town (1.7's Y2): the lost thing lying, hers to carry back. */
+  turnUp(): WorldEvent[] {
+    const lying = this.lying();
+    if (!lying) return [];
+    this.keeps.takings.take('lost');
+    this.carrying = lying.lost;
+    return [{ kind: 'foundLost', lost: lying.lost }];
+  }
+
   /**
    * What a neighbour says about the small event: thanks, if she's carrying back what they lost;
    * their news, the first time she talks to them this window; or asking after what they've lost.

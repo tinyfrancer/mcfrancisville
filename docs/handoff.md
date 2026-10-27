@@ -3,7 +3,8 @@
 Written 2026-09-26 for version 0, and kept since by every plan's sessions; rewritten at the top by
 V1's review (decision 324) for after 1.0, by V1.1's (decision 356) for after 1.2, by V1.3's
 (decision 366) for after 1.3, by V1.5's (decision 377) for after 1.5, and by V1.6's
-(decision 386) for after 1.6, the last release of the user's subscription. Read "In progress",
+(decision 386) for after 1.6, and by the 1.7 release (decision 390) for after 1.7, the last
+release of the user's subscription. Read "In progress",
 then "If you are starting cold after a long gap", then "After 1.0"; "Where things stand" further
 down is the long history.
 
@@ -14,8 +15,9 @@ Nothing is in progress.
 ## If you are starting cold after a long gap
 
 Written at 1.3 (2026-10-25) for a session that may come months later and knows nothing, brought
-up to 1.5 by V1.5's review (decision 377), and rewritten by V1.6's (decision 386) on 2026-10-26,
-the last day of the user's subscription, for whoever comes next: perhaps nobody for a long while,
+up to 1.5 by V1.5's review (decision 377), rewritten by V1.6's (decision 386) on 2026-10-26,
+the last day of the user's subscription, and brought up to 1.7 by its release the same evening
+(decision 390), for whoever comes next: perhaps nobody for a long while,
 perhaps a year from now. Read this, then "After 1.0", then the code.
 
 - **What the game is.** McFrancisVille is a cozy, spooky-cute pixel-art life sim the user (Cody)
@@ -29,11 +31,11 @@ perhaps a year from now. Read this, then "After 1.0", then the code.
 - **Where it lives.** `tinyfrancer/mcfrancisville` on GitHub (public). Vercel deploys `main`, and
   only `main`, to her phone: previews are off for `claude/**`, `release-*` and every dev branch
   (`vercel.json`'s `deploymentEnabled`, the user's call), so **merging to `main` publishes**.
-  **1.6 is the last release** (the release PR from `v1.6-dev`, "Release 1.6"; "After 1.0" says
-  where it stands). Her town is in her phone's `localStorage` (`mcfrancisville:save`, save v59 at
-  1.6), migrated forward on load (`src/persistence/`); the installed app is a cached shell
-  (`public/sw.js`), so a deploy reaches her on the next open or the one after. **No plan follows
-  1.6.**
+  **1.7 is the last release** (the release PR from `v1.7-dev`, "Release 1.7", the last update
+  for a while, its card saying so with Cody's own line on it; "After 1.0" says where it stands).
+  Her town is in her phone's `localStorage` (`mcfrancisville:save`, save v60 at 1.7), migrated
+  forward on load (`src/persistence/`); the installed app is a cached shell (`public/sw.js`), so
+  a deploy reaches her on the next open or the one after. **No plan follows 1.7.**
 - **How to run it.** `npm ci` (from the lockfile; "Environment notes" below), `npm run dev`, open
   `http://localhost:5173/`. A dev build takes `?skiptitle`, `?day=2026-12-24&hour=21.5`,
   `?weather=rain`, `?rainbow` and `?loop=manual` (smoke's hand crank); any build takes `?gallery`
@@ -53,7 +55,7 @@ perhaps a year from now. Read this, then "After 1.0", then the code.
   `docs/architecture.md`, still empty. (3) **Her eye on the art notes** at the end of this file.
   (4) **The personal touches**, parked since decision 177: the numbered questions under "Still to
   put to the user" wait for the user to take them up; a session doesn't ask them unprompted.
-  (5) **Two stale branches** in GitHub to delete, `release-1.4` and, once merged, `release-1.6`
+  (5) **Three stale branches** in GitHub to delete, `release-1.4`, `release-1.6` and `release-1.7`
   ("After 1.0", step 6).
 - **If she reports a bug**, first: (1) ask the user for a screenshot and what she did, and for
   Settings' error note if it shows one (`src/errorNotes.ts` keeps the last five uncaught errors on
@@ -61,9 +63,9 @@ perhaps a year from now. Read this, then "After 1.0", then the code.
   back up from Settings (the code restores through the same migrations, decision 25), and never
   delete a save (an unreadable one is moved aside); (3) reproduce it on a dev build at her day and
   hour (`?day=…&hour=…`), with a lived-in fixture if it's her town's shape
-  (`tests/persistence/fixtures/lived-in-v59.json` is 1.6's, loaded into `localStorage` from a
-  page of the site that isn't the game, as decision 377 and 386 did); (4) a test that fails, the
-  fix, the checks, on a branch from `main`, as a PR the user merges, with a `NOTES` row (`1.6.1`)
+  (`tests/persistence/fixtures/lived-in-v60.json` is 1.7's, loaded into `localStorage` from a
+  page of the site that isn't the game, as decisions 377, 386 and 390 did); (4) a test that fails, the
+  fix, the checks, on a branch from `main`, as a PR the user merges, with a `NOTES` row (`1.7.1`)
   only if it's something she'd notice. A small fix needs no plan.
 - **Where new content goes** (each a row and some art on a seam an earlier plan made; CLAUDE.md
   names the files): a **critter** is a `CRITTERS` row (hours, habitat, `where`, rarity, `season`),
@@ -111,16 +113,23 @@ perhaps a year from now. Read this, then "After 1.0", then the code.
 
 ## After 1.0
 
-**The 1.6 plan is complete, and 1.6 is the release PR "Release 1.6"** (`v1.6-dev` → `main`, from the
-branch `release-1.6` at `v1.6-dev`'s head after V1.6 merged), for the coordinating session to merge
-at the user's word, as 1.4 and 1.5 were; merging deploys to her phone, and `main` after it is the
-game as it stands. Her phone is on 1.5 until then (PR #234, 2026-10-26: the photo mode, the attic,
-Pickle, save v58). 1.6 is X1's festival lights fixed and the 31st rehearsed, X2's ride on the big
+**The 1.7 plan is complete, and 1.7 is the release PR "Release 1.7"** (`v1.7-dev` → `main`, from
+the branch `release-1.7` at `v1.7-dev`'s head, decision 390), merged by the coordinating session
+the evening of 2026-10-26 at the user's word; `main` after it is the game as it stands, **the last
+update for a while**. 1.7 is Y1's rough edges (the half-rolled snowball and the rainbow kept
+across a reload, save v59 → v60; company on the big wheel, or a crow; the ride's free line; the
+bubbles out of photos; the rod taken up over a seed or a kite) and Y2's wishing well on the square
+(a Candy a day for a wish, the lucky penny with the first) and leaf piles under the autumn trees
+(a jump, the golden leaf with the first): she reads one card, `1.7`, four lines, the mayor's P.S.
+handing the page to Cody, and Cody's own line, "You are my everything, and I want nothing more
+than to see you smile everyday." (decision 388). Its fixture is `lived-in-v60.json`, 1.6's town
+opened in 1.7 and played on 27 October 2026 (the well, a pile, a reload). **1.6 before it** (PR
+#242, 2026-10-26) is X1's festival lights fixed and the 31st rehearsed, X2's ride on the big
 wheel, X3's hens at Boo Acres, X4's snowmen, snowballs, footprints, puddles and rainbow, X5's small
 delights and X6's Gerald and kites: she reads one card, `1.6`, five lines and the mayor's last P.S.
 for a long while (decision 386), and her save goes v58 → v59 (X3's henhouse, a town from before
 starting unfed with no eggs), held by `livedIn.test.ts`'s fixtures (the newest, `lived-in-v59.json`,
-is 1.5's town opened in 1.6 and played on to the festival of 2027). **No plan follows 1.6**, and the
+is 1.5's town opened in 1.6 and played on to the festival of 2027). **No plan follows 1.7**, and the
 user's subscription ends with it. A session starting cold with nothing asked of it does nothing to
 the game and asks the user what they'd like next.
 
@@ -140,24 +149,27 @@ knows, neither is done):
    readings (frame p50/p95, work p50/p95, fps, the phone and its iOS) into the table under "On her
    iPhone" in `docs/architecture.md`. The container's numbers for 1.0 to 1.6 are the tables just
    above it.
-3. **1.6 on her phone, as the days come**: the festival's lights strung round every roof and pole
+3. **1.7 on her phone, now**: the card with his line; the well on the square (walk up, Toss a
+   Candy); a leaf pile under a tree in town, Whisperwood or Boo Acres (tap it); the big wheel in
+   the evening with Cody along.
+4. **1.6 on her phone, as the days come**: the festival's lights strung round every roof and pole
    to pole at the fair, any evening to 31 October; the party photo on the 31st, both facing the
    camera; the big wheel (walk up to it at the fair; the first ride each day free; a weekend
    afternoon brings Agatha along); the coop by Scarah's barn (feed the hens from the bag, eggs by
    morning); in the snow from December, a tap on herself in her yard; a kite from Cobweb Corner on
    a breezy day at the pier's end; every fossil to the museum for Gerald; standing still outdoors
    for a butterfly.
-4. **1.4's and 1.5's, as they come**: the woollies at Cobweb Corner from 1 November; the pond
+5. **1.4's and 1.5's, as they come**: the woollies at Cobweb Corner from 1 November; the pond
    frozen 15 December to 15 January; a constellation each month at the castle telescope; a shiny
    now and then; the camera's **Keep it** into Photos; the attic once the back room is built.
-5. Earlier checks, if never made: the moon's visitors the day after a full or new moon (1.3), the
+6. Earlier checks, if never made: the moon's visitors the day after a full or new moon (1.3), the
    silent switch and **Play on silent**, the **Ambience** switch, the builds (1.2).
-6. **Tidy the branches in GitHub**: delete `release-1.4` (PR #231's head, merged long since) and,
-   once the release PR has merged, `release-1.6`. Sessions don't delete branches, so it's left for
-   the user's hand; nothing reads either.
+7. **Tidy the branches in GitHub**: delete `release-1.4`, `release-1.6` and `release-1.7` (each a
+   merged release PR's head). Sessions don't delete branches, so it's left for the user's hand;
+   nothing reads them.
 
-**`v1.6-dev` was the integration branch for 1.6** and ends with it (`v1.4-dev` was 1.4 and 1.5's,
-`v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's). A later plan makes its own from `main` once
+**`v1.7-dev` was the integration branch for 1.7** and ends with it (`v1.6-dev` was 1.6's,
+`v1.4-dev` 1.4 and 1.5's, `v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's). A later plan makes its own from `main` once
 the release PR has merged, and adds it to `vercel.json`'s no-preview list that day (decision 265).
 
 ### 1.6, the last day (the 1.6 plan's sessions and its review, 2026-10-26)
@@ -2458,14 +2470,13 @@ four after it; the kite flying off the top of a phone on its side was mended, no
   she is, so a branch held up in the air there is in front of her legs: the depth is right. Kept.
 - **The fish under the ice are dim** (1.4's G3, alpha 0.3 against open water's 0.6): on the pale
   ice by day at Close they're faint smudges, found by looking; on purpose, so the ice looks thick.
-- **Fishing with a seed in her hand** (decision 110's rule, older than the rod): she keeps a seed
-  through a tap on a fish, so the line runs from the seed packet and no rod is drawn ("Where it
-  hurts").
+- **Fishing with a seed in her hand**: mended by 1.7's Y1 (decision 388), the rod taken up for a
+  cast whatever she holds.
 - **Their Halloween photo** (1.6's X1, which turned them both to the camera): it's cut from the
   frame as the party stands, so she's in front of Cody where she walked up to him (his face over
-  her shoulder), and the neighbours' chatter bubbles and a question's "?" are in the picture. The
-  camera's own photos (1.5's G5) are taken the same way; a squeeze side by side would need the
-  photo to move her, which nothing else at the party does.
+  her shoulder). The bubbles over heads are left out since 1.7's Y1 (decision 388). The camera's
+  own photos (1.5's G5) are taken the same way; a squeeze side by side would need the photo to
+  move her, which nothing else at the party does.
 - **The hens bunch up** (1.6's X3, seen by V1.6): four birds in a run 32 pixels wide, each
   pottering from the clock alone (`henAt`), so at times three or four stand in a heap at one side
   of the run with the other half empty. Spreading them (a spot each, or a nudge apart) is a rule

@@ -14,8 +14,11 @@ It is a static site (TypeScript + Vite, Canvas 2D, and a backend, a tiny one: `a
 in `localStorage`, and go up sealed to the cloud save beside it (`src/persistence/cloud.ts`; the
 store is the user's to link, README's "Cloud save").
 
-**There is no plan now; the last was `docs/v1.6_plan.md`, and 1.6 the last release** (the end
-of this paragraph). The releases, oldest first: **the V1 plan was `docs/v1_plan.md`** (settled
+**There is no plan now: the last was `docs/v1.7_plan.md`** (settled 2026-10-26, decision 387,
+complete with its release, decision 390), the evening of the last day, from `v1.7-dev`: the rough
+edges 1.6's review logged, the wishing well and leaf piles, and the `1.7` card, the last update
+for a while, with Cody's own line on it. **1.7 is on her phone** (the release PR from
+`release-1.7`, 2026-10-26, save v59 → v60); `main` is the game as it stands. The releases, oldest first: **the V1 plan was `docs/v1_plan.md`** (settled
 2026-10-06, decisions 266–275, after
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
@@ -46,9 +49,10 @@ subscription: the festival's lights fixed and the 31st rehearsed, a ride on the 
 chickens at Boo Acres, snow and puddles, small delights, the museum's skeleton and a kite, from
 `v1.6-dev`, every session Opus. **1.6 is the release PR "Release 1.6"** (`v1.6-dev` → `main`,
 save v58 → v59), the coordinator's to merge at the user's word; `main` after it is the game as it
-stands. **There is no plan after 1.6**: `docs/v1.6_plan.md` and every plan before it are
-complete, and a session starting cold with nothing asked of it changes nothing, reads the
-handoff's cold-start section and asks the user what they'd like next.
+stands. **1.6 was merged by the coordinator on 2026-10-26: it is on her phone.** `docs/v1.7_plan.md`
+and every plan before it are complete; there is no plan after 1.7, and a session starting
+cold with nothing asked of it changes nothing, reads the handoff's cold-start section and asks
+the user what they'd like next.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
 (0.3's is Scarah, decision 214; V1's is Rob Boo, the mayor, decision 270).
 **A session starting cold reads `docs/handoff.md` first**, its "If you are starting cold
@@ -93,8 +97,7 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.6-dev` was the integration branch for 1.6** and ends with it (`v1.4-dev` was 1.4 and
-1.5's, `v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision
+**`v1.7-dev` was the integration branch for 1.7** and ends with it (`v1.6-dev` was 1.6's, `v1.4-dev` 1.4 and 1.5's, `v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision
 212). **The next plan makes its own from `main`** once the release PR has merged, and adds it to
 `vercel.json`'s no-preview list that day (decision 265). While a plan runs, each session
 branches from its branch, its PR targets it, and it is merged with a merge commit as soon as it is
@@ -275,8 +278,10 @@ what each owns, and where it hurts. Update it when a seam moves.
   `fortune:freeGo` in `Takings`), and the lucky duck squish is only won there (`data/fairPrizes.ts`).
   A ride on the big wheel (1.6's X2, decision 381) is a fifth row (`bigWheel`, `does: { ride }`):
   once round on the sheet's stage (`render/fairRide.ts`, art `sprites/fairRide.ts`, rules
-  `systems/fairRide.ts`, `world.activities.board`/`land`), with her husband or her closest
-  neighbour at the fair, the day's first ride free (`fortune:ride`), a ticket stub the first time.
+  `systems/fairRide.ts`, `world.activities.board`/`land`), with Cody of an evening, else her
+  husband or her closest neighbour at the fair, else a crow in the car opposite who says nothing
+  (`CROW_VIEW`; 1.7's Y1, decision 388), the day's first ride free (`fortune:ride`, the sheet's
+  line saying so only till it's had), a ticket stub the first time.
   The calendar comes there with the gate open, as it is from the start (0.2's M3, decision 202): a happening row's `fair`
   (where they gather, the calendar's words, its `set`) moves it before the stage, `venueOf` in
   `systems/happenings.ts` says where it is today, read from `systems/venues.ts` (`knowFairground`,
@@ -440,7 +445,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   prop's other shape for a season is `RESHAPED`, 1.0.1's X2, decision 327), and Nessa skates on
   the frozen pond (`src/data/skating.ts`). `?day=2027-01-15` shows winter; `npm run sprite -- 'season:*:town'`.
   **Snow days** (1.6's X4, decision 383): on lying snow (`snowyOn` in `src/systems/snow.ts`) a tap
-  on herself, hands empty, rolls a snowball beside her in her yard (`Yard`'s unsaved `ball`), a
+  on herself, hands empty, rolls a snowball beside her in her yard (`Yard`'s `ball`, saved since
+  save v60, 1.7's Y1), a
   tap on it rolls it bigger and the next stands a snowman, a yard piece (`SnowmanId`, rows
   `src/data/snow.ts`, art `src/sprites/snowman.ts`, his hat by his tile, `hatOf`; never indoors,
   refusal `melts`); out of her yard she throws one (`world.snow`, `Snow`), at a neighbour within
@@ -466,7 +472,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   in `systems/weather.ts`): `drawFlash` in `src/render/weather.ts`, and a `thunder` moment's
   rumble from `world.weather`. On a rainy day she and her pets splash through the puddles
   (`underfootOn`, a `puddle` footstep), and on a clear day after a rainy one a rainbow arcs over
-  the view the first ten minutes she's out (`Forecast.rainbow`, `rainbowDay`, `render/rainbow.ts`
+  the view the first ten minutes she's out (`Forecast.rainbow`, `rainbowDay`, kept in the save's
+  `rainbow` since v60, `render/rainbow.ts`
   in the weather pass; a Today line, a `rainbowJar` the first time; `?rainbow` in a dev build;
   1.6's X4, decision 383).
 - **The garden:** Hosta La Vista Farm, beside her house. Beds are `x` in the map (a `bed` tile,
@@ -690,7 +697,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   a simulated year filling the Cabinet in about nine months (seven and a half to ten): rerun it when a critter changes. `world.collecting` has `critters`, `critterAt`,
   `netSwing` and `donate`; tapping one walks up and swings (`caught`, `fled`). Fish are critters
   too, dealt into the water in slots of their own and drawn as shadows (phase Q, decision 121):
-  tapping one walks her to the bank and casts her rod (`world.fishing`,
+  tapping one walks her to the bank, puts the rod in her hand whatever she holds (`Hands.takeUp`,
+  1.7's Y1) and casts it (`world.fishing`,
   `src/world/services/Fishing.ts`), the line's nibbles and bite are worked out from the cast in
   `src/systems/fishing.ts`, any tap reels in, and `src/render/fishing.ts` draws the line, float
   and "!". Since V1's R6a (decision 316) a bite is shorter the rarer the fish (`BITE_MS`), a rare
@@ -762,7 +770,9 @@ what each owns, and where it hurts. Update it when a seam moves.
   one finger pans (`FollowCamera.pan`), a pinch or the ± goes Close or Far for the viewfinder alone
   (`lens` in `main.ts`). Filters are pixel sums (`src/render/filters.ts`, rows
   `src/data/photo.ts`), stickers and the caption's rules `src/systems/photo.ts` (six at most).
-  The shutter cuts the photo (`photoFrom`) and shows the party photo's card (`PhotoCard`, Keep
+  The shutter cuts the photo (`photoFrom`) from a frame drawn by `drawForPhoto`
+  (`render/photo.ts`), which the bubbles over heads leave themselves out of (1.7's Y1), as the party
+  photo's is, and shows the party photo's card (`PhotoCard`, Keep
   it through `keepPhoto` / Another / Done); nothing is kept in the save.
 - **Her pets:** rows in `src/data/pets.ts` (the seven pets and their accessories), with art in
   `src/sprites/pets.ts` drawn by `src/render/pets.ts`. `src/world/Pet.ts` is one pet following her
@@ -796,6 +806,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   `holdUp` (the `holding` pose cue), any tap winds it in, and the `kite` pass
   (`src/render/passes/kite.ts`, in `over`) draws it climbing, bobbing, its tail and string. The
   first flight gives `skyOnAString`; Today says a windy day; the ambience takes `breezy`.
+- **The wishing well** (1.7's Y2, decision 389): walking up to the square's `well` opens
+  `src/hud/WellCard.ts` (`WellApi`); `world.well` (`Well`) takes a Candy once a day (`well:wish`)
+  for a wish dealt by `wishOn` (`src/systems/well.ts`, lines in `src/data/wishes.ts`, a day drawing
+  only from its own parity's, so never twice running), a lucky `wellPenny` with the first, now and
+  then a pebble or bead (`comesUpOn`); a `wished` moment, its `plink` and a ripple over the water.
+- **Leaf piles** (1.7's Y2): in autumn `Piles` (`src/world/zones/Piles.ts`, last of `MapZone`'s
+  overlays, never blocking) deals two or three a place at the shedding trees' feet
+  (`src/systems/leafPiles.ts`); a tap walks her in and `world.leafPiles` (`LeafPiles`) jumps her
+  (the `jump` verb, `hopOf`, an `autumnLeaf` burst, `rustle`), flat till the window turns; the
+  first jump of the day in a place (`pile:<zone>`) finds the `goldenLeaf` once ever, else a lost
+  thing in town, a critter rustling out for her net (`Collecting.rustle`) or a little Candy. Drawn
+  on the ground by the `leafPiles` pass in `src/render/leaves.ts`, art `src/sprites/leafPiles.ts`.
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`
@@ -941,7 +963,8 @@ what each owns, and where it hurts. Update it when a seam moves.
   (`DEDICATION` in `src/data/greetings.ts`), and after that it's written on the title. The first
   time a phone opens a new version, the mayor's typed notes follow (decision 142): a `NOTES` row
   per version in `src/data/patchNotes.ts`, the newest being the version on her phone (a release
-  adds or finishes its row), shown by `src/hud/NotesCard.ts` and again from Settings. Then the
+  adds or finishes its row), shown by `src/hud/NotesCard.ts` and again from Settings; a row's
+  `handed` is someone else's line under the P.S., signed (1.7's, Cody's, decision 388). Then the
   creator or Cody's welcome. A dev build's `?skiptitle` goes straight in.
 - **Greetings, visits and passive Candy** (phase O, decisions 114–116): Cody's greeting as she
   opens the game is `greetingFor` in `src/systems/greetings.ts` (lines in `src/data/greetings.ts`:

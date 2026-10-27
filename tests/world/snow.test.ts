@@ -6,7 +6,7 @@ import { chatOn } from '../../src/systems/neighbourLife';
 import { hatOf, rainbowDay } from '../../src/systems/snow';
 import { weatherOn } from '../../src/systems/weather';
 import type { Tile } from '../../src/systems/pathfinding';
-import { tileOf, type WorldEvent } from '../../src/world/World';
+import { fromSave, tileOf, World, type WorldEvent } from '../../src/world/World';
 import { harness } from './harness';
 
 type H = ReturnType<typeof harness>;
@@ -259,5 +259,57 @@ describe('her snowball in the way (1.6’s X4)', () => {
     expect(h.world.yard.rollSnowball({ tx: below.tx, ty: below.ty + 1 }, stand)).toBe(true);
     expect(h.world.yard.snowball).toEqual({ tx: below.tx, ty: below.ty + 1, size: 1 });
     expect(h.world.canWalk(below.tx, below.ty)).toBe(true);
+  });
+});
+
+describe('kept over a reload (1.7’s Y1)', () => {
+  /** The town as a reload finds it: built again from its save, on the same clock. */
+  const reload = (world: World, h: H) => new World({ ...fromSave(world.save()), clock: h.clock });
+
+  it('finds a half-rolled snowball where she left it, as big, and still in the way', () => {
+    const { h, stand, below } = onTheSnow();
+    h.world.tapTile(stand.tx, stand.ty);
+    h.tick(1);
+    h.world.tapTile(below.tx, below.ty);
+    h.tick(2);
+    expect(h.world.save().yard?.ball).toEqual({ ...below, size: 2 });
+    const again = reload(h.world, h);
+    expect(again.yard.snowball).toEqual({ ...below, size: 2 });
+    expect(again.canWalk(below.tx, below.ty)).toBe(false);
+  });
+
+  it('saves no snowball when there is none, and lets the thaw take a saved one', () => {
+    const { h, stand, below } = onTheSnow();
+    expect(h.world.save().yard?.ball).toBeUndefined();
+    h.world.tapTile(stand.tx, stand.ty);
+    h.tick(1);
+    at(h, '2027-04-15');
+    const again = reload(h.world, h);
+    expect(again.yard.snowball).toEqual({ ...below, size: 1 });
+    again.update(16);
+    expect(again.yard.snowball).toBeNull();
+    expect(again.save().yard?.ball).toBeUndefined();
+  });
+
+  it('keeps a rainbow’s ten minutes: a reload halfway shows the second half, not ten more', () => {
+    let day = '2027-04-01';
+    while (!rainbowDay(day)) day = shiftDay(day, 1);
+    const h = harness();
+    at(h, day, 10);
+    h.tick(1);
+    h.clock.advance(RAINBOW_MS / 2);
+    expect(h.world.save().rainbow).toEqual({ day, at: h.clock.now() - RAINBOW_MS / 2 });
+    const again = reload(h.world, h);
+    again.update(16);
+    expect(again.weather.rainbow()).toBeCloseTo(0.5);
+    h.clock.advance(RAINBOW_MS / 2);
+    again.update(16);
+    expect(again.weather.rainbow()).toBeNull();
+    // Gone for the day, however often she comes back; the next day's save lets it go.
+    const later = reload(again, h);
+    later.update(16);
+    expect(later.weather.rainbow()).toBeNull();
+    at(h, shiftDay(day, 1), 10);
+    expect(later.save().rainbow).toBeNull();
   });
 });

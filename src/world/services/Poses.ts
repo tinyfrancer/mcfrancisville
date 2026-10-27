@@ -5,6 +5,7 @@ import {
   blinking,
   breathingOut,
   feelingUntil,
+  hopOf,
   idlePose,
   ROCK_MS,
   rockPose,
@@ -86,6 +87,9 @@ export function verbOf(e: WorldEvent): { verb: Verb; afterMs: number } | null {
       return now('show');
     case 'sneezed':
       return now('sneeze');
+    // Into a leaf pile, and up out of it (1.7's Y2).
+    case 'leapt':
+      return now('jump');
     case 'arrived':
       // A wave hello to a neighbour, and down to pat a pet.
       if (e.villager) return now('greet');
@@ -234,6 +238,12 @@ export class Poses {
     const rock = rockPose(this.ctx.clock.now() - this.rockFrom);
     if (rock) return rock;
     return this.cues.busy() ? null : idlePose(this.stillMs);
+  }
+
+  /** How far off the ground she is, mid-jump (1.7's Y2); 0 the rest of the time. */
+  hop(): number {
+    if (!this.doing || this.cues.moving() || this.cues.seated()) return 0;
+    return hopOf(this.doing, this.ctx.clock.now() - this.doingFrom);
   }
 
   /** Which frame of her pose: a wave's hand, a swing's arm. */

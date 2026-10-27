@@ -67,16 +67,25 @@ export function openNotes(
     item.style.setProperty('--i', String(i));
     lines.append(item);
   });
-  body.append(
-    el(
-      'div',
-      { className: 'hud-letter hud-notes' },
-      el('p', { textContent: fill(NOTES_HEAD.dear, { name: api.name() }) }),
-      el('p', { textContent: NOTES_HEAD.intro }),
-      lines,
-      el('p', { className: 'hud-notes-signed', textContent: NOTES_HEAD.signed }),
-      el('p', { className: 'hud-notes-ps', textContent: notes.ps }),
-    ),
+  const letter = el(
+    'div',
+    { className: 'hud-letter hud-notes' },
+    el('p', { textContent: fill(NOTES_HEAD.dear, { name: api.name() }) }),
+    el('p', { textContent: NOTES_HEAD.intro }),
+    lines,
+    el('p', { className: 'hud-notes-signed', textContent: NOTES_HEAD.signed }),
+    el('p', { className: 'hud-notes-ps', textContent: notes.ps }),
   );
+  if (notes.handed) {
+    letter.append(
+      el(
+        'p',
+        { className: 'hud-notes-handed' },
+        el('span', { textContent: `\u201c${notes.handed.words}\u201d` }),
+        el('span', { className: 'hud-notes-by', textContent: `\u2014 ${notes.handed.by}` }),
+      ),
+    );
+  }
+  body.append(letter);
   return close;
 }

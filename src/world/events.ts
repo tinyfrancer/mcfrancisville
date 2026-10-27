@@ -387,7 +387,25 @@ export type WorldEvent =
   /** A pet at home trotted up to say hello as she came in, `at` over its back. */
   | { kind: 'greeted'; pet: PetId; at: { x: number; y: number } }
   /** Fibi brought her something, which isn't hers: `from` where Fibi is. */
-  | { kind: 'petGift'; pet: PetId; gift: PetGiftId; line: string; from: { x: number; y: number } };
+  | { kind: 'petGift'; pet: PetId; gift: PetGiftId; line: string; from: { x: number; y: number } }
+  // The wishing well and the leaf piles (1.7's Y2, decision 389).
+  /**
+   * She tossed a Candy in the wishing well and a wish came back up; now and then something with
+   * it, and with her very first wish the lucky penny (`first`).
+   */
+  | { kind: 'wished'; line: string; well: TileBox; found?: ItemId; first?: true }
+  /**
+   * She jumped in a leaf pile at `tile`; the first jump of the day in a place, what was in it: a
+   * critter rustling out for her net, Candy, or the first time ever the golden leaf (a lost thing
+   * in town is its own `foundLost`).
+   */
+  | {
+      kind: 'leapt';
+      tile: { tx: number; ty: number };
+      critter?: CritterId;
+      candy?: number;
+      item?: ItemId;
+    };
 
 /** What's told as out of the ordinary today (V1's R3). */
 export type Herald = { rare: RareEventId } | { passer: PasserId } | { shop: 'moonPie' | 'popUp' };

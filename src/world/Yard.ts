@@ -32,8 +32,8 @@ export class Yard implements Overlay {
   /** Lawn kept for a project going up there (V1's R4), or under her snowball, where nothing may stand. */
   private readonly kept: Kept;
   /**
-   * The snowball she's rolling (1.6's X4): where, and how big. Not saved: it's the moment's play,
-   * and only the snowman it becomes is a piece of hers.
+   * The snowball she's rolling (1.6's X4): where, and how big. Saved since 1.7's Y1 (decision
+   * 388), so a reload finds it half rolled where she left it; the thaw takes it.
    */
   private ball: { tx: number; ty: number; size: number } | null = null;
 
@@ -57,6 +57,18 @@ export class Yard implements Overlay {
         this.pieces.push(piece);
       } else home.store(p.id);
     }
+    this.ball = this.restoredBall(saved?.ball);
+  }
+
+  /** A saved snowball, if it's whole and still has room to become a snowman where it lay. */
+  private restoredBall(saved: unknown): { tx: number; ty: number; size: number } | null {
+    if (!this.ground || typeof saved !== 'object' || saved === null) return null;
+    const { tx, ty, size } = saved as Record<string, unknown>;
+    if (!Number.isInteger(tx) || !Number.isInteger(ty) || !Number.isInteger(size)) return null;
+    const at = { tx: tx as number, ty: ty as number };
+    const piece: Placed = { id: 'snowmanTopHat', ...at, turn: 0 };
+    if (yardRefusal(this.ground, this.pieces, piece, null, this.kept) !== null) return null;
+    return { ...at, size: Math.max(1, size as number) };
   }
 
   /** Whether the town has a yard of hers at all (a test's small map may not). */
@@ -287,6 +299,7 @@ export class Yard implements Overlay {
   }
 
   snapshot(): YardSnapshot {
-    return { placed: this.pieces.map((p) => ({ ...p })) };
+    const placed = this.pieces.map((p) => ({ ...p }));
+    return this.ball ? { placed, ball: { ...this.ball } } : { placed };
   }
 }

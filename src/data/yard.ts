@@ -11,6 +11,11 @@ import { SNOWMAN_IDS } from './snow';
 /** Her yard as saved (save v40, 0.3's H5): what stands out there, as a room's pieces are. */
 export interface YardSnapshot {
   placed: Placed[];
+  /**
+   * The snowball she was rolling, where and how big (save v60, 1.7's Y1, decision 388), so a
+   * reload finds it where she left it; absent when there's none. Gone at the thaw, as it would be.
+   */
+  ball?: { tx: number; ty: number; size: number };
 }
 
 /** The pieces made for her yard, sold at Cobweb Corner. */

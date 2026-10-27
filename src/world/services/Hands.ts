@@ -10,7 +10,8 @@ const HOLDABLE: readonly (ItemKind | undefined)[] = ['seed', 'gear', 'kite'];
 /**
  * What she's holding, picked on the quick bar (phase M): her hands, her net, her watering can, or
  * a seed to plant. It follows what she does, too: watering a bed puts the can in her hand, and
- * swinging at a critter her net, unless she's holding a seed, which she keeps until it runs out.
+ * swinging at a critter her net, unless she's holding a seed, which she keeps until it runs out;
+ * casting to a fish always puts the rod in it (1.7's Y1).
  */
 export class Hands {
   private readonly ctx: WorldContext;
@@ -70,6 +71,14 @@ export class Hands {
   /** Picks up a tool to do something with it, unless she's holding a seed or a sprinkler. */
   use(tool: ToolId): void {
     if (isTool(this.holding)) this.put(tool);
+  }
+
+  /**
+   * Picks up a tool whatever's in her hand (1.7's Y1, decision 388): a tap on a fish is only ever
+   * fishing, so the rod comes out over a seed or a kite, which wait on the quick bar.
+   */
+  takeUp(tool: ToolId): void {
+    this.put(tool);
   }
 
   snapshot(): { held: Held } {

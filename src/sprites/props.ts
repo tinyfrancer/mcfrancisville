@@ -39,6 +39,7 @@ import {
 import { Sketch } from './sketch';
 import { GOOSE_ART } from './geese';
 import { FARM_PROP_ART } from './farm';
+import { LEAF_PILE_ART } from './leafPiles';
 
 /** Agatha's brew, which glows a little after dark. */
 const CAULDRON = fillOf(ACCENT);
@@ -256,6 +257,8 @@ const STORAGE_CHEST = (() => {
 export const PROP_ART: Record<PropId, PropArt> = {
   ...HOLIDAY_PROP_ART,
   ...FARM_PROP_ART,
+  // A pile of autumn leaves to jump in (1.7's Y2), drawn by its own pass.
+  leafPile: LEAF_PILE_ART,
   // The town's projects going up (V1's R4).
   ...PROJECT_ART,
   tree: {

@@ -129,6 +129,18 @@ async function snowDay() {
     if (size === 2) {
       const grew = await page.evaluate(() => window.world.yard.snowball?.size ?? null);
       check('a tap on the snowball rolls it bigger', grew === 2, String(grew));
+      // 1.7's Y1: half rolled, it's kept over a reload, where it lay and as big.
+      await page.evaluate(() => window.view.saveNow());
+      await page.reload({ waitUntil: 'load', timeout: 60_000 });
+      await page.waitForFunction(() => window.world && window.view, null, { timeout: 30_000 });
+      await closeSheets();
+      await page.evaluate(() => window.view.step(40, 5));
+      const kept = await page.evaluate(() => window.world.yard.snowball);
+      check(
+        'a half-rolled snowball is where she left it after a reload',
+        kept?.tx === spot.below.tx && kept?.ty === spot.below.ty && kept?.size === 2,
+        JSON.stringify(kept),
+      );
     }
   }
   const snowman = await page.evaluate(
@@ -272,6 +284,8 @@ async function festival() {
   await page.evaluate(() => window.world.tapTile(20, 21));
   await stepUntil(() => !window.world.player.moving, 'she walks into the square');
   await page.evaluate(() => window.view.step(40, 5));
+  // The tile is the well's, whose card opens as she walks up (1.7's Y2): not today.
+  await closeSheets();
   await page.screenshot({ path: '.smoke/festival.png' });
   await tapElement('.hud-today');
   const sheet = await page.evaluate(() => ({
