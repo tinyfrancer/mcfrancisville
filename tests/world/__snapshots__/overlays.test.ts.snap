@@ -297,6 +297,39 @@ exports[`MapZone's overlays (1.1 W1) > answer every tile as they did, in lived-i
 }
 `;
 
+exports[`MapZone's overlays (1.1 W1) > answer every tile as they did, in lived-in-v60 1`] = `
+{
+  "2026-10-24 19h booAcres": "c80df5d8cd37f41f",
+  "2026-10-24 19h castleHill": "d64567a527680bd7",
+  "2026-10-24 19h fairground": "e23e308e8045a3fa",
+  "2026-10-24 19h hiddenClearing": "1a3b8842a86682c0",
+  "2026-10-24 19h lanternShore": "1c1a925a8421d929",
+  "2026-10-24 19h town": "91a1b3ad75a44d67",
+  "2026-10-24 19h whisperwood": "00f4f0875e873105",
+  "2026-12-24 12h booAcres": "4b4ef27a61d4926f",
+  "2026-12-24 12h castleHill": "e1de5b597123907d",
+  "2026-12-24 12h fairground": "073027c9015e9074",
+  "2026-12-24 12h hiddenClearing": "1a3b8842a86682c0",
+  "2026-12-24 12h lanternShore": "98245cf87beddabf",
+  "2026-12-24 12h town": "bd723cb2abf6d9e9",
+  "2026-12-24 12h whisperwood": "58e806a91bc38960",
+  "2026-9-26 12h booAcres": "f401f306e2336256",
+  "2026-9-26 12h castleHill": "e1de5b597123907d",
+  "2026-9-26 12h fairground": "02e18430260835dd",
+  "2026-9-26 12h hiddenClearing": "1a3b8842a86682c0",
+  "2026-9-26 12h lanternShore": "f3eff8c706ff1dbb",
+  "2026-9-26 12h town": "d164b9bc44730958",
+  "2026-9-26 12h whisperwood": "00f4f0875e873105",
+  "2027-5-12 9h booAcres": "94cb2ccd79f3178e",
+  "2027-5-12 9h castleHill": "4186d37c310db57d",
+  "2027-5-12 9h fairground": "1dc262e6a58746b2",
+  "2027-5-12 9h hiddenClearing": "1a3b8842a86682c0",
+  "2027-5-12 9h lanternShore": "5906acaed6f06bb3",
+  "2027-5-12 9h town": "2e2a9dad8ab850cd",
+  "2027-5-12 9h whisperwood": "2ee471ad66e0d4ee",
+}
+`;
+
 exports[`MapZone's overlays (1.1 W1) > answer every tile as they did, in new 1`] = `
 {
   "2026-10-24 19h booAcres": "c80df5d8cd37f41f",

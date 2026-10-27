@@ -14,10 +14,11 @@ It is a static site (TypeScript + Vite, Canvas 2D, and a backend, a tiny one: `a
 in `localStorage`, and go up sealed to the cloud save beside it (`src/persistence/cloud.ts`; the
 store is the user's to link, README's "Cloud save").
 
-**The plan now is `docs/v1.7_plan.md`** (settled 2026-10-26, decision 387), the evening of the
-last day, from `v1.7-dev`: the rough edges 1.6's review logged, the wishing well and leaf piles,
-and the `1.7` card, the last update for a while, with Cody's own line on it. 1.6 is on her phone
-(PR #242, 2026-10-26). The releases, oldest first: **the V1 plan was `docs/v1_plan.md`** (settled
+**There is no plan now: the last was `docs/v1.7_plan.md`** (settled 2026-10-26, decision 387,
+complete with its release, decision 390), the evening of the last day, from `v1.7-dev`: the rough
+edges 1.6's review logged, the wishing well and leaf piles, and the `1.7` card, the last update
+for a while, with Cody's own line on it. **1.7 is on her phone** (the release PR from
+`release-1.7`, 2026-10-26, save v59 → v60); `main` is the game as it stands. The releases, oldest first: **the V1 plan was `docs/v1_plan.md`** (settled
 2026-10-06, decisions 266–275, after
 `docs/v1_analysis.md` found the game wide but not deep): five lanes of sessions, each one
 context window, two lanes at a time, shipped as patches (0.4, 0.5…) to her phone at the user's
@@ -48,8 +49,8 @@ subscription: the festival's lights fixed and the 31st rehearsed, a ride on the 
 chickens at Boo Acres, snow and puddles, small delights, the museum's skeleton and a kite, from
 `v1.6-dev`, every session Opus. **1.6 is the release PR "Release 1.6"** (`v1.6-dev` → `main`,
 save v58 → v59), the coordinator's to merge at the user's word; `main` after it is the game as it
-stands. **1.6 was merged by the coordinator on 2026-10-26: it is on her phone.** `docs/v1.6_plan.md`
-and every plan before it are complete; after 1.7 ships there is no plan, and a session starting
+stands. **1.6 was merged by the coordinator on 2026-10-26: it is on her phone.** `docs/v1.7_plan.md`
+and every plan before it are complete; there is no plan after 1.7, and a session starting
 cold with nothing asked of it changes nothing, reads the handoff's cold-start section and asks
 the user what they'd like next.
 **New neighbours come with releases**, perhaps themed to the release, never over time in play
@@ -96,8 +97,7 @@ Work happens on a branch and merges through a PR with a merge commit (not a squa
 fix. Each phase of the plan is one PR. Keep commits separable when a change has independent parts.
 Merging to `main` deploys to her phone, so a merge publishes.
 
-**`v1.7-dev` is the integration branch for 1.7**, made from `main` the evening 1.6 merged and
-added to `vercel.json`'s no-preview list (`v1.6-dev` was 1.6's, `v1.4-dev` 1.4 and 1.5's, `v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision
+**`v1.7-dev` was the integration branch for 1.7** and ends with it (`v1.6-dev` was 1.6's, `v1.4-dev` 1.4 and 1.5's, `v1.3-dev` 1.3's, `v1.1-dev` 1.1's, `v1-dev` V1's, decision 266; `v0.3-dev` 0.3's, decision
 212). **The next plan makes its own from `main`** once the release PR has merged, and adds it to
 `vercel.json`'s no-preview list that day (decision 265). While a plan runs, each session
 branches from its branch, its PR targets it, and it is merged with a merge commit as soon as it is

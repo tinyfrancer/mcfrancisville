@@ -34,7 +34,11 @@ import { fromSave, World } from '../../src/world/World';
  * the hens fed and their eggs collected, every fossil given and Gerald walked up to, a bat kite
  * bought and flown at the castle lookout and the pier, the big wheel ridden by day with Agatha and
  * by night alone, the rainbow's jar, a sneeze in the meadow, fireflies on a July night, Fibi's
- * gifts, the festival's lights at night, and the hens fed again that night.
+ * gifts, the festival's lights at night, and the hens fed again that night. 1.7's is 1.6's opened
+ * in a 1.7 dev build as her phone will (through step 59, the one `1.7` card with Cody's line),
+ * then played on by taps on 27 October 2026 (the release, decision 390): a Candy tossed in the
+ * wishing well for its lucky penny, a jump in a leaf pile in town for the golden leaf, and the
+ * evening after a reload.
  */
 const LIVED_IN = {
   '0.2.2': 'lived-in-v27.json',
@@ -45,6 +49,7 @@ const LIVED_IN = {
   '1.2': 'lived-in-v55.json',
   '1.5': 'lived-in-v58.json',
   '1.6': 'lived-in-v59.json',
+  '1.7': 'lived-in-v60.json',
 };
 
 const FIXTURES = join(dirname(fileURLToPath(import.meta.url)), 'fixtures');

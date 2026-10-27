@@ -10468,3 +10468,30 @@ behind it, half in the grass); critters kept off pile tiles (it would change whe
 dealt, and the rarity year); piles in winter's snow or spring (the leaves fall in autumn); Today's
 "a wish is waiting at the well" (not a one-line add: a fact, a line kind, its words and where it
 goes; the brief said skip it then).
+
+## 390. 1.7 released: the last update for a while (2026-10-26)
+
+**Context:** Y1 (decision 388, PR #243, save v60) and Y2 (decision 389, PR #244) merged into
+`v1.7-dev` the same evening. The plan's V1.7 is the coordinator's: the card checked whole, the
+fixture, the docs, the release PR.
+
+**Decision:** the `1.7` card's third line is Y1's and Y2's folded into one ("The old well on the
+square grants wishes: toss in a Candy once a day and something kind comes back up. And the
+leaves lie in piles under the trees. Jump in."), the rest of Y1's card as written; Cody's
+line stands exactly as he gave it, under the mayor's P.S., signed by him. 1.6's lived-in town
+(`lived-in-v59.json`) was opened in a 1.7 dev build as her phone will (notes last seen `1.6`, the
+dedication seen, a page of the site that isn't the game, the method of decisions 377 and 386): the
+title, then the one `1.7` card (his line whole at phone size, reached by scrolling), Cody's hello,
+save v60; then played by taps on 27 October 2026, in town: a Candy tossed in the well (the wish's
+toast, the lucky penny with the first), a jump in a leaf pile (the golden leaf with the first),
+and the evening after a reload, the wish kept. Kept as `lived-in-v60.json` in `livedIn.test.ts`
+and the overlays snapshot. The handoff's head, cold-start section and "After 1.0", `CLAUDE.md`
+and the plan say 1.7 is the last release and no plan follows it. The release PR is
+`release-1.7` → `main` at `v1.7-dev`'s head, merged by the coordinator at the user's word for the
+evening ("let's squeeze something else in… mention it'll be the last update for awhile").
+
+**Rejected:** a review session of its own (the usage left was for the game, not for a document
+of it: the checks here are the play-through and the suite); a fifth line on the card for Y2
+(the mayor's four and Cody's one is the shape Y1 chose, and his line is what the card is for); a
+perf table for 1.7 (nothing in it runs per frame but the piles' overlay and the well's ripple,
+and 1.6's table stands).

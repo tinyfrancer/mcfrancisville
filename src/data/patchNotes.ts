@@ -282,14 +282,13 @@ export const NOTES: readonly PatchNotes[] = [
     version: '1.7',
     lines: [
       // 1.7's Y1 (decision 388): the last card for a while, written first so it ships whatever
-      // else does. The third line is Y2's well and leaf piles, from the plan; the coordinator
-      // folds in what Y2 hands over.
+      // else does; the third line is Y2's well and leaf piles, folded by the release (decision 390).
       'I did say the last note was my last. Then I found one more sheet of paper. So here it ' +
         'is, and after it the typewriter goes under its cover for a while.',
       'A few loose threads, tied: a half-rolled snowball waits for you, the rainbow keeps its ' +
         'ten minutes, and nobody rides the big wheel alone. Well. There is a crow.',
-      'Toss a Candy in the well in the square once a day and make a wish. And while the leaves ' +
-        'fall, the piles under the trees are for jumping in. I insist.',
+      'The old well on the square grants wishes: toss in a Candy once a day and something kind ' +
+        'comes back up. And the leaves lie in piles under the trees. Jump in.',
       'The town keeps on without my notes: every day still turns, the hens still lay, and ' +
         'nothing here stops or runs out. It will be just where you left it.',
     ],
