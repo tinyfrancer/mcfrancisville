@@ -8,6 +8,7 @@ import { Gates } from './Gates';
 import type { Lots } from './Lots';
 import type { Mounds } from './Mounds';
 import type { Overlay } from './Overlay';
+import type { Piles } from './Piles';
 import { Plots } from './Plots';
 import type { Sites } from './Sites';
 import type { Stalls } from './Stalls';
@@ -19,7 +20,8 @@ import { covers, ringOf, type Crossing, type Entry, type Zone } from './Zone';
  * A place outdoors, drawn from a map: the town, Whisperwood, Lantern Shore. Over the map stand its
  * overlays (1.1's W1, decision 340): the newcomers' lots (phase T), the day's decorations (phase
  * U), the project sites (V1's R4), the town's stalls on their days, a shut gate, today's mound
- * (0.3's C1), the farm's built rows (0.2's N1) and her yard (0.3's H5).
+ * (0.3's C1), the farm's built rows (0.2's N1), her yard (0.3's H5) and autumn's leaf piles
+ * (1.7's Y2).
  */
 export class MapZone implements Zone {
   readonly id: MapZoneId;
@@ -44,6 +46,8 @@ export class MapZone implements Zone {
   readonly mounds: Mounds | null;
   /** The town's projects going up here (V1's R4). */
   readonly sites: Sites | null;
+  /** Autumn's leaf piles at the trees' feet (1.7's Y2), walked through and jumped in. */
+  readonly piles: Piles | null;
 
   constructor(
     id: MapZoneId,
@@ -56,8 +60,10 @@ export class MapZone implements Zone {
     yard: Yard | null = null,
     mounds: Mounds | null = null,
     sites: Sites | null = null,
+    piles: Piles | null = null,
   ) {
     this.id = id;
+    this.piles = piles;
     this.sites = sites?.any ? sites : null;
     this.mounds = mounds;
     this.yard = yard?.exists ? yard : null;
@@ -76,6 +82,7 @@ export class MapZone implements Zone {
       this.mounds,
       this.plots.any ? this.plots : null,
       this.yard,
+      this.piles,
     ];
     this.overlays = over.filter((o) => o !== null);
     const standing = new Set(
@@ -86,6 +93,7 @@ export class MapZone implements Zone {
         ),
       ),
     );
+    piles?.ground(this.canWalk);
     this.water = new Set(
       map.tiles.flatMap((t, i) => (t === 'water' && decorations && !standing.has(i) ? [i] : [])),
     );

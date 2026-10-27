@@ -9,7 +9,11 @@ down is the long history.
 
 ## In progress
 
-Nothing is in progress.
+Nothing is in progress. Session Y2 (decision 389, PR #244) merged into `v1.7-dev`; its two lines
+for the `1.7` card, for the coordinator to fold into the mayor's four (Y1 writes the card): "The
+old well on the square takes wishes now: toss in a Candy once a day and something kind comes back
+up." and "The trees have dropped their leaves in piles. Jump in! There's often something hiding in
+there."
 
 ## If you are starting cold after a long gap
 

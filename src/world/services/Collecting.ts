@@ -1,19 +1,27 @@
-import { CRITTERS, flies, isCritter, type Rarity } from '../../data/critters';
+import {
+  CRITTER_IDS,
+  CRITTERS,
+  flies,
+  isCritter,
+  type Family,
+  type Rarity,
+} from '../../data/critters';
 import { MUSEUM_LABELS, MUSEUM_LETTERS, MUSEUM_SHINY, MUSEUM_SPECIAL } from '../../data/museum';
 import { shinyOf } from '../../data/shinies';
-import { dayKey, hourOf } from '../../systems/clock';
+import { dayKey, hourOf, windowKey } from '../../systems/clock';
 import { lureKey, luredCritter } from '../../systems/cooking';
 import {
   critterKey,
   crittersOut,
   flutterTo,
+  isAbout,
   isCharmed,
   placeHabitats,
   townHabitats,
   type Habitats,
   type OutCritter,
 } from '../../systems/critters';
-import { hashString } from '../../systems/random';
+import { hashMixed, hashString } from '../../systems/random';
 import { fishInHole, holeKey } from '../../systems/fishing';
 import { weatherOn } from '../../systems/weather';
 import { isWhopper } from '../../systems/catchSize';
@@ -30,6 +38,11 @@ import type { MapZone } from '../zones/MapZone';
 import type { Lure } from './Kitchen';
 import type { Mailbox } from './Mailbox';
 import type { Takings } from './Takings';
+
+/** What a critter rustled out of a leaf pile is caught under, once a window (1.7's Y2). */
+function rustledKey(place: MapZoneId): string {
+  return `rustled:${place}`;
+}
 
 /** How long a swing of her net takes. */
 export const NET_MS = 420;
@@ -91,6 +104,8 @@ export class Collecting {
   private lastCatch: { id: CritterId; day: string } | null = null;
   /** The last shiny she caught and the day of it (1.4's G1); not saved. */
   private lastShiny: { id: CritterId; day: string } | null = null;
+  /** What rustled out of a leaf pile in each place (1.7's Y2), till caught or the window turns. */
+  private readonly rustled = new Map<MapZoneId, { window: string; critter: OutCritter }>();
 
   constructor(
     ctx: WorldContext,
@@ -176,7 +191,61 @@ export class Collecting {
     }
     const lured = this.luredIn(place, out);
     if (lured) out.push(this.where(lured, lureKey(this.lurer!.lure()!.at), now));
+    const rustled = this.rustled.get(place);
+    const rustleKey = rustledKey(place);
+    if (rustled?.window === windowKey(now) && this.keeps.takings.isReady(rustleKey)) {
+      out.push(this.where(rustled.critter, rustleKey, now));
+    }
     return out;
+  }
+
+  /**
+   * Something rustles out of a leaf pile she jumped in (1.7's Y2): one of `families` that lives in
+   * the place and could be out now, never a legendary one, one she hasn't caught first, out on
+   * open ground beside the pile for her net till the window turns. Null if nothing could.
+   */
+  rustle(place: MapZoneId, families: readonly Family[], pile: Tile): CritterId | null {
+    const now = this.ctx.clock.now();
+    const day = dayKey(now);
+    const hour = Math.floor(hourOf(now));
+    const weather = weatherOn(day);
+    let pool = CRITTER_IDS.filter((id) => {
+      const row = CRITTERS[id];
+      return (
+        families.includes(row.family) &&
+        row.where.includes(place) &&
+        row.rarity !== 'legendary' &&
+        isAbout(id, day, hour, weather)
+      );
+    });
+    const fresh = pool.filter((id) => this.keeps.cabinet.caughtOn(id) === null);
+    if (fresh.length > 0) pool = fresh;
+    if (pool.length === 0) return null;
+    const id = pool[hashMixed(`rustle:${place}:${windowKey(now)}`) % pool.length]!;
+    const zone = this.zone(place);
+    const taken = new Set(this.critters(place).map((c) => `${c.tx},${c.ty}`));
+    const round: Tile[] = [];
+    for (const [dx, dy] of [
+      [0, 1],
+      [1, 0],
+      [-1, 0],
+      [1, 1],
+      [-1, 1],
+      [0, -1],
+      [1, -1],
+      [-1, -1],
+    ] as const) {
+      round.push({ tx: pile.tx + dx, ty: pile.ty + dy });
+    }
+    const tile = round.find(
+      (t) => zone.canWalk(t.tx, t.ty) && !zone.isIce(t.tx, t.ty) && !taken.has(`${t.tx},${t.ty}`),
+    );
+    if (!tile) return null;
+    this.rustled.set(place, {
+      window: windowKey(now),
+      critter: { slot: -2, critter: id, tx: tile.tx, ty: tile.ty },
+    });
+    return id;
   }
 
   /** A critter where it is now: wherever it fluttered or drifted to, and mid-hop if it is. */

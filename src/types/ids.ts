@@ -151,7 +151,9 @@ export type PropId =
   | 'iceHutFrame'
   | 'iceHut'
   // The henhouse by Scarah's barn, its run fenced in (1.6's X3).
-  | 'coop';
+  | 'coop'
+  // A pile of autumn leaves at a tree's foot, to jump in (1.7's Y2), never written in a map.
+  | 'leafPile';
 
 /** What's growing in the pots by her door (phase G). */
 export type PotPlantId = 'mums' | 'plumMums' | 'succulents' | 'hostas';
@@ -339,6 +341,9 @@ export type ItemId =
   // Three kites from Cobweb Corner, and the keepsake of her first flight (1.6's X6).
   | KiteId
   | 'skyOnAString'
+  // What comes back up the wishing well, and the leaf piles' keepsake (1.7's Y2).
+  | WellThingId
+  | 'goldenLeaf'
   | DishId
   | FruitId
   | CritterId
@@ -1009,6 +1014,9 @@ export type SnowmanId = 'snowmanTopHat' | 'snowmanBobble' | 'snowmanWitch';
 
 /** The keepsakes of 1.6's X4: a snowman that didn't melt, and a jar of the first rainbow. */
 export type SnowKeepsakeId = 'meltlessSnowman' | 'rainbowJar';
+
+/** What the wishing well gives back now and then (1.7's Y2): a pebble, and once a lucky penny. */
+export type WellThingId = 'wellPebble' | 'wellPenny';
 
 /** The kites she flies from the pier's end and the castle lookout (1.6's X6). */
 export type KiteId = 'batKite' | 'ghostKite' | 'mothKite';

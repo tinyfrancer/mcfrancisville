@@ -4,10 +4,12 @@ import {
   PHONE,
   check,
   closeSheets,
+  framed,
   openOn,
   page,
   propTile,
   stepUntil,
+  tapProp,
   tapElement,
   tapTile,
   tapToastAway,
@@ -571,10 +573,129 @@ async function delights() {
   await stepUntil(() => window.world.scene === 'town', 'she flies back to town');
 }
 
+/** Sends off every toast up, one tap at a time, so the next one read is the next one made. */
+async function clearToasts() {
+  for (let i = 0; i < 6 && (await page.locator('.hud-toast-shown').count()) > 0; i++) {
+    await tapToastAway();
+  }
+}
+
+/**
+ * The wishing well (1.7's Y2, decision 389): walking up to the square's well opens its card, and
+ * Toss a Candy takes one, closes the card and gives a wish back as a toast, a ripple over the
+ * water. A second visit the same day has nothing to toss.
+ */
+async function wishingWell() {
+  await openOn('2026-10-27', 15);
+  await page.evaluate(() => window.world.scene === 'town' || window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she is in town');
+  await closeSheets();
+  await clearToasts();
+  const before = await page.evaluate(() => window.world.wallet.candy);
+  const penny = await page.evaluate(() => window.world.bag.count('wellPenny') === 0);
+  const wished = await page.evaluate(() => window.world.well.view().wished);
+  await tapProp('well');
+  const opened = await stepUntil(
+    () => !window.world.player.moving && document.querySelector('.hud-well-sheet') !== null,
+    'she walks up to the well and its card opens',
+  );
+  if (!opened) return;
+  await framed('.hud-well-sheet', { picture: true });
+  await page.screenshot({ path: '.smoke/well-card.png' });
+  if (wished) {
+    check(
+      'a wish already made today leaves nothing to toss',
+      (await page.locator('.hud-well-toss').count()) === 0,
+    );
+    await closeSheets();
+    return;
+  }
+  await tapElement('.hud-well-toss');
+  await page.evaluate((ms) => window.view.step(ms, 8), FRAME_MS);
+  check('the card goes as she tosses', (await page.locator('.hud-well-sheet').count()) === 0);
+  check(
+    'a Candy goes in the well',
+    (await page.evaluate(() => window.world.wallet.candy)) === before - 1,
+  );
+  await page.screenshot({ path: '.smoke/well-wish.png' });
+  // A toast before it (a clue the mystery left at the well) is read first, so it waits its turn.
+  const wishes = penny ? /lucky penny/ : /well|wish|plink|echo|frog|ghost/i;
+  let toast = null;
+  for (let i = 0; i < 5 && (await page.locator('.hud-toast-shown').count()) > 0; i++) {
+    toast = await page.locator('.hud-toast-shown').textContent();
+    if (wishes.test(toast ?? '')) break;
+    await tapToastAway();
+    await page.evaluate((ms) => window.view.step(ms, 4), FRAME_MS);
+  }
+  check(
+    penny ? 'a wish comes back up, and with the first a lucky penny' : 'a wish comes back up',
+    wishes.test(toast ?? ''),
+    toast ?? 'no toast',
+  );
+  await clearToasts();
+  await tapProp('well');
+  await stepUntil(() => document.querySelector('.hud-well-sheet') !== null, 'the card opens again');
+  check(
+    'once a day: the card has nothing more to toss',
+    (await page.locator('.hud-well-toss').count()) === 0,
+  );
+  await closeSheets();
+}
+
+/**
+ * Leaf piles (1.7's Y2): in autumn a pile or two at the trees' feet in town, Whisperwood and Boo
+ * Acres; a real tap on one walks her in and she jumps, and it lies flat after.
+ */
+async function leafPiles() {
+  await openOn('2026-10-27', 15);
+  /** @type {import('../../src/types/ids').MapZoneId[]} */
+  const places = ['town', 'whisperwood', 'booAcres'];
+  for (const place of places) {
+    await page.evaluate((p) => {
+      window.world.atlas.find(p);
+      return window.world.scene === p || window.world.travel.go(p);
+    }, place);
+    await stepUntil(`window.world.scene === ${JSON.stringify(place)}`, `she goes to ${place}`);
+    await closeSheets();
+    await clearToasts();
+    const pile = await page.evaluate((p) => {
+      const out = window.world.collecting.critters(p);
+      const piles = window.world.leafPiles.piles(p).map((x) => x.pile);
+      const free = piles.find((x) => !out.some((c) => c.tx === x.tx && c.ty === x.ty));
+      if (!free) return null;
+      const beside = window.world.zones.outdoor(p)?.standBeside(free.tx, free.ty)[0];
+      if (beside) window.world.movement.standAt(beside, 'down');
+      return { tx: free.tx, ty: free.ty, count: piles.length };
+    }, place);
+    check(
+      `two or three leaf piles in ${place}`,
+      pile !== null && pile.count >= 2,
+      `${pile?.count}`,
+    );
+    if (!pile) continue;
+    // Long enough for the iris into a new place to open.
+    await page.evaluate((ms) => window.view.step(ms, 30), FRAME_MS);
+    await page.screenshot({ path: `.smoke/leaves-${place}.png` });
+    await tapTile(pile.tx, pile.ty);
+    const jumped = await stepUntil(
+      `window.world.leafPiles.piles(window.world.scene).some((x) => x.flat && x.pile.tx === ${pile.tx} && x.pile.ty === ${pile.ty})`,
+      `she jumps in the pile in ${place}`,
+    );
+    await page.evaluate((ms) => window.view.step(ms, 9), FRAME_MS);
+    await page.screenshot({ path: `.smoke/leaves-${place}-jump.png` });
+    if (jumped) check(`a tap on a leaf pile in ${place} walks her in, and it lies flat`, true);
+    await clearToasts();
+  }
+  await page.evaluate(() => window.world.travel.go('town'));
+  await stepUntil(() => window.world.scene === 'town', 'she goes back to town');
+}
+
 /** @type {import('./lib.mjs').Section[]} */
 export const sections = [
   ['effects', effects],
   ['delights', delights],
+  ['wishingWell', wishingWell],
+  ['leafPiles', leafPiles],
   ['verbs', verbs],
   ['moves', moves],
   ['taps', taps],

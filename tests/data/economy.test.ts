@@ -29,6 +29,9 @@ import { harness } from '../world/harness';
 import { PROJECT_IDS, PROJECTS } from '../../src/data/projects';
 import { worthOf } from '../../src/systems/projects';
 import { GATHERS_PER_WINDOW } from '../../src/systems/gathering';
+import { ZONES } from '../../src/data/zones';
+import { WELL_FINDS, WELL_ODDS, WISH_CANDY } from '../../src/data/wishes';
+import { PILE_CANDY } from '../../src/data/leafPiles';
 
 /**
  * The shape of the economy (phase V's balance pass, decision 128): not its exact numbers, which
@@ -349,6 +352,19 @@ describe('the economy', () => {
         }
       }
     }
+  });
+
+  it('sends back up the wishing well less on average than the Candy tossed in (1.7 Y2)', () => {
+    const weights = WELL_FINDS.reduce((sum, f) => sum + f.weight, 0);
+    const worth = WELL_FINDS.reduce((sum, f) => sum + f.weight * ITEM_VALUE[f.item], 0) / weights;
+    expect(worth / WELL_ODDS).toBeLessThan(WISH_CANDY);
+    expect(ITEM_VALUE.wellPenny).toBe(0);
+  });
+
+  it("keeps a day's leaf piles in every place less than a round of the town (1.7 Y2)", () => {
+    const places = Object.keys(ZONES).filter((id) => ZONES[id as keyof typeof ZONES].map).length;
+    expect(places * PILE_CANDY.most).toBeLessThan(roundOf('town').candy);
+    expect(ITEM_VALUE.goldenLeaf).toBe(0);
   });
 
   it("carves no figurine worth more than the three it's made from, so carving makes no Candy (C3)", () => {

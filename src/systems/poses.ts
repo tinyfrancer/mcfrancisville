@@ -32,7 +32,7 @@ export function rockPose(sinceMs: number): Pose | null {
 // ---- What she does as she does something (V1's E2, decision 281) ---------------------------
 
 /** What she's doing, which says which action poses she takes, and for how long. */
-export type Verb = 'pick' | 'water' | 'find' | 'show' | 'greet' | 'shrug' | 'sneeze';
+export type Verb = 'pick' | 'water' | 'find' | 'show' | 'greet' | 'shrug' | 'sneeze' | 'jump';
 
 /** One pose of an action, held for `ms`. */
 export interface Beat {
@@ -59,6 +59,15 @@ export const SHRUG_MS = 640;
 export const SNEEZE_AH_MS = 420;
 export const SNEEZE_CHOO_MS = 260;
 
+/**
+ * A jump in a leaf pile (1.7's Y2): down into a crouch, then up with her arms in the air, lifted
+ * off the ground (`hopOf`) while they're up.
+ */
+export const JUMP_CROUCH_MS = 220;
+export const JUMP_UP_MS = 460;
+/** How high she hops, at the top, in world pixels. */
+export const JUMP_PX = 9;
+
 const crouch: Beat = { pose: 'crouch', ms: CROUCH_MS };
 const holdUp: Beat = { pose: 'holdUp', ms: HOLD_UP_MS };
 
@@ -74,7 +83,19 @@ export const VERBS: Record<Verb, readonly Beat[]> = {
     { pose: 'shrug', ms: SNEEZE_AH_MS },
     { pose: 'crouch', ms: SNEEZE_CHOO_MS },
   ],
+  jump: [
+    { pose: 'crouch', ms: JUMP_CROUCH_MS },
+    { pose: 'holdUp', ms: JUMP_UP_MS },
+  ],
 };
+
+/** How far off the ground she is `sinceMs` into an action: only a jump lifts her, in an arc. */
+export function hopOf(verb: Verb, sinceMs: number): number {
+  if (verb !== 'jump') return 0;
+  const t = (sinceMs - JUMP_CROUCH_MS) / JUMP_UP_MS;
+  if (t <= 0 || t >= 1) return 0;
+  return Math.round(Math.sin(t * Math.PI) * JUMP_PX);
+}
 
 /** How long an action takes from start to finish. */
 export function actionMs(verb: Verb): number {

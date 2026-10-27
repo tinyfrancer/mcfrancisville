@@ -137,6 +137,8 @@ const ORDER = [
   'seeThrough',
   'effects',
   'delights',
+  'wishingWell',
+  'leafPiles',
   'faces',
   'verbs',
   'alive',

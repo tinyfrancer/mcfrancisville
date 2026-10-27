@@ -9,6 +9,8 @@ import { TICKET_ITEMS } from './fairRide';
 import { HEN_ITEMS } from './hens';
 import { KITE_ITEMS } from './kites';
 import { SNOW_ITEMS } from './snow';
+import { WELL_ITEMS } from './wishes';
+import { LEAF_PILE_ITEMS } from './leafPiles';
 import { SHINY_ITEMS } from './shinies';
 
 /** What a thing in the bag is, which decides where it sits in the bag and what it's good for later. */
@@ -890,6 +892,9 @@ export const ITEMS: Record<ItemId, ItemRow> = {
   ...SNOW_ITEMS,
   // Three kites, and the keepsake of her first flight (1.6's X6).
   ...KITE_ITEMS,
+  // What the wishing well sends back up, and the leaf piles' keepsake (1.7's Y2).
+  ...WELL_ITEMS,
+  ...LEAF_PILE_ITEMS,
 };
 
 /** Whether something is hers to keep rather than give away: Fibi's bone, and her keepsakes. */

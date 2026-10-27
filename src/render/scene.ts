@@ -151,7 +151,8 @@ export function playerDrawable(world: World, nowMs = 0): Drawable {
   const footY = Math.round(p.y) + FEET_BELOW_CENTRE;
   const x = Math.round(p.x);
   const left = x - sprite.width / 2;
-  const top = footY - sprite.height - (dancing ? step.hop : 0);
+  // Off the ground mid-dance, or mid-jump in a leaf pile (1.7's Y2).
+  const top = footY - sprite.height - (dancing ? step.hop : world.poses.hop());
   const busy = dancing || pose !== null || world.collecting.netSwing() !== null;
   const cast = world.fishing.line !== null;
   // Her hand is where it is on her body, below whatever a tall hat adds above her.
