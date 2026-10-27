@@ -529,6 +529,7 @@ export abstract class WorldParts {
       ...this.visits.snapshot(),
       ...this.candyTree.snapshot(),
       ...this.henhouse.snapshot(),
+      ...this.weather.snapshot(),
       ...this.stall.snapshot(),
       ...this.kitchen.snapshot(),
       ...this.smallEvents.snapshot(),

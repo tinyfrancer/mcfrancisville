@@ -263,6 +263,17 @@ export interface SaveState {
    * eggs waiting that she hasn't collected.
    */
   henhouse: HenhouseState;
+  /**
+   * When she was first out under the day's rainbow (save v60, 1.7's Y1, decision 388): its day
+   * key and the time, so a reload keeps its ten minutes; null with none seen.
+   */
+  rainbow?: RainbowSeen | null;
+}
+
+/** When she was first out under a day's rainbow (1.6's X4), kept since save v60. */
+export interface RainbowSeen {
+  day: string;
+  at: number;
 }
 
 export function newSave(
@@ -317,6 +328,7 @@ export function newSave(
     firstDay: { done: [], over: false },
     projects: { current: null, given: {}, built: [] },
     henhouse: { fed: null, waiting: 0 },
+    rainbow: null,
   };
 }
 
@@ -444,10 +456,26 @@ function isPlacedList(value: unknown): boolean {
   );
 }
 
-/** Her yard (0.3's H5): what stands out there. */
+/** Her yard (0.3's H5): what stands out there, and the snowball she was rolling (v60), if any. */
 function isYardShape(value: unknown): boolean {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
-  return isPlacedList((value as Record<string, unknown>).placed);
+  const { placed, ball } = value as Record<string, unknown>;
+  return isPlacedList(placed) && (ball === undefined || isTileSize(ball));
+}
+
+/** A snowball as saved (v60): a tile and a size, whole numbers. */
+function isTileSize(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) return false;
+  const { tx, ty, size } = value as Record<string, unknown>;
+  return Number.isInteger(tx) && Number.isInteger(ty) && Number.isInteger(size);
+}
+
+/** When she was first out under a day's rainbow (v60): its day key and the time. */
+function isRainbowShape(value: unknown): boolean {
+  if (value === null) return true;
+  if (typeof value !== 'object') return false;
+  const { day, at } = value as Record<string, unknown>;
+  return typeof day === 'string' && typeof at === 'number' && Number.isFinite(at);
 }
 
 /** One room of her home (0.3's H4): what's in it, its walls and floor, and its size. */
@@ -713,7 +741,8 @@ export function isSaveState(value: unknown): value is SaveState {
     isJoinedShape(s.happenings) &&
     isFirstDayShape(s.firstDay) &&
     isProjectsShape(s.projects) &&
-    isHenhouseShape(s.henhouse)
+    isHenhouseShape(s.henhouse) &&
+    (s.rainbow === undefined || isRainbowShape(s.rainbow))
   );
 }
 
