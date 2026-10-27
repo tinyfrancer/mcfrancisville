@@ -1,10 +1,15 @@
+import { TILE_SIZE } from '../config/world';
 import { FALLING_LEAVES } from '../data/leaves';
 import { bake } from '../sprites/bake';
+import { LEAF_PILE, LEAF_PILE_FLAT, LEAF_PILE_PALETTE } from '../sprites/leafPiles';
 import { LEAF_FRAMES, LEAF_PALETTES } from '../sprites/leaves';
 import { tileHash } from '../sprites/terrain';
-import { seasonOf } from '../systems/seasons';
+import { pilesFallOn } from '../systems/leafPiles';
 import type { PropId } from '../types/ids';
-import type { Drawable } from './scene';
+import type { World } from '../world/World';
+import type { MapZone } from '../world/zones/MapZone';
+import type { Pass } from './passes/pass';
+import { drawDrawables, type Drawable } from './scene';
 
 /*
  * Leaves falling under the trees in autumn (V1's E5), with `render/butterflies.ts` as the
@@ -19,9 +24,9 @@ const ROUND_MS = 6500;
 /** How long it rocks one way and back. */
 const ROCK_MS = 1300;
 
-/** Whether leaves fall on a day, by its key. */
+/** Whether leaves fall on a day, by its key: the days the piles gather too (1.7's Y2). */
 export function leavesFall(day: string): boolean {
-  return seasonOf(day) === FALLING_LEAVES.season;
+  return pilesFallOn(day);
 }
 
 /** Whether a prop is a tree that lets its leaves go. */
@@ -70,4 +75,27 @@ export function leafDrawables(trees: readonly Drawable[], nowMs: number): Drawab
     }
   }
   return drawn;
+}
+
+/**
+ * Autumn's leaf piles at the trees' feet (1.7's Y2), heaped, or flat once she has jumped in one
+ * this window: on the ground, under everything standing, so she stands in the leaves.
+ */
+export function leafPilesPass(world: World, zone: MapZone): Pass {
+  return {
+    name: 'leafPiles',
+    ground(ctx, { cam }) {
+      const piles = world.leafPiles.piles(zone.id);
+      if (piles.length === 0) return;
+      const heaped = bake('prop:leafPile:0', LEAF_PILE, LEAF_PILE_PALETTE);
+      const flat = bake('prop:leafPile:flat', LEAF_PILE_FLAT, LEAF_PILE_PALETTE);
+      const drawn = piles.map(({ pile, flat: down }): Drawable => {
+        const sprite = down ? flat : heaped;
+        const footY = (pile.ty + 1) * TILE_SIZE;
+        const x = pile.tx * TILE_SIZE + (TILE_SIZE - sprite.width) / 2;
+        return { footY, sprite, x, y: footY - sprite.height };
+      });
+      drawDrawables(ctx, drawn, cam);
+    },
+  };
 }

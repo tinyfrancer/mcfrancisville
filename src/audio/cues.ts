@@ -176,6 +176,24 @@ export const CUES = {
     { wave: 'brush', notes: line('E6:.3'), gain: 0.06, q: 1 },
     chime('G6:.12 E6:.12 C6:.12 G5:.6', 0.1),
   ),
+  // The wishing well (1.7's Y2): a coin's plink far down, its echo coming back up softer, and a
+  // shimmer as the wish is heard.
+  plink: cue(
+    chime('E6:.1 -:.25 B6:.5', 0.14),
+    chime('-:.7 E6:.1 -:.2 B6:.4', 0.05),
+    chime('-:1.3 G5:.15 B5:.15 E6:.15 G6:.9', 0.07),
+  ),
+  // A jump in a leaf pile: a crunchy rustle, and a little bright landing.
+  rustle: cue(
+    {
+      wave: 'brush',
+      notes: line('C6:.12 -:.03 D6:.12 -:.03 C6:.12 -:.03 E6:.25'),
+      gain: 0.16,
+      q: 0.9,
+    },
+    { wave: 'brush', notes: line('-:.7 A5:.3'), gain: 0.07, q: 1.2 },
+    pluck('-:.15 G5:.1 C6:.4', 0.06, 'sine'),
+  ),
 } satisfies Record<string, Tune>;
 
 export type CueId = keyof typeof CUES;
@@ -371,6 +389,10 @@ export function cueOf(event: WorldEvent): CueId | null {
       return HELLO[event.pet];
     case 'petGift':
       return 'found';
+    case 'wished':
+      return 'plink';
+    case 'leapt':
+      return 'rustle';
     default:
       return null;
   }

@@ -173,6 +173,8 @@ export const PROP_FOOTPRINT: Record<PropId, { w: number; h: number; door?: numbe
   reeds: { w: 1, h: 1 },
   rowboat: { w: 2, h: 1 },
   mound: { w: 1, h: 1 },
+  // Never written in a map: autumn's leaf piles (1.7's Y2) gather at the trees' feet.
+  leafPile: { w: 1, h: 1 },
   gatePost: { w: 1, h: 1 },
   telescope: { w: 1, h: 1 },
   castle: { w: 9, h: 5, door: 4 },

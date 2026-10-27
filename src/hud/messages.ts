@@ -43,6 +43,8 @@ import { SIGNPOSTS } from '../data/signposts';
 import { BURIED } from '../data/buried';
 import { FOSSILS } from '../data/fossils';
 import { KITE_FIRST, KITE_IN, KITE_NOWHERE, KITE_STILL, KITE_UP } from '../data/kites';
+import { WELL_BACK, WELL_PENNY_LINE } from '../data/wishes';
+import { PILE_CANDY_FOUND, PILE_CRITTER, PILE_GOLDEN } from '../data/leafPiles';
 import type { MoundFind } from '../systems/fossils';
 import { FRUIT_OF, isFruitTree } from '../data/orchard';
 import type { VisitGift } from '../data/visits';
@@ -204,6 +206,35 @@ export const MARKET_SHUT: Toast = {
 export const NO_SEEDS: Toast = {
   text: "You're out of seeds for now. Every harvest gives one back, so check what's growing!",
 };
+
+/** "a wishing pebble", "an ant": a thing's name with its article, as it's said in a sentence. */
+function aThing(item: ItemId): string {
+  const name = ITEMS[item].name.toLowerCase();
+  return `${/^[aeiou]/.test(name) ? 'an' : 'a'} ${name}`;
+}
+
+/** The well's wish, and whatever came back up with it (1.7's Y2). */
+function wishedToast(line: string, found: ItemId | undefined, first: boolean): Toast {
+  if (first)
+    return { text: `${line} ${WELL_PENNY_LINE}`, special: true, icon: { item: 'wellPenny' } };
+  if (found)
+    return { text: `${line} ${WELL_BACK} ${aThing(found)}!`, special: true, icon: { item: found } };
+  return { text: line, icon: 'sparkle' };
+}
+
+/** What the first jump of the day in a place found in a leaf pile (1.7's Y2); later ones, nothing. */
+function leaptToast(event: Extract<WorldEvent, { kind: 'leapt' }>): Toast | null {
+  if (event.item) return { text: PILE_GOLDEN, special: true, icon: { item: event.item } };
+  if (event.critter) {
+    const [before, after] = PILE_CRITTER;
+    return { text: `${before} ${aThing(event.critter)}! ${after}`, icon: { item: event.critter } };
+  }
+  if (event.candy) {
+    const [before, after] = PILE_CANDY_FOUND;
+    return { text: `${before} ${candy(event.candy)} ${after}`, icon: 'candy' };
+  }
+  return null;
+}
 
 /** Candy, as it's said in a sentence: "12 Candy". A price on a button is `price` (`glyph.ts`). */
 export function candy(amount: number): string {
@@ -595,6 +626,11 @@ export function eventToast(event: WorldEvent): Toast | null {
       }
       if (event.did === 'in') return { text: KITE_IN, icon: { item: event.kite } };
       return { text: event.did === 'still' ? KITE_STILL : KITE_NOWHERE, icon: 'leaf' };
+    // The wishing well and the leaf piles (1.7's Y2).
+    case 'wished':
+      return wishedToast(event.line, event.found, event.first === true);
+    case 'leapt':
+      return leaptToast(event);
     // Gerald stood up in the museum (1.6's X6).
     case 'assembled':
       return { text: ASSEMBLED, special: true, icon: { item: 'dragonTooth' } };

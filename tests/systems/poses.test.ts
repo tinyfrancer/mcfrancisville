@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
+  actionPose,
   BANG_MS,
+  hopOf,
+  JUMP_CROUCH_MS,
+  JUMP_PX,
+  JUMP_UP_MS,
   IDLE_AFTER_MS,
   IDLE_GAP_MS,
   IDLE_SPELL_MS,
@@ -27,5 +32,15 @@ describe('her poses', () => {
     expect(rockPose(BANG_MS)).toBe('bang');
     expect(rockPose(2 * BANG_MS)).toBe('horns');
     expect(rockPose(ROCK_MS)).toBeNull();
+  });
+
+  it("jumps in a leaf pile: down into a crouch, then up off the ground with her arms up (1.7's Y2)", () => {
+    expect(actionPose('jump', 0)?.pose).toBe('crouch');
+    expect(actionPose('jump', JUMP_CROUCH_MS)?.pose).toBe('holdUp');
+    expect(actionPose('jump', JUMP_CROUCH_MS + JUMP_UP_MS)).toBeNull();
+    expect(hopOf('jump', 0)).toBe(0);
+    expect(hopOf('jump', JUMP_CROUCH_MS + JUMP_UP_MS / 2)).toBe(JUMP_PX);
+    expect(hopOf('jump', JUMP_CROUCH_MS + JUMP_UP_MS)).toBe(0);
+    expect(hopOf('pick', JUMP_CROUCH_MS + JUMP_UP_MS / 2)).toBe(0);
   });
 });

@@ -12,6 +12,7 @@ import { fairgroundApis } from './apis/fairground';
 import { calendarApis } from './apis/calendar';
 import { skyApis } from './apis/sky';
 import { welcomeApis } from './apis/welcome';
+import { wellApis } from './apis/well';
 import type { ApiWiring, SheetApis } from './apis/shared';
 
 export { holdablesIn, seedsIn, type ApiWiring, type Waiting } from './apis/shared';
@@ -36,5 +37,6 @@ export function sheetApis(wiring: ApiWiring): SheetApis {
     ...calendarApis(wiring),
     ...skyApis(wiring),
     ...welcomeApis(wiring),
+    ...wellApis(wiring),
   };
 }

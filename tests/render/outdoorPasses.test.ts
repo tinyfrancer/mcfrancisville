@@ -12,8 +12,9 @@ describe('the passes outdoors', () => {
   it('draw each layer in the order the view drew it before the split', () => {
     expect(OUTDOOR_LAYERS).toEqual({
       // Glints and long grass, footprints in the snow (1.6's X4), rain's splashes, the yard's
-      // dots, her hole in the ice (1.4's G3), where she's walking to.
-      ground: ['life', 'effects', 'weather', 'yard', 'fishing', 'target'],
+      // dots, her hole in the ice (1.4's G3), where she's walking to; autumn's leaf piles under
+      // the prints (1.7's Y2).
+      ground: ['life', 'leafPiles', 'effects', 'weather', 'yard', 'fishing', 'target'],
       stand: [
         'props',
         'moving',
