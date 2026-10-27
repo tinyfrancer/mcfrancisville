@@ -799,6 +799,18 @@ what each owns, and where it hurts. Update it when a seam moves.
   `holdUp` (the `holding` pose cue), any tap winds it in, and the `kite` pass
   (`src/render/passes/kite.ts`, in `over`) draws it climbing, bobbing, its tail and string. The
   first flight gives `skyOnAString`; Today says a windy day; the ambience takes `breezy`.
+- **The wishing well** (1.7's Y2, decision 389): walking up to the square's `well` opens
+  `src/hud/WellCard.ts` (`WellApi`); `world.well` (`Well`) takes a Candy once a day (`well:wish`)
+  for a wish dealt by `wishOn` (`src/systems/well.ts`, lines in `src/data/wishes.ts`, a day drawing
+  only from its own parity's, so never twice running), a lucky `wellPenny` with the first, now and
+  then a pebble or bead (`comesUpOn`); a `wished` moment, its `plink` and a ripple over the water.
+- **Leaf piles** (1.7's Y2): in autumn `Piles` (`src/world/zones/Piles.ts`, last of `MapZone`'s
+  overlays, never blocking) deals two or three a place at the shedding trees' feet
+  (`src/systems/leafPiles.ts`); a tap walks her in and `world.leafPiles` (`LeafPiles`) jumps her
+  (the `jump` verb, `hopOf`, an `autumnLeaf` burst, `rustle`), flat till the window turns; the
+  first jump of the day in a place (`pile:<zone>`) finds the `goldenLeaf` once ever, else a lost
+  thing in town, a critter rustling out for her net (`Collecting.rustle`) or a little Candy. Drawn
+  on the ground by the `leafPiles` pass in `src/render/leaves.ts`, art `src/sprites/leafPiles.ts`.
 - **The mayor's mystery:** clues, suspects and the mayor's letters are `src/data/mystery.ts`; where
   Wes lurks and when the second letter is due, `src/systems/mystery.ts`; the pinned clues,
   `src/world/Casebook.ts`. `world.mystery` has `wes()` and pins clues as she goes (a `clue`

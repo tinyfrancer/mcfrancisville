@@ -9,24 +9,11 @@ down is the long history.
 
 ## In progress
 
-**Session Y2 of the 1.7 plan** (the wishing well and leaf piles, decision 389), branch
-`claude/y2-well-leaves` from `v1.7-dev`, its draft PR into `v1.7-dev`. Nothing saved, no save bump.
-
-- **Done** (first commit): the well (`data/wishes.ts`, `systems/well.ts`, `world/services/Well.ts`
-  in the outdoors area, `hud/WellCard.ts` through `wiring/apis/well.ts`, opened from `moments.ts`
-  on arriving at `well`; a `wished` moment with its `plink` cue, a ripple and sparkle over the water
-  and a toast), the items `wellPebble`, `wellPenny` and `goldenLeaf`; the leaf piles (`Piles`
-  overlay in `world/zones/Piles.ts`, last in `MapZone`'s list, dealt by `systems/leafPiles.ts`;
-  `world/services/LeafPiles.ts` in the catching area, `leafPile` arrival; `Collecting.rustle`,
-  `SmallEvents.turnUp`; the `jump` verb with `hopOf`; the `leafPiles` ground pass in
-  `render/leaves.ts`; art `sprites/leafPiles.ts`, `sprites/well.ts`); tests for each, the
-  arrivals snapshot updated (only leaf-pile lines added), the overlays hash leaving piles out.
-- **Next**: look at it by eye at `?day=2026-10-27&hour=15` in town, Whisperwood and Boo Acres;
-  a smoke section; the whole smoke and `smoke:offline`; decision 389, the plan's line, CLAUDE.md;
-  merge `origin/v1.7-dev`; mark ready, CI green, merge.
-- **The two card lines for the coordinator** (Y1 writes the card): "The old well on the square
-  takes wishes now: toss in a Candy once a day and something kind comes back up." and "The trees
-  have dropped their leaves in piles. Jump in! There's often something hiding in there."
+Nothing is in progress. Session Y2 (decision 389, PR #244) merged into `v1.7-dev`; its two lines
+for the `1.7` card, for the coordinator to fold into the mayor's four (Y1 writes the card): "The
+old well on the square takes wishes now: toss in a Candy once a day and something kind comes back
+up." and "The trees have dropped their leaves in piles. Jump in! There's often something hiding in
+there."
 
 ## If you are starting cold after a long gap
 

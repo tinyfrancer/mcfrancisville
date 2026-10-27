@@ -272,6 +272,8 @@ async function festival() {
   await page.evaluate(() => window.world.tapTile(20, 21));
   await stepUntil(() => !window.world.player.moving, 'she walks into the square');
   await page.evaluate(() => window.view.step(40, 5));
+  // The tile is the well's, whose card opens as she walks up (1.7's Y2): not today.
+  await closeSheets();
   await page.screenshot({ path: '.smoke/festival.png' });
   await tapElement('.hud-today');
   const sheet = await page.evaluate(() => ({
